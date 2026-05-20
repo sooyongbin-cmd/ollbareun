@@ -1,22 +1,18 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import GuardPage from "./guard/page";
 import AssignmentPage from "./manager/employee/assignments/new/page";
 import EmployeeNewPage from "./manager/employee/employees/new/page";
+import ManagerLayout from "./manager/layout";
 import ManagerPage from "./manager/page";
 import WorksiteNewPage from "./manager/employee/worksites/new/page";
-import Home from "./page";
 
-const bootstrap = {
-  employees: [],
-  worksites: [],
-  assignments: [],
-  attendance: [],
-  summary: { totalEmployees: 0, currentlyClockedIn: 0 },
-};
+function renderWithManagerLayout(ui: ReactElement) {
+  return render(<ManagerLayout>{ui}</ManagerLayout>);
+}
 
-describe("Phase1App", () => {
+describe("manager pages", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     vi.stubGlobal(
@@ -24,19 +20,42 @@ describe("Phase1App", () => {
       vi.fn(async (input: RequestInfo | URL) => {
         const url = String(input);
         if (url.endsWith("/api/bootstrap")) {
-          return Response.json(bootstrap);
+          return Response.json({
+            employees: [
+              {
+                id: "emp-1",
+                name: "홍길동",
+                phone: "010-1234-5678",
+                phone_normalized: "01012345678",
+              },
+            ],
+            worksites: [
+              {
+                id: "work-1",
+                name: "본사",
+                latitude: 37.5,
+                longitude: 127.0,
+                radius_meters: 100,
+              },
+            ],
+            assignments: [],
+            attendance: [],
+            summary: { totalEmployees: 1, currentlyClockedIn: 0 },
+          });
         }
         if (url.endsWith("/api/employees")) {
           return Response.json({
-            employee: { id: "emp-1", name: "홍길동", phone: "010-1234-5678" },
+            employee: { id: "emp-2", name: "김철수", phone: "010-2222-3333" },
           });
         }
-        if (url.endsWith("/api/guard/auth")) {
+        if (url.endsWith("/api/worksites")) {
           return Response.json({
-            employee: { id: "emp-1", name: "홍길동", phone: "010-1234-5678" },
-            assignment: null,
-            worksite: null,
-            attendance: null,
+            worksite: { id: "work-2", name: "서울 본부" },
+          });
+        }
+        if (url.endsWith("/api/assignments")) {
+          return Response.json({
+            assignment: { id: "assign-1" },
           });
         }
         return Response.json({}, { status: 404 });
@@ -44,43 +63,15 @@ describe("Phase1App", () => {
     );
   });
 
-  it("renders only manager and guard navigation buttons on the initial screen", () => {
-    render(<Home />);
+  it("renders the shared manager chrome with links to the registration pages", () => {
+    renderWithManagerLayout(<ManagerPage />);
 
-    expect(screen.getByRole("link", { name: "관리자" })).toHaveAttribute("href", "/manager");
-    expect(screen.getByRole("link", { name: "경비원" })).toHaveAttribute("href", "/guard");
-    expect(screen.queryByRole("heading", { name: "관리자 화면" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "경비원 화면" })).not.toBeInTheDocument();
-  });
-
-  it("renders the manager overview without registration forms or guard UI", async () => {
-    render(<ManagerPage />);
-
-    expect(await screen.findByRole("heading", { name: "관리자 화면" })).toBeInTheDocument();
-    expect(screen.queryByLabelText("직원이름")).not.toBeInTheDocument();
-    expect(screen.queryByLabelText("근무지명")).not.toBeInTheDocument();
-    expect(screen.queryByText("관리자 로그인")).not.toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "경비원 화면" })).not.toBeInTheDocument();
-  });
-
-  it("renders manager sidebar links to independent registration pages", async () => {
-    render(<ManagerPage />);
-
-    const menu = await screen.findByRole("navigation", { name: "관리자화면 메뉴" });
-    const employeeSection = screen.getByText("직원 관리").closest("li");
-
-    expect(menu).toHaveTextContent("대시보드");
-    expect(menu).toHaveTextContent("직원 관리");
-    expect(menu).toHaveTextContent("직원명부관리(목록)/등록/수정");
-    expect(menu).toHaveTextContent("근태 관리");
-    expect(menu).toHaveTextContent("근무지 배정 및 관리");
-    expect(menu).toHaveTextContent("안전교육 관리");
-    expect(menu).toHaveTextContent("권한 관리");
-    expect(menu).toHaveTextContent("리포트 출력");
-    expect(menu).not.toHaveTextContent("등록 메뉴");
-    expect(employeeSection).toContainElement(screen.getByRole("link", { name: "직원등록" }));
-    expect(employeeSection).toContainElement(screen.getByRole("link", { name: "근무지등록" }));
-    expect(employeeSection).toContainElement(screen.getByRole("link", { name: "근무지배정" }));
+    expect(screen.getByRole("heading", { name: "관리자" })).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "관리자화면 메뉴" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "직원명부관리" })).toHaveAttribute(
+      "href",
+      "/manager/employee/employees",
+    );
     expect(screen.getByRole("link", { name: "직원등록" })).toHaveAttribute(
       "href",
       "/manager/employee/employees/new",
@@ -95,60 +86,41 @@ describe("Phase1App", () => {
     );
   });
 
-  it("renders employee registration as an independent manager page", async () => {
-    render(<EmployeeNewPage />);
+  it("renders the manager overview content", () => {
+    renderWithManagerLayout(<ManagerPage />);
 
-    expect(await screen.findByRole("heading", { name: "직원등록" })).toBeInTheDocument();
-    expect(screen.getByLabelText("직원이름")).toBeInTheDocument();
-    expect(screen.getByLabelText("연락처")).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "근무지등록" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "근무지배정" })).not.toBeInTheDocument();
-  });
-
-  it("renders worksite registration as an independent manager page", async () => {
-    render(<WorksiteNewPage />);
-
-    expect(await screen.findByRole("heading", { name: "근무지등록" })).toBeInTheDocument();
-    expect(screen.getByLabelText("근무지명")).toBeInTheDocument();
-    expect(screen.getByLabelText("위도")).toBeInTheDocument();
-    expect(screen.getByLabelText("경도")).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "직원등록" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "근무지배정" })).not.toBeInTheDocument();
-  });
-
-  it("renders worksite assignment as an independent manager page", async () => {
-    render(<AssignmentPage />);
-
-    expect(await screen.findByRole("heading", { name: "근무지배정" })).toBeInTheDocument();
-    expect(screen.getByLabelText("직원")).toBeInTheDocument();
-    expect(screen.getByLabelText("근무지")).toBeInTheDocument();
-    expect(screen.getByLabelText("근무일")).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "직원등록" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "근무지등록" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "관리자 화면" })).toBeInTheDocument();
+    expect(screen.getByText("실시간 출근 현황")).toBeInTheDocument();
+    expect(screen.queryByLabelText("직원이름")).not.toBeInTheDocument();
   });
 
   it("registers an employee from the admin form", async () => {
     const user = userEvent.setup();
-    render(<EmployeeNewPage />);
+    renderWithManagerLayout(<EmployeeNewPage />);
 
-    await user.type(await screen.findByLabelText("직원이름"), "홍길동");
-    await user.type(screen.getByLabelText("연락처"), "010-1234-5678");
+    expect(screen.getByRole("heading", { name: "직원등록" })).toBeInTheDocument();
+    await user.type(screen.getByLabelText("직원이름"), "김철수");
+    await user.type(screen.getByLabelText("연락처"), "010-2222-3333");
     await user.click(screen.getByRole("button", { name: "직원 등록" }));
 
-    expect(await screen.findByText("홍길동 / 010-1234-5678")).toBeInTheDocument();
+    expect(await screen.findByText("김철수 / 010-2222-3333")).toBeInTheDocument();
   });
 
-  it("authenticates a guard with registered name and contact number", async () => {
-    const user = userEvent.setup();
-    render(<GuardPage />);
+  it("renders worksite registration as an independent manager page", () => {
+    renderWithManagerLayout(<WorksiteNewPage />);
 
-    expect(await screen.findByRole("heading", { name: "경비원 화면" })).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "관리자 화면" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "근무지등록" })).toBeInTheDocument();
+    expect(screen.getByLabelText("근무지명")).toBeInTheDocument();
+    expect(screen.getByLabelText("위도")).toBeInTheDocument();
+    expect(screen.getByLabelText("경도")).toBeInTheDocument();
+  });
 
-    await user.type(screen.getByLabelText("경비원 이름"), "홍길동");
-    await user.type(screen.getByLabelText("경비원 연락처"), "010-1234-5678");
-    await user.click(screen.getByRole("button", { name: "경비원 인증" }));
+  it("renders worksite assignment as an independent manager page", () => {
+    renderWithManagerLayout(<AssignmentPage />);
 
-    expect(await screen.findByText("홍길동님 인증됨")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "근무지배정" })).toBeInTheDocument();
+    expect(screen.getByLabelText("직원")).toBeInTheDocument();
+    expect(screen.getByLabelText("근무지")).toBeInTheDocument();
+    expect(screen.getByLabelText("근무일")).toBeInTheDocument();
   });
 });

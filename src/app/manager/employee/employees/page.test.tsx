@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import ManagerLayout from "../../layout";
 import ManagerPage from "../../page";
 import EmployeeRosterPage from "./page";
 
@@ -25,6 +27,10 @@ const bootstrap = {
   summary: { totalEmployees: 2, currentlyClockedIn: 0 },
 };
 
+function renderWithManagerLayout(ui: ReactElement) {
+  return render(<ManagerLayout>{ui}</ManagerLayout>);
+}
+
 describe("employee roster page", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -42,7 +48,7 @@ describe("employee roster page", () => {
 
   it("renders the employee roster page and supports search", async () => {
     const user = userEvent.setup();
-    render(<EmployeeRosterPage />);
+    renderWithManagerLayout(<EmployeeRosterPage />);
 
     expect(await screen.findByRole("heading", { name: "직원명부관리" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "직원 등록" })).toHaveAttribute(
@@ -56,10 +62,10 @@ describe("employee roster page", () => {
     expect(screen.queryByText("Alice")).not.toBeInTheDocument();
   });
 
-  it("exposes the roster route from the manager menu", async () => {
-    render(<ManagerPage />);
+  it("exposes the roster route from the manager menu", () => {
+    renderWithManagerLayout(<ManagerPage />);
 
-    expect(await screen.findByRole("link", { name: "직원명부관리" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "직원명부관리" })).toHaveAttribute(
       "href",
       "/manager/employee/employees",
     );

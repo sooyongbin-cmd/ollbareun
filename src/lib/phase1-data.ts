@@ -27,6 +27,11 @@ export type AssignmentRow = {
   created_at: string;
 };
 
+export type AssignmentListRow = AssignmentRow & {
+  employee_name: string;
+  worksite_name: string;
+};
+
 export type AttendanceRow = {
   id: string;
   employee_id: string;
@@ -256,6 +261,73 @@ export async function createAssignment(input: {
 
   throwIfError(error);
   return data as AssignmentRow;
+}
+
+export async function listAssignments() {
+  const supabase = getSupabase();
+  const [assignmentsResult, employeesResult, worksitesResult] = await Promise.all([
+    supabase.from("work_assignments").select("*").order("work_date", { ascending: false }).order("created_at", { ascending: false }),
+    supabase.from("employees").select("id,name"),
+    supabase.from("worksites").select("id,name"),
+  ]);
+
+  throwIfError(assignmentsResult.error);
+  throwIfError(employeesResult.error);
+  throwIfError(worksitesResult.error);
+
+  const employeesById = new Map((employeesResult.data ?? []).map((employee) => [employee.id, employee.name]));
+  const worksitesById = new Map((worksitesResult.data ?? []).map((worksite) => [worksite.id, worksite.name]));
+
+  return (assignmentsResult.data ?? []).map((assignment) => ({
+    ...assignment,
+    employee_name: employeesById.get(assignment.employee_id) ?? "직원 없음",
+    worksite_name: worksitesById.get(assignment.worksite_id) ?? "근무지 없음",
+  })) as AssignmentListRow[];
+}
+
+export async function getAssignmentById(id: unknown) {
+  const assignmentId = requireString(id, "배정");
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("work_assignments")
+    .select("*")
+    .eq("id", assignmentId)
+    .single();
+
+  throwIfError(error);
+  return data as AssignmentRow;
+}
+
+export async function updateAssignment(input: {
+  id: unknown;
+  employeeId: unknown;
+  worksiteId: unknown;
+  workDate?: unknown;
+}) {
+  const id = requireString(input.id, "배정");
+  const employee_id = requireString(input.employeeId, "직원");
+  const worksite_id = requireString(input.worksiteId, "근무지");
+  const work_date =
+    typeof input.workDate === "string" && input.workDate ? input.workDate : todayDate();
+
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("work_assignments")
+    .update({ employee_id, worksite_id, work_date })
+    .eq("id", id)
+    .select("*")
+    .single();
+
+  throwIfError(error);
+  return data as AssignmentRow;
+}
+
+export async function deleteAssignment(id: unknown) {
+  const assignmentId = requireString(id, "배정");
+  const supabase = getSupabase();
+  const { error } = await supabase.from("work_assignments").delete().eq("id", assignmentId);
+
+  throwIfError(error);
 }
 
 export async function authenticateGuard(input: { name: unknown; phone: unknown }) {

@@ -1,4 +1,15 @@
-import { createAssignment } from "@/lib/phase1-data";
+import { createAssignment, listAssignments } from "@/lib/phase1-data";
+
+export async function GET() {
+  try {
+    return Response.json({ assignments: await listAssignments() });
+  } catch (error) {
+    return Response.json(
+      { error: error instanceof Error ? error.message : "배정 목록을 불러오지 못했습니다." },
+      { status: 500 },
+    );
+  }
+}
 
 export async function POST(request: Request) {
   try {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 
 type Bootstrap = {
   employees: { id: string; name: string }[];
@@ -22,7 +23,7 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
   const payload = await response.json();
 
   if (!response.ok) {
-    throw new Error(payload.error ?? "요청을 처리하지 못했습니다.");
+    throw new Error(payload.error ?? "배정을 처리하지 못했습니다.");
   }
 
   return payload as T;
@@ -36,6 +37,7 @@ export default function AssignmentNewPage() {
   const [data, setData] = useState<Bootstrap>({ employees: [], worksites: [] });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
     let ignore = false;
@@ -62,7 +64,7 @@ export default function AssignmentNewPage() {
       }
     }
 
-    loadBootstrap();
+    void loadBootstrap();
 
     return () => {
       ignore = true;
@@ -83,20 +85,20 @@ export default function AssignmentNewPage() {
         workDate: data.get("workDate"),
       });
 
-      setMessage("근무지가 배정되었습니다.");
-      form.reset();
+      window.alert("자료를 저장하였습니다.");
+      router.push("/manager/employee/assignments");
     } catch (submitError) {
       setMessage("");
-      setError(submitError instanceof Error ? submitError.message : "요청을 처리하지 못했습니다.");
+      setError(submitError instanceof Error ? submitError.message : "배정을 처리하지 못했습니다.");
     }
   }
 
   return (
     <section className="space-y-[24px]">
       <header>
-        <h1 className="text-[40px] font-semibold tracking-tight leading-[1.1]">근무지배정</h1>
+        <h1 className="text-[40px] font-semibold tracking-tight leading-[1.1]">배정하기</h1>
         <p className="text-[21px] font-normal text-ink-muted-48 mt-2 max-w-[600px]">
-          직원에게 근무일별 근무지를 배정합니다.
+          직원에게 근무지를 배정합니다.
         </p>
       </header>
 
@@ -138,7 +140,7 @@ export default function AssignmentNewPage() {
           </div>
 
           <button className="button-primary w-full md:w-auto" data-testid="assignment-submit" type="submit">
-            근무지 배정
+            배정하기
           </button>
         </form>
 

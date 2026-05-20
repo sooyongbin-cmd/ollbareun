@@ -2,11 +2,11 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import AssignmentPage from "./manager/employee/assignments/new/page";
 import EmployeeNewPage from "./manager/employee/employees/new/page";
 import ManagerLayout from "./manager/layout";
 import ManagerPage from "./manager/page";
 import WorksiteNewPage from "./manager/employee/worksites/new/page";
+import AssignmentManagementPage from "./manager/employee/assignments/page";
 
 const push = vi.fn();
 
@@ -66,7 +66,19 @@ describe("manager pages", () => {
             worksite: { id: "work-2", name: "서울 본부" },
           });
         }
-        if (url.endsWith("/api/assignments")) {
+        if (!init && url.endsWith("/api/assignments")) {
+          return Response.json({
+            assignments: [
+              {
+                id: "assign-1",
+                work_date: "2026-05-21",
+                employee_name: "근태수",
+                worksite_name: "본사",
+              },
+            ],
+          });
+        }
+        if (init?.method === "POST" && url.endsWith("/api/assignments")) {
           return Response.json({
             assignment: { id: "assign-1" },
           });
@@ -92,7 +104,7 @@ describe("manager pages", () => {
     );
     expect(screen.getByRole("link", { name: "근무지배정" })).toHaveAttribute(
       "href",
-      "/manager/employee/assignments/new",
+      "/manager/employee/assignments",
     );
   });
 
@@ -127,12 +139,12 @@ describe("manager pages", () => {
     expect(screen.getByLabelText("경도")).toBeInTheDocument();
   });
 
-  it("renders worksite assignment as an independent manager page", () => {
-    renderWithManagerLayout(<AssignmentPage />);
+  it("renders worksite assignment management as an independent manager page", () => {
+    renderWithManagerLayout(<AssignmentManagementPage />);
 
     expect(screen.getByRole("heading", { name: "근무지배정" })).toBeInTheDocument();
-    expect(screen.getByLabelText("직원")).toBeInTheDocument();
+    expect(screen.getByLabelText("날짜")).toBeInTheDocument();
     expect(screen.getByLabelText("근무지")).toBeInTheDocument();
-    expect(screen.getByLabelText("근무일")).toBeInTheDocument();
+    expect(screen.getByLabelText("이름")).toBeInTheDocument();
   });
 });

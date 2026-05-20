@@ -120,7 +120,7 @@ const managerPageTitles = {
   overview: "관리자 화면",
   employee: "직원등록",
   worksite: "근무지등록",
-  assignment: "근무지배정",
+  assignment: "배정하기",
 };
 
 const managerPageDescriptions = {
@@ -128,7 +128,7 @@ const managerPageDescriptions = {
   overview: "異쒓렐 ?꾪솴怨??깅줉??吏곸썝, ?ㅻ뒛 諛곗젙???뺤씤?⑸땲??",
   employee: "吏곸썝?대쫫怨??곕씫泥섎? ?낅젰??吏곸썝???깅줉?⑸땲??",
   worksite: "洹쇰Т吏紐? GPS 醫뚰몴, ?덉슜 諛섍꼍???낅젰??洹쇰Т吏瑜??깅줉?⑸땲??",
-  assignment: "직원에게 작업장을 배정합니다.",
+  assignment: "직원에게 근무지를 배정합니다.",
 };
 const adminMenu = [
   {
@@ -148,7 +148,7 @@ const adminMenu = [
       "근무지 관리",
       { label: "직원명부관리", href: "/manager/employee/employees" },
       { label: "근무지관리", href: "/manager/employee/worksites" },
-      { label: "근무지배정", href: "/manager/employee/assignments/new" },
+      { label: "근무지배정", href: "/manager/employee/assignments" },
     ],
   },
   {
@@ -618,7 +618,7 @@ export function Phase1App({ mode, managerView = "overview" }: Phase1AppProps) {
                         </div>
                       </div>
                       <button className="button-primary w-full md:w-auto" data-testid="assignment-submit" type="submit">
-                        근무지 배정
+                        배정하기
                       </button>
                     </form>
                   ) : null}

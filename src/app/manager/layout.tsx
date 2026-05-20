@@ -10,7 +10,7 @@ const menu = [
     children: [
       { label: "직원명부관리", href: "/manager/employee/employees" },
       { label: "근무지관리", href: "/manager/employee/worksites" },
-      { label: "근무지배정", href: "/manager/employee/assignments/new" },
+      { label: "근무지배정", href: "/manager/employee/assignments" },
     ],
   },
   {

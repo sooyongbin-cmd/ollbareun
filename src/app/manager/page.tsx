@@ -33,7 +33,7 @@ export default function ManagerPage() {
             </p>
           </Link>
           <Link
-            href="/manager/employee/assignments/new"
+            href="/manager/employee/assignments"
             className="rounded-[18px] border border-hairline bg-canvas-parchment p-6 hover:border-primary/30 transition-colors"
           >
             <div className="text-[14px] font-semibold text-ink-muted-48">근무지 배정</div>

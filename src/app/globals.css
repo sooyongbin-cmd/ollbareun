@@ -1,0 +1,176 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-primary: #0066cc;
+  --color-primary-focus: #0071e3;
+  --color-primary-on-dark: #2997ff;
+  
+  --color-canvas: #ffffff;
+  --color-canvas-parchment: #f5f5f7;
+  --color-surface-pearl: #fafafc;
+  --color-surface-tile-1: #272729;
+  --color-surface-tile-2: #2a2a2c;
+  --color-surface-tile-3: #252527;
+  --color-surface-black: #000000;
+  
+  --color-ink: #1d1d1f;
+  --color-ink-muted-80: #333333;
+  --color-ink-muted-48: #7a7a7a;
+  
+  --color-divider-soft: rgba(0, 0, 0, 0.04);
+  --color-hairline: #e0e0e0;
+
+  --font-apple: "SF Pro Text", "SF Pro Display", system-ui, -apple-system, sans-serif;
+  
+  --radius-apple-sm: 8px;
+  --radius-apple-md: 11px;
+  --radius-apple-lg: 18px;
+  --radius-pill: 9999px;
+
+  --spacing-apple-xs: 8px;
+  --spacing-apple-sm: 12px;
+  --spacing-apple-md: 17px;
+  --spacing-apple-lg: 24px;
+  --spacing-apple-xl: 32px;
+  --spacing-apple-xxl: 48px;
+  --spacing-apple-section: 80px;
+
+  --shadow-product: 3px 5px 30px 0 rgba(0, 0, 0, 0.22);
+}
+
+body {
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-apple);
+  font-size: 17px;
+  line-height: 1.47;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.022em;
+}
+
+/* Apple Typography Defaults */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+
+/* Button & UI Scale Micro-interaction */
+.apple-pressable {
+  transition: transform 160ms ease;
+}
+
+.apple-pressable:active {
+  transform: scale(0.95);
+}
+
+/* Component: button-primary */
+.button-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-primary);
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 400;
+  padding: 11px 22px;
+  border-radius: var(--radius-pill);
+  transition: background-color 160ms ease, transform 160ms ease;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+}
+
+.button-primary:hover:not(:disabled) {
+  background-color: #0077ed;
+}
+
+.button-primary:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.button-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Component: button-secondary-pill */
+.button-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  color: var(--color-primary);
+  font-size: 17px;
+  font-weight: 400;
+  padding: 11px 22px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-primary);
+  transition: background-color 160ms ease, transform 160ms ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.button-secondary:hover:not(:disabled) {
+  background-color: rgba(0, 102, 204, 0.05);
+}
+
+.button-secondary:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+/* Component: field */
+.field {
+  width: 100%;
+  background-color: var(--color-canvas);
+  border: 1px solid var(--color-hairline);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 17px;
+  color: var(--color-ink);
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.field:focus {
+  border-color: var(--color-primary-focus);
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
+}
+
+/* Status variants */
+.status-ok {
+  color: #1d1d1f;
+  background-color: #f5f5f7;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.status-warn {
+  color: #b64e00;
+  background-color: #fff4e5;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+/* Table styling */
+.apple-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.apple-table th {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-ink-muted-48);
+  text-transform: uppercase;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.apple-table td {
+  padding: 16px;
+  border-bottom: 1px solid var(--color-divider-soft);
+  font-size: 17px;
+}

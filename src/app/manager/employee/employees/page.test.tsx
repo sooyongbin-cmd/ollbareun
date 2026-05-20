@@ -45,7 +45,7 @@ describe("employee roster page", () => {
     render(<EmployeeRosterPage />);
 
     expect(await screen.findByRole("heading", { name: "직원명부관리" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "직원등록" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "직원 등록" })).toHaveAttribute(
       "href",
       "/manager/employee/employees/new",
     );

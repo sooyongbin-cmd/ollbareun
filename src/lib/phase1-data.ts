@@ -6,6 +6,7 @@ export type EmployeeRow = {
   name: string;
   phone: string;
   phone_normalized: string;
+  is_retired: boolean;
   created_at: string;
 };
 
@@ -117,7 +118,7 @@ export async function createEmployee(input: { name: unknown; phone: unknown }) {
   const { data, error } = await supabase
     .from("employees")
     .upsert(
-      { name, phone, phone_normalized },
+      { name, phone, phone_normalized, is_retired: false },
       { onConflict: "name,phone_normalized" },
     )
     .select("*")
@@ -136,16 +137,22 @@ export async function getEmployeeById(id: unknown) {
   return data as EmployeeRow;
 }
 
-export async function updateEmployee(input: { id: unknown; name: unknown; phone: unknown }) {
+export async function updateEmployee(input: {
+  id: unknown;
+  name: unknown;
+  phone: unknown;
+  is_retired: unknown;
+}) {
   const id = requireString(input.id, "직원");
   const name = requireString(input.name, "직원이름");
   const phone = requireString(input.phone, "연락처");
   const phone_normalized = normalizePhone(phone);
+  const is_retired = Boolean(input.is_retired);
 
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("employees")
-    .update({ name, phone, phone_normalized })
+    .update({ name, phone, phone_normalized, is_retired })
     .eq("id", id)
     .select("*")
     .single();

@@ -27,16 +27,24 @@ describe("employee save page", () => {
               id: "emp-1",
               name: "Alice",
               phone: "010-1234-5678",
+              is_retired: false,
             },
           });
         }
 
         if (init?.method === "PATCH" && url.endsWith("/api/employees/emp-1")) {
+          const body = JSON.parse(String(init.body));
+          expect(body).toEqual({
+            name: "Alice Kim",
+            phone: "010-9999-8888",
+            is_retired: true,
+          });
           return Response.json({
             employee: {
               id: "emp-1",
               name: "Alice Kim",
               phone: "010-9999-8888",
+              is_retired: true,
             },
           });
         }
@@ -55,11 +63,13 @@ describe("employee save page", () => {
     expect(await screen.findByRole("heading", { name: "직원수정" })).toBeInTheDocument();
     expect(await screen.findByDisplayValue("Alice")).toBeInTheDocument();
     expect(screen.getByDisplayValue("010-1234-5678")).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "퇴직" })).not.toBeChecked();
 
     await user.clear(screen.getByLabelText("직원이름"));
     await user.type(screen.getByLabelText("직원이름"), "Alice Kim");
     await user.clear(screen.getByLabelText("연락처"));
     await user.type(screen.getByLabelText("연락처"), "010-9999-8888");
+    await user.click(screen.getByRole("checkbox", { name: "퇴직" }));
     await user.click(screen.getByRole("button", { name: "저장" }));
 
     expect(alert).toHaveBeenCalledWith("수정이 완료되었습니다.");

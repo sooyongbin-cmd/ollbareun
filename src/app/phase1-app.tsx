@@ -14,6 +14,7 @@ type EmployeeRow = {
   name: string;
   phone: string;
   phone_normalized: string;
+  is_retired: boolean;
 };
 
 type WorksiteRow = {

@@ -19,12 +19,14 @@ const bootstrap = {
       name: "Alice",
       phone: "010-1234-5678",
       phone_normalized: "01012345678",
+      is_retired: false,
     },
     {
       id: "emp-2",
       name: "Bob",
       phone: "010-9999-8888",
       phone_normalized: "01099998888",
+      is_retired: true,
     },
   ],
   worksites: [],
@@ -63,9 +65,11 @@ describe("employee roster page", () => {
       "/manager/employee/employees/new",
     );
     expect(await screen.findByText("Alice")).toBeInTheDocument();
+    expect(screen.getByText("현직")).toBeInTheDocument();
 
     await user.type(screen.getByRole("textbox"), "Bob");
     expect(await screen.findByText("Bob")).toBeInTheDocument();
+    expect(screen.getByText("퇴직")).toBeInTheDocument();
     expect(screen.queryByText("Alice")).not.toBeInTheDocument();
   });
 

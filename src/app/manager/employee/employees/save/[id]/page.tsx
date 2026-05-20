@@ -7,6 +7,7 @@ type Employee = {
   id: string;
   name: string;
   phone: string;
+  is_retired: boolean;
 };
 
 type EmployeeResponse = {
@@ -30,6 +31,7 @@ export default function EmployeeSavePage() {
   const employeeId = params.id;
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [isRetired, setIsRetired] = useState(false);
   const [loading, setLoading] = useState(Boolean(employeeId));
   const [error, setError] = useState("");
   const routeError = employeeId ? error : "직원 정보를 불러오지 못했습니다.";
@@ -43,6 +45,7 @@ export default function EmployeeSavePage() {
         if (!ignore) {
           setName(data.employee.name);
           setPhone(data.employee.phone);
+          setIsRetired(data.employee.is_retired);
         }
       } catch (loadError) {
         if (!ignore) {
@@ -76,7 +79,7 @@ export default function EmployeeSavePage() {
       await fetchJson<EmployeeResponse>(`/api/employees/${employeeId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone }),
+        body: JSON.stringify({ name, phone, is_retired: isRetired }),
       });
 
       window.alert("수정이 완료되었습니다.");
@@ -130,6 +133,14 @@ export default function EmployeeSavePage() {
                   required
                 />
               </div>
+              <label className="flex items-center gap-3 text-[14px] font-semibold text-ink-muted-48 ml-1">
+                <input
+                  type="checkbox"
+                  checked={isRetired}
+                  onChange={(event) => setIsRetired(event.target.checked)}
+                />
+                퇴직
+              </label>
             </div>
 
             <button className="button-primary w-full md:w-auto" type="submit">

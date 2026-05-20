@@ -9,6 +9,7 @@ type EmployeeRow = {
   name: string;
   phone: string;
   phone_normalized: string;
+  is_retired: boolean;
 };
 
 type Bootstrap = {
@@ -169,8 +170,14 @@ export default function EmployeeRosterPage() {
                       <td className="font-semibold">{employee.name}</td>
                       <td className="text-ink-muted-48">{employee.phone}</td>
                       <td className="text-right">
-                        <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-[12px] font-semibold text-primary">
-                          등록됨
+                        <span
+                          className={`inline-flex rounded-full px-3 py-1 text-[12px] font-semibold ${
+                            employee.is_retired
+                              ? "bg-ink/10 text-ink-muted-48"
+                              : "bg-primary/10 text-primary"
+                          }`}
+                        >
+                          {employee.is_retired ? "퇴직" : "현직"}
                         </span>
                       </td>
                     </tr>

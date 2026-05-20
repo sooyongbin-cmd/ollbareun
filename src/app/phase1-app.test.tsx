@@ -34,6 +34,7 @@ describe("manager pages", () => {
                 name: "홍길동",
                 phone: "010-1234-5678",
                 phone_normalized: "01012345678",
+                is_retired: false,
               },
             ],
             worksites: [
@@ -52,7 +53,12 @@ describe("manager pages", () => {
         }
         if (url.endsWith("/api/employees")) {
           return Response.json({
-            employee: { id: "emp-2", name: "김철수", phone: "010-2222-3333" },
+            employee: {
+              id: "emp-2",
+              name: "김철수",
+              phone: "010-2222-3333",
+              is_retired: false,
+            },
           });
         }
         if (url.endsWith("/api/worksites")) {

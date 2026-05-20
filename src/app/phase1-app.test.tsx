@@ -86,9 +86,9 @@ describe("manager pages", () => {
       "/manager/employee/employees",
     );
     expect(screen.queryByRole("link", { name: "직원등록" })).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "근무지등록" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "근무지관리" })).toHaveAttribute(
       "href",
-      "/manager/employee/worksites/new",
+      "/manager/employee/worksites",
     );
     expect(screen.getByRole("link", { name: "근무지배정" })).toHaveAttribute(
       "href",

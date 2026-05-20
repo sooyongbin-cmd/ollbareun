@@ -145,9 +145,9 @@ const adminMenu = [
     children: [
       "직원명부관리(목록)/등록/수정",
       "근태 관리",
-      "근무지 배정 및 관리",
+      "근무지 관리",
       { label: "직원명부관리", href: "/manager/employee/employees" },
-      { label: "근무지등록", href: "/manager/employee/worksites/new" },
+      { label: "근무지관리", href: "/manager/employee/worksites" },
       { label: "근무지배정", href: "/manager/employee/assignments/new" },
     ],
   },

@@ -147,7 +147,8 @@ export async function updateEmployee(input: {
   const name = requireString(input.name, "직원이름");
   const phone = requireString(input.phone, "연락처");
   const phone_normalized = normalizePhone(phone);
-  const is_retired = Boolean(input.is_retired);
+  const is_retired =
+    input.is_retired === true || input.is_retired === "true" || input.is_retired === 1;
 
   const supabase = getSupabase();
   const { data, error } = await supabase
@@ -159,6 +160,14 @@ export async function updateEmployee(input: {
 
   throwIfError(error);
   return data as EmployeeRow;
+}
+
+export async function deleteEmployee(id: unknown) {
+  const employeeId = requireString(id, "직원");
+  const supabase = getSupabase();
+  const { error } = await supabase.from("employees").delete().eq("id", employeeId);
+
+  throwIfError(error);
 }
 
 export async function createWorksite(input: {

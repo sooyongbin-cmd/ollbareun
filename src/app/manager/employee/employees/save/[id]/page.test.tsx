@@ -49,6 +49,10 @@ describe("employee save page", () => {
           });
         }
 
+        if (init?.method === "DELETE" && url.endsWith("/api/employees/emp-1")) {
+          return new Response(null, { status: 204 });
+        }
+
         return Response.json({}, { status: 404 });
       }),
     );
@@ -73,6 +77,21 @@ describe("employee save page", () => {
     await user.click(screen.getByRole("button", { name: "저장" }));
 
     expect(alert).toHaveBeenCalledWith("수정이 완료되었습니다.");
+    expect(push).toHaveBeenCalledWith("/manager/employee/employees");
+  });
+
+  it("confirms and deletes the employee", async () => {
+    const user = userEvent.setup();
+
+    render(<EmployeeSavePage />);
+
+    expect(await screen.findByRole("heading", { name: "직원수정" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "삭제" }));
+    expect(screen.getByText("현재자료를 삭제할까요?")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "예" }));
+
     expect(push).toHaveBeenCalledWith("/manager/employee/employees");
   });
 });

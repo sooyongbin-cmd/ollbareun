@@ -70,7 +70,7 @@ describe("manager pages", () => {
     );
   });
 
-  it("renders the shared manager chrome with links to the registration pages", () => {
+  it("renders the shared manager chrome with links to the remaining registration pages", () => {
     renderWithManagerLayout(<ManagerPage />);
 
     expect(screen.getByRole("heading", { name: "관리자" })).toBeInTheDocument();
@@ -79,10 +79,7 @@ describe("manager pages", () => {
       "href",
       "/manager/employee/employees",
     );
-    expect(screen.getByRole("link", { name: "직원등록" })).toHaveAttribute(
-      "href",
-      "/manager/employee/employees/new",
-    );
+    expect(screen.queryByRole("link", { name: "직원등록" })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "근무지등록" })).toHaveAttribute(
       "href",
       "/manager/employee/worksites/new",

@@ -9,7 +9,6 @@ const menu = [
     label: "직원 관리",
     children: [
       { label: "직원명부관리", href: "/manager/employee/employees" },
-      { label: "직원등록", href: "/manager/employee/employees/new" },
       { label: "근무지등록", href: "/manager/employee/worksites/new" },
       { label: "근무지배정", href: "/manager/employee/assignments/new" },
     ],

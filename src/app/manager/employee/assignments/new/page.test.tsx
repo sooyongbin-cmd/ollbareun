@@ -41,10 +41,10 @@ describe("assignment new page", () => {
     render(<AssignmentNewPage />);
 
     expect(await screen.findByRole("heading", { name: "배정하기" })).toBeInTheDocument();
-    await user.selectOptions(screen.getByLabelText("직원"), "emp-1");
-    await user.selectOptions(screen.getByLabelText("근무지"), "work-1");
     await user.clear(screen.getByLabelText("근무일"));
     await user.type(screen.getByLabelText("근무일"), "2026-05-21");
+    await user.selectOptions(screen.getByLabelText("근무지"), "work-1");
+    await user.selectOptions(screen.getByLabelText("직원"), "emp-1");
     await user.click(screen.getByRole("button", { name: "배정하기" }));
 
     expect(alert).toHaveBeenCalledWith("자료를 저장하였습니다.");

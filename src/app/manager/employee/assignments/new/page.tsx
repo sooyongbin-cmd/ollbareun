@@ -106,17 +106,10 @@ export default function AssignmentNewPage() {
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-employee">
-                직원
+              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-date">
+                근무일
               </label>
-              <select className="field appearance-none" id="assignment-employee" name="employeeId" required>
-                <option value="">선택</option>
-                {data.employees.map((employee) => (
-                  <option key={employee.id} value={employee.id}>
-                    {employee.name}
-                  </option>
-                ))}
-              </select>
+              <input className="field" id="assignment-date" name="workDate" type="date" defaultValue={todayDate()} />
             </div>
             <div className="space-y-2">
               <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-worksite">
@@ -132,10 +125,17 @@ export default function AssignmentNewPage() {
               </select>
             </div>
             <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-date">
-                근무일
+              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-employee">
+                직원
               </label>
-              <input className="field" id="assignment-date" name="workDate" type="date" defaultValue={todayDate()} />
+              <select className="field appearance-none" id="assignment-employee" name="employeeId" required>
+                <option value="">선택</option>
+                {data.employees.map((employee) => (
+                  <option key={employee.id} value={employee.id}>
+                    {employee.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 

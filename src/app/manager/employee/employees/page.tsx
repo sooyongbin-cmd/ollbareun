@@ -14,6 +14,14 @@ type EmployeeRow = {
 
 type Bootstrap = {
   employees: EmployeeRow[];
+  worksites: {
+    id: string;
+    name: string;
+  }[];
+  assignments: {
+    employee_id: string;
+    worksite_id: string;
+  }[];
   summary: {
     totalEmployees: number;
     currentlyClockedIn: number;
@@ -22,6 +30,8 @@ type Bootstrap = {
 
 const emptyBootstrap: Bootstrap = {
   employees: [],
+  worksites: [],
+  assignments: [],
   summary: {
     totalEmployees: 0,
     currentlyClockedIn: 0,
@@ -48,7 +58,12 @@ export default function EmployeeRosterPage() {
         }
 
         if (!ignore) {
-          setData(payload as Bootstrap);
+          setData({
+            employees: payload.employees ?? [],
+            worksites: payload.worksites ?? [],
+            assignments: payload.assignments ?? [],
+            summary: payload.summary ?? emptyBootstrap.summary,
+          });
         }
       } catch (loadError) {
         if (!ignore) {
@@ -61,7 +76,7 @@ export default function EmployeeRosterPage() {
       }
     }
 
-    loadBootstrap();
+    void loadBootstrap();
 
     return () => {
       ignore = true;
@@ -88,6 +103,14 @@ export default function EmployeeRosterPage() {
       );
     });
   }, [data.employees, query]);
+
+  const worksiteById = useMemo(() => {
+    return new Map(data.worksites.map((worksite) => [worksite.id, worksite.name]));
+  }, [data.worksites]);
+
+  const worksiteByEmployeeId = useMemo(() => {
+    return new Map(data.assignments.map((assignment) => [assignment.employee_id, assignment.worksite_id]));
+  }, [data.assignments]);
 
   function openEditPage(employeeId: string) {
     router.push(`/manager/employee/employees/save/${employeeId}`);
@@ -116,7 +139,7 @@ export default function EmployeeRosterPage() {
               id="employee-roster-search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="이름 또는 연락처를 입력하세요."
+              placeholder="이름 또는 연락처를 입력하세요"
             />
           </div>
 
@@ -141,14 +164,15 @@ export default function EmployeeRosterPage() {
                 <tr>
                   <th className="text-left">이름</th>
                   <th className="text-left">연락처</th>
+                  <th className="text-left">근무지</th>
                   <th className="text-right">상태</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredEmployees.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="p-8 text-center text-ink-muted-48 italic">
-                      검색 결과에 해당하는 직원이 없습니다.
+                    <td colSpan={4} className="p-8 text-center text-ink-muted-48 italic">
+                      조회 결과에 해당하는 직원이 없습니다.
                     </td>
                   </tr>
                 ) : (
@@ -169,6 +193,9 @@ export default function EmployeeRosterPage() {
                     >
                       <td className="font-semibold">{employee.name}</td>
                       <td className="text-ink-muted-48">{employee.phone}</td>
+                      <td className="text-ink-muted-48">
+                        {worksiteById.get(worksiteByEmployeeId.get(employee.id) ?? "") ?? "-"}
+                      </td>
                       <td className="text-right">
                         <span
                           className={`inline-flex rounded-full px-3 py-1 text-[12px] font-semibold ${

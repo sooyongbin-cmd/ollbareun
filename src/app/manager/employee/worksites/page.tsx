@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 type WorksiteRow = {
@@ -27,11 +27,12 @@ const emptyBootstrap: Bootstrap = {
 };
 
 export default function WorksiteManagementPage() {
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams?.get("worksite") ?? "";
   const [data, setData] = useState<Bootstrap>(emptyBootstrap);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const router = useRouter();
 
   useEffect(() => {
     let ignore = false;
@@ -62,7 +63,7 @@ export default function WorksiteManagementPage() {
       }
     }
 
-    loadBootstrap();
+    void loadBootstrap();
 
     return () => {
       ignore = true;
@@ -86,10 +87,6 @@ export default function WorksiteManagementPage() {
     return data.worksites.filter((worksite) => worksite.name.toLowerCase().includes(normalizedQuery));
   }, [data.worksites, query]);
 
-  function openEditPage(worksiteId: string) {
-    router.push(`/manager/employee/worksites/save/${worksiteId}`);
-  }
-
   return (
     <section className="space-y-[24px]">
       <header>
@@ -97,7 +94,7 @@ export default function WorksiteManagementPage() {
         <div className="space-y-3">
           <h1 className="text-[40px] font-semibold tracking-tight leading-[1.1]">근무지관리</h1>
           <p className="text-[21px] font-normal text-ink-muted-48 max-w-[640px]">
-            등록된 근무지를 검색하고 위치와 반경, 배정 현황을 확인합니다.
+            등록된 근무지를 검색하고 배정 현황을 확인합니다.
           </p>
         </div>
       </header>
@@ -113,7 +110,7 @@ export default function WorksiteManagementPage() {
               id="worksite-search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="근무지명을 입력하세요."
+              placeholder="근무지 이름을 입력하세요"
             />
           </div>
 
@@ -137,7 +134,7 @@ export default function WorksiteManagementPage() {
               <thead>
                 <tr>
                   <th className="text-left">근무지명</th>
-                  <th className="text-center">배정 직원 수</th>
+                  <th className="text-center">배정인원수</th>
                   <th className="text-left">위도</th>
                   <th className="text-left">경도</th>
                   <th className="text-right">허용반경</th>
@@ -147,32 +144,40 @@ export default function WorksiteManagementPage() {
                 {filteredWorksites.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="p-8 text-center text-ink-muted-48 italic">
-                      검색 결과에 해당하는 근무지가 없습니다.
+                      조회 결과에 해당하는 근무지가 없습니다.
                     </td>
                   </tr>
                 ) : (
-                  filteredWorksites.map((worksite) => (
-                    <tr
-                      key={worksite.id}
-                      aria-label={worksite.name}
-                      className="cursor-pointer hover:bg-canvas-parchment transition-colors"
-                      onClick={() => openEditPage(worksite.id)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter" || event.key === " ") {
-                          event.preventDefault();
-                          openEditPage(worksite.id);
-                        }
-                      }}
-                      role="link"
-                      tabIndex={0}
-                    >
-                      <td className="font-semibold">{worksite.name}</td>
-                      <td className="text-center">{worksiteCounts[worksite.id] ?? 0}</td>
-                      <td className="text-ink-muted-48">{worksite.latitude}</td>
-                      <td className="text-ink-muted-48">{worksite.longitude}</td>
-                      <td className="text-right">{worksite.radius_meters}m</td>
-                    </tr>
-                  ))
+                  filteredWorksites.map((worksite) => {
+                    const count = worksiteCounts[worksite.id] ?? 0;
+                    return (
+                      <tr key={worksite.id} className="hover:bg-canvas-parchment transition-colors">
+                        <td className="font-semibold">
+                          <Link
+                            className="text-primary hover:underline"
+                            href={`/manager/employee/worksites/save/${worksite.id}`}
+                          >
+                            {worksite.name}
+                          </Link>
+                        </td>
+                        <td className="text-center">
+                          {count > 0 ? (
+                            <Link
+                              className="text-primary font-semibold hover:underline"
+                              href={`/manager/employee/assignments?worksite=${encodeURIComponent(worksite.name)}`}
+                            >
+                              {count}
+                            </Link>
+                          ) : (
+                            <span className="text-ink-muted-48">{count}</span>
+                          )}
+                        </td>
+                        <td className="text-ink-muted-48">{worksite.latitude}</td>
+                        <td className="text-ink-muted-48">{worksite.longitude}</td>
+                        <td className="text-right">{worksite.radius_meters}m</td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 type AssignmentRow = {
@@ -15,8 +15,6 @@ type AssignmentResponse = {
   assignments: AssignmentRow[];
 };
 
-const emptyAssignments: AssignmentRow[] = [];
-
 async function fetchJson<T>(url: string): Promise<T> {
   const response = await fetch(url);
   const payload = await response.json();
@@ -28,15 +26,13 @@ async function fetchJson<T>(url: string): Promise<T> {
   return payload as T;
 }
 
-function formatDate(value: string) {
-  return value ? value : "-";
-}
-
 export default function AssignmentManagementPage() {
   const router = useRouter();
-  const [assignments, setAssignments] = useState<AssignmentRow[]>(emptyAssignments);
+  const searchParams = useSearchParams();
+  const initialWorksite = searchParams?.get("worksite") ?? "";
+  const [assignments, setAssignments] = useState<AssignmentRow[]>([]);
   const [dateQuery, setDateQuery] = useState("");
-  const [worksiteQuery, setWorksiteQuery] = useState("");
+  const [worksiteQuery, setWorksiteQuery] = useState(initialWorksite);
   const [nameQuery, setNameQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -188,7 +184,7 @@ export default function AssignmentManagementPage() {
                       role="link"
                       tabIndex={0}
                     >
-                      <td className="font-semibold">{formatDate(assignment.work_date)}</td>
+                      <td className="font-semibold">{assignment.work_date}</td>
                       <td>{assignment.worksite_name}</td>
                       <td className="text-ink-muted-48">{assignment.employee_name}</td>
                     </tr>

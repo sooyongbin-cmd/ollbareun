@@ -29,8 +29,18 @@ const bootstrap = {
       is_retired: true,
     },
   ],
-  worksites: [],
-  assignments: [],
+  worksites: [
+    {
+      id: "work-1",
+      name: "본사",
+    },
+  ],
+  assignments: [
+    {
+      employee_id: "emp-1",
+      worksite_id: "work-1",
+    },
+  ],
   attendance: [],
   summary: { totalEmployees: 2, currentlyClockedIn: 0 },
 };
@@ -65,6 +75,7 @@ describe("employee roster page", () => {
       "/manager/employee/employees/new",
     );
     expect(await screen.findByText("Alice")).toBeInTheDocument();
+    expect(screen.getByText("본사")).toBeInTheDocument();
     expect(screen.getByText("현직")).toBeInTheDocument();
 
     await user.type(screen.getByRole("textbox"), "Bob");

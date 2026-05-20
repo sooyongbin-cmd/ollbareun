@@ -49,11 +49,6 @@ export default function ManagerLayout({
       <nav className="h-[52px] bg-canvas-parchment/80 backdrop-blur-md sticky top-[44px] z-40 border-b border-hairline/30">
         <div className="mx-auto max-w-[980px] w-full h-full flex items-center justify-between px-5">
           <h2 className="text-[21px] font-semibold tracking-[0.231px]">관리자</h2>
-          <div className="flex items-center gap-6">
-            <Link href="/" className="text-[14px] text-primary hover:underline">
-              나가기
-            </Link>
-          </div>
         </div>
       </nav>
 

@@ -6,6 +6,12 @@ import ManagerLayout from "../../layout";
 import ManagerPage from "../../page";
 import EmployeeRosterPage from "./page";
 
+const push = vi.fn();
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push }),
+}));
+
 const bootstrap = {
   employees: [
     {
@@ -34,6 +40,7 @@ function renderWithManagerLayout(ui: ReactElement) {
 describe("employee roster page", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    push.mockReset();
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: RequestInfo | URL) => {
@@ -60,6 +67,24 @@ describe("employee roster page", () => {
     await user.type(screen.getByRole("textbox"), "Bob");
     expect(await screen.findByText("Bob")).toBeInTheDocument();
     expect(screen.queryByText("Alice")).not.toBeInTheDocument();
+  });
+
+  it("opens the employee edit page when a roster row is clicked", async () => {
+    const user = userEvent.setup();
+    renderWithManagerLayout(<EmployeeRosterPage />);
+
+    await screen.findByText("Alice");
+    await user.click(screen.getByRole("link", { name: "Alice" }));
+
+    expect(push).toHaveBeenCalledWith("/manager/employee/employees/save/emp-1");
+  });
+
+  it("does not show the manager home and exit links on the roster page", async () => {
+    renderWithManagerLayout(<EmployeeRosterPage />);
+
+    await screen.findByRole("heading", { name: "직원명부관리" });
+    expect(screen.queryByRole("link", { name: "관리자화면으로" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "나가기" })).not.toBeInTheDocument();
   });
 
   it("exposes the roster route from the manager menu", () => {

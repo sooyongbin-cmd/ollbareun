@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 type EmployeeRow = {
@@ -31,6 +32,7 @@ export default function EmployeeRosterPage() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
     let ignore = false;
@@ -85,6 +87,10 @@ export default function EmployeeRosterPage() {
       );
     });
   }, [data.employees, query]);
+
+  function openEditPage(employeeId: string) {
+    router.push(`/manager/employee/employees/save/${employeeId}`);
+  }
 
   return (
     <section className="space-y-[24px]">
@@ -146,7 +152,20 @@ export default function EmployeeRosterPage() {
                   </tr>
                 ) : (
                   filteredEmployees.map((employee) => (
-                    <tr key={employee.id} className="hover:bg-canvas-parchment transition-colors">
+                    <tr
+                      key={employee.id}
+                      aria-label={employee.name}
+                      className="cursor-pointer hover:bg-canvas-parchment transition-colors"
+                      onClick={() => openEditPage(employee.id)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          openEditPage(employee.id);
+                        }
+                      }}
+                      role="link"
+                      tabIndex={0}
+                    >
                       <td className="font-semibold">{employee.name}</td>
                       <td className="text-ink-muted-48">{employee.phone}</td>
                       <td className="text-right">
@@ -161,15 +180,6 @@ export default function EmployeeRosterPage() {
             </table>
           </div>
         )}
-
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Link className="text-[14px] text-primary hover:underline" href="/manager">
-            관리자 화면으로
-          </Link>
-          <Link className="text-[14px] text-primary hover:underline" href="/">
-            나가기
-          </Link>
-        </div>
       </section>
     </section>
   );

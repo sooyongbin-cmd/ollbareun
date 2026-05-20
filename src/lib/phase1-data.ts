@@ -127,6 +127,33 @@ export async function createEmployee(input: { name: unknown; phone: unknown }) {
   return data as EmployeeRow;
 }
 
+export async function getEmployeeById(id: unknown) {
+  const employeeId = requireString(id, "직원");
+  const supabase = getSupabase();
+  const { data, error } = await supabase.from("employees").select("*").eq("id", employeeId).single();
+
+  throwIfError(error);
+  return data as EmployeeRow;
+}
+
+export async function updateEmployee(input: { id: unknown; name: unknown; phone: unknown }) {
+  const id = requireString(input.id, "직원");
+  const name = requireString(input.name, "직원이름");
+  const phone = requireString(input.phone, "연락처");
+  const phone_normalized = normalizePhone(phone);
+
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("employees")
+    .update({ name, phone, phone_normalized })
+    .eq("id", id)
+    .select("*")
+    .single();
+
+  throwIfError(error);
+  return data as EmployeeRow;
+}
+
 export async function createWorksite(input: {
   name: unknown;
   latitude: unknown;

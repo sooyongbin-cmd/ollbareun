@@ -8,6 +8,12 @@ import ManagerLayout from "./manager/layout";
 import ManagerPage from "./manager/page";
 import WorksiteNewPage from "./manager/employee/worksites/new/page";
 
+const push = vi.fn();
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push }),
+}));
+
 function renderWithManagerLayout(ui: ReactElement) {
   return render(<ManagerLayout>{ui}</ManagerLayout>);
 }
@@ -15,6 +21,7 @@ function renderWithManagerLayout(ui: ReactElement) {
 describe("manager pages", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    push.mockReset();
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: RequestInfo | URL) => {
@@ -96,6 +103,7 @@ describe("manager pages", () => {
 
   it("registers an employee from the admin form", async () => {
     const user = userEvent.setup();
+    const alert = vi.spyOn(window, "alert").mockImplementation(() => undefined);
     renderWithManagerLayout(<EmployeeNewPage />);
 
     expect(screen.getByRole("heading", { name: "직원등록" })).toBeInTheDocument();
@@ -103,7 +111,8 @@ describe("manager pages", () => {
     await user.type(screen.getByLabelText("연락처"), "010-2222-3333");
     await user.click(screen.getByRole("button", { name: "직원 등록" }));
 
-    expect(await screen.findByText("김철수 / 010-2222-3333")).toBeInTheDocument();
+    expect(alert).toHaveBeenCalledWith("직원이름(김철수) 연락처(010-2222-3333) 등록완료");
+    expect(push).toHaveBeenCalledWith("/manager/employee/employees");
   });
 
   it("renders worksite registration as an independent manager page", () => {

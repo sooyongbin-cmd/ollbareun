@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 type EmployeeResponse = {
@@ -26,8 +27,8 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
 }
 
 export default function EmployeeNewPage() {
-  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const router = useRouter();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -42,10 +43,10 @@ export default function EmployeeNewPage() {
         phone: data.get("phone"),
       });
 
-      setMessage(`${result.employee.name} / ${result.employee.phone}`);
+      window.alert(`직원이름(${result.employee.name}) 연락처(${result.employee.phone}) 등록완료`);
       form.reset();
+      router.push("/manager/employee/employees");
     } catch (submitError) {
-      setMessage("");
       setError(submitError instanceof Error ? submitError.message : "요청을 처리하지 못했습니다.");
     }
   }
@@ -81,7 +82,6 @@ export default function EmployeeNewPage() {
           </button>
         </form>
 
-        {message ? <p className="status-ok mt-6 text-center">{message}</p> : null}
         {error ? <p className="status-warn mt-6 text-center">{error}</p> : null}
       </section>
     </section>

@@ -192,6 +192,48 @@ export async function createWorksite(input: {
   return data as WorksiteRow;
 }
 
+export async function getWorksiteById(id: unknown) {
+  const worksiteId = requireString(id, "근무지");
+  const supabase = getSupabase();
+  const { data, error } = await supabase.from("worksites").select("*").eq("id", worksiteId).single();
+
+  throwIfError(error);
+  return data as WorksiteRow;
+}
+
+export async function updateWorksite(input: {
+  id: unknown;
+  name: unknown;
+  latitude: unknown;
+  longitude: unknown;
+  radiusMeters: unknown;
+}) {
+  const id = requireString(input.id, "근무지");
+  const name = requireString(input.name, "근무지명");
+  const latitude = requireNumber(input.latitude, "위도");
+  const longitude = requireNumber(input.longitude, "경도");
+  const radius_meters = Math.max(1, Math.round(requireNumber(input.radiusMeters, "허용반경")));
+
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("worksites")
+    .update({ name, latitude, longitude, radius_meters })
+    .eq("id", id)
+    .select("*")
+    .single();
+
+  throwIfError(error);
+  return data as WorksiteRow;
+}
+
+export async function deleteWorksite(id: unknown) {
+  const worksiteId = requireString(id, "근무지");
+  const supabase = getSupabase();
+  const { error } = await supabase.from("worksites").delete().eq("id", worksiteId);
+
+  throwIfError(error);
+}
+
 export async function createAssignment(input: {
   employeeId: unknown;
   worksiteId: unknown;

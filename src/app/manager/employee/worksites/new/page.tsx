@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 type WorksiteResponse = {
@@ -25,8 +26,8 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
 }
 
 export default function WorksiteNewPage() {
-  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const router = useRouter();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -36,17 +37,16 @@ export default function WorksiteNewPage() {
     const data = new FormData(form);
 
     try {
-      const result = await postJson<WorksiteResponse>("/api/worksites", {
+      await postJson<WorksiteResponse>("/api/worksites", {
         name: data.get("name"),
         latitude: data.get("latitude"),
         longitude: data.get("longitude"),
         radiusMeters: data.get("radiusMeters"),
       });
 
-      setMessage(`${result.worksite.name} 근무지가 등록되었습니다.`);
-      form.reset();
+      window.alert("자료를 저장하였습니다.");
+      router.push("/manager/employee/worksites");
     } catch (submitError) {
-      setMessage("");
       setError(submitError instanceof Error ? submitError.message : "요청을 처리하지 못했습니다.");
     }
   }
@@ -84,7 +84,7 @@ export default function WorksiteNewPage() {
               </div>
               <div className="space-y-2">
                 <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="worksite-radius">
-                  반경(m)
+                  허용반경(m)
                 </label>
                 <input className="field" id="worksite-radius" name="radiusMeters" placeholder="100" required />
               </div>
@@ -96,7 +96,6 @@ export default function WorksiteNewPage() {
           </button>
         </form>
 
-        {message ? <p className="status-ok mt-6 text-center">{message}</p> : null}
         {error ? <p className="status-warn mt-6 text-center">{error}</p> : null}
       </section>
     </section>

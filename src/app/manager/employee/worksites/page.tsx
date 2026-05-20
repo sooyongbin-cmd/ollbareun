@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 type WorksiteRow = {
@@ -30,6 +31,7 @@ export default function WorksiteManagementPage() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
     let ignore = false;
@@ -83,6 +85,10 @@ export default function WorksiteManagementPage() {
 
     return data.worksites.filter((worksite) => worksite.name.toLowerCase().includes(normalizedQuery));
   }, [data.worksites, query]);
+
+  function openEditPage(worksiteId: string) {
+    router.push(`/manager/employee/worksites/save/${worksiteId}`);
+  }
 
   return (
     <section className="space-y-[24px]">
@@ -146,7 +152,20 @@ export default function WorksiteManagementPage() {
                   </tr>
                 ) : (
                   filteredWorksites.map((worksite) => (
-                    <tr key={worksite.id} className="hover:bg-canvas-parchment transition-colors">
+                    <tr
+                      key={worksite.id}
+                      aria-label={worksite.name}
+                      className="cursor-pointer hover:bg-canvas-parchment transition-colors"
+                      onClick={() => openEditPage(worksite.id)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          openEditPage(worksite.id);
+                        }
+                      }}
+                      role="link"
+                      tabIndex={0}
+                    >
                       <td className="font-semibold">{worksite.name}</td>
                       <td className="text-center">{worksiteCounts[worksite.id] ?? 0}</td>
                       <td className="text-ink-muted-48">{worksite.latitude}</td>

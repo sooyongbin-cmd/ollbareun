@@ -352,6 +352,10 @@ export async function authenticateGuard(input: { name: unknown; phone: unknown }
     throw new Error("등록된 직원 정보와 일치하지 않습니다.");
   }
 
+  if (employee.is_retired) {
+    throw new Error("해당직원은 퇴직처리되었습니다.");
+  }
+
   const { data: assignment, error: assignmentError } = await supabase
     .from("work_assignments")
     .select("*")

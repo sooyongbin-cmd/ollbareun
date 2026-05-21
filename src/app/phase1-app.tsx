@@ -403,14 +403,22 @@ export function Phase1App({ mode, managerView = "overview" }: Phase1AppProps) {
     event.preventDefault();
     setError("");
     const form = new FormData(event.currentTarget);
-    const session = await postJson<GuardSession>("/api/guard/auth", {
-      name: form.get("name"),
-      phone: form.get("phone"),
-    });
-    setGuard(session);
-    setLatitude(session.worksite ? String(session.worksite.latitude) : "");
-    setLongitude(session.worksite ? String(session.worksite.longitude) : "");
-    setMessage("경비원 인증이 완료되었습니다.");
+    try {
+      const session = await postJson<GuardSession>("/api/guard/auth", {
+        name: form.get("name"),
+        phone: form.get("phone"),
+      });
+      setGuard(session);
+      setLatitude(session.worksite ? String(session.worksite.latitude) : "");
+      setLongitude(session.worksite ? String(session.worksite.longitude) : "");
+      setMessage("경비원 인증이 완료되었습니다.");
+    } catch (authError) {
+      const authMessage = authError instanceof Error ? authError.message : "경비원 인증에 실패했습니다.";
+      setGuard(null);
+      setMessage("");
+      setError(authMessage);
+      window.alert(authMessage);
+    }
   }
 
   async function updateCurrentLocation() {

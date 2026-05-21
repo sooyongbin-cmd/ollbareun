@@ -50,6 +50,39 @@ describe("guard page", () => {
     expect(screen.getByText(/개인정보처리방침/)).toBeInTheDocument();
     expect(screen.queryByText(/\?щ컮|愿|踰뺤쟻|짤 2026/)).not.toBeInTheDocument();
   });
+
+  it("shows an alert and keeps the guard logged out when the employee is retired", async () => {
+    const user = userEvent.setup();
+    const alert = vi.spyOn(window, "alert").mockImplementation(() => undefined);
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith("/api/bootstrap")) {
+        return Response.json({
+          employees: [],
+          worksites: [],
+          assignments: [],
+          attendance: [],
+          summary: { totalEmployees: 0, currentlyClockedIn: 0 },
+        });
+      }
+      if (init?.method === "POST" && url.endsWith("/api/guard/auth")) {
+        return Response.json(
+          { error: "해당직원은 퇴직처리되었습니다." },
+          { status: 401 },
+        );
+      }
+      return Response.json({}, { status: 404 });
+    });
+
+    render(<Phase1App mode="guard" />);
+
+    await user.type(screen.getByLabelText("경비원 이름"), "홍길동");
+    await user.type(screen.getByLabelText("경비원 연락처"), "010-1234-5678");
+    await user.click(screen.getByRole("button", { name: "경비원 인증" }));
+
+    expect(alert).toHaveBeenCalledWith("해당직원은 퇴직처리되었습니다.");
+    expect(screen.queryByText("홍길동님 인증됨")).not.toBeInTheDocument();
+  });
 });
 
 describe("manager pages", () => {

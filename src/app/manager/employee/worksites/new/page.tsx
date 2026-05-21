@@ -1,7 +1,19 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+
+declare global {
+  interface Window {
+    jusoCallBack?: (
+      roadFullAddr?: string,
+      roadAddrPart1?: string,
+      addrDetail?: string,
+      roadAddrPart2?: string,
+      ...rest: string[]
+    ) => void;
+  }
+}
 
 type WorksiteResponse = {
   worksite: {
@@ -27,7 +39,29 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
 
 export default function WorksiteNewPage() {
   const [error, setError] = useState("");
+  const [address, setAddress] = useState("");
   const router = useRouter();
+
+  useEffect(() => {
+    window.jusoCallBack = (roadFullAddr, roadAddrPart1, addrDetail, roadAddrPart2) => {
+      const selectedAddress =
+        roadFullAddr?.trim() || [roadAddrPart1, addrDetail, roadAddrPart2].filter(Boolean).join(" ").trim();
+      setAddress(selectedAddress);
+    };
+
+    return () => {
+      delete window.jusoCallBack;
+    };
+  }, []);
+
+  function openAddressPopup() {
+    const popup = window.open(
+      "/api/juso/popup",
+      "jusoPopup",
+      "width=570,height=620,scrollbars=yes,resizable=yes",
+    );
+    popup?.focus();
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -39,6 +73,7 @@ export default function WorksiteNewPage() {
     try {
       await postJson<WorksiteResponse>("/api/worksites", {
         name: data.get("name"),
+        address,
         latitude: data.get("latitude"),
         longitude: data.get("longitude"),
         radiusMeters: data.get("radiusMeters"),
@@ -68,6 +103,25 @@ export default function WorksiteNewPage() {
                 근무지명
               </label>
               <input className="field" id="worksite-name" name="name" placeholder="작업장 이름을 입력하세요." required />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="worksite-address">
+                근무지주소
+              </label>
+              <div className="flex flex-col gap-3 md:flex-row">
+                <input
+                  className="field"
+                  id="worksite-address"
+                  name="address"
+                  value={address}
+                  onChange={(event) => setAddress(event.target.value)}
+                  placeholder="주소 검색으로 선택하세요."
+                  required
+                />
+                <button className="button-secondary w-full md:w-auto" type="button" onClick={openAddressPopup}>
+                  주소 검색
+                </button>
+              </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">

@@ -6,6 +6,7 @@ import { useEffect, useState, type FormEvent } from "react";
 type Worksite = {
   id: string;
   name: string;
+  address: string;
   latitude: number;
   longitude: number;
   radius_meters: number;
@@ -40,6 +41,7 @@ export default function WorksiteSavePage() {
   const router = useRouter();
   const worksiteId = params.id;
   const [name, setName] = useState("");
+  const [address, setAddress] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
   const [radiusMeters, setRadiusMeters] = useState("");
@@ -57,6 +59,7 @@ export default function WorksiteSavePage() {
         const data = await fetchJson<WorksiteResponse>(`/api/worksites/${worksiteId}`);
         if (!ignore) {
           setName(data.worksite.name);
+          setAddress(data.worksite.address ?? "");
           setLatitude(String(data.worksite.latitude));
           setLongitude(String(data.worksite.longitude));
           setRadiusMeters(String(data.worksite.radius_meters));
@@ -93,7 +96,7 @@ export default function WorksiteSavePage() {
       await fetchJson<WorksiteResponse>(`/api/worksites/${worksiteId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, latitude, longitude, radiusMeters }),
+        body: JSON.stringify({ name, address, latitude, longitude, radiusMeters }),
       });
 
       window.alert("자료가 저장되었습니다");
@@ -148,6 +151,18 @@ export default function WorksiteSavePage() {
                   id="worksite-name"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="worksite-address">
+                  근무지주소
+                </label>
+                <input
+                  className="field"
+                  id="worksite-address"
+                  value={address}
+                  onChange={(event) => setAddress(event.target.value)}
                   required
                 />
               </div>

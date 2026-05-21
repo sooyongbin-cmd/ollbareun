@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 type EmployeeRow = {
@@ -43,7 +42,6 @@ export default function EmployeeRosterPage() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const router = useRouter();
 
   useEffect(() => {
     let ignore = false;
@@ -112,10 +110,6 @@ export default function EmployeeRosterPage() {
     return new Map(data.assignments.map((assignment) => [assignment.employee_id, assignment.worksite_id]));
   }, [data.assignments]);
 
-  function openEditPage(employeeId: string) {
-    router.push(`/manager/employee/employees/save/${employeeId}`);
-  }
-
   return (
     <section className="space-y-[24px]">
       <header>
@@ -177,21 +171,15 @@ export default function EmployeeRosterPage() {
                   </tr>
                 ) : (
                   filteredEmployees.map((employee) => (
-                    <tr
-                      key={employee.id}
-                      aria-label={employee.name}
-                      className="cursor-pointer hover:bg-canvas-parchment transition-colors"
-                      onClick={() => openEditPage(employee.id)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter" || event.key === " ") {
-                          event.preventDefault();
-                          openEditPage(employee.id);
-                        }
-                      }}
-                      role="link"
-                      tabIndex={0}
-                    >
-                      <td className="font-semibold">{employee.name}</td>
+                    <tr key={employee.id} className="hover:bg-canvas-parchment transition-colors">
+                      <td className="font-semibold">
+                        <Link
+                          className="text-primary hover:underline"
+                          href={`/manager/employee/employees/save/${employee.id}`}
+                        >
+                          {employee.name}
+                        </Link>
+                      </td>
                       <td className="text-ink-muted-48">{employee.phone}</td>
                       <td className="text-ink-muted-48">
                         {worksiteById.get(worksiteByEmployeeId.get(employee.id) ?? "") ?? "-"}

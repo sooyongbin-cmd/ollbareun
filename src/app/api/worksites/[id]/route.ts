@@ -24,6 +24,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
       worksite: await updateWorksite({
         id,
         name: body.name,
+        address: body.address,
         latitude: body.latitude,
         longitude: body.longitude,
         radiusMeters: body.radiusMeters,

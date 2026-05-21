@@ -6,12 +6,6 @@ import ManagerLayout from "../../layout";
 import ManagerPage from "../../page";
 import EmployeeRosterPage from "./page";
 
-const push = vi.fn();
-
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push }),
-}));
-
 const bootstrap = {
   employees: [
     {
@@ -52,7 +46,6 @@ function renderWithManagerLayout(ui: ReactElement) {
 describe("employee roster page", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
-    push.mockReset();
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: RequestInfo | URL) => {
@@ -75,6 +68,10 @@ describe("employee roster page", () => {
       "/manager/employee/employees/new",
     );
     expect(await screen.findByText("Alice")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Alice" })).toHaveAttribute(
+      "href",
+      "/manager/employee/employees/save/emp-1",
+    );
     expect(screen.getByText("본사")).toBeInTheDocument();
     expect(screen.getByText("현직")).toBeInTheDocument();
 
@@ -84,14 +81,14 @@ describe("employee roster page", () => {
     expect(screen.queryByText("Alice")).not.toBeInTheDocument();
   });
 
-  it("opens the employee edit page when a roster row is clicked", async () => {
-    const user = userEvent.setup();
+  it("links the employee name to the edit page", async () => {
     renderWithManagerLayout(<EmployeeRosterPage />);
 
     await screen.findByText("Alice");
-    await user.click(screen.getByRole("link", { name: "Alice" }));
-
-    expect(push).toHaveBeenCalledWith("/manager/employee/employees/save/emp-1");
+    expect(screen.getByRole("link", { name: "Alice" })).toHaveAttribute(
+      "href",
+      "/manager/employee/employees/save/emp-1",
+    );
   });
 
   it("does not show the manager home and exit links on the roster page", async () => {

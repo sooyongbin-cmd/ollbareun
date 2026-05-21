@@ -13,6 +13,7 @@ export type EmployeeRow = {
 export type WorksiteRow = {
   id: string;
   name: string;
+  address: string;
   latitude: number;
   longitude: number;
   radius_meters: number;
@@ -177,11 +178,13 @@ export async function deleteEmployee(id: unknown) {
 
 export async function createWorksite(input: {
   name: unknown;
+  address: unknown;
   latitude: unknown;
   longitude: unknown;
   radiusMeters: unknown;
 }) {
   const name = requireString(input.name, "근무지명");
+  const address = requireString(input.address, "근무지주소");
   const latitude = requireNumber(input.latitude, "위도");
   const longitude = requireNumber(input.longitude, "경도");
   const radius_meters = Math.max(1, Math.round(requireNumber(input.radiusMeters, "반경")));
@@ -189,7 +192,7 @@ export async function createWorksite(input: {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("worksites")
-    .insert({ name, latitude, longitude, radius_meters })
+    .insert({ name, address, latitude, longitude, radius_meters })
     .select("*")
     .single();
 
@@ -209,12 +212,14 @@ export async function getWorksiteById(id: unknown) {
 export async function updateWorksite(input: {
   id: unknown;
   name: unknown;
+  address: unknown;
   latitude: unknown;
   longitude: unknown;
   radiusMeters: unknown;
 }) {
   const id = requireString(input.id, "근무지");
   const name = requireString(input.name, "근무지명");
+  const address = requireString(input.address, "근무지주소");
   const latitude = requireNumber(input.latitude, "위도");
   const longitude = requireNumber(input.longitude, "경도");
   const radius_meters = Math.max(1, Math.round(requireNumber(input.radiusMeters, "허용반경")));
@@ -222,7 +227,7 @@ export async function updateWorksite(input: {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("worksites")
-    .update({ name, latitude, longitude, radius_meters })
+    .update({ name, address, latitude, longitude, radius_meters })
     .eq("id", id)
     .select("*")
     .single();

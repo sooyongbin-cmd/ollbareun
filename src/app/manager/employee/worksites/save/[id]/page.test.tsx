@@ -26,6 +26,7 @@ describe("worksite save page", () => {
             worksite: {
               id: "work-1",
               name: "본사",
+              address: "부산광역시 부산진구 중앙대로 1",
               latitude: 37.5,
               longitude: 127.0,
               radius_meters: 100,
@@ -37,6 +38,7 @@ describe("worksite save page", () => {
           const body = JSON.parse(String(init.body));
           expect(body).toEqual({
             name: "서울 본부",
+            address: "서울특별시 중구 세종대로 1",
             latitude: "37.45",
             longitude: "126.97",
             radiusMeters: "120",
@@ -45,6 +47,7 @@ describe("worksite save page", () => {
             worksite: {
               id: "work-1",
               name: "서울 본부",
+              address: "서울특별시 중구 세종대로 1",
               latitude: 37.45,
               longitude: 126.97,
               radius_meters: 120,
@@ -69,9 +72,12 @@ describe("worksite save page", () => {
 
     expect(await screen.findByRole("heading", { name: "근무지수정" })).toBeInTheDocument();
     expect(await screen.findByDisplayValue("본사")).toBeInTheDocument();
+    expect(await screen.findByDisplayValue("부산광역시 부산진구 중앙대로 1")).toBeInTheDocument();
 
     await user.clear(screen.getByLabelText("근무지명"));
     await user.type(screen.getByLabelText("근무지명"), "서울 본부");
+    await user.clear(screen.getByLabelText("근무지주소"));
+    await user.type(screen.getByLabelText("근무지주소"), "서울특별시 중구 세종대로 1");
     await user.clear(screen.getByLabelText("위도"));
     await user.type(screen.getByLabelText("위도"), "37.45");
     await user.clear(screen.getByLabelText("경도"));

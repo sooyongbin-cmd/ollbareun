@@ -83,6 +83,51 @@ describe("guard page", () => {
     expect(alert).toHaveBeenCalledWith("해당직원은 퇴직처리되었습니다.");
     expect(screen.queryByText("홍길동님 인증됨")).not.toBeInTheDocument();
   });
+
+  it("shows the guard action buttons only after login succeeds", async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith("/api/bootstrap")) {
+        return Response.json({
+          employees: [],
+          worksites: [],
+          assignments: [],
+          attendance: [],
+          summary: { totalEmployees: 0, currentlyClockedIn: 0 },
+        });
+      }
+      if (init?.method === "POST" && url.endsWith("/api/guard/auth")) {
+        return Response.json({
+          employee: {
+            id: "emp-1",
+            name: "홍길동",
+            phone: "010-1234-5678",
+            phone_normalized: "01012345678",
+            is_retired: false,
+          },
+          assignment: null,
+          worksite: null,
+          attendance: null,
+        });
+      }
+      return Response.json({}, { status: 404 });
+    });
+
+    render(<Phase1App mode="guard" />);
+
+    for (const name of ["출근", "퇴근", "안전교육", "근무지체크", "개인프로필"]) {
+      expect(screen.queryByRole("button", { name })).not.toBeInTheDocument();
+    }
+
+    await user.type(screen.getByLabelText("경비원 이름"), "홍길동");
+    await user.type(screen.getByLabelText("경비원 연락처"), "010-1234-5678");
+    await user.click(screen.getByRole("button", { name: "경비원 인증" }));
+
+    for (const name of ["출근", "퇴근", "안전교육", "근무지체크", "개인프로필"]) {
+      expect(await screen.findByRole("button", { name })).toBeInTheDocument();
+    }
+  });
 });
 
 describe("manager pages", () => {

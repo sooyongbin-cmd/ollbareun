@@ -787,7 +787,7 @@ export function Phase1App({ mode, managerView = "overview" }: Phase1AppProps) {
                     {clockInDecision.reason}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
                     <button
                       className="button-primary"
                       data-testid="clock-in"
@@ -795,7 +795,7 @@ export function Phase1App({ mode, managerView = "overview" }: Phase1AppProps) {
                       disabled={!clockInDecision.allowed || !!guard.attendance?.clock_in_at}
                       onClick={handleClockIn}
                     >
-                      출근하기
+                      출근
                     </button>
                     <button
                       className="button-secondary"
@@ -804,7 +804,16 @@ export function Phase1App({ mode, managerView = "overview" }: Phase1AppProps) {
                       disabled={!clockOutDecision.allowed}
                       onClick={handleClockOut}
                     >
-                      퇴근하기
+                      퇴근
+                    </button>
+                    <button className="button-secondary" type="button">
+                      안전교육
+                    </button>
+                    <button className="button-secondary" type="button">
+                      근무지체크
+                    </button>
+                    <button className="button-secondary md:col-span-2" type="button">
+                      개인프로필
                     </button>
                   </div>
 

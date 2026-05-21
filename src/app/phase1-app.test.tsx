@@ -7,6 +7,7 @@ import ManagerLayout from "./manager/layout";
 import ManagerPage from "./manager/page";
 import WorksiteNewPage from "./manager/employee/worksites/new/page";
 import AssignmentManagementPage from "./manager/employee/assignments/page";
+import { Phase1App } from "./phase1-app";
 
 const push = vi.fn();
 
@@ -18,6 +19,38 @@ vi.mock("next/navigation", () => ({
 function renderWithManagerLayout(ui: ReactElement) {
   return render(<ManagerLayout>{ui}</ManagerLayout>);
 }
+
+describe("guard page", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.endsWith("/api/bootstrap")) {
+          return Response.json({
+            employees: [],
+            worksites: [],
+            assignments: [],
+            attendance: [],
+            summary: { totalEmployees: 0, currentlyClockedIn: 0 },
+          });
+        }
+        return Response.json({}, { status: 404 });
+      }),
+    );
+  });
+
+  it("renders guard chrome and footer text without mojibake", () => {
+    render(<Phase1App mode="guard" />);
+
+    expect(screen.getAllByText("올바른 관리시스템").length).toBeGreaterThan(0);
+    expect(screen.getByRole("link", { name: "나가기" })).toHaveAttribute("href", "/");
+    expect(screen.getByText("법적 고지")).toBeInTheDocument();
+    expect(screen.getByText(/개인정보처리방침/)).toBeInTheDocument();
+    expect(screen.queryByText(/\?щ컮|愿|踰뺤쟻|짤 2026/)).not.toBeInTheDocument();
+  });
+});
 
 describe("manager pages", () => {
   beforeEach(() => {

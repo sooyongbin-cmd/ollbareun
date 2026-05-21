@@ -104,7 +104,7 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
   const payload = await response.json();
 
   if (!response.ok) {
-    throw new Error(payload.error ?? "?붿껌??泥섎━?섏? 紐삵뻽?듬땲??");
+    throw new Error(payload.error ?? "요청을 처리하지 못했습니다.");
   }
 
   return payload as T;
@@ -337,8 +337,8 @@ export function Phase1App({ mode, managerView = "overview" }: Phase1AppProps) {
       : {
           allowed: false,
           reason: guard?.worksite
-            ? "?꾩옱 ?꾩튂瑜??낅젰?섍굅???뺤씤?섏꽭??"
-            : "?ㅻ뒛 諛곗젙??洹쇰Т吏媛 ?놁뒿?덈떎.",
+            ? "현재 위치를 입력하거나 확인하세요."
+            : "오늘 배정된 근무지가 없습니다.",
         };
 
   const clockOutDecision = canClockOut(asAttendance(guard?.attendance ?? null));
@@ -410,12 +410,12 @@ export function Phase1App({ mode, managerView = "overview" }: Phase1AppProps) {
     setGuard(session);
     setLatitude(session.worksite ? String(session.worksite.latitude) : "");
     setLongitude(session.worksite ? String(session.worksite.longitude) : "");
-    setMessage("寃쎈퉬???몄쬆???꾨즺?섏뿀?듬땲??");
+    setMessage("경비원 인증이 완료되었습니다.");
   }
 
   async function updateCurrentLocation() {
     if (!navigator.geolocation) {
-      setError("??釉뚮씪?곗??먯꽌???꾩튂 ?뺤씤???ъ슜?????놁뒿?덈떎.");
+      setError("이 브라우저에서는 위치 확인을 사용할 수 없습니다.");
       return;
     }
 
@@ -424,7 +424,7 @@ export function Phase1App({ mode, managerView = "overview" }: Phase1AppProps) {
         setLatitude(String(position.coords.latitude));
         setLongitude(String(position.coords.longitude));
       },
-      () => setError("?꾩옱 ?꾩튂瑜??뺤씤?섏? 紐삵뻽?듬땲??"),
+      () => setError("현재 위치를 확인하지 못했습니다."),
       { enableHighAccuracy: true, timeout: 8000 },
     );
   }
@@ -441,7 +441,7 @@ export function Phase1App({ mode, managerView = "overview" }: Phase1AppProps) {
       longitude,
     });
     setGuard({ ...guard, attendance: result.attendance });
-    setMessage("異쒓렐 泥섎━?섏뿀?듬땲??");
+    setMessage("출근 처리되었습니다.");
     await refresh();
   }
 
@@ -456,7 +456,7 @@ export function Phase1App({ mode, managerView = "overview" }: Phase1AppProps) {
       longitude: longitude || guard.worksite?.longitude,
     });
     setGuard({ ...guard, attendance: result.attendance });
-    setMessage("?닿렐 泥섎━?섏뿀?듬땲??");
+    setMessage("퇴근 처리되었습니다.");
     await refresh();
   }
 
@@ -466,7 +466,7 @@ export function Phase1App({ mode, managerView = "overview" }: Phase1AppProps) {
       <nav className="h-[44px] bg-surface-black text-white flex items-center px-5 sticky top-0 z-50">
         <div className="mx-auto max-w-[980px] w-full flex items-center justify-between">
           <Link href="/" className="text-[12px] font-normal tracking-[-0.12px] hover:opacity-80 transition-opacity">
-            ?щ컮瑜?愿由ъ떆?ㅽ뀥
+            올바른 관리시스템
           </Link>
           <div className="flex gap-5">
             <span className="text-[12px] font-normal tracking-[-0.12px] opacity-60">Phase 1</span>
@@ -488,7 +488,8 @@ export function Phase1App({ mode, managerView = "overview" }: Phase1AppProps) {
               </div>
             )}
             <Link href="/" className="text-[14px] text-primary hover:underline">
-              ?섍?湲?            </Link>
+              나가기
+            </Link>
           </div>
         </div>
       </nav>
@@ -746,12 +747,12 @@ export function Phase1App({ mode, managerView = "overview" }: Phase1AppProps) {
                       </div>
                       <div>
                         <p className="text-[19px] font-semibold">{guard.employee.name}님 인증됨</p>
-                        <p className="text-[14px] text-ink-muted-48">?ㅻ뒛 諛곗젙 ?꾩옣: <span className="text-ink font-medium">{guard.worksite?.name ?? "?놁쓬"}</span></p>
+                        <p className="text-[14px] text-ink-muted-48">오늘 배정 현장: <span className="text-ink font-medium">{guard.worksite?.name ?? "없음"}</span></p>
                       </div>
                     </div>
                     {guard.worksite && (
                       <div className="text-[13px] text-ink-muted-48 bg-canvas-parchment rounded-lg p-3">
-                        ?꾩옣 ?꾩튂: {guard.worksite.latitude}, {guard.worksite.longitude} (諛섍꼍 {guard.worksite.radius_meters}m)
+                        현장 위치: {guard.worksite.latitude}, {guard.worksite.longitude} (반경 {guard.worksite.radius_meters}m)
                       </div>
                     )}
                   </div>
@@ -759,11 +760,11 @@ export function Phase1App({ mode, managerView = "overview" }: Phase1AppProps) {
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="current-latitude">?꾩옱 ?꾨룄</label>
+                        <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="current-latitude">현재 위도</label>
                         <input className="field bg-canvas" id="current-latitude" value={latitude} onChange={(e) => setLatitude(e.target.value)} />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="current-longitude">?꾩옱 寃쎈룄</label>
+                        <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="current-longitude">현재 경도</label>
                         <input className="field bg-canvas" id="current-longitude" value={longitude} onChange={(e) => setLongitude(e.target.value)} />
                       </div>
                     </div>
@@ -800,9 +801,9 @@ export function Phase1App({ mode, managerView = "overview" }: Phase1AppProps) {
                   </div>
 
                   <div className="bg-canvas border border-hairline rounded-[18px] p-6 space-y-4">
-                    <h4 className="text-[17px] font-semibold">?ㅻ뒛??洹쇰Т 湲곕줉</h4>
+                    <h4 className="text-[17px] font-semibold">오늘의 근무 기록</h4>
                     <div className="flex justify-between items-center text-[15px]">
-                      <span className="text-ink-muted-48">異쒓렐 ?쒓컖</span>
+                      <span className="text-ink-muted-48">출근 시각</span>
                       <span className="font-medium">
                         {guard.attendance?.clock_in_at
                           ? new Date(guard.attendance.clock_in_at).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })
@@ -810,7 +811,7 @@ export function Phase1App({ mode, managerView = "overview" }: Phase1AppProps) {
                       </span>
                     </div>
                     <div className="flex justify-between items-center text-[15px]">
-                      <span className="text-ink-muted-48">?닿렐 ?쒓컖</span>
+                      <span className="text-ink-muted-48">퇴근 시각</span>
                       <span className="font-medium">
                         {guard.attendance?.clock_out_at
                           ? new Date(guard.attendance.clock_out_at).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })
@@ -831,10 +832,10 @@ export function Phase1App({ mode, managerView = "overview" }: Phase1AppProps) {
       <footer className="bg-canvas-parchment border-t border-hairline py-[64px] px-5">
         <div className="mx-auto max-w-[980px] w-full grid md:grid-cols-4 gap-8">
           <div className="col-span-2">
-            <h4 className="text-[14px] font-semibold text-ink-muted-80 mb-4">?щ컮瑜?愿由ъ떆?ㅽ뀥</h4>
+            <h4 className="text-[14px] font-semibold text-ink-muted-80 mb-4">올바른 관리시스템</h4>
             <p className="text-[12px] text-ink-muted-48 leading-relaxed max-w-[400px]">
-              蹂??쒖뒪?쒖? ?ㅼ떆媛?洹쇳깭 愿由?諛??덉쟾 援먯쑁 ?댁닔 ?꾪솴??愿由ы븯湲??꾪븳 湲곗뾽???붾（?섏엯?덈떎. 
-              ?ъ슜 以?臾몄쓽?ы빆? 愿由ъ옄?먭쾶 ?곕씫 諛붾엻?덈떎.
+              본 시스템은 실시간 근태 관리 및 안전 교육 이수 현황을 관리하기 위한 기업용 솔루션입니다.
+              사용 중 문의사항은 관리자에게 연락 바랍니다.
             </p>
           </div>
           <div>
@@ -845,10 +846,10 @@ export function Phase1App({ mode, managerView = "overview" }: Phase1AppProps) {
             </ul>
           </div>
           <div>
-            <h4 className="text-[14px] font-semibold text-ink-muted-80 mb-4">踰뺤쟻 怨좎?</h4>
+            <h4 className="text-[14px] font-semibold text-ink-muted-80 mb-4">법적 고지</h4>
             <p className="text-[12px] text-ink-muted-48 leading-relaxed">
-              짤 2026 ?щ컮瑜? All rights reserved. 
-              媛쒖씤?뺣낫泥섎━諛⑹묠 | ?쒕퉬?ㅼ씠?⑹빟愿
+              © 2026 올바른. All rights reserved.
+              개인정보처리방침 | 서비스이용약관
             </p>
           </div>
         </div>

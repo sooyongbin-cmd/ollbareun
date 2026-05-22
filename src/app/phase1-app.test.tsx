@@ -128,6 +128,51 @@ describe("guard page", () => {
       expect(await screen.findByRole("button", { name })).toBeInTheDocument();
     }
   });
+
+  it("saves the authenticated guard name and uses it as the next default name", async () => {
+    const user = userEvent.setup();
+    localStorage.clear();
+    vi.mocked(fetch).mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith("/api/bootstrap")) {
+        return Response.json({
+          employees: [],
+          worksites: [],
+          assignments: [],
+          attendance: [],
+          summary: { totalEmployees: 0, currentlyClockedIn: 0 },
+        });
+      }
+      if (init?.method === "POST" && url.endsWith("/api/guard/auth")) {
+        return Response.json({
+          employee: {
+            id: "emp-1",
+            name: "홍길동",
+            phone: "010-1234-5678",
+            phone_normalized: "01012345678",
+            is_retired: false,
+          },
+          assignment: null,
+          worksite: null,
+          attendance: null,
+        });
+      }
+      return Response.json({}, { status: 404 });
+    });
+
+    const { unmount } = render(<Phase1App mode="guard" />);
+
+    await user.type(screen.getByLabelText("경비원 이름"), "홍길동");
+    await user.type(screen.getByLabelText("경비원 연락처"), "010-1234-5678");
+    await user.click(screen.getByRole("button", { name: "경비원 인증" }));
+
+    expect(localStorage.getItem("ollbareun.guard.name")).toBe("홍길동");
+
+    unmount();
+    render(<Phase1App mode="guard" />);
+
+    expect(await screen.findByLabelText("경비원 이름")).toHaveValue("홍길동");
+  });
 });
 
 describe("manager pages", () => {

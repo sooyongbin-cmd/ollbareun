@@ -67,6 +67,8 @@ const emptyBootstrap: Bootstrap = {
   summary: { totalEmployees: 0, currentlyClockedIn: 0 },
 };
 
+const guardNameStorageKey = "ollbareun.guard.name";
+
 function todayDate() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -108,6 +110,30 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
   }
 
   return payload as T;
+}
+
+function readStoredGuardName() {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  try {
+    return window.localStorage.getItem(guardNameStorageKey) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function writeStoredGuardName(name: string) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(guardNameStorageKey, name);
+  } catch {
+    // Keep authentication usable when storage is unavailable.
+  }
 }
 
 type Phase1AppProps = {
@@ -272,6 +298,7 @@ export function Phase1App({ mode, managerView = "overview" }: Phase1AppProps) {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [guard, setGuard] = useState<GuardSession | null>(null);
+  const [savedGuardName, setSavedGuardName] = useState(readStoredGuardName);
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
 
@@ -409,6 +436,8 @@ export function Phase1App({ mode, managerView = "overview" }: Phase1AppProps) {
         phone: form.get("phone"),
       });
       setGuard(session);
+      setSavedGuardName(session.employee.name);
+      writeStoredGuardName(session.employee.name);
       setLatitude(session.worksite ? String(session.worksite.latitude) : "");
       setLongitude(session.worksite ? String(session.worksite.longitude) : "");
       setMessage("경비원 인증이 완료되었습니다.");
@@ -734,7 +763,7 @@ export function Phase1App({ mode, managerView = "overview" }: Phase1AppProps) {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="guard-name">경비원 이름</label>
-                    <input className="field" id="guard-name" name="name" placeholder="이름을 입력하세요." required />
+                    <input className="field" defaultValue={savedGuardName} id="guard-name" key={savedGuardName} name="name" placeholder="이름을 입력하세요." required />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="guard-phone">경비원 연락처</label>

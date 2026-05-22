@@ -44,6 +44,7 @@ describe("guard page", () => {
   it("renders guard chrome and footer text without mojibake", () => {
     render(<Phase1App mode="guard" />);
 
+    expect(screen.getByRole("heading", { name: "경비원화면1" })).toBeInTheDocument();
     expect(screen.getAllByText("올바른 관리시스템").length).toBeGreaterThan(0);
     expect(screen.getByRole("link", { name: "나가기" })).toHaveAttribute("href", "/");
     expect(screen.getByText("법적 고지")).toBeInTheDocument();

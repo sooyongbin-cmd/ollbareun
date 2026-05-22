@@ -754,7 +754,7 @@ export function Phase1App({ mode, managerView = "overview" }: Phase1AppProps) {
         {mode === "guard" ? (
           <div className="max-w-[600px] mx-auto">
             <header className="mb-[48px] text-center">
-              <h1 className="text-[40px] font-semibold tracking-tight">경비원 화면</h1>
+              <h1 className="text-[40px] font-semibold tracking-tight">경비원화면1</h1>
               <p className="text-[21px] text-ink-muted-48 mt-2">이름과 연락처로 직원 테이블을 비교해 인증합니다.</p>
             </header>
 

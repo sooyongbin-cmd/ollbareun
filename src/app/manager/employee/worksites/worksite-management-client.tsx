@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import ManagerLoadingMessage from "../../manager-loading-message";
 
 type WorksiteRow = {
   id: string;
@@ -125,7 +126,7 @@ export default function WorksiteManagementClient() {
         </div>
 
         {loading ? (
-          <p className="mt-6 text-[16px] text-ink-muted-48">근무지 목록을 불러오는 중입니다.</p>
+          <ManagerLoadingMessage className="mt-6" />
         ) : error ? (
           <p className="mt-6 text-[16px] text-status-warn">{error}</p>
         ) : (

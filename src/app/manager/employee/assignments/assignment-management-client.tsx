@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import ManagerLoadingMessage from "../../manager-loading-message";
 
 type AssignmentRow = {
   id: string;
@@ -148,7 +149,7 @@ export default function AssignmentManagementClient() {
         </div>
 
         {loading ? (
-          <p className="mt-6 text-[16px] text-ink-muted-48">배정 목록을 불러오는 중입니다.</p>
+          <ManagerLoadingMessage className="mt-6" />
         ) : error ? (
           <p className="mt-6 text-[16px] text-status-warn">{error}</p>
         ) : (

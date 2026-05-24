@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import ManagerLoadingMessage from "../../../manager-loading-message";
 
 type Bootstrap = {
   employees: { id: string; name: string }[];
@@ -37,6 +38,7 @@ export default function AssignmentNewPage() {
   const [data, setData] = useState<Bootstrap>({ employees: [], worksites: [] });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -60,6 +62,10 @@ export default function AssignmentNewPage() {
       } catch (loadError) {
         if (!ignore) {
           setError(loadError instanceof Error ? loadError.message : "기본 데이터를 불러오지 못했습니다.");
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
         }
       }
     }
@@ -103,46 +109,50 @@ export default function AssignmentNewPage() {
       </header>
 
       <section className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50">
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-date">
-                근무일
-              </label>
-              <input className="field" id="assignment-date" name="workDate" type="date" defaultValue={todayDate()} />
+        {loading ? (
+          <ManagerLoadingMessage />
+        ) : (
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="space-y-2">
+                <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-date">
+                  근무일
+                </label>
+                <input className="field" id="assignment-date" name="workDate" type="date" defaultValue={todayDate()} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-worksite">
+                  근무지
+                </label>
+                <select className="field appearance-none" id="assignment-worksite" name="worksiteId" required>
+                  <option value="">선택</option>
+                  {data.worksites.map((worksite) => (
+                    <option key={worksite.id} value={worksite.id}>
+                      {worksite.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-employee">
+                  직원
+                </label>
+                <select className="field appearance-none" id="assignment-employee" name="employeeId" required>
+                  <option value="">선택</option>
+                  {data.employees.map((employee) => (
+                    <option key={employee.id} value={employee.id}>
+                      {employee.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-worksite">
-                근무지
-              </label>
-              <select className="field appearance-none" id="assignment-worksite" name="worksiteId" required>
-                <option value="">선택</option>
-                {data.worksites.map((worksite) => (
-                  <option key={worksite.id} value={worksite.id}>
-                    {worksite.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-employee">
-                직원
-              </label>
-              <select className="field appearance-none" id="assignment-employee" name="employeeId" required>
-                <option value="">선택</option>
-                {data.employees.map((employee) => (
-                  <option key={employee.id} value={employee.id}>
-                    {employee.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
 
-          <button className="button-primary w-full md:w-auto" data-testid="assignment-submit" type="submit">
-            배정하기
-          </button>
-        </form>
+            <button className="button-primary w-full md:w-auto" data-testid="assignment-submit" type="submit">
+              배정하기
+            </button>
+          </form>
+        )}
 
         {message ? <p className="status-ok mt-6 text-center">{message}</p> : null}
         {error ? <p className="status-warn mt-6 text-center">{error}</p> : null}

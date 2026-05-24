@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import ManagerLoadingMessage from "../../manager-loading-message";
 
 type EmployeeRow = {
   id: string;
@@ -148,7 +149,7 @@ export default function EmployeeRosterPage() {
         </div>
 
         {loading ? (
-          <p className="mt-6 text-[16px] text-ink-muted-48">직원 목록을 불러오는 중입니다.</p>
+          <ManagerLoadingMessage className="mt-6" />
         ) : error ? (
           <p className="mt-6 text-[16px] text-status-warn">{error}</p>
         ) : (

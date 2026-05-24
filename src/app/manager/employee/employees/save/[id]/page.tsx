@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
+import ManagerLoadingMessage from "../../../../manager-loading-message";
 
 type Employee = {
   id: string;
@@ -129,7 +130,7 @@ export default function EmployeeSavePage() {
 
       <section className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50">
         {loading ? (
-          <p className="text-[16px] text-ink-muted-48">직원 정보를 불러오는 중입니다.</p>
+          <ManagerLoadingMessage />
         ) : routeError ? (
           <p className="text-[16px] text-status-warn">{routeError}</p>
         ) : (

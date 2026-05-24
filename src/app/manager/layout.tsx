@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import ManagerLoadingMessage from "./manager-loading-message";
 
 const menu = [
   {
@@ -87,7 +89,9 @@ export default function ManagerLayout({
             </nav>
           </aside>
 
-          <section>{children}</section>
+          <section>
+            <Suspense fallback={<ManagerLoadingMessage />}>{children}</Suspense>
+          </section>
         </div>
       </div>
     </div>

@@ -1,0 +1,28 @@
+import type { MetadataRoute } from "next";
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    name: "올바른 경비원",
+    short_name: "올바른 경비원",
+    description: "올바른 경비원 모바일 근태 앱",
+    start_url: "/guard",
+    scope: "/",
+    display: "standalone",
+    background_color: "#ffffff",
+    theme_color: "#0066cc",
+    icons: [
+      {
+        src: "/guard-icon.svg",
+        sizes: "any",
+        type: "image/svg+xml",
+        purpose: "any",
+      },
+      {
+        src: "/guard-icon.svg",
+        sizes: "any",
+        type: "image/svg+xml",
+        purpose: "maskable",
+      },
+    ],
+  };
+}

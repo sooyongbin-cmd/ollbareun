@@ -71,6 +71,21 @@ describe("assignment management page", () => {
     expect(push).toHaveBeenCalledWith("/manager/employee/assignments/save/assign-2");
   });
 
+  it("separates assignment search controls from the assignment list section", async () => {
+    renderWithManagerLayout(<AssignmentManagementPage />);
+
+    const searchSection = await screen.findByRole("region", { name: "배정 검색" });
+    const listSection = await screen.findByRole("region", { name: "배정 목록" });
+
+    expect(searchSection).toContainElement(screen.getByLabelText("날짜"));
+    expect(searchSection).toContainElement(screen.getByLabelText("근무지"));
+    expect(searchSection).toContainElement(screen.getByLabelText("이름"));
+    expect(searchSection).toContainElement(screen.getByRole("link", { name: "배정하기" }));
+    expect(listSection).toContainElement(screen.getByText("전체 배정 2"));
+    expect(listSection).toContainElement(screen.getByText("조회 결과 2"));
+    expect(listSection).toContainElement(screen.getByRole("table"));
+  });
+
   it("exposes assignment management from the manager menu", () => {
     renderWithManagerLayout(<ManagerPage />);
 

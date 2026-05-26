@@ -81,6 +81,19 @@ describe("employee roster page", () => {
     expect(screen.queryByText("Alice")).not.toBeInTheDocument();
   });
 
+  it("separates employee search controls from the employee list section", async () => {
+    renderWithManagerLayout(<EmployeeRosterPage />);
+
+    const searchSection = await screen.findByRole("region", { name: "직원 검색" });
+    const listSection = await screen.findByRole("region", { name: "직원 목록" });
+
+    expect(searchSection).toContainElement(screen.getByLabelText("직원 이름 검색"));
+    expect(searchSection).toContainElement(screen.getByRole("link", { name: "직원 등록" }));
+    expect(listSection).toContainElement(screen.getByText("전체 직원 2"));
+    expect(listSection).toContainElement(screen.getByText("검색 결과 2"));
+    expect(listSection).toContainElement(screen.getByRole("table"));
+  });
+
   it("links the employee name to the edit page", async () => {
     renderWithManagerLayout(<EmployeeRosterPage />);
 

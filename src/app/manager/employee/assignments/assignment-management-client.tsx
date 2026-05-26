@@ -97,7 +97,10 @@ export default function AssignmentManagementClient() {
         </div>
       </header>
 
-      <section className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50">
+      <section
+        aria-label="배정 검색"
+        className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50"
+      >
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="grid gap-4 flex-1 md:grid-cols-3">
             <div className="space-y-2">
@@ -142,8 +145,13 @@ export default function AssignmentManagementClient() {
             배정하기
           </Link>
         </div>
+      </section>
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-[14px] text-ink-muted-48">
+      <section
+        aria-label="배정 목록"
+        className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3 text-[14px] text-ink-muted-48">
           <span>전체 배정 {assignments.length}</span>
           <span>조회 결과 {filteredAssignments.length}</span>
         </div>

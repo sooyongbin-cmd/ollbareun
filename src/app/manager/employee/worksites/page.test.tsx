@@ -84,6 +84,19 @@ describe("worksite management page", () => {
     expect(screen.queryByText("본사")).not.toBeInTheDocument();
   });
 
+  it("separates worksite search controls from the worksite list section", async () => {
+    renderWithManagerLayout(<WorksiteManagementPage />);
+
+    const searchSection = await screen.findByRole("region", { name: "근무지 검색" });
+    const listSection = await screen.findByRole("region", { name: "근무지 목록" });
+
+    expect(searchSection).toContainElement(screen.getByLabelText("근무지"));
+    expect(searchSection).toContainElement(screen.getByRole("link", { name: "근무지 등록" }));
+    expect(listSection).toContainElement(screen.getByText("전체 근무지 2"));
+    expect(listSection).toContainElement(screen.getByText("검색 결과 2"));
+    expect(listSection).toContainElement(screen.getByRole("table"));
+  });
+
   it("exposes the worksite management route from the manager menu", () => {
     renderWithManagerLayout(<ManagerPage />);
 

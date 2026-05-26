@@ -100,7 +100,10 @@ export default function WorksiteManagementClient() {
         </div>
       </header>
 
-      <section className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50">
+      <section
+        aria-label="근무지 검색"
+        className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50"
+      >
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-2 flex-1">
             <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="worksite-search">
@@ -119,8 +122,13 @@ export default function WorksiteManagementClient() {
             근무지 등록
           </Link>
         </div>
+      </section>
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-[14px] text-ink-muted-48">
+      <section
+        aria-label="근무지 목록"
+        className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3 text-[14px] text-ink-muted-48">
           <span>전체 근무지 {data.worksites.length}</span>
           <span>검색 결과 {filteredWorksites.length}</span>
         </div>

@@ -123,7 +123,10 @@ export default function EmployeeRosterPage() {
         </div>
       </header>
 
-      <section className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50">
+      <section
+        aria-label="직원 검색"
+        className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50"
+      >
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-2 flex-1">
             <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="employee-roster-search">
@@ -142,8 +145,13 @@ export default function EmployeeRosterPage() {
             직원 등록
           </Link>
         </div>
+      </section>
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-[14px] text-ink-muted-48">
+      <section
+        aria-label="직원 목록"
+        className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3 text-[14px] text-ink-muted-48">
           <span>전체 직원 {data.employees.length}</span>
           <span>검색 결과 {filteredEmployees.length}</span>
         </div>

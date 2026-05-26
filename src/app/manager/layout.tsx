@@ -57,7 +57,6 @@ export default function ManagerLayout({
         <div className="grid gap-[48px] lg:grid-cols-[240px_1fr]">
           <aside className="lg:sticky lg:top-[120px] self-start">
             <nav className="space-y-[12px]" aria-label="관리자화면 메뉴">
-              <p className="text-[14px] font-semibold text-ink-muted-48 px-2 uppercase tracking-wider">관리자화면</p>
               <ul className="space-y-1">
                 {menu.map((item) => (
                   <li key={item.label} className="py-2 px-2">

@@ -119,9 +119,9 @@ export default function EmployeeSavePage() {
   return (
     <section className="space-y-[24px]">
       <header>
-        <p className="text-[14px] font-semibold text-ink-muted-48 uppercase tracking-wider">관리자 화면</p>
+        <p className="text-[14px] font-semibold text-ink-muted-48 uppercase">관리자 화면</p>
         <div className="space-y-3">
-          <h1 className="text-[40px] font-semibold tracking-tight leading-[1.1]">직원수정</h1>
+          <h1 className="text-[40px] font-semibold leading-[1.1]">직원수정</h1>
           <p className="text-[21px] font-normal text-ink-muted-48 max-w-[640px]">
             선택한 직원의 이름과 연락처를 수정할 수 있습니다.
           </p>
@@ -189,8 +189,8 @@ export default function EmployeeSavePage() {
       </section>
 
       {deleteConfirmOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-5">
-          <div className="w-full max-w-[420px] rounded-[20px] bg-canvas p-6 shadow-2xl border border-hairline">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay-scrim px-5">
+          <div className="w-full max-w-[420px] rounded-[18px] bg-canvas p-6 shadow-product border border-hairline">
             <h2 className="text-[24px] font-semibold">현재자료를 삭제할까요?</h2>
             <p className="mt-3 text-[16px] text-ink-muted-48">
               삭제하면 해당 직원의 자료와 연결된 근무 배정, 출퇴근 기록도 함께 삭제됩니다.

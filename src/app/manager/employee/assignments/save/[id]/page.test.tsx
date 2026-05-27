@@ -27,7 +27,8 @@ describe("assignment save page", () => {
               id: "assign-1",
               employee_id: "emp-1",
               worksite_id: "work-1",
-              work_date: "2026-05-21",
+              start_date: "2026-05-21",
+              end_date: "2026-05-23",
             },
           });
         }
@@ -35,8 +36,8 @@ describe("assignment save page", () => {
         if (!init && url.endsWith("/api/bootstrap")) {
           return Response.json({
             employees: [
-              { id: "emp-1", name: "근태수" },
-              { id: "emp-2", name: "홍길동" },
+              { id: "emp-1", name: "홍길동" },
+              { id: "emp-2", name: "김철수" },
             ],
             worksites: [
               { id: "work-1", name: "본사" },
@@ -46,18 +47,19 @@ describe("assignment save page", () => {
         }
 
         if (init?.method === "PATCH" && url.endsWith("/api/assignments/assign-1")) {
-          const body = JSON.parse(String(init.body));
-          expect(body).toEqual({
+          expect(JSON.parse(String(init.body))).toEqual({
             employeeId: "emp-2",
             worksiteId: "work-2",
-            workDate: "2026-05-22",
+            startDate: "2026-05-22",
+            endDate: "2026-05-24",
           });
           return Response.json({
             assignment: {
               id: "assign-1",
               employee_id: "emp-2",
               worksite_id: "work-2",
-              work_date: "2026-05-22",
+              start_date: "2026-05-22",
+              end_date: "2026-05-24",
             },
           });
         }
@@ -71,7 +73,7 @@ describe("assignment save page", () => {
     );
   });
 
-  it("saves assignment changes and returns to management", async () => {
+  it("saves assignment period changes and returns to management", async () => {
     const user = userEvent.setup();
     const alert = vi.spyOn(window, "alert").mockImplementation(() => undefined);
 
@@ -79,11 +81,14 @@ describe("assignment save page", () => {
 
     expect(await screen.findByRole("heading", { name: "배정수정" })).toBeInTheDocument();
     expect(await screen.findByDisplayValue("2026-05-21")).toBeInTheDocument();
+    expect(await screen.findByDisplayValue("2026-05-23")).toBeInTheDocument();
 
     await user.selectOptions(screen.getByLabelText("직원"), "emp-2");
     await user.selectOptions(screen.getByLabelText("근무지"), "work-2");
-    await user.clear(screen.getByLabelText("근무일"));
-    await user.type(screen.getByLabelText("근무일"), "2026-05-22");
+    await user.clear(screen.getByLabelText("시작일"));
+    await user.type(screen.getByLabelText("시작일"), "2026-05-22");
+    await user.clear(screen.getByLabelText("종료일"));
+    await user.type(screen.getByLabelText("종료일"), "2026-05-24");
     await user.click(screen.getByRole("button", { name: "저장" }));
 
     expect(alert).toHaveBeenCalledWith("자료가 저장되었습니다.");

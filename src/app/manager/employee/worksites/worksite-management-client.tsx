@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { formatGpsInfo, type GpsInfo } from "@/lib/gps";
 import ManagerLoadingMessage from "../../manager-loading-message";
 
 type WorksiteRow = {
   id: string;
   name: string;
-  latitude: number;
-  longitude: number;
+  gps_info: GpsInfo;
   radius_meters: number;
 };
 
@@ -91,9 +91,8 @@ export default function WorksiteManagementClient() {
   return (
     <section className="space-y-[24px]">
       <header>
-        <p className="text-[14px] font-semibold text-ink-muted-48 uppercase tracking-wider">관리자 화면</p>
         <div className="space-y-3">
-          <h1 className="text-[40px] font-semibold tracking-tight leading-[1.1]">근무지관리</h1>
+          <h1 className="text-[40px] font-semibold leading-[1.1]">근무지관리</h1>
           <p className="text-[21px] font-normal text-ink-muted-48 max-w-[640px]">
             등록된 근무지를 검색하고 배정 현황을 확인합니다.
           </p>
@@ -114,7 +113,7 @@ export default function WorksiteManagementClient() {
               id="worksite-search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="근무지 이름을 입력하세요"
+              placeholder="근무지 이름을 입력하세요."
             />
           </div>
 
@@ -138,21 +137,20 @@ export default function WorksiteManagementClient() {
         ) : error ? (
           <p className="mt-6 text-[16px] text-status-warn">{error}</p>
         ) : (
-          <div className="mt-4 overflow-hidden rounded-[16px] border border-hairline bg-canvas">
+          <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-[16px] border border-hairline bg-canvas">
             <table className="apple-table">
               <thead>
                 <tr>
                   <th className="text-left">근무지명</th>
                   <th className="text-center">배정인원수</th>
-                  <th className="text-left">위도</th>
-                  <th className="text-left">경도</th>
+                  <th className="text-left">GPS정보</th>
                   <th className="text-right">허용반경</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredWorksites.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-8 text-center text-ink-muted-48 italic">
+                    <td colSpan={4} className="p-8 text-center text-ink-muted-48 italic">
                       조회 결과에 해당하는 근무지가 없습니다.
                     </td>
                   </tr>
@@ -181,8 +179,7 @@ export default function WorksiteManagementClient() {
                             <span className="text-ink-muted-48">{count}</span>
                           )}
                         </td>
-                        <td className="text-ink-muted-48">{worksite.latitude}</td>
-                        <td className="text-ink-muted-48">{worksite.longitude}</td>
+                        <td className="text-ink-muted-48">{formatGpsInfo(worksite.gps_info)}</td>
                         <td className="text-right">{worksite.radius_meters}m</td>
                       </tr>
                     );

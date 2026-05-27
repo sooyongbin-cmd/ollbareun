@@ -8,13 +8,13 @@ export default function GuardMainLayout({
 }) {
   return (
     <main className="min-h-screen bg-canvas text-ink font-apple selection:bg-primary/20">
-      <nav className="h-[44px] bg-surface-black text-white flex items-center px-5 sticky top-0 z-50">
+      <nav className="h-[44px] bg-surface-black text-canvas flex items-center px-5 sticky top-0 z-50">
         <div className="mx-auto max-w-[980px] w-full flex items-center justify-between">
-          <Link href="/" className="text-[12px] font-normal tracking-[-0.12px] hover:opacity-80 transition-opacity">
+          <Link href="/" className="text-[12px] font-normal hover:opacity-80 transition-opacity">
             올바른 관리시스템
           </Link>
           <div className="flex gap-5">
-            <span className="text-[12px] font-normal tracking-[-0.12px] opacity-60">Phase 1</span>
+            <span className="text-[12px] font-normal opacity-60">Phase 1</span>
           </div>
         </div>
       </nav>
@@ -22,7 +22,7 @@ export default function GuardMainLayout({
       <nav className="h-[52px] bg-canvas-parchment/80 backdrop-blur-md sticky top-[44px] z-40 border-b border-hairline/30">
         <div className="mx-auto max-w-[980px] w-full h-full flex items-center justify-between px-5">
           <div className="flex min-w-0 items-center gap-3">
-            <h2 className="shrink-0 text-[21px] font-semibold tracking-[0.231px]">경비원</h2>
+            <h2 className="shrink-0 text-[21px] font-semibold">경비원</h2>
             <GuardSessionSummary />
           </div>
           <div className="flex items-center gap-6">

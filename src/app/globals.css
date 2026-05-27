@@ -1,9 +1,21 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Noonnu";
+  font-style: normal;
+  font-weight: 45 920;
+  font-display: swap;
+  src: url("/Pretendard-1.3.9/web/variable/woff2/PretendardVariable.woff2") format("woff2-variations");
+}
+
 @theme inline {
   --color-primary: #0066cc;
   --color-primary-focus: #0071e3;
+  --color-primary-hover: #0077ed;
   --color-primary-on-dark: #2997ff;
+  --color-primary-soft: rgba(0, 102, 204, 0.05);
+  --color-primary-ring: rgba(0, 113, 227, 0.2);
+  --color-text-inverse: #ffffff;
   
   --color-canvas: #ffffff;
   --color-canvas-parchment: #f5f5f7;
@@ -19,8 +31,14 @@
   
   --color-divider-soft: rgba(0, 0, 0, 0.04);
   --color-hairline: #e0e0e0;
+  --color-overlay-scrim: rgba(0, 0, 0, 0.4);
+  --color-status-ok-bg: #f5f5f7;
+  --color-status-ok-text: #1d1d1f;
+  --color-status-warn-bg: #fff4e5;
+  --color-status-warn-text: #b64e00;
 
-  --font-apple: "SF Pro Text", "SF Pro Display", system-ui, -apple-system, sans-serif;
+  --font-noonnu: "Noonnu", "Pretendard Variable", "Pretendard", system-ui, -apple-system, sans-serif;
+  --font-apple: var(--font-noonnu);
   
   --radius-apple-sm: 8px;
   --radius-apple-md: 11px;
@@ -45,14 +63,14 @@ body {
   font-size: 17px;
   line-height: 1.47;
   -webkit-font-smoothing: antialiased;
-  letter-spacing: -0.022em;
+  letter-spacing: 0;
 }
 
-/* Apple Typography Defaults */
+/* Typography Defaults */
 h1, h2, h3, h4, h5, h6 {
-  font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+  font-family: var(--font-noonnu);
   font-weight: 600;
-  letter-spacing: -0.012em;
+  letter-spacing: 0;
 }
 
 /* Button & UI Scale Micro-interaction */
@@ -70,7 +88,7 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: center;
   background-color: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-text-inverse);
   font-size: 17px;
   font-weight: 400;
   padding: 11px 22px;
@@ -82,7 +100,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .button-primary:hover:not(:disabled) {
-  background-color: #0077ed;
+  background-color: var(--color-primary-hover);
 }
 
 .button-primary:active:not(:disabled) {
@@ -112,7 +130,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .button-secondary:hover:not(:disabled) {
-  background-color: rgba(0, 102, 204, 0.05);
+  background-color: var(--color-primary-soft);
 }
 
 .button-secondary:active:not(:disabled) {
@@ -134,21 +152,30 @@ h1, h2, h3, h4, h5, h6 {
 
 .field:focus {
   border-color: var(--color-primary-focus);
-  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
+  box-shadow: 0 0 0 4px var(--color-primary-ring);
+}
+
+.button-primary:focus-visible,
+.button-secondary:focus-visible,
+.field:focus-visible,
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--color-primary-focus);
+  outline-offset: 3px;
 }
 
 /* Status variants */
 .status-ok {
-  color: #1d1d1f;
-  background-color: #f5f5f7;
+  color: var(--color-status-ok-text);
+  background-color: var(--color-status-ok-bg);
   padding: 12px 16px;
   border-radius: 12px;
   font-size: 14px;
 }
 
 .status-warn {
-  color: #b64e00;
-  background-color: #fff4e5;
+  color: var(--color-status-warn-text);
+  background-color: var(--color-status-warn-bg);
   padding: 12px 16px;
   border-radius: 12px;
   font-size: 14px;

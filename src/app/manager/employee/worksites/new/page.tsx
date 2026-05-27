@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
+import type { GpsInfo } from "@/lib/gps";
+import WorksiteGpsPicker from "../worksite-gps-picker";
 
 declare global {
   interface Window {
@@ -40,6 +42,7 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
 export default function WorksiteNewPage() {
   const [error, setError] = useState("");
   const [address, setAddress] = useState("");
+  const [gpsInfo, setGpsInfo] = useState<GpsInfo | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -67,6 +70,11 @@ export default function WorksiteNewPage() {
     event.preventDefault();
     setError("");
 
+    if (!gpsInfo) {
+      setError("GPS정보를 입력하거나 지도에서 위치를 선택하세요.");
+      return;
+    }
+
     const form = event.currentTarget;
     const data = new FormData(form);
 
@@ -74,8 +82,7 @@ export default function WorksiteNewPage() {
       await postJson<WorksiteResponse>("/api/worksites", {
         name: data.get("name"),
         address,
-        latitude: data.get("latitude"),
-        longitude: data.get("longitude"),
+        gpsInfo,
         radiusMeters: data.get("radiusMeters"),
       });
 
@@ -89,9 +96,9 @@ export default function WorksiteNewPage() {
   return (
     <section className="space-y-[24px]">
       <header>
-        <h1 className="text-[40px] font-semibold tracking-tight leading-[1.1]">근무지등록</h1>
+        <h1 className="text-[40px] font-semibold leading-[1.1]">근무지등록</h1>
         <p className="text-[21px] font-normal text-ink-muted-48 mt-2 max-w-[600px]">
-          근무지명, GPS 좌표, 허용 반경을 입력해 근무지를 등록합니다.
+          근무지명, 주소, 실제 GPS정보, 허용 반경을 입력해 근무지를 등록합니다.
         </p>
       </header>
 
@@ -108,7 +115,7 @@ export default function WorksiteNewPage() {
               <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="worksite-address">
                 근무지주소
               </label>
-              <div className="flex flex-col gap-3 md:flex-row">
+              <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_132px]">
                 <input
                   className="field"
                   id="worksite-address"
@@ -118,30 +125,17 @@ export default function WorksiteNewPage() {
                   placeholder="주소 검색으로 선택하세요."
                   required
                 />
-                <button className="button-secondary w-full md:w-auto" type="button" onClick={openAddressPopup}>
+                <button className="button-secondary w-full whitespace-nowrap md:w-full" type="button" onClick={openAddressPopup}>
                   주소 검색
                 </button>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="worksite-latitude">
-                  위도
-                </label>
-                <input className="field" id="worksite-latitude" name="latitude" placeholder="37.123456" required />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="worksite-longitude">
-                  경도
-                </label>
-                <input className="field" id="worksite-longitude" name="longitude" placeholder="127.123456" required />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="worksite-radius">
-                  허용반경(m)
-                </label>
-                <input className="field" id="worksite-radius" name="radiusMeters" placeholder="100" required />
-              </div>
+            <WorksiteGpsPicker address={address} value={gpsInfo} onChange={setGpsInfo} />
+            <div className="space-y-2">
+              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="worksite-radius">
+                허용반경(m)
+              </label>
+              <input className="field" id="worksite-radius" name="radiusMeters" placeholder="100" required />
             </div>
           </div>
 

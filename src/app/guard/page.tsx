@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import type { GpsInfo } from "@/lib/gps";
 
 type EmployeeRow = {
   id: string;
@@ -14,8 +15,7 @@ type EmployeeRow = {
 type WorksiteRow = {
   id: string;
   name: string;
-  latitude: number;
-  longitude: number;
+  gps_info: GpsInfo;
   radius_meters: number;
 };
 
@@ -23,7 +23,8 @@ type AssignmentRow = {
   id: string;
   employee_id: string;
   worksite_id: string;
-  work_date: string;
+  start_date: string;
+  end_date: string;
 };
 
 type AttendanceRow = {

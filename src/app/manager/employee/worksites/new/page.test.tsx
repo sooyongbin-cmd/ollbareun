@@ -21,16 +21,18 @@ describe("worksite new page", () => {
           const body = JSON.parse(String(init?.body));
           expect(body).toMatchObject({
             name: "인천 현장",
-            address: "인천광역시 남동구 예술로 1",
-            latitude: "37.1",
-            longitude: "126.7",
+            address: "인천광역시 동구 송림로 1",
+            gpsInfo: {
+              latitude: 37.1,
+              longitude: 126.7,
+            },
             radiusMeters: "100",
           });
           return Response.json({
             worksite: {
               id: "work-3",
               name: "인천 현장",
-              address: "인천광역시 남동구 예술로 1",
+              address: "인천광역시 동구 송림로 1",
             },
           });
         }
@@ -45,10 +47,16 @@ describe("worksite new page", () => {
 
     render(<WorksiteNewPage />);
 
+    expect(screen.getByLabelText("근무지주소").parentElement).toHaveClass(
+      "md:grid-cols-[minmax(0,1fr)_132px]",
+    );
+    expect(screen.getByRole("button", { name: "주소 검색" })).toHaveClass("md:w-full", "whitespace-nowrap");
+
     await user.type(screen.getByLabelText("근무지명"), "인천 현장");
-    await user.type(screen.getByLabelText("근무지주소"), "인천광역시 남동구 예술로 1");
-    await user.type(screen.getByLabelText("위도"), "37.1");
-    await user.type(screen.getByLabelText("경도"), "126.7");
+    await user.type(screen.getByLabelText("근무지주소"), "인천광역시 동구 송림로 1");
+    expect(screen.getByText("주소 기준 GPS")).toBeInTheDocument();
+    expect(screen.getByTestId("worksite-map")).toBeInTheDocument();
+    await user.type(screen.getByLabelText("GPS정보"), "37.1, 126.7");
     await user.type(screen.getByLabelText("허용반경(m)"), "100");
     await user.click(screen.getByRole("button", { name: "근무지 등록" }));
 

@@ -30,14 +30,16 @@ describe("assignment management page", () => {
             assignments: [
               {
                 id: "assign-1",
-                work_date: "2026-05-21",
-                employee_name: "근태수",
+                start_date: "2026-05-21",
+                end_date: "2026-05-23",
+                employee_name: "홍길동",
                 worksite_name: "본사",
               },
               {
                 id: "assign-2",
-                work_date: "2026-05-20",
-                employee_name: "홍길동",
+                start_date: "2026-05-24",
+                end_date: "2026-05-25",
+                employee_name: "김철수",
                 worksite_name: "서울지점",
               },
             ],
@@ -48,26 +50,28 @@ describe("assignment management page", () => {
     );
   });
 
-  it("renders assignment management, supports filtering, and opens edit page", async () => {
+  it("renders assignment periods, filters by included date, and opens edit page", async () => {
     const user = userEvent.setup();
 
     renderWithManagerLayout(<AssignmentManagementPage />);
 
     expect(await screen.findByRole("heading", { name: "근무지배정" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "배정하기" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "배정등록" })).toHaveAttribute(
       "href",
       "/manager/employee/assignments/new",
     );
 
-    const row = await screen.findByRole("link", { name: "근태수" });
-    expect(within(row).getByText("2026-05-21")).toBeInTheDocument();
+    const row = await screen.findByRole("link", { name: "홍길동" });
+    expect(within(row).getByText("2026-05-21 ~ 2026-05-23")).toBeInTheDocument();
     expect(within(row).getByText("본사")).toBeInTheDocument();
 
-    await user.type(screen.getByLabelText("이름"), "홍길동");
+    await user.type(screen.getByLabelText("날짜"), "2026-05-22");
     expect(await screen.findByRole("link", { name: "홍길동" })).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "근태수" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "김철수" })).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("link", { name: "홍길동" }));
+    await user.clear(screen.getByLabelText("날짜"));
+    await user.type(screen.getByLabelText("이름"), "김철수");
+    await user.click(await screen.findByRole("link", { name: "김철수" }));
     expect(push).toHaveBeenCalledWith("/manager/employee/assignments/save/assign-2");
   });
 
@@ -80,7 +84,7 @@ describe("assignment management page", () => {
     expect(searchSection).toContainElement(screen.getByLabelText("날짜"));
     expect(searchSection).toContainElement(screen.getByLabelText("근무지"));
     expect(searchSection).toContainElement(screen.getByLabelText("이름"));
-    expect(searchSection).toContainElement(screen.getByRole("link", { name: "배정하기" }));
+    expect(searchSection).toContainElement(screen.getByRole("link", { name: "배정등록" }));
     expect(listSection).toContainElement(screen.getByText("전체 배정 2"));
     expect(listSection).toContainElement(screen.getByText("조회 결과 2"));
     expect(listSection).toContainElement(screen.getByRole("table"));

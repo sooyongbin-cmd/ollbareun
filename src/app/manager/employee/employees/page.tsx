@@ -114,9 +114,8 @@ export default function EmployeeRosterPage() {
   return (
     <section className="space-y-[24px]">
       <header>
-        <p className="text-[14px] font-semibold text-ink-muted-48 uppercase tracking-wider">관리자 화면</p>
         <div className="space-y-3">
-          <h1 className="text-[40px] font-semibold tracking-tight leading-[1.1]">직원명부관리</h1>
+          <h1 className="text-[40px] font-semibold leading-[1.1]">직원명부관리</h1>
           <p className="text-[21px] font-normal text-ink-muted-48 max-w-[640px]">
             등록된 직원의 이름과 연락처를 검색해 확인합니다.
           </p>
@@ -161,7 +160,7 @@ export default function EmployeeRosterPage() {
         ) : error ? (
           <p className="mt-6 text-[16px] text-status-warn">{error}</p>
         ) : (
-          <div className="mt-4 overflow-hidden rounded-[16px] border border-hairline bg-canvas">
+          <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-[16px] border border-hairline bg-canvas">
             <table className="apple-table">
               <thead>
                 <tr>

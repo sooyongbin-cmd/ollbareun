@@ -5,7 +5,7 @@ export default function ManagerPage() {
     <section className="space-y-[80px]">
       <div className="space-y-[24px]">
         <header>
-          <h1 className="text-[40px] font-semibold tracking-tight leading-[1.1]">관리자 화면</h1>
+          <h1 className="text-[40px] font-semibold leading-[1.1]">관리자 화면</h1>
           <p className="text-[21px] font-normal text-ink-muted-48 mt-2 max-w-[600px]">
             출근 현황과 등록된 직원, 오늘 배정을 확인합니다.
           </p>

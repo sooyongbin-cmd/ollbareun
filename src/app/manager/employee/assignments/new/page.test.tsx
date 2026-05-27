@@ -20,12 +20,18 @@ describe("assignment new page", () => {
 
         if (!init && url.endsWith("/api/bootstrap")) {
           return Response.json({
-            employees: [{ id: "emp-1", name: "근태수" }],
+            employees: [{ id: "emp-1", name: "홍길동" }],
             worksites: [{ id: "work-1", name: "본사" }],
           });
         }
 
         if (init?.method === "POST" && url.endsWith("/api/assignments")) {
+          expect(JSON.parse(String(init.body))).toEqual({
+            employeeId: "emp-1",
+            worksiteId: "work-1",
+            startDate: "2026-05-21",
+            endDate: "2026-05-23",
+          });
           return Response.json({ assignment: { id: "assign-1" } });
         }
 
@@ -34,18 +40,22 @@ describe("assignment new page", () => {
     );
   });
 
-  it("shows an alert after saving and returns to assignment management", async () => {
+  it("saves an assignment period and returns to assignment management", async () => {
     const user = userEvent.setup();
     const alert = vi.spyOn(window, "alert").mockImplementation(() => undefined);
 
     render(<AssignmentNewPage />);
 
-    expect(await screen.findByRole("heading", { name: "배정하기" })).toBeInTheDocument();
-    await user.clear(screen.getByLabelText("근무일"));
-    await user.type(screen.getByLabelText("근무일"), "2026-05-21");
+    expect(await screen.findByRole("heading", { name: "배정등록" })).toBeInTheDocument();
+    expect(screen.getByText("근무기간")).toBeInTheDocument();
+    expect(screen.getByText("근무기간").closest("div")).toHaveClass("lg:min-w-[360px]");
+    await user.clear(screen.getByLabelText("시작일"));
+    await user.type(screen.getByLabelText("시작일"), "2026-05-21");
+    await user.clear(screen.getByLabelText("종료일"));
+    await user.type(screen.getByLabelText("종료일"), "2026-05-23");
     await user.selectOptions(screen.getByLabelText("근무지"), "work-1");
     await user.selectOptions(screen.getByLabelText("직원"), "emp-1");
-    await user.click(screen.getByRole("button", { name: "배정하기" }));
+    await user.click(screen.getByRole("button", { name: "배정등록" }));
 
     expect(alert).toHaveBeenCalledWith("자료를 저장하였습니다.");
     expect(push).toHaveBeenCalledWith("/manager/employee/assignments");

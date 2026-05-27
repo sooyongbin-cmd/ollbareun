@@ -27,15 +27,13 @@ describe("worksite management page", () => {
               {
                 id: "work-1",
                 name: "본사",
-                latitude: 37.5,
-                longitude: 127.0,
+                gps_info: { latitude: 37.5, longitude: 127.0 },
                 radius_meters: 100,
               },
               {
                 id: "work-2",
                 name: "서울지점",
-                latitude: 37.45,
-                longitude: 126.97,
+                gps_info: { latitude: 37.45, longitude: 126.97 },
                 radius_meters: 120,
               },
             ],
@@ -75,8 +73,10 @@ describe("worksite management page", () => {
       ),
     ).toBe("본사");
 
-    expect(screen.getByText("37.5")).toBeInTheDocument();
-    expect(screen.getByText("127")).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "GPS정보" })).toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "위도" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "경도" })).not.toBeInTheDocument();
+    expect(screen.getByText("37.500000, 127.000000")).toBeInTheDocument();
     expect(screen.getByText("100m")).toBeInTheDocument();
 
     await user.type(screen.getByRole("textbox"), "서울");

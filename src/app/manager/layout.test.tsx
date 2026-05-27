@@ -7,6 +7,20 @@ function SuspendedManagerChild() {
 }
 
 describe("manager layout loading state", () => {
+  it("uses the wider manager content width", () => {
+    const { container } = render(
+      <ManagerLayout>
+        <div>관리자 본문</div>
+      </ManagerLayout>,
+    );
+
+    const widerContainers = Array.from(container.querySelectorAll("div")).filter((element) =>
+      element.className.includes("max-w-[1180px]"),
+    );
+
+    expect(widerContainers).toHaveLength(3);
+  });
+
   it("shows the data lookup message while manager content is suspended", () => {
     render(
       <ManagerLayout>

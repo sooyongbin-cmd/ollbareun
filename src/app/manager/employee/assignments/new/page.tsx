@@ -82,13 +82,14 @@ export default function AssignmentNewPage() {
     setError("");
 
     const form = event.currentTarget;
-    const data = new FormData(form);
+    const formData = new FormData(form);
 
     try {
       await postJson<AssignmentResponse>("/api/assignments", {
-        employeeId: data.get("employeeId"),
-        worksiteId: data.get("worksiteId"),
-        workDate: data.get("workDate"),
+        employeeId: formData.get("employeeId"),
+        worksiteId: formData.get("worksiteId"),
+        startDate: formData.get("startDate"),
+        endDate: formData.get("endDate"),
       });
 
       window.alert("자료를 저장하였습니다.");
@@ -102,7 +103,7 @@ export default function AssignmentNewPage() {
   return (
     <section className="space-y-[24px]">
       <header>
-        <h1 className="text-[40px] font-semibold tracking-tight leading-[1.1]">배정하기</h1>
+        <h1 className="text-[40px] font-semibold leading-[1.1]">배정등록</h1>
         <p className="text-[21px] font-normal text-ink-muted-48 mt-2 max-w-[600px]">
           직원에게 근무지를 배정합니다.
         </p>
@@ -113,12 +114,35 @@ export default function AssignmentNewPage() {
           <ManagerLoadingMessage />
         ) : (
           <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-date">
-                  근무일
-                </label>
-                <input className="field" id="assignment-date" name="workDate" type="date" defaultValue={todayDate()} />
+            <div className="grid gap-4 lg:grid-cols-[minmax(360px,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
+              <div className="space-y-2 lg:min-w-[360px]">
+                <p className="text-[14px] font-semibold text-ink-muted-48 ml-1">근무기간</p>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <label className="sr-only" htmlFor="assignment-start-date">
+                    시작일
+                  </label>
+                  <input
+                    aria-label="시작일"
+                    className="field"
+                    id="assignment-start-date"
+                    name="startDate"
+                    type="date"
+                    defaultValue={todayDate()}
+                    required
+                  />
+                  <label className="sr-only" htmlFor="assignment-end-date">
+                    종료일
+                  </label>
+                  <input
+                    aria-label="종료일"
+                    className="field"
+                    id="assignment-end-date"
+                    name="endDate"
+                    type="date"
+                    defaultValue={todayDate()}
+                    required
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-worksite">
@@ -149,7 +173,7 @@ export default function AssignmentNewPage() {
             </div>
 
             <button className="button-primary w-full md:w-auto" data-testid="assignment-submit" type="submit">
-              배정하기
+              배정등록
             </button>
           </form>
         )}

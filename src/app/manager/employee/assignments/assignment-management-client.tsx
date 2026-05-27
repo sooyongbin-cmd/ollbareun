@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 
 type AssignmentRow = {
   id: string;
-  work_date: string;
+  start_date: string;
+  end_date: string;
   employee_name: string;
   worksite_name: string;
 };
@@ -25,6 +26,12 @@ async function fetchJson<T>(url: string): Promise<T> {
   }
 
   return payload as T;
+}
+
+function formatPeriod(assignment: AssignmentRow) {
+  return assignment.start_date === assignment.end_date
+    ? assignment.start_date
+    : `${assignment.start_date} ~ ${assignment.end_date}`;
 }
 
 export default function AssignmentManagementClient() {
@@ -71,7 +78,9 @@ export default function AssignmentManagementClient() {
     const normalizedName = nameQuery.trim().toLowerCase();
 
     return assignments.filter((assignment) => {
-      const matchesDate = !normalizedDate || assignment.work_date.includes(normalizedDate);
+      const matchesDate =
+        !normalizedDate ||
+        (assignment.start_date <= normalizedDate && normalizedDate <= assignment.end_date);
       const matchesWorksite =
         !normalizedWorksite || assignment.worksite_name.toLowerCase().includes(normalizedWorksite);
       const matchesName =
@@ -88,9 +97,8 @@ export default function AssignmentManagementClient() {
   return (
     <section className="space-y-[24px]">
       <header>
-        <p className="text-[14px] font-semibold text-ink-muted-48 uppercase tracking-wider">관리자 화면</p>
         <div className="space-y-3">
-          <h1 className="text-[40px] font-semibold tracking-tight leading-[1.1]">근무지배정</h1>
+          <h1 className="text-[40px] font-semibold leading-[1.1]">근무지배정</h1>
           <p className="text-[21px] font-normal text-ink-muted-48 max-w-[640px]">
             날짜, 근무지, 이름으로 배정 현황을 확인하고 필요하면 수정합니다.
           </p>
@@ -142,7 +150,7 @@ export default function AssignmentManagementClient() {
           </div>
 
           <Link className="button-primary w-full text-center md:w-auto" href="/manager/employee/assignments/new">
-            배정하기
+            배정등록
           </Link>
         </div>
       </section>
@@ -161,7 +169,7 @@ export default function AssignmentManagementClient() {
         ) : error ? (
           <p className="mt-6 text-[16px] text-status-warn">{error}</p>
         ) : (
-          <div className="mt-4 overflow-hidden rounded-[16px] border border-hairline bg-canvas">
+          <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-[16px] border border-hairline bg-canvas">
             <table className="apple-table">
               <thead>
                 <tr>
@@ -193,7 +201,7 @@ export default function AssignmentManagementClient() {
                       role="link"
                       tabIndex={0}
                     >
-                      <td className="font-semibold">{assignment.work_date}</td>
+                      <td className="font-semibold">{formatPeriod(assignment)}</td>
                       <td>{assignment.worksite_name}</td>
                       <td className="text-ink-muted-48">{assignment.employee_name}</td>
                     </tr>

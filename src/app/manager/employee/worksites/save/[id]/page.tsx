@@ -2,14 +2,15 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
+import type { GpsInfo } from "@/lib/gps";
 import ManagerLoadingMessage from "../../../../manager-loading-message";
+import WorksiteGpsPicker from "../../worksite-gps-picker";
 
 type Worksite = {
   id: string;
   name: string;
   address: string;
-  latitude: number;
-  longitude: number;
+  gps_info: GpsInfo;
   radius_meters: number;
 };
 
@@ -43,8 +44,7 @@ export default function WorksiteSavePage() {
   const worksiteId = params.id;
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
-  const [latitude, setLatitude] = useState("");
-  const [longitude, setLongitude] = useState("");
+  const [gpsInfo, setGpsInfo] = useState<GpsInfo | null>(null);
   const [radiusMeters, setRadiusMeters] = useState("");
   const [loading, setLoading] = useState(Boolean(worksiteId));
   const [error, setError] = useState("");
@@ -61,8 +61,7 @@ export default function WorksiteSavePage() {
         if (!ignore) {
           setName(data.worksite.name);
           setAddress(data.worksite.address ?? "");
-          setLatitude(String(data.worksite.latitude));
-          setLongitude(String(data.worksite.longitude));
+          setGpsInfo(data.worksite.gps_info ?? null);
           setRadiusMeters(String(data.worksite.radius_meters));
         }
       } catch (loadError) {
@@ -93,14 +92,19 @@ export default function WorksiteSavePage() {
     event.preventDefault();
     setError("");
 
+    if (!gpsInfo) {
+      setError("GPS정보를 입력하거나 지도에서 위치를 선택하세요.");
+      return;
+    }
+
     try {
       await fetchJson<WorksiteResponse>(`/api/worksites/${worksiteId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, address, latitude, longitude, radiusMeters }),
+        body: JSON.stringify({ name, address, gpsInfo, radiusMeters }),
       });
 
-      window.alert("자료가 저장되었습니다");
+      window.alert("자료가 저장되었습니다.");
       router.push("/manager/employee/worksites");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "근무지를 저장하지 못했습니다.");
@@ -126,11 +130,11 @@ export default function WorksiteSavePage() {
   return (
     <section className="space-y-[24px]">
       <header>
-        <p className="text-[14px] font-semibold text-ink-muted-48 uppercase tracking-wider">관리자 화면</p>
+        <p className="text-[14px] font-semibold text-ink-muted-48 uppercase">관리자 화면</p>
         <div className="space-y-3">
-          <h1 className="text-[40px] font-semibold tracking-tight leading-[1.1]">근무지수정</h1>
+          <h1 className="text-[40px] font-semibold leading-[1.1]">근무지수정</h1>
           <p className="text-[21px] font-normal text-ink-muted-48 max-w-[640px]">
-            선택한 근무지의 이름과 위치, 허용 반경을 수정할 수 있습니다.
+            선택한 근무지의 이름, 주소, 실제 GPS정보, 허용 반경을 수정할 수 있습니다.
           </p>
         </div>
       </header>
@@ -167,43 +171,18 @@ export default function WorksiteSavePage() {
                   required
                 />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="worksite-latitude">
-                    위도
-                  </label>
-                  <input
-                    className="field"
-                    id="worksite-latitude"
-                    value={latitude}
-                    onChange={(event) => setLatitude(event.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="worksite-longitude">
-                    경도
-                  </label>
-                  <input
-                    className="field"
-                    id="worksite-longitude"
-                    value={longitude}
-                    onChange={(event) => setLongitude(event.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="worksite-radius">
-                    허용반경(m)
-                  </label>
-                  <input
-                    className="field"
-                    id="worksite-radius"
-                    value={radiusMeters}
-                    onChange={(event) => setRadiusMeters(event.target.value)}
-                    required
-                  />
-                </div>
+              <WorksiteGpsPicker address={address} value={gpsInfo} onChange={setGpsInfo} />
+              <div className="space-y-2">
+                <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="worksite-radius">
+                  허용반경(m)
+                </label>
+                <input
+                  className="field"
+                  id="worksite-radius"
+                  value={radiusMeters}
+                  onChange={(event) => setRadiusMeters(event.target.value)}
+                  required
+                />
               </div>
             </div>
 
@@ -226,20 +205,15 @@ export default function WorksiteSavePage() {
       </section>
 
       {deleteConfirmOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-5">
-          <div className="w-full max-w-[420px] rounded-[20px] bg-canvas p-6 shadow-2xl border border-hairline">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay-scrim px-5">
+          <div className="w-full max-w-[420px] rounded-[18px] bg-canvas p-6 shadow-product border border-hairline">
             <h2 className="text-[24px] font-semibold">자료를 삭제하시겠습니까?</h2>
             <p className="mt-3 text-[16px] text-ink-muted-48">
-              삭제하면 해당 근무지의 배정과 출퇴근 기록도 함께 삭제됩니다.
+              삭제하면 해당 근무지와 연결된 배정, 출퇴근 기록에 영향을 줄 수 있습니다.
             </p>
 
             <div className="mt-6 flex gap-3">
-              <button
-                className="button-primary flex-1"
-                type="button"
-                onClick={handleDelete}
-                disabled={deleting}
-              >
+              <button className="button-primary flex-1" type="button" onClick={handleDelete} disabled={deleting}>
                 예
               </button>
               <button

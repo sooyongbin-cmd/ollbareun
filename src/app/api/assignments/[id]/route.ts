@@ -25,7 +25,8 @@ export async function PATCH(request: Request, { params }: RouteContext) {
         id,
         employeeId: body.employeeId,
         worksiteId: body.worksiteId,
-        workDate: body.workDate,
+        startDate: body.startDate,
+        endDate: body.endDate,
       }),
     });
   } catch (error) {

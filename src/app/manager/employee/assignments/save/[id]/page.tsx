@@ -8,7 +8,8 @@ type Assignment = {
   id: string;
   employee_id: string;
   worksite_id: string;
-  work_date: string;
+  start_date: string;
+  end_date: string;
 };
 
 type Employee = {
@@ -58,7 +59,8 @@ export default function AssignmentSavePage() {
   const [worksites, setWorksites] = useState<Worksite[]>([]);
   const [employeeId, setEmployeeId] = useState("");
   const [worksiteId, setWorksiteId] = useState("");
-  const [workDate, setWorkDate] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [loading, setLoading] = useState(Boolean(assignmentId));
   const [error, setError] = useState("");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -77,7 +79,8 @@ export default function AssignmentSavePage() {
         if (!ignore) {
           setEmployeeId(assignmentPayload.assignment.employee_id);
           setWorksiteId(assignmentPayload.assignment.worksite_id);
-          setWorkDate(assignmentPayload.assignment.work_date);
+          setStartDate(assignmentPayload.assignment.start_date);
+          setEndDate(assignmentPayload.assignment.end_date);
           setEmployees(bootstrapPayload.employees ?? []);
           setWorksites(bootstrapPayload.worksites ?? []);
         }
@@ -116,7 +119,8 @@ export default function AssignmentSavePage() {
         body: JSON.stringify({
           employeeId,
           worksiteId,
-          workDate,
+          startDate,
+          endDate,
         }),
       });
 
@@ -146,11 +150,11 @@ export default function AssignmentSavePage() {
   return (
     <section className="space-y-[24px]">
       <header>
-        <p className="text-[14px] font-semibold text-ink-muted-48 uppercase tracking-wider">관리자 화면</p>
+        <p className="text-[14px] font-semibold text-ink-muted-48 uppercase">관리자 화면</p>
         <div className="space-y-3">
-          <h1 className="text-[40px] font-semibold tracking-tight leading-[1.1]">배정수정</h1>
+          <h1 className="text-[40px] font-semibold leading-[1.1]">배정수정</h1>
           <p className="text-[21px] font-normal text-ink-muted-48 max-w-[640px]">
-            선택한 배정의 직원, 근무지, 날짜를 수정합니다.
+            선택한 배정의 직원, 근무지, 근무기간을 수정합니다.
           </p>
         </div>
       </header>
@@ -162,7 +166,7 @@ export default function AssignmentSavePage() {
           <p className="text-[16px] text-status-warn">{error}</p>
         ) : (
           <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-4">
               <div className="space-y-2">
                 <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-employee">
                   직원
@@ -202,17 +206,33 @@ export default function AssignmentSavePage() {
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-date">
-                  근무일
-                </label>
-                <input
-                  className="field"
-                  id="assignment-date"
-                  type="date"
-                  value={workDate}
-                  onChange={(event) => setWorkDate(event.target.value)}
-                  required
-                />
+                <p className="text-[14px] font-semibold text-ink-muted-48 ml-1">근무기간</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="sr-only" htmlFor="assignment-start-date">
+                    시작일
+                  </label>
+                  <input
+                    aria-label="시작일"
+                    className="field"
+                    id="assignment-start-date"
+                    type="date"
+                    value={startDate}
+                    onChange={(event) => setStartDate(event.target.value)}
+                    required
+                  />
+                  <label className="sr-only" htmlFor="assignment-end-date">
+                    종료일
+                  </label>
+                  <input
+                    aria-label="종료일"
+                    className="field"
+                    id="assignment-end-date"
+                    type="date"
+                    value={endDate}
+                    onChange={(event) => setEndDate(event.target.value)}
+                    required
+                  />
+                </div>
               </div>
             </div>
 
@@ -235,8 +255,8 @@ export default function AssignmentSavePage() {
       </section>
 
       {deleteConfirmOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-5">
-          <div className="w-full max-w-[420px] rounded-[20px] bg-canvas p-6 shadow-2xl border border-hairline">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay-scrim px-5">
+          <div className="w-full max-w-[420px] rounded-[18px] bg-canvas p-6 shadow-product border border-hairline">
             <h2 className="text-[24px] font-semibold">자료를 삭제하시겠습니까?</h2>
             <p className="mt-3 text-[16px] text-ink-muted-48">
               삭제하면 현재 배정 자료가 완전히 제거됩니다.
@@ -257,7 +277,7 @@ export default function AssignmentSavePage() {
                 onClick={() => setDeleteConfirmOpen(false)}
                 disabled={deleting}
               >
-                아니오
+                아니요
               </button>
             </div>
           </div>

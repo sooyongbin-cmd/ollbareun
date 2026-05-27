@@ -2,12 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import {
-  canClockIn,
-  canClockOut,
-  type AttendanceRecord,
-  type Worksite,
-} from "@/lib/phase1";
+import { canClockIn, canClockOut, type AttendanceRecord, type Worksite } from "@/lib/phase1";
+import { formatGpsInfo, type GpsInfo } from "@/lib/gps";
 
 type EmployeeRow = {
   id: string;
@@ -20,8 +16,7 @@ type EmployeeRow = {
 type WorksiteRow = {
   id: string;
   name: string;
-  latitude: number;
-  longitude: number;
+  gps_info: GpsInfo;
   radius_meters: number;
 };
 
@@ -29,7 +24,8 @@ type AssignmentRow = {
   id: string;
   employee_id: string;
   worksite_id: string;
-  work_date: string;
+  start_date: string;
+  end_date: string;
 };
 
 type AttendanceRow = {
@@ -54,8 +50,8 @@ function asWorksite(row: WorksiteRow): Worksite {
   return {
     id: row.id,
     name: row.name,
-    latitude: row.latitude,
-    longitude: row.longitude,
+    latitude: row.gps_info.latitude,
+    longitude: row.gps_info.longitude,
     radiusMeters: row.radius_meters,
   };
 }
@@ -118,8 +114,8 @@ export default function GuardAttendancePage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [guard, setGuard] = useState<GuardSession | null>(readStoredGuardSession);
-  const [latitude, setLatitude] = useState(() => (guard?.worksite ? String(guard.worksite.latitude) : ""));
-  const [longitude, setLongitude] = useState(() => (guard?.worksite ? String(guard.worksite.longitude) : ""));
+  const [latitude, setLatitude] = useState(() => (guard?.worksite ? String(guard.worksite.gps_info.latitude) : ""));
+  const [longitude, setLongitude] = useState(() => (guard?.worksite ? String(guard.worksite.gps_info.longitude) : ""));
 
   const clockInDecision =
     guard?.worksite && latitude && longitude
@@ -179,8 +175,8 @@ export default function GuardAttendancePage() {
     setError("");
     const result = await postJson<{ attendance: AttendanceRow }>("/api/attendance/clock-out", {
       employeeId: guard.employee.id,
-      latitude: latitude || guard.worksite?.latitude,
-      longitude: longitude || guard.worksite?.longitude,
+      latitude: latitude || guard.worksite?.gps_info.latitude,
+      longitude: longitude || guard.worksite?.gps_info.longitude,
     });
     const nextGuard = { ...guard, attendance: result.attendance };
     setGuard(nextGuard);
@@ -214,8 +210,7 @@ export default function GuardAttendancePage() {
                 </div>
                 {guard.worksite && (
                   <div className="text-[13px] text-ink-muted-48 bg-canvas-parchment rounded-lg p-3">
-                    현장 위치: {guard.worksite.latitude}, {guard.worksite.longitude} (반경{" "}
-                    {guard.worksite.radius_meters}m)
+                    현장 위치: {formatGpsInfo(guard.worksite.gps_info)} (반경 {guard.worksite.radius_meters}m)
                   </div>
                 )}
               </div>

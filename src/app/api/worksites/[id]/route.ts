@@ -25,8 +25,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
         id,
         name: body.name,
         address: body.address,
-        latitude: body.latitude,
-        longitude: body.longitude,
+        gpsInfo: body.gpsInfo,
         radiusMeters: body.radiusMeters,
       }),
     });

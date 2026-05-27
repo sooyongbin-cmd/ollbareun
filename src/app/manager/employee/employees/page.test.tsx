@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -74,10 +74,12 @@ describe("employee roster page", () => {
     );
     expect(screen.getByText("본사")).toBeInTheDocument();
     expect(screen.getByText("현직")).toBeInTheDocument();
+    expect(screen.queryByText("Bob")).not.toBeInTheDocument();
 
+    await user.click(screen.getByRole("checkbox", { name: "퇴직" }));
     await user.type(screen.getByRole("textbox"), "Bob");
     expect(await screen.findByText("Bob")).toBeInTheDocument();
-    expect(screen.getByText("퇴직")).toBeInTheDocument();
+    expect(within(screen.getByRole("table")).getByText("퇴직")).toBeInTheDocument();
     expect(screen.queryByText("Alice")).not.toBeInTheDocument();
   });
 
@@ -88,9 +90,11 @@ describe("employee roster page", () => {
     const listSection = await screen.findByRole("region", { name: "직원 목록" });
 
     expect(searchSection).toContainElement(screen.getByLabelText("직원 이름 검색"));
+    expect(searchSection).toContainElement(screen.getByRole("checkbox", { name: "퇴직" }));
+    expect(screen.getByRole("checkbox", { name: "퇴직" })).not.toBeChecked();
     expect(searchSection).toContainElement(screen.getByRole("link", { name: "직원 등록" }));
     expect(listSection).toContainElement(screen.getByText("전체 직원 2"));
-    expect(listSection).toContainElement(screen.getByText("검색 결과 2"));
+    expect(listSection).toContainElement(screen.getByText("검색 결과 1"));
     expect(listSection).toContainElement(screen.getByRole("table"));
   });
 

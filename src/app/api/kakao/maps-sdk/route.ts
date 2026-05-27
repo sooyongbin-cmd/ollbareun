@@ -10,5 +10,29 @@ export function GET() {
   url.searchParams.set("libraries", "services");
   url.searchParams.set("autoload", "false");
 
-  return Response.redirect(url.toString(), 307);
+  return new Response(
+    `
+(function () {
+  var script = document.createElement("script");
+  script.async = false;
+  script.src = ${JSON.stringify(url.toString())};
+  script.onload = function () {
+    if (window.__ollbareunKakaoMapSdkLoaded) {
+      window.__ollbareunKakaoMapSdkLoaded();
+    }
+  };
+  script.onerror = function () {
+    if (window.__ollbareunKakaoMapSdkError) {
+      window.__ollbareunKakaoMapSdkError();
+    }
+  };
+  document.head.appendChild(script);
+})();
+`,
+    {
+      headers: {
+        "Content-Type": "application/javascript; charset=utf-8",
+      },
+    },
+  );
 }

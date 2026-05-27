@@ -22,7 +22,11 @@ export default function GuardMainLayout({
       <nav className="h-[52px] bg-canvas-parchment/80 backdrop-blur-md sticky top-[44px] z-40 border-b border-hairline/30">
         <div className="mx-auto max-w-[980px] w-full h-full flex items-center justify-between px-5">
           <div className="flex min-w-0 items-center gap-3">
-            <h2 className="shrink-0 text-[21px] font-semibold">경비원</h2>
+            <h2 className="shrink-0 text-[21px] font-semibold">
+              <Link href="/guard/main" className="hover:opacity-80 transition-opacity">
+                경비원
+              </Link>
+            </h2>
             <GuardSessionSummary />
           </div>
           <div className="flex items-center gap-6">

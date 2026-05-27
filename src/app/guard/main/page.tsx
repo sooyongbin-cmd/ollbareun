@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export default function GuardMainPage() {
-  const pendingActions = ["안전교육", "근무지확인", "퇴근하기", "개인프로필"];
+  const pendingActions = ["근무지확인", "퇴근하기", "개인프로필"];
 
   return (
     <div className="mx-auto max-w-[980px] w-full px-5 py-[80px]">
@@ -10,6 +10,9 @@ export default function GuardMainPage() {
           출근하기
         </Link>
         <div className="mt-4 flex flex-col gap-3">
+          <Link className="button-secondary w-full text-center" href="/guard/main/safty">
+            안전교육
+          </Link>
           {pendingActions.map((label) => (
             <button key={label} className="button-secondary w-full" type="button">
               {label}

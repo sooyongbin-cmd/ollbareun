@@ -187,12 +187,6 @@ export default function GuardAttendancePage() {
   return (
     <div className="mx-auto max-w-[980px] w-full px-5 py-[80px]">
       <div className="max-w-[600px] mx-auto">
-        <div className="mb-6">
-          <Link className="button-secondary inline-flex" href="/guard/main">
-            홈으로
-          </Link>
-        </div>
-
         {guard ? (
           <section className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50">
             <div className="space-y-[32px]">

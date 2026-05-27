@@ -16,6 +16,9 @@ export function getSupabase() {
         persistSession: false,
         autoRefreshToken: false,
       },
+      db: {
+        timeout: 20_000,
+      },
     });
   }
 

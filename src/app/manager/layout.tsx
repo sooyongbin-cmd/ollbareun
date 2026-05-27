@@ -16,8 +16,11 @@ const menu = [
     ],
   },
   {
-    label: "안전교육 관리",
-    children: ["교육 대상 관리 목록/등록/수정", "교육 이수 관리"],
+    label: "안전교육",
+    children: [
+      { label: "교육자료관리", href: "/manager/safty/resources" },
+      { label: "교육이수관리", href: "/manager/safty/completions" },
+    ],
   },
   // ***** 권한관리(permission)는 초기 로그인만으로 처리하는 것으로 변경됨.
   // {

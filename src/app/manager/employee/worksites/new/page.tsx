@@ -121,8 +121,8 @@ export default function WorksiteNewPage() {
                   id="worksite-address"
                   name="address"
                   value={address}
-                  onChange={(event) => setAddress(event.target.value)}
                   placeholder="주소 검색으로 선택하세요."
+                  readOnly
                   required
                 />
                 <button className="button-secondary w-full whitespace-nowrap md:w-full" type="button" onClick={openAddressPopup}>

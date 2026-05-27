@@ -9,12 +9,15 @@ type KakaoLatLng = {
 };
 
 type KakaoMap = {
+  relayout?: () => void;
   setCenter: (position: KakaoLatLng) => void;
 };
 
 type KakaoMarker = {
   setPosition: (position: KakaoLatLng) => void;
 };
+
+type KakaoMarkerImage = unknown;
 
 type KakaoMouseEvent = {
   latLng: KakaoLatLng;
@@ -30,9 +33,20 @@ type KakaoGlobal = {
     load: (callback: () => void) => void;
     LatLng: new (latitude: number, longitude: number) => KakaoLatLng;
     Map: new (element: HTMLElement, options: { center: KakaoLatLng; level: number }) => KakaoMap;
-    Marker: new (options: { position: KakaoLatLng; map: KakaoMap }) => KakaoMarker;
+    Marker: new (options: { position: KakaoLatLng; map: KakaoMap; image?: KakaoMarkerImage }) => KakaoMarker;
+    MarkerImage?: new (
+      src: string,
+      size: unknown,
+      options?: { offset?: unknown },
+    ) => KakaoMarkerImage;
+    Point?: new (x: number, y: number) => unknown;
+    Size?: new (width: number, height: number) => unknown;
     event: {
-      addListener: (map: KakaoMap, eventName: "click", handler: (event: KakaoMouseEvent) => void) => void;
+      addListener: (
+        map: KakaoMap,
+        eventName: "click" | "dragend",
+        handler: (event?: KakaoMouseEvent) => void,
+      ) => void;
     };
     services: {
       Geocoder: new () => {
@@ -51,6 +65,8 @@ type KakaoGlobal = {
 declare global {
   interface Window {
     kakao?: KakaoGlobal;
+    __ollbareunKakaoMapSdkLoaded?: () => void;
+    __ollbareunKakaoMapSdkError?: () => void;
   }
 }
 
@@ -67,6 +83,11 @@ type GeocodeResponse = {
 
 let kakaoLoader: Promise<void> | null = null;
 
+const RED_MARKER_SVG = encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="34" height="44" viewBox="0 0 34 44"><path fill="#e03131" stroke="#9f1239" stroke-width="2" d="M17 42s14-15.2 14-26A14 14 0 1 0 3 16c0 10.8 14 26 14 26Z"/><circle cx="17" cy="16" r="5.5" fill="#fff"/></svg>',
+);
+const RED_MARKER_IMAGE_SRC = `data:image/svg+xml;charset=UTF-8,${RED_MARKER_SVG}`;
+
 function loadKakaoMap() {
   if (typeof window === "undefined") {
     return Promise.reject(new Error("Browser only"));
@@ -81,17 +102,30 @@ function loadKakaoMap() {
   if (!kakaoLoader) {
     kakaoLoader = new Promise((resolve, reject) => {
       const script = document.createElement("script");
+      script.async = false;
       script.src = "/api/kakao/maps-sdk";
-      script.async = true;
-      script.onload = () => {
+      const cleanupCallbacks = () => {
+        delete window.__ollbareunKakaoMapSdkLoaded;
+        delete window.__ollbareunKakaoMapSdkError;
+      };
+
+      window.__ollbareunKakaoMapSdkLoaded = () => {
         const loadedKakao = window.kakao;
         if (loadedKakao?.maps) {
-          loadedKakao.maps.load(resolve);
+          loadedKakao.maps.load(() => {
+            cleanupCallbacks();
+            resolve();
+          });
         } else {
+          cleanupCallbacks();
           reject(new Error("Kakao map SDK를 불러오지 못했습니다."));
         }
       };
-      script.onerror = () => reject(new Error("Kakao map SDK를 불러오지 못했습니다."));
+      window.__ollbareunKakaoMapSdkError = () => {
+        cleanupCallbacks();
+        reject(new Error("Kakao map SDK를 불러오지 못했습니다."));
+      };
+      script.onerror = window.__ollbareunKakaoMapSdkError;
       document.head.appendChild(script);
     });
   }
@@ -108,14 +142,36 @@ function toLatLng(gps: GpsInfo) {
   return new kakao.maps.LatLng(gps.latitude, gps.longitude);
 }
 
+function updateMapPosition(map: KakaoMap, marker: KakaoMarker | null, position: KakaoLatLng) {
+  map.relayout?.();
+  map.setCenter(position);
+  marker?.setPosition(position);
+}
+
+function createMarkerImage() {
+  const kakao = window.kakao;
+  if (!kakao?.maps.MarkerImage || !kakao.maps.Size || !kakao.maps.Point) {
+    return undefined;
+  }
+
+  return new kakao.maps.MarkerImage(RED_MARKER_IMAGE_SRC, new kakao.maps.Size(34, 44), {
+    offset: new kakao.maps.Point(17, 42),
+  });
+}
+
 export default function WorksiteGpsPicker({ address, value, onChange }: WorksiteGpsPickerProps) {
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<KakaoMap | null>(null);
   const markerRef = useRef<KakaoMarker | null>(null);
   const manualInputRef = useRef(false);
+  const selectedGpsRef = useRef<GpsInfo | null>(value);
   const [addressGps, setAddressGps] = useState<GpsInfo | null>(null);
   const [inputValue, setInputValue] = useState(formatGpsInfo(value));
   const [status, setStatus] = useState("");
+
+  useEffect(() => {
+    selectedGpsRef.current = value ?? addressGps;
+  }, [addressGps, value]);
 
   useEffect(() => {
     if (manualInputRef.current) {
@@ -153,14 +209,29 @@ export default function WorksiteGpsPicker({ address, value, onChange }: Worksite
             center,
             level: 3,
           });
-          markerRef.current = new kakao.maps.Marker({ position: center, map: mapRef.current });
+          markerRef.current = new kakao.maps.Marker({
+            position: center,
+            map: mapRef.current,
+            image: createMarkerImage(),
+          });
+          updateMapPosition(mapRef.current, markerRef.current, center);
           kakao.maps.event.addListener(mapRef.current, "click", (mouseEvent) => {
-            const latLng = mouseEvent.latLng;
+            const latLng = mouseEvent?.latLng;
+            if (!latLng) {
+              return;
+            }
             onChange({ latitude: latLng.getLat(), longitude: latLng.getLng() });
           });
+          kakao.maps.event.addListener(mapRef.current, "dragend", () => {
+            const selectedGps = selectedGpsRef.current;
+            if (!selectedGps) {
+              return;
+            }
+
+            markerRef.current?.setPosition(toLatLng(selectedGps));
+          });
         } else {
-          mapRef.current.setCenter(center);
-          markerRef.current?.setPosition(center);
+          updateMapPosition(mapRef.current, markerRef.current, center);
         }
       } catch (error) {
         if (!ignore) {
@@ -237,8 +308,7 @@ export default function WorksiteGpsPicker({ address, value, onChange }: Worksite
     }
 
     const position = toLatLng(nextGps);
-    markerRef.current.setPosition(position);
-    mapRef.current.setCenter(position);
+    updateMapPosition(mapRef.current, markerRef.current, position);
   }, [addressGps, value]);
 
   function handleGpsInputChange(nextValue: string) {
@@ -249,18 +319,10 @@ export default function WorksiteGpsPicker({ address, value, onChange }: Worksite
 
   return (
     <div className="space-y-4">
-      <div className="space-y-2">
-        <p className="text-[14px] font-semibold text-ink-muted-48 ml-1">주소 기준 GPS</p>
-        <div className="field bg-canvas text-ink-muted-48">
-          {addressGps
-            ? formatGpsInfo(addressGps)
-            : status || (address.trim() ? "주소의 GPS정보를 확인하는 중입니다." : "근무지주소 입력 후 자동으로 표시됩니다.")}
-        </div>
-      </div>
-
       <div
         ref={mapElementRef}
         className="h-[360px] w-full overflow-hidden rounded-[16px] border border-hairline bg-canvas"
+        data-test-id="worksite-map"
         data-testid="worksite-map"
       />
 

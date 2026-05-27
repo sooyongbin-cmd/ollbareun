@@ -58,13 +58,24 @@ describe("guard main navigation", () => {
     expect(logoutButton).toHaveAttribute("href", "/guard");
   });
 
+  it("links the guard section title to the guard main page", () => {
+    render(
+      <GuardMainLayout>
+        <GuardMainPage />
+      </GuardMainLayout>,
+    );
+
+    expect(screen.getByRole("link", { name: "경비원" })).toHaveAttribute("href", "/guard/main");
+  });
+
   it("keeps the main page as an entry point to attendance", () => {
     window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
 
     render(<GuardMainPage />);
 
     expect(screen.getByRole("link", { name: "출근하기" })).toHaveAttribute("href", "/guard/main/attendance");
-    for (const label of ["안전교육", "근무지확인", "퇴근하기", "개인프로필"]) {
+    expect(screen.getByRole("link", { name: "안전교육" })).toHaveAttribute("href", "/guard/main/safty");
+    for (const label of ["근무지확인", "퇴근하기", "개인프로필"]) {
       expect(screen.getByRole("button", { name: label })).toBeInTheDocument();
     }
     expect(screen.queryByTestId("clock-in")).not.toBeInTheDocument();
@@ -80,7 +91,7 @@ describe("guard main navigation", () => {
 
     render(<AttendancePage />);
 
-    expect(screen.getByRole("link", { name: "홈으로" })).toHaveAttribute("href", "/guard/main");
+    expect(screen.queryByRole("link", { name: "홈으로" })).not.toBeInTheDocument();
     expect(getCurrentPosition).toHaveBeenCalledWith(expect.any(Function), expect.any(Function), {
       enableHighAccuracy: true,
       timeout: 8000,

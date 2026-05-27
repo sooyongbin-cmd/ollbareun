@@ -41,6 +41,7 @@ const emptyBootstrap: Bootstrap = {
 export default function EmployeeRosterPage() {
   const [data, setData] = useState<Bootstrap>(emptyBootstrap);
   const [query, setQuery] = useState("");
+  const [showRetired, setShowRetired] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -84,14 +85,15 @@ export default function EmployeeRosterPage() {
 
   const filteredEmployees = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
+    const statusFilteredEmployees = data.employees.filter((employee) => employee.is_retired === showRetired);
 
     if (!normalizedQuery) {
-      return data.employees;
+      return statusFilteredEmployees;
     }
 
     const digitQuery = normalizedQuery.replace(/\D/g, "");
 
-    return data.employees.filter((employee) => {
+    return statusFilteredEmployees.filter((employee) => {
       const name = employee.name.toLowerCase();
       const phone = employee.phone.toLowerCase();
 
@@ -101,7 +103,7 @@ export default function EmployeeRosterPage() {
         (digitQuery.length > 0 && employee.phone_normalized.includes(digitQuery))
       );
     });
-  }, [data.employees, query]);
+  }, [data.employees, query, showRetired]);
 
   const worksiteById = useMemo(() => {
     return new Map(data.worksites.map((worksite) => [worksite.id, worksite.name]));
@@ -139,6 +141,16 @@ export default function EmployeeRosterPage() {
               placeholder="이름 또는 연락처를 입력하세요"
             />
           </div>
+
+          <label className="flex h-[48px] items-center gap-2 text-[15px] font-semibold text-ink-muted-80 md:mb-0">
+            <input
+              checked={showRetired}
+              className="h-4 w-4 accent-primary"
+              onChange={(event) => setShowRetired(event.target.checked)}
+              type="checkbox"
+            />
+            퇴직
+          </label>
 
           <Link className="button-primary w-full text-center md:w-auto" href="/manager/employee/employees/new">
             직원 등록

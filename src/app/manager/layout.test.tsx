@@ -30,4 +30,24 @@ describe("manager layout loading state", () => {
 
     expect(screen.getByText("자료조회중입니다...")).toBeInTheDocument();
   });
+
+  it("renames the safety education menu and links education resources", () => {
+    render(
+      <ManagerLayout>
+        <div>관리자 본문</div>
+      </ManagerLayout>,
+    );
+
+    expect(screen.getByText("안전교육")).toBeInTheDocument();
+    expect(screen.queryByText("안전교육 관리")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "교육자료관리" })).toHaveAttribute(
+      "href",
+      "/manager/safty/resources",
+    );
+    expect(screen.getByRole("link", { name: "교육이수관리" })).toHaveAttribute(
+      "href",
+      "/manager/safty/completions",
+    );
+    expect(screen.queryByText("교육 대상 관리 목록/등록/수정")).not.toBeInTheDocument();
+  });
 });

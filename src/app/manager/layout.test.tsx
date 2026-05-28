@@ -38,13 +38,14 @@ describe("manager layout loading state", () => {
       </ManagerLayout>,
     );
 
-    expect(screen.getByText("안전교육")).toBeInTheDocument();
+    // Both mobile and desktop menus contain "안전교육"
+    expect(screen.getAllByText("안전교육")[0]).toBeInTheDocument();
     expect(screen.queryByText("안전교육 관리")).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "교육자료관리" })).toHaveAttribute(
+    expect(screen.getAllByRole("link", { name: "교육자료관리" })[0]).toHaveAttribute(
       "href",
       "/manager/safty/resources",
     );
-    expect(screen.getByRole("link", { name: "교육이수관리" })).toHaveAttribute(
+    expect(screen.getAllByRole("link", { name: "교육이수관리" })[0]).toHaveAttribute(
       "href",
       "/manager/safty/completions",
     );

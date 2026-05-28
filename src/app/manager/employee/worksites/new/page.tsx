@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import type { GpsInfo } from "@/lib/gps";
 import WorksiteGpsPicker from "../worksite-gps-picker";
+import { SaveIcon } from "@/components/icons/save-icon";
+import AlertModal from "@/components/modals/alert-modal";
 
 declare global {
   interface Window {
@@ -43,6 +45,7 @@ export default function WorksiteNewPage() {
   const [error, setError] = useState("");
   const [address, setAddress] = useState("");
   const [gpsInfo, setGpsInfo] = useState<GpsInfo | null>(null);
+  const [alertMessage, setAlertMessage] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -86,8 +89,7 @@ export default function WorksiteNewPage() {
         radiusMeters: data.get("radiusMeters"),
       });
 
-      window.alert("자료를 저장하였습니다.");
-      router.push("/manager/employee/worksites");
+      setAlertMessage("자료를 저장하였습니다.");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "요청을 처리하지 못했습니다.");
     }
@@ -139,13 +141,28 @@ export default function WorksiteNewPage() {
             </div>
           </div>
 
-          <button className="button-primary w-full md:w-auto" data-testid="worksite-submit" type="submit">
-            근무지 등록
+          <button
+            aria-label="저장"
+            className="button-primary w-full md:w-auto"
+            data-testid="worksite-submit"
+            type="submit"
+          >
+            <SaveIcon size={20} />
           </button>
         </form>
 
         {error ? <p className="status-warn mt-6 text-center">{error}</p> : null}
       </section>
+
+      <AlertModal
+        isOpen={Boolean(alertMessage)}
+        onClose={() => {
+          setAlertMessage("");
+          router.push("/manager/employee/worksites");
+        }}
+        title="알림"
+        description={alertMessage}
+      />
     </section>
   );
 }

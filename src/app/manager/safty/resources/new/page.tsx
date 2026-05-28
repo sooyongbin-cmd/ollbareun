@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { SaveIcon } from "@/components/icons/save-icon";
+import AlertModal from "@/components/modals/alert-modal";
 
 const SAVE_TIMEOUT_MS = 70_000;
 
@@ -26,6 +28,7 @@ async function postResource(formData: FormData) {
 export default function EducationResourceNewPage() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
   const router = useRouter();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -71,8 +74,7 @@ export default function EducationResourceNewPage() {
     try {
       setIsSubmitting(true);
       await postResource(formData);
-      window.alert("자료를 저장하였습니다.");
-      router.push("/manager/safty/resources");
+      setAlertMessage("자료를 저장하였습니다.");
     } catch (submitError) {
       if (submitError instanceof DOMException && submitError.name === "AbortError") {
         setError("저장 요청 시간이 초과되었습니다. 잠시 후 다시 시도하세요.");
@@ -124,14 +126,29 @@ export default function EducationResourceNewPage() {
             </div>
           </div>
 
-          <button className="button-primary w-full md:w-auto" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "저장 중..." : "저장"}
+          <button
+            aria-label="저장"
+            className="button-primary w-full md:w-auto disabled:opacity-50"
+            type="submit"
+            disabled={isSubmitting}
+          >
+            <SaveIcon size={20} />
           </button>
         </form>
 
         {isSubmitting ? <p className="status-ok mt-6 text-center">유튜브 링크를 저장 중입니다.</p> : null}
         {error ? <p className="status-warn mt-6 text-center">{error}</p> : null}
       </section>
+
+      <AlertModal
+        isOpen={Boolean(alertMessage)}
+        onClose={() => {
+          setAlertMessage("");
+          router.push("/manager/safty/resources");
+        }}
+        title="알림"
+        description={alertMessage}
+      />
     </section>
   );
 }

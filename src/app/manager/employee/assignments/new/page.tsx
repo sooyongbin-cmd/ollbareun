@@ -3,6 +3,8 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import ManagerLoadingMessage from "../../../manager-loading-message";
+import { SaveIcon } from "@/components/icons/save-icon";
+import AlertModal from "@/components/modals/alert-modal";
 
 type Bootstrap = {
   employees: { id: string; name: string }[];
@@ -36,7 +38,7 @@ function todayDate() {
 
 export default function AssignmentNewPage() {
   const [data, setData] = useState<Bootstrap>({ employees: [], worksites: [] });
-  const [message, setMessage] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -92,10 +94,8 @@ export default function AssignmentNewPage() {
         endDate: formData.get("endDate"),
       });
 
-      window.alert("자료를 저장하였습니다.");
-      router.push("/manager/employee/assignments");
+      setAlertMessage("자료를 저장하였습니다.");
     } catch (submitError) {
-      setMessage("");
       setError(submitError instanceof Error ? submitError.message : "배정을 처리하지 못했습니다.");
     }
   }
@@ -172,15 +172,29 @@ export default function AssignmentNewPage() {
               </div>
             </div>
 
-            <button className="button-primary w-full md:w-auto" data-testid="assignment-submit" type="submit">
-              배정등록
+            <button
+              aria-label="저장"
+              className="button-primary w-full md:w-auto"
+              data-testid="assignment-submit"
+              type="submit"
+            >
+              <SaveIcon size={20} />
             </button>
           </form>
         )}
 
-        {message ? <p className="status-ok mt-6 text-center">{message}</p> : null}
         {error ? <p className="status-warn mt-6 text-center">{error}</p> : null}
       </section>
+
+      <AlertModal
+        isOpen={Boolean(alertMessage)}
+        onClose={() => {
+          setAlertMessage("");
+          router.push("/manager/employee/assignments");
+        }}
+        title="알림"
+        description={alertMessage}
+      />
     </section>
   );
 }

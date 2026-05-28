@@ -17,7 +17,6 @@ describe("education resource new page", () => {
 
   it("saves a YouTube education resource and returns to resource management", async () => {
     const user = userEvent.setup();
-    const alert = vi.spyOn(window, "alert").mockImplementation(() => undefined);
     const fetch = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
       expect(init?.method).toBe("POST");
       expect(init?.body).toBeInstanceOf(FormData);
@@ -42,9 +41,11 @@ describe("education resource new page", () => {
     await user.type(screen.getByLabelText("유튜브 링크"), "https://www.youtube.com/watch?v=fireSafety");
     await user.click(screen.getByRole("button", { name: "저장" }));
 
+    expect(await screen.findByText("자료를 저장하였습니다.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "확인" }));
+
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith("/api/education/resources", expect.any(Object));
-      expect(alert).toHaveBeenCalledWith("자료를 저장하였습니다.");
       expect(push).toHaveBeenCalledWith("/manager/safty/resources");
     });
   });
@@ -57,7 +58,6 @@ describe("education resource new page", () => {
     });
     const fetch = vi.fn(() => fetchPromise);
     vi.stubGlobal("fetch", fetch);
-    vi.spyOn(window, "alert").mockImplementation(() => undefined);
 
     render(<EducationResourceNewPage />);
 
@@ -65,7 +65,7 @@ describe("education resource new page", () => {
     await user.type(screen.getByLabelText("유튜브 링크"), "https://www.youtube.com/watch?v=fireSafety");
     await user.click(screen.getByRole("button", { name: "저장" }));
 
-    expect(screen.getByRole("button", { name: "저장 중..." })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "저장" })).toBeDisabled();
     expect(screen.getByText("유튜브 링크를 저장 중입니다.")).toBeInTheDocument();
 
     resolveFetch(
@@ -77,6 +77,9 @@ describe("education resource new page", () => {
         },
       }),
     );
+
+    expect(await screen.findByText("자료를 저장하였습니다.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "확인" }));
 
     await waitFor(() => {
       expect(push).toHaveBeenCalledWith("/manager/safty/resources");

@@ -42,7 +42,6 @@ describe("assignment new page", () => {
 
   it("saves an assignment period and returns to assignment management", async () => {
     const user = userEvent.setup();
-    const alert = vi.spyOn(window, "alert").mockImplementation(() => undefined);
 
     render(<AssignmentNewPage />);
 
@@ -55,9 +54,10 @@ describe("assignment new page", () => {
     await user.type(screen.getByLabelText("종료일"), "2026-05-23");
     await user.selectOptions(screen.getByLabelText("근무지"), "work-1");
     await user.selectOptions(screen.getByLabelText("직원"), "emp-1");
-    await user.click(screen.getByRole("button", { name: "배정등록" }));
+    await user.click(screen.getByRole("button", { name: "저장" }));
 
-    expect(alert).toHaveBeenCalledWith("자료를 저장하였습니다.");
+    expect(await screen.findByText("자료를 저장하였습니다.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "확인" }));
     expect(push).toHaveBeenCalledWith("/manager/employee/assignments");
   });
 });

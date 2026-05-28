@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
+import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
 
 type EmployeeRow = {
   id: string;
@@ -40,7 +41,8 @@ const emptyBootstrap: Bootstrap = {
 
 export default function EmployeeRosterPage() {
   const [data, setData] = useState<Bootstrap>(emptyBootstrap);
-  const [query, setQuery] = useState("");
+  const [nameQuery, setNameQuery] = useState("");
+  const [phoneQuery, setPhoneQuery] = useState("");
   const [showRetired, setShowRetired] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -83,27 +85,48 @@ export default function EmployeeRosterPage() {
     };
   }, []);
 
+  // Reset filters when retirement status changes
+  useEffect(() => {
+    setNameQuery("");
+    setPhoneQuery("");
+  }, [showRetired]);
+
+  const availableEmployees = useMemo(() => {
+    return data.employees.filter((e) => e.is_retired === showRetired);
+  }, [data.employees, showRetired]);
+
+  const uniqueNames = useMemo(() => {
+    const names = availableEmployees.map((e) => e.name);
+    return Array.from(new Set(names)).sort();
+  }, [availableEmployees]);
+
+  const uniquePhones = useMemo(() => {
+    const phones = availableEmployees.map((e) => e.phone);
+    return Array.from(new Set(phones)).sort();
+  }, [availableEmployees]);
+
   const filteredEmployees = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-    const statusFilteredEmployees = data.employees.filter((employee) => employee.is_retired === showRetired);
+    const normalizedNameQuery = nameQuery.trim().toLowerCase();
+    const normalizedPhoneQuery = phoneQuery.trim().toLowerCase();
+    const digitPhoneQuery = normalizedPhoneQuery.replace(/\D/g, "");
 
-    if (!normalizedQuery) {
-      return statusFilteredEmployees;
-    }
+    return availableEmployees.filter((employee) => {
+      if (normalizedNameQuery && !employee.name.toLowerCase().includes(normalizedNameQuery)) {
+        return false;
+      }
 
-    const digitQuery = normalizedQuery.replace(/\D/g, "");
+      if (normalizedPhoneQuery) {
+        const matchesPhone = employee.phone.toLowerCase().includes(normalizedPhoneQuery);
+        const matchesNormalizedPhone =
+          digitPhoneQuery.length > 0 && employee.phone_normalized.includes(digitPhoneQuery);
+        if (!matchesPhone && !matchesNormalizedPhone) {
+          return false;
+        }
+      }
 
-    return statusFilteredEmployees.filter((employee) => {
-      const name = employee.name.toLowerCase();
-      const phone = employee.phone.toLowerCase();
-
-      return (
-        name.includes(normalizedQuery) ||
-        phone.includes(normalizedQuery) ||
-        (digitQuery.length > 0 && employee.phone_normalized.includes(digitQuery))
-      );
+      return true;
     });
-  }, [data.employees, query, showRetired]);
+  }, [availableEmployees, nameQuery, phoneQuery]);
 
   const worksiteById = useMemo(() => {
     return new Map(data.worksites.map((worksite) => [worksite.id, worksite.name]));
@@ -129,17 +152,43 @@ export default function EmployeeRosterPage() {
         className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50"
       >
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="space-y-2 flex-1">
-            <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="employee-roster-search">
-              직원 이름 검색
-            </label>
-            <input
-              className="field"
-              id="employee-roster-search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="이름 또는 연락처를 입력하세요"
-            />
+          <div className="flex flex-1 flex-col gap-4 md:flex-row">
+            <div className="space-y-2 flex-1">
+              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="employee-roster-name-search">
+                이름
+              </label>
+              <select
+                className="field appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"
+                id="employee-roster-name-search"
+                value={nameQuery}
+                onChange={(event) => setNameQuery(event.target.value)}
+              >
+                <option value="">전체 이름</option>
+                {uniqueNames.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2 flex-1">
+              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="employee-roster-phone-search">
+                연락처
+              </label>
+              <select
+                className="field appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"
+                id="employee-roster-phone-search"
+                value={phoneQuery}
+                onChange={(event) => setPhoneQuery(event.target.value)}
+              >
+                <option value="">전체 연락처</option>
+                {uniquePhones.map((phone) => (
+                  <option key={phone} value={phone}>
+                    {phone}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <label className="flex h-[48px] items-center gap-2 text-[15px] font-semibold text-ink-muted-80 md:mb-0">
@@ -152,8 +201,12 @@ export default function EmployeeRosterPage() {
             퇴직
           </label>
 
-          <Link className="button-primary w-full text-center md:w-auto" href="/manager/employee/employees/new">
-            직원 등록
+          <Link
+            className="button-primary w-full text-center md:w-auto gap-2"
+            href="/manager/employee/employees/new"
+          >
+            <span>직원 등록</span>
+            <ArrowRightIcon size={18} />
           </Link>
         </div>
       </section>

@@ -3,6 +3,10 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import ManagerLoadingMessage from "../../../../manager-loading-message";
+import { SaveIcon } from "@/components/icons/save-icon";
+import { DeleteIcon } from "@/components/icons/delete-icon";
+import ConfirmModal from "@/components/modals/confirm-modal";
+import AlertModal from "@/components/modals/alert-modal";
 
 type EducationResource = {
   id: string;
@@ -23,6 +27,15 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   }
 
   return payload as T;
+}
+
+async function deleteRequest(url: string): Promise<void> {
+  const response = await fetch(url, { method: "DELETE" });
+
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    throw new Error(payload.error ?? "교육자료를 삭제하지 못했습니다.");
+  }
 }
 
 function getYoutubeLinkError(youtubeLink: string) {
@@ -52,6 +65,9 @@ export default function EducationResourceSavePage() {
   const [youtubeLink, setYoutubeLink] = useState("");
   const [loading, setLoading] = useState(Boolean(resourceId));
   const [error, setError] = useState("");
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [deleting, setDeleting] = useState(false);
   const routeError = resourceId ? error : "교육자료 정보를 불러오지 못했습니다.";
 
   useEffect(() => {
@@ -113,10 +129,23 @@ export default function EducationResourceSavePage() {
         body: JSON.stringify({ title: nextTitle, youtubeLink: nextYoutubeLink }),
       });
 
-      window.alert("수정이 완료되었습니다.");
-      router.push("/manager/safty/resources");
+      setAlertMessage("수정이 완료되었습니다.");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "교육자료 정보를 저장하지 못했습니다.");
+    }
+  }
+
+  async function handleDelete() {
+    setDeleting(true);
+    setError("");
+
+    try {
+      await deleteRequest(`/api/education/resources/${resourceId}`);
+      setAlertMessage("자료가 삭제되었습니다.");
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : "교육자료를 삭제하지 못했습니다.");
+      setDeleteConfirmOpen(false);
+      setDeleting(false);
     }
   }
 
@@ -168,14 +197,43 @@ export default function EducationResourceSavePage() {
               </div>
             </div>
 
-            <button className="button-primary w-full md:w-auto" type="submit">
-              저장
-            </button>
+            <div className="flex flex-wrap gap-3">
+              <button aria-label="저장" className="button-primary w-full md:w-auto" type="submit">
+                <SaveIcon size={20} />
+              </button>
+              <button
+                aria-label="삭제"
+                className="button-secondary w-full md:w-auto"
+                type="button"
+                onClick={() => setDeleteConfirmOpen(true)}
+              >
+                <DeleteIcon size={20} />
+              </button>
+            </div>
           </form>
         )}
 
         {error ? <p className="mt-6 text-[16px] text-status-warn">{error}</p> : null}
       </section>
+
+      <ConfirmModal
+        isOpen={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        onConfirm={handleDelete}
+        title="자료를 삭제하시겠습니까?"
+        description="삭제하면 해당 교육자료가 시스템에서 완전히 제거됩니다."
+        loading={deleting}
+      />
+
+      <AlertModal
+        isOpen={Boolean(alertMessage)}
+        onClose={() => {
+          setAlertMessage("");
+          router.push("/manager/safty/resources");
+        }}
+        title="알림"
+        description={alertMessage}
+      />
     </section>
   );
 }

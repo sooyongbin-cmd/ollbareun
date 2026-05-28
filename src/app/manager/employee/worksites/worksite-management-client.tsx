@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { formatGpsInfo, type GpsInfo } from "@/lib/gps";
 import ManagerLoadingMessage from "../../manager-loading-message";
+import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
 
 type WorksiteRow = {
   id: string;
@@ -117,8 +118,12 @@ export default function WorksiteManagementClient() {
             />
           </div>
 
-          <Link className="button-primary w-full text-center md:w-auto" href="/manager/employee/worksites/new">
-            근무지 등록
+          <Link
+            className="button-primary w-full text-center md:w-auto gap-2"
+            href="/manager/employee/worksites/new"
+          >
+            <span>근무지 등록</span>
+            <ArrowRightIcon size={18} />
           </Link>
         </div>
       </section>

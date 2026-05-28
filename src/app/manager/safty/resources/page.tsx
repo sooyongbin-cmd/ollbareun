@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
+import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
 
 type EducationResourceRow = {
   id: string;
@@ -136,8 +137,12 @@ export default function EducationResourcesPage() {
             />
           </div>
 
-          <Link className="button-primary w-full text-center md:w-auto" href="/manager/safty/resources/new">
-            교재등록
+          <Link
+            className="button-primary w-full text-center md:w-auto gap-2"
+            href="/manager/safty/resources/new"
+          >
+            <span>교재등록</span>
+            <ArrowRightIcon size={18} />
           </Link>
         </div>
       </section>

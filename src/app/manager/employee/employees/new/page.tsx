@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { SaveIcon } from "@/components/icons/save-icon";
+import AlertModal from "@/components/modals/alert-modal";
 
 type EmployeeResponse = {
   employee: {
@@ -28,6 +30,7 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
 
 export default function EmployeeNewPage() {
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -43,9 +46,7 @@ export default function EmployeeNewPage() {
         phone: data.get("phone"),
       });
 
-      window.alert(`직원이름(${result.employee.name}) 연락처(${result.employee.phone}) 등록완료`);
-      form.reset();
-      router.push("/manager/employee/employees");
+      setSuccessMessage(`직원이름(${result.employee.name}) 연락처(${result.employee.phone}) 등록완료`);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "요청을 처리하지 못했습니다.");
     }
@@ -77,13 +78,28 @@ export default function EmployeeNewPage() {
             </div>
           </div>
 
-          <button className="button-primary w-full md:w-auto" data-testid="employee-submit" type="submit">
-            직원 등록
+          <button
+            aria-label="저장"
+            className="button-primary w-full md:w-auto"
+            data-testid="employee-submit"
+            type="submit"
+          >
+            <SaveIcon size={20} />
           </button>
         </form>
 
         {error ? <p className="status-warn mt-6 text-center">{error}</p> : null}
       </section>
+
+      <AlertModal
+        isOpen={Boolean(successMessage)}
+        onClose={() => {
+          setSuccessMessage("");
+          router.push("/manager/employee/employees");
+        }}
+        title="알림"
+        description={successMessage}
+      />
     </section>
   );
 }

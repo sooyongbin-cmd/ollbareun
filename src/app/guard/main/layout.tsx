@@ -1,5 +1,7 @@
 import Link from "next/link";
 import GuardSessionSummary from "./guard-session-summary";
+import { PowerIcon } from "@/components/icons/power-icon";
+import { GuardIcon } from "@/components/icons/guard-icon";
 
 export default function GuardMainLayout({
   children,
@@ -23,15 +25,21 @@ export default function GuardMainLayout({
         <div className="mx-auto max-w-[980px] w-full h-full flex items-center justify-between px-5">
           <div className="flex min-w-0 items-center gap-3">
             <h2 className="shrink-0 text-[21px] font-semibold">
-              <Link href="/guard/main" className="hover:opacity-80 transition-opacity">
-                경비원
+              <Link href="/guard/main" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <GuardIcon size={24} className="text-primary" />
+                <span>경비원</span>
               </Link>
             </h2>
             <GuardSessionSummary />
           </div>
           <div className="flex items-center gap-6">
-            <Link href="/guard" role="button" className="button-secondary px-4 py-2 text-[14px]">
-              로그아웃
+            <Link
+              href="/guard"
+              role="button"
+              aria-label="로그아웃"
+              className="button-secondary inline-flex h-11 w-11 items-center justify-center !p-0"
+            >
+              <PowerIcon size={24} className="lucide lucide-power" />
             </Link>
           </div>
         </div>

@@ -56,6 +56,7 @@ describe("guard main navigation", () => {
 
     const logoutButton = screen.getByRole("button", { name: "로그아웃" });
     expect(logoutButton).toHaveAttribute("href", "/guard");
+    expect(screen.queryByText("로그아웃")).not.toBeInTheDocument();
   });
 
   it("links the guard section title to the guard main page", () => {
@@ -73,12 +74,45 @@ describe("guard main navigation", () => {
 
     render(<GuardMainPage />);
 
-    expect(screen.getByRole("link", { name: "출근하기" })).toHaveAttribute("href", "/guard/main/attendance");
-    expect(screen.getByRole("link", { name: "안전교육" })).toHaveAttribute("href", "/guard/main/safty");
-    for (const label of ["근무지확인", "퇴근하기", "개인프로필"]) {
+    expect(screen.getByRole("button", { name: "출근하기" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "교육 받기" })).toHaveAttribute("href", "/guard/main/safty");
+    for (const label of ["근무지확인", "개인프로필"]) {
       expect(screen.getByRole("button", { name: label })).toBeInTheDocument();
     }
     expect(screen.queryByTestId("clock-in")).not.toBeInTheDocument();
+  });
+
+  it("prominently displays today's worksite on the main page", async () => {
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
+
+    render(<GuardMainPage />);
+
+    expect(await screen.findByText(/오늘의 근무지/)).toBeInTheDocument();
+    expect(screen.getByText("본사")).toBeInTheDocument();
+    expect(screen.getByText(/배정기간/)).toBeInTheDocument();
+    expect(screen.getByText("2026-05-24")).toBeInTheDocument();
+  });
+
+  it("displays attendance status on the main page", async () => {
+    const sessionWithAttendance = {
+      ...guardSession,
+      attendance: {
+        id: "att-1",
+        employee_id: "employee-1",
+        worksite_id: "worksite-1",
+        work_date: "2026-05-24",
+        clock_in_at: "2026-05-24T08:00:00Z",
+        clock_out_at: "2026-05-24T17:00:00Z",
+      },
+    };
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(sessionWithAttendance));
+
+    render(<GuardMainPage />);
+
+    expect(await screen.findByText("출근 상황")).toBeInTheDocument();
+    expect(screen.getByText("출근 시각")).toBeInTheDocument();
+    expect(screen.getByText("퇴근 시각")).toBeInTheDocument();
+    expect(screen.getByText(/오늘의 근무가 모두 완료되었습니다/)).toBeInTheDocument();
   });
 
   it("shows the attendance workflow on the attendance page", () => {

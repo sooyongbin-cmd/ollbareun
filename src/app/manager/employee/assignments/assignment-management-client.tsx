@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
+import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
 
 type AssignmentRow = {
   id: string;
@@ -149,8 +150,12 @@ export default function AssignmentManagementClient() {
             </div>
           </div>
 
-          <Link className="button-primary w-full text-center md:w-auto" href="/manager/employee/assignments/new">
-            배정등록
+          <Link
+            className="button-primary w-full text-center md:w-auto gap-2"
+            href="/manager/employee/assignments/new"
+          >
+            <span>배정등록</span>
+            <ArrowRightIcon size={18} />
           </Link>
         </div>
       </section>

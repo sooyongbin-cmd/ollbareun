@@ -67,20 +67,20 @@ describe("employee roster page", () => {
       "href",
       "/manager/employee/employees/new",
     );
-    expect(await screen.findByText("Alice")).toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: "Alice" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Alice" })).toHaveAttribute(
       "href",
       "/manager/employee/employees/save/emp-1",
     );
     expect(screen.getByText("본사")).toBeInTheDocument();
     expect(screen.getByText("현직")).toBeInTheDocument();
-    expect(screen.queryByText("Bob")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Bob" })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("checkbox", { name: "퇴직" }));
-    await user.type(screen.getByRole("textbox"), "Bob");
-    expect(await screen.findByText("Bob")).toBeInTheDocument();
+    await user.selectOptions(screen.getByLabelText("이름"), "Bob");
+    expect(await screen.findByRole("link", { name: "Bob" })).toBeInTheDocument();
     expect(within(screen.getByRole("table")).getByText("퇴직")).toBeInTheDocument();
-    expect(screen.queryByText("Alice")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Alice" })).not.toBeInTheDocument();
   });
 
   it("separates employee search controls from the employee list section", async () => {
@@ -89,7 +89,8 @@ describe("employee roster page", () => {
     const searchSection = await screen.findByRole("region", { name: "직원 검색" });
     const listSection = await screen.findByRole("region", { name: "직원 목록" });
 
-    expect(searchSection).toContainElement(screen.getByLabelText("직원 이름 검색"));
+    expect(searchSection).toContainElement(screen.getByLabelText("이름"));
+    expect(searchSection).toContainElement(screen.getByLabelText("연락처"));
     expect(searchSection).toContainElement(screen.getByRole("checkbox", { name: "퇴직" }));
     expect(screen.getByRole("checkbox", { name: "퇴직" })).not.toBeChecked();
     expect(searchSection).toContainElement(screen.getByRole("link", { name: "직원 등록" }));
@@ -101,7 +102,7 @@ describe("employee roster page", () => {
   it("links the employee name to the edit page", async () => {
     renderWithManagerLayout(<EmployeeRosterPage />);
 
-    await screen.findByText("Alice");
+    await screen.findByRole("link", { name: "Alice" });
     expect(screen.getByRole("link", { name: "Alice" })).toHaveAttribute(
       "href",
       "/manager/employee/employees/save/emp-1",

@@ -60,7 +60,6 @@ describe("employee save page", () => {
 
   it("loads an employee and saves the edited data", async () => {
     const user = userEvent.setup();
-    const alert = vi.spyOn(window, "alert").mockImplementation(() => undefined);
 
     render(<EmployeeSavePage />);
 
@@ -76,7 +75,8 @@ describe("employee save page", () => {
     await user.click(screen.getByRole("checkbox", { name: "퇴직" }));
     await user.click(screen.getByRole("button", { name: "저장" }));
 
-    expect(alert).toHaveBeenCalledWith("수정이 완료되었습니다.");
+    expect(await screen.findByText("수정이 완료되었습니다.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "확인" }));
     expect(push).toHaveBeenCalledWith("/manager/employee/employees");
   });
 

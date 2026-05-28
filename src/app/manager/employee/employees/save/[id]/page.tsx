@@ -3,6 +3,10 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import ManagerLoadingMessage from "../../../../manager-loading-message";
+import { SaveIcon } from "@/components/icons/save-icon";
+import { DeleteIcon } from "@/components/icons/delete-icon";
+import ConfirmModal from "@/components/modals/confirm-modal";
+import AlertModal from "@/components/modals/alert-modal";
 
 type Employee = {
   id: string;
@@ -45,6 +49,7 @@ export default function EmployeeSavePage() {
   const [loading, setLoading] = useState(Boolean(employeeId));
   const [error, setError] = useState("");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [saveSuccessOpen, setSaveSuccessOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const routeError = employeeId ? error : "직원 정보를 불러오지 못했습니다.";
 
@@ -94,8 +99,7 @@ export default function EmployeeSavePage() {
         body: JSON.stringify({ name, phone, is_retired: isRetired }),
       });
 
-      window.alert("수정이 완료되었습니다.");
-      router.push("/manager/employee/employees");
+      setSaveSuccessOpen(true);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "직원 정보를 저장하지 못했습니다.");
     }
@@ -171,15 +175,16 @@ export default function EmployeeSavePage() {
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <button className="button-primary w-full md:w-auto" type="submit">
-                저장
+              <button aria-label="저장" className="button-primary w-full md:w-auto" type="submit">
+                <SaveIcon size={20} />
               </button>
               <button
+                aria-label="삭제"
                 className="button-secondary w-full md:w-auto"
                 type="button"
                 onClick={() => setDeleteConfirmOpen(true)}
               >
-                삭제
+                <DeleteIcon size={20} />
               </button>
             </div>
           </form>
@@ -188,35 +193,24 @@ export default function EmployeeSavePage() {
         {error ? <p className="mt-6 text-[16px] text-status-warn">{error}</p> : null}
       </section>
 
-      {deleteConfirmOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay-scrim px-5">
-          <div className="w-full max-w-[420px] rounded-[18px] bg-canvas p-6 shadow-product border border-hairline">
-            <h2 className="text-[24px] font-semibold">현재자료를 삭제할까요?</h2>
-            <p className="mt-3 text-[16px] text-ink-muted-48">
-              삭제하면 해당 직원의 자료와 연결된 근무 배정, 출퇴근 기록도 함께 삭제됩니다.
-            </p>
+      <ConfirmModal
+        isOpen={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        onConfirm={handleDelete}
+        title="현재자료를 삭제할까요?"
+        description="삭제하면 해당 직원의 자료와 연결된 근무 배정, 출퇴근 기록도 함께 삭제됩니다."
+        loading={deleting}
+      />
 
-            <div className="mt-6 flex gap-3">
-              <button
-                className="button-primary flex-1"
-                type="button"
-                onClick={handleDelete}
-                disabled={deleting}
-              >
-                예
-              </button>
-              <button
-                className="button-secondary flex-1"
-                type="button"
-                onClick={() => setDeleteConfirmOpen(false)}
-                disabled={deleting}
-              >
-                아니오
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <AlertModal
+        isOpen={saveSuccessOpen}
+        onClose={() => {
+          setSaveSuccessOpen(false);
+          router.push("/manager/employee/employees");
+        }}
+        title="알림"
+        description="수정이 완료되었습니다."
+      />
     </section>
   );
 }

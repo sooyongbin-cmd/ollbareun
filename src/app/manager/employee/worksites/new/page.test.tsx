@@ -287,7 +287,6 @@ describe("worksite new page", () => {
 
   it("shows an alert after saving and returns to worksite management", async () => {
     const user = userEvent.setup();
-    const alert = vi.spyOn(window, "alert").mockImplementation(() => undefined);
 
     render(<WorksiteNewPage />);
 
@@ -304,9 +303,10 @@ describe("worksite new page", () => {
     expect(screen.getByTestId("worksite-map")).toBeInTheDocument();
     await user.type(screen.getByLabelText("GPS정보"), "37.1, 126.7");
     await user.type(screen.getByLabelText("허용반경(m)"), "100");
-    await user.click(screen.getByRole("button", { name: "근무지 등록" }));
+    await user.click(screen.getByRole("button", { name: "저장" }));
 
-    expect(alert).toHaveBeenCalledWith("자료를 저장하였습니다.");
+    expect(await screen.findByText("자료를 저장하였습니다.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "확인" }));
     expect(push).toHaveBeenCalledWith("/manager/employee/worksites");
   });
 

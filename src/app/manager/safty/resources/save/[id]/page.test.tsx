@@ -53,7 +53,6 @@ describe("education resource save page", () => {
 
   it("loads and saves an education resource", async () => {
     const user = userEvent.setup();
-    const alert = vi.spyOn(window, "alert").mockImplementation(() => undefined);
 
     render(<EducationResourceSavePage />);
 
@@ -67,7 +66,8 @@ describe("education resource save page", () => {
     await user.type(screen.getByLabelText("유튜브 링크"), "https://youtu.be/patrolSafety");
     await user.click(screen.getByRole("button", { name: "저장" }));
 
-    expect(alert).toHaveBeenCalledWith("수정이 완료되었습니다.");
+    expect(await screen.findByText("수정이 완료되었습니다.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "확인" }));
     expect(push).toHaveBeenCalledWith("/manager/safty/resources");
   });
 });

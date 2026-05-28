@@ -1,4 +1,4 @@
-﻿import { canClockIn, canClockOut, normalizePhone } from "./phase1";
+import { canClockIn, canClockOut, normalizePhone } from "./phase1";
 import { requireGpsInfo, type GpsInfo } from "./gps";
 import { getSupabase } from "./supabase";
 
@@ -152,7 +152,7 @@ export async function loadBootstrap() {
 }
 
 export async function createEmployee(input: { name: unknown; phone: unknown }) {
-  const name = requireString(input.name, "吏곸썝?대쫫");
+  const name = requireString(input.name, "직원이름");
   const phone = requireString(input.phone, "연락처");
   const phone_normalized = normalizePhone(phone);
 
@@ -171,7 +171,7 @@ export async function createEmployee(input: { name: unknown; phone: unknown }) {
 }
 
 export async function getEmployeeById(id: unknown) {
-  const employeeId = requireString(id, "吏곸썝");
+  const employeeId = requireString(id, "직원");
   const supabase = getSupabase();
   const { data, error } = await supabase.from("employees").select("*").eq("id", employeeId).single();
 
@@ -185,8 +185,8 @@ export async function updateEmployee(input: {
   phone: unknown;
   is_retired: unknown;
 }) {
-  const id = requireString(input.id, "吏곸썝");
-  const name = requireString(input.name, "吏곸썝?대쫫");
+  const id = requireString(input.id, "직원");
+  const name = requireString(input.name, "직원이름");
   const phone = requireString(input.phone, "연락처");
   const phone_normalized = normalizePhone(phone);
   const is_retired =
@@ -205,7 +205,7 @@ export async function updateEmployee(input: {
 }
 
 export async function deleteEmployee(id: unknown) {
-  const employeeId = requireString(id, "吏곸썝");
+  const employeeId = requireString(id, "직원");
   const supabase = getSupabase();
   const { error } = await supabase.from("employees").delete().eq("id", employeeId);
 
@@ -235,7 +235,7 @@ export async function createWorksite(input: {
 }
 
 export async function getWorksiteById(id: unknown) {
-  const worksiteId = requireString(id, "洹쇰Т吏");
+  const worksiteId = requireString(id, "근무지");
   const supabase = getSupabase();
   const { data, error } = await supabase.from("worksites").select("*").eq("id", worksiteId).single();
 
@@ -269,7 +269,7 @@ export async function updateWorksite(input: {
 }
 
 export async function deleteWorksite(id: unknown) {
-  const worksiteId = requireString(id, "洹쇰Т吏");
+  const worksiteId = requireString(id, "근무지");
   const supabase = getSupabase();
   const { error } = await supabase.from("worksites").delete().eq("id", worksiteId);
 
@@ -282,8 +282,8 @@ export async function createAssignment(input: {
   startDate?: unknown;
   endDate?: unknown;
 }) {
-  const employee_id = requireString(input.employeeId, "吏곸썝");
-  const worksite_id = requireString(input.worksiteId, "洹쇰Т吏");
+  const employee_id = requireString(input.employeeId, "직원");
+  const worksite_id = requireString(input.worksiteId, "근무지");
   const { start_date, end_date } = requireDateRange(input);
 
   const supabase = getSupabase();
@@ -328,13 +328,13 @@ export async function listAssignments() {
 
   return (assignmentsResult.data ?? []).map((assignment) => ({
     ...assignment,
-    employee_name: employeesById.get(assignment.employee_id) ?? "吏곸썝 ?놁쓬",
-    worksite_name: worksitesById.get(assignment.worksite_id) ?? "洹쇰Т吏 ?놁쓬",
+    employee_name: employeesById.get(assignment.employee_id) ?? "직원 없음",
+    worksite_name: worksitesById.get(assignment.worksite_id) ?? "근무지 없음",
   })) as AssignmentListRow[];
 }
 
 export async function getAssignmentById(id: unknown) {
-  const assignmentId = requireString(id, "諛곗젙");
+  const assignmentId = requireString(id, "배정");
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("work_assignments")
@@ -353,9 +353,9 @@ export async function updateAssignment(input: {
   startDate?: unknown;
   endDate?: unknown;
 }) {
-  const id = requireString(input.id, "諛곗젙");
-  const employee_id = requireString(input.employeeId, "吏곸썝");
-  const worksite_id = requireString(input.worksiteId, "洹쇰Т吏");
+  const id = requireString(input.id, "배정");
+  const employee_id = requireString(input.employeeId, "직원");
+  const worksite_id = requireString(input.worksiteId, "근무지");
   const { start_date, end_date } = requireDateRange(input);
 
   const supabase = getSupabase();
@@ -386,7 +386,7 @@ export async function updateAssignment(input: {
 }
 
 export async function deleteAssignment(id: unknown) {
-  const assignmentId = requireString(id, "諛곗젙");
+  const assignmentId = requireString(id, "배정");
   const supabase = getSupabase();
   const { error } = await supabase.from("work_assignments").delete().eq("id", assignmentId);
 
@@ -394,7 +394,7 @@ export async function deleteAssignment(id: unknown) {
 }
 
 export async function authenticateGuard(input: { name: unknown; phone: unknown }) {
-  const name = requireString(input.name, "寃쎈퉬???대쫫");
+  const name = requireString(input.name, "경비원 이름");
   const phone = requireString(input.phone, "경비원 연락처");
   const supabase = getSupabase();
 
@@ -407,7 +407,7 @@ export async function authenticateGuard(input: { name: unknown; phone: unknown }
 
   throwIfError(employeeError);
   if (!employee) {
-    throw new Error("?깅줉??吏곸썝 ?뺣낫? ?쇱튂?섏? ?딆뒿?덈떎.");
+    throw new Error("등록된 직원 정보와 일치하지 않습니다.");
   }
 
   if (employee.is_retired) {
@@ -453,10 +453,10 @@ export async function clockIn(input: {
   latitude: unknown;
   longitude: unknown;
 }) {
-  const employee_id = requireString(input.employeeId, "吏곸썝");
-  const worksite_id = requireString(input.worksiteId, "洹쇰Т吏");
-  const latitude = requireNumber(input.latitude, "?꾨룄");
-  const longitude = requireNumber(input.longitude, "寃쎈룄");
+  const employee_id = requireString(input.employeeId, "직원");
+  const worksite_id = requireString(input.worksiteId, "근무지");
+  const latitude = requireNumber(input.latitude, "위도");
+  const longitude = requireNumber(input.longitude, "경도");
   const supabase = getSupabase();
 
   const { data: worksite, error: worksiteError } = await supabase
@@ -512,9 +512,9 @@ export async function clockOut(input: {
   latitude: unknown;
   longitude: unknown;
 }) {
-  const employee_id = requireString(input.employeeId, "吏곸썝");
-  const latitude = requireNumber(input.latitude, "?꾨룄");
-  const longitude = requireNumber(input.longitude, "寃쎈룄");
+  const employee_id = requireString(input.employeeId, "직원");
+  const latitude = requireNumber(input.latitude, "위도");
+  const longitude = requireNumber(input.longitude, "경도");
   const supabase = getSupabase();
 
   const { data: attendance, error: attendanceError } = await supabase

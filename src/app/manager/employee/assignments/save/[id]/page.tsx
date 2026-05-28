@@ -3,6 +3,10 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import ManagerLoadingMessage from "../../../../manager-loading-message";
+import { SaveIcon } from "@/components/icons/save-icon";
+import { DeleteIcon } from "@/components/icons/delete-icon";
+import ConfirmModal from "@/components/modals/confirm-modal";
+import AlertModal from "@/components/modals/alert-modal";
 
 type Assignment = {
   id: string;
@@ -64,6 +68,7 @@ export default function AssignmentSavePage() {
   const [loading, setLoading] = useState(Boolean(assignmentId));
   const [error, setError] = useState("");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
@@ -124,8 +129,7 @@ export default function AssignmentSavePage() {
         }),
       });
 
-      window.alert("자료가 저장되었습니다.");
-      router.push("/manager/employee/assignments");
+      setAlertMessage("자료가 저장되었습니다.");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "자료를 저장하지 못했습니다.");
     }
@@ -137,13 +141,11 @@ export default function AssignmentSavePage() {
 
     try {
       await deleteRequest(`/api/assignments/${assignmentId}`);
-      window.alert("자료가 삭제되었습니다.");
-      router.push("/manager/employee/assignments");
+      setAlertMessage("자료가 삭제되었습니다.");
     } catch (deleteError) {
       setError(deleteError instanceof Error ? deleteError.message : "자료를 삭제하지 못했습니다.");
-    } finally {
-      setDeleting(false);
       setDeleteConfirmOpen(false);
+      setDeleting(false);
     }
   }
 
@@ -205,7 +207,7 @@ export default function AssignmentSavePage() {
                   ))}
                 </select>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 md:col-span-2">
                 <p className="text-[14px] font-semibold text-ink-muted-48 ml-1">근무기간</p>
                 <div className="grid grid-cols-2 gap-2">
                   <label className="sr-only" htmlFor="assignment-start-date">
@@ -237,15 +239,16 @@ export default function AssignmentSavePage() {
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <button className="button-primary w-full md:w-auto" type="submit">
-                저장
+              <button aria-label="저장" className="button-primary w-full md:w-auto" type="submit">
+                <SaveIcon size={20} />
               </button>
               <button
+                aria-label="삭제"
                 className="button-secondary w-full md:w-auto"
                 type="button"
                 onClick={() => setDeleteConfirmOpen(true)}
               >
-                삭제
+                <DeleteIcon size={20} />
               </button>
             </div>
           </form>
@@ -254,35 +257,24 @@ export default function AssignmentSavePage() {
         {error ? <p className="mt-6 text-[16px] text-status-warn">{error}</p> : null}
       </section>
 
-      {deleteConfirmOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay-scrim px-5">
-          <div className="w-full max-w-[420px] rounded-[18px] bg-canvas p-6 shadow-product border border-hairline">
-            <h2 className="text-[24px] font-semibold">자료를 삭제하시겠습니까?</h2>
-            <p className="mt-3 text-[16px] text-ink-muted-48">
-              삭제하면 현재 배정 자료가 완전히 제거됩니다.
-            </p>
+      <ConfirmModal
+        isOpen={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        onConfirm={handleDelete}
+        title="자료를 삭제하시겠습니까?"
+        description="삭제하면 현재 배정 자료가 완전히 제거됩니다."
+        loading={deleting}
+      />
 
-            <div className="mt-6 flex gap-3">
-              <button
-                className="button-primary flex-1"
-                type="button"
-                onClick={handleDelete}
-                disabled={deleting}
-              >
-                예
-              </button>
-              <button
-                className="button-secondary flex-1"
-                type="button"
-                onClick={() => setDeleteConfirmOpen(false)}
-                disabled={deleting}
-              >
-                아니요
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <AlertModal
+        isOpen={Boolean(alertMessage)}
+        onClose={() => {
+          setAlertMessage("");
+          router.push("/manager/employee/assignments");
+        }}
+        title="알림"
+        description={alertMessage}
+      />
     </section>
   );
 }

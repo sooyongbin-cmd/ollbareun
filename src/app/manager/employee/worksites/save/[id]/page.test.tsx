@@ -63,7 +63,6 @@ describe("worksite save page", () => {
 
   it("saves worksite changes and returns to management", async () => {
     const user = userEvent.setup();
-    const alert = vi.spyOn(window, "alert").mockImplementation(() => undefined);
 
     render(<WorksiteSavePage />);
 
@@ -81,13 +80,13 @@ describe("worksite save page", () => {
     await user.type(screen.getByLabelText("허용반경(m)"), "120");
     await user.click(screen.getByRole("button", { name: "저장" }));
 
-    expect(alert).toHaveBeenCalledWith("자료가 저장되었습니다.");
+    expect(await screen.findByText("자료가 저장되었습니다.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "확인" }));
     expect(push).toHaveBeenCalledWith("/manager/employee/worksites");
   });
 
   it("confirms and deletes the worksite", async () => {
     const user = userEvent.setup();
-    const alert = vi.spyOn(window, "alert").mockImplementation(() => undefined);
 
     render(<WorksiteSavePage />);
 
@@ -96,7 +95,8 @@ describe("worksite save page", () => {
     expect(screen.getByText("자료를 삭제하시겠습니까?")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "예" }));
 
-    expect(alert).toHaveBeenCalledWith("자료가 삭제되었습니다.");
+    expect(await screen.findByText("자료가 삭제되었습니다.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "확인" }));
     expect(push).toHaveBeenCalledWith("/manager/employee/worksites");
   });
 });

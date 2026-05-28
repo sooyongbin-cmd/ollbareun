@@ -40,6 +40,7 @@ export default function EducationCompletionsPage() {
   const [resources, setResources] = useState<EducationResourceRow[]>([]);
   const resourceIdFromUrl = useSyncExternalStore(subscribeToLocationChange, readResourceIdFromLocation, () => "");
   const [selectedResourceIdOverride, setSelectedResourceIdOverride] = useState<string | null>(null);
+  const [nameQuery, setNameQuery] = useState("");
   const selectedResourceId = selectedResourceIdOverride ?? resourceIdFromUrl;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -102,12 +103,15 @@ export default function EducationCompletionsPage() {
   }, [completions, resources]);
 
   const filteredCompletions = useMemo(() => {
-    if (!selectedResourceId) {
-      return completions;
-    }
+    const normalizedNameQuery = nameQuery.trim().toLowerCase();
 
-    return completions.filter((completion) => completion.resource_id === selectedResourceId);
-  }, [completions, selectedResourceId]);
+    return completions.filter((completion) => {
+      const matchesResource = !selectedResourceId || completion.resource_id === selectedResourceId;
+      const matchesName = !normalizedNameQuery || completion.employee_name.toLowerCase().includes(normalizedNameQuery);
+
+      return matchesResource && matchesName;
+    });
+  }, [completions, selectedResourceId, nameQuery]);
 
   return (
     <section className="space-y-[24px]">
@@ -125,23 +129,37 @@ export default function EducationCompletionsPage() {
         className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50"
       >
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="space-y-2 flex-1">
-            <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="completion-resource-search">
-              교재
-            </label>
-            <select
-              className="field"
-              id="completion-resource-search"
-              value={selectedResourceId}
-              onChange={(event) => setSelectedResourceIdOverride(event.target.value)}
-            >
-              <option value="">전체</option>
-              {resourceOptions.map(([resourceId, resourceTitle]) => (
-                <option key={resourceId} value={resourceId}>
-                  {resourceTitle}
-                </option>
-              ))}
-            </select>
+          <div className="flex flex-1 flex-col gap-4 md:flex-row">
+            <div className="space-y-2 flex-1">
+              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="completion-resource-search">
+                교재
+              </label>
+              <select
+                className="field"
+                id="completion-resource-search"
+                value={selectedResourceId}
+                onChange={(event) => setSelectedResourceIdOverride(event.target.value)}
+              >
+                <option value="">전체</option>
+                {resourceOptions.map(([resourceId, resourceTitle]) => (
+                  <option key={resourceId} value={resourceId}>
+                    {resourceTitle}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2 flex-1">
+              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="completion-name-search">
+                직원 이름
+              </label>
+              <input
+                className="field"
+                id="completion-name-search"
+                value={nameQuery}
+                onChange={(event) => setNameQuery(event.target.value)}
+                placeholder="검색할 직원 이름을 입력하세요."
+              />
+            </div>
           </div>
         </div>
       </section>

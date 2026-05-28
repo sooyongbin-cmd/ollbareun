@@ -75,7 +75,6 @@ describe("assignment save page", () => {
 
   it("saves assignment period changes and returns to management", async () => {
     const user = userEvent.setup();
-    const alert = vi.spyOn(window, "alert").mockImplementation(() => undefined);
 
     render(<AssignmentSavePage />);
 
@@ -91,13 +90,13 @@ describe("assignment save page", () => {
     await user.type(screen.getByLabelText("종료일"), "2026-05-24");
     await user.click(screen.getByRole("button", { name: "저장" }));
 
-    expect(alert).toHaveBeenCalledWith("자료가 저장되었습니다.");
+    expect(await screen.findByText("자료가 저장되었습니다.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "확인" }));
     expect(push).toHaveBeenCalledWith("/manager/employee/assignments");
   });
 
   it("confirms and deletes the assignment", async () => {
     const user = userEvent.setup();
-    const alert = vi.spyOn(window, "alert").mockImplementation(() => undefined);
 
     render(<AssignmentSavePage />);
 
@@ -106,7 +105,8 @@ describe("assignment save page", () => {
     expect(screen.getByText("자료를 삭제하시겠습니까?")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "예" }));
 
-    expect(alert).toHaveBeenCalledWith("자료가 삭제되었습니다.");
+    expect(await screen.findByText("자료가 삭제되었습니다.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "확인" }));
     expect(push).toHaveBeenCalledWith("/manager/employee/assignments");
   });
 });

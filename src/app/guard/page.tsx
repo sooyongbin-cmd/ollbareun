@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { GpsInfo } from "@/lib/gps";
+import AlertModal from "@/components/modals/alert-modal";
 
 type EmployeeRow = {
   id: string;
@@ -100,6 +101,7 @@ function writeStoredGuardSession(session: GuardSession) {
 export default function GuardPage() {
   const router = useRouter();
   const [savedGuardName, setSavedGuardName] = useState(readStoredGuardName);
+  const [errorMessage, setErrorMessage] = useState("");
 
   async function handleGuardAuth(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -117,7 +119,7 @@ export default function GuardPage() {
       router.push("/guard/main");
     } catch (authError) {
       const authMessage = authError instanceof Error ? authError.message : "경비원 인증에 실패했습니다.";
-      window.alert(authMessage);
+      setErrorMessage(authMessage);
     }
   }
 
@@ -152,6 +154,13 @@ export default function GuardPage() {
           </button>
         </form>
       </div>
+
+      <AlertModal
+        isOpen={Boolean(errorMessage)}
+        onClose={() => setErrorMessage("")}
+        title="인증 오류"
+        description={errorMessage}
+      />
     </main>
   );
 }

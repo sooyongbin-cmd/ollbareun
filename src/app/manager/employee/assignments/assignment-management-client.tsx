@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
+import { SortableHeader } from "@/components/sortable-header";
 
 type AssignmentRow = {
   id: string;
@@ -43,6 +44,8 @@ export default function AssignmentManagementClient() {
   const [dateQuery, setDateQuery] = useState("");
   const [worksiteQuery, setWorksiteQuery] = useState(initialWorksite);
   const [nameQuery, setNameQuery] = useState("");
+  const [sortKey, setSortKey] = useState<"date" | "worksite" | "name">("date");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -90,6 +93,42 @@ export default function AssignmentManagementClient() {
       return matchesDate && matchesWorksite && matchesName;
     });
   }, [assignments, dateQuery, nameQuery, worksiteQuery]);
+
+  const sortedAssignments = useMemo(() => {
+    return [...filteredAssignments].sort((left, right) => {
+      if (sortKey === "date") {
+        if (left.start_date === right.start_date) {
+          return left.employee_name.localeCompare(right.employee_name, "ko-KR");
+        }
+        return sortDirection === "asc"
+          ? left.start_date.localeCompare(right.start_date)
+          : right.start_date.localeCompare(left.start_date);
+      } else if (sortKey === "worksite") {
+        if (left.worksite_name === right.worksite_name) {
+          return left.start_date.localeCompare(right.start_date);
+        }
+        return sortDirection === "asc"
+          ? left.worksite_name.localeCompare(right.worksite_name, "ko-KR")
+          : right.worksite_name.localeCompare(left.worksite_name, "ko-KR");
+      } else {
+        if (left.employee_name === right.employee_name) {
+          return left.start_date.localeCompare(right.start_date);
+        }
+        return sortDirection === "asc"
+          ? left.employee_name.localeCompare(right.employee_name, "ko-KR")
+          : right.employee_name.localeCompare(left.employee_name, "ko-KR");
+      }
+    });
+  }, [filteredAssignments, sortKey, sortDirection]);
+
+  const handleSort = (key: "date" | "worksite" | "name") => {
+    if (sortKey === key) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDirection("asc");
+    }
+  };
 
   function openEditPage(assignmentId: string) {
     router.push(`/manager/employee/assignments/save/${assignmentId}`);
@@ -178,20 +217,44 @@ export default function AssignmentManagementClient() {
             <table className="apple-table">
               <thead>
                 <tr>
-                  <th className="text-left">날짜</th>
-                  <th className="text-left">근무지</th>
-                  <th className="text-left">이름</th>
+                  <SortableHeader
+                    sortKey="date"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="text-left"
+                  >
+                    날짜
+                  </SortableHeader>
+                  <SortableHeader
+                    sortKey="worksite"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="text-left"
+                  >
+                    근무지
+                  </SortableHeader>
+                  <SortableHeader
+                    sortKey="name"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="text-left"
+                  >
+                    이름
+                  </SortableHeader>
                 </tr>
               </thead>
               <tbody>
-                {filteredAssignments.length === 0 ? (
+                {sortedAssignments.length === 0 ? (
                   <tr>
                     <td colSpan={3} className="p-8 text-center text-ink-muted-48 italic">
                       조회 결과가 없습니다.
                     </td>
                   </tr>
                 ) : (
-                  filteredAssignments.map((assignment) => (
+                  sortedAssignments.map((assignment) => (
                     <tr
                       key={assignment.id}
                       aria-label={assignment.employee_name}

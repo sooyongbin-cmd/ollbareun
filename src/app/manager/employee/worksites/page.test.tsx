@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -104,5 +104,35 @@ describe("worksite management page", () => {
       "href",
       "/manager/employee/worksites",
     );
+  });
+
+  it("sorts worksites by name and radius", async () => {
+    const user = userEvent.setup();
+
+    renderWithManagerLayout(<WorksiteManagementPage />);
+
+    // Wait for rows to load
+    await screen.findAllByRole("row");
+
+    // Default order should be name ASC: 본사, 서울지점
+    const rows = screen.getAllByRole("row");
+    expect(within(rows[1]).getByText("본사")).toBeInTheDocument();
+    expect(within(rows[2]).getByText("서울지점")).toBeInTheDocument();
+
+    // Click "근무지명" to sort DESC: 서울지점 first, then 본사
+    const nameHeader = screen.getByRole("columnheader", { name: "근무지명" });
+    await user.click(nameHeader);
+
+    const updatedRows = screen.getAllByRole("row");
+    expect(within(updatedRows[1]).getByText("서울지점")).toBeInTheDocument();
+    expect(within(updatedRows[2]).getByText("본사")).toBeInTheDocument();
+
+    // Click "허용반경" to sort ASC: 100m first, then 120m
+    const radiusHeader = screen.getByRole("columnheader", { name: "허용반경" });
+    await user.click(radiusHeader);
+
+    const updatedRows2 = screen.getAllByRole("row");
+    expect(within(updatedRows2[1]).getByText("100m")).toBeInTheDocument();
+    expect(within(updatedRows2[2]).getByText("120m")).toBeInTheDocument();
   });
 });

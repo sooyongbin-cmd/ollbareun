@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
+import { SortableHeader } from "@/components/sortable-header";
 
 type EducationResourceRow = {
   id: string;
@@ -28,6 +29,8 @@ export default function EducationResourcesPage() {
   const [completions, setCompletions] = useState<EducationCompletionRow[]>([]);
   const [employees, setEmployees] = useState<EmployeeRow[]>([]);
   const [query, setQuery] = useState("");
+  const [sortKey, setSortKey] = useState<"title" | "completions">("title");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -108,6 +111,32 @@ export default function EducationResourcesPage() {
     return completedEmployeesByResourceId;
   }, [activeEmployeeIds, completions]);
 
+  const sortedResources = useMemo(() => {
+    return [...filteredResources].sort((left, right) => {
+      if (sortKey === "title") {
+        return sortDirection === "asc"
+          ? left.title.localeCompare(right.title, "ko-KR")
+          : right.title.localeCompare(left.title, "ko-KR");
+      } else {
+        const leftCount = completedEmployeeCountByResourceId.get(left.id)?.size ?? 0;
+        const rightCount = completedEmployeeCountByResourceId.get(right.id)?.size ?? 0;
+        if (leftCount === rightCount) {
+          return left.title.localeCompare(right.title, "ko-KR");
+        }
+        return sortDirection === "asc" ? leftCount - rightCount : rightCount - leftCount;
+      }
+    });
+  }, [filteredResources, sortKey, sortDirection, completedEmployeeCountByResourceId]);
+
+  const handleSort = (key: "title" | "completions") => {
+    if (sortKey === key) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDirection("asc");
+    }
+  };
+
   return (
     <section className="space-y-[24px]">
       <header>
@@ -165,20 +194,36 @@ export default function EducationResourcesPage() {
             <table className="apple-table">
               <thead>
                 <tr>
-                  <th className="text-left">제목</th>
+                  <SortableHeader
+                    sortKey="title"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="text-left"
+                  >
+                    제목
+                  </SortableHeader>
                   <th className="text-left">유튜브 링크</th>
-                  <th className="text-left">이수현황</th>
+                  <SortableHeader
+                    sortKey="completions"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="text-left"
+                  >
+                    이수현황
+                  </SortableHeader>
                 </tr>
               </thead>
               <tbody>
-                {filteredResources.length === 0 ? (
+                {sortedResources.length === 0 ? (
                   <tr>
                     <td colSpan={3} className="p-8 text-center text-ink-muted-48 italic">
                       조회 결과에 해당하는 교육자료가 없습니다.
                     </td>
                   </tr>
                 ) : (
-                  filteredResources.map((resource) => (
+                  sortedResources.map((resource) => (
                     <tr key={resource.id} className="hover:bg-canvas-parchment transition-colors">
                       <td className="font-semibold">
                         <Link
@@ -201,7 +246,7 @@ export default function EducationResourcesPage() {
                       <td className="font-semibold text-ink-muted-80">
                         <Link
                           className="text-primary hover:underline"
-                          href={`/manager/safty/completions?resourceId=${encodeURIComponent(resource.id)}`}
+                          href={`/manager/safty/completions/detail?resourceId=${encodeURIComponent(resource.id)}`}
                         >
                           {completedEmployeeCountByResourceId.get(resource.id)?.size ?? 0}/{activeEmployeeIds.size}
                         </Link>

@@ -125,4 +125,40 @@ describe("employee roster page", () => {
       "/manager/employee/employees",
     );
   });
+
+  it("sorts employees by name", async () => {
+    const user = userEvent.setup();
+    const extendedBootstrap = {
+      ...bootstrap,
+      employees: [
+        { id: "emp-1", name: "Alice", phone: "010-1234-5678", phone_normalized: "01012345678", is_retired: false },
+        { id: "emp-3", name: "Charlie", phone: "010-1111-2222", phone_normalized: "01011112222", is_retired: false },
+        { id: "emp-2", name: "Bob", phone: "010-9999-8888", phone_normalized: "01099998888", is_retired: true },
+      ]
+    };
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+      if (String(input).endsWith("/api/bootstrap")) {
+        return Response.json(extendedBootstrap);
+      }
+      return Response.json({}, { status: 404 });
+    }));
+
+    renderWithManagerLayout(<EmployeeRosterPage />);
+
+    // Wait for rows to load
+    await screen.findAllByRole("row");
+
+    // Initially sorted ASC by name: Alice, Charlie
+    const rows = screen.getAllByRole("row");
+    expect(within(rows[1]).getByText("Alice")).toBeInTheDocument();
+    expect(within(rows[2]).getByText("Charlie")).toBeInTheDocument();
+
+    // Click "이름" header to sort DESC: Charlie first, then Alice
+    const nameHeader = screen.getByRole("columnheader", { name: "이름" });
+    await user.click(nameHeader);
+
+    const updatedRows = screen.getAllByRole("row");
+    expect(within(updatedRows[1]).getByText("Charlie")).toBeInTheDocument();
+    expect(within(updatedRows[2]).getByText("Alice")).toBeInTheDocument();
+  });
 });

@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { formatGpsInfo, type GpsInfo } from "@/lib/gps";
 import ManagerLoadingMessage from "../../manager-loading-message";
 import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
+import { SortableHeader } from "@/components/sortable-header";
 
 type WorksiteRow = {
   id: string;
@@ -33,6 +34,8 @@ export default function WorksiteManagementClient() {
   const initialQuery = searchParams?.get("worksite") ?? "";
   const [data, setData] = useState<Bootstrap>(emptyBootstrap);
   const [query, setQuery] = useState(initialQuery);
+  const [sortKey, setSortKey] = useState<"name" | "count" | "radius">("name");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -88,6 +91,39 @@ export default function WorksiteManagementClient() {
 
     return data.worksites.filter((worksite) => worksite.name.toLowerCase().includes(normalizedQuery));
   }, [data.worksites, query]);
+
+  const sortedWorksites = useMemo(() => {
+    return [...filteredWorksites].sort((left, right) => {
+      if (sortKey === "name") {
+        return sortDirection === "asc"
+          ? left.name.localeCompare(right.name, "ko-KR")
+          : right.name.localeCompare(left.name, "ko-KR");
+      } else if (sortKey === "count") {
+        const leftCount = worksiteCounts[left.id] ?? 0;
+        const rightCount = worksiteCounts[right.id] ?? 0;
+        if (leftCount === rightCount) {
+          return left.name.localeCompare(right.name, "ko-KR");
+        }
+        return sortDirection === "asc" ? leftCount - rightCount : rightCount - leftCount;
+      } else {
+        if (left.radius_meters === right.radius_meters) {
+          return left.name.localeCompare(right.name, "ko-KR");
+        }
+        return sortDirection === "asc"
+          ? left.radius_meters - right.radius_meters
+          : right.radius_meters - left.radius_meters;
+      }
+    });
+  }, [filteredWorksites, sortKey, sortDirection, worksiteCounts]);
+
+  const handleSort = (key: "name" | "count" | "radius") => {
+    if (sortKey === key) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDirection("asc");
+    }
+  };
 
   return (
     <section className="space-y-[24px]">
@@ -146,21 +182,45 @@ export default function WorksiteManagementClient() {
             <table className="apple-table">
               <thead>
                 <tr>
-                  <th className="text-left">근무지명</th>
-                  <th className="text-center">배정인원수</th>
+                  <SortableHeader
+                    sortKey="name"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="text-left"
+                  >
+                    근무지명
+                  </SortableHeader>
+                  <SortableHeader
+                    sortKey="count"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="text-center"
+                  >
+                    배정인원수
+                  </SortableHeader>
                   <th className="text-left">GPS정보</th>
-                  <th className="text-right">허용반경</th>
+                  <SortableHeader
+                    sortKey="radius"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="text-right"
+                  >
+                    허용반경
+                  </SortableHeader>
                 </tr>
               </thead>
               <tbody>
-                {filteredWorksites.length === 0 ? (
+                {sortedWorksites.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="p-8 text-center text-ink-muted-48 italic">
                       조회 결과에 해당하는 근무지가 없습니다.
                     </td>
                   </tr>
                 ) : (
-                  filteredWorksites.map((worksite) => {
+                  sortedWorksites.map((worksite) => {
                     const count = worksiteCounts[worksite.id] ?? 0;
                     return (
                       <tr key={worksite.id} className="hover:bg-canvas-parchment transition-colors">

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
+import { SortableHeader } from "@/components/sortable-header";
 
 type EmployeeRow = {
   id: string;
@@ -44,6 +45,8 @@ export default function EmployeeRosterPage() {
   const [nameQuery, setNameQuery] = useState("");
   const [phoneQuery, setPhoneQuery] = useState("");
   const [showRetired, setShowRetired] = useState(false);
+  const [sortKey, setSortKey] = useState<"name" | "phone" | "worksite" | "status">("name");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -85,11 +88,7 @@ export default function EmployeeRosterPage() {
     };
   }, []);
 
-  // Reset filters when retirement status changes
-  useEffect(() => {
-    setNameQuery("");
-    setPhoneQuery("");
-  }, [showRetired]);
+
 
   const availableEmployees = useMemo(() => {
     return data.employees.filter((e) => e.is_retired === showRetired);
@@ -135,6 +134,45 @@ export default function EmployeeRosterPage() {
   const worksiteByEmployeeId = useMemo(() => {
     return new Map(data.assignments.map((assignment) => [assignment.employee_id, assignment.worksite_id]));
   }, [data.assignments]);
+
+  const sortedEmployees = useMemo(() => {
+    return [...filteredEmployees].sort((left, right) => {
+      if (sortKey === "name") {
+        return sortDirection === "asc"
+          ? left.name.localeCompare(right.name, "ko-KR")
+          : right.name.localeCompare(left.name, "ko-KR");
+      } else if (sortKey === "phone") {
+        return sortDirection === "asc"
+          ? left.phone.localeCompare(right.phone, "ko-KR")
+          : right.phone.localeCompare(left.phone, "ko-KR");
+      } else if (sortKey === "worksite") {
+        const leftWorksite = worksiteById.get(worksiteByEmployeeId.get(left.id) ?? "") ?? "";
+        const rightWorksite = worksiteById.get(worksiteByEmployeeId.get(right.id) ?? "") ?? "";
+        if (leftWorksite === rightWorksite) {
+          return left.name.localeCompare(right.name, "ko-KR");
+        }
+        return sortDirection === "asc"
+          ? leftWorksite.localeCompare(rightWorksite, "ko-KR")
+          : rightWorksite.localeCompare(leftWorksite, "ko-KR");
+      } else {
+        const leftVal = left.is_retired ? 1 : 0;
+        const rightVal = right.is_retired ? 1 : 0;
+        if (leftVal === rightVal) {
+          return left.name.localeCompare(right.name, "ko-KR");
+        }
+        return sortDirection === "asc" ? leftVal - rightVal : rightVal - leftVal;
+      }
+    });
+  }, [filteredEmployees, sortKey, sortDirection, worksiteById, worksiteByEmployeeId]);
+
+  const handleSort = (key: "name" | "phone" | "worksite" | "status") => {
+    if (sortKey === key) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDirection("asc");
+    }
+  };
 
   return (
     <section className="space-y-[24px]">
@@ -195,7 +233,11 @@ export default function EmployeeRosterPage() {
             <input
               checked={showRetired}
               className="h-4 w-4 accent-primary"
-              onChange={(event) => setShowRetired(event.target.checked)}
+              onChange={(event) => {
+                setShowRetired(event.target.checked);
+                setNameQuery("");
+                setPhoneQuery("");
+              }}
               type="checkbox"
             />
             퇴직
@@ -229,21 +271,53 @@ export default function EmployeeRosterPage() {
             <table className="apple-table">
               <thead>
                 <tr>
-                  <th className="text-left">이름</th>
-                  <th className="text-left">연락처</th>
-                  <th className="text-left">근무지</th>
-                  <th className="text-right">상태</th>
+                  <SortableHeader
+                    sortKey="name"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="text-left"
+                  >
+                    이름
+                  </SortableHeader>
+                  <SortableHeader
+                    sortKey="phone"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="text-left"
+                  >
+                    연락처
+                  </SortableHeader>
+                  <SortableHeader
+                    sortKey="worksite"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="text-left"
+                  >
+                    근무지
+                  </SortableHeader>
+                  <SortableHeader
+                    sortKey="status"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="text-right"
+                  >
+                    상태
+                  </SortableHeader>
                 </tr>
               </thead>
               <tbody>
-                {filteredEmployees.length === 0 ? (
+                {sortedEmployees.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="p-8 text-center text-ink-muted-48 italic">
                       조회 결과에 해당하는 직원이 없습니다.
                     </td>
                   </tr>
                 ) : (
-                  filteredEmployees.map((employee) => (
+                  sortedEmployees.map((employee) => (
                     <tr key={employee.id} className="hover:bg-canvas-parchment transition-colors">
                       <td className="font-semibold">
                         <Link

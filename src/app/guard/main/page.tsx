@@ -1,11 +1,12 @@
-import Link from "next/link";
 import GuardWorksiteSection from "./guard-worksite-section";
 import GuardAttendanceSection from "./guard-attendance-section";
 import GuardSafetySection from "./guard-safety-section";
+import GuardPushRegister from "./guard-push-register";
 
 export default function GuardMainPage() {
   return (
     <div className="mx-auto max-w-[980px] w-full px-5 py-[80px]">
+      <GuardPushRegister />
       <div className="max-w-[600px] mx-auto">
         <GuardWorksiteSection />
         <GuardAttendanceSection />

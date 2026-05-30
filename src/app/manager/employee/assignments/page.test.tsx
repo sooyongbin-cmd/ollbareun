@@ -98,4 +98,34 @@ describe("assignment management page", () => {
       "/manager/employee/assignments",
     );
   });
+
+  it("sorts assignments by date, worksite name, and employee name", async () => {
+    const user = userEvent.setup();
+
+    const { container } = renderWithManagerLayout(<AssignmentManagementPage />);
+
+    // Wait for the data to load by finding one of the names
+    await screen.findByText("김철수");
+
+    // By default, sorted DESC by start_date: assign-2 ("2026-05-24") first, then assign-1 ("2026-05-21")
+    let trs = container.querySelectorAll("tbody tr");
+    expect(within(trs[0] as HTMLElement).getByText("김철수")).toBeInTheDocument();
+    expect(within(trs[1] as HTMLElement).getByText("홍길동")).toBeInTheDocument();
+
+    // Click "날짜" to sort ASC: assign-1 first, then assign-2
+    const dateHeader = screen.getByRole("columnheader", { name: "날짜" });
+    await user.click(dateHeader);
+
+    trs = container.querySelectorAll("tbody tr");
+    expect(within(trs[0] as HTMLElement).getByText("홍길동")).toBeInTheDocument();
+    expect(within(trs[1] as HTMLElement).getByText("김철수")).toBeInTheDocument();
+
+    // Click "이름" to sort ASC: 김철수 (김) first, then 홍길동 (홍)
+    const nameHeader = screen.getByRole("columnheader", { name: "이름" });
+    await user.click(nameHeader);
+
+    trs = container.querySelectorAll("tbody tr");
+    expect(within(trs[0] as HTMLElement).getByText("김철수")).toBeInTheDocument();
+    expect(within(trs[1] as HTMLElement).getByText("홍길동")).toBeInTheDocument();
+  });
 });

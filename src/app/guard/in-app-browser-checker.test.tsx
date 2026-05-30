@@ -6,15 +6,22 @@ describe("InAppBrowserChecker", () => {
   const originalLocation = window.location;
 
   beforeEach(() => {
-    delete (window as unknown as { location: unknown }).location;
-    window.location = {
-      origin: "http://localhost:3000",
-      href: "http://localhost:3000/guard",
-    } as unknown as Location;
+    Object.defineProperty(window, "location", {
+      value: {
+        origin: "http://localhost:3000",
+        href: "http://localhost:3000/guard",
+      },
+      writable: true,
+      configurable: true,
+    });
   });
 
   afterEach(() => {
-    window.location = originalLocation;
+    Object.defineProperty(window, "location", {
+      value: originalLocation,
+      writable: true,
+      configurable: true,
+    });
     vi.restoreAllMocks();
   });
 

@@ -1,13 +1,24 @@
-// Service Worker for handling Web Push Notifications
+import { defaultCache } from "@serwist/next/worker";
+import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
+import { Serwist } from "serwist";
 
-self.addEventListener("install", () => {
-  self.skipWaiting();
+declare global {
+  interface WorkerGlobalScope extends SerwistGlobalConfig {
+    __SW_MANIFEST: (PrecacheEntry | string)[] | undefined;
+  }
+}
+
+declare const self: WorkerGlobalScope;
+
+const serwist = new Serwist({
+  precacheEntries: self.__SW_MANIFEST,
+  skipWaiting: true,
+  clientsClaim: true,
+  navigationPreload: true,
+  runtimeCaching: defaultCache,
 });
 
-self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
-});
-
+// Custom push event listener for handling Web Push Notifications
 self.addEventListener("push", (event) => {
   if (!event.data) return;
 
@@ -26,7 +37,7 @@ self.addEventListener("push", (event) => {
 
     // Post message to active, visible client windows (foreground app)
     event.waitUntil(
-      clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
+      self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
         windowClients.forEach((client) => {
           if (client.visibilityState === "visible") {
             client.postMessage({
@@ -52,6 +63,7 @@ self.addEventListener("push", (event) => {
   }
 });
 
+// Custom notificationclick listener for handling redirect action
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
@@ -59,7 +71,7 @@ self.addEventListener("notificationclick", (event) => {
   const targetUrl = new URL("/guard/main", self.location.origin).href;
 
   event.waitUntil(
-    clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
       // Check if there is already a window open with the dashboard url
       for (let i = 0; i < windowClients.length; i++) {
         const client = windowClients[i];
@@ -68,9 +80,11 @@ self.addEventListener("notificationclick", (event) => {
         }
       }
       // If not, open a new window
-      if (clients.openWindow) {
-        return clients.openWindow(targetUrl);
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(targetUrl);
       }
     })
   );
 });
+
+serwist.addEventListeners();

@@ -5,7 +5,6 @@ import { X, AlertTriangle } from "lucide-react";
 
 export default function InAppBrowserChecker() {
   const [isInApp, setIsInApp] = useState(false);
-  const [os, setOs] = useState<"android" | "ios" | "unknown">("unknown");
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
@@ -17,11 +16,6 @@ export default function InAppBrowserChecker() {
       // Defer state update to avoid synchronous setState inside useEffect warning
       const timer = setTimeout(() => {
         setIsInApp(true);
-        if (ua.includes("android")) {
-          setOs("android");
-        } else if (ua.includes("iphone") || ua.includes("ipad")) {
-          setOs("ios");
-        }
       }, 0);
       return () => clearTimeout(timer);
     }
@@ -30,6 +24,30 @@ export default function InAppBrowserChecker() {
   if (!isInApp || dismissed) {
     return null;
   }
+
+  const handleOpenDefaultBrowser = async () => {
+    const targetUrl = window.location.origin + "/guard/main";
+    const ua = navigator.userAgent.toLowerCase();
+
+    if (ua.includes("android")) {
+      const urlWithoutProtocol = targetUrl.replace(/https?:\/\//i, "");
+      window.location.href = `intent://${urlWithoutProtocol}#Intent;scheme=https;end`;
+    } else if (ua.includes("iphone") || ua.includes("ipad")) {
+      if (ua.includes("kakaotalk")) {
+        window.location.href = `kakaotalk://web/openExternal?url=${encodeURIComponent(targetUrl)}`;
+      } else {
+        // iOS Naver or other in-app browsers
+        try {
+          await navigator.clipboard.writeText(targetUrl);
+          alert("링크가 클립보드에 복사되었습니다.\nSafari 브라우저를 열고 주소창에 붙여넣어 접속해 주세요.");
+        } catch {
+          alert(`아래 주소를 복사하여 Safari 브라우저에 붙여넣어 주세요:\n\n${targetUrl}`);
+        }
+      }
+    } else {
+      window.open(targetUrl, "_blank");
+    }
+  };
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-[110] px-4 pb-4 sm:pb-6" role="dialog" aria-labelledby="in-app-browser-title">
@@ -59,18 +77,14 @@ export default function InAppBrowserChecker() {
           </div>
         </div>
 
-        <div className="border-t border-amber-500/10 pt-3 text-[13px] text-amber-700 leading-relaxed">
-          {os === "android" ? (
-            <p>
-              우측 상단의 <strong>더보기(점 3개)</strong> 버튼을 누르고 <br className="hidden sm:inline" />
-              <strong>&apos;다른 브라우저로 열기&apos;</strong> 또는 <strong>&apos;Chrome으로 열기&apos;</strong>를 선택해 주세요.
-            </p>
-          ) : (
-            <p>
-              우측 하단의 <strong>내보내기(공유)</strong> 또는 <strong>나침반</strong> 아이콘을 누르고 <br className="hidden sm:inline" />
-              <strong>&apos;Safari로 열기&apos;</strong>를 선택해 주세요.
-            </p>
-          )}
+        <div className="border-t border-amber-500/10 pt-3">
+          <button
+            type="button"
+            onClick={handleOpenDefaultBrowser}
+            className="w-full rounded-[12px] bg-amber-600 hover:bg-amber-700 text-white font-bold text-[14px] py-2.5 transition-colors shadow-sm"
+          >
+            기본 브라우저로 열기
+          </button>
         </div>
       </div>
     </div>

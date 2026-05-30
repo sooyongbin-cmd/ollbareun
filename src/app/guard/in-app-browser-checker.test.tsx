@@ -39,7 +39,7 @@ describe("InAppBrowserChecker", () => {
     expect(actionButton).toBeInTheDocument();
 
     fireEvent.click(actionButton);
-    expect(window.location.href).toBe("intent://localhost:3000/guard/main#Intent;scheme=https;end");
+    expect(window.location.href).toBe("intent://localhost:3000/guard#Intent;scheme=https;end");
   });
 
   it("renders iOS KakaoTalk guide and redirects using kakaotalk scheme on button click", async () => {
@@ -51,7 +51,7 @@ describe("InAppBrowserChecker", () => {
     const actionButton = screen.getByRole("button", { name: "기본 브라우저로 열기" });
     fireEvent.click(actionButton);
 
-    expect(window.location.href).toBe("kakaotalk://web/openExternal?url=http%3A%2F%2Flocalhost%3A3000%2Fguard%2Fmain");
+    expect(window.location.href).toBe("kakaotalk://web/openExternal?url=http%3A%2F%2Flocalhost%3A3000%2Fguard");
   });
 
   it("renders iOS Naver guide and copies link to clipboard on button click", async () => {
@@ -74,7 +74,7 @@ describe("InAppBrowserChecker", () => {
     fireEvent.click(actionButton);
 
     await waitFor(() => {
-      expect(writeTextMock).toHaveBeenCalledWith("http://localhost:3000/guard/main");
+      expect(writeTextMock).toHaveBeenCalledWith("http://localhost:3000/guard");
     });
     await waitFor(() => {
       expect(alertSpy).toHaveBeenCalledWith(expect.stringContaining("링크가 클립보드에 복사되었습니다"));

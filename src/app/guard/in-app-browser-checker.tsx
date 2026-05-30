@@ -26,7 +26,7 @@ export default function InAppBrowserChecker() {
   }
 
   const handleOpenDefaultBrowser = async () => {
-    const targetUrl = window.location.origin + "/guard/main";
+    const targetUrl = window.location.origin + "/guard";
     const ua = navigator.userAgent.toLowerCase();
 
     if (ua.includes("android")) {

@@ -1,6 +1,6 @@
 // Service Worker for handling Web Push Notifications
 
-self.addEventListener("install", (event) => {
+self.addEventListener("install", () => {
   self.skipWaiting();
 });
 

@@ -9,6 +9,8 @@ describe("PWA manifest", () => {
       start_url: "/guard",
       scope: "/",
       display: "standalone",
+      orientation: "portrait",
+      id: "https://ollbareun.vercel.app/manager",
       background_color: "#ffffff",
       theme_color: "#0066cc",
       icons: [

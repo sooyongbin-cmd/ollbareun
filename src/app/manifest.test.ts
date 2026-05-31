@@ -37,6 +37,14 @@ describe("PWA manifest", () => {
           purpose: "maskable",
         },
       ],
+      screenshots: [
+        {
+          src: "/screenshot.jpg",
+          sizes: "1280x720",
+          type: "image/jpeg",
+          form_factor: "wide",
+        },
+      ],
     });
   });
 });

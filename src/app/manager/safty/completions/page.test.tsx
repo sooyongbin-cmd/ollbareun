@@ -86,6 +86,7 @@ describe("education completions page", () => {
     expect(screen.getByRole("columnheader", { name: "직원" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "이수현황" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "구독상태" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "알림결과" })).toBeInTheDocument();
 
     // Active employees
     expect(screen.getByText("홍길동")).toBeInTheDocument();
@@ -182,8 +183,10 @@ describe("education completions page", () => {
         failedCount: 1,
         unregisteredCount: 1,
         notifiedEmployees: ["이순신"],
+        notifiedEmployeeIds: ["employee-2"],
         unregisteredEmployees: ["홍길동"],
-        failedEmployees: [{ employeeName: "임꺽정", reason: "네트워크 오류" }],
+        unregisteredEmployeeIds: ["employee-1"],
+        failedEmployees: [{ employeeId: "employee-4", employeeName: "임꺽정", reason: "네트워크 오류" }],
       }),
     });
 
@@ -233,6 +236,8 @@ describe("education completions page", () => {
     expect(screen.getByText("알림 전송 실패 (1명)")).toBeInTheDocument();
     expect(screen.getByText("임꺽정")).toBeInTheDocument();
     expect(screen.getByText("네트워크 오류")).toBeInTheDocument();
+    expect(screen.getByText("성공")).toBeInTheDocument();
+    expect(screen.getAllByText("미구독").length).toBeGreaterThanOrEqual(1);
 
     const closeButtons = screen.getAllByRole("button", { name: "닫기" });
     await user.click(closeButtons[0]);

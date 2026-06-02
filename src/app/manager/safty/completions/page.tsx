@@ -28,6 +28,11 @@ type EmployeeRow = {
   is_retired: boolean;
 };
 
+type PushDeliveryStatus =
+  | { status: "success" }
+  | { status: "unregistered" }
+  | { status: "failed"; reason: string };
+
 export default function EducationCompletionsPage() {
   const [completions, setCompletions] = useState<EducationCompletionRow[]>([]);
   const [resources, setResources] = useState<EducationResourceRow[]>([]);
@@ -44,9 +49,14 @@ export default function EducationCompletionsPage() {
     failedCount: number;
     unregisteredCount: number;
     notifiedEmployees: string[];
+    notifiedEmployeeIds: string[];
     unregisteredEmployees: string[];
-    failedEmployees: { employeeName: string; reason: string }[];
+    unregisteredEmployeeIds: string[];
+    failedEmployees: { employeeId?: string; employeeName: string; reason: string }[];
   } | null>(null);
+  const [pushDeliveryStatusByEmployeeId, setPushDeliveryStatusByEmployeeId] = useState<
+    Map<string, PushDeliveryStatus>
+  >(new Map());
   const [showResultModal, setShowResultModal] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
@@ -180,9 +190,27 @@ export default function EducationCompletionsPage() {
         failedCount: data.failedCount,
         unregisteredCount: data.unregisteredCount,
         notifiedEmployees: data.notifiedEmployees || [],
+        notifiedEmployeeIds: data.notifiedEmployeeIds || [],
         unregisteredEmployees: data.unregisteredEmployees || [],
+        unregisteredEmployeeIds: data.unregisteredEmployeeIds || [],
         failedEmployees: data.failedEmployees || [],
       });
+
+      const nextDeliveryStatuses = new Map<string, PushDeliveryStatus>();
+      (data.notifiedEmployeeIds || []).forEach((employeeId: string) => {
+        nextDeliveryStatuses.set(employeeId, { status: "success" });
+      });
+      (data.unregisteredEmployeeIds || []).forEach((employeeId: string) => {
+        nextDeliveryStatuses.set(employeeId, { status: "unregistered" });
+      });
+      (data.failedEmployees || []).forEach(
+        (failed: { employeeId?: string; employeeName: string; reason: string }) => {
+          if (failed.employeeId) {
+            nextDeliveryStatuses.set(failed.employeeId, { status: "failed", reason: failed.reason });
+          }
+        },
+      );
+      setPushDeliveryStatusByEmployeeId(nextDeliveryStatuses);
       setShowResultModal(true);
     } catch (err) {
       setAlertMessage(err instanceof Error ? err.message : "알림 전송 중 오류가 발생했습니다.");
@@ -281,12 +309,13 @@ export default function EducationCompletionsPage() {
                     이수현황
                   </SortableHeader>
                   <th className="text-left">구독상태</th>
+                  <th className="text-left">알림결과</th>
                 </tr>
               </thead>
               <tbody>
                 {sortedEmployees.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="p-8 text-center text-ink-muted-48 italic">
+                    <td colSpan={4} className="p-8 text-center text-ink-muted-48 italic">
                       조회 결과에 해당하는 직원이 없습니다.
                     </td>
                   </tr>
@@ -294,6 +323,7 @@ export default function EducationCompletionsPage() {
                   sortedEmployees.map((employee) => {
                     const completedCount = completedCountByEmployeeId.get(employee.id) ?? 0;
                     const isSubscribed = subscribedEmployeeIds.has(employee.id);
+                    const deliveryStatus = pushDeliveryStatusByEmployeeId.get(employee.id);
                     return (
                       <tr key={employee.id} className="hover:bg-canvas-parchment transition-colors">
                         <td className="font-semibold">{employee.name}</td>
@@ -315,6 +345,28 @@ export default function EducationCompletionsPage() {
                           >
                             {isSubscribed ? "구독중" : "미구독"}
                           </span>
+                        </td>
+                        <td>
+                          {deliveryStatus ? (
+                            <span
+                              className={
+                                deliveryStatus.status === "success"
+                                  ? "inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-[13px] font-semibold text-primary"
+                                  : deliveryStatus.status === "failed"
+                                    ? "inline-flex items-center rounded-full bg-status-warn/15 px-3 py-1 text-[13px] font-semibold text-status-warn"
+                                    : "inline-flex items-center rounded-full bg-canvas-parchment px-3 py-1 text-[13px] font-semibold text-ink-muted-48"
+                              }
+                              title={deliveryStatus.status === "failed" ? deliveryStatus.reason : undefined}
+                            >
+                              {deliveryStatus.status === "success"
+                                ? "성공"
+                                : deliveryStatus.status === "failed"
+                                  ? "실패"
+                                  : "미구독"}
+                            </span>
+                          ) : (
+                            <span className="text-[13px] font-semibold text-ink-muted-48">대기</span>
+                          )}
                         </td>
                       </tr>
                     );

@@ -57,8 +57,10 @@ export async function POST(request: Request) {
     }
 
     const notifiedEmployees: string[] = [];
+    const notifiedEmployeeIds: string[] = [];
     const unregisteredEmployees: string[] = [];
-    const failedEmployees: { employeeName: string; reason: string }[] = [];
+    const unregisteredEmployeeIds: string[] = [];
+    const failedEmployees: { employeeId: string; employeeName: string; reason: string }[] = [];
     let successCount = 0;
     let failedCount = 0;
 
@@ -71,6 +73,7 @@ export async function POST(request: Request) {
 
       if (employeeSubs.length === 0) {
         unregisteredEmployees.push(employeeName);
+        unregisteredEmployeeIds.push(employeeId);
         return;
       }
 
@@ -124,8 +127,9 @@ export async function POST(request: Request) {
 
       if (employeeNotified) {
         notifiedEmployees.push(employeeName);
+        notifiedEmployeeIds.push(employeeId);
       } else {
-        failedEmployees.push({ employeeName, reason: lastErrorReason || "기기 전송 실패" });
+        failedEmployees.push({ employeeId, employeeName, reason: lastErrorReason || "기기 전송 실패" });
       }
     });
 
@@ -145,7 +149,9 @@ export async function POST(request: Request) {
       failedCount,
       unregisteredCount: unregisteredEmployees.length,
       notifiedEmployees,
+      notifiedEmployeeIds,
       unregisteredEmployees,
+      unregisteredEmployeeIds,
       failedEmployees,
     });
   } catch (error) {

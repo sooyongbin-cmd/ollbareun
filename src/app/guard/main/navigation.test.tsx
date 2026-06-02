@@ -104,6 +104,12 @@ describe("guard main navigation", () => {
       }),
     );
     expect(window.sessionStorage.getItem("ollbareun.guard.session")).toBeNull();
+    expect(window.sessionStorage.getItem("ollbareun.guard.logout.pushResult")).toEqual(
+      expect.stringContaining('"browserSubscription":"removed"'),
+    );
+    expect(window.sessionStorage.getItem("ollbareun.guard.logout.pushResult")).toEqual(
+      expect.stringContaining('"serverSubscription":"removed"'),
+    );
     expect(push).toHaveBeenCalledWith("/guard");
     expect(screen.queryByText("로그아웃")).not.toBeInTheDocument();
   });

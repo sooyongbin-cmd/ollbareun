@@ -4,6 +4,16 @@ import { useRouter } from "next/navigation";
 import { PowerIcon } from "@/components/icons/power-icon";
 
 const guardSessionStorageKey = "ollbareun.guard.session";
+const guardLogoutPushResultStorageKey = "ollbareun.guard.logout.pushResult";
+
+type LogoutPushResult = {
+  completedAt: string;
+  employeeId: string | null;
+  endpoint: string | null;
+  browserSubscription: "removed" | "not-found" | "unsupported" | "failed";
+  serverSubscription: "removed" | "skipped" | "failed";
+  session: "removed" | "failed";
+};
 
 function readEmployeeIdFromSession() {
   try {
@@ -19,7 +29,7 @@ function readEmployeeIdFromSession() {
 
 async function getCurrentPushEndpoint() {
   if (!("serviceWorker" in navigator)) {
-    return null;
+    return { endpoint: null, status: "unsupported" as const };
   }
 
   const registration = await navigator.serviceWorker.getRegistration("/sw.js");
@@ -28,9 +38,18 @@ async function getCurrentPushEndpoint() {
 
   if (subscription) {
     await subscription.unsubscribe();
+    return { endpoint, status: "removed" as const };
   }
 
-  return endpoint;
+  return { endpoint, status: "not-found" as const };
+}
+
+function writeLogoutPushResult(result: LogoutPushResult) {
+  try {
+    window.sessionStorage.setItem(guardLogoutPushResultStorageKey, JSON.stringify(result));
+  } catch {
+    // The logout navigation should continue even if storage is unavailable.
+  }
 }
 
 export default function GuardLogoutButton() {
@@ -39,21 +58,29 @@ export default function GuardLogoutButton() {
   async function handleLogout() {
     const employeeId = readEmployeeIdFromSession();
     let endpoint: string | null = null;
+    let browserSubscription: LogoutPushResult["browserSubscription"] = "not-found";
+    let serverSubscription: LogoutPushResult["serverSubscription"] = "skipped";
+    let session: LogoutPushResult["session"] = "removed";
 
     try {
-      endpoint = await getCurrentPushEndpoint();
+      const pushResult = await getCurrentPushEndpoint();
+      endpoint = pushResult.endpoint;
+      browserSubscription = pushResult.status;
     } catch (error) {
+      browserSubscription = "failed";
       console.error("Failed to unsubscribe browser push subscription:", error);
     }
 
     if (employeeId) {
       try {
-        await fetch("/api/notifications/unsubscribe", {
+        const response = await fetch("/api/notifications/unsubscribe", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ employeeId, endpoint }),
         });
+        serverSubscription = response.ok ? "removed" : "failed";
       } catch (error) {
+        serverSubscription = "failed";
         console.error("Failed to remove push subscription from backend:", error);
       }
     }
@@ -61,8 +88,18 @@ export default function GuardLogoutButton() {
     try {
       window.sessionStorage.removeItem(guardSessionStorageKey);
     } catch {
+      session = "failed";
       // Navigation below still completes logout for browsers with unavailable storage.
     }
+
+    writeLogoutPushResult({
+      completedAt: new Date().toISOString(),
+      employeeId,
+      endpoint,
+      browserSubscription,
+      serverSubscription,
+      session,
+    });
 
     router.push("/guard");
   }

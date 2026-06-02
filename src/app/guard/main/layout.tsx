@@ -1,4 +1,5 @@
 import Link from "next/link";
+import GuardSessionGate from "./guard-session-gate";
 import GuardSessionSummary from "./guard-session-summary";
 import GuardLogoutButton from "./guard-logout-button";
 import { GuardIcon } from "@/components/icons/guard-icon";
@@ -10,6 +11,7 @@ export default function GuardMainLayout({
 }) {
   return (
     <main className="min-h-screen bg-canvas text-ink font-apple selection:bg-primary/20">
+      <GuardSessionGate />
       <nav className="h-[44px] bg-surface-black text-canvas flex items-center px-5 sticky top-0 z-50">
         <div className="mx-auto max-w-[980px] w-full flex items-center justify-between">
           <Link href="/" className="text-[12px] font-normal hover:opacity-80 transition-opacity">

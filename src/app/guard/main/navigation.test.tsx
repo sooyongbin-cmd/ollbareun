@@ -6,9 +6,10 @@ import GuardMainLayout from "./layout";
 import GuardMainPage from "./page";
 
 const push = vi.fn();
+const replace = vi.fn();
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push }),
+  useRouter: () => ({ push, replace }),
 }));
 
 const guardSession = {
@@ -38,8 +39,19 @@ const guardSession = {
 describe("guard main navigation", () => {
   beforeEach(() => {
     push.mockReset();
+    replace.mockReset();
     vi.restoreAllMocks();
     window.sessionStorage.clear();
+  });
+
+  it("redirects to the guard login page when no guard session exists", () => {
+    render(
+      <GuardMainLayout>
+        <GuardMainPage />
+      </GuardMainLayout>,
+    );
+
+    expect(replace).toHaveBeenCalledWith("/guard");
   });
 
   it("shows authenticated guard name and phone in the section navigation", async () => {

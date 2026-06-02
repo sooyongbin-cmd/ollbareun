@@ -123,6 +123,9 @@ describe("guard main navigation", () => {
 
     render(<GuardMainPage />);
 
+    expect(screen.getByRole("heading", { name: "푸시 알림 연결 준비 중" })).toBeInTheDocument();
+    expect(screen.getByText("브라우저 지원 확인")).toBeInTheDocument();
+    expect(screen.getByText("서버 저장")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "출근하기" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "교육 받기" })).toHaveAttribute("href", "/guard/main/safty");
     for (const label of ["근무지확인", "개인프로필"]) {

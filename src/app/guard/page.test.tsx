@@ -57,4 +57,22 @@ describe("guard login page", () => {
     expect(screen.getByText("Supabase 구독정보 삭제 완료")).toBeInTheDocument();
     expect(screen.getByText("로그인 세션 삭제 완료")).toBeInTheDocument();
   });
+
+  it("shows when there was no server push subscription to delete", () => {
+    window.sessionStorage.setItem(
+      "ollbareun.guard.logout.pushResult",
+      JSON.stringify({
+        completedAt: "2026-06-02T09:00:00.000Z",
+        employeeId: "employee-1",
+        endpoint: null,
+        browserSubscription: "not-found",
+        serverSubscription: "not-found",
+        session: "removed",
+      }),
+    );
+
+    render(<GuardPage />);
+
+    expect(screen.getByText("삭제할 Supabase 구독정보 없음")).toBeInTheDocument();
+  });
 });

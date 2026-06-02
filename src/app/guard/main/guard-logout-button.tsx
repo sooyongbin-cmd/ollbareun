@@ -11,7 +11,7 @@ type LogoutPushResult = {
   employeeId: string | null;
   endpoint: string | null;
   browserSubscription: "removed" | "not-found" | "unsupported" | "failed";
-  serverSubscription: "removed" | "skipped" | "failed";
+  serverSubscription: "removed" | "not-found" | "skipped" | "failed";
   session: "removed" | "failed";
 };
 
@@ -78,7 +78,12 @@ export default function GuardLogoutButton() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ employeeId, endpoint }),
         });
-        serverSubscription = response.ok ? "removed" : "failed";
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) {
+          serverSubscription = "failed";
+        } else {
+          serverSubscription = payload?.deletedCount > 0 ? "removed" : "not-found";
+        }
       } catch (error) {
         serverSubscription = "failed";
         console.error("Failed to remove push subscription from backend:", error);

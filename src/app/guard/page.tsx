@@ -49,7 +49,7 @@ type LogoutPushResult = {
   employeeId: string | null;
   endpoint: string | null;
   browserSubscription: "removed" | "not-found" | "unsupported" | "failed";
-  serverSubscription: "removed" | "skipped" | "failed";
+  serverSubscription: "removed" | "not-found" | "skipped" | "failed";
   session: "removed" | "failed";
 };
 
@@ -167,6 +167,7 @@ function getBrowserSubscriptionText(status: LogoutPushResult["browserSubscriptio
 
 function getServerSubscriptionText(status: LogoutPushResult["serverSubscription"]) {
   if (status === "removed") return "Supabase 구독정보 삭제 완료";
+  if (status === "not-found") return "삭제할 Supabase 구독정보 없음";
   if (status === "skipped") return "직원 ID가 없어 서버 삭제 요청 생략";
   return "Supabase 구독정보 삭제 실패";
 }

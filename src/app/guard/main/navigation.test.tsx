@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import AttendancePage from "./attendance/page";
@@ -90,7 +90,7 @@ describe("guard main navigation", () => {
         removeEventListener: vi.fn(),
       },
     });
-    const fetchMock = vi.fn().mockResolvedValue(Response.json({ success: true }));
+    const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(Response.json({ success: true, deletedCount: 1 })));
     vi.stubGlobal("fetch", fetchMock);
     window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
 
@@ -115,15 +115,50 @@ describe("guard main navigation", () => {
         }),
       }),
     );
-    expect(window.sessionStorage.getItem("ollbareun.guard.session")).toBeNull();
-    expect(window.sessionStorage.getItem("ollbareun.guard.logout.pushResult")).toEqual(
-      expect.stringContaining('"browserSubscription":"removed"'),
-    );
-    expect(window.sessionStorage.getItem("ollbareun.guard.logout.pushResult")).toEqual(
-      expect.stringContaining('"serverSubscription":"removed"'),
-    );
-    expect(push).toHaveBeenCalledWith("/guard");
+    await waitFor(() => {
+      expect(window.sessionStorage.getItem("ollbareun.guard.session")).toBeNull();
+      expect(window.sessionStorage.getItem("ollbareun.guard.logout.pushResult")).toEqual(
+        expect.stringContaining('"browserSubscription":"removed"'),
+      );
+      expect(window.sessionStorage.getItem("ollbareun.guard.logout.pushResult")).toEqual(
+        expect.stringContaining('"serverSubscription":"removed"'),
+      );
+      expect(push).toHaveBeenCalledWith("/guard");
+    });
     expect(screen.queryByText("로그아웃")).not.toBeInTheDocument();
+  });
+
+  it("records when there is no server push subscription to delete", async () => {
+    const user = userEvent.setup();
+    Object.defineProperty(navigator, "serviceWorker", {
+      configurable: true,
+      value: {
+        getRegistration: vi.fn().mockResolvedValue({
+          pushManager: { getSubscription: vi.fn().mockResolvedValue(null) },
+        }),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      },
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(() => Promise.resolve(Response.json({ success: true, deletedCount: 0 }))),
+    );
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
+
+    render(
+      <GuardMainLayout>
+        <GuardMainPage />
+      </GuardMainLayout>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "로그아웃" }));
+
+    await waitFor(() => {
+      expect(window.sessionStorage.getItem("ollbareun.guard.logout.pushResult")).toEqual(
+        expect.stringContaining('"serverSubscription":"not-found"'),
+      );
+    });
   });
 
   it("links the guard section title to the guard main page", () => {

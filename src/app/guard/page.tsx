@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { GpsInfo } from "@/lib/gps";
 import AlertModal from "@/components/modals/alert-modal";
 import { isCurrentInAppBrowser } from "./in-app-browser";
+import InAppBrowserGuide from "./in-app-browser-guide";
 
 type EmployeeRow = {
   id: string;
@@ -222,6 +223,8 @@ export default function GuardPage() {
   return (
     <main className="min-h-screen bg-canvas text-ink font-apple selection:bg-primary/20">
       <div className="mx-auto flex min-h-screen w-full max-w-[600px] flex-col justify-center gap-6 px-5 py-10">
+        {isInAppBrowser === true && <InAppBrowserGuide />}
+
         {isInAppBrowser === false && (
           <>
             <form className="w-full space-y-6" onSubmit={handleGuardAuth}>

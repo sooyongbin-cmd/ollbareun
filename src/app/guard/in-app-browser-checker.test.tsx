@@ -9,7 +9,8 @@ describe("InAppBrowserChecker", () => {
     Object.defineProperty(window, "location", {
       value: {
         origin: "http://localhost:3000",
-        href: "http://localhost:3000/guard",
+        href: "http://localhost:3000/guard/main",
+        pathname: "/guard/main",
       },
       writable: true,
       configurable: true,
@@ -33,6 +34,25 @@ describe("InAppBrowserChecker", () => {
     setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1");
     const { container } = render(<InAppBrowserChecker />);
     expect(container.firstChild).toBeNull();
+  });
+
+  it("does not render the popup on the guard login page", async () => {
+    Object.defineProperty(window, "location", {
+      value: {
+        origin: "http://localhost:3000",
+        href: "http://localhost:3000/guard",
+        pathname: "/guard",
+      },
+      writable: true,
+      configurable: true,
+    });
+    setUserAgent("Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/110.0.0.0 Mobile Safari/537.36 KAKAOTALK/9.8.5");
+
+    const { container } = render(<InAppBrowserChecker />);
+
+    await waitFor(() => {
+      expect(container.firstChild).toBeNull();
+    });
   });
 
   it("renders Android specific guide when inside KakaoTalk on Android and handles button click", async () => {

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import GuardPage from "./page";
 
@@ -15,6 +15,15 @@ describe("guard login page", () => {
     replace.mockReset();
     window.sessionStorage.clear();
     vi.restoreAllMocks();
+    Object.defineProperty(window, "location", {
+      value: {
+        origin: "http://localhost:3000",
+        href: "http://localhost:3000/guard",
+        pathname: "/guard",
+      },
+      writable: true,
+      configurable: true,
+    });
   });
 
   function setUserAgent(ua: string) {
@@ -85,7 +94,7 @@ describe("guard login page", () => {
     expect(await screen.findByText("삭제할 Supabase 구독정보 없음")).toBeInTheDocument();
   });
 
-  it("hides the login form and logout push result in in-app browsers", async () => {
+  it("shows an inline default browser guide in in-app browsers", async () => {
     setUserAgent("Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/110.0.0.0 Mobile Safari/537.36 KAKAOTALK/9.8.5");
     window.sessionStorage.setItem(
       "ollbareun.guard.logout.pushResult",
@@ -107,5 +116,19 @@ describe("guard login page", () => {
       expect(screen.queryByRole("button", { name: "로그인" })).not.toBeInTheDocument();
       expect(screen.queryByText("로그아웃 Push 처리 결과")).not.toBeInTheDocument();
     });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "기본 브라우저로 열기 안내" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "기본 브라우저로 열기" })).toBeInTheDocument();
+  });
+
+  it("opens the default browser from the inline guide on Android", async () => {
+    setUserAgent("Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/110.0.0.0 Mobile Safari/537.36 KAKAOTALK/9.8.5");
+
+    render(<GuardPage />);
+
+    const actionButton = await screen.findByRole("button", { name: "기본 브라우저로 열기" });
+    fireEvent.click(actionButton);
+
+    expect(window.location.href).toBe("intent://localhost:3000/guard#Intent;scheme=https;end");
   });
 });

@@ -2,17 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { X, AlertTriangle } from "lucide-react";
+import { isCurrentInAppBrowser } from "./in-app-browser";
 
 export default function InAppBrowserChecker() {
   const [isInApp, setIsInApp] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    const ua = navigator.userAgent.toLowerCase();
-    const isKakao = ua.includes("kakaotalk");
-    const isNaver = ua.includes("naver");
-
-    if (isKakao || isNaver) {
+    if (isCurrentInAppBrowser()) {
       // Defer state update to avoid synchronous setState inside useEffect warning
       const timer = setTimeout(() => {
         setIsInApp(true);

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { GpsInfo } from "@/lib/gps";
 import AlertModal from "@/components/modals/alert-modal";
+import { isCurrentInAppBrowser } from "./in-app-browser";
 
 type EmployeeRow = {
   id: string;
@@ -182,6 +183,15 @@ export default function GuardPage() {
   const [savedGuardName, setSavedGuardName] = useState(readStoredGuardName);
   const [logoutPushResult] = useState(readLogoutPushResult);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isInAppBrowser, setIsInAppBrowser] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsInAppBrowser(isCurrentInAppBrowser());
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (hasStoredGuardSession()) {
@@ -212,68 +222,72 @@ export default function GuardPage() {
   return (
     <main className="min-h-screen bg-canvas text-ink font-apple selection:bg-primary/20">
       <div className="mx-auto flex min-h-screen w-full max-w-[600px] flex-col justify-center gap-6 px-5 py-10">
-        <form className="w-full space-y-6" onSubmit={handleGuardAuth}>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="guard-name">
-                경비원 이름
-              </label>
-              <input
-                className="field"
-                defaultValue={savedGuardName}
-                id="guard-name"
-                key={savedGuardName}
-                name="name"
-                placeholder="이름을 입력하세요."
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="guard-phone">
-                경비원 연락처
-              </label>
-              <input className="field" id="guard-phone" name="phone" placeholder="010-0000-0000" required />
-            </div>
-          </div>
-          <button className="button-primary w-full" data-testid="guard-auth-submit" type="submit">
-            로그인
-          </button>
-        </form>
+        {isInAppBrowser === false && (
+          <>
+            <form className="w-full space-y-6" onSubmit={handleGuardAuth}>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="guard-name">
+                    경비원 이름
+                  </label>
+                  <input
+                    className="field"
+                    defaultValue={savedGuardName}
+                    id="guard-name"
+                    key={savedGuardName}
+                    name="name"
+                    placeholder="이름을 입력하세요."
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="guard-phone">
+                    경비원 연락처
+                  </label>
+                  <input className="field" id="guard-phone" name="phone" placeholder="010-0000-0000" required />
+                </div>
+              </div>
+              <button className="button-primary w-full" data-testid="guard-auth-submit" type="submit">
+                로그인
+              </button>
+            </form>
 
-        <section className="w-full rounded-[18px] border border-hairline/50 bg-canvas-parchment p-6">
-          <div className="space-y-2">
-            <p className="text-[13px] font-semibold text-primary">로그아웃 Push 처리 결과</p>
-            <h2 className="text-[21px] font-semibold">
-              {logoutPushResult ? "마지막 로그아웃 처리 내역" : "처리 내역 없음"}
-            </h2>
-            <p className="text-[14px] leading-relaxed text-ink-muted-48">
-              {logoutPushResult
-                ? `${formatLogoutResultTime(logoutPushResult.completedAt)}에 수행된 Push 알림 정리 결과입니다.`
-                : "로그아웃을 수행하면 브라우저 Push 구독 해제와 Supabase 구독정보 삭제 결과가 여기에 표시됩니다."}
-            </p>
-          </div>
+            <section className="w-full rounded-[18px] border border-hairline/50 bg-canvas-parchment p-6">
+              <div className="space-y-2">
+                <p className="text-[13px] font-semibold text-primary">로그아웃 Push 처리 결과</p>
+                <h2 className="text-[21px] font-semibold">
+                  {logoutPushResult ? "마지막 로그아웃 처리 내역" : "처리 내역 없음"}
+                </h2>
+                <p className="text-[14px] leading-relaxed text-ink-muted-48">
+                  {logoutPushResult
+                    ? `${formatLogoutResultTime(logoutPushResult.completedAt)}에 수행된 Push 알림 정리 결과입니다.`
+                    : "로그아웃을 수행하면 브라우저 Push 구독 해제와 Supabase 구독정보 삭제 결과가 여기에 표시됩니다."}
+                </p>
+              </div>
 
-          {logoutPushResult && (
-            <dl className="mt-5 grid gap-3 text-[14px]">
-              <div className="rounded-[12px] border border-hairline/40 bg-canvas px-4 py-3">
-                <dt className="font-semibold text-ink">브라우저 구독</dt>
-                <dd className="mt-1 text-ink-muted-48">{getBrowserSubscriptionText(logoutPushResult.browserSubscription)}</dd>
-              </div>
-              <div className="rounded-[12px] border border-hairline/40 bg-canvas px-4 py-3">
-                <dt className="font-semibold text-ink">서버 구독정보</dt>
-                <dd className="mt-1 text-ink-muted-48">{getServerSubscriptionText(logoutPushResult.serverSubscription)}</dd>
-              </div>
-              <div className="rounded-[12px] border border-hairline/40 bg-canvas px-4 py-3">
-                <dt className="font-semibold text-ink">로그인 세션</dt>
-                <dd className="mt-1 text-ink-muted-48">{getSessionText(logoutPushResult.session)}</dd>
-              </div>
-              <div className="rounded-[12px] border border-hairline/40 bg-canvas px-4 py-3">
-                <dt className="font-semibold text-ink">endpoint</dt>
-                <dd className="mt-1 break-all text-ink-muted-48">{maskEndpoint(logoutPushResult.endpoint)}</dd>
-              </div>
-            </dl>
-          )}
-        </section>
+              {logoutPushResult && (
+                <dl className="mt-5 grid gap-3 text-[14px]">
+                  <div className="rounded-[12px] border border-hairline/40 bg-canvas px-4 py-3">
+                    <dt className="font-semibold text-ink">브라우저 구독</dt>
+                    <dd className="mt-1 text-ink-muted-48">{getBrowserSubscriptionText(logoutPushResult.browserSubscription)}</dd>
+                  </div>
+                  <div className="rounded-[12px] border border-hairline/40 bg-canvas px-4 py-3">
+                    <dt className="font-semibold text-ink">서버 구독정보</dt>
+                    <dd className="mt-1 text-ink-muted-48">{getServerSubscriptionText(logoutPushResult.serverSubscription)}</dd>
+                  </div>
+                  <div className="rounded-[12px] border border-hairline/40 bg-canvas px-4 py-3">
+                    <dt className="font-semibold text-ink">로그인 세션</dt>
+                    <dd className="mt-1 text-ink-muted-48">{getSessionText(logoutPushResult.session)}</dd>
+                  </div>
+                  <div className="rounded-[12px] border border-hairline/40 bg-canvas px-4 py-3">
+                    <dt className="font-semibold text-ink">endpoint</dt>
+                    <dd className="mt-1 break-all text-ink-muted-48">{maskEndpoint(logoutPushResult.endpoint)}</dd>
+                  </div>
+                </dl>
+              )}
+            </section>
+          </>
+        )}
       </div>
 
       <AlertModal

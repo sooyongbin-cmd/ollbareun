@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import GuardPage from "./page";
 
@@ -14,17 +14,24 @@ describe("guard login page", () => {
     push.mockReset();
     replace.mockReset();
     window.sessionStorage.clear();
+    vi.restoreAllMocks();
   });
 
-  it("labels the guard authentication submit button as login", () => {
+  function setUserAgent(ua: string) {
+    vi.spyOn(navigator, "userAgent", "get").mockReturnValue(ua);
+  }
+
+  it("labels the guard authentication submit button as login", async () => {
+    setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1");
     render(<GuardPage />);
 
-    expect(screen.getByRole("button", { name: "로그인" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "로그인" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "경비원 인증" })).not.toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "처리 내역 없음" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "처리 내역 없음" })).toBeInTheDocument();
   });
 
   it("redirects to guard main when an active guard session exists", () => {
+    setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1");
     window.sessionStorage.setItem(
       "ollbareun.guard.session",
       JSON.stringify({
@@ -37,7 +44,8 @@ describe("guard login page", () => {
     expect(replace).toHaveBeenCalledWith("/guard/main");
   });
 
-  it("shows the last logout push cleanup result", () => {
+  it("shows the last logout push cleanup result", async () => {
+    setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1");
     window.sessionStorage.setItem(
       "ollbareun.guard.logout.pushResult",
       JSON.stringify({
@@ -52,13 +60,14 @@ describe("guard login page", () => {
 
     render(<GuardPage />);
 
-    expect(screen.getByRole("heading", { name: "마지막 로그아웃 처리 내역" })).toBeInTheDocument();
-    expect(screen.getByText("브라우저 Push 구독 해제 완료")).toBeInTheDocument();
-    expect(screen.getByText("Supabase 구독정보 삭제 완료")).toBeInTheDocument();
-    expect(screen.getByText("로그인 세션 삭제 완료")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "마지막 로그아웃 처리 내역" })).toBeInTheDocument();
+    expect(await screen.findByText("브라우저 Push 구독 해제 완료")).toBeInTheDocument();
+    expect(await screen.findByText("Supabase 구독정보 삭제 완료")).toBeInTheDocument();
+    expect(await screen.findByText("로그인 세션 삭제 완료")).toBeInTheDocument();
   });
 
-  it("shows when there was no server push subscription to delete", () => {
+  it("shows when there was no server push subscription to delete", async () => {
+    setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1");
     window.sessionStorage.setItem(
       "ollbareun.guard.logout.pushResult",
       JSON.stringify({
@@ -73,6 +82,30 @@ describe("guard login page", () => {
 
     render(<GuardPage />);
 
-    expect(screen.getByText("삭제할 Supabase 구독정보 없음")).toBeInTheDocument();
+    expect(await screen.findByText("삭제할 Supabase 구독정보 없음")).toBeInTheDocument();
+  });
+
+  it("hides the login form and logout push result in in-app browsers", async () => {
+    setUserAgent("Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/110.0.0.0 Mobile Safari/537.36 KAKAOTALK/9.8.5");
+    window.sessionStorage.setItem(
+      "ollbareun.guard.logout.pushResult",
+      JSON.stringify({
+        completedAt: "2026-06-02T09:00:00.000Z",
+        employeeId: "employee-1",
+        endpoint: "https://push.example.test/subscription-1",
+        browserSubscription: "removed",
+        serverSubscription: "removed",
+        session: "removed",
+      }),
+    );
+
+    render(<GuardPage />);
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText("경비원 이름")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("경비원 연락처")).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "로그인" })).not.toBeInTheDocument();
+      expect(screen.queryByText("로그아웃 Push 처리 결과")).not.toBeInTheDocument();
+    });
   });
 });

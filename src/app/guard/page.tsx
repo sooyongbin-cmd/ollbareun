@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { GpsInfo } from "@/lib/gps";
 import AlertModal from "@/components/modals/alert-modal";
@@ -108,6 +108,22 @@ function writeStoredGuardSession(session: GuardSession) {
   }
 }
 
+function hasStoredGuardSession() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  try {
+    const stored = window.sessionStorage.getItem(guardSessionStorageKey);
+    if (!stored) return false;
+
+    const session = JSON.parse(stored);
+    return typeof session.employee?.id === "string" && session.employee.id.trim() !== "";
+  } catch {
+    return false;
+  }
+}
+
 function readLogoutPushResult(): LogoutPushResult | null {
   if (typeof window === "undefined") {
     return null;
@@ -165,6 +181,12 @@ export default function GuardPage() {
   const [savedGuardName, setSavedGuardName] = useState(readStoredGuardName);
   const [logoutPushResult] = useState(readLogoutPushResult);
   const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    if (hasStoredGuardSession()) {
+      router.replace("/guard/main");
+    }
+  }, [router]);
 
   async function handleGuardAuth(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

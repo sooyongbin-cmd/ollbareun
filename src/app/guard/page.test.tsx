@@ -2,12 +2,17 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import GuardPage from "./page";
 
+const push = vi.fn();
+const replace = vi.fn();
+
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => ({ push, replace }),
 }));
 
 describe("guard login page", () => {
   beforeEach(() => {
+    push.mockReset();
+    replace.mockReset();
     window.sessionStorage.clear();
   });
 
@@ -17,6 +22,19 @@ describe("guard login page", () => {
     expect(screen.getByRole("button", { name: "로그인" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "경비원 인증" })).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "처리 내역 없음" })).toBeInTheDocument();
+  });
+
+  it("redirects to guard main when an active guard session exists", () => {
+    window.sessionStorage.setItem(
+      "ollbareun.guard.session",
+      JSON.stringify({
+        employee: { id: "employee-1", name: "홍길동" },
+      }),
+    );
+
+    render(<GuardPage />);
+
+    expect(replace).toHaveBeenCalledWith("/guard/main");
   });
 
   it("shows the last logout push cleanup result", () => {

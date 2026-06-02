@@ -30,8 +30,25 @@ describe("guard login page", () => {
     vi.spyOn(navigator, "userAgent", "get").mockReturnValue(ua);
   }
 
-  it("labels the guard authentication submit button as login", async () => {
+  function setStandaloneMode(matches: boolean) {
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: query === "(display-mode: standalone)" ? matches : false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
+  }
+
+  it("labels the guard authentication submit button as login in standalone mode", async () => {
     setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1");
+    setStandaloneMode(true);
     render(<GuardPage />);
 
     expect(await screen.findByRole("button", { name: "로그인" })).toBeInTheDocument();
@@ -41,6 +58,7 @@ describe("guard login page", () => {
 
   it("redirects to guard main when an active guard session exists", () => {
     setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1");
+    setStandaloneMode(true);
     window.sessionStorage.setItem(
       "ollbareun.guard.session",
       JSON.stringify({
@@ -55,6 +73,7 @@ describe("guard login page", () => {
 
   it("shows the last logout push cleanup result", async () => {
     setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1");
+    setStandaloneMode(true);
     window.sessionStorage.setItem(
       "ollbareun.guard.logout.pushResult",
       JSON.stringify({
@@ -77,6 +96,7 @@ describe("guard login page", () => {
 
   it("shows when there was no server push subscription to delete", async () => {
     setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1");
+    setStandaloneMode(true);
     window.sessionStorage.setItem(
       "ollbareun.guard.logout.pushResult",
       JSON.stringify({
@@ -96,6 +116,7 @@ describe("guard login page", () => {
 
   it("shows an inline default browser guide in in-app browsers", async () => {
     setUserAgent("Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/110.0.0.0 Mobile Safari/537.36 KAKAOTALK/9.8.5");
+    setStandaloneMode(false);
     window.sessionStorage.setItem(
       "ollbareun.guard.logout.pushResult",
       JSON.stringify({
@@ -123,6 +144,7 @@ describe("guard login page", () => {
 
   it("opens the default browser from the inline guide on Android", async () => {
     setUserAgent("Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/110.0.0.0 Mobile Safari/537.36 KAKAOTALK/9.8.5");
+    setStandaloneMode(false);
 
     render(<GuardPage />);
 
@@ -130,5 +152,40 @@ describe("guard login page", () => {
     fireEvent.click(actionButton);
 
     expect(window.location.href).toBe("intent://localhost:3000/guard#Intent;scheme=https;end");
+  });
+
+  it("shows an install section in an installable browser", async () => {
+    const prompt = vi.fn().mockResolvedValue(undefined);
+    const installEvent = new Event("beforeinstallprompt") as Event & {
+      prompt: () => Promise<void>;
+      userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+    };
+    installEvent.prompt = prompt;
+    installEvent.userChoice = Promise.resolve({ outcome: "accepted" });
+    installEvent.preventDefault = vi.fn();
+    setUserAgent("Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 Chrome/110.0 Mobile Safari/537.36");
+    setStandaloneMode(false);
+
+    render(<GuardPage />);
+    window.dispatchEvent(installEvent);
+
+    expect(await screen.findByRole("heading", { name: "홈화면 아이콘 설치" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "로그인" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "홈화면 아이콘 설치" }));
+
+    expect(installEvent.preventDefault).toHaveBeenCalled();
+    expect(prompt).toHaveBeenCalled();
+  });
+
+  it("shows a home screen launch guide when a regular browser has no install prompt", async () => {
+    setUserAgent("Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 Chrome/110.0 Mobile Safari/537.36");
+    setStandaloneMode(false);
+
+    render(<GuardPage />);
+
+    expect(await screen.findByRole("heading", { name: "홈화면 아이콘에서 실행해 주세요" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "로그인" })).not.toBeInTheDocument();
+    expect(screen.queryByText("로그아웃 Push 처리 결과")).not.toBeInTheDocument();
   });
 });

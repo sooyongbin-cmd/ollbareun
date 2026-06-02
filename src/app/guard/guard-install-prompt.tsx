@@ -1,25 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { isStandaloneGuardApp } from "./in-app-browser";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform?: string }>;
 };
 
-function isStandaloneApp() {
-  if (typeof window === "undefined") {
-    return false;
-  }
-
-  return typeof window.matchMedia === "function" && window.matchMedia("(display-mode: standalone)").matches;
-}
-
 export default function GuardInstallPrompt() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [hidden, setHidden] = useState(isStandaloneApp);
+  const [hidden, setHidden] = useState(isStandaloneGuardApp);
 
   useEffect(() => {
+    if (window.location.pathname === "/guard") {
+      return;
+    }
+
     function handleBeforeInstallPrompt(event: Event) {
       event.preventDefault();
       setInstallPrompt(event as BeforeInstallPromptEvent);

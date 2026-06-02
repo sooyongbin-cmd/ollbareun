@@ -11,6 +11,19 @@ export function isCurrentInAppBrowser() {
   return isInAppBrowserUserAgent(navigator.userAgent);
 }
 
+export function isStandaloneGuardApp() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  const isStandaloneDisplayMode =
+    typeof window.matchMedia === "function" && window.matchMedia("(display-mode: standalone)").matches;
+  const isIosStandalone =
+    "standalone" in window.navigator && (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+
+  return isStandaloneDisplayMode || isIosStandalone;
+}
+
 export async function openGuardInDefaultBrowser() {
   const targetUrl = window.location.origin + "/guard";
   const ua = navigator.userAgent.toLowerCase();

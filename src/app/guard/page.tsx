@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { GpsInfo } from "@/lib/gps";
 import AlertModal from "@/components/modals/alert-modal";
-import { isCurrentInAppBrowser } from "./in-app-browser";
+import { isCurrentInAppBrowser, isStandaloneGuardApp } from "./in-app-browser";
 import InAppBrowserGuide from "./in-app-browser-guide";
+import GuardBrowserGate from "./guard-browser-gate";
 
 type EmployeeRow = {
   id: string;
@@ -54,6 +55,13 @@ type LogoutPushResult = {
   serverSubscription: "removed" | "not-found" | "skipped" | "failed";
   session: "removed" | "failed";
 };
+
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform?: string }>;
+};
+
+type GuardLaunchState = "checking" | "in-app" | "standalone" | "installable-browser" | "browser-installed-or-unavailable";
 
 const guardNameStorageKey = "ollbareun.guard.name";
 const guardSessionStorageKey = "ollbareun.guard.session";
@@ -184,14 +192,51 @@ export default function GuardPage() {
   const [savedGuardName, setSavedGuardName] = useState(readStoredGuardName);
   const [logoutPushResult] = useState(readLogoutPushResult);
   const [errorMessage, setErrorMessage] = useState("");
-  const [isInAppBrowser, setIsInAppBrowser] = useState<boolean | null>(null);
+  const [launchState, setLaunchState] = useState<GuardLaunchState>("checking");
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsInAppBrowser(isCurrentInAppBrowser());
-    }, 0);
+    if (isCurrentInAppBrowser()) {
+      const timer = setTimeout(() => {
+        setLaunchState("in-app");
+      }, 0);
 
-    return () => clearTimeout(timer);
+      return () => clearTimeout(timer);
+    }
+
+    if (isStandaloneGuardApp()) {
+      const timer = setTimeout(() => {
+        setLaunchState("standalone");
+      }, 0);
+
+      return () => clearTimeout(timer);
+    }
+
+    function handleBeforeInstallPrompt(event: Event) {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+      setLaunchState("installable-browser");
+    }
+
+    function handleAppInstalled() {
+      setInstallPrompt(null);
+      setLaunchState("browser-installed-or-unavailable");
+    }
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    const timer = setTimeout(() => {
+      setLaunchState((currentState) =>
+        currentState === "checking" ? "browser-installed-or-unavailable" : currentState,
+      );
+    }, 600);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
   }, []);
 
   useEffect(() => {
@@ -223,9 +268,19 @@ export default function GuardPage() {
   return (
     <main className="min-h-screen bg-canvas text-ink font-apple selection:bg-primary/20">
       <div className="mx-auto flex min-h-screen w-full max-w-[600px] flex-col justify-center gap-6 px-5 py-10">
-        {isInAppBrowser === true && <InAppBrowserGuide />}
+        {launchState === "in-app" && <InAppBrowserGuide />}
 
-        {isInAppBrowser === false && (
+        {(launchState === "installable-browser" || launchState === "browser-installed-or-unavailable") && (
+          <GuardBrowserGate
+            installPrompt={installPrompt}
+            onInstalled={() => {
+              setInstallPrompt(null);
+              setLaunchState("browser-installed-or-unavailable");
+            }}
+          />
+        )}
+
+        {launchState === "standalone" && (
           <>
             <form className="w-full space-y-6" onSubmit={handleGuardAuth}>
               <div className="space-y-4">

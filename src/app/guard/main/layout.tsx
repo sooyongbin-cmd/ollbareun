@@ -1,6 +1,6 @@
 import Link from "next/link";
 import GuardSessionSummary from "./guard-session-summary";
-import { PowerIcon } from "@/components/icons/power-icon";
+import GuardLogoutButton from "./guard-logout-button";
 import { GuardIcon } from "@/components/icons/guard-icon";
 
 export default function GuardMainLayout({
@@ -33,14 +33,7 @@ export default function GuardMainLayout({
             <GuardSessionSummary />
           </div>
           <div className="flex items-center gap-6">
-            <Link
-              href="/guard"
-              role="button"
-              aria-label="로그아웃"
-              className="button-secondary inline-flex h-11 w-11 items-center justify-center !p-0"
-            >
-              <PowerIcon size={24} className="lucide lucide-power" />
-            </Link>
+            <GuardLogoutButton />
           </div>
         </div>
       </nav>

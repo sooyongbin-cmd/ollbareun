@@ -1,8 +1,15 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import AttendancePage from "./attendance/page";
 import GuardMainLayout from "./layout";
 import GuardMainPage from "./page";
+
+const push = vi.fn();
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push }),
+}));
 
 const guardSession = {
   employee: {
@@ -29,6 +36,12 @@ const guardSession = {
 };
 
 describe("guard main navigation", () => {
+  beforeEach(() => {
+    push.mockReset();
+    vi.restoreAllMocks();
+    window.sessionStorage.clear();
+  });
+
   it("shows authenticated guard name and phone in the section navigation", async () => {
     window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
 
@@ -47,7 +60,28 @@ describe("guard main navigation", () => {
     expect(screen.queryByRole("link", { name: "경비원 출입" })).not.toBeInTheDocument();
   });
 
-  it("keeps logout navigation on the guard login page", () => {
+  it("removes push subscription data before guard logout navigation", async () => {
+    const user = userEvent.setup();
+    const unsubscribe = vi.fn().mockResolvedValue(true);
+    const getSubscription = vi.fn().mockResolvedValue({
+      endpoint: "https://push.example.test/subscription-1",
+      unsubscribe,
+    });
+    const getRegistration = vi.fn().mockResolvedValue({
+      pushManager: { getSubscription },
+    });
+    Object.defineProperty(navigator, "serviceWorker", {
+      configurable: true,
+      value: {
+        getRegistration,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      },
+    });
+    const fetchMock = vi.fn().mockResolvedValue(Response.json({ success: true }));
+    vi.stubGlobal("fetch", fetchMock);
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
+
     render(
       <GuardMainLayout>
         <GuardMainPage />
@@ -55,7 +89,22 @@ describe("guard main navigation", () => {
     );
 
     const logoutButton = screen.getByRole("button", { name: "로그아웃" });
-    expect(logoutButton).toHaveAttribute("href", "/guard");
+    await user.click(logoutButton);
+
+    expect(getRegistration).toHaveBeenCalledWith("/sw.js");
+    expect(unsubscribe).toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/notifications/unsubscribe",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          employeeId: "employee-1",
+          endpoint: "https://push.example.test/subscription-1",
+        }),
+      }),
+    );
+    expect(window.sessionStorage.getItem("ollbareun.guard.session")).toBeNull();
+    expect(push).toHaveBeenCalledWith("/guard");
     expect(screen.queryByText("로그아웃")).not.toBeInTheDocument();
   });
 

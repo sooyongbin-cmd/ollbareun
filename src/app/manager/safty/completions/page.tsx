@@ -32,6 +32,7 @@ export default function EducationCompletionsPage() {
   const [completions, setCompletions] = useState<EducationCompletionRow[]>([]);
   const [resources, setResources] = useState<EducationResourceRow[]>([]);
   const [employees, setEmployees] = useState<EmployeeRow[]>([]);
+  const [subscribedEmployeeIds, setSubscribedEmployeeIds] = useState<Set<string>>(new Set());
   const [nameQuery, setNameQuery] = useState("");
   const [sortKey, setSortKey] = useState<"name" | "completion">("name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
@@ -54,14 +55,16 @@ export default function EducationCompletionsPage() {
 
     async function loadData() {
       try {
-        const [completionsResponse, resourcesResponse, bootstrapResponse] = await Promise.all([
+        const [completionsResponse, resourcesResponse, bootstrapResponse, subscriptionsResponse] = await Promise.all([
           fetch("/api/education/completions"),
           fetch("/api/education/resources"),
           fetch("/api/bootstrap"),
+          fetch("/api/notifications/subscriptions"),
         ]);
         const completionsPayload = await completionsResponse.json();
         const resourcesPayload = await resourcesResponse.json();
         const bootstrapPayload = await bootstrapResponse.json();
+        const subscriptionsPayload = await subscriptionsResponse.json();
 
         if (!completionsResponse.ok) {
           throw new Error(completionsPayload.error ?? "교육이수 목록을 불러오지 못했습니다.");
@@ -72,11 +75,15 @@ export default function EducationCompletionsPage() {
         if (!bootstrapResponse.ok) {
           throw new Error(bootstrapPayload.error ?? "직원 목록을 불러오지 못했습니다.");
         }
+        if (!subscriptionsResponse.ok) {
+          throw new Error(subscriptionsPayload.error ?? "구독상태를 불러오지 못했습니다.");
+        }
 
         if (!ignore) {
           setCompletions(completionsPayload.completions ?? []);
           setResources(resourcesPayload.resources ?? []);
           setEmployees(bootstrapPayload.employees ?? []);
+          setSubscribedEmployeeIds(new Set(subscriptionsPayload.employeeIds ?? []));
         }
       } catch (loadError) {
         if (!ignore) {
@@ -273,18 +280,20 @@ export default function EducationCompletionsPage() {
                   >
                     이수현황
                   </SortableHeader>
+                  <th className="text-left">구독상태</th>
                 </tr>
               </thead>
               <tbody>
                 {sortedEmployees.length === 0 ? (
                   <tr>
-                    <td colSpan={2} className="p-8 text-center text-ink-muted-48 italic">
+                    <td colSpan={3} className="p-8 text-center text-ink-muted-48 italic">
                       조회 결과에 해당하는 직원이 없습니다.
                     </td>
                   </tr>
                 ) : (
                   sortedEmployees.map((employee) => {
                     const completedCount = completedCountByEmployeeId.get(employee.id) ?? 0;
+                    const isSubscribed = subscribedEmployeeIds.has(employee.id);
                     return (
                       <tr key={employee.id} className="hover:bg-canvas-parchment transition-colors">
                         <td className="font-semibold">{employee.name}</td>
@@ -295,6 +304,17 @@ export default function EducationCompletionsPage() {
                           >
                             {completedCount}/{totalResourceCount}
                           </Link>
+                        </td>
+                        <td>
+                          <span
+                            className={
+                              isSubscribed
+                                ? "inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-[13px] font-semibold text-primary"
+                                : "inline-flex items-center rounded-full bg-canvas-parchment px-3 py-1 text-[13px] font-semibold text-ink-muted-48"
+                            }
+                          >
+                            {isSubscribed ? "구독중" : "미구독"}
+                          </span>
                         </td>
                       </tr>
                     );

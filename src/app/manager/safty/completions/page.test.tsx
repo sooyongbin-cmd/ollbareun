@@ -71,6 +71,9 @@ describe("education completions page", () => {
             summary: { totalEmployees: 3, currentlyClockedIn: 0 },
           });
         }
+        if (url.endsWith("/api/notifications/subscriptions")) {
+          return Response.json({ employeeIds: ["employee-1"] });
+        }
         return Response.json({}, { status: 404 });
       }),
     );
@@ -82,10 +85,13 @@ describe("education completions page", () => {
     expect(await screen.findByRole("heading", { name: "교육이수관리" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "직원" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "이수현황" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "구독상태" })).toBeInTheDocument();
 
     // Active employees
     expect(screen.getByText("홍길동")).toBeInTheDocument();
     expect(screen.getByText("이순신")).toBeInTheDocument();
+    expect(screen.getByText("구독중")).toBeInTheDocument();
+    expect(screen.getByText("미구독")).toBeInTheDocument();
 
     // Retired employee should NOT be rendered
     expect(screen.queryByText("퇴직자")).not.toBeInTheDocument();

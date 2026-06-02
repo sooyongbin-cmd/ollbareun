@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
     const supabase = getSupabase();
 
-    // Upsert subscription to handle multiple devices/sessions
+    // Keep one current push subscription per employee.
     const { data, error } = await supabase
       .from("push_subscriptions")
       .upsert(
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
           auth: subscription.keys.auth,
           updated_at: new Date().toISOString(),
         },
-        { onConflict: "employee_id,endpoint" },
+        { onConflict: "employee_id" },
       )
       .select()
       .single();

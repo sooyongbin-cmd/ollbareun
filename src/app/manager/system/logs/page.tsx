@@ -62,14 +62,14 @@ function getMainPushStatusLabel(status: GuardSessionLogRow["main_push_status"]) 
 function StatusIcon({ status }: { status: "success" | "failed" | "error" }) {
   if (status === "success") {
     return (
-      <span className="inline-flex items-center justify-center text-primary" role="img" aria-label="성공">
+      <span className="inline-flex items-center justify-center text-[#16a34a]" role="img" aria-label="성공">
         <CheckIcon size={18} />
       </span>
     );
   }
 
   return (
-    <span className="inline-flex items-center justify-center text-status-warn" role="img" aria-label="실패">
+    <span className="inline-flex items-center justify-center text-[#dc2626]" role="img" aria-label="실패">
       <XmarkIcon size={18} />
     </span>
   );

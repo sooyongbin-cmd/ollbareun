@@ -14,6 +14,11 @@ type PushStep = {
   status: PushStepStatus;
 };
 
+type StoredGuardSessionInfo = {
+  employeeId: string | null;
+  sessionLogId: string | null;
+};
+
 const initialPushSteps: PushStep[] = [
   {
     id: "support",
@@ -98,6 +103,44 @@ function getStepStatusLabel(status: PushStepStatus) {
   return "대기";
 }
 
+function readStoredGuardSessionInfo(): StoredGuardSessionInfo {
+  try {
+    const stored = window.sessionStorage.getItem(guardSessionStorageKey);
+    if (!stored) {
+      return { employeeId: null, sessionLogId: null };
+    }
+
+    const session = JSON.parse(stored);
+    return {
+      employeeId: typeof session.employee?.id === "string" ? session.employee.id : null,
+      sessionLogId: typeof session.sessionLogId === "string" ? session.sessionLogId : null,
+    };
+  } catch (err) {
+    console.error("Error reading guard session for push registration:", err);
+    return { employeeId: null, sessionLogId: null };
+  }
+}
+
+async function recordMainPushResult(
+  sessionLogId: string | null,
+  status: "success" | "warning" | "error" | "skipped",
+  result: unknown,
+) {
+  if (!sessionLogId) {
+    return;
+  }
+
+  try {
+    await fetch(`/api/guard/session-logs/${sessionLogId}/main-push`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status, result }),
+    });
+  } catch (error) {
+    console.error("Failed to record guard main push log:", error);
+  }
+}
+
 export default function GuardPushRegister() {
   const [showInAppModal, setShowInAppModal] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
@@ -118,6 +161,8 @@ export default function GuardPushRegister() {
     if (typeof window === "undefined") return;
 
     async function registerPush() {
+      const sessionInfo = readStoredGuardSessionInfo();
+
       // 1. Check support
       updateStep("support", "running", "현재 브라우저의 Web Push 지원 여부를 확인하는 중입니다.");
       if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
@@ -125,28 +170,29 @@ export default function GuardPushRegister() {
         setPushStatusDetail("이 브라우저는 Service Worker 또는 PushManager를 지원하지 않습니다.");
         updateStep("support", "error", "Service Worker 또는 PushManager가 지원되지 않습니다.");
         console.warn("Push notifications are not supported in this browser.");
+        await recordMainPushResult(sessionInfo.sessionLogId, "error", {
+          title: "푸시 알림을 사용할 수 없음",
+          detail: "Service Worker 또는 PushManager가 지원되지 않습니다.",
+          employeeId: sessionInfo.employeeId,
+        });
         return;
       }
       updateStep("support", "success", "Service Worker와 PushManager를 사용할 수 있습니다.");
 
       // 2. Get employee ID from session
       updateStep("session", "running", "sessionStorage에서 로그인한 경비원 세션을 확인하는 중입니다.");
-      let employeeId: string | null = null;
-      try {
-        const stored = window.sessionStorage.getItem(guardSessionStorageKey);
-        if (stored) {
-          const session = JSON.parse(stored);
-          employeeId = typeof session.employee?.id === "string" ? session.employee.id : null;
-        }
-      } catch (err) {
-        console.error("Error reading guard session for push registration:", err);
-      }
+      const employeeId = sessionInfo.employeeId;
 
       if (!employeeId) {
         setPushStatusTitle("푸시 알림 등록 건너뜀");
         setPushStatusDetail("로그인한 경비원 세션을 찾지 못해 구독 등록을 진행하지 않았습니다.");
         updateStep("session", "warning", "직원 ID가 포함된 경비원 세션이 없습니다.");
         console.log("No active guard employee session. Skipping push subscription.");
+        await recordMainPushResult(sessionInfo.sessionLogId, "skipped", {
+          title: "푸시 알림 등록 건너뜀",
+          detail: "로그인한 경비원 세션을 찾지 못해 구독 등록을 진행하지 않았습니다.",
+          employeeId,
+        });
         return;
       }
       updateStep("session", "success", `직원 ID ${employeeId} 세션을 확인했습니다.`);
@@ -163,6 +209,11 @@ export default function GuardPushRegister() {
         setPushStatusDetail("푸시 알림 수신에 필요한 /sw.js 등록에 실패했습니다.");
         updateStep("service-worker", "error", err instanceof Error ? err.message : "서비스워커 등록에 실패했습니다.");
         console.error("Service Worker registration failed:", err);
+        await recordMainPushResult(sessionInfo.sessionLogId, "error", {
+          title: "서비스워커 등록 실패",
+          detail: err instanceof Error ? err.message : "서비스워커 등록에 실패했습니다.",
+          employeeId,
+        });
         return;
       }
 
@@ -176,6 +227,11 @@ export default function GuardPushRegister() {
             setPushStatusDetail("브라우저 알림 권한을 허용해야 교육알림 Push를 받을 수 있습니다.");
             updateStep("permission", "warning", `사용자가 알림 권한을 ${permission} 상태로 남겼습니다.`);
             console.log("Notification permission denied by user.");
+            await recordMainPushResult(sessionInfo.sessionLogId, "warning", {
+              title: "알림 권한이 허용되지 않음",
+              detail: `사용자가 알림 권한을 ${permission} 상태로 남겼습니다.`,
+              employeeId,
+            });
             return;
           }
         } catch (err) {
@@ -183,6 +239,11 @@ export default function GuardPushRegister() {
           setPushStatusDetail("브라우저 알림 권한 요청 중 오류가 발생했습니다.");
           updateStep("permission", "error", err instanceof Error ? err.message : "알림 권한 요청에 실패했습니다.");
           console.error("Failed to request notification permission:", err);
+          await recordMainPushResult(sessionInfo.sessionLogId, "error", {
+            title: "알림 권한 요청 실패",
+            detail: err instanceof Error ? err.message : "알림 권한 요청에 실패했습니다.",
+            employeeId,
+          });
           return;
         }
       } else if (Notification.permission === "denied") {
@@ -190,6 +251,11 @@ export default function GuardPushRegister() {
         setPushStatusDetail("브라우저 설정에서 알림 권한을 다시 허용해야 교육알림 Push를 받을 수 있습니다.");
         updateStep("permission", "warning", "브라우저 알림 권한이 차단되어 있습니다.");
         console.log("Notification permission was previously denied.");
+        await recordMainPushResult(sessionInfo.sessionLogId, "warning", {
+          title: "알림 권한 차단됨",
+          detail: "브라우저 알림 권한이 차단되어 있습니다.",
+          employeeId,
+        });
         return;
       }
       updateStep("permission", "success", "브라우저 알림 권한이 허용되어 있습니다.");
@@ -203,6 +269,11 @@ export default function GuardPushRegister() {
           setPushStatusDetail("NEXT_PUBLIC_VAPID_PUBLIC_KEY 환경변수가 없어 푸시 구독을 생성할 수 없습니다.");
           updateStep("subscription", "error", "NEXT_PUBLIC_VAPID_PUBLIC_KEY가 설정되어 있지 않습니다.");
           console.error("NEXT_PUBLIC_VAPID_PUBLIC_KEY is not defined in environment variables.");
+          await recordMainPushResult(sessionInfo.sessionLogId, "error", {
+            title: "VAPID 공개키 누락",
+            detail: "NEXT_PUBLIC_VAPID_PUBLIC_KEY가 설정되어 있지 않습니다.",
+            employeeId,
+          });
           return;
         }
 
@@ -229,6 +300,11 @@ export default function GuardPushRegister() {
           setPushStatusDetail("브라우저에서 endpoint 또는 암호화 키를 받지 못했습니다.");
           updateStep("subscription", "error", "endpoint, p256dh, auth 중 일부가 비어 있습니다.");
           console.error("Invalid subscription keys received from PushManager.");
+          await recordMainPushResult(sessionInfo.sessionLogId, "error", {
+            title: "구독 정보 확인 실패",
+            detail: "endpoint, p256dh, auth 중 일부가 비어 있습니다.",
+            employeeId,
+          });
           return;
         }
         updateStep(
@@ -265,11 +341,23 @@ export default function GuardPushRegister() {
         setPushStatusDetail("교육알림 Push를 받을 수 있도록 현재 브라우저 구독 정보가 저장되었습니다.");
         updateStep("save", "success", "Supabase push_subscriptions 테이블에 구독 정보를 저장했습니다.");
         console.log("Push subscription successfully saved to backend.");
+        await recordMainPushResult(sessionInfo.sessionLogId, "success", {
+          title: "푸시 알림 연결 완료",
+          detail: "교육알림 Push를 받을 수 있도록 현재 브라우저 구독 정보가 저장되었습니다.",
+          employeeId,
+          endpoint: maskEndpoint(endpoint),
+          subscription: hadExistingSubscription ? "existing" : "created",
+        });
       } catch (err) {
         setPushStatusTitle("푸시 알림 연결 실패");
         setPushStatusDetail("브라우저 구독 생성 또는 서버 저장 중 오류가 발생했습니다.");
         updateStep("save", "error", err instanceof Error ? err.message : "구독 저장에 실패했습니다.");
         console.error("Failed to subscribe to push notification:", err);
+        await recordMainPushResult(sessionInfo.sessionLogId, "error", {
+          title: "푸시 알림 연결 실패",
+          detail: err instanceof Error ? err.message : "구독 저장에 실패했습니다.",
+          employeeId,
+        });
       }
     }
 

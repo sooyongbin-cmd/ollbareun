@@ -9,21 +9,25 @@ const guardLogoutPushResultStorageKey = "ollbareun.guard.logout.pushResult";
 type LogoutPushResult = {
   completedAt: string;
   employeeId: string | null;
+  sessionLogId?: string | null;
   endpoint: string | null;
   browserSubscription: "removed" | "not-found" | "unsupported" | "failed";
   serverSubscription: "removed" | "not-found" | "skipped" | "failed";
   session: "removed" | "failed";
 };
 
-function readEmployeeIdFromSession() {
+function readGuardSessionInfo() {
   try {
     const stored = window.sessionStorage.getItem(guardSessionStorageKey);
-    if (!stored) return null;
+    if (!stored) return { employeeId: null, sessionLogId: null };
 
     const session = JSON.parse(stored);
-    return typeof session.employee?.id === "string" ? session.employee.id : null;
+    return {
+      employeeId: typeof session.employee?.id === "string" ? session.employee.id : null,
+      sessionLogId: typeof session.sessionLogId === "string" ? session.sessionLogId : null,
+    };
   } catch {
-    return null;
+    return { employeeId: null, sessionLogId: null };
   }
 }
 
@@ -52,11 +56,32 @@ function writeLogoutPushResult(result: LogoutPushResult) {
   }
 }
 
+async function recordLogoutResult(sessionLogId: string | null, result: LogoutPushResult) {
+  if (!sessionLogId) {
+    return;
+  }
+
+  try {
+    await fetch(`/api/guard/session-logs/${sessionLogId}/logout`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        browserPushStatus: result.browserSubscription,
+        serverPushStatus: result.serverSubscription,
+        sessionStatus: result.session,
+        result,
+      }),
+    });
+  } catch (error) {
+    console.error("Failed to record guard logout log:", error);
+  }
+}
+
 export default function GuardLogoutButton() {
   const router = useRouter();
 
   async function handleLogout() {
-    const employeeId = readEmployeeIdFromSession();
+    const { employeeId, sessionLogId } = readGuardSessionInfo();
     let endpoint: string | null = null;
     let browserSubscription: LogoutPushResult["browserSubscription"] = "not-found";
     let serverSubscription: LogoutPushResult["serverSubscription"] = "skipped";
@@ -97,14 +122,18 @@ export default function GuardLogoutButton() {
       // Navigation below still completes logout for browsers with unavailable storage.
     }
 
-    writeLogoutPushResult({
+    const logoutResult = {
       completedAt: new Date().toISOString(),
       employeeId,
+      sessionLogId,
       endpoint,
       browserSubscription,
       serverSubscription,
       session,
-    });
+    };
+
+    await recordLogoutResult(sessionLogId, logoutResult);
+    writeLogoutPushResult(logoutResult);
 
     router.push("/guard");
   }

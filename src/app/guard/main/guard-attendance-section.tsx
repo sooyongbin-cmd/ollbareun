@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { distanceMeters, canClockIn, canClockOut, type AttendanceRecord, type Worksite } from "@/lib/phase1";
-import { formatGpsInfo, type GpsInfo } from "@/lib/gps";
+import type { GpsInfo } from "@/lib/gps";
 import AlertModal from "@/components/modals/alert-modal";
 
 type EmployeeRow = {
@@ -95,7 +95,7 @@ export default function GuardAttendanceSection() {
 
   useEffect(() => {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
-      setLocError("위치 확인 불가");
+      queueMicrotask(() => setLocError("위치 확인 불가"));
       return;
     }
     navigator.geolocation.getCurrentPosition(
@@ -105,13 +105,15 @@ export default function GuardAttendanceSection() {
     );
   }, []);
 
-  const distance = useMemo(() => {
-    if (!currentGps || !session?.worksite?.gps_info) return null;
-    return distanceMeters(
-      currentGps.latitude, currentGps.longitude,
-      session.worksite.gps_info.latitude, session.worksite.gps_info.longitude
-    );
-  }, [currentGps, session?.worksite?.gps_info]);
+  const distance =
+    currentGps && session?.worksite?.gps_info
+      ? distanceMeters(
+          currentGps.latitude,
+          currentGps.longitude,
+          session.worksite.gps_info.latitude,
+          session.worksite.gps_info.longitude,
+        )
+      : null;
 
   async function handleClockIn() {
     if (!session?.employee || !session.worksite || processing) return;

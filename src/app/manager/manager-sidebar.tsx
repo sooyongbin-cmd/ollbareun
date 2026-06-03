@@ -9,7 +9,7 @@ const menu = [
     children: ["요약 카드", "출퇴근 추이 차트", "안전교육 이수율 추이 차트", "실시간 출퇴근 현황"],
   },
   {
-    label: "직원 관리",
+    label: "직원관리",
     children: [
       { label: "직원명부관리", href: "/manager/employee/employees" },
       { label: "근무지관리", href: "/manager/employee/worksites" },
@@ -24,8 +24,12 @@ const menu = [
     ],
   },
   {
-    label: "리포트 출력",
+    label: "리포트출력",
     children: ["주차 / 야간 / 직원이름 검색", "출퇴근 기록", "교육이수 자료", "자동 양식 생성"],
+  },
+  {
+    label: "시스템",
+    children: [{ label: "로그", href: "/manager/system/logs" }],
   },
 ];
 

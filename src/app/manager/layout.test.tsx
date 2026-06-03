@@ -51,4 +51,19 @@ describe("manager layout loading state", () => {
     );
     expect(screen.queryByText("교육 대상 관리 목록/등록/수정")).not.toBeInTheDocument();
   });
+
+  it("adds system logs to the manager menu", () => {
+    render(
+      <ManagerLayout>
+        <div>관리자 본문</div>
+      </ManagerLayout>,
+    );
+
+    expect(screen.getAllByText("직원관리")[0]).toBeInTheDocument();
+    expect(screen.queryByText("직원 관리")).not.toBeInTheDocument();
+    expect(screen.getAllByText("리포트출력")[0]).toBeInTheDocument();
+    expect(screen.queryByText("리포트 출력")).not.toBeInTheDocument();
+    expect(screen.getAllByText("시스템")[0]).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: "로그" })[0]).toHaveAttribute("href", "/manager/system/logs");
+  });
 });

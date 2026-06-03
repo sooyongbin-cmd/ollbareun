@@ -34,6 +34,7 @@ function readGuardSessionSnapshot() {
 
 function subscribeToSessionChange(onStoreChange: () => void) {
   if (typeof window === "undefined") return () => {};
+  void onStoreChange;
   return () => {};
 }
 

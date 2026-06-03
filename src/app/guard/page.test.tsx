@@ -138,8 +138,8 @@ describe("guard login page", () => {
       expect(screen.queryByText("로그아웃 Push 처리 결과")).not.toBeInTheDocument();
     });
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "기본 브라우저로 열기 안내" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "기본 브라우저로 열기" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "기본 브라우저로 열기 안내" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "기본 브라우저로 열기" })).toBeInTheDocument();
   });
 
   it("opens the default browser from the inline guide on Android", async () => {

@@ -38,6 +38,7 @@ describe("manager system logs page", () => {
     render(<ManagerSystemLogsPage />);
 
     expect(await screen.findByRole("heading", { name: "로그현황" })).toBeInTheDocument();
+    expect(screen.getByText(/최신 100건만 유지합니다/)).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "경비원" })).toBeInTheDocument();
     expect(await screen.findByText("홍길동")).toBeInTheDocument();
     expect(screen.getByText(/2026\. 6\. 3\./)).toBeInTheDocument();

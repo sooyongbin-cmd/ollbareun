@@ -23,7 +23,12 @@ describe("guard session logs", () => {
     });
     const select = vi.fn().mockReturnValue({ single });
     const insert = vi.fn().mockReturnValue({ select });
-    const supabase = { from: vi.fn().mockReturnValue({ insert }) };
+    const pruneQuery = {
+      select: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      range: vi.fn().mockResolvedValue({ data: [], error: null }),
+    };
+    const supabase = { from: vi.fn().mockReturnValueOnce({ insert }).mockReturnValueOnce(pruneQuery) };
     vi.mocked(getSupabase).mockReturnValue(supabase as never);
 
     await expect(
@@ -39,6 +44,54 @@ describe("guard session logs", () => {
         login_error: null,
       }),
     );
+    expect(pruneQuery.range).toHaveBeenCalledWith(100, 1099);
+  });
+
+  it("removes logs older than the latest 100 after creating a log", async () => {
+    const single = vi.fn().mockResolvedValue({
+      data: { id: "log-1", guard_name: "홍길동", login_status: "success" },
+      error: null,
+    });
+    const insert = vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ single }) });
+    const pruneQuery = {
+      select: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      range: vi.fn().mockResolvedValue({ data: [{ id: "old-1" }, { id: "old-2" }], error: null }),
+    };
+    const deleteIn = vi.fn().mockResolvedValue({ error: null });
+    const deleteQuery = {
+      delete: vi.fn().mockReturnValue({ in: deleteIn }),
+    };
+    const supabase = {
+      from: vi.fn().mockReturnValueOnce({ insert }).mockReturnValueOnce(pruneQuery).mockReturnValueOnce(deleteQuery),
+    };
+    vi.mocked(getSupabase).mockReturnValue(supabase as never);
+
+    await createGuardSessionLog({ employeeId: "emp-1", guardName: "홍길동", loginStatus: "success" });
+
+    expect(deleteQuery.delete).toHaveBeenCalled();
+    expect(deleteIn).toHaveBeenCalledWith("id", ["old-1", "old-2"]);
+  });
+
+  it("keeps returning the created log when pruning old logs fails", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const single = vi.fn().mockResolvedValue({
+      data: { id: "log-1", guard_name: "홍길동", login_status: "success" },
+      error: null,
+    });
+    const insert = vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ single }) });
+    const pruneQuery = {
+      select: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      range: vi.fn().mockResolvedValue({ data: null, error: { message: "delete policy missing" } }),
+    };
+    const supabase = { from: vi.fn().mockReturnValueOnce({ insert }).mockReturnValueOnce(pruneQuery) };
+    vi.mocked(getSupabase).mockReturnValue(supabase as never);
+
+    await expect(
+      createGuardSessionLog({ employeeId: "emp-1", guardName: "홍길동", loginStatus: "success" }),
+    ).resolves.toMatchObject({ id: "log-1" });
+    expect(consoleError).toHaveBeenCalledWith("Failed to prune guard session logs:", expect.any(Error));
   });
 
   it("updates the main push result", async () => {

@@ -40,6 +40,37 @@ function requireLogId(id: unknown) {
   return id.trim();
 }
 
+async function pruneGuardSessionLogs(limit = 100) {
+  const supabase = getSupabase();
+  const batchSize = 1_000;
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("guard_session_logs")
+      .select("id")
+      .order("login_at", { ascending: false })
+      .order("created_at", { ascending: false })
+      .range(limit, limit + batchSize - 1);
+
+    throwIfError(error);
+
+    const ids = (data ?? [])
+      .map((log) => ("id" in log ? log.id : null))
+      .filter((id): id is string => typeof id === "string" && id.trim() !== "");
+
+    if (ids.length === 0) {
+      return;
+    }
+
+    const { error: deleteError } = await supabase.from("guard_session_logs").delete().in("id", ids);
+    throwIfError(deleteError);
+
+    if (ids.length < batchSize) {
+      return;
+    }
+  }
+}
+
 export async function createGuardSessionLog(input: {
   employeeId?: string | null;
   guardName: unknown;
@@ -61,7 +92,15 @@ export async function createGuardSessionLog(input: {
     .single();
 
   throwIfError(error);
-  return data as GuardSessionLogRow;
+  const log = data as GuardSessionLogRow;
+
+  try {
+    await pruneGuardSessionLogs();
+  } catch (pruneError) {
+    console.error("Failed to prune guard session logs:", pruneError);
+  }
+
+  return log;
 }
 
 export async function updateGuardSessionMainPushLog(input: {

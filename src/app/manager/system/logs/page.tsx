@@ -20,17 +20,35 @@ type GuardSessionLogRow = {
   logout_push_result: unknown | null;
 };
 
-function formatDateTime(value: string | null) {
+function formatDateTimeParts(value: string | null) {
   if (!value) {
-    return "-";
+    return null;
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return value;
+    return { date: value, time: "" };
   }
 
-  return date.toLocaleString("ko-KR");
+  return {
+    date: date.toLocaleDateString("ko-KR"),
+    time: date.toLocaleTimeString("ko-KR"),
+  };
+}
+
+function DateTimeCell({ value }: { value: string | null }) {
+  const parts = formatDateTimeParts(value);
+
+  if (!parts) {
+    return <span>-</span>;
+  }
+
+  return (
+    <span className="inline-flex flex-col leading-relaxed">
+      <span>{parts.date}</span>
+      {parts.time ? <span className="text-ink-muted-48">{parts.time}</span> : null}
+    </span>
+  );
 }
 
 function getLoginStatusLabel(status: GuardSessionLogRow["login_status"]) {
@@ -205,7 +223,7 @@ export default function ManagerSystemLogsPage() {
               <thead>
                 <tr>
                   <th className="text-left">로그인 시각</th>
-                  <th className="text-left">경비원 이름</th>
+                  <th className="text-left">경비원</th>
                   <th className="text-center">로그인 결과</th>
                   <th className="text-center">main Push 결과</th>
                   <th className="text-left">로그아웃 시각</th>
@@ -223,11 +241,15 @@ export default function ManagerSystemLogsPage() {
                 ) : (
                   logs.map((log) => (
                     <tr key={log.id} className="hover:bg-canvas-parchment transition-colors">
-                      <td className="whitespace-nowrap">{formatDateTime(log.login_at)}</td>
+                      <td className="whitespace-nowrap">
+                        <DateTimeCell value={log.login_at} />
+                      </td>
                       <td className="font-semibold">{log.guard_name}</td>
                       <td className="text-center">{getLoginStatusLabel(log.login_status)}</td>
                       <td className="text-center">{getMainPushStatusLabel(log.main_push_status)}</td>
-                      <td className="whitespace-nowrap">{formatDateTime(log.logout_at)}</td>
+                      <td className="whitespace-nowrap">
+                        <DateTimeCell value={log.logout_at} />
+                      </td>
                       <td className="min-w-[220px] text-ink-muted-48">{getLogoutPushSummary(log)}</td>
                       <td className="min-w-[180px] text-ink-muted-48">{getDetailSummary(log)}</td>
                     </tr>

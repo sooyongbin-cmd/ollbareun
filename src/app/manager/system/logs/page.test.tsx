@@ -42,8 +42,41 @@ describe("manager system logs page", () => {
     expect(await screen.findByText("홍길동")).toBeInTheDocument();
     expect(screen.getByText(/2026\. 6\. 3\./)).toBeInTheDocument();
     expect(screen.getAllByText(/오/).length).toBeGreaterThanOrEqual(2);
-    expect(screen.getAllByText("성공").length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByRole("img", { name: "성공" })).toHaveLength(2);
     expect(screen.getByText("브라우저 removed / 서버 removed / 세션 removed")).toBeInTheDocument();
+  });
+
+  it("renders xmark icons for failed login and failed push statuses", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        Response.json({
+          logs: [
+            {
+              id: "log-2",
+              employee_id: null,
+              guard_name: "실패사용자",
+              login_status: "failed",
+              login_at: "2026-06-03T09:00:00.000Z",
+              login_error: "등록된 직원 정보와 일치하지 않습니다.",
+              main_push_processed_at: "2026-06-03T09:00:03.000Z",
+              main_push_status: "error",
+              main_push_result: null,
+              logout_at: null,
+              logout_browser_push_status: null,
+              logout_server_push_status: null,
+              logout_session_status: null,
+              logout_push_result: null,
+            },
+          ],
+        }),
+      ),
+    );
+
+    render(<ManagerSystemLogsPage />);
+
+    expect(await screen.findByText("실패사용자")).toBeInTheDocument();
+    expect(screen.getAllByRole("img", { name: "실패" })).toHaveLength(2);
   });
 
   it("reloads logs when filters change", async () => {

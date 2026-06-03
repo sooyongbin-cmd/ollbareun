@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
+import { CheckIcon } from "@/components/icons/check-icon";
+import { XmarkIcon } from "@/components/icons/xmark-icon";
 
 type GuardSessionLogRow = {
   id: string;
@@ -51,16 +53,38 @@ function DateTimeCell({ value }: { value: string | null }) {
   );
 }
 
-function getLoginStatusLabel(status: GuardSessionLogRow["login_status"]) {
-  return status === "success" ? "성공" : "실패";
-}
-
 function getMainPushStatusLabel(status: GuardSessionLogRow["main_push_status"]) {
-  if (status === "success") return "성공";
   if (status === "warning") return "확인필요";
-  if (status === "error") return "실패";
   if (status === "skipped") return "건너뜀";
   return "미처리";
+}
+
+function StatusIcon({ status }: { status: "success" | "failed" | "error" }) {
+  if (status === "success") {
+    return (
+      <span className="inline-flex items-center justify-center text-primary" role="img" aria-label="성공">
+        <CheckIcon size={18} />
+      </span>
+    );
+  }
+
+  return (
+    <span className="inline-flex items-center justify-center text-status-warn" role="img" aria-label="실패">
+      <XmarkIcon size={18} />
+    </span>
+  );
+}
+
+function MainPushStatus({ status }: { status: GuardSessionLogRow["main_push_status"] }) {
+  if (status === "success") {
+    return <StatusIcon status="success" />;
+  }
+
+  if (status === "error") {
+    return <StatusIcon status="error" />;
+  }
+
+  return <span>{getMainPushStatusLabel(status)}</span>;
 }
 
 function getLogoutPushSummary(log: GuardSessionLogRow) {
@@ -245,8 +269,12 @@ export default function ManagerSystemLogsPage() {
                         <DateTimeCell value={log.login_at} />
                       </td>
                       <td className="font-semibold">{log.guard_name}</td>
-                      <td className="text-center">{getLoginStatusLabel(log.login_status)}</td>
-                      <td className="text-center">{getMainPushStatusLabel(log.main_push_status)}</td>
+                      <td className="text-center">
+                        <StatusIcon status={log.login_status} />
+                      </td>
+                      <td className="text-center">
+                        <MainPushStatus status={log.main_push_status} />
+                      </td>
                       <td className="whitespace-nowrap">
                         <DateTimeCell value={log.logout_at} />
                       </td>

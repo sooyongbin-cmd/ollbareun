@@ -29,7 +29,7 @@ const menu = [
   },
   {
     label: "시스템",
-    children: [{ label: "로그", href: "/manager/system/logs" }],
+    children: [{ label: "로그현황", href: "/manager/system/logs" }],
   },
 ];
 

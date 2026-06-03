@@ -64,6 +64,6 @@ describe("manager layout loading state", () => {
     expect(screen.getAllByText("리포트출력")[0]).toBeInTheDocument();
     expect(screen.queryByText("리포트 출력")).not.toBeInTheDocument();
     expect(screen.getAllByText("시스템")[0]).toBeInTheDocument();
-    expect(screen.getAllByRole("link", { name: "로그" })[0]).toHaveAttribute("href", "/manager/system/logs");
+    expect(screen.getAllByRole("link", { name: "로그현황" })[0]).toHaveAttribute("href", "/manager/system/logs");
   });
 });

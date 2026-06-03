@@ -37,7 +37,7 @@ describe("manager system logs page", () => {
 
     render(<ManagerSystemLogsPage />);
 
-    expect(await screen.findByRole("heading", { name: "로그" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "로그현황" })).toBeInTheDocument();
     expect(await screen.findByText("홍길동")).toBeInTheDocument();
     expect(screen.getAllByText("성공").length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText("브라우저 removed / 서버 removed / 세션 removed")).toBeInTheDocument();

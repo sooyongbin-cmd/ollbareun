@@ -6,7 +6,7 @@ import Link from "next/link";
 const menu = [
   {
     label: "대시보드",
-    children: ["요약 카드", "출퇴근 추이 차트", "안전교육 이수율 추이 차트", "실시간 출퇴근 현황"],
+    children: [],
   },
   {
     label: "직원관리",
@@ -25,7 +25,10 @@ const menu = [
   },
   {
     label: "리포트출력",
-    children: ["주차 / 야간 / 직원이름 검색", "출퇴근 기록", "교육이수 자료", "자동 양식 생성"],
+    children: [
+      { label: "근태내역", href: "/manager/reports/attendance" },
+      { label: "교육이수자료", href: "/manager/reports/education" },
+    ],
   },
   {
     label: "시스템",
@@ -95,8 +98,9 @@ export default function ManagerSidebar() {
           {menu.map((item) => (
             <li key={item.label} className="py-2 px-2">
               <div className="text-[14px] font-semibold text-ink mb-2">{item.label}</div>
-              <div className="space-y-2 pl-2">
-                {item.children.map((child, idx) => {
+              {item.children.length > 0 ? (
+                <div className="space-y-2 pl-2">
+                  {item.children.map((child, idx) => {
                   const isLink = typeof child !== "string";
                   const label = isLink ? child.label : child;
                   const href = isLink ? child.href : "#";
@@ -114,8 +118,9 @@ export default function ManagerSidebar() {
                       {label}
                     </span>
                   );
-                })}
-              </div>
+                  })}
+                </div>
+              ) : null}
             </li>
           ))}
         </ul>

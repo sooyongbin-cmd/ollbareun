@@ -66,4 +66,28 @@ describe("manager layout loading state", () => {
     expect(screen.getAllByText("시스템")[0]).toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: "로그현황" })[0]).toHaveAttribute("href", "/manager/system/logs");
   });
+
+  it("removes dashboard submenus and keeps only the requested report links", () => {
+    render(
+      <ManagerLayout>
+        <div>관리자 본문</div>
+      </ManagerLayout>,
+    );
+
+    expect(screen.queryByText("요약 카드")).not.toBeInTheDocument();
+    expect(screen.queryByText("출퇴근 추이 차트")).not.toBeInTheDocument();
+    expect(screen.queryByText("안전교육 이수율 추이 차트")).not.toBeInTheDocument();
+    expect(screen.queryByText("실시간 출퇴근 현황")).not.toBeInTheDocument();
+    expect(screen.queryByText("주차 / 야간 / 직원이름 검색")).not.toBeInTheDocument();
+    expect(screen.queryByText("출퇴근 기록")).not.toBeInTheDocument();
+    expect(screen.queryByText("자동 양식 생성")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: "근태내역" })[0]).toHaveAttribute(
+      "href",
+      "/manager/reports/attendance",
+    );
+    expect(screen.getAllByRole("link", { name: "교육이수자료" })[0]).toHaveAttribute(
+      "href",
+      "/manager/reports/education",
+    );
+  });
 });

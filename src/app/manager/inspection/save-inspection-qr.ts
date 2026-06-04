@@ -39,6 +39,7 @@ function canvasToBlob(canvas: HTMLCanvasElement) {
 export async function saveInspectionQrImage(input: {
   payload: InspectionQrPayload;
   worksiteName: string;
+  siteName: string;
   fileName: string;
 }) {
   const qrDataUrl = await QRCode.toDataURL(JSON.stringify(input.payload), {
@@ -48,7 +49,7 @@ export async function saveInspectionQrImage(input: {
   const qrImage = await loadImage(qrDataUrl);
   const canvas = document.createElement("canvas");
   const width = 420;
-  const titleHeight = 84;
+  const titleHeight = 112;
   canvas.width = width;
   canvas.height = titleHeight + 340;
   const context = canvas.getContext("2d");
@@ -60,10 +61,11 @@ export async function saveInspectionQrImage(input: {
   context.fillStyle = "#ffffff";
   context.fillRect(0, 0, canvas.width, canvas.height);
   context.fillStyle = "#111111";
-  context.font = "700 28px sans-serif";
+  context.font = "700 24px sans-serif";
   context.textAlign = "center";
   context.textBaseline = "middle";
-  context.fillText(input.worksiteName, width / 2, 42);
+  context.fillText(`근무지 : ${input.worksiteName}`, width / 2, 32);
+  context.fillText(`현장명 : ${input.siteName}`, width / 2, 70);
   context.drawImage(qrImage, 50, titleHeight, 320, 320);
 
   const blob = await canvasToBlob(canvas);

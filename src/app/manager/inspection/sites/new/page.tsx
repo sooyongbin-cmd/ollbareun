@@ -152,6 +152,7 @@ export default function InspectionSiteNewPage() {
       await saveInspectionQrImage({
         payload: buildInspectionQrPayload(savedSite),
         worksiteName: savedSite.worksite_name,
+        siteName: savedSite.name,
         fileName: `올바른_현장점검_${savedSite.worksite_name}_${savedSite.name}`,
       });
     } catch (printError) {

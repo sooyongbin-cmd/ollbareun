@@ -120,7 +120,7 @@ function getDetailSummary(log: GuardSessionLogRow) {
 export default function ManagerSystemLogsPage() {
   const [logs, setLogs] = useState<GuardSessionLogRow[]>([]);
   const [guardName, setGuardName] = useState("");
-  const [loginStatus, setLoginStatus] = useState("");
+  const [showFailedLogins, setShowFailedLogins] = useState(true);
   const [pushStatus, setPushStatus] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -128,10 +128,10 @@ export default function ManagerSystemLogsPage() {
   const queryString = useMemo(() => {
     const params = new URLSearchParams();
     if (guardName.trim()) params.set("guardName", guardName.trim());
-    if (loginStatus) params.set("loginStatus", loginStatus);
+    params.set("loginStatus", showFailedLogins ? "failed" : "success");
     if (pushStatus) params.set("pushStatus", pushStatus);
     return params.toString();
-  }, [guardName, loginStatus, pushStatus]);
+  }, [guardName, showFailedLogins, pushStatus]);
 
   useEffect(() => {
     let ignore = false;
@@ -181,7 +181,7 @@ export default function ManagerSystemLogsPage() {
       </header>
 
       <section aria-label="로그 검색" className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50">
-        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_160px_160px]">
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_120px_160px] md:items-end">
           <div className="space-y-2">
             <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="log-guard-name">
               경비원 이름
@@ -195,21 +195,15 @@ export default function ManagerSystemLogsPage() {
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="log-login-status">
-              로그인 상태
-            </label>
-            <select
-              className="field"
-              id="log-login-status"
-              value={loginStatus}
-              onChange={(event) => setLoginStatus(event.target.value)}
-            >
-              <option value="">전체</option>
-              <option value="success">성공</option>
-              <option value="failed">실패</option>
-            </select>
-          </div>
+          <label className="flex h-[48px] items-center gap-2 text-[15px] font-semibold text-ink-muted-80">
+            <input
+              checked={showFailedLogins}
+              className="h-4 w-4 accent-primary"
+              onChange={(event) => setShowFailedLogins(event.target.checked)}
+              type="checkbox"
+            />
+            실패
+          </label>
 
           <div className="space-y-2">
             <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="log-push-status">

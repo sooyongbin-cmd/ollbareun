@@ -90,16 +90,24 @@ describe("manager system logs page", () => {
     render(<ManagerSystemLogsPage />);
 
     await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith("/api/guard/session-logs");
+      expect(fetchMock).toHaveBeenCalledWith("/api/guard/session-logs?loginStatus=failed");
     });
 
+    expect(screen.getByRole("checkbox", { name: "실패" })).toBeChecked();
     await user.type(screen.getByLabelText("경비원 이름"), "홍");
-    await user.selectOptions(screen.getByLabelText("로그인 상태"), "failed");
     await user.selectOptions(screen.getByLabelText("Push 상태"), "warning");
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenLastCalledWith(
         expect.stringContaining("/api/guard/session-logs?guardName=%ED%99%8D&loginStatus=failed&pushStatus=warning"),
+      );
+    });
+
+    await user.click(screen.getByRole("checkbox", { name: "실패" }));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenLastCalledWith(
+        expect.stringContaining("/api/guard/session-logs?guardName=%ED%99%8D&loginStatus=success&pushStatus=warning"),
       );
     });
   });

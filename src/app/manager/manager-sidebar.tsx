@@ -18,6 +18,13 @@ const menu = [
     ],
   },
   {
+    label: "현장점검",
+    children: [
+      { label: "현장관리", href: "/manager/inspection/sites" },
+      { label: "현장점검현황", href: "/manager/inspection/logs" },
+    ],
+  },
+  {
     label: "안전교육",
     children: [
       { label: "교육자료관리", href: "/manager/safty/resources" },

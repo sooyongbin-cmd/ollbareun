@@ -100,4 +100,29 @@ describe("manager layout loading state", () => {
       "/manager/reports/education",
     );
   });
+
+  it("adds inspection menu between employee management and safety education", () => {
+    render(
+      <ManagerLayout>
+        <div>관리자 본문</div>
+      </ManagerLayout>,
+    );
+
+    const menuLabels = screen
+      .getAllByRole("listitem")
+      .slice(0, 5)
+      .map((item) => item.textContent ?? "");
+
+    expect(menuLabels[1]).toContain("직원관리");
+    expect(menuLabels[2]).toContain("현장점검");
+    expect(menuLabels[3]).toContain("안전교육");
+    expect(screen.getAllByRole("link", { name: "현장관리" })[0]).toHaveAttribute(
+      "href",
+      "/manager/inspection/sites",
+    );
+    expect(screen.getAllByRole("link", { name: "현장점검현황" })[0]).toHaveAttribute(
+      "href",
+      "/manager/inspection/logs",
+    );
+  });
 });

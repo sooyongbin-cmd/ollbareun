@@ -18,9 +18,9 @@ export default function GuardMainPage() {
             <Link className="button-secondary w-full justify-center" href="/guard/main/inspection">
               현장점검
             </Link>
-            <button className="button-secondary w-full" type="button">
+            <Link className="button-secondary w-full justify-center" href="/guard/main/profile">
               개인프로필
-            </button>
+            </Link>
           </div>
         </section>
       </div>

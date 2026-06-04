@@ -183,7 +183,7 @@ describe("guard main navigation", () => {
     expect(screen.getByRole("link", { name: "교육 받기" })).toHaveAttribute("href", "/guard/main/safty");
     expect(screen.getByRole("link", { name: "현장점검" })).toHaveAttribute("href", "/guard/main/inspection");
     expect(screen.queryByRole("button", { name: "근무지확인" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "개인프로필" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "개인프로필" })).toHaveAttribute("href", "/guard/main/profile");
     expect(screen.queryByTestId("clock-in")).not.toBeInTheDocument();
   });
 

@@ -67,6 +67,16 @@ describe("manager layout loading state", () => {
     expect(screen.getAllByRole("link", { name: "로그현황" })[0]).toHaveAttribute("href", "/manager/system/logs");
   });
 
+  it("links the dashboard menu to manager home", () => {
+    render(
+      <ManagerLayout>
+        <div>관리자 본문</div>
+      </ManagerLayout>,
+    );
+
+    expect(screen.getAllByRole("link", { name: "대시보드" })[0]).toHaveAttribute("href", "/manager");
+  });
+
   it("removes dashboard submenus and keeps only the requested report links", () => {
     render(
       <ManagerLayout>

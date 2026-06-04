@@ -6,6 +6,7 @@ import Link from "next/link";
 const menu = [
   {
     label: "대시보드",
+    href: "/manager",
     children: [],
   },
   {
@@ -51,14 +52,23 @@ export default function ManagerSidebar() {
           <ul className="flex flex-row overflow-x-auto border-b border-hairline/30 pb-2 gap-6 scrollbar-hide">
             {menu.map((item) => (
               <li key={item.label} className="shrink-0">
-                <button
-                  onClick={() => toggleMenu(item.label)}
-                  className={`text-[15px] font-semibold py-2 transition-colors ${
-                    activeLabel === item.label ? "text-primary border-b-2 border-primary" : "text-ink-muted-48"
-                  }`}
-                >
-                  {item.label}
-                </button>
+                {item.href ? (
+                  <Link
+                    href={item.href}
+                    className="block text-[15px] font-semibold py-2 transition-colors text-ink-muted-48"
+                  >
+                    {item.label}
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => toggleMenu(item.label)}
+                    className={`text-[15px] font-semibold py-2 transition-colors ${
+                      activeLabel === item.label ? "text-primary border-b-2 border-primary" : "text-ink-muted-48"
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                )}
               </li>
             ))}
           </ul>
@@ -97,7 +107,16 @@ export default function ManagerSidebar() {
         <ul className="hidden lg:block space-y-1">
           {menu.map((item) => (
             <li key={item.label} className="py-2 px-2">
-              <div className="text-[14px] font-semibold text-ink mb-2">{item.label}</div>
+              {item.href ? (
+                <Link
+                  href={item.href}
+                  className="block text-[14px] font-semibold text-primary mb-2 hover:opacity-80 transition-opacity"
+                >
+                  {item.label}
+                </Link>
+              ) : (
+                <div className="text-[14px] font-semibold text-ink mb-2">{item.label}</div>
+              )}
               {item.children.length > 0 ? (
                 <div className="space-y-2 pl-2">
                   {item.children.map((child, idx) => {

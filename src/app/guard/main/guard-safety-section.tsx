@@ -110,7 +110,7 @@ export default function GuardSafetySection() {
           )}
         </div>
         <Link 
-          href="/guard/main/safty" 
+          href="/guard/main/safety" 
           className="button-secondary text-[13px] py-2 px-4"
         >
           교육 받기

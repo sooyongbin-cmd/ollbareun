@@ -6,7 +6,7 @@ const guardMainFilesWithSections = [
   "page.tsx",
   "attendance/page.tsx",
   "profile/page.tsx",
-  "safty/page.tsx",
+  "safety/page.tsx",
 ];
 
 describe("guard main section spacing", () => {

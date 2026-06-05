@@ -180,7 +180,7 @@ describe("guard main navigation", () => {
     expect(screen.getByText("브라우저 지원 확인")).toBeInTheDocument();
     expect(screen.getByText("서버 저장")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "출근하기" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "교육 받기" })).toHaveAttribute("href", "/guard/main/safty");
+    expect(screen.getByRole("link", { name: "교육 받기" })).toHaveAttribute("href", "/guard/main/safety");
     expect(screen.getByRole("link", { name: "현장점검" })).toHaveAttribute("href", "/guard/main/inspection");
     expect(screen.queryByRole("button", { name: "근무지확인" })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "개인프로필" })).toHaveAttribute("href", "/guard/main/profile");

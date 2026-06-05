@@ -125,11 +125,14 @@ describe("guard safety education page", () => {
     );
   });
 
-  it("shows safety education titles and links", async () => {
+  it("shows only safety education titles in the education list", async () => {
     render(<GuardSafetyEducationPage />);
 
     expect(await screen.findByRole("button", { name: fireTitle })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "https://www.youtube.com/watch?v=fireSafety" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "제목" })).toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "링크" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "https://www.youtube.com/watch?v=fireSafety" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "https://youtu.be/patrolSafety" })).not.toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByTitle(fireTitle)).toHaveAttribute(
         "src",
@@ -144,7 +147,7 @@ describe("guard safety education page", () => {
     render(<GuardSafetyEducationPage />);
 
     expect(await screen.findByRole("button", { name: fireTitle })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "https://youtu.be/patrolSafety" }));
+    await user.click(screen.getByRole("button", { name: patrolTitle }));
 
     await waitFor(() => {
       expect(screen.getByTitle(patrolTitle)).toHaveAttribute(

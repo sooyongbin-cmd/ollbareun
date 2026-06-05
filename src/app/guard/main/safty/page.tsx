@@ -432,13 +432,12 @@ export default function GuardSafetyEducationPage() {
                 <thead>
                   <tr>
                     <th className="text-left">제목</th>
-                    <th className="text-left">링크</th>
                   </tr>
                 </thead>
                 <tbody>
                   {sortedResources.length === 0 ? (
                     <tr>
-                      <td colSpan={2} className="p-8 text-center text-ink-muted-48 italic">
+                      <td colSpan={1} className="p-8 text-center text-ink-muted-48 italic">
                         이수하지 않은 안전교육 자료가 없습니다.
                       </td>
                     </tr>
@@ -456,19 +455,6 @@ export default function GuardSafetyEducationPage() {
                             }}
                           >
                             {resource.title}
-                          </button>
-                        </td>
-                        <td className="text-ink-muted-48">
-                          <button
-                            className="underline-offset-4 hover:underline"
-                            type="button"
-                            onClick={() => {
-                              setSelectedResource(resource);
-                              setMessage("");
-                              setCompletionError("");
-                            }}
-                          >
-                            {resource.youtube_link}
                           </button>
                         </td>
                       </tr>

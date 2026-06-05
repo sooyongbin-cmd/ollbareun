@@ -23,6 +23,12 @@ type GuardSession = {
 
 type YoutubePlayer = {
   destroy: () => void;
+  getCurrentTime: () => number;
+  getDuration: () => number;
+  getPlaybackRate: () => number;
+  setPlaybackRate: (suggestedRate: number) => void;
+  seekTo: (seconds: number, allowSeekAhead: boolean) => void;
+  playVideo: () => void;
 };
 
 type YoutubeApi = {
@@ -32,6 +38,8 @@ type YoutubeApi = {
       videoId?: string;
       playerVars?: Record<string, string | number>;
       events?: {
+        onReady?: (event: { target: YoutubePlayer }) => void;
+        onPlaybackRateChange?: (event: { data: number; target: YoutubePlayer }) => void;
         onStateChange?: (event: { data: number }) => void;
       };
     },
@@ -48,6 +56,24 @@ declare global {
 const guardSessionStorageKey = "ollbareun.guard.session";
 const youtubeApiScriptId = "youtube-iframe-api";
 const youtubePlayerReadyState = 0;
+const requiredPlaybackRate = 1;
+const watchProgressIntervalMs = 1000;
+const maximumAllowedForwardSeconds = 3;
+const completionWatchRatio = 0.95;
+
+type WatchProgress = {
+  lastAllowedTime: number;
+  lastSampleTime: number;
+  watchedSeconds: number;
+};
+
+function createInitialWatchProgress(): WatchProgress {
+  return {
+    lastAllowedTime: 0,
+    lastSampleTime: 0,
+    watchedSeconds: 0,
+  };
+}
 
 function readGuardEmployeeId() {
   if (typeof window === "undefined") {
@@ -74,21 +100,25 @@ function getYoutubeEmbedUrl(youtubeLink: string) {
 
     if (hostname === "youtu.be") {
       const videoId = url.pathname.split("/").filter(Boolean)[0];
-      return videoId ? `https://www.youtube.com/embed/${videoId}?enablejsapi=1&playsinline=1&rel=0` : "";
+      return videoId
+        ? `https://www.youtube.com/embed/${videoId}?enablejsapi=1&playsinline=1&rel=0&controls=0&disablekb=1&modestbranding=1`
+        : "";
     }
 
     if (["youtube.com", "www.youtube.com", "m.youtube.com"].includes(hostname)) {
       if (url.pathname === "/watch") {
         const videoId = url.searchParams.get("v");
-        return videoId ? `https://www.youtube.com/embed/${videoId}?enablejsapi=1&playsinline=1&rel=0` : "";
+        return videoId
+          ? `https://www.youtube.com/embed/${videoId}?enablejsapi=1&playsinline=1&rel=0&controls=0&disablekb=1&modestbranding=1`
+          : "";
       }
 
       const [section, videoId] = url.pathname.split("/").filter(Boolean);
       if (section === "embed" && videoId) {
-        return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&playsinline=1&rel=0`;
+        return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&playsinline=1&rel=0&controls=0&disablekb=1&modestbranding=1`;
       }
       if (section === "shorts" && videoId) {
-        return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&playsinline=1&rel=0`;
+        return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&playsinline=1&rel=0&controls=0&disablekb=1&modestbranding=1`;
       }
     }
   } catch {
@@ -135,6 +165,8 @@ export default function GuardSafetyEducationPage() {
   const [playerReady, setPlayerReady] = useState(() => typeof window !== "undefined" && Boolean(window.YT?.Player));
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const playerRef = useRef<YoutubePlayer | null>(null);
+  const watchProgressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const watchProgressRef = useRef<WatchProgress>(createInitialWatchProgress());
   const completedResourceIdsRef = useRef(new Set<string>());
 
   const markEducationCompletion = useCallback(async (resourceId: string) => {
@@ -269,12 +301,27 @@ export default function GuardSafetyEducationPage() {
   const selectedEmbedUrl = selectedResource ? getYoutubeEmbedUrl(selectedResource.youtube_link) : "";
 
   useEffect(() => {
+    const clearWatchProgressInterval = () => {
+      if (watchProgressIntervalRef.current) {
+        clearInterval(watchProgressIntervalRef.current);
+        watchProgressIntervalRef.current = null;
+      }
+    };
+
+    const resetWatchProgress = () => {
+      watchProgressRef.current = createInitialWatchProgress();
+    };
+
     if (!selectedResource || !playerReady || !iframeRef.current || !window.YT?.Player) {
+      clearWatchProgressInterval();
+      resetWatchProgress();
       playerRef.current?.destroy();
       playerRef.current = null;
       return;
     }
 
+    clearWatchProgressInterval();
+    resetWatchProgress();
     playerRef.current?.destroy();
     playerRef.current = new window.YT.Player(iframeRef.current, {
       videoId: getYoutubeVideoId(selectedResource.youtube_link),
@@ -282,12 +329,33 @@ export default function GuardSafetyEducationPage() {
         enablejsapi: 1,
         playsinline: 1,
         rel: 0,
+        controls: 0,
+        disablekb: 1,
+        modestbranding: 1,
       },
       events: {
+        onReady: (event) => {
+          event.target.setPlaybackRate(requiredPlaybackRate);
+        },
+        onPlaybackRateChange: (event) => {
+          if (event.data !== requiredPlaybackRate) {
+            event.target.setPlaybackRate(requiredPlaybackRate);
+          }
+        },
         onStateChange: (event) => {
           if (event.data === youtubePlayerReadyState) {
             const resourceId = selectedResource.id;
-            if (!completedResourceIdsRef.current.has(resourceId)) {
+            const player = playerRef.current;
+            const duration = player?.getDuration() ?? 0;
+            const playbackRate = player?.getPlaybackRate() ?? requiredPlaybackRate;
+            const hasEnoughWatchTime =
+              duration > 0 && watchProgressRef.current.watchedSeconds >= duration * completionWatchRatio;
+
+            if (
+              playbackRate === requiredPlaybackRate &&
+              hasEnoughWatchTime &&
+              !completedResourceIdsRef.current.has(resourceId)
+            ) {
               completedResourceIdsRef.current.add(resourceId);
               void markEducationCompletion(resourceId);
             }
@@ -296,7 +364,41 @@ export default function GuardSafetyEducationPage() {
       },
     });
 
+    watchProgressIntervalRef.current = setInterval(() => {
+      const player = playerRef.current;
+      if (!player) {
+        return;
+      }
+
+      const currentTime = player.getCurrentTime();
+      const playbackRate = player.getPlaybackRate();
+      const progress = watchProgressRef.current;
+      const elapsedSinceLastSample = currentTime - progress.lastSampleTime;
+
+      if (playbackRate !== requiredPlaybackRate) {
+        player.setPlaybackRate(requiredPlaybackRate);
+        progress.lastSampleTime = currentTime;
+        return;
+      }
+
+      if (elapsedSinceLastSample > maximumAllowedForwardSeconds) {
+        player.seekTo(progress.lastAllowedTime, true);
+        progress.lastSampleTime = progress.lastAllowedTime;
+        progress.watchedSeconds = Math.min(progress.watchedSeconds, progress.lastAllowedTime);
+        return;
+      }
+
+      if (elapsedSinceLastSample > 0) {
+        progress.watchedSeconds += elapsedSinceLastSample;
+        progress.lastAllowedTime = currentTime;
+      }
+
+      progress.lastSampleTime = currentTime;
+    }, watchProgressIntervalMs);
+
     return () => {
+      clearWatchProgressInterval();
+      resetWatchProgress();
       playerRef.current?.destroy();
       playerRef.current = null;
     };

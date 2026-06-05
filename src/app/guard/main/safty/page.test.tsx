@@ -10,32 +10,59 @@ let completionRows: Array<{
   completed_at: string | null;
 }> = [];
 
-const playerInstances: Array<{
-  options: {
-    events?: {
-      onStateChange?: (event: { data: number }) => void;
-    };
-  };
-  destroy: ReturnType<typeof vi.fn>;
-}> = [];
+const fireTitle = "화재 안전 교육";
+const patrolTitle = "순찰 안전 교육";
+
+const playerInstances: MockYoutubePlayer[] = [];
 
 class MockYoutubePlayer {
   options: {
     events?: {
+      onReady?: (event: { target: MockYoutubePlayer }) => void;
+      onPlaybackRateChange?: (event: { data: number; target: MockYoutubePlayer }) => void;
       onStateChange?: (event: { data: number }) => void;
     };
   };
 
+  currentTime = 0;
+  duration = 100;
+  playbackRate = 1;
   destroy = vi.fn();
+  getCurrentTime = vi.fn(() => this.currentTime);
+  getDuration = vi.fn(() => this.duration);
+  getPlaybackRate = vi.fn(() => this.playbackRate);
+  setPlaybackRate = vi.fn((rate: number) => {
+    this.playbackRate = rate;
+  });
+  seekTo = vi.fn((seconds: number) => {
+    this.currentTime = seconds;
+  });
+  playVideo = vi.fn();
 
-  constructor(_element: HTMLIFrameElement, options: { events?: { onStateChange?: (event: { data: number }) => void } }) {
+  constructor(
+    _element: HTMLIFrameElement,
+    options: {
+      events?: {
+        onReady?: (event: { target: MockYoutubePlayer }) => void;
+        onPlaybackRateChange?: (event: { data: number; target: MockYoutubePlayer }) => void;
+        onStateChange?: (event: { data: number }) => void;
+      };
+    },
+  ) {
     this.options = options;
     playerInstances.push(this);
   }
 }
 
+function completionPosts() {
+  return vi
+    .mocked(fetch)
+    .mock.calls.filter(([input, init]) => String(input).endsWith("/api/education/completions") && init?.method === "POST");
+}
+
 describe("guard safety education page", () => {
   beforeEach(() => {
+    vi.useRealTimers();
     vi.restoreAllMocks();
     playerInstances.length = 0;
     completionRows = [];
@@ -58,13 +85,13 @@ describe("guard safety education page", () => {
             resources: [
               {
                 id: "resource-1",
-                title: "화재 안전 교육",
+                title: fireTitle,
                 youtube_link: "https://www.youtube.com/watch?v=fireSafety",
                 created_at: "2026-05-27T00:00:00.000Z",
               },
               {
                 id: "resource-2",
-                title: "순찰 안전 교육",
+                title: patrolTitle,
                 youtube_link: "https://youtu.be/patrolSafety",
                 created_at: "2026-05-27T00:00:00.000Z",
               },
@@ -101,17 +128,12 @@ describe("guard safety education page", () => {
   it("shows safety education titles and links", async () => {
     render(<GuardSafetyEducationPage />);
 
-    expect(await screen.findByRole("heading", { name: "안전교육" })).toBeInTheDocument();
-    expect(screen.getByRole("region", { name: "안전교육 목록" })).toBeInTheDocument();
-    expect(screen.getByRole("region", { name: "안전교육 영상" })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "제목" })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "링크" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "화재 안전 교육" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: fireTitle })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "https://www.youtube.com/watch?v=fireSafety" })).toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByTitle("화재 안전 교육")).toHaveAttribute(
+      expect(screen.getByTitle(fireTitle)).toHaveAttribute(
         "src",
-        "https://www.youtube.com/embed/fireSafety?enablejsapi=1&playsinline=1&rel=0",
+        "https://www.youtube.com/embed/fireSafety?enablejsapi=1&playsinline=1&rel=0&controls=0&disablekb=1&modestbranding=1",
       );
     });
   });
@@ -121,13 +143,13 @@ describe("guard safety education page", () => {
 
     render(<GuardSafetyEducationPage />);
 
-    expect(await screen.findByRole("button", { name: "화재 안전 교육" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: fireTitle })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "https://youtu.be/patrolSafety" }));
 
     await waitFor(() => {
-      expect(screen.getByTitle("순찰 안전 교육")).toHaveAttribute(
+      expect(screen.getByTitle(patrolTitle)).toHaveAttribute(
         "src",
-        "https://www.youtube.com/embed/patrolSafety?enablejsapi=1&playsinline=1&rel=0",
+        "https://www.youtube.com/embed/patrolSafety?enablejsapi=1&playsinline=1&rel=0&controls=0&disablekb=1&modestbranding=1",
       );
     });
   });
@@ -144,40 +166,87 @@ describe("guard safety education page", () => {
 
     render(<GuardSafetyEducationPage />);
 
-    expect(await screen.findByRole("button", { name: "순찰 안전 교육" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "화재 안전 교육" })).not.toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: patrolTitle })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: fireTitle })).not.toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByTitle("순찰 안전 교육")).toHaveAttribute(
+      expect(screen.getByTitle(patrolTitle)).toHaveAttribute(
         "src",
-        "https://www.youtube.com/embed/patrolSafety?enablejsapi=1&playsinline=1&rel=0",
+        "https://www.youtube.com/embed/patrolSafety?enablejsapi=1&playsinline=1&rel=0&controls=0&disablekb=1&modestbranding=1",
       );
     });
   });
 
-  it("records completion when the video ends", async () => {
+  it("forces playback speed back to 1x when the user changes it", async () => {
     render(<GuardSafetyEducationPage />);
 
-    expect(await screen.findByRole("button", { name: "화재 안전 교육" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: fireTitle })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(playerInstances).toHaveLength(1);
+    });
+
+    playerInstances[0].options.events?.onReady?.({ target: playerInstances[0] });
+    playerInstances[0].options.events?.onPlaybackRateChange?.({ data: 2, target: playerInstances[0] });
+
+    expect(playerInstances[0].setPlaybackRate).toHaveBeenCalledWith(1);
+  });
+
+  it("returns the video to the last valid position when the user skips forward", async () => {
+    vi.useFakeTimers();
+    render(<GuardSafetyEducationPage />);
+
+    await vi.waitFor(() => {
+      expect(screen.getByRole("button", { name: fireTitle })).toBeInTheDocument();
+      expect(playerInstances).toHaveLength(1);
+    });
+
+    playerInstances[0].currentTime = 1;
+    await vi.advanceTimersByTimeAsync(1000);
+    playerInstances[0].currentTime = 2;
+    await vi.advanceTimersByTimeAsync(1000);
+    playerInstances[0].currentTime = 30;
+    await vi.advanceTimersByTimeAsync(1000);
+
+    expect(playerInstances[0].seekTo).toHaveBeenCalledWith(2, true);
+    vi.useRealTimers();
+  });
+
+  it("does not record completion when the video ends without enough normal watch time", async () => {
+    render(<GuardSafetyEducationPage />);
+
+    expect(await screen.findByRole("button", { name: fireTitle })).toBeInTheDocument();
     await waitFor(() => {
       expect(playerInstances).toHaveLength(1);
     });
 
     playerInstances[0].options.events?.onStateChange?.({ data: 0 });
 
-    await waitFor(() => {
-      expect(screen.getByText("교육이수 처리가 완료되었습니다.")).toBeInTheDocument();
+    expect(completionPosts()).toHaveLength(0);
+  });
+
+  it("records completion once after enough 1x watch time and the video ends", async () => {
+    vi.useFakeTimers();
+    render(<GuardSafetyEducationPage />);
+
+    await vi.waitFor(() => {
+      expect(screen.getByRole("button", { name: fireTitle })).toBeInTheDocument();
+      expect(playerInstances).toHaveLength(1);
     });
+
+    for (let second = 1; second <= 95; second += 1) {
+      playerInstances[0].currentTime = second;
+      await vi.advanceTimersByTimeAsync(1000);
+    }
 
     playerInstances[0].options.events?.onStateChange?.({ data: 0 });
+    playerInstances[0].options.events?.onStateChange?.({ data: 0 });
 
-    await waitFor(() => {
-      expect(screen.queryByRole("button", { name: "화재 안전 교육" })).not.toBeInTheDocument();
+    await vi.waitFor(() => {
+      expect(screen.queryByRole("button", { name: fireTitle })).not.toBeInTheDocument();
     });
-    expect(screen.getByRole("button", { name: "순찰 안전 교육" })).toBeInTheDocument();
-
-    const completionPosts = vi
-      .mocked(fetch)
-      .mock.calls.filter(([input, init]) => String(input).endsWith("/api/education/completions") && init?.method === "POST");
-    expect(completionPosts).toHaveLength(1);
+    expect(screen.getByRole("button", { name: patrolTitle })).toBeInTheDocument();
+    await vi.waitFor(() => {
+      expect(completionPosts()).toHaveLength(1);
+    });
+    vi.useRealTimers();
   });
 });

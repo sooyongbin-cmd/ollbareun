@@ -80,4 +80,35 @@ describe("manager dashboard data", () => {
       educationRate: 0,
     });
   });
+
+  it("counts current assignment totals by worksite and includes empty worksites", () => {
+    const data = buildManagerDashboardData({
+      now: new Date("2026-06-04T03:00:00.000Z"),
+      employees: [
+        { id: "emp-1", name: "김철수", is_retired: false },
+        { id: "emp-2", name: "이영희", is_retired: false },
+        { id: "emp-3", name: "박민수", is_retired: false },
+      ],
+      worksites: [
+        { id: "work-1", name: "문현동현장" },
+        { id: "work-2", name: "센텀현장" },
+        { id: "work-3", name: "배정없음" },
+      ],
+      assignments: [
+        { employee_id: "emp-1", worksite_id: "work-1", start_date: "2026-01-01", end_date: "2026-12-31" },
+        { employee_id: "emp-2", worksite_id: "work-1", start_date: "2026-01-01", end_date: "2026-12-31" },
+        { employee_id: "emp-3", worksite_id: "work-2", start_date: "2026-01-01", end_date: "2026-12-31" },
+        { employee_id: "emp-3", worksite_id: "work-1", start_date: "2026-05-01", end_date: "2026-05-31" },
+      ],
+      attendance: [],
+      educationResources: [],
+      educationCompletions: [],
+    });
+
+    expect(data.worksiteAssignments).toEqual([
+      { worksiteId: "work-1", worksiteName: "문현동현장", assignedCount: 2 },
+      { worksiteId: "work-2", worksiteName: "센텀현장", assignedCount: 1 },
+      { worksiteId: "work-3", worksiteName: "배정없음", assignedCount: 0 },
+    ]);
+  });
 });

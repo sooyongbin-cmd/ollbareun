@@ -21,6 +21,10 @@ const dashboardPayload = {
       attendanceStatus: "출근",
     },
   ],
+  worksiteAssignments: [
+    { worksiteId: "work-1", worksiteName: "문현동현장", assignedCount: 2 },
+    { worksiteId: "work-2", worksiteName: "센텀현장", assignedCount: 0 },
+  ],
 };
 
 describe("manager dashboard page", () => {
@@ -44,6 +48,18 @@ describe("manager dashboard page", () => {
     expect(screen.getByText("전체인원 12명 현재출근 7명 교육미이수 3명")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "출근율 일별 차트" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "안전교육 이수율 일별 차트" })).toBeInTheDocument();
+
+    const assignmentSection = screen.getByRole("region", { name: "현장별 인원 배치" });
+    expect(within(assignmentSection).getByRole("heading", { name: "현장별 인원 배치" })).toBeInTheDocument();
+    expect(within(assignmentSection).getByRole("columnheader", { name: "근무지명" })).toBeInTheDocument();
+    expect(within(assignmentSection).getByRole("columnheader", { name: "배정인원수" })).toBeInTheDocument();
+    expect(within(assignmentSection).getByText("문현동현장")).toBeInTheDocument();
+    expect(within(assignmentSection).getByText("센텀현장")).toBeInTheDocument();
+    expect(within(assignmentSection).getByRole("link", { name: "2" })).toHaveAttribute(
+      "href",
+      "/manager/employee/assignments?worksite=%EB%AC%B8%ED%98%84%EB%8F%99%ED%98%84%EC%9E%A5",
+    );
+    expect(within(assignmentSection).getByText("0")).toBeInTheDocument();
 
     const liveSection = screen.getByRole("region", { name: "실시간출근현황 리스트" });
     expect(within(liveSection).getByRole("columnheader", { name: "성명" })).toBeInTheDocument();

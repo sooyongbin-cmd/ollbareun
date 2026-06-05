@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import ManagerLoadingMessage from "./manager-loading-message";
 
@@ -21,6 +22,11 @@ type DashboardPayload = {
     educationStatus: "완료" | "미이수";
     attendanceStatus: "출근" | "퇴근";
   }[];
+  worksiteAssignments: {
+    worksiteId: string;
+    worksiteName: string;
+    assignedCount: number;
+  }[];
 };
 
 const emptyDashboard: DashboardPayload = {
@@ -31,6 +37,7 @@ const emptyDashboard: DashboardPayload = {
   },
   dailyRates: [],
   liveAttendance: [],
+  worksiteAssignments: [],
 };
 
 function formatTime(value: string | null) {
@@ -146,6 +153,7 @@ export default function ManagerPage() {
             summary: payload.summary ?? emptyDashboard.summary,
             dailyRates: payload.dailyRates ?? [],
             liveAttendance: payload.liveAttendance ?? [],
+            worksiteAssignments: payload.worksiteAssignments ?? [],
           });
         }
       } catch (loadError) {
@@ -188,6 +196,50 @@ export default function ManagerPage() {
           <section className="grid gap-5 xl:grid-cols-2">
             <DailyRateChart title="출근율 일별 차트" data={data.dailyRates} valueKey="attendanceRate" />
             <DailyRateChart title="안전교육 이수율 일별 차트" data={data.dailyRates} valueKey="educationRate" />
+          </section>
+
+          <section
+            aria-label="현장별 인원 배치"
+            className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[32px]"
+          >
+            <h2 className="text-[24px] font-semibold">현장별 인원 배치</h2>
+            <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-[16px] border border-hairline bg-canvas">
+              <table className="apple-table">
+                <thead>
+                  <tr>
+                    <th className="text-left">근무지명</th>
+                    <th className="text-center">배정인원수</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.worksiteAssignments.length === 0 ? (
+                    <tr>
+                      <td colSpan={2} className="p-8 text-center text-ink-muted-48 italic">
+                        등록된 근무지가 없습니다.
+                      </td>
+                    </tr>
+                  ) : (
+                    data.worksiteAssignments.map((worksite) => (
+                      <tr key={worksite.worksiteId} className="hover:bg-canvas-parchment transition-colors">
+                        <td className="font-semibold">{worksite.worksiteName}</td>
+                        <td className="text-center">
+                          {worksite.assignedCount > 0 ? (
+                            <Link
+                              className="text-primary font-semibold hover:underline"
+                              href={`/manager/employee/assignments?worksite=${encodeURIComponent(worksite.worksiteName)}`}
+                            >
+                              {worksite.assignedCount}
+                            </Link>
+                          ) : (
+                            <span className="text-ink-muted-48">{worksite.assignedCount}</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </section>
 
           <section

@@ -55,6 +55,11 @@ export type ManagerDashboardData = {
     educationStatus: "완료" | "미이수";
     attendanceStatus: "출근" | "퇴근";
   }[];
+  worksiteAssignments: {
+    worksiteId: string;
+    worksiteName: string;
+    assignedCount: number;
+  }[];
 };
 
 type BuildManagerDashboardInput = {
@@ -121,6 +126,12 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
   );
   const allResourceIds = input.educationResources.map((resource) => resource.id);
   const completedByEmployee = completedResourceIdsByEmployee(input.educationCompletions);
+  const currentAssignmentCounts = input.assignments
+    .filter((assignment) => inDateRange(today, assignment.start_date, assignment.end_date))
+    .reduce<Record<string, number>>((counts, assignment) => {
+      counts[assignment.worksite_id] = (counts[assignment.worksite_id] ?? 0) + 1;
+      return counts;
+    }, {});
 
   const educationUncompleted =
     allResourceIds.length === 0
@@ -182,6 +193,11 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
     },
     dailyRates,
     liveAttendance,
+    worksiteAssignments: input.worksites.map((worksite) => ({
+      worksiteId: worksite.id,
+      worksiteName: worksite.name,
+      assignedCount: currentAssignmentCounts[worksite.id] ?? 0,
+    })),
   };
 }
 

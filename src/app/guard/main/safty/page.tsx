@@ -488,7 +488,7 @@ export default function GuardSafetyEducationPage() {
             <span>{selectedResource ? selectedResource.title : "재생할 교육자료 없음"}</span>
           </div>
 
-          <div className="mt-4 rounded-[16px] border border-hairline bg-canvas p-4">
+          <div className="mt-4 rounded-[16px] border border-hairline bg-canvas p-0">
             {selectedResource && selectedEmbedUrl ? (
               <iframe
                 key={selectedResource.id}

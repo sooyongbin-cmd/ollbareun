@@ -29,6 +29,7 @@ const menu = [
     children: [
       { label: "교육자료관리", href: "/manager/safty/resources" },
       { label: "교육이수관리", href: "/manager/safty/completions" },
+      { label: "교육자료(cloudflare)", href: "/manager/safty/cloudflare" },
     ],
   },
   {

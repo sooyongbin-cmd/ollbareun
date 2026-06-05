@@ -13,7 +13,7 @@ export default function GuardMainPage() {
         <GuardAttendanceSection />
         <GuardSafetySection />
         
-        <section className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50">
+        <section className="bg-canvas-parchment rounded-[18px] p-[16px] border border-hairline/50">
           <div className="flex flex-col gap-3">
             <Link className="button-secondary w-full justify-center" href="/guard/main/inspection">
               현장점검

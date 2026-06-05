@@ -188,7 +188,7 @@ export default function GuardAttendancePage() {
     <div className="mx-auto max-w-[980px] w-full px-5 py-[80px]">
       <div className="max-w-[600px] mx-auto">
         {guard ? (
-          <section className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50">
+          <section className="bg-canvas-parchment rounded-[18px] p-[16px] border border-hairline/50">
             <div className="space-y-[32px]">
               <div className="bg-canvas rounded-[18px] p-6 border border-hairline shadow-sm">
                 <div className="flex items-center gap-4 mb-4">
@@ -305,7 +305,7 @@ export default function GuardAttendancePage() {
             </div>
           </section>
         ) : (
-          <section className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50 text-center">
+          <section className="bg-canvas-parchment rounded-[18px] p-[16px] border border-hairline/50 text-center">
             <p className="text-[17px] text-ink-muted-48">경비원 인증 후 이용할 수 있습니다.</p>
             <Link className="button-primary mt-6 inline-flex" href="/guard">
               인증하러 가기

@@ -122,7 +122,7 @@ export default function GuardProfilePage() {
 
         <section
           aria-label="근무스케줄"
-          className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[32px]"
+          className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[16px]"
         >
           <h2 className="text-[24px] font-semibold">근무스케줄</h2>
           <ProfileTableShell>
@@ -155,7 +155,7 @@ export default function GuardProfilePage() {
 
         <section
           aria-label="월별출근현황"
-          className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[32px]"
+          className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[16px]"
         >
           <h2 className="text-[24px] font-semibold">월별출근현황</h2>
           <ProfileTableShell>

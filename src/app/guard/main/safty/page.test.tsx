@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import GuardSafetyEducationPage from "./page";
@@ -139,6 +139,16 @@ describe("guard safety education page", () => {
         "https://www.youtube.com/embed/fireSafety?enablejsapi=1&playsinline=1&rel=0&controls=0&disablekb=1&modestbranding=1",
       );
     });
+  });
+
+  it("removes the video section title and outer padding", async () => {
+    render(<GuardSafetyEducationPage />);
+
+    expect(await screen.findByRole("button", { name: fireTitle })).toBeInTheDocument();
+
+    const videoSection = screen.getByRole("region", { name: "안전교육 영상" });
+    expect(videoSection).toHaveClass("p-0");
+    expect(within(videoSection).queryByText(fireTitle)).not.toBeInTheDocument();
   });
 
   it("changes the iframe when a safety education item is selected", async () => {

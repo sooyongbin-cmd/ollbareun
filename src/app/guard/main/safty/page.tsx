@@ -468,13 +468,9 @@ export default function GuardSafetyEducationPage() {
 
         <section
           aria-label="안전교육 영상"
-          className="bg-canvas-parchment rounded-[18px] p-[16px] border border-hairline/50"
+          className="bg-canvas-parchment rounded-[18px] p-0 border border-hairline/50"
         >
-          <div className="flex flex-wrap items-center justify-between gap-3 text-[14px] text-ink-muted-48">
-            <span>{selectedResource ? selectedResource.title : "재생할 교육자료 없음"}</span>
-          </div>
-
-          <div className="mt-4 rounded-[16px] border border-hairline bg-canvas p-0">
+          <div className="rounded-[16px] border border-hairline bg-canvas p-0">
             {selectedResource && selectedEmbedUrl ? (
               <iframe
                 key={selectedResource.id}

@@ -93,32 +93,45 @@ function readGuardEmployeeId() {
   }
 }
 
-function getYoutubeEmbedUrl(youtubeLink: string) {
+function getYoutubeEmbedUrl(youtubeLink: string, origin?: string) {
+  const createEmbedUrl = (videoId: string) => {
+    const params = new URLSearchParams({
+      enablejsapi: "1",
+      playsinline: "1",
+      rel: "0",
+      controls: "0",
+      disablekb: "1",
+      modestbranding: "1",
+    });
+
+    if (origin) {
+      params.set("origin", origin);
+    }
+
+    return `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
+  };
+
   try {
     const url = new URL(youtubeLink);
     const hostname = url.hostname.toLowerCase();
 
     if (hostname === "youtu.be") {
       const videoId = url.pathname.split("/").filter(Boolean)[0];
-      return videoId
-        ? `https://www.youtube.com/embed/${videoId}?enablejsapi=1&playsinline=1&rel=0&controls=0&disablekb=1&modestbranding=1`
-        : "";
+      return videoId ? createEmbedUrl(videoId) : "";
     }
 
     if (["youtube.com", "www.youtube.com", "m.youtube.com"].includes(hostname)) {
       if (url.pathname === "/watch") {
         const videoId = url.searchParams.get("v");
-        return videoId
-          ? `https://www.youtube.com/embed/${videoId}?enablejsapi=1&playsinline=1&rel=0&controls=0&disablekb=1&modestbranding=1`
-          : "";
+        return videoId ? createEmbedUrl(videoId) : "";
       }
 
       const [section, videoId] = url.pathname.split("/").filter(Boolean);
       if (section === "embed" && videoId) {
-        return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&playsinline=1&rel=0&controls=0&disablekb=1&modestbranding=1`;
+        return createEmbedUrl(videoId);
       }
       if (section === "shorts" && videoId) {
-        return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&playsinline=1&rel=0&controls=0&disablekb=1&modestbranding=1`;
+        return createEmbedUrl(videoId);
       }
     }
   } catch {
@@ -163,6 +176,7 @@ export default function GuardSafetyEducationPage() {
   const [completionError, setCompletionError] = useState("");
   const [message, setMessage] = useState("");
   const [playerReady, setPlayerReady] = useState(() => typeof window !== "undefined" && Boolean(window.YT?.Player));
+  const [loadedIframeResourceId, setLoadedIframeResourceId] = useState<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const playerRef = useRef<YoutubePlayer | null>(null);
   const watchProgressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -298,7 +312,9 @@ export default function GuardSafetyEducationPage() {
         }),
     [completedResourceIds, resources],
   );
-  const selectedEmbedUrl = selectedResource ? getYoutubeEmbedUrl(selectedResource.youtube_link) : "";
+  const selectedEmbedUrl = selectedResource
+    ? getYoutubeEmbedUrl(selectedResource.youtube_link, typeof window !== "undefined" ? window.location.origin : "")
+    : "";
 
   useEffect(() => {
     const clearWatchProgressInterval = () => {
@@ -312,7 +328,13 @@ export default function GuardSafetyEducationPage() {
       watchProgressRef.current = createInitialWatchProgress();
     };
 
-    if (!selectedResource || !playerReady || !iframeRef.current || !window.YT?.Player) {
+    if (
+      !selectedResource ||
+      !playerReady ||
+      loadedIframeResourceId !== selectedResource.id ||
+      !iframeRef.current ||
+      !window.YT?.Player
+    ) {
       clearWatchProgressInterval();
       resetWatchProgress();
       playerRef.current?.destroy();
@@ -332,6 +354,7 @@ export default function GuardSafetyEducationPage() {
         controls: 0,
         disablekb: 1,
         modestbranding: 1,
+        origin: window.location.origin,
       },
       events: {
         onReady: (event) => {
@@ -402,7 +425,7 @@ export default function GuardSafetyEducationPage() {
       playerRef.current?.destroy();
       playerRef.current = null;
     };
-  }, [markEducationCompletion, playerReady, selectedResource]);
+  }, [loadedIframeResourceId, markEducationCompletion, playerReady, selectedResource]);
 
   return (
     <div className="mx-auto max-w-[980px] w-full px-5 py-[56px]">
@@ -478,6 +501,7 @@ export default function GuardSafetyEducationPage() {
                 className="aspect-video w-full rounded-[12px] border border-hairline bg-surface-black"
                 src={selectedEmbedUrl}
                 title={selectedResource.title}
+                onLoad={() => setLoadedIframeResourceId(selectedResource.id)}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
               />

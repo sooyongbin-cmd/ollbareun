@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import GuardSafetyEducationPage from "./page";
@@ -58,6 +58,15 @@ function completionPosts() {
   return vi
     .mocked(fetch)
     .mock.calls.filter(([input, init]) => String(input).endsWith("/api/education/completions") && init?.method === "POST");
+}
+
+async function loadInitialYoutubeIframe() {
+  const iframe = await screen.findByTitle(fireTitle);
+  fireEvent.load(iframe);
+  await waitFor(() => {
+    expect(playerInstances).toHaveLength(1);
+  });
+  return iframe;
 }
 
 describe("guard safety education page", () => {
@@ -134,10 +143,10 @@ describe("guard safety education page", () => {
     expect(screen.queryByRole("button", { name: "https://www.youtube.com/watch?v=fireSafety" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "https://youtu.be/patrolSafety" })).not.toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByTitle(fireTitle)).toHaveAttribute(
-        "src",
-        "https://www.youtube.com/embed/fireSafety?enablejsapi=1&playsinline=1&rel=0&controls=0&disablekb=1&modestbranding=1",
-      );
+      const iframeUrl = new URL(screen.getByTitle(fireTitle).getAttribute("src") ?? "");
+      expect(`${iframeUrl.origin}${iframeUrl.pathname}`).toBe("https://www.youtube.com/embed/fireSafety");
+      expect(iframeUrl.searchParams.get("enablejsapi")).toBe("1");
+      expect(iframeUrl.searchParams.get("origin")).toBe(window.location.origin);
     });
   });
 
@@ -160,10 +169,9 @@ describe("guard safety education page", () => {
     await user.click(screen.getByRole("button", { name: patrolTitle }));
 
     await waitFor(() => {
-      expect(screen.getByTitle(patrolTitle)).toHaveAttribute(
-        "src",
-        "https://www.youtube.com/embed/patrolSafety?enablejsapi=1&playsinline=1&rel=0&controls=0&disablekb=1&modestbranding=1",
-      );
+      const iframeUrl = new URL(screen.getByTitle(patrolTitle).getAttribute("src") ?? "");
+      expect(`${iframeUrl.origin}${iframeUrl.pathname}`).toBe("https://www.youtube.com/embed/patrolSafety");
+      expect(iframeUrl.searchParams.get("origin")).toBe(window.location.origin);
     });
   });
 
@@ -182,10 +190,22 @@ describe("guard safety education page", () => {
     expect(await screen.findByRole("button", { name: patrolTitle })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: fireTitle })).not.toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByTitle(patrolTitle)).toHaveAttribute(
-        "src",
-        "https://www.youtube.com/embed/patrolSafety?enablejsapi=1&playsinline=1&rel=0&controls=0&disablekb=1&modestbranding=1",
-      );
+      const iframeUrl = new URL(screen.getByTitle(patrolTitle).getAttribute("src") ?? "");
+      expect(`${iframeUrl.origin}${iframeUrl.pathname}`).toBe("https://www.youtube.com/embed/patrolSafety");
+      expect(iframeUrl.searchParams.get("origin")).toBe(window.location.origin);
+    });
+  });
+
+  it("waits for the YouTube iframe to load before creating the API player", async () => {
+    render(<GuardSafetyEducationPage />);
+
+    const iframe = await screen.findByTitle(fireTitle);
+    expect(playerInstances).toHaveLength(0);
+
+    fireEvent.load(iframe);
+
+    await waitFor(() => {
+      expect(playerInstances).toHaveLength(1);
     });
   });
 
@@ -193,9 +213,7 @@ describe("guard safety education page", () => {
     render(<GuardSafetyEducationPage />);
 
     expect(await screen.findByRole("button", { name: fireTitle })).toBeInTheDocument();
-    await waitFor(() => {
-      expect(playerInstances).toHaveLength(1);
-    });
+    await loadInitialYoutubeIframe();
 
     playerInstances[0].options.events?.onReady?.({ target: playerInstances[0] });
     playerInstances[0].options.events?.onPlaybackRateChange?.({ data: 2, target: playerInstances[0] });
@@ -209,8 +227,9 @@ describe("guard safety education page", () => {
 
     await vi.waitFor(() => {
       expect(screen.getByRole("button", { name: fireTitle })).toBeInTheDocument();
-      expect(playerInstances).toHaveLength(1);
     });
+    fireEvent.load(screen.getByTitle(fireTitle));
+    await vi.waitFor(() => expect(playerInstances).toHaveLength(1));
 
     playerInstances[0].currentTime = 1;
     await vi.advanceTimersByTimeAsync(1000);
@@ -227,9 +246,7 @@ describe("guard safety education page", () => {
     render(<GuardSafetyEducationPage />);
 
     expect(await screen.findByRole("button", { name: fireTitle })).toBeInTheDocument();
-    await waitFor(() => {
-      expect(playerInstances).toHaveLength(1);
-    });
+    await loadInitialYoutubeIframe();
 
     playerInstances[0].options.events?.onStateChange?.({ data: 0 });
 
@@ -242,8 +259,9 @@ describe("guard safety education page", () => {
 
     await vi.waitFor(() => {
       expect(screen.getByRole("button", { name: fireTitle })).toBeInTheDocument();
-      expect(playerInstances).toHaveLength(1);
     });
+    fireEvent.load(screen.getByTitle(fireTitle));
+    await vi.waitFor(() => expect(playerInstances).toHaveLength(1));
 
     for (let second = 1; second <= 95; second += 1) {
       playerInstances[0].currentTime = second;

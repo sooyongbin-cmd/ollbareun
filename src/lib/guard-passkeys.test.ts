@@ -55,7 +55,7 @@ describe("guard passkey data flow", () => {
       data: { id: "req-1", employee_id: "emp-1", status: "pending" },
       error: null,
     });
-    vi.mocked(getSupabase).mockReturnValue({
+    vi.mocked(getSupabaseAdmin).mockReturnValue({
       from: vi.fn().mockReturnValueOnce(employeeQuery).mockReturnValueOnce(requestQuery),
     } as never);
 
@@ -67,7 +67,7 @@ describe("guard passkey data flow", () => {
   });
 
   it("rejects passkey requests for retired employees", async () => {
-    vi.mocked(getSupabase).mockReturnValue({
+    vi.mocked(getSupabaseAdmin).mockReturnValue({
       from: vi.fn().mockReturnValue(
         query({
           data: { id: "emp-1", name: "홍길동", is_retired: true },
@@ -84,7 +84,7 @@ describe("guard passkey data flow", () => {
       data: { id: "req-1", employee_id: "emp-1", status: "approved" },
       error: null,
     });
-    vi.mocked(getSupabase).mockReturnValue({ from: vi.fn().mockReturnValue(requestQuery) } as never);
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from: vi.fn().mockReturnValue(requestQuery) } as never);
 
     await expect(loadGuardPasskeyRequestForEmployee("emp-1")).resolves.toMatchObject({ status: "approved" });
     expect(requestQuery.eq).toHaveBeenCalledWith("employee_id", "emp-1");
@@ -93,7 +93,7 @@ describe("guard passkey data flow", () => {
   });
 
   it("lists manager approval rows with employee details", async () => {
-    vi.mocked(getSupabase).mockReturnValue({
+    vi.mocked(getSupabaseAdmin).mockReturnValue({
       from: vi.fn().mockReturnValue(
         query({
           data: [
@@ -124,7 +124,7 @@ describe("guard passkey data flow", () => {
     const rejectQuery = query({ data: { id: "req-2", status: "rejected" }, error: null });
     const revokeRequestQuery = query({ data: { id: "req-3", employee_id: "emp-1", status: "revoked" }, error: null });
     const employeeUpdateQuery = query({ data: { id: "emp-1" }, error: null });
-    vi.mocked(getSupabase).mockReturnValue({
+    vi.mocked(getSupabaseAdmin).mockReturnValue({
       from: vi
         .fn()
         .mockReturnValueOnce(approveQuery)
@@ -166,10 +166,8 @@ describe("guard passkey data flow", () => {
       error: null,
     });
     const employeeUpdateQuery = query({ data: { id: "emp-1" }, error: null });
-    vi.mocked(getSupabase).mockReturnValue({
-      from: vi.fn().mockReturnValueOnce(requestQuery).mockReturnValueOnce(employeeUpdateQuery),
-    } as never);
     vi.mocked(getSupabaseAdmin).mockReturnValue({
+      from: vi.fn().mockReturnValueOnce(requestQuery).mockReturnValueOnce(employeeUpdateQuery),
       auth: {
         admin: {
           createUser: vi.fn().mockResolvedValue({ data: { user: { id: "auth-1" } }, error: null }),
@@ -192,11 +190,11 @@ describe("guard passkey data flow", () => {
     });
     const updateQuery = query({ data: { id: "req-1", status: "registered" }, error: null });
     const employeeUpdateQuery = query({ data: { id: "emp-1" }, error: null });
-    vi.mocked(getSupabase).mockReturnValue({
-      from: vi.fn().mockReturnValueOnce(requestQuery).mockReturnValueOnce(updateQuery).mockReturnValueOnce(employeeUpdateQuery),
-    } as never);
     const updateUserById = vi.fn().mockResolvedValue({ data: { user: { id: "auth-1" } }, error: null });
-    vi.mocked(getSupabaseAdmin).mockReturnValue({ auth: { admin: { updateUserById } } } as never);
+    vi.mocked(getSupabaseAdmin).mockReturnValue({
+      from: vi.fn().mockReturnValueOnce(requestQuery).mockReturnValueOnce(updateQuery).mockReturnValueOnce(employeeUpdateQuery),
+      auth: { admin: { updateUserById } },
+    } as never);
 
     await completeGuardPasskeyRegistration("emp-1");
 
@@ -236,12 +234,14 @@ describe("guard passkey data flow", () => {
     vi.mocked(getSupabase).mockReturnValue({
       from: vi
         .fn()
-        .mockReturnValueOnce(employeeQuery)
         .mockReturnValueOnce(employeeByIdQuery)
         .mockReturnValueOnce(assignmentQuery)
         .mockReturnValueOnce(attendanceQuery),
     } as never);
     vi.mocked(getSupabaseAdmin).mockReturnValue({
+      from: vi
+        .fn()
+        .mockReturnValueOnce(employeeQuery),
       auth: {
         getUser: vi.fn().mockResolvedValue({ data: { user: { id: "auth-1" } }, error: null }),
       },

@@ -1,6 +1,5 @@
 import { randomBytes } from "crypto";
 import { loadGuardSessionByEmployeeId } from "./phase1-data";
-import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
 
 type SupabaseError = { message?: string; code?: string } | null | undefined;
@@ -92,7 +91,7 @@ function createTemporaryPassword() {
 }
 
 async function loadEmployeeForPasskey(employeeId: string) {
-  const supabase = getSupabase();
+  const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("employees")
     .select("id,name,phone,is_retired,auth_user_id")
@@ -115,7 +114,7 @@ export async function createGuardPasskeyRequest(employeeIdInput: unknown) {
     throw new Error("퇴직 처리된 경비원은 패스키를 요청할 수 없습니다.");
   }
 
-  const supabase = getSupabase();
+  const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("guard_passkey_requests")
     .insert({ employee_id: employeeId })
@@ -128,7 +127,7 @@ export async function createGuardPasskeyRequest(employeeIdInput: unknown) {
 
 export async function loadGuardPasskeyRequestForEmployee(employeeIdInput: unknown) {
   const employeeId = requireId(employeeIdInput, "경비원");
-  const supabase = getSupabase();
+  const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("guard_passkey_requests")
     .select("*")
@@ -142,7 +141,7 @@ export async function loadGuardPasskeyRequestForEmployee(employeeIdInput: unknow
 }
 
 export async function listGuardPasskeyRequests() {
-  const supabase = getSupabase();
+  const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("guard_passkey_requests")
     .select("*, employees(name,phone,is_retired)")
@@ -159,7 +158,7 @@ async function updateGuardPasskeyRequestStatus(
 ) {
   const requestId = requireId(requestIdInput, "요청");
   const reviewedBy = typeof reviewedByInput === "string" && reviewedByInput.trim() ? reviewedByInput.trim() : "manager";
-  const supabase = getSupabase();
+  const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("guard_passkey_requests")
     .update({
@@ -187,7 +186,7 @@ export function rejectGuardPasskeyRequest(requestId: unknown, reviewedBy?: unkno
 export async function revokeGuardPasskey(requestIdInput: unknown, reviewedByInput?: unknown) {
   const requestId = requireId(requestIdInput, "요청");
   const reviewedBy = typeof reviewedByInput === "string" && reviewedByInput.trim() ? reviewedByInput.trim() : "manager";
-  const supabase = getSupabase();
+  const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("guard_passkey_requests")
     .update({
@@ -219,7 +218,7 @@ export async function revokeGuardPasskey(requestIdInput: unknown, reviewedByInpu
 }
 
 async function loadApprovedRequestWithEmployee(employeeId: string) {
-  const supabase = getSupabase();
+  const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("guard_passkey_requests")
     .select("*, employees(name,phone,is_retired,auth_user_id)")
@@ -272,7 +271,7 @@ export async function createGuardPasskeyRegistrationCredential(employeeIdInput: 
       throw new Error("패스키 등록 계정 ID를 확인하지 못했습니다.");
     }
 
-    const supabase = getSupabase();
+    const supabase = getSupabaseAdmin();
     const updateResult = await supabase
       .from("employees")
       .update({ auth_user_id: authUserId })
@@ -303,7 +302,7 @@ export async function completeGuardPasskeyRegistration(employeeIdInput: unknown)
   });
   throwIfError(rotateError, "임시 등록 비밀번호를 회전하지 못했습니다.");
 
-  const supabase = getSupabase();
+  const supabase = getSupabaseAdmin();
   const [requestResult, employeeResult] = await Promise.all([
     supabase
       .from("guard_passkey_requests")
@@ -339,7 +338,7 @@ export async function createGuardSessionFromAuthToken(accessTokenInput: unknown)
     throw new Error("패스키 로그인 사용자를 확인하지 못했습니다.");
   }
 
-  const supabase = getSupabase();
+  const supabase = getSupabaseAdmin();
   const { data: employee, error: employeeError } = await supabase
     .from("employees")
     .select("*")

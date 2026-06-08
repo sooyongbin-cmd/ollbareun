@@ -90,6 +90,25 @@ function createTemporaryPassword() {
   return randomBytes(24).toString("base64url");
 }
 
+function isDuplicateAuthEmailError(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof error.message === "string" &&
+    error.message.toLowerCase().includes("already been registered")
+  );
+}
+
+async function findAuthUserIdByEmail(email: string) {
+  const admin = getSupabaseAdmin();
+  const { data, error } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+
+  throwIfError(error, "기존 패스키 등록 계정을 확인하지 못했습니다.");
+  const user = data.users.find((candidate) => candidate.email?.toLowerCase() === email.toLowerCase());
+  return user?.id ?? null;
+}
+
 async function loadEmployeeForPasskey(employeeId: string) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
@@ -206,7 +225,6 @@ export async function revokeGuardPasskey(requestIdInput: unknown, reviewedByInpu
   const employeeResult = await supabase
     .from("employees")
     .update({
-      auth_user_id: null,
       passkey_enabled: false,
     })
     .eq("id", row.employee_id)
@@ -265,8 +283,18 @@ export async function createGuardPasskeyRegistrationCredential(employeeIdInput: 
       },
     });
 
-    throwIfError(error, "패스키 등록 계정을 만들지 못했습니다.");
-    authUserId = data.user?.id ?? null;
+    if (error && isDuplicateAuthEmailError(error)) {
+      authUserId = await findAuthUserIdByEmail(email);
+      if (!authUserId) {
+        throw new Error("기존 패스키 등록 계정을 찾지 못했습니다.");
+      }
+      const { error: updateError } = await admin.auth.admin.updateUserById(authUserId, { password });
+      throwIfError(updateError, "패스키 등록 임시 비밀번호를 갱신하지 못했습니다.");
+    } else {
+      throwIfError(error, "패스키 등록 계정을 만들지 못했습니다.");
+      authUserId = data.user?.id ?? null;
+    }
+
     if (!authUserId) {
       throw new Error("패스키 등록 계정 ID를 확인하지 못했습니다.");
     }

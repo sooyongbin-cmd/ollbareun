@@ -150,7 +150,6 @@ describe("guard passkey data flow", () => {
       updated_at: expect.any(String),
     });
     expect(employeeUpdateQuery.update).toHaveBeenCalledWith({
-      auth_user_id: null,
       passkey_enabled: false,
     });
   });
@@ -181,6 +180,45 @@ describe("guard passkey data flow", () => {
     expect(result.email).toBe("guard-emp-1@ollbareun-passkey.local");
     expect(result.password.length).toBeGreaterThan(20);
     expect(employeeUpdateQuery.update).toHaveBeenCalledWith({ auth_user_id: "auth-1" });
+  });
+
+  it("reuses an existing auth user when a previously revoked employee registers again", async () => {
+    const requestQuery = query({
+      data: {
+        id: "req-1",
+        employee_id: "emp-1",
+        status: "approved",
+        employees: { name: "홍길동", phone: "010-1234-5678", auth_user_id: null },
+      },
+      error: null,
+    });
+    const employeeUpdateQuery = query({ data: { id: "emp-1" }, error: null });
+    const createUser = vi.fn().mockResolvedValue({
+      data: { user: null },
+      error: { message: "A user with this email address has already been registered" },
+    });
+    const listUsers = vi.fn().mockResolvedValue({
+      data: { users: [{ id: "auth-existing", email: "guard-emp-1@ollbareun-passkey.local" }] },
+      error: null,
+    });
+    const updateUserById = vi.fn().mockResolvedValue({ data: { user: { id: "auth-existing" } }, error: null });
+    vi.mocked(getSupabaseAdmin).mockReturnValue({
+      from: vi.fn().mockReturnValueOnce(requestQuery).mockReturnValueOnce(employeeUpdateQuery),
+      auth: {
+        admin: {
+          createUser,
+          listUsers,
+          updateUserById,
+        },
+      },
+    } as never);
+
+    const result = await createGuardPasskeyRegistrationCredential("emp-1");
+
+    expect(result.email).toBe("guard-emp-1@ollbareun-passkey.local");
+    expect(listUsers).toHaveBeenCalledWith({ page: 1, perPage: 1000 });
+    expect(updateUserById).toHaveBeenCalledWith("auth-existing", { password: expect.any(String) });
+    expect(employeeUpdateQuery.update).toHaveBeenCalledWith({ auth_user_id: "auth-existing" });
   });
 
   it("marks registration complete and rotates the temporary password", async () => {

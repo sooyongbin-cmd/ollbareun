@@ -64,6 +64,22 @@ describe("guard login page", () => {
     expect(await screen.findByRole("heading", { name: "처리 내역 없음" })).toBeInTheDocument();
   });
 
+  it("places the passkey login section below the guard login section", async () => {
+    setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1");
+    setStandaloneMode(true);
+    render(<GuardPage />);
+
+    const loginSection = await screen.findByRole("region", { name: "경비원 로그인" });
+    const passkeyButton = await screen.findByRole("button", { name: "패스키로 로그인" });
+    const passkeySection = passkeyButton.closest("section");
+
+    expect(loginSection).toContainElement(screen.getByLabelText("경비원 이름"));
+    expect(loginSection).toContainElement(screen.getByLabelText("경비원 연락처"));
+    expect(loginSection).toContainElement(screen.getByRole("button", { name: "로그인" }));
+    expect(passkeySection).not.toBeNull();
+    expect(Boolean(loginSection.compareDocumentPosition(passkeySection!) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
+  });
+
   it("redirects to guard main when an active guard session exists", () => {
     setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1");
     setStandaloneMode(true);

@@ -315,6 +315,39 @@ export default function GuardPage() {
 
         {launchState === "standalone" && (
           <>
+            <section
+              aria-label="경비원 로그인"
+              className="w-full rounded-[18px] border border-hairline/50 bg-canvas-parchment p-5"
+            >
+              <form className="w-full space-y-6" onSubmit={handleGuardAuth}>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="guard-name">
+                      경비원 이름
+                    </label>
+                    <input
+                      className="field"
+                      defaultValue={savedGuardName}
+                      id="guard-name"
+                      key={savedGuardName}
+                      name="name"
+                      placeholder="이름을 입력하세요."
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="guard-phone">
+                      경비원 연락처
+                    </label>
+                    <input className="field" id="guard-phone" name="phone" placeholder="010-0000-0000" required />
+                  </div>
+                </div>
+                <button className="button-primary w-full" data-testid="guard-auth-submit" type="submit">
+                  로그인
+                </button>
+              </form>
+            </section>
+
             <section className="w-full rounded-[18px] border border-hairline/50 bg-canvas-parchment p-5">
               <button className="button-primary w-full" onClick={handlePasskeyLogin} type="button">
                 패스키로 로그인
@@ -323,34 +356,6 @@ export default function GuardPage() {
                 관리자 승인을 받은 뒤 이 기기에 패스키를 등록한 경비원만 사용할 수 있습니다.
               </p>
             </section>
-
-            <form className="w-full space-y-6" onSubmit={handleGuardAuth}>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="guard-name">
-                    경비원 이름
-                  </label>
-                  <input
-                    className="field"
-                    defaultValue={savedGuardName}
-                    id="guard-name"
-                    key={savedGuardName}
-                    name="name"
-                    placeholder="이름을 입력하세요."
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="guard-phone">
-                    경비원 연락처
-                  </label>
-                  <input className="field" id="guard-phone" name="phone" placeholder="010-0000-0000" required />
-                </div>
-              </div>
-              <button className="button-primary w-full" data-testid="guard-auth-submit" type="submit">
-                로그인
-              </button>
-            </form>
 
             <section className="w-full rounded-[18px] border border-hairline/50 bg-canvas-parchment p-6">
               <div className="space-y-2">

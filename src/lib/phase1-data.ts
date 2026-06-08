@@ -414,6 +414,11 @@ export async function authenticateGuard(input: { name: unknown; phone: unknown }
     throw new Error("해당직원은 퇴직처리되었습니다.");
   }
 
+  return loadGuardSessionByEmployee(employee as EmployeeRow);
+}
+
+async function loadGuardSessionByEmployee(employee: EmployeeRow) {
+  const supabase = getSupabase();
   const { data: assignment, error: assignmentError } = await supabase
     .from("work_assignments")
     .select("*")
@@ -445,6 +450,27 @@ export async function authenticateGuard(input: { name: unknown; phone: unknown }
     worksite: worksiteResult.data as WorksiteRow | null,
     attendance: attendanceResult.data as AttendanceRow | null,
   };
+}
+
+export async function loadGuardSessionByEmployeeId(employeeIdInput: unknown) {
+  const employeeId = requireString(employeeIdInput, "경비원");
+  const supabase = getSupabase();
+  const { data: employee, error } = await supabase
+    .from("employees")
+    .select("*")
+    .eq("id", employeeId)
+    .maybeSingle();
+
+  throwIfError(error);
+  if (!employee) {
+    throw new Error("등록된 직원 정보를 찾을 수 없습니다.");
+  }
+
+  if (employee.is_retired) {
+    throw new Error("해당직원은 퇴직처리되었습니다.");
+  }
+
+  return loadGuardSessionByEmployee(employee as EmployeeRow);
 }
 
 export async function clockIn(input: {

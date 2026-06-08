@@ -41,7 +41,10 @@ const menu = [
   },
   {
     label: "시스템",
-    children: [{ label: "로그현황", href: "/manager/system/logs" }],
+    children: [
+      { label: "로그현황", href: "/manager/system/logs" },
+      { label: "패스키 요청 관리", href: "/manager/system/passkeys" },
+    ],
   },
 ];
 

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { GpsInfo } from "@/lib/gps";
 import AlertModal from "@/components/modals/alert-modal";
+import { getSupabasePasskeyClient } from "@/lib/supabase-passkey-client";
 import { isCurrentInAppBrowser, isStandaloneGuardApp } from "./in-app-browser";
 import InAppBrowserGuide from "./in-app-browser-guide";
 import GuardBrowserGate from "./guard-browser-gate";
@@ -265,6 +266,38 @@ export default function GuardPage() {
     }
   }
 
+  async function handlePasskeyLogin() {
+    try {
+      const supabase = getSupabasePasskeyClient();
+      const { data, error } = await supabase.auth.signInWithPasskey();
+
+      if (error) {
+        throw error;
+      }
+
+      const accessToken = data.session?.access_token;
+      if (!accessToken) {
+        throw new Error("패스키 로그인 세션을 확인하지 못했습니다.");
+      }
+
+      const response = await fetch("/api/guard/passkeys/session", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const session = await response.json();
+
+      if (!response.ok) {
+        throw new Error(session.error ?? "패스키 로그인에 실패했습니다.");
+      }
+
+      writeStoredGuardSession(session);
+      router.push("/guard/main");
+    } catch (passkeyError) {
+      const message = passkeyError instanceof Error ? passkeyError.message : "패스키 로그인에 실패했습니다.";
+      setErrorMessage(message);
+    }
+  }
+
   return (
     <main className="min-h-screen bg-canvas text-ink font-apple selection:bg-primary/20">
       <div className="mx-auto flex min-h-screen w-full max-w-[600px] flex-col justify-center gap-6 px-5 py-10">
@@ -282,6 +315,15 @@ export default function GuardPage() {
 
         {launchState === "standalone" && (
           <>
+            <section className="w-full rounded-[18px] border border-hairline/50 bg-canvas-parchment p-5">
+              <button className="button-primary w-full" onClick={handlePasskeyLogin} type="button">
+                패스키로 로그인
+              </button>
+              <p className="mt-3 text-[13px] leading-relaxed text-ink-muted-48">
+                관리자 승인을 받은 뒤 이 기기에 패스키를 등록한 경비원만 사용할 수 있습니다.
+              </p>
+            </section>
+
             <form className="w-full space-y-6" onSubmit={handleGuardAuth}>
               <div className="space-y-4">
                 <div className="space-y-2">

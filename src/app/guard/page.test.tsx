@@ -4,15 +4,23 @@ import GuardPage from "./page";
 
 const push = vi.fn();
 const replace = vi.fn();
+const signInWithPasskey = vi.fn();
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push, replace }),
+}));
+
+vi.mock("@/lib/supabase-passkey-client", () => ({
+  getSupabasePasskeyClient: () => ({
+    auth: { signInWithPasskey },
+  }),
 }));
 
 describe("guard login page", () => {
   beforeEach(() => {
     push.mockReset();
     replace.mockReset();
+    signInWithPasskey.mockReset();
     window.sessionStorage.clear();
     vi.restoreAllMocks();
     Object.defineProperty(window, "location", {
@@ -69,6 +77,38 @@ describe("guard login page", () => {
     render(<GuardPage />);
 
     expect(replace).toHaveBeenCalledWith("/guard/main");
+  });
+
+  it("stores a guard session after passkey login succeeds", async () => {
+    setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1");
+    setStandaloneMode(true);
+    signInWithPasskey.mockResolvedValue({
+      data: { session: { access_token: "token-1" } },
+      error: null,
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        Response.json({
+          employee: { id: "emp-1", name: "홍길동" },
+          assignment: null,
+          worksite: null,
+          attendance: null,
+        }),
+      ),
+    );
+
+    render(<GuardPage />);
+    fireEvent.click(await screen.findByRole("button", { name: "패스키로 로그인" }));
+
+    await waitFor(() => {
+      expect(push).toHaveBeenCalledWith("/guard/main");
+    });
+    expect(fetch).toHaveBeenCalledWith("/api/guard/passkeys/session", {
+      method: "POST",
+      headers: { Authorization: "Bearer token-1" },
+    });
+    expect(window.sessionStorage.getItem("ollbareun.guard.session")).toContain("emp-1");
   });
 
   it("shows the last logout push cleanup result", async () => {

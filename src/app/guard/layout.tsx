@@ -7,10 +7,10 @@ export default function GuardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
+    <div className="guard-font-scale">
       {children}
       <GuardInstallPrompt />
       <InAppBrowserChecker />
-    </>
+    </div>
   );
 }

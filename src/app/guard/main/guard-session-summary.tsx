@@ -65,7 +65,7 @@ export default function GuardSessionSummary() {
         {summary.phone}
       </span>
       {summary.worksiteName ? (
-        <span className="whitespace-nowrap" title={`오늘의 근무지 : ${summary.worksiteName}`}>
+        <span className="min-w-0 truncate" title={`오늘의 근무지 : ${summary.worksiteName}`}>
           (오늘의 근무지 : {summary.worksiteName})
         </span>
       ) : null}

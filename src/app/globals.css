@@ -201,3 +201,94 @@ button:focus-visible {
   border-bottom: 1px solid var(--color-divider-soft);
   font-size: 17px;
 }
+
+/* Guard-only readable font scale */
+.guard-font-scale {
+  font-size: 22px;
+}
+
+.guard-font-scale .button-primary,
+.guard-font-scale .button-secondary,
+.guard-font-scale .field {
+  font-size: 22px;
+}
+
+.guard-font-scale .status-ok,
+.guard-font-scale .status-warn {
+  font-size: 18px;
+}
+
+.guard-font-scale .apple-table th {
+  font-size: 16px;
+}
+
+.guard-font-scale .apple-table td {
+  font-size: 22px;
+}
+
+.guard-font-scale .text-\[12px\] {
+  font-size: 16px;
+}
+
+.guard-font-scale .text-\[13px\] {
+  font-size: 17px;
+}
+
+.guard-font-scale .text-\[14px\] {
+  font-size: 18px;
+}
+
+.guard-font-scale .text-\[15px\] {
+  font-size: 20px;
+}
+
+.guard-font-scale .text-\[16px\] {
+  font-size: 21px;
+}
+
+.guard-font-scale .text-\[17px\] {
+  font-size: 22px;
+}
+
+.guard-font-scale .text-\[18px\] {
+  font-size: 23px;
+}
+
+.guard-font-scale .text-\[19px\] {
+  font-size: 25px;
+}
+
+.guard-font-scale .text-\[20px\],
+.guard-font-scale .text-xl {
+  font-size: 26px;
+}
+
+.guard-font-scale .text-\[21px\] {
+  font-size: 27px;
+}
+
+.guard-font-scale .text-\[24px\] {
+  font-size: 31px;
+}
+
+.guard-font-scale .text-\[36px\] {
+  font-size: 47px;
+}
+
+.guard-font-scale .text-\[40px\] {
+  font-size: 52px;
+}
+
+.guard-font-scale .leading-5 {
+  line-height: 26px;
+}
+
+.guard-font-scale .leading-6 {
+  line-height: 31px;
+}
+
+@media (width >= 40rem) {
+  .guard-font-scale .sm\:text-\[13px\] {
+    font-size: 17px;
+  }
+}

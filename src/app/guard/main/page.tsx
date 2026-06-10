@@ -7,7 +7,6 @@ import GuardPushRegister from "./guard-push-register";
 export default function GuardMainPage() {
   return (
     <div className="mx-auto max-w-[980px] w-full px-5 py-[80px]">
-      <GuardPushRegister />
       <div className="max-w-[600px] mx-auto">
         <GuardWorksiteSection />
         <GuardAttendanceSection />
@@ -23,6 +22,8 @@ export default function GuardMainPage() {
             </Link>
           </div>
         </section>
+
+        <GuardPushRegister />
       </div>
     </div>
   );

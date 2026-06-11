@@ -96,15 +96,105 @@ describe("guard main navigation", () => {
     expect(screen.getByRole("heading", { name: "푸시 알림 연결 준비 중" })).toBeInTheDocument();
     expect(screen.getByText("브라우저 지원 확인")).toBeInTheDocument();
     expect(screen.getByText("서버 저장")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "출근하기" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "출근하기" })[0]).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "교육 받기" })).toHaveAttribute("href", "/guard/main/safety");
-    expect(screen.getByRole("link", { name: "현장점검" })).toHaveAttribute("href", "/guard/main/inspection");
+    expect(screen.getByRole("button", { name: "현장점검" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "근무지확인" })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "개인프로필" })).toHaveAttribute("href", "/guard/main/profile");
     expect(screen.queryByTestId("clock-in")).not.toBeInTheDocument();
   });
 
-  it("asks for location permission on the main page when the browser is ready to prompt", async () => {
+  it("does not ask for location permission immediately on the main page", () => {
+    const query = vi.fn(async () => ({ state: "prompt" }));
+
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: { getCurrentPosition: vi.fn() },
+    });
+    Object.defineProperty(navigator, "permissions", {
+      configurable: true,
+      value: { query },
+    });
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
+
+    render(<GuardMainPage />);
+
+    expect(query).not.toHaveBeenCalled();
+    expect(screen.queryByRole("heading", { name: "위치 권한이 필요합니다" })).not.toBeInTheDocument();
+  });
+
+  it("navigates to attendance when location permission is granted", async () => {
+    const user = userEvent.setup();
+    const query = vi.fn(async () => ({ state: "granted" }));
+
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: { getCurrentPosition: vi.fn() },
+    });
+    Object.defineProperty(navigator, "permissions", {
+      configurable: true,
+      value: { query },
+    });
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
+
+    render(<GuardMainPage />);
+
+    await user.click(screen.getAllByRole("button", { name: "출근하기" })[0]);
+
+    await waitFor(() => {
+      expect(push).toHaveBeenCalledWith("/guard/main/attendance");
+    });
+    expect(query).toHaveBeenCalledWith({ name: "geolocation" });
+  });
+
+  it("navigates to inspection when location permission is granted", async () => {
+    const user = userEvent.setup();
+    const query = vi.fn(async () => ({ state: "granted" }));
+
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: { getCurrentPosition: vi.fn() },
+    });
+    Object.defineProperty(navigator, "permissions", {
+      configurable: true,
+      value: { query },
+    });
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
+
+    render(<GuardMainPage />);
+
+    await user.click(screen.getByRole("button", { name: "현장점검" }));
+
+    await waitFor(() => {
+      expect(push).toHaveBeenCalledWith("/guard/main/inspection");
+    });
+    expect(query).toHaveBeenCalledWith({ name: "geolocation" });
+  });
+
+  it("blocks attendance navigation and shows guidance when location permission is denied", async () => {
+    const user = userEvent.setup();
+    const query = vi.fn(async () => ({ state: "denied" }));
+
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: { getCurrentPosition: vi.fn() },
+    });
+    Object.defineProperty(navigator, "permissions", {
+      configurable: true,
+      value: { query },
+    });
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
+
+    render(<GuardMainPage />);
+
+    await user.click(screen.getAllByRole("button", { name: "출근하기" })[0]);
+
+    expect(push).not.toHaveBeenCalledWith("/guard/main/attendance");
+    expect(await screen.findByRole("heading", { name: "위치 권한이 필요합니다" })).toBeInTheDocument();
+    expect(screen.getByText(/설정에서 위치 권한을 허용/)).toBeInTheDocument();
+  });
+
+  it("requests location permission on click and navigates when the user allows it", async () => {
     const user = userEvent.setup();
     const getCurrentPosition = vi.fn((success: PositionCallback) => {
       success({
@@ -134,20 +224,24 @@ describe("guard main navigation", () => {
 
     render(<GuardMainPage />);
 
-    expect(await screen.findByRole("heading", { name: "위치 권한이 필요합니다" })).toBeInTheDocument();
+    await user.click(screen.getAllByRole("button", { name: "출근하기" })[0]);
 
-    await user.click(screen.getByRole("button", { name: "위치 허용하기" }));
-
-    expect(query).toHaveBeenCalledWith({ name: "geolocation" });
     expect(getCurrentPosition).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(push).toHaveBeenCalledWith("/guard/main/attendance");
+    });
   });
 
-  it("does not show the location permission dialog when geolocation is already granted", async () => {
-    const query = vi.fn(async () => ({ state: "granted" }));
+  it("blocks navigation when the user denies the location request", async () => {
+    const user = userEvent.setup();
+    const getCurrentPosition = vi.fn((_success: PositionCallback, error: PositionErrorCallback) => {
+      error({ code: 1, message: "denied", PERMISSION_DENIED: 1, POSITION_UNAVAILABLE: 2, TIMEOUT: 3 });
+    });
+    const query = vi.fn(async () => ({ state: "prompt" }));
 
     Object.defineProperty(navigator, "geolocation", {
       configurable: true,
-      value: { getCurrentPosition: vi.fn() },
+      value: { getCurrentPosition },
     });
     Object.defineProperty(navigator, "permissions", {
       configurable: true,
@@ -157,10 +251,11 @@ describe("guard main navigation", () => {
 
     render(<GuardMainPage />);
 
-    await waitFor(() => {
-      expect(query).toHaveBeenCalledWith({ name: "geolocation" });
-    });
-    expect(screen.queryByRole("heading", { name: "위치 권한이 필요합니다" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "현장점검" }));
+
+    expect(getCurrentPosition).toHaveBeenCalled();
+    expect(push).not.toHaveBeenCalledWith("/guard/main/inspection");
+    expect(await screen.findByRole("heading", { name: "위치 권한이 필요합니다" })).toBeInTheDocument();
   });
 
   it("prominently displays today's worksite on the main page", async () => {
@@ -219,7 +314,7 @@ describe("guard main navigation", () => {
     expect(screen.getByTestId("clock-in")).toBeInTheDocument();
   });
 
-  it("shows Chrome site settings guidance on the attendance page when location is blocked", async () => {
+  it("shows settings guidance on the attendance page when location is blocked", async () => {
     const watchPosition = vi.fn();
     const clearWatch = vi.fn();
     const query = vi.fn(async () => ({ state: "denied" }));
@@ -237,7 +332,7 @@ describe("guard main navigation", () => {
     render(<AttendancePage />);
 
     expect(await screen.findByRole("heading", { name: "위치 권한이 필요합니다" })).toBeInTheDocument();
-    expect(screen.getByText(/Chrome 사이트 설정에서 위치 권한을 허용/)).toBeInTheDocument();
+    expect(screen.getByText(/설정에서 위치 권한을 허용/)).toBeInTheDocument();
   });
 
   it("adds the attendance map section and stable section ids", async () => {

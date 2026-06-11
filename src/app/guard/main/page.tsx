@@ -3,7 +3,7 @@ import GuardWorksiteSection from "./guard-worksite-section";
 import GuardAttendanceSection from "./guard-attendance-section";
 import GuardSafetySection from "./guard-safety-section";
 import GuardPushRegister from "./guard-push-register";
-import GuardLocationPermissionPrompt from "./guard-location-permission-prompt";
+import GuardLocationGateLink from "./guard-location-gate-link";
 
 export default function GuardMainPage() {
   return (
@@ -13,12 +13,8 @@ export default function GuardMainPage() {
         
         <section className="bg-canvas-parchment rounded-[18px] p-[16px] border border-hairline/50">
           <div className="flex flex-col gap-3">
-            <Link className="button-secondary w-full justify-center" href="/guard/main/attendance">
-              출근하기
-            </Link>            
-            <Link className="button-secondary w-full justify-center" href="/guard/main/inspection">
-              현장점검
-            </Link>
+            <GuardLocationGateLink href="/guard/main/attendance">출근하기</GuardLocationGateLink>
+            <GuardLocationGateLink href="/guard/main/inspection">현장점검</GuardLocationGateLink>
             <Link className="button-secondary w-full justify-center" href="/guard/main/profile">
               개인프로필
             </Link>
@@ -27,7 +23,6 @@ export default function GuardMainPage() {
         <GuardSafetySection />
         <GuardAttendanceSection />
         <GuardPushRegister />
-        <GuardLocationPermissionPrompt />
       </div>
     </div>
   );

@@ -13,7 +13,7 @@ const geolocationOptions: PositionOptions = { enableHighAccuracy: true, maximumA
 function getDialogCopy(permissionState: GeolocationPermissionState) {
   if (permissionState === "denied") {
     return {
-      description: "Chrome 사이트 설정에서 위치 권한을 허용한 뒤 다시 시도해주세요.",
+      description: "설정에서 위치 권한을 허용한 뒤 다시 시도해주세요.",
       buttonLabel: "확인",
     };
   }

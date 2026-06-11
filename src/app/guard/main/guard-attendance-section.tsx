@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { distanceMeters, canClockIn, canClockOut, type AttendanceRecord, type Worksite } from "@/lib/phase1";
 import type { GpsInfo } from "@/lib/gps";
 import AlertModal from "@/components/modals/alert-modal";
-import { locationPermissionGrantedEvent, queryGeolocationPermission } from "./location-permission";
 
 type EmployeeRow = {
   id: string;
@@ -77,8 +76,8 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
 export default function GuardAttendanceSection() {
   const storedSession = useSyncExternalStore(subscribeToSessionChange, readGuardSessionSnapshot, () => null);
   
-  const [currentGps, setCurrentGps] = useState<GpsInfo | null>(null);
-  const [locError, setLocError] = useState("");
+  const [currentGps] = useState<GpsInfo | null>(null);
+  const [locError] = useState("");
   const [localAttendance, setLocalAttendance] = useState<AttendanceRow | null>(null);
   const [alertInfo, setAlertMessage] = useState<{ title: string; message: string } | null>(null);
   const [processing, setProcessing] = useState(false);
@@ -93,43 +92,6 @@ export default function GuardAttendanceSection() {
   }, [storedSession]);
 
   const attendance = localAttendance ?? session?.attendance ?? null;
-
-  useEffect(() => {
-    if (typeof navigator === "undefined" || !navigator.geolocation) {
-      queueMicrotask(() => setLocError("위치 확인 불가"));
-      return;
-    }
-    let isMounted = true;
-
-    async function loadCurrentPosition() {
-      const permissionState = await queryGeolocationPermission();
-      if (!isMounted) {
-        return;
-      }
-
-      if (permissionState === "denied" || permissionState === "prompt") {
-        setLocError("위치 권한 필요");
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setCurrentGps({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
-          setLocError("");
-        },
-        () => setLocError("위치 확인 실패"),
-        { enableHighAccuracy: true, timeout: 8000 }
-      );
-    }
-
-    window.addEventListener(locationPermissionGrantedEvent, loadCurrentPosition);
-    void loadCurrentPosition();
-
-    return () => {
-      isMounted = false;
-      window.removeEventListener(locationPermissionGrantedEvent, loadCurrentPosition);
-    };
-  }, []);
 
   const distance =
     currentGps && session?.worksite?.gps_info
@@ -241,7 +203,7 @@ export default function GuardAttendanceSection() {
         <div className="flex items-center justify-between text-[13px]">
           <span className="text-ink-muted-48 font-semibold">근무지와의 거리</span>
           <span className={`font-bold ${distance !== null && distance > (session?.worksite?.radius_meters ?? 100) ? "text-status-warn" : "text-primary"}`}>
-            {distance !== null ? `${Math.round(distance)}m` : locError || "위치 확인 중..."}
+            {distance !== null ? `${Math.round(distance)}m` : locError || "출근 화면에서 확인"}
           </span>
         </div>
       </div>

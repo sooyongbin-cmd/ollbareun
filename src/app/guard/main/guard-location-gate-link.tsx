@@ -1,0 +1,97 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import AlertModal from "@/components/modals/alert-modal";
+import {
+  notifyLocationPermissionGranted,
+  queryGeolocationPermission,
+  type GeolocationPermissionState,
+} from "./location-permission";
+
+type GuardLocationGateLinkProps = {
+  children: React.ReactNode;
+  href: string;
+};
+
+const geolocationOptions: PositionOptions = { enableHighAccuracy: true, maximumAge: 3000, timeout: 8000 };
+
+function getBlockedDescription(permissionState: GeolocationPermissionState) {
+  if (permissionState === "unsupported") {
+    return "이 브라우저에서는 위치 확인을 사용할 수 없습니다.";
+  }
+
+  return "설정에서 위치 권한을 허용한 뒤 다시 시도해주세요.";
+}
+
+function requestCurrentPosition() {
+  return new Promise<void>((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error("unsupported"));
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      () => resolve(),
+      reject,
+      geolocationOptions,
+    );
+  });
+}
+
+export default function GuardLocationGateLink({ children, href }: GuardLocationGateLinkProps) {
+  const router = useRouter();
+  const [blockedState, setBlockedState] = useState<GeolocationPermissionState | null>(null);
+  const [isChecking, setIsChecking] = useState(false);
+
+  async function handleClick() {
+    if (isChecking) {
+      return;
+    }
+
+    setIsChecking(true);
+    try {
+      const permissionState = await queryGeolocationPermission();
+
+      if (permissionState === "granted") {
+        router.push(href);
+        return;
+      }
+
+      if (permissionState === "prompt") {
+        try {
+          await requestCurrentPosition();
+          notifyLocationPermissionGranted();
+          router.push(href);
+        } catch {
+          setBlockedState("denied");
+        }
+        return;
+      }
+
+      setBlockedState(permissionState);
+    } finally {
+      setIsChecking(false);
+    }
+  }
+
+  return (
+    <>
+      <button
+        className="button-secondary w-full justify-center"
+        disabled={isChecking}
+        onClick={handleClick}
+        type="button"
+      >
+        {children}
+      </button>
+      <AlertModal
+        isOpen={blockedState !== null}
+        onClose={() => setBlockedState(null)}
+        title="위치 권한이 필요합니다"
+        description={blockedState ? getBlockedDescription(blockedState) : ""}
+        buttonLabel="확인"
+      />
+    </>
+  );
+}

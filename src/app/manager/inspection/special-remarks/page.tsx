@@ -138,7 +138,7 @@ export default function SpecialRemarksPage() {
                   <th className="text-left">점검일시</th>
                   <th className="text-left">점검자</th>
                   <th className="text-left">특이사항내용</th>
-                  <th className="text-left">첨부사진링크</th>
+                  <th className="text-left">첨부사진</th>
                 </tr>
               </thead>
               <tbody>
@@ -163,7 +163,12 @@ export default function SpecialRemarksPage() {
                       <td className="max-w-[420px]">{summarizeContent(report.content)}</td>
                       <td>
                         {report.photo_url ? (
-                          <span className="text-primary font-semibold">첨부사진</span>
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            alt="첨부사진 썸네일"
+                            className="h-14 w-20 rounded-[8px] border border-hairline object-cover"
+                            src={report.photo_url}
+                          />
                         ) : (
                           <span className="text-ink-muted-48">-</span>
                         )}

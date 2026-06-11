@@ -36,7 +36,7 @@ describe("manager special remarks page", () => {
     expect(screen.getByRole("columnheader", { name: "점검일시" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "점검자" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "특이사항내용" })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "첨부사진링크" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "첨부사진" })).toBeInTheDocument();
 
     await user.type(screen.getByLabelText("조회연도"), "2026");
     await user.click(screen.getByRole("button", { name: "조회" }));
@@ -50,5 +50,6 @@ describe("manager special remarks page", () => {
       "href",
       "/manager/inspection/special-remarks/report-1",
     );
+    expect(screen.getByAltText("첨부사진 썸네일")).toHaveAttribute("src", "https://example.com/photo.jpg");
   });
 });

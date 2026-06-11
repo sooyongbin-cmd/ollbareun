@@ -4,8 +4,8 @@ import manifest from "./manifest";
 describe("PWA manifest", () => {
   it("configures the guard app install entry for Android Chrome", () => {
     expect(manifest()).toMatchObject({
-      name: "올바른 경비원",
-      short_name: "올바른 경비원",
+      name: "사회적기업 올바른",
+      short_name: "사회적기업 올바른",
       start_url: "/guard",
       scope: "/",
       display: "standalone",

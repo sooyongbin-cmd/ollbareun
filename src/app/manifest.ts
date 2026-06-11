@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "올바른 경비원",
-    short_name: "올바른 경비원",
+    name: "사회적기업 올바른",
+    short_name: "사회적기업 올바른",
     description: "올바른 경비원 모바일 근태 앱",
     start_url: "/guard",
     scope: "/",

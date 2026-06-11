@@ -1,6 +1,7 @@
 import Link from "next/link";
 import GuardSessionGate from "./guard-session-gate";
 import GuardSessionSummary from "./guard-session-summary";
+import GuardHeaderTitle from "./guard-header-title";
 import { GuardIcon } from "@/components/icons/guard-icon";
 
 export default function GuardMainLayout({
@@ -18,7 +19,7 @@ export default function GuardMainLayout({
             <h2 className="shrink-0 text-[21px] font-semibold">
               <Link href="/guard/main" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                 <GuardIcon size={24} className="text-primary" />
-                <span>경비원</span>
+                <GuardHeaderTitle />
               </Link>
             </h2>
             <GuardSessionSummary />

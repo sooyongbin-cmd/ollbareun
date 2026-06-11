@@ -69,12 +69,12 @@ describe("guard login page", () => {
     setStandaloneMode(true);
     render(<GuardPage />);
 
-    const loginSection = await screen.findByRole("region", { name: "경비원 로그인" });
+    const loginSection = await screen.findByRole("region", { name: "근무자 로그인" });
     const passkeyButton = await screen.findByRole("button", { name: "패스키로 로그인" });
     const passkeySection = passkeyButton.closest("section");
 
-    expect(loginSection).toContainElement(screen.getByLabelText("경비원 이름"));
-    expect(loginSection).toContainElement(screen.getByLabelText("경비원 연락처"));
+    expect(loginSection).toContainElement(screen.getByLabelText("이름"));
+    expect(loginSection).toContainElement(screen.getByLabelText("연락처"));
     expect(loginSection).toContainElement(screen.getByRole("button", { name: "로그인" }));
     expect(passkeySection).not.toBeNull();
     expect(Boolean(loginSection.compareDocumentPosition(passkeySection!) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
@@ -188,8 +188,8 @@ describe("guard login page", () => {
     render(<GuardPage />);
 
     await waitFor(() => {
-      expect(screen.queryByLabelText("경비원 이름")).not.toBeInTheDocument();
-      expect(screen.queryByLabelText("경비원 연락처")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("이름")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("연락처")).not.toBeInTheDocument();
       expect(screen.queryByRole("button", { name: "로그인" })).not.toBeInTheDocument();
       expect(screen.queryByText("로그아웃 Push 처리 결과")).not.toBeInTheDocument();
     });

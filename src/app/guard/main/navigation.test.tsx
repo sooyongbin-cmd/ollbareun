@@ -19,6 +19,7 @@ const guardSession = {
     phone: "010-1234-5678",
     phone_normalized: "01012345678",
     is_retired: false,
+    role: "경비원",
   },
   assignment: {
     id: "assignment-1",
@@ -98,7 +99,7 @@ describe("guard main navigation", () => {
     expect(screen.getByText("서버 저장")).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "출근하기" })[0]).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "교육 받기" })).toHaveAttribute("href", "/guard/main/safety");
-    expect(screen.getByRole("button", { name: "현장점검" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "순찰" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "특이사항" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "근무지확인" })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "개인프로필" })).toHaveAttribute("href", "/guard/main/profile");
@@ -164,7 +165,7 @@ describe("guard main navigation", () => {
 
     render(<GuardMainPage />);
 
-    await user.click(screen.getByRole("button", { name: "현장점검" }));
+    await user.click(screen.getByRole("button", { name: "순찰" }));
 
     await waitFor(() => {
       expect(push).toHaveBeenCalledWith("/guard/main/inspection");
@@ -276,7 +277,7 @@ describe("guard main navigation", () => {
 
     render(<GuardMainPage />);
 
-    await user.click(screen.getByRole("button", { name: "현장점검" }));
+    await user.click(screen.getByRole("button", { name: "순찰" }));
 
     expect(getCurrentPosition).toHaveBeenCalled();
     expect(push).not.toHaveBeenCalledWith("/guard/main/inspection");
@@ -632,5 +633,39 @@ describe("guard main navigation", () => {
     render(<AttendancePage />);
 
     expect(document.getElementById("attendance-auth-required-section")).toBeInTheDocument();
+  });
+
+  it("shows '청소구역' button for role 미화원", () => {
+    const cleanerSession = {
+      ...guardSession,
+      employee: {
+        ...guardSession.employee,
+        role: "미화원",
+      },
+    };
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(cleanerSession));
+
+    render(<GuardMainPage />);
+
+    expect(screen.getByRole("button", { name: "청소구역" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "순찰" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "현장점검" })).not.toBeInTheDocument();
+  });
+
+  it("hides inspection button for role 파견", () => {
+    const dispatchSession = {
+      ...guardSession,
+      employee: {
+        ...guardSession.employee,
+        role: "파견",
+      },
+    };
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(dispatchSession));
+
+    render(<GuardMainPage />);
+
+    expect(screen.queryByRole("button", { name: "순찰" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "청소구역" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "현장점검" })).not.toBeInTheDocument();
   });
 });

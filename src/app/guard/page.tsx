@@ -15,6 +15,7 @@ type EmployeeRow = {
   phone: string;
   phone_normalized: string;
   is_retired: boolean;
+  role: "경비원" | "미화원" | "파견";
 };
 
 type WorksiteRow = {
@@ -261,7 +262,7 @@ export default function GuardPage() {
       writeStoredGuardSession(session);
       router.push("/guard/main");
     } catch (authError) {
-      const authMessage = authError instanceof Error ? authError.message : "경비원 인증에 실패했습니다.";
+      const authMessage = authError instanceof Error ? authError.message : "근무자 인증에 실패했습니다.";
       setErrorMessage(authMessage);
     }
   }
@@ -316,14 +317,18 @@ export default function GuardPage() {
         {launchState === "standalone" && (
           <>
             <section
-              aria-label="경비원 로그인"
+              aria-label="근무자 로그인"
               className="w-full rounded-[18px] border border-hairline/50 bg-canvas-parchment p-5"
             >
+              <div className="text-center space-y-1 mb-6">
+                <p className="text-[15px] font-semibold text-primary">사회적기업 올바른</p>
+                <h1 className="text-[28px] font-bold text-ink">근무자 로그인</h1>
+              </div>
               <form className="w-full space-y-6" onSubmit={handleGuardAuth}>
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="guard-name">
-                      경비원 이름
+                      이름
                     </label>
                     <input
                       className="field"
@@ -337,7 +342,7 @@ export default function GuardPage() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="guard-phone">
-                      경비원 연락처
+                      연락처
                     </label>
                     <input className="field" id="guard-phone" name="phone" placeholder="010-0000-0000" required />
                   </div>
@@ -353,7 +358,7 @@ export default function GuardPage() {
                 패스키로 로그인
               </button>
               <p className="mt-3 text-[13px] leading-relaxed text-ink-muted-48">
-                관리자 승인을 받은 뒤 이 기기에 패스키를 등록한 경비원만 사용할 수 있습니다.
+                관리자 승인을 받은 뒤 이 기기에 패스키를 등록한 근무자만 사용할 수 있습니다.
               </p>
             </section>
 

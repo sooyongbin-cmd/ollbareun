@@ -12,6 +12,7 @@ type EmployeeRow = {
   phone: string;
   phone_normalized: string;
   is_retired: boolean;
+  role: "경비원" | "미화원" | "파견";
 };
 
 type Bootstrap = {
@@ -43,9 +44,9 @@ const emptyBootstrap: Bootstrap = {
 export default function EmployeeRosterPage() {
   const [data, setData] = useState<Bootstrap>(emptyBootstrap);
   const [nameQuery, setNameQuery] = useState("");
-  const [phoneQuery, setPhoneQuery] = useState("");
+  const [roleQuery, setRoleQuery] = useState("");
   const [showRetired, setShowRetired] = useState(false);
-  const [sortKey, setSortKey] = useState<"name" | "phone" | "worksite" | "status">("name");
+  const [sortKey, setSortKey] = useState<"name" | "phone" | "role" | "worksite" | "status">("name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -99,33 +100,21 @@ export default function EmployeeRosterPage() {
     return Array.from(new Set(names)).sort();
   }, [availableEmployees]);
 
-  const uniquePhones = useMemo(() => {
-    const phones = availableEmployees.map((e) => e.phone);
-    return Array.from(new Set(phones)).sort();
-  }, [availableEmployees]);
-
   const filteredEmployees = useMemo(() => {
     const normalizedNameQuery = nameQuery.trim().toLowerCase();
-    const normalizedPhoneQuery = phoneQuery.trim().toLowerCase();
-    const digitPhoneQuery = normalizedPhoneQuery.replace(/\D/g, "");
 
     return availableEmployees.filter((employee) => {
       if (normalizedNameQuery && !employee.name.toLowerCase().includes(normalizedNameQuery)) {
         return false;
       }
 
-      if (normalizedPhoneQuery) {
-        const matchesPhone = employee.phone.toLowerCase().includes(normalizedPhoneQuery);
-        const matchesNormalizedPhone =
-          digitPhoneQuery.length > 0 && employee.phone_normalized.includes(digitPhoneQuery);
-        if (!matchesPhone && !matchesNormalizedPhone) {
-          return false;
-        }
+      if (roleQuery && employee.role !== roleQuery) {
+        return false;
       }
 
       return true;
     });
-  }, [availableEmployees, nameQuery, phoneQuery]);
+  }, [availableEmployees, nameQuery, roleQuery]);
 
   const worksiteById = useMemo(() => {
     return new Map(data.worksites.map((worksite) => [worksite.id, worksite.name]));
@@ -145,6 +134,10 @@ export default function EmployeeRosterPage() {
         return sortDirection === "asc"
           ? left.phone.localeCompare(right.phone, "ko-KR")
           : right.phone.localeCompare(left.phone, "ko-KR");
+      } else if (sortKey === "role") {
+        return sortDirection === "asc"
+          ? left.role.localeCompare(right.role, "ko-KR")
+          : right.role.localeCompare(left.role, "ko-KR");
       } else if (sortKey === "worksite") {
         const leftWorksite = worksiteById.get(worksiteByEmployeeId.get(left.id) ?? "") ?? "";
         const rightWorksite = worksiteById.get(worksiteByEmployeeId.get(right.id) ?? "") ?? "";
@@ -165,7 +158,7 @@ export default function EmployeeRosterPage() {
     });
   }, [filteredEmployees, sortKey, sortDirection, worksiteById, worksiteByEmployeeId]);
 
-  const handleSort = (key: "name" | "phone" | "worksite" | "status") => {
+  const handleSort = (key: "name" | "phone" | "role" | "worksite" | "status") => {
     if (sortKey === key) {
       setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
     } else {
@@ -210,21 +203,19 @@ export default function EmployeeRosterPage() {
               </select>
             </div>
             <div className="space-y-2 flex-1">
-              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="employee-roster-phone-search">
-                연락처
+              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="employee-roster-role-search">
+                역할
               </label>
               <select
                 className="field appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"
-                id="employee-roster-phone-search"
-                value={phoneQuery}
-                onChange={(event) => setPhoneQuery(event.target.value)}
+                id="employee-roster-role-search"
+                value={roleQuery}
+                onChange={(event) => setRoleQuery(event.target.value)}
               >
-                <option value="">전체 연락처</option>
-                {uniquePhones.map((phone) => (
-                  <option key={phone} value={phone}>
-                    {phone}
-                  </option>
-                ))}
+                <option value="">전체 역할</option>
+                <option value="경비원">경비원</option>
+                <option value="미화원">미화원</option>
+                <option value="파견">파견</option>
               </select>
             </div>
           </div>
@@ -236,7 +227,7 @@ export default function EmployeeRosterPage() {
               onChange={(event) => {
                 setShowRetired(event.target.checked);
                 setNameQuery("");
-                setPhoneQuery("");
+                setRoleQuery("");
               }}
               type="checkbox"
             />
@@ -290,6 +281,15 @@ export default function EmployeeRosterPage() {
                     연락처
                   </SortableHeader>
                   <SortableHeader
+                    sortKey="role"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="text-left"
+                  >
+                    역할
+                  </SortableHeader>
+                  <SortableHeader
                     sortKey="worksite"
                     currentSortKey={sortKey}
                     sortDirection={sortDirection}
@@ -312,7 +312,7 @@ export default function EmployeeRosterPage() {
               <tbody>
                 {sortedEmployees.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="p-8 text-center text-ink-muted-48 italic">
+                    <td colSpan={5} className="p-8 text-center text-ink-muted-48 italic">
                       조회 결과에 해당하는 직원이 없습니다.
                     </td>
                   </tr>
@@ -328,6 +328,7 @@ export default function EmployeeRosterPage() {
                         </Link>
                       </td>
                       <td className="text-ink-muted-48">{employee.phone}</td>
+                      <td className="text-ink-muted-48">{employee.role}</td>
                       <td className="text-ink-muted-48">
                         {worksiteById.get(worksiteByEmployeeId.get(employee.id) ?? "") ?? "-"}
                       </td>

@@ -8,6 +8,7 @@ export type EmployeeRow = {
   phone: string;
   phone_normalized: string;
   is_retired: boolean;
+  role: "경비원" | "미화원" | "파견";
   created_at: string;
 };
 
@@ -151,16 +152,20 @@ export async function loadBootstrap() {
   };
 }
 
-export async function createEmployee(input: { name: unknown; phone: unknown }) {
+export async function createEmployee(input: { name: unknown; phone: unknown; role?: unknown }) {
   const name = requireString(input.name, "직원이름");
   const phone = requireString(input.phone, "연락처");
   const phone_normalized = normalizePhone(phone);
+  const role = input.role ? requireString(input.role, "역할") : "경비원";
+  if (!["경비원", "미화원", "파견"].includes(role)) {
+    throw new Error("올바르지 않은 역할입니다.");
+  }
 
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("employees")
     .upsert(
-      { name, phone, phone_normalized, is_retired: false },
+      { name, phone, phone_normalized, is_retired: false, role },
       { onConflict: "name,phone_normalized" },
     )
     .select("*")
@@ -184,6 +189,7 @@ export async function updateEmployee(input: {
   name: unknown;
   phone: unknown;
   is_retired: unknown;
+  role?: unknown;
 }) {
   const id = requireString(input.id, "직원");
   const name = requireString(input.name, "직원이름");
@@ -191,11 +197,15 @@ export async function updateEmployee(input: {
   const phone_normalized = normalizePhone(phone);
   const is_retired =
     input.is_retired === true || input.is_retired === "true" || input.is_retired === 1;
+  const role = input.role ? requireString(input.role, "역할") : "경비원";
+  if (!["경비원", "미화원", "파견"].includes(role)) {
+    throw new Error("올바르지 않은 역할입니다.");
+  }
 
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("employees")
-    .update({ name, phone, phone_normalized, is_retired })
+    .update({ name, phone, phone_normalized, is_retired, role })
     .eq("id", id)
     .select("*")
     .single();
@@ -394,8 +404,8 @@ export async function deleteAssignment(id: unknown) {
 }
 
 export async function authenticateGuard(input: { name: unknown; phone: unknown }) {
-  const name = requireString(input.name, "경비원 이름");
-  const phone = requireString(input.phone, "경비원 연락처");
+  const name = requireString(input.name, "이름");
+  const phone = requireString(input.phone, "연락처");
   const supabase = getSupabase();
 
   const { data: employee, error: employeeError } = await supabase

@@ -26,6 +26,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
         name: body.name,
         phone: body.phone,
         is_retired: body.is_retired,
+        role: body.role,
       }),
     });
   } catch (error) {

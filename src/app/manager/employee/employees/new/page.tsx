@@ -10,6 +10,7 @@ type EmployeeResponse = {
     id: string;
     name: string;
     phone: string;
+    role: string;
   };
 };
 
@@ -44,9 +45,10 @@ export default function EmployeeNewPage() {
       const result = await postJson<EmployeeResponse>("/api/employees", {
         name: data.get("name"),
         phone: data.get("phone"),
+        role: data.get("role"),
       });
 
-      setSuccessMessage(`직원이름(${result.employee.name}) 연락처(${result.employee.phone}) 등록완료`);
+      setSuccessMessage(`직원이름(${result.employee.name}) 연락처(${result.employee.phone}) 역할(${result.employee.role}) 등록완료`);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "요청을 처리하지 못했습니다.");
     }
@@ -75,6 +77,22 @@ export default function EmployeeNewPage() {
                 연락처
               </label>
               <input className="field" id="employee-phone" name="phone" placeholder="010-0000-0000" required />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="employee-role">
+                역할
+              </label>
+              <select
+                className="field appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"
+                id="employee-role"
+                name="role"
+                defaultValue="경비원"
+                required
+              >
+                <option value="경비원">경비원</option>
+                <option value="미화원">미화원</option>
+                <option value="파견">파견</option>
+              </select>
             </div>
           </div>
 

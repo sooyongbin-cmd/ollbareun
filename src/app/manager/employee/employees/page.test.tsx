@@ -14,6 +14,7 @@ const bootstrap = {
       phone: "010-1234-5678",
       phone_normalized: "01012345678",
       is_retired: false,
+      role: "경비원",
     },
     {
       id: "emp-2",
@@ -21,6 +22,7 @@ const bootstrap = {
       phone: "010-9999-8888",
       phone_normalized: "01099998888",
       is_retired: true,
+      role: "미화원",
     },
   ],
   worksites: [
@@ -90,7 +92,7 @@ describe("employee roster page", () => {
     const listSection = await screen.findByRole("region", { name: "직원 목록" });
 
     expect(searchSection).toContainElement(screen.getByLabelText("이름"));
-    expect(searchSection).toContainElement(screen.getByLabelText("연락처"));
+    expect(searchSection).toContainElement(screen.getByLabelText("역할"));
     expect(searchSection).toContainElement(screen.getByRole("checkbox", { name: "퇴직" }));
     expect(screen.getByRole("checkbox", { name: "퇴직" })).not.toBeChecked();
     expect(searchSection).toContainElement(screen.getByRole("link", { name: "직원 등록" }));
@@ -131,9 +133,9 @@ describe("employee roster page", () => {
     const extendedBootstrap = {
       ...bootstrap,
       employees: [
-        { id: "emp-1", name: "Alice", phone: "010-1234-5678", phone_normalized: "01012345678", is_retired: false },
-        { id: "emp-3", name: "Charlie", phone: "010-1111-2222", phone_normalized: "01011112222", is_retired: false },
-        { id: "emp-2", name: "Bob", phone: "010-9999-8888", phone_normalized: "01099998888", is_retired: true },
+        { id: "emp-1", name: "Alice", phone: "010-1234-5678", phone_normalized: "01012345678", is_retired: false, role: "경비원" },
+        { id: "emp-3", name: "Charlie", phone: "010-1111-2222", phone_normalized: "01011112222", is_retired: false, role: "경비원" },
+        { id: "emp-2", name: "Bob", phone: "010-9999-8888", phone_normalized: "01099998888", is_retired: true, role: "미화원" },
       ]
     };
     vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {

@@ -13,6 +13,7 @@ type Employee = {
   name: string;
   phone: string;
   is_retired: boolean;
+  role: "경비원" | "미화원" | "파견";
 };
 
 type EmployeeResponse = {
@@ -45,6 +46,7 @@ export default function EmployeeSavePage() {
   const employeeId = params.id;
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [role, setRole] = useState<"경비원" | "미화원" | "파견">("경비원");
   const [isRetired, setIsRetired] = useState(false);
   const [loading, setLoading] = useState(Boolean(employeeId));
   const [error, setError] = useState("");
@@ -62,6 +64,7 @@ export default function EmployeeSavePage() {
         if (!ignore) {
           setName(data.employee.name);
           setPhone(data.employee.phone);
+          setRole(data.employee.role);
           setIsRetired(data.employee.is_retired);
         }
       } catch (loadError) {
@@ -96,7 +99,7 @@ export default function EmployeeSavePage() {
       await fetchJson<EmployeeResponse>(`/api/employees/${employeeId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, is_retired: isRetired }),
+        body: JSON.stringify({ name, phone, role, is_retired: isRetired }),
       });
 
       setSaveSuccessOpen(true);
@@ -163,6 +166,22 @@ export default function EmployeeSavePage() {
                   onChange={(event) => setPhone(event.target.value)}
                   required
                 />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="employee-role">
+                  역할
+                </label>
+                <select
+                  className="field appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"
+                  id="employee-role"
+                  value={role}
+                  onChange={(event) => setRole(event.target.value as "경비원" | "미화원" | "파견")}
+                  required
+                >
+                  <option value="경비원">경비원</option>
+                  <option value="미화원">미화원</option>
+                  <option value="파견">파견</option>
+                </select>
               </div>
               <label className="flex items-center gap-3 text-[14px] font-semibold text-ink-muted-48 ml-1">
                 <input

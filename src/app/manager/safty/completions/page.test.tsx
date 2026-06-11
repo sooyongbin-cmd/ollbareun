@@ -195,7 +195,7 @@ describe("education completions page", () => {
       "fetch",
       vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = String(input);
-        if (url.endsWith("/api/notifications/send")) {
+        if (url.endsWith("/api/education/reminders/send")) {
           return sendMock(input, init);
         }
         return originalFetch(input, init);
@@ -212,14 +212,10 @@ describe("education completions page", () => {
     await user.click(pushButton);
 
     expect(sendMock).toHaveBeenCalledTimes(1);
+    expect(sendMock.mock.calls[0][0]).toBe("/api/education/reminders/send");
     const callArgs = sendMock.mock.calls[0];
     const requestBody = JSON.parse(callArgs[1].body);
-    expect(requestBody.notifications).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ employeeName: "홍길동", uncompletedCount: 2 }),
-        expect.objectContaining({ employeeName: "이순신", uncompletedCount: 3 }),
-      ]),
-    );
+    expect(requestBody.employeeIds).toEqual(["employee-1", "employee-2"]);
 
     expect(await screen.findByText("교육 알림 전송 결과")).toBeInTheDocument();
     expect(screen.getByText("성공 건수")).toBeInTheDocument();
@@ -243,5 +239,44 @@ describe("education completions page", () => {
     await user.click(closeButtons[0]);
 
     expect(screen.queryByText("교육 알림 전송 결과")).not.toBeInTheDocument();
+  });
+
+  it("sends only filtered employee ids to the education reminder API", async () => {
+    const user = userEvent.setup();
+    const sendMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        success: true,
+        successCount: 1,
+        failedCount: 0,
+        unregisteredCount: 0,
+        notifiedEmployees: ["홍길동"],
+        notifiedEmployeeIds: ["employee-1"],
+        unregisteredEmployees: [],
+        unregisteredEmployeeIds: [],
+        failedEmployees: [],
+      }),
+    });
+
+    const originalFetch = globalThis.fetch;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input);
+        if (url.endsWith("/api/education/reminders/send")) {
+          return sendMock(input, init);
+        }
+        return originalFetch(input, init);
+      }),
+    );
+
+    render(<EducationCompletionsPage />);
+
+    expect(await screen.findByText("홍길동")).toBeInTheDocument();
+    await user.type(screen.getByLabelText("직원 이름"), "홍");
+    await user.click(screen.getByRole("button", { name: "교육알림" }));
+
+    expect(sendMock).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(sendMock.mock.calls[0][1].body).employeeIds).toEqual(["employee-1"]);
   });
 });

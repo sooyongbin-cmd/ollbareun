@@ -1,6 +1,12 @@
-import { act, render } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import GuardPushRegister from "./guard-push-register";
+
+const push = vi.fn();
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push }),
+}));
 
 const guardSessionStorageKey = "ollbareun.guard.session";
 const guardPushRegistrationStorageKey = "ollbareun.guard.pushRegistration";
@@ -57,10 +63,13 @@ describe("GuardPushRegister", () => {
   let registerMock: ReturnType<typeof vi.fn>;
   let getSubscriptionMock: ReturnType<typeof vi.fn>;
   let subscribeMock: ReturnType<typeof vi.fn>;
+  let serviceWorkerMessageHandler: ((event: MessageEvent) => void) | null;
 
   beforeEach(() => {
     vi.useFakeTimers();
     window.sessionStorage.clear();
+    push.mockReset();
+    serviceWorkerMessageHandler = null;
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY = "AQID";
 
     fetchMock = vi.fn().mockResolvedValue({
@@ -82,7 +91,11 @@ describe("GuardPushRegister", () => {
       configurable: true,
       value: {
         register: registerMock,
-        addEventListener: vi.fn(),
+        addEventListener: vi.fn((type: string, handler: (event: MessageEvent) => void) => {
+          if (type === "message") {
+            serviceWorkerMessageHandler = handler;
+          }
+        }),
         removeEventListener: vi.fn(),
       },
     });
@@ -202,5 +215,33 @@ describe("GuardPushRegister", () => {
     await runPushRegistration();
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("moves to the push payload URL when the in-app reminder modal is confirmed", async () => {
+    writeGuardSession("employee-1");
+    getSubscriptionMock.mockResolvedValue(createSubscription("https://push.example.test/current-endpoint"));
+
+    const { getByRole } = render(<GuardPushRegister />);
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      serviceWorkerMessageHandler?.(
+        new MessageEvent("message", {
+          data: {
+            type: "PUSH_NOTIFICATION_RECEIVED",
+            title: "안전교육 이수 독려 알림",
+            body: "안전교육을 이수해주세요.",
+            data: { url: "/guard/main/safety" },
+          },
+        }),
+      );
+    });
+
+    fireEvent.click(getByRole("button", { name: "확인" }));
+
+    expect(push).toHaveBeenCalledWith("/guard/main/safety");
   });
 });

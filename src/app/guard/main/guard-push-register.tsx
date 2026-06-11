@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import AlertModal from "@/components/modals/alert-modal";
 
 const guardSessionStorageKey = "ollbareun.guard.session";
@@ -190,9 +191,11 @@ async function recordMainPushResult(
 }
 
 export default function GuardPushRegister() {
+  const router = useRouter();
   const [showInAppModal, setShowInAppModal] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalBody, setModalBody] = useState("");
+  const [modalUrl, setModalUrl] = useState<string | null>(null);
   const [pushStatusTitle, setPushStatusTitle] = useState("푸시 알림 연결 준비 중");
   const [pushStatusDetail, setPushStatusDetail] = useState(
     "로그인 이후 교육알림 수신을 위한 브라우저 구독 상태를 확인합니다.",
@@ -440,6 +443,7 @@ export default function GuardPushRegister() {
       if (event.data && event.data.type === "PUSH_NOTIFICATION_RECEIVED") {
         setModalTitle(event.data.title || "안전교육 독려 알림");
         setModalBody(event.data.body || "");
+        setModalUrl(typeof event.data.data?.url === "string" ? event.data.data.url : null);
         setShowInAppModal(true);
       }
     };
@@ -449,6 +453,13 @@ export default function GuardPushRegister() {
       navigator.serviceWorker.removeEventListener("message", handleServiceWorkerMessage);
     };
   }, []);
+
+  function handleInAppModalClose() {
+    setShowInAppModal(false);
+    if (modalUrl) {
+      router.push(modalUrl);
+    }
+  }
 
   return (
     <>
@@ -479,7 +490,7 @@ export default function GuardPushRegister() {
 
       <AlertModal
         isOpen={showInAppModal}
-        onClose={() => setShowInAppModal(false)}
+        onClose={handleInAppModalClose}
         title={modalTitle}
         description={modalBody}
         buttonLabel="확인"

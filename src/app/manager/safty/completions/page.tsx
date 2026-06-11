@@ -153,31 +153,19 @@ export default function EducationCompletionsPage() {
   }, [filteredEmployees, sortKey, sortDirection, completedCountByEmployeeId]);
 
   const handleSendPushNotifications = useCallback(async () => {
-    const targets = filteredEmployees
-      .map((employee) => {
-        const completedCount = completedCountByEmployeeId.get(employee.id) ?? 0;
-        const uncompletedCount = totalResourceCount - completedCount;
-        return {
-          employeeId: employee.id,
-          employeeName: employee.name,
-          uncompletedCount,
-        };
-      })
-      .filter((target) => target.uncompletedCount >= 1);
-
-    if (targets.length === 0) {
-      setAlertMessage("알림을 보낼 미이수 직원이 없습니다.");
+    if (filteredEmployees.length === 0) {
+      setAlertMessage("알림을 보낼 직원이 없습니다.");
       return;
     }
 
     setSendingPush(true);
     try {
-      const response = await fetch("/api/notifications/send", {
+      const response = await fetch("/api/education/reminders/send", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ notifications: targets }),
+        body: JSON.stringify({ employeeIds: filteredEmployees.map((employee) => employee.id) }),
       });
 
       const data = await response.json();
@@ -217,7 +205,7 @@ export default function EducationCompletionsPage() {
     } finally {
       setSendingPush(false);
     }
-  }, [filteredEmployees, completedCountByEmployeeId, totalResourceCount]);
+  }, [filteredEmployees]);
 
   const handleSort = (key: "name" | "completion") => {
     if (sortKey === key) {

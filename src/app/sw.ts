@@ -77,8 +77,8 @@ self.addEventListener("push", (event) => {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  // Redirect to guard main dashboard page when clicking notification
-  const targetUrl = new URL("/guard/main", self.location.origin).href;
+  const notificationUrl = event.notification.data?.url || "/guard/main";
+  const targetUrl = new URL(notificationUrl, self.location.origin).href;
 
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {

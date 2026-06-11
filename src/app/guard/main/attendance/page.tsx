@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { canClockIn, canClockOut, type AttendanceRecord, type Worksite } from "@/lib/phase1";
 import { formatGpsInfo, type GpsInfo } from "@/lib/gps";
+import AttendanceMapSection from "./attendance-map-section";
 
 type EmployeeRow = {
   id: string;
@@ -190,7 +191,13 @@ export default function GuardAttendancePage() {
         {guard ? (
           <section className="bg-canvas-parchment rounded-[18px] p-[16px] border border-hairline/50">
             <div className="space-y-[32px]">
-              <div className="bg-canvas rounded-[18px] p-6 border border-hairline shadow-sm">
+              <AttendanceMapSection
+                currentLatitude={latitude}
+                currentLongitude={longitude}
+                worksite={guard.worksite}
+              />
+
+              <div className="bg-canvas rounded-[18px] p-6 border border-hairline shadow-sm" id="attendance-profile-section">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary text-xl font-bold">
                     {guard.employee.name[0]}
@@ -209,7 +216,7 @@ export default function GuardAttendancePage() {
                 )}
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4" id="attendance-current-location-section">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="current-latitude">
@@ -240,11 +247,12 @@ export default function GuardAttendancePage() {
                 className={`p-4 rounded-xl text-center text-[15px] font-medium transition-colors ${
                   clockInDecision.allowed ? "bg-primary/5 text-primary" : "bg-status-warn text-ink"
                 }`}
+                id="attendance-decision-section"
               >
                 {clockInDecision.reason}
               </div>
 
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3" id="attendance-actions-section">
                 <button
                   className="button-primary"
                   data-testid="clock-in"
@@ -263,18 +271,9 @@ export default function GuardAttendancePage() {
                 >
                   퇴근
                 </button>
-                <button className="button-secondary" type="button">
-                  안전교육
-                </button>
-                <button className="button-secondary" type="button">
-                  근무지체크
-                </button>
-                <button className="button-secondary md:col-span-2" type="button">
-                  개인프로필
-                </button>
               </div>
 
-              <div className="bg-canvas border border-hairline rounded-[18px] p-6 space-y-4">
+              <div className="bg-canvas border border-hairline rounded-[18px] p-6 space-y-4" id="attendance-record-section">
                 <h4 className="text-[17px] font-semibold">오늘의 근무 기록</h4>
                 <div className="flex justify-between items-center text-[15px]">
                   <span className="text-ink-muted-48">출근 시각</span>
@@ -305,7 +304,10 @@ export default function GuardAttendancePage() {
             </div>
           </section>
         ) : (
-          <section className="bg-canvas-parchment rounded-[18px] p-[16px] border border-hairline/50 text-center">
+          <section
+            className="bg-canvas-parchment rounded-[18px] p-[16px] border border-hairline/50 text-center"
+            id="attendance-auth-required-section"
+          >
             <p className="text-[17px] text-ink-muted-48">경비원 인증 후 이용할 수 있습니다.</p>
             <Link className="button-primary mt-6 inline-flex" href="/guard">
               인증하러 가기

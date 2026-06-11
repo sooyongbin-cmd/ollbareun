@@ -196,6 +196,8 @@ export default function GuardPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [launchState, setLaunchState] = useState<GuardLaunchState>("checking");
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [guardLoginProgress, setGuardLoginProgress] = useState("");
+  const [isGuardLoginPending, setIsGuardLoginPending] = useState(false);
 
   useEffect(() => {
     if (isCurrentInAppBrowser()) {
@@ -249,21 +251,33 @@ export default function GuardPage() {
 
   async function handleGuardAuth(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (isGuardLoginPending) {
+      return;
+    }
+
     const form = new FormData(event.currentTarget);
 
     try {
+      setErrorMessage("");
+      setIsGuardLoginPending(true);
+      setGuardLoginProgress("로그인 요청을 전송하고 있습니다.");
       const session = await postJson<GuardSession>("/api/guard/auth", {
         name: form.get("name"),
         phone: form.get("phone"),
       });
 
+      setGuardLoginProgress("근무자 정보를 확인했습니다.");
       setSavedGuardName(session.employee.name);
+      setGuardLoginProgress("로그인 정보를 저장하고 있습니다.");
       writeStoredGuardName(session.employee.name);
       writeStoredGuardSession(session);
+      setGuardLoginProgress("메인 화면으로 이동합니다.");
       router.push("/guard/main");
     } catch (authError) {
       const authMessage = authError instanceof Error ? authError.message : "근무자 인증에 실패했습니다.";
+      setGuardLoginProgress("로그인에 실패했습니다. 내용을 확인해 주세요.");
       setErrorMessage(authMessage);
+      setIsGuardLoginPending(false);
     }
   }
 
@@ -347,9 +361,19 @@ export default function GuardPage() {
                     <input className="field" id="guard-phone" name="phone" placeholder="010-0000-0000" required />
                   </div>
                 </div>
-                <button className="button-primary w-full" data-testid="guard-auth-submit" type="submit">
+                <button
+                  className="button-primary w-full disabled:opacity-70"
+                  data-testid="guard-auth-submit"
+                  disabled={isGuardLoginPending}
+                  type="submit"
+                >
                   로그인
                 </button>
+                {guardLoginProgress && (
+                  <p aria-live="polite" className="-mt-3 text-center text-[13px] leading-relaxed text-ink-muted-48">
+                    {guardLoginProgress}
+                  </p>
+                )}
               </form>
             </section>
 

@@ -95,6 +95,39 @@ describe("guard login page", () => {
     expect(replace).toHaveBeenCalledWith("/guard/main");
   });
 
+  it("shows guard login progress below the login button while authentication is running", async () => {
+    setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1");
+    setStandaloneMode(true);
+    let resolveAuth!: (response: Response) => void;
+    const authPromise = new Promise<Response>((resolve) => {
+      resolveAuth = resolve;
+    });
+    vi.stubGlobal("fetch", vi.fn(() => authPromise));
+
+    render(<GuardPage />);
+
+    fireEvent.change(await screen.findByLabelText("이름"), { target: { value: "홍길동" } });
+    fireEvent.change(screen.getByLabelText("연락처"), { target: { value: "010-0000-0000" } });
+    fireEvent.click(screen.getByRole("button", { name: "로그인" }));
+
+    expect(await screen.findByText("로그인 요청을 전송하고 있습니다.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "로그인" })).toBeDisabled();
+
+    resolveAuth(
+      Response.json({
+        employee: { id: "emp-1", name: "홍길동" },
+        assignment: null,
+        worksite: null,
+        attendance: null,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("메인 화면으로 이동합니다.")).toBeInTheDocument();
+    });
+    expect(push).toHaveBeenCalledWith("/guard/main");
+  });
+
   it("stores a guard session after passkey login succeeds", async () => {
     setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1");
     setStandaloneMode(true);

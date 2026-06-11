@@ -20,6 +20,18 @@ export async function POST(request: Request) {
 
     const supabase = getSupabase();
 
+    // Remove any existing subscription associated with this endpoint (device)
+    // so that only the most recently logged-in employee on this device receives push notifications.
+    const { error: deleteError } = await supabase
+      .from("push_subscriptions")
+      .delete()
+      .eq("endpoint", subscription.endpoint);
+
+    if (deleteError) {
+      console.error("Database error deleting duplicate endpoint push subscription:", deleteError);
+      return Response.json({ error: deleteError.message }, { status: 500 });
+    }
+
     // Keep one current push subscription per employee.
     const { data, error } = await supabase
       .from("push_subscriptions")

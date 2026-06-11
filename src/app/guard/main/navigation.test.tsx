@@ -220,6 +220,45 @@ describe("guard main navigation", () => {
     expect(screen.getByText(/설정에서 위치 권한을 허용/)).toBeInTheDocument();
   });
 
+  it("blocks worksite-required navigation when no worksite is assigned", async () => {
+    const user = userEvent.setup();
+    const query = vi.fn(async () => ({ state: "granted" }));
+    const sessionWithoutWorksite = {
+      ...guardSession,
+      assignment: null,
+      worksite: null,
+    };
+
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: { getCurrentPosition: vi.fn() },
+    });
+    Object.defineProperty(navigator, "permissions", {
+      configurable: true,
+      value: { query },
+    });
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(sessionWithoutWorksite));
+
+    render(<GuardMainPage />);
+
+    const worksiteRequiredButtons = [
+      screen.getAllByRole("button", { name: "출근하기" })[0],
+      screen.getByRole("button", { name: "순찰" }),
+      screen.getByRole("button", { name: "특이사항" }),
+    ];
+
+    for (const button of worksiteRequiredButtons) {
+      await user.click(button);
+
+      expect(push).not.toHaveBeenCalled();
+      expect(query).not.toHaveBeenCalled();
+      expect(await screen.findByRole("heading", { name: "배정된 근무지가 없습니다" })).toBeInTheDocument();
+      expect(screen.getByText("관리자에게 근무지 배정을 요청한 뒤 다시 시도해주세요.")).toBeInTheDocument();
+
+      await user.click(screen.getByRole("button", { name: "확인" }));
+    }
+  });
+
   it("requests location permission on click and navigates when the user allows it", async () => {
     const user = userEvent.setup();
     const getCurrentPosition = vi.fn((success: PositionCallback) => {

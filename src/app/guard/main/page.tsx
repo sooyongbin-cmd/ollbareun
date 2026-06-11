@@ -12,6 +12,13 @@ type GuardSession = {
   employee?: {
     role?: string;
   } | null;
+  assignment?: {
+    id?: unknown;
+  } | null;
+  worksite?: {
+    id?: unknown;
+    name?: unknown;
+  } | null;
 };
 
 const guardSessionStorageKey = "ollbareun.guard.session";
@@ -56,6 +63,23 @@ export default function GuardMainPage() {
     return null;
   }, [role]);
 
+  const hasAssignedWorksite = useMemo(() => {
+    if (!storedSession) return false;
+    try {
+      const session = JSON.parse(storedSession) as GuardSession;
+      return (
+        typeof session.assignment?.id === "string" &&
+        session.assignment.id.trim() !== "" &&
+        typeof session.worksite?.id === "string" &&
+        session.worksite.id.trim() !== "" &&
+        typeof session.worksite?.name === "string" &&
+        session.worksite.name.trim() !== ""
+      );
+    } catch {
+      return false;
+    }
+  }, [storedSession]);
+
   return (
     <div className="mx-auto max-w-[980px] w-full px-5 py-[80px]">
       <div className="max-w-[600px] mx-auto">
@@ -63,13 +87,17 @@ export default function GuardMainPage() {
         
         <section className="bg-canvas-parchment rounded-[18px] p-[16px] border border-hairline/50">
           <div className="flex flex-col gap-3">
-            <GuardLocationGateLink href="/guard/main/attendance">출근하기</GuardLocationGateLink>
+            <GuardLocationGateLink href="/guard/main/attendance" hasAssignedWorksite={hasAssignedWorksite}>
+              출근하기
+            </GuardLocationGateLink>
             {inspectionLabel !== null && (
-              <GuardLocationGateLink href="/guard/main/inspection">
+              <GuardLocationGateLink href="/guard/main/inspection" hasAssignedWorksite={hasAssignedWorksite}>
                 {inspectionLabel}
               </GuardLocationGateLink>
             )}
-            <GuardLocationGateLink href="/guard/main/special-remarks">특이사항</GuardLocationGateLink>
+            <GuardLocationGateLink href="/guard/main/special-remarks" hasAssignedWorksite={hasAssignedWorksite}>
+              특이사항
+            </GuardLocationGateLink>
             <Link className="button-secondary w-full justify-center" href="/guard/main/profile">
               개인프로필
             </Link>

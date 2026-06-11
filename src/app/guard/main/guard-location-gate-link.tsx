@@ -12,6 +12,7 @@ import {
 type GuardLocationGateLinkProps = {
   children: React.ReactNode;
   href: string;
+  hasAssignedWorksite?: boolean;
 };
 
 const geolocationOptions: PositionOptions = { enableHighAccuracy: true, maximumAge: 3000, timeout: 8000 };
@@ -39,13 +40,19 @@ function requestCurrentPosition() {
   });
 }
 
-export default function GuardLocationGateLink({ children, href }: GuardLocationGateLinkProps) {
+export default function GuardLocationGateLink({ children, href, hasAssignedWorksite = true }: GuardLocationGateLinkProps) {
   const router = useRouter();
   const [blockedState, setBlockedState] = useState<GeolocationPermissionState | null>(null);
+  const [isMissingWorksite, setIsMissingWorksite] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
 
   async function handleClick() {
     if (isChecking) {
+      return;
+    }
+
+    if (!hasAssignedWorksite) {
+      setIsMissingWorksite(true);
       return;
     }
 
@@ -90,6 +97,13 @@ export default function GuardLocationGateLink({ children, href }: GuardLocationG
         onClose={() => setBlockedState(null)}
         title="위치 권한이 필요합니다"
         description={blockedState ? getBlockedDescription(blockedState) : ""}
+        buttonLabel="확인"
+      />
+      <AlertModal
+        isOpen={isMissingWorksite}
+        onClose={() => setIsMissingWorksite(false)}
+        title="배정된 근무지가 없습니다"
+        description="관리자에게 근무지 배정을 요청한 뒤 다시 시도해주세요."
         buttonLabel="확인"
       />
     </>

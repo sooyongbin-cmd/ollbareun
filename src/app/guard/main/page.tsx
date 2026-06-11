@@ -3,6 +3,7 @@ import GuardWorksiteSection from "./guard-worksite-section";
 import GuardAttendanceSection from "./guard-attendance-section";
 import GuardSafetySection from "./guard-safety-section";
 import GuardPushRegister from "./guard-push-register";
+import GuardLocationPermissionPrompt from "./guard-location-permission-prompt";
 
 export default function GuardMainPage() {
   return (
@@ -26,6 +27,7 @@ export default function GuardMainPage() {
         <GuardSafetySection />
         <GuardAttendanceSection />
         <GuardPushRegister />
+        <GuardLocationPermissionPrompt />
       </div>
     </div>
   );

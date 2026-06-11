@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { distanceMeters, canClockIn, canClockOut, type AttendanceRecord, type Worksite } from "@/lib/phase1";
 import type { GpsInfo } from "@/lib/gps";
 import AlertModal from "@/components/modals/alert-modal";
+import { locationPermissionGrantedEvent, queryGeolocationPermission } from "./location-permission";
 
 type EmployeeRow = {
   id: string;
@@ -98,11 +99,36 @@ export default function GuardAttendanceSection() {
       queueMicrotask(() => setLocError("위치 확인 불가"));
       return;
     }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => setCurrentGps({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
-      () => setLocError("위치 확인 실패"),
-      { enableHighAccuracy: true, timeout: 8000 }
-    );
+    let isMounted = true;
+
+    async function loadCurrentPosition() {
+      const permissionState = await queryGeolocationPermission();
+      if (!isMounted) {
+        return;
+      }
+
+      if (permissionState === "denied" || permissionState === "prompt") {
+        setLocError("위치 권한 필요");
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setCurrentGps({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+          setLocError("");
+        },
+        () => setLocError("위치 확인 실패"),
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    }
+
+    window.addEventListener(locationPermissionGrantedEvent, loadCurrentPosition);
+    void loadCurrentPosition();
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener(locationPermissionGrantedEvent, loadCurrentPosition);
+    };
   }, []);
 
   const distance =

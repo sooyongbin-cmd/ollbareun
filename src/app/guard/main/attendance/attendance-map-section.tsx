@@ -159,6 +159,10 @@ function createMarkerImage(src: string, width: number, height: number, offsetX: 
 }
 
 function parseCurrentGps(latitude: string, longitude: string): GpsInfo | null {
+  if (!latitude.trim() || !longitude.trim()) {
+    return null;
+  }
+
   const parsedLatitude = Number(latitude);
   const parsedLongitude = Number(longitude);
 

@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { canClockIn, canClockOut, type AttendanceRecord, type Worksite } from "@/lib/phase1";
 import { type GpsInfo } from "@/lib/gps";
 import AttendanceMapSection from "./attendance-map-section";
+import GuardLocationPermissionPrompt from "../guard-location-permission-prompt";
+import { locationPermissionGrantedEvent, queryGeolocationPermission } from "../location-permission";
 
 type EmployeeRow = {
   id: string;
@@ -122,8 +124,8 @@ export default function GuardAttendancePage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [guard, setGuard] = useState<GuardSession | null>(readStoredGuardSession);
-  const [latitude, setLatitude] = useState(() => (guard?.worksite ? String(guard.worksite.gps_info.latitude) : ""));
-  const [longitude, setLongitude] = useState(() => (guard?.worksite ? String(guard.worksite.gps_info.longitude) : ""));
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
 
   const clockInDecision =
     guard?.worksite && latitude && longitude
@@ -141,23 +143,50 @@ export default function GuardAttendancePage() {
 
   useEffect(() => {
     const geolocation = navigator.geolocation;
+    let watchId: number | null = null;
+    let isMounted = true;
 
     if (!geolocation) {
       queueMicrotask(() => setError("이 브라우저에서는 위치 확인을 사용할 수 없습니다."));
       return;
     }
 
-    const watchId = geolocation.watchPosition(
-      (position) => {
-        setLatitude(String(position.coords.latitude));
-        setLongitude(String(position.coords.longitude));
-        setError("");
-      },
-      () => setError("현재 위치를 확인하지 못했습니다."),
-      geolocationOptions,
-    );
+    async function startWatchingPosition() {
+      const permissionState = await queryGeolocationPermission();
+      if (!isMounted || watchId !== null) {
+        return;
+      }
 
-    return () => geolocation.clearWatch(watchId);
+      if (permissionState === "denied" || permissionState === "prompt") {
+        setError("위치 권한을 허용해주세요.");
+        return;
+      }
+
+      watchId = geolocation.watchPosition(
+        (position) => {
+          setLatitude(String(position.coords.latitude));
+          setLongitude(String(position.coords.longitude));
+          setError("");
+        },
+        () => setError("현재 위치를 확인하지 못했습니다."),
+        geolocationOptions,
+      );
+    }
+
+    function handleLocationPermissionGranted() {
+      void startWatchingPosition();
+    }
+
+    window.addEventListener(locationPermissionGrantedEvent, handleLocationPermissionGranted);
+    void startWatchingPosition();
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener(locationPermissionGrantedEvent, handleLocationPermissionGranted);
+      if (watchId !== null) {
+        geolocation.clearWatch(watchId);
+      }
+    };
   }, []);
 
   async function handleClockIn() {
@@ -256,6 +285,7 @@ export default function GuardAttendancePage() {
 
               {message ? <p className="status-ok text-center">{message}</p> : null}
               {error ? <p className="status-warn text-center">{error}</p> : null}
+              <GuardLocationPermissionPrompt />
             </div>
           </section>
         ) : (

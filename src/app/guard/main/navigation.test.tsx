@@ -43,6 +43,10 @@ describe("guard main navigation", () => {
     vi.restoreAllMocks();
     document.head.innerHTML = "";
     delete window.kakao;
+    Object.defineProperty(navigator, "permissions", {
+      configurable: true,
+      value: undefined,
+    });
     window.sessionStorage.clear();
   });
 
@@ -100,6 +104,65 @@ describe("guard main navigation", () => {
     expect(screen.queryByTestId("clock-in")).not.toBeInTheDocument();
   });
 
+  it("asks for location permission on the main page when the browser is ready to prompt", async () => {
+    const user = userEvent.setup();
+    const getCurrentPosition = vi.fn((success: PositionCallback) => {
+      success({
+        coords: {
+          latitude: 37.5665,
+          longitude: 126.978,
+          accuracy: 5,
+          altitude: null,
+          altitudeAccuracy: null,
+          heading: null,
+          speed: null,
+        },
+        timestamp: Date.now(),
+      });
+    });
+    const query = vi.fn(async () => ({ state: "prompt" }));
+
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: { getCurrentPosition },
+    });
+    Object.defineProperty(navigator, "permissions", {
+      configurable: true,
+      value: { query },
+    });
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
+
+    render(<GuardMainPage />);
+
+    expect(await screen.findByRole("heading", { name: "위치 권한이 필요합니다" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "위치 허용하기" }));
+
+    expect(query).toHaveBeenCalledWith({ name: "geolocation" });
+    expect(getCurrentPosition).toHaveBeenCalled();
+  });
+
+  it("does not show the location permission dialog when geolocation is already granted", async () => {
+    const query = vi.fn(async () => ({ state: "granted" }));
+
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: { getCurrentPosition: vi.fn() },
+    });
+    Object.defineProperty(navigator, "permissions", {
+      configurable: true,
+      value: { query },
+    });
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
+
+    render(<GuardMainPage />);
+
+    await waitFor(() => {
+      expect(query).toHaveBeenCalledWith({ name: "geolocation" });
+    });
+    expect(screen.queryByRole("heading", { name: "위치 권한이 필요합니다" })).not.toBeInTheDocument();
+  });
+
   it("prominently displays today's worksite on the main page", async () => {
     window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
 
@@ -133,7 +196,7 @@ describe("guard main navigation", () => {
     expect(screen.getByText(/오늘의 근무가 모두 완료되었습니다/)).toBeInTheDocument();
   });
 
-  it("shows the attendance workflow on the attendance page", () => {
+  it("shows the attendance workflow on the attendance page", async () => {
     const watchPosition = vi.fn();
     const clearWatch = vi.fn();
     Object.defineProperty(navigator, "geolocation", {
@@ -145,13 +208,36 @@ describe("guard main navigation", () => {
     render(<AttendancePage />);
 
     expect(screen.queryByRole("link", { name: "홈으로" })).not.toBeInTheDocument();
-    expect(watchPosition).toHaveBeenCalledWith(expect.any(Function), expect.any(Function), {
-      enableHighAccuracy: true,
-      maximumAge: 3000,
-      timeout: 8000,
+    await waitFor(() => {
+      expect(watchPosition).toHaveBeenCalledWith(expect.any(Function), expect.any(Function), {
+        enableHighAccuracy: true,
+        maximumAge: 3000,
+        timeout: 8000,
+      });
     });
     expect(screen.queryByRole("button", { name: "현재 위치 가져오기" })).not.toBeInTheDocument();
     expect(screen.getByTestId("clock-in")).toBeInTheDocument();
+  });
+
+  it("shows Chrome site settings guidance on the attendance page when location is blocked", async () => {
+    const watchPosition = vi.fn();
+    const clearWatch = vi.fn();
+    const query = vi.fn(async () => ({ state: "denied" }));
+
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: { watchPosition, clearWatch },
+    });
+    Object.defineProperty(navigator, "permissions", {
+      configurable: true,
+      value: { query },
+    });
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
+
+    render(<AttendancePage />);
+
+    expect(await screen.findByRole("heading", { name: "위치 권한이 필요합니다" })).toBeInTheDocument();
+    expect(screen.getByText(/Chrome 사이트 설정에서 위치 권한을 허용/)).toBeInTheDocument();
   });
 
   it("adds the attendance map section and stable section ids", async () => {

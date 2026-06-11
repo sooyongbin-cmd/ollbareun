@@ -9,11 +9,12 @@ export default function GuardMainPage() {
     <div className="mx-auto max-w-[980px] w-full px-5 py-[80px]">
       <div className="max-w-[600px] mx-auto">
         <GuardWorksiteSection />
-        <GuardAttendanceSection />
-        <GuardSafetySection />
         
         <section className="bg-canvas-parchment rounded-[18px] p-[16px] border border-hairline/50">
           <div className="flex flex-col gap-3">
+            <Link className="button-secondary w-full justify-center" href="/guard/main/attendance">
+              출근하기
+            </Link>            
             <Link className="button-secondary w-full justify-center" href="/guard/main/inspection">
               현장점검
             </Link>
@@ -22,7 +23,8 @@ export default function GuardMainPage() {
             </Link>
           </div>
         </section>
-
+        <GuardSafetySection />
+        <GuardAttendanceSection />
         <GuardPushRegister />
       </div>
     </div>

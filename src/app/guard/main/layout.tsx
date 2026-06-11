@@ -12,7 +12,7 @@ export default function GuardMainLayout({
     <main className="min-h-screen bg-canvas text-ink font-apple selection:bg-primary/20">
       <GuardSessionGate />
 
-      <nav className="h-[52px] bg-canvas-parchment/80 backdrop-blur-md sticky top-[44px] z-40 border-b border-hairline/30">
+      <nav className="h-[52px] bg-canvas-parchment/80 backdrop-blur-md sticky z-40 border-b border-hairline/30">
         <div className="mx-auto max-w-[980px] w-full h-full flex items-center justify-between px-5">
           <div className="flex min-w-0 items-center gap-3">
             <h2 className="shrink-0 text-[21px] font-semibold">

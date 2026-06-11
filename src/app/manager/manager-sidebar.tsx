@@ -22,6 +22,7 @@ const menu = [
     children: [
       { label: "현장관리", href: "/manager/inspection/sites" },
       { label: "현장점검현황", href: "/manager/inspection/logs" },
+      { label: "특이사항", href: "/manager/inspection/special-remarks" },
     ],
   },
   {
@@ -44,6 +45,7 @@ const menu = [
     children: [
       { label: "로그현황", href: "/manager/system/logs" },
       { label: "패스키 요청 관리", href: "/manager/system/passkeys" },
+      { label: "시스템설정", href: "/manager/system/configs" },
     ],
   },
 ];

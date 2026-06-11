@@ -99,6 +99,7 @@ describe("guard main navigation", () => {
     expect(screen.getAllByRole("button", { name: "출근하기" })[0]).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "교육 받기" })).toHaveAttribute("href", "/guard/main/safety");
     expect(screen.getByRole("button", { name: "현장점검" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "특이사항" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "근무지확인" })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "개인프로필" })).toHaveAttribute("href", "/guard/main/profile");
     expect(screen.queryByTestId("clock-in")).not.toBeInTheDocument();
@@ -167,6 +168,30 @@ describe("guard main navigation", () => {
 
     await waitFor(() => {
       expect(push).toHaveBeenCalledWith("/guard/main/inspection");
+    });
+    expect(query).toHaveBeenCalledWith({ name: "geolocation" });
+  });
+
+  it("navigates to special remarks when location permission is granted", async () => {
+    const user = userEvent.setup();
+    const query = vi.fn(async () => ({ state: "granted" }));
+
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: { getCurrentPosition: vi.fn() },
+    });
+    Object.defineProperty(navigator, "permissions", {
+      configurable: true,
+      value: { query },
+    });
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
+
+    render(<GuardMainPage />);
+
+    await user.click(screen.getByRole("button", { name: "특이사항" }));
+
+    await waitFor(() => {
+      expect(push).toHaveBeenCalledWith("/guard/main/special-remarks");
     });
     expect(query).toHaveBeenCalledWith({ name: "geolocation" });
   });

@@ -125,5 +125,13 @@ describe("manager layout loading state", () => {
       "href",
       "/manager/inspection/logs",
     );
+    expect(screen.getAllByRole("link", { name: "특이사항" })[0]).toHaveAttribute(
+      "href",
+      "/manager/inspection/special-remarks",
+    );
+    expect(screen.getAllByRole("link", { name: "시스템설정" })[0]).toHaveAttribute(
+      "href",
+      "/manager/system/configs",
+    );
   });
 });

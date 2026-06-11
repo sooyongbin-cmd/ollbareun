@@ -15,6 +15,7 @@ export default function GuardMainPage() {
           <div className="flex flex-col gap-3">
             <GuardLocationGateLink href="/guard/main/attendance">출근하기</GuardLocationGateLink>
             <GuardLocationGateLink href="/guard/main/inspection">현장점검</GuardLocationGateLink>
+            <GuardLocationGateLink href="/guard/main/special-remarks">특이사항</GuardLocationGateLink>
             <Link className="button-secondary w-full justify-center" href="/guard/main/profile">
               개인프로필
             </Link>

@@ -2,6 +2,7 @@ import { getSystemConfigContent } from "./system-configs";
 import { getSupabaseAdmin } from "./supabase-admin";
 
 const STORAGE_BUCKET = "special-remarks";
+const MAX_PHOTO_BYTES = 500 * 1024;
 
 export type SpecialRemarkReportRow = {
   id: string;
@@ -65,6 +66,10 @@ async function uploadPhoto(input: {
   const parsed = parseDataUrl(input.photoDataUrl);
   if (!parsed) {
     return null;
+  }
+
+  if (parsed.buffer.length > MAX_PHOTO_BYTES) {
+    throw new Error("첨부사진은 500KB 이하만 업로드할 수 있습니다.");
   }
 
   const supabase = getSupabaseAdmin();
@@ -249,4 +254,42 @@ export async function listSpecialRemarkReports(input: { year?: unknown } = {}) {
   const { data, error } = await query;
   throwIfError(error);
   return (data ?? []) as SpecialRemarkReportRow[];
+}
+
+export async function getSpecialRemarkReport(idInput: unknown) {
+  const id = requireString(idInput, "특이사항 보고");
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase.from("inspection_special_reports").select("*").eq("id", id).single();
+
+  throwIfError(error);
+  return data as SpecialRemarkReportRow;
+}
+
+export function getSpecialRemarkStoragePathFromPublicUrl(photoUrl: string | null | undefined) {
+  if (!photoUrl) {
+    return null;
+  }
+
+  const marker = `/storage/v1/object/public/${STORAGE_BUCKET}/`;
+  const markerIndex = photoUrl.indexOf(marker);
+  if (markerIndex === -1) {
+    return null;
+  }
+
+  return decodeURIComponent(photoUrl.slice(markerIndex + marker.length));
+}
+
+export async function deleteSpecialRemarkReport(idInput: unknown) {
+  const id = requireString(idInput, "특이사항 보고");
+  const supabase = getSupabaseAdmin();
+  const report = await getSpecialRemarkReport(id);
+  const storagePath = getSpecialRemarkStoragePathFromPublicUrl(report.photo_url);
+
+  if (storagePath) {
+    const { error: storageError } = await supabase.storage.from(STORAGE_BUCKET).remove([storagePath]);
+    throwIfError(storageError);
+  }
+
+  const { error } = await supabase.from("inspection_special_reports").delete().eq("id", id);
+  throwIfError(error);
 }

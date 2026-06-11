@@ -17,7 +17,7 @@ describe("manager special remarks page", () => {
                 id: "report-1",
                 reported_at: "2026-06-11T00:10:00Z",
                 employee_name: "홍길동",
-                content: "출입문 파손",
+                content: "출입문 파손\n두번째 줄 내용",
                 photo_url: "https://example.com/photo.jpg",
               },
             ],
@@ -28,7 +28,7 @@ describe("manager special remarks page", () => {
     );
   });
 
-  it("filters by year and opens the attached photo popup", async () => {
+  it("filters by year and links each reported date to the detail page", async () => {
     const user = userEvent.setup();
     render(<SpecialRemarksPage />);
 
@@ -44,10 +44,11 @@ describe("manager special remarks page", () => {
     await waitFor(() => {
       expect(fetch).toHaveBeenLastCalledWith("/api/inspection/special-remarks?year=2026");
     });
-    expect(await screen.findByText("출입문 파손")).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "첨부사진" }));
-
-    expect(screen.getByAltText("첨부사진")).toHaveAttribute("src", "https://example.com/photo.jpg");
+    expect(await screen.findByText("출입문 파손....")).toBeInTheDocument();
+    expect(screen.queryByText("두번째 줄 내용")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /2026/ })).toHaveAttribute(
+      "href",
+      "/manager/inspection/special-remarks/report-1",
+    );
   });
 });

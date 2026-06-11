@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 
@@ -27,6 +28,11 @@ function formatDateTime(value: string) {
   }).format(new Date(value));
 }
 
+function summarizeContent(content: string) {
+  const firstLine = content.split(/\r?\n/)[0]?.trim() ?? "";
+  return `${firstLine}....`;
+}
+
 async function fetchReports(year: string) {
   const query = year.trim() ? `?year=${encodeURIComponent(year.trim())}` : "";
   const response = await fetch(`/api/inspection/special-remarks${query}`);
@@ -42,7 +48,6 @@ async function fetchReports(year: string) {
 export default function SpecialRemarksPage() {
   const [year, setYear] = useState("");
   const [reports, setReports] = useState<SpecialRemarkReport[]>([]);
-  const [selectedPhotoUrl, setSelectedPhotoUrl] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -146,14 +151,19 @@ export default function SpecialRemarksPage() {
                 ) : (
                   reports.map((report) => (
                     <tr key={report.id} className="hover:bg-canvas-parchment transition-colors">
-                      <td>{formatDateTime(report.reported_at)}</td>
+                      <td>
+                        <Link
+                          className="text-primary font-semibold hover:opacity-80"
+                          href={`/manager/inspection/special-remarks/${encodeURIComponent(report.id)}`}
+                        >
+                          {formatDateTime(report.reported_at)}
+                        </Link>
+                      </td>
                       <td>{report.employee_name}</td>
-                      <td className="max-w-[420px] whitespace-pre-wrap">{report.content}</td>
+                      <td className="max-w-[420px]">{summarizeContent(report.content)}</td>
                       <td>
                         {report.photo_url ? (
-                          <button className="text-primary font-semibold hover:opacity-80" onClick={() => setSelectedPhotoUrl(report.photo_url ?? "")} type="button">
-                            첨부사진
-                          </button>
+                          <span className="text-primary font-semibold">첨부사진</span>
                         ) : (
                           <span className="text-ink-muted-48">-</span>
                         )}
@@ -166,18 +176,6 @@ export default function SpecialRemarksPage() {
           </div>
         )}
       </section>
-
-      {selectedPhotoUrl ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay-scrim px-5">
-          <div className="w-full max-w-[720px] rounded-[18px] bg-canvas p-5 shadow-product border border-hairline">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img alt="첨부사진" className="max-h-[70vh] w-full object-contain rounded-[12px]" src={selectedPhotoUrl} />
-            <button className="button-primary mt-5 w-full justify-center" onClick={() => setSelectedPhotoUrl("")} type="button">
-              확인
-            </button>
-          </div>
-        </div>
-      ) : null}
     </section>
   );
 }

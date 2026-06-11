@@ -3,6 +3,8 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import GuardSpecialRemarksPage from "./page";
 
+const realCreateElement = document.createElement.bind(document);
+
 const guardSession = {
   employee: {
     id: "employee-1",
@@ -39,9 +41,8 @@ describe("guard special remarks page", () => {
       configurable: true,
       value: 480,
     });
-    const originalCreateElement = document.createElement.bind(document);
     vi.spyOn(document, "createElement").mockImplementation((tagName: string) => {
-      const element = originalCreateElement(tagName);
+      const element = realCreateElement(tagName);
       if (tagName === "canvas") {
         Object.assign(element, {
           getContext: () => ({ drawImage: vi.fn() }),
@@ -79,6 +80,35 @@ describe("guard special remarks page", () => {
         body: expect.stringContaining("data:image/jpeg;base64,AAAA"),
       }),
     );
+  });
+
+  it("compresses captured photos until they are under 500KB", async () => {
+    const user = userEvent.setup();
+    const largeDataUrl = `data:image/jpeg;base64,${"A".repeat(700 * 1024)}`;
+    const smallDataUrl = "data:image/jpeg;base64,BBBB";
+    const toDataURL = vi
+      .fn()
+      .mockReturnValueOnce(largeDataUrl)
+      .mockReturnValueOnce(smallDataUrl);
+
+    vi.mocked(document.createElement).mockImplementation((tagName: string) => {
+      const element = realCreateElement(tagName);
+      if (tagName === "canvas") {
+        Object.assign(element, {
+          getContext: () => ({ drawImage: vi.fn() }),
+          toDataURL,
+        });
+      }
+      return element;
+    });
+
+    render(<GuardSpecialRemarksPage />);
+
+    await user.click(screen.getByRole("button", { name: "촬영" }));
+
+    expect(toDataURL).toHaveBeenNthCalledWith(1, "image/jpeg", 0.82);
+    expect(toDataURL).toHaveBeenNthCalledWith(2, "image/jpeg", 0.78);
+    expect(await screen.findByAltText("촬영된 첨부사진")).toHaveAttribute("src", smallDataUrl);
   });
 
   it("adds recognized speech to the text area", async () => {

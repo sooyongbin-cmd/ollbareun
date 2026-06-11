@@ -32,6 +32,16 @@ type SpeechRecognitionEvent = {
   results: ArrayLike<ArrayLike<{ transcript: string }>>;
 };
 
+const MAX_PHOTO_BYTES = 500 * 1024;
+const PHOTO_COMPRESSION_ATTEMPTS = [
+  { maxSide: 1280, quality: 0.82 },
+  { maxSide: 1024, quality: 0.78 },
+  { maxSide: 900, quality: 0.74 },
+  { maxSide: 800, quality: 0.7 },
+  { maxSide: 720, quality: 0.66 },
+  { maxSide: 640, quality: 0.62 },
+];
+
 declare global {
   interface Window {
     SpeechRecognition?: SpeechRecognitionConstructor;
@@ -70,18 +80,36 @@ async function startCamera(video: HTMLVideoElement) {
   return stream;
 }
 
-function capturePhoto(video: HTMLVideoElement) {
-  const canvas = document.createElement("canvas");
-  canvas.width = video.videoWidth || 1280;
-  canvas.height = video.videoHeight || 960;
-  const context = canvas.getContext("2d");
+function getDataUrlSizeBytes(dataUrl: string) {
+  const base64 = dataUrl.split(",")[1] ?? "";
+  return Math.floor((base64.length * 3) / 4);
+}
 
-  if (!context) {
-    throw new Error("사진을 촬영하지 못했습니다.");
+function captureCompressedPhoto(video: HTMLVideoElement) {
+  const sourceWidth = video.videoWidth || 1280;
+  const sourceHeight = video.videoHeight || 960;
+  const sourceMaxSide = Math.max(sourceWidth, sourceHeight);
+
+  for (const attempt of PHOTO_COMPRESSION_ATTEMPTS) {
+    const scale = Math.min(1, attempt.maxSide / sourceMaxSide);
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(sourceWidth * scale));
+    canvas.height = Math.max(1, Math.round(sourceHeight * scale));
+    const context = canvas.getContext("2d");
+
+    if (!context) {
+      throw new Error("사진을 촬영하지 못했습니다.");
+    }
+
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL("image/jpeg", attempt.quality);
+
+    if (getDataUrlSizeBytes(dataUrl) <= MAX_PHOTO_BYTES) {
+      return dataUrl;
+    }
   }
 
-  context.drawImage(video, 0, 0, canvas.width, canvas.height);
-  return canvas.toDataURL("image/jpeg", 0.88);
+  throw new Error("첨부사진은 500KB 이하로 촬영해주세요.");
 }
 
 export default function GuardSpecialRemarksPage() {
@@ -174,7 +202,7 @@ export default function GuardSpecialRemarksPage() {
     }
 
     try {
-      setPhotoDataUrl(capturePhoto(videoRef.current));
+      setPhotoDataUrl(captureCompressedPhoto(videoRef.current));
       setCameraStatus("사진이 촬영되었습니다.");
       setError("");
     } catch (captureError) {

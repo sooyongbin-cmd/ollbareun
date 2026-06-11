@@ -111,6 +111,7 @@ describe("guard login page", () => {
     fireEvent.click(screen.getByRole("button", { name: "로그인" }));
 
     expect(await screen.findByText("로그인 요청을 전송하고 있습니다.")).toBeInTheDocument();
+    expect(screen.getByText("로그인진행중....")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "로그인" })).toBeDisabled();
 
     resolveAuth(
@@ -158,6 +159,39 @@ describe("guard login page", () => {
       headers: { Authorization: "Bearer token-1" },
     });
     expect(window.sessionStorage.getItem("ollbareun.guard.session")).toContain("emp-1");
+  });
+
+  it("shows login pending modal during passkey login", async () => {
+    setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1");
+    setStandaloneMode(true);
+    signInWithPasskey.mockResolvedValue({
+      data: { session: { access_token: "token-1" } },
+      error: null,
+    });
+
+    let resolveSession!: (response: Response) => void;
+    const sessionPromise = new Promise<Response>((resolve) => {
+      resolveSession = resolve;
+    });
+    vi.stubGlobal("fetch", vi.fn(() => sessionPromise));
+
+    render(<GuardPage />);
+    fireEvent.click(await screen.findByRole("button", { name: "패스키로 로그인" }));
+
+    expect(await screen.findByText("로그인진행중....")).toBeInTheDocument();
+
+    resolveSession(
+      Response.json({
+        employee: { id: "emp-1", name: "홍길동" },
+        assignment: null,
+        worksite: null,
+        attendance: null,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(push).toHaveBeenCalledWith("/guard/main");
+    });
   });
 
   it("shows the last logout push cleanup result", async () => {

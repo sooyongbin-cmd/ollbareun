@@ -282,7 +282,14 @@ export default function GuardPage() {
   }
 
   async function handlePasskeyLogin() {
+    if (isGuardLoginPending) {
+      return;
+    }
     try {
+      setErrorMessage("");
+      setIsGuardLoginPending(true);
+      setGuardLoginProgress("패스키 로그인 요청을 전송하고 있습니다.");
+
       const supabase = getSupabasePasskeyClient();
       const { data, error } = await supabase.auth.signInWithPasskey();
 
@@ -310,6 +317,8 @@ export default function GuardPage() {
     } catch (passkeyError) {
       const message = passkeyError instanceof Error ? passkeyError.message : "패스키 로그인에 실패했습니다.";
       setErrorMessage(message);
+      setIsGuardLoginPending(false);
+      setGuardLoginProgress("");
     }
   }
 
@@ -423,6 +432,16 @@ export default function GuardPage() {
           </>
         )}
       </div>
+
+      {isGuardLoginPending && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay-scrim px-5">
+          <div className="w-full max-w-[280px] rounded-[18px] bg-canvas p-6 text-center shadow-product border border-hairline animate-in fade-in zoom-in-95 duration-200">
+            <p className="text-[16px] font-semibold text-ink animate-pulse tracking-wide">
+              로그인진행중....
+            </p>
+          </div>
+        </div>
+      )}
 
       <AlertModal
         isOpen={Boolean(errorMessage)}

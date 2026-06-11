@@ -1,50 +1,50 @@
 # 직원명부관리 페이지 구현 계획
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **에이전트 작업자 가이드:** 필수 하위 기술: 이 계획을 작업 단위별(task-by-task)로 구현하기 위해 superpowers:subagent-driven-development(권장) 또는 superpowers:executing-plans를 사용하십시오. 진행 상황은 체크박스(`- [ ]`) 구문을 사용하여 추적합니다.
 
-**Goal:** `screen-design.md`의 `직원명부관리` 화면을 독립 라우트로 만들고, 관리자 메뉴에서 바로 이동할 수 있게 연결한다.
+**목표:** `screen-design.md`에 정의된 `직원명부관리` 화면을 독립적인 라우트(route)로 생성하고, 관리자 메뉴에서 직접 이동할 수 있도록 연결한다.
 
-**Architecture:** 기존 `Phase1App`의 bootstrap 기반 데이터 흐름을 그대로 재사용한다. 새 라우트 `/manager/employee/employees`는 전용 page 파일에서 `Phase1App`의 새 manager view를 렌더링하고, 목록 필터링은 클라이언트 상태에서만 처리한다. 메뉴 링크는 기존 관리자 사이드바의 직원 관리 섹션에 추가해 진입점을 명확하게 만든다.
+**아키텍처:** 기존 `Phase1App`의 bootstrap 기반 데이터 흐름을 그대로 재사용한다. 새로운 라우트 `/manager/employee/employees`는 전용 page 파일에서 `Phase1App`의 새로운 관리자 뷰(manager view)를 렌더링하며, 목록 필터링은 클라이언트 상태에서만 처리한다. 메뉴 링크는 기존 관리자 사이드바의 직원 관리 섹션에 추가하여 명확한 진입점을 제공한다.
 
-**Tech Stack:** Next.js App Router, React client components, TypeScript, existing `/api/bootstrap` route, Vitest + Testing Library.
+**기술 스택:** Next.js App Router, React 클라이언트 컴포넌트, TypeScript, 기존 `/api/bootstrap` 라우트, Vitest + Testing Library.
 
 ---
 
-### Task 1: Add the employee roster route and view
+### 작업 1: 직원 명부 라우트 및 뷰 추가
 
-**Files:**
-- Create: `src/app/manager/employee/employees/page.tsx`
-- Modify: `src/app/phase1-app.tsx`
-- Test: `src/app/phase1-app.test.tsx`
+**수정 대상 파일:**
+- 신규 생성: `src/app/manager/employee/employees/page.tsx`
+- 수정: `src/app/phase1-app.tsx`
+- 테스트: `src/app/phase1-app.test.tsx`
 
-- [ ] **Step 1: Write the failing test**
+- [ ] **단계 1: 실패하는 테스트 작성**
 
-Add a test that renders the new roster route and verifies:
-- the page heading is `吏곸썝紐낅?愿由?`
-- the `직원등록` action links to `/manager/employee/employees/new`
-- the employee list shows rows from the bootstrap payload
+새로운 명부 라우트를 렌더링하고 다음을 검증하는 테스트를 추가합니다:
+- 페이지 제목이 `직원명부관리`인지 확인
+- `직원등록` 버튼이 `/manager/employee/employees/new`로 링크되는지 확인
+- 직원 목록에 bootstrap 페이로드의 데이터가 표시되는지 확인
 
 ```tsx
 it("renders the employee roster page", async () => {
   render(<EmployeeRosterPage />);
 
-  expect(await screen.findByRole("heading", { name: "吏곸썝紐낅?愿由?" })).toBeInTheDocument();
-  expect(screen.getByRole("link", { name: "吏곸썝?깅줉" })).toHaveAttribute(
+  expect(await screen.findByRole("heading", { name: "직원명부관리" })).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "직원등록" })).toHaveAttribute(
     "href",
     "/manager/employee/employees/new",
   );
-  expect(await screen.findByText("?띻만??/ 010-1234-5678")).toBeInTheDocument();
+  expect(await screen.findByText("홍길동 / 010-1234-5678")).toBeInTheDocument();
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [ ] **단계 2: 테스트 실행 및 실패 여부 확인**
 
-Run: `npm test -- src/app/phase1-app.test.tsx`
-Expected: FAIL because `EmployeeRosterPage` and the new manager view do not exist yet.
+실행 명령어: `npm test -- src/app/phase1-app.test.tsx`
+예상 결과: `EmployeeRosterPage`와 새로운 관리자 뷰가 아직 존재하지 않으므로 실패(FAIL).
 
-- [ ] **Step 3: Write minimal implementation**
+- [ ] **단계 3: 최소 구현 작성**
 
-Create `src/app/manager/employee/employees/page.tsx`:
+`src/app/manager/employee/employees/page.tsx` 파일 생성:
 
 ```tsx
 import { Phase1App } from "../../../../phase1-app";
@@ -54,98 +54,102 @@ export default function EmployeeRosterPage() {
 }
 ```
 
-Update `src/app/phase1-app.tsx`:
-- extend `Phase1AppProps.managerView` to include `"employeeList"`
-- add title and description text for the roster view
-- add a client-side search input for name/phone filtering
-- render a table or list of employees with a register button linking to `/manager/employee/employees/new`
-- keep the existing overview, registration, and guard flows unchanged
+`src/app/phase1-app.tsx` 파일 수정:
+- `Phase1AppProps.managerView` 타입에 `"employeeList"` 추가
+- 명부 뷰(roster view)의 제목 및 설명 텍스트 추가
+- 이름/연락처 필터링을 위한 클라이언트 측 검색 입력(search input) 추가
+- `/manager/employee/employees/new`로 연결되는 등록 버튼과 함께 직원 테이블 또는 목록 렌더링
+- 기존의 요약(overview), 등록(registration) 및 경비원(guard) 관련 흐름은 변경 없이 유지
 
-- [ ] **Step 4: Run test to verify it passes**
+- [ ] **단계 4: 테스트 실행 및 성공 여부 확인**
 
-Run:
+실행 명령어:
 `npm test -- src/app/phase1-app.test.tsx`
 
-Expected: PASS.
+예상 결과: 테스트 통과(PASS).
 
-- [ ] **Step 5: Commit**
+- [ ] **단계 5: 커밋**
 
 ```bash
 git add src/app/manager/employee/employees/page.tsx src/app/phase1-app.tsx src/app/phase1-app.test.tsx plan.md
 git commit -m "feat: add employee roster page"
 ```
 
-### Task 2: Link the new page from the manager menu
+---
 
-**Files:**
-- Modify: `src/app/phase1-app.tsx`
-- Test: `src/app/phase1-app.test.tsx`
+### 작업 2: 관리자 메뉴에 새 페이지 링크 연결
 
-- [ ] **Step 1: Write the failing test**
+**수정 대상 파일:**
+- 수정: `src/app/phase1-app.tsx`
+- 테스트: `src/app/phase1-app.test.tsx`
 
-Add an assertion on the manager navigation that the employee management section includes a link to `/manager/employee/employees` labeled `吏곸썝紐낅?愿由?`.
+- [ ] **단계 1: 실패하는 테스트 작성**
+
+관리자 내비게이션의 직원 관리 섹션에 `직원명부관리` 레이블을 가진 `/manager/employee/employees` 링크가 포함되어 있는지 검증하는 단언(assertion)을 추가합니다.
 
 ```tsx
-expect(screen.getByRole("link", { name: "吏곸썝紐낅?愿由?" })).toHaveAttribute(
+expect(screen.getByRole("link", { name: "직원명부관리" })).toHaveAttribute(
   "href",
   "/manager/employee/employees",
 );
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [ ] **단계 2: 테스트 실행 및 실패 여부 확인**
 
-Run: `npm test -- src/app/phase1-app.test.tsx`
-Expected: FAIL because the menu does not yet expose the roster route.
+실행 명령어: `npm test -- src/app/phase1-app.test.tsx`
+예상 결과: 메뉴에 명부 라우트가 아직 노출되지 않았으므로 실패(FAIL).
 
-- [ ] **Step 3: Write minimal implementation**
+- [ ] **단계 3: 최소 구현 작성**
 
-Update the employee management menu group in `src/app/phase1-app.tsx` so the roster item points to `/manager/employee/employees`. Keep the existing links for `직원등록`, `작업장등록`, and `작업장배정`.
+`src/app/phase1-app.tsx` 내의 직원 관리 메뉴 그룹을 수정하여 명부 항목이 `/manager/employee/employees`를 가리키도록 합니다. 기존의 `직원등록`, `작업장등록`, `작업장배정` 링크는 그대로 유지합니다.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [ ] **단계 4: 테스트 실행 및 성공 여부 확인**
 
-Run:
+실행 명령어:
 `npm test -- src/app/phase1-app.test.tsx`
 
-Expected: PASS.
+예상 결과: 테스트 통과(PASS).
 
-- [ ] **Step 5: Commit**
+- [ ] **단계 5: 커밋**
 
 ```bash
 git add src/app/phase1-app.tsx src/app/phase1-app.test.tsx
 git commit -m "feat: link employee roster in menu"
 ```
 
-### Task 3: Verify the route and publish to `main`
+---
 
-**Files:**
-- Modify: none if Tasks 1-2 pass cleanly
+### 작업 3: 라우트 검증 및 `main` 브랜치에 배포
 
-- [ ] **Step 1: Run the focused test suite**
+**수정 대상 파일:**
+- 수정: 작업 1~2가 성공적으로 완료된 경우 없음
 
-Run:
+- [ ] **단계 1: 전체 테스트 제품군 실행**
+
+실행 명령어:
 `npm test`
 
-Expected: all tests pass.
+예상 결과: 모든 테스트가 통과(PASS).
 
-- [ ] **Step 2: Run lint**
+- [ ] **단계 2: 린트(Lint) 실행**
 
-Run:
+실행 명령어:
 `npm run lint`
 
-Expected: no ESLint errors.
+예상 결과: ESLint 오류 없음.
 
-- [ ] **Step 3: Verify the route in a browser**
+- [ ] **단계 3: 브라우저에서 라우트 수동 검증**
 
-Open `http://localhost:3000/manager/employee/employees` and confirm:
-- the roster heading renders
-- the search/filter controls appear
-- the `직원등록` link navigates to `/manager/employee/employees/new`
+`http://localhost:3000/manager/employee/employees`를 열고 다음을 확인합니다:
+- 명부 제목이 렌더링되는지 확인
+- 검색/필터 컨트롤이 표시되는지 확인
+- `직원등록` 링크가 `/manager/employee/employees/new`로 이동하는지 확인
 
-- [ ] **Step 4: Push to GitHub main**
+- [ ] **단계 4: GitHub main 브랜치에 푸시**
 
-Run:
+실행 명령어:
 ```bash
 git push origin main
 ```
 
-Expected: remote `main` advances with the roster page and menu link changes.
+예상 결과: 원격 `main` 브랜치에 명부 페이지 및 메뉴 링크 변경 사항이 반영됨.

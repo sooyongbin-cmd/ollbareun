@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { canClockIn, canClockOut, type AttendanceRecord, type Worksite } from "@/lib/phase1";
-import { formatGpsInfo, type GpsInfo } from "@/lib/gps";
+import { type GpsInfo } from "@/lib/gps";
 import AttendanceMapSection from "./attendance-map-section";
 
 type EmployeeRow = {
@@ -197,52 +197,6 @@ export default function GuardAttendancePage() {
                 worksite={guard.worksite}
               />
 
-              <div className="bg-canvas rounded-[18px] p-6 border border-hairline shadow-sm" id="attendance-profile-section">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary text-xl font-bold">
-                    {guard.employee.name[0]}
-                  </div>
-                  <div>
-                    <p className="text-[19px] font-semibold">{guard.employee.name}님 인증됨</p>
-                    <p className="text-[14px] text-ink-muted-48">
-                      오늘 배정 현장: <span className="text-ink font-medium">{guard.worksite?.name ?? "없음"}</span>
-                    </p>
-                  </div>
-                </div>
-                {guard.worksite && (
-                  <div className="text-[13px] text-ink-muted-48 bg-canvas-parchment rounded-lg p-3">
-                    현장 위치: {formatGpsInfo(guard.worksite.gps_info)} (반경 {guard.worksite.radius_meters}m)
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-4" id="attendance-current-location-section">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="current-latitude">
-                      현재 위도
-                    </label>
-                    <input
-                      className="field bg-canvas"
-                      id="current-latitude"
-                      value={latitude}
-                      onChange={(event) => setLatitude(event.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="current-longitude">
-                      현재 경도
-                    </label>
-                    <input
-                      className="field bg-canvas"
-                      id="current-longitude"
-                      value={longitude}
-                      onChange={(event) => setLongitude(event.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-
               <div
                 className={`p-4 rounded-xl text-center text-[15px] font-medium transition-colors ${
                   clockInDecision.allowed ? "bg-primary/5 text-primary" : "bg-status-warn text-ink"
@@ -271,32 +225,6 @@ export default function GuardAttendancePage() {
                 >
                   퇴근
                 </button>
-              </div>
-
-              <div className="bg-canvas border border-hairline rounded-[18px] p-6 space-y-4" id="attendance-record-section">
-                <h4 className="text-[17px] font-semibold">오늘의 근무 기록</h4>
-                <div className="flex justify-between items-center text-[15px]">
-                  <span className="text-ink-muted-48">출근 시각</span>
-                  <span className="font-medium">
-                    {guard.attendance?.clock_in_at
-                      ? new Date(guard.attendance.clock_in_at).toLocaleTimeString("ko-KR", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })
-                      : "-"}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-[15px]">
-                  <span className="text-ink-muted-48">퇴근 시각</span>
-                  <span className="font-medium">
-                    {guard.attendance?.clock_out_at
-                      ? new Date(guard.attendance.clock_out_at).toLocaleTimeString("ko-KR", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })
-                      : "-"}
-                  </span>
-                </div>
               </div>
 
               {message ? <p className="status-ok text-center">{message}</p> : null}

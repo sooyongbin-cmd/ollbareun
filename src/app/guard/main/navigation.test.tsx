@@ -163,11 +163,16 @@ describe("guard main navigation", () => {
 
     expect(screen.getByTestId("attendance-map")).toHaveAttribute("id", "attendance-map-canvas");
     expect(document.getElementById("attendance-map-section")).toBeInTheDocument();
-    expect(document.getElementById("attendance-profile-section")).toBeInTheDocument();
-    expect(document.getElementById("attendance-current-location-section")).toBeInTheDocument();
     expect(document.getElementById("attendance-decision-section")).toBeInTheDocument();
     expect(document.getElementById("attendance-actions-section")).toBeInTheDocument();
-    expect(document.getElementById("attendance-record-section")).toBeInTheDocument();
+    expect(document.getElementById("attendance-profile-section")).not.toBeInTheDocument();
+    expect(document.getElementById("attendance-current-location-section")).not.toBeInTheDocument();
+    expect(document.getElementById("attendance-record-section")).not.toBeInTheDocument();
+    expect(screen.getByText("근무지 : 본사")).toBeInTheDocument();
+    expect(screen.queryByText(/본사 중심/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/현장 위치:/)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("현재 위도")).not.toBeInTheDocument();
+    expect(screen.queryByText("오늘의 근무 기록")).not.toBeInTheDocument();
 
     await waitFor(() => {
       const script = document.head.querySelector<HTMLScriptElement>('script[src="/api/kakao/maps-sdk"]');
@@ -180,10 +185,12 @@ describe("guard main navigation", () => {
     const map = {
       relayout: vi.fn(),
       setCenter: vi.fn(),
+      setBounds: vi.fn(),
     };
     const markers: unknown[] = [];
     const circles: unknown[] = [];
     const latLngs: Array<{ latitude: number; longitude: number }> = [];
+    const boundsExtensions: Array<{ latitude: number; longitude: number }> = [];
     const getCurrentPosition = vi.fn((success: PositionCallback) => {
       success({
         coords: {
@@ -219,6 +226,13 @@ describe("guard main navigation", () => {
           }),
           Map: vi.fn(function Map() {
             return map;
+          }),
+          LatLngBounds: vi.fn(function LatLngBounds() {
+            return {
+              extend: vi.fn((position: { latitude: number; longitude: number }) => {
+                boundsExtensions.push({ latitude: position.latitude, longitude: position.longitude });
+              }),
+            };
           }),
           Marker: vi.fn(function Marker(options: unknown) {
             markers.push(options);
@@ -271,7 +285,15 @@ describe("guard main navigation", () => {
       radius: 100,
       map,
     });
-    expect(map.setCenter).toHaveBeenCalledWith(expect.objectContaining({ latitude: 37.5665, longitude: 126.978 }));
+    expect(screen.getByText("나와의 거리 : 104m")).toBeInTheDocument();
+    expect(screen.queryByText("근무지")).not.toBeInTheDocument();
+    expect(screen.getByText("현재 위치")).toBeInTheDocument();
+    expect(screen.getByText("지오펜스 (100m)")).toBeInTheDocument();
+    expect(boundsExtensions).toEqual([
+      { latitude: 37.5665, longitude: 126.978 },
+      { latitude: 37.567, longitude: 126.979 },
+    ]);
+    expect(map.setBounds).toHaveBeenCalledWith(expect.objectContaining({ extend: expect.any(Function) }));
   });
 
   it("adds the unauthenticated attendance section id", () => {

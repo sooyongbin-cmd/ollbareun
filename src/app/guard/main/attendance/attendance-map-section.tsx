@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { formatGpsInfo, type GpsInfo } from "@/lib/gps";
+import { type GpsInfo } from "@/lib/gps";
+import { distanceMeters } from "@/lib/phase1";
 
 type KakaoLatLng = {
   getLat: () => number;
@@ -11,6 +12,11 @@ type KakaoLatLng = {
 type KakaoMap = {
   relayout?: () => void;
   setCenter: (position: KakaoLatLng) => void;
+  setBounds?: (bounds: KakaoLatLngBounds) => void;
+};
+
+type KakaoLatLngBounds = {
+  extend: (position: KakaoLatLng) => void;
 };
 
 type KakaoMarker = {
@@ -30,6 +36,7 @@ type KakaoGlobal = {
   maps: {
     load: (callback: () => void) => void;
     LatLng: new (latitude: number, longitude: number) => KakaoLatLng;
+    LatLngBounds?: new () => KakaoLatLngBounds;
     Map: new (element: HTMLElement, options: { center: KakaoLatLng; level: number }) => KakaoMap;
     Marker: new (options: { position: KakaoLatLng; map: KakaoMap; image?: KakaoMarkerImage }) => KakaoMarker;
     Circle: new (options: {
@@ -165,6 +172,36 @@ function parseCurrentGps(latitude: string, longitude: string): GpsInfo | null {
   };
 }
 
+function formatCurrentDistance(worksite: AttendanceMapWorksite, currentGps: GpsInfo | null) {
+  if (!currentGps) {
+    return "나와의 거리 : 확인 중";
+  }
+
+  const distance = distanceMeters(
+    worksite.gps_info.latitude,
+    worksite.gps_info.longitude,
+    currentGps.latitude,
+    currentGps.longitude,
+  );
+
+  return `나와의 거리 : ${Math.round(distance)}m`;
+}
+
+function fitMapToWorksiteAndCurrentLocation(map: KakaoMap, worksitePosition: KakaoLatLng, currentGps: GpsInfo | null) {
+  const kakao = getKakaoWindow().kakao;
+
+  if (!currentGps || !kakao?.maps.LatLngBounds || !map.setBounds) {
+    map.setCenter(worksitePosition);
+    return;
+  }
+
+  const currentPosition = toLatLng(currentGps);
+  const bounds = new kakao.maps.LatLngBounds();
+  bounds.extend(worksitePosition);
+  bounds.extend(currentPosition);
+  map.setBounds(bounds);
+}
+
 export default function AttendanceMapSection({
   worksite,
   currentLatitude,
@@ -226,10 +263,10 @@ export default function AttendanceMapSection({
             map: mapRef.current,
           });
           mapRef.current.relayout?.();
-          mapRef.current.setCenter(worksitePosition);
+          fitMapToWorksiteAndCurrentLocation(mapRef.current, worksitePosition, currentGps);
         } else {
           mapRef.current.relayout?.();
-          mapRef.current.setCenter(worksitePosition);
+          fitMapToWorksiteAndCurrentLocation(mapRef.current, worksitePosition, currentGps);
           worksiteMarkerRef.current?.setPosition(worksitePosition);
           geofenceCircleRef.current?.setPosition?.(worksitePosition);
           geofenceCircleRef.current?.setRadius?.(worksite.radius_meters);
@@ -249,7 +286,7 @@ export default function AttendanceMapSection({
     return () => {
       ignore = true;
     };
-  }, [worksite]);
+  }, [currentGps, worksite]);
 
   useEffect(() => {
     if (!isMapReady || !mapRef.current || !currentGps) {
@@ -272,7 +309,10 @@ export default function AttendanceMapSection({
     }
 
     currentMarkerRef.current.setPosition(currentPosition);
-  }, [currentGps, isMapReady]);
+    if (worksite && mapRef.current) {
+      fitMapToWorksiteAndCurrentLocation(mapRef.current, toLatLng(worksite.gps_info), currentGps);
+    }
+  }, [currentGps, isMapReady, worksite]);
 
   if (!worksite) {
     return (
@@ -290,9 +330,8 @@ export default function AttendanceMapSection({
     <section className="bg-canvas rounded-[18px] p-6 border border-hairline shadow-sm" id="attendance-map-section">
       <div className="mb-4 flex flex-col gap-1">
         <h3 className="text-[17px] font-semibold">지도</h3>
-        <p className="text-[13px] text-ink-muted-48">
-          {worksite.name} 중심 {formatGpsInfo(worksite.gps_info)} · 반경 {worksite.radius_meters}m
-        </p>
+        <p className="text-[13px] text-ink-muted-48">근무지 : {worksite.name}</p>
+        <p className="text-[13px] text-ink-muted-48">{formatCurrentDistance(worksite, currentGps)}</p>
       </div>
       <div
         ref={mapElementRef}
@@ -302,16 +341,12 @@ export default function AttendanceMapSection({
       />
       <div className="mt-3 flex flex-wrap gap-3 text-[13px] text-ink-muted-48">
         <span className="inline-flex items-center gap-2">
-          <span className="h-3 w-3 rounded-full bg-status-warn" />
-          근무지
-        </span>
-        <span className="inline-flex items-center gap-2">
           <span className="h-3 w-3 rounded-full bg-primary" />
           현재 위치
         </span>
         <span className="inline-flex items-center gap-2">
           <span className="h-3 w-3 rounded-full border border-primary bg-primary/10" />
-          지오펜스
+          지오펜스 ({worksite.radius_meters}m)
         </span>
       </div>
       {status ? <p className="status-warn mt-3 text-center">{status}</p> : null}

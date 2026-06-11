@@ -46,6 +46,7 @@ type GuardSession = {
 };
 
 const guardSessionStorageKey = "ollbareun.guard.session";
+const geolocationOptions: PositionOptions = { enableHighAccuracy: true, maximumAge: 3000, timeout: 8000 };
 
 function asWorksite(row: WorksiteRow): Worksite {
   return {
@@ -111,6 +112,12 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
   return payload as T;
 }
 
+function readCurrentPosition(geolocation: Geolocation): Promise<GeolocationPosition> {
+  return new Promise((resolve, reject) => {
+    geolocation.getCurrentPosition(resolve, reject, geolocationOptions);
+  });
+}
+
 export default function GuardAttendancePage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -140,14 +147,17 @@ export default function GuardAttendancePage() {
       return;
     }
 
-    geolocation.getCurrentPosition(
+    const watchId = geolocation.watchPosition(
       (position) => {
         setLatitude(String(position.coords.latitude));
         setLongitude(String(position.coords.longitude));
+        setError("");
       },
       () => setError("현재 위치를 확인하지 못했습니다."),
-      { enableHighAccuracy: true, timeout: 8000 },
+      geolocationOptions,
     );
+
+    return () => geolocation.clearWatch(watchId);
   }, []);
 
   async function handleClockIn() {
@@ -155,17 +165,34 @@ export default function GuardAttendancePage() {
       return;
     }
 
-    setError("");
-    const result = await postJson<{ attendance: AttendanceRow }>("/api/attendance/clock-in", {
-      employeeId: guard.employee.id,
-      worksiteId: guard.worksite.id,
-      latitude,
-      longitude,
-    });
-    const nextGuard = { ...guard, attendance: result.attendance };
-    setGuard(nextGuard);
-    writeStoredGuardSession(nextGuard);
-    setMessage("출근 처리되었습니다.");
+    const geolocation = navigator.geolocation;
+    if (!geolocation) {
+      setError("이 브라우저에서는 위치 확인을 사용할 수 없습니다.");
+      return;
+    }
+
+    try {
+      setError("");
+      const position = await readCurrentPosition(geolocation);
+      const nextLatitude = String(position.coords.latitude);
+      const nextLongitude = String(position.coords.longitude);
+
+      setLatitude(nextLatitude);
+      setLongitude(nextLongitude);
+
+      const result = await postJson<{ attendance: AttendanceRow }>("/api/attendance/clock-in", {
+        employeeId: guard.employee.id,
+        worksiteId: guard.worksite.id,
+        latitude: nextLatitude,
+        longitude: nextLongitude,
+      });
+      const nextGuard = { ...guard, attendance: result.attendance };
+      setGuard(nextGuard);
+      writeStoredGuardSession(nextGuard);
+      setMessage("출근 처리되었습니다.");
+    } catch (clockInError) {
+      setError(clockInError instanceof Error ? clockInError.message : "출근 처리에 실패했습니다.");
+    }
   }
 
   async function handleClockOut() {

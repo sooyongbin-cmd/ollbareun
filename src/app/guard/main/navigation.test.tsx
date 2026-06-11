@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import AttendancePage from "./attendance/page";
 import GuardMainLayout from "./layout";
@@ -133,18 +134,20 @@ describe("guard main navigation", () => {
   });
 
   it("shows the attendance workflow on the attendance page", () => {
-    const getCurrentPosition = vi.fn();
+    const watchPosition = vi.fn();
+    const clearWatch = vi.fn();
     Object.defineProperty(navigator, "geolocation", {
       configurable: true,
-      value: { getCurrentPosition },
+      value: { watchPosition, clearWatch },
     });
     window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
 
     render(<AttendancePage />);
 
     expect(screen.queryByRole("link", { name: "홈으로" })).not.toBeInTheDocument();
-    expect(getCurrentPosition).toHaveBeenCalledWith(expect.any(Function), expect.any(Function), {
+    expect(watchPosition).toHaveBeenCalledWith(expect.any(Function), expect.any(Function), {
       enableHighAccuracy: true,
+      maximumAge: 3000,
       timeout: 8000,
     });
     expect(screen.queryByRole("button", { name: "현재 위치 가져오기" })).not.toBeInTheDocument();
@@ -152,10 +155,11 @@ describe("guard main navigation", () => {
   });
 
   it("adds the attendance map section and stable section ids", async () => {
-    const getCurrentPosition = vi.fn();
+    const watchPosition = vi.fn();
+    const clearWatch = vi.fn();
     Object.defineProperty(navigator, "geolocation", {
       configurable: true,
-      value: { getCurrentPosition },
+      value: { watchPosition, clearWatch },
     });
     window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
 
@@ -191,7 +195,7 @@ describe("guard main navigation", () => {
     const circles: unknown[] = [];
     const latLngs: Array<{ latitude: number; longitude: number }> = [];
     const boundsExtensions: Array<{ latitude: number; longitude: number }> = [];
-    const getCurrentPosition = vi.fn((success: PositionCallback) => {
+    const watchPosition = vi.fn((success: PositionCallback) => {
       success({
         coords: {
           latitude: 37.567,
@@ -204,11 +208,13 @@ describe("guard main navigation", () => {
         },
         timestamp: Date.now(),
       });
+      return 7;
     });
+    const clearWatch = vi.fn();
 
     Object.defineProperty(navigator, "geolocation", {
       configurable: true,
-      value: { getCurrentPosition },
+      value: { watchPosition, clearWatch },
     });
     Object.assign(window, {
       kakao: {
@@ -294,6 +300,126 @@ describe("guard main navigation", () => {
       { latitude: 37.567, longitude: 126.979 },
     ]);
     expect(map.setBounds).toHaveBeenCalledWith(expect.objectContaining({ extend: expect.any(Function) }));
+  });
+
+  it("enables clock-in when watched position enters the worksite radius", async () => {
+    let watchSuccess: PositionCallback | null = null;
+    const watchPosition = vi.fn((success: PositionCallback) => {
+      watchSuccess = success;
+      success({
+        coords: {
+          latitude: 37.57,
+          longitude: 126.99,
+          accuracy: 5,
+          altitude: null,
+          altitudeAccuracy: null,
+          heading: null,
+          speed: null,
+        },
+        timestamp: Date.now(),
+      });
+      return 11;
+    });
+    const clearWatch = vi.fn();
+
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: { watchPosition, clearWatch },
+    });
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
+
+    render(<AttendancePage />);
+
+    expect(await screen.findByRole("button", { name: "출근" })).toBeDisabled();
+
+    watchSuccess?.({
+      coords: {
+        latitude: 37.5665,
+        longitude: 126.978,
+        accuracy: 5,
+        altitude: null,
+        altitudeAccuracy: null,
+        heading: null,
+        speed: null,
+      },
+      timestamp: Date.now(),
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "출근" })).toBeEnabled();
+    });
+  });
+
+  it("remeasures the current position when clocking in and posts the fresh coordinates", async () => {
+    const user = userEvent.setup();
+    const watchPosition = vi.fn((success: PositionCallback) => {
+      success({
+        coords: {
+          latitude: 37.5665,
+          longitude: 126.978,
+          accuracy: 5,
+          altitude: null,
+          altitudeAccuracy: null,
+          heading: null,
+          speed: null,
+        },
+        timestamp: Date.now(),
+      });
+      return 12;
+    });
+    const getCurrentPosition = vi.fn((success: PositionCallback) => {
+      success({
+        coords: {
+          latitude: 37.5666,
+          longitude: 126.9781,
+          accuracy: 5,
+          altitude: null,
+          altitudeAccuracy: null,
+          heading: null,
+          speed: null,
+        },
+        timestamp: Date.now(),
+      });
+    });
+    const clearWatch = vi.fn();
+    const fetch = vi.fn(async () =>
+      Response.json({
+        attendance: {
+          id: "att-1",
+          employee_id: "employee-1",
+          worksite_id: "worksite-1",
+          work_date: "2026-05-24",
+          clock_in_at: "2026-05-24T08:00:00Z",
+          clock_out_at: null,
+        },
+      }),
+    );
+
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: { watchPosition, getCurrentPosition, clearWatch },
+    });
+    vi.stubGlobal("fetch", fetch);
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
+
+    render(<AttendancePage />);
+
+    await user.click(await screen.findByRole("button", { name: "출근" }));
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        "/api/attendance/clock-in",
+        expect.objectContaining({
+          body: expect.stringContaining('"latitude":"37.5666"'),
+        }),
+      );
+    });
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/attendance/clock-in",
+      expect.objectContaining({
+        body: expect.stringContaining('"longitude":"126.9781"'),
+      }),
+    );
   });
 
   it("adds the unauthenticated attendance section id", () => {

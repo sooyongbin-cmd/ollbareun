@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import AlertModal from "@/components/modals/alert-modal";
 
 const guardSessionStorageKey = "ollbareun.guard.session";
+const guardPushRegistrationStorageKey = "ollbareun.guard.pushRegistration";
 
 type PushStepStatus = "waiting" | "running" | "success" | "warning" | "error";
 
@@ -17,6 +18,12 @@ type PushStep = {
 type StoredGuardSessionInfo = {
   employeeId: string | null;
   sessionLogId: string | null;
+};
+
+type StoredGuardPushRegistration = {
+  employeeId: string;
+  endpoint: string;
+  savedAt: string;
 };
 
 const initialPushSteps: PushStep[] = [
@@ -118,6 +125,47 @@ function readStoredGuardSessionInfo(): StoredGuardSessionInfo {
   } catch (err) {
     console.error("Error reading guard session for push registration:", err);
     return { employeeId: null, sessionLogId: null };
+  }
+}
+
+function readStoredGuardPushRegistration(): StoredGuardPushRegistration | null {
+  try {
+    const stored = window.sessionStorage.getItem(guardPushRegistrationStorageKey);
+    if (!stored) {
+      return null;
+    }
+
+    const parsed = JSON.parse(stored);
+    if (
+      typeof parsed.employeeId !== "string" ||
+      typeof parsed.endpoint !== "string" ||
+      typeof parsed.savedAt !== "string"
+    ) {
+      return null;
+    }
+
+    return {
+      employeeId: parsed.employeeId,
+      endpoint: parsed.endpoint,
+      savedAt: parsed.savedAt,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredGuardPushRegistration(input: { employeeId: string; endpoint: string }) {
+  try {
+    window.sessionStorage.setItem(
+      guardPushRegistrationStorageKey,
+      JSON.stringify({
+        employeeId: input.employeeId,
+        endpoint: input.endpoint,
+        savedAt: new Date().toISOString(),
+      }),
+    );
+  } catch {
+    // Push registration already succeeded; storage failure should not block the page.
   }
 }
 
@@ -313,6 +361,20 @@ export default function GuardPushRegister() {
           `${hadExistingSubscription ? "기존" : "신규"} endpoint를 확인했습니다: ${maskEndpoint(endpoint)}`,
         );
 
+        const storedPushRegistration = readStoredGuardPushRegistration();
+        const alreadySavedCurrentEndpoint =
+          hadExistingSubscription &&
+          storedPushRegistration?.employeeId === employeeId &&
+          storedPushRegistration.endpoint === endpoint;
+
+        if (alreadySavedCurrentEndpoint) {
+          setPushStatusTitle("푸시 알림 연결 유지 중");
+          setPushStatusDetail("현재 브라우저 구독 정보가 이미 저장되어 있어 추가 저장하지 않습니다.");
+          updateStep("save", "success", "현재 세션에서 이미 저장된 Push 구독 정보입니다.");
+          console.log("Push subscription server save skipped because the current endpoint is already cached.");
+          return;
+        }
+
         // 6. Send subscription to our server API
         updateStep("save", "running", "구독 정보를 /api/notifications/subscribe로 저장하는 중입니다.");
         const response = await fetch("/api/notifications/subscribe", {
@@ -341,6 +403,7 @@ export default function GuardPushRegister() {
         setPushStatusDetail("교육알림 Push를 받을 수 있도록 현재 브라우저 구독 정보가 저장되었습니다.");
         updateStep("save", "success", "Supabase push_subscriptions 테이블에 구독 정보를 저장했습니다.");
         console.log("Push subscription successfully saved to backend.");
+        writeStoredGuardPushRegistration({ employeeId, endpoint });
         await recordMainPushResult(sessionInfo.sessionLogId, "success", {
           title: "푸시 알림 연결 완료",
           detail: "교육알림 Push를 받을 수 있도록 현재 브라우저 구독 정보가 저장되었습니다.",

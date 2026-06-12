@@ -234,7 +234,6 @@ async function sendRemarkEmailWithFormspree(input: {
     method: "POST",
     headers: { Accept: "application/json", "Content-Type": "application/json" },
     body: JSON.stringify({
-      email: input.to,
       _subject: "특이사항보고",
       message: buildFormspreeMessage({
         employeeName: input.employeeName,
@@ -243,11 +242,6 @@ async function sendRemarkEmailWithFormspree(input: {
         content: input.content,
         photoUrl: input.photoUrl,
       }),
-      employeeName: input.employeeName,
-      worksiteName: input.worksiteName,
-      reportedAt: input.reportedAt,
-      content: input.content,
-      photoUrl: input.photoUrl,
     }),
   });
 

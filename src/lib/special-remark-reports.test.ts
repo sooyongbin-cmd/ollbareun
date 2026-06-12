@@ -159,7 +159,12 @@ describe("special remark report Formspree delivery", () => {
     const body = JSON.parse(String(init?.body));
     expect(body.message).toContain("문이 파손되었습니다.");
     expect(body.message).toContain("https://example.supabase.co/storage/v1/object/public/special-remarks/employee-1/photo.jpg");
-    expect(body.photoUrl).toBe("https://example.supabase.co/storage/v1/object/public/special-remarks/employee-1/photo.jpg");
+    expect(body).not.toHaveProperty("email");
+    expect(body).not.toHaveProperty("employeeName");
+    expect(body).not.toHaveProperty("worksiteName");
+    expect(body).not.toHaveProperty("reportedAt");
+    expect(body).not.toHaveProperty("content");
+    expect(body).not.toHaveProperty("photoUrl");
     expect(body).not.toHaveProperty("photo");
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({

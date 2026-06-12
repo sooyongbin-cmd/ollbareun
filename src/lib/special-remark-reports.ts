@@ -175,7 +175,7 @@ function buildFormspreeMessage(input: {
   worksiteName: string;
   reportedAt: string;
   content: string;
-  photoUrl: string | null;
+  photoAttached: boolean;
 }) {
   return [
     "특이사항보고",
@@ -187,7 +187,7 @@ function buildFormspreeMessage(input: {
     "특이사항 내용:",
     input.content,
     "",
-    `첨부사진: ${input.photoUrl ?? "없음"}`,
+    `첨부사진: ${input.photoAttached ? "파일 첨부" : "없음"}`,
   ].join("\n");
 }
 
@@ -229,20 +229,36 @@ async function sendRemarkEmailWithFormspree(input: {
   reportedAt: string;
   content: string;
   photoUrl: string | null;
+  photoDataUrl?: unknown;
 }) {
-  const response = await fetch(FORMSPREE_ENDPOINT, {
-    method: "POST",
-    headers: { Accept: "application/json", "Content-Type": "application/json" },
-    body: JSON.stringify({
-      email: input.to,
-      _subject: "특이사항보고",
-      message: buildFormspreeMessage(input),
+  const parsedPhoto = parseDataUrl(input.photoDataUrl);
+  const formData = new FormData();
+  formData.append("email", input.to);
+  formData.append("_subject", "특이사항보고");
+  formData.append(
+    "message",
+    buildFormspreeMessage({
       employeeName: input.employeeName,
       worksiteName: input.worksiteName,
       reportedAt: input.reportedAt,
       content: input.content,
-      photoUrl: input.photoUrl,
+      photoAttached: Boolean(parsedPhoto),
     }),
+  );
+  formData.append("employeeName", input.employeeName);
+  formData.append("worksiteName", input.worksiteName);
+  formData.append("reportedAt", input.reportedAt);
+  formData.append("content", input.content);
+
+  if (parsedPhoto) {
+    const photoBlob = new Blob([new Uint8Array(parsedPhoto.buffer)], { type: parsedPhoto.mimeType });
+    formData.append("photo", photoBlob, `special-remark-report.${parsedPhoto.extension}`);
+  }
+
+  const response = await fetch(FORMSPREE_ENDPOINT, {
+    method: "POST",
+    headers: { Accept: "application/json" },
+    body: formData,
   });
 
   if (!response.ok) {
@@ -296,6 +312,7 @@ export async function createSpecialRemarkReport(input: {
       reportedAt: report.reported_at,
       content,
       photoUrl: photo_url,
+      photoDataUrl: input.photoDataUrl,
     };
 
     if (options.emailProvider === "formspree") {

@@ -61,6 +61,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
   const [printing, setPrinting] = useState(false);
   const [error, setError] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
+  const [shouldReturnToList, setShouldReturnToList] = useState(false);
   const [nfcUrl, setNfcUrl] = useState("");
   const [copyMessage, setCopyMessage] = useState("");
 
@@ -144,6 +145,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
         },
       );
       setSavedSite(payload.site);
+      setShouldReturnToList(true);
       setAlertMessage("현장이 저장되었습니다.");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "현장을 저장하지 못했습니다.");
@@ -163,8 +165,8 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
       await fetchJson<{ success: boolean }>(`/api/inspection/sites/${encodeURIComponent(siteId)}`, {
         method: "DELETE",
       });
-      router.push("/manager/inspection/sites");
-      router.refresh();
+      setShouldReturnToList(true);
+      setAlertMessage("현장이 삭제되었습니다.");
     } catch (deleteError) {
       setError(deleteError instanceof Error ? deleteError.message : "현장을 삭제하지 못했습니다.");
     } finally {
@@ -204,6 +206,15 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
   async function handleCopyNfcUrl() {
     await navigator.clipboard.writeText(nfcUrl);
     setCopyMessage("복사되었습니다.");
+  }
+
+  function handleAlertClose() {
+    setAlertMessage("");
+    if (shouldReturnToList) {
+      setShouldReturnToList(false);
+      router.push("/manager/inspection/sites");
+      router.refresh();
+    }
   }
 
   return (
@@ -305,7 +316,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
 
       <AlertModal
         isOpen={Boolean(alertMessage)}
-        onClose={() => setAlertMessage("")}
+        onClose={handleAlertClose}
         title="알림"
         description={alertMessage}
       />

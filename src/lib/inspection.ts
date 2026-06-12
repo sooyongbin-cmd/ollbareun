@@ -184,6 +184,50 @@ export async function getInspectionSiteById(id: unknown) {
   } as InspectionSiteRow;
 }
 
+export async function updateInspectionSite(input: {
+  id: unknown;
+  worksiteId: unknown;
+  name: unknown;
+  address: unknown;
+  gpsInfo: unknown;
+}) {
+  const siteId = requireString(input.id, "현장");
+  const worksite_id = requireString(input.worksiteId, "근무지");
+  const name = requireString(input.name, "현장명");
+  const address = requireString(input.address, "현장주소");
+  const gps_info = requireGpsInfo(input.gpsInfo);
+  const supabase = getSupabase();
+
+  const { data, error } = await supabase
+    .from("inspection_sites")
+    .update({ worksite_id, name, address, gps_info })
+    .eq("id", siteId)
+    .select("*")
+    .single();
+
+  throwIfError(error);
+
+  const { data: worksite, error: worksiteError } = await supabase
+    .from("worksites")
+    .select("id,name")
+    .eq("id", worksite_id)
+    .single();
+
+  throwIfError(worksiteError);
+
+  return {
+    ...(data as RawInspectionSite),
+    worksite_name: worksite?.name ?? "근무지 없음",
+  } as InspectionSiteRow;
+}
+
+export async function deleteInspectionSite(id: unknown) {
+  const siteId = requireString(id, "현장");
+  const supabase = getSupabase();
+  const { error } = await supabase.from("inspection_sites").delete().eq("id", siteId);
+  throwIfError(error);
+}
+
 export async function createInspectionLog(input: {
   employeeId: unknown;
   employeeName: unknown;

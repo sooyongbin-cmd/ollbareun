@@ -4,9 +4,11 @@ import {
   buildInspectionQrPayload,
   createInspectionLog,
   createInspectionSite,
+  deleteInspectionSite,
   listInspectionLogs,
   listInspectionSites,
   parseInspectionQrPayload,
+  updateInspectionSite,
 } from "./inspection";
 import { getSupabase } from "./supabase";
 
@@ -92,6 +94,68 @@ describe("inspection data helpers", () => {
       address: "서울시 중구 세종대로 1",
       gps_info: { latitude: 37.5, longitude: 127 },
     });
+  });
+
+  it("updates an inspection site under a worksite", async () => {
+    const updateQuery = {
+      update: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({
+        data: {
+          id: "site-1",
+          worksite_id: "work-1",
+          name: "Gate",
+          address: "Seoul",
+          gps_info: { latitude: 37.5, longitude: 127 },
+        },
+        error: null,
+      }),
+    };
+    const worksiteQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({
+        data: { id: "work-1", name: "Worksite" },
+        error: null,
+      }),
+    };
+    const supabase = {
+      from: vi.fn().mockReturnValueOnce(updateQuery).mockReturnValueOnce(worksiteQuery),
+    };
+    vi.mocked(getSupabase).mockReturnValue(supabase as never);
+
+    await expect(
+      updateInspectionSite({
+        id: "site-1",
+        worksiteId: "work-1",
+        name: "Gate",
+        address: "Seoul",
+        gpsInfo: { latitude: 37.5, longitude: 127 },
+      }),
+    ).resolves.toMatchObject({ id: "site-1", worksite_name: "Worksite" });
+    expect(updateQuery.update).toHaveBeenCalledWith({
+      worksite_id: "work-1",
+      name: "Gate",
+      address: "Seoul",
+      gps_info: { latitude: 37.5, longitude: 127 },
+    });
+    expect(updateQuery.eq).toHaveBeenCalledWith("id", "site-1");
+  });
+
+  it("deletes an inspection site", async () => {
+    const deleteQuery = {
+      delete: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ error: null }),
+    };
+    const supabase = {
+      from: vi.fn().mockReturnValue(deleteQuery),
+    };
+    vi.mocked(getSupabase).mockReturnValue(supabase as never);
+
+    await expect(deleteInspectionSite("site-1")).resolves.toBeUndefined();
+    expect(deleteQuery.delete).toHaveBeenCalled();
+    expect(deleteQuery.eq).toHaveBeenCalledWith("id", "site-1");
   });
 
   it("lists inspection sites with worksite names and search filter", async () => {

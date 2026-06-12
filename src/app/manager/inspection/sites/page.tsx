@@ -139,7 +139,11 @@ export default function InspectionSitesPage() {
                 ) : (
                   sites.map((site) => (
                     <tr key={site.id} className="hover:bg-canvas-parchment transition-colors">
-                      <td className="font-semibold">{site.name}</td>
+                      <td className="font-semibold">
+                        <Link className="text-primary hover:underline" href={`/manager/inspection/sites/${site.id}`}>
+                          {site.name}
+                        </Link>
+                      </td>
                       <td>{site.worksite_name}</td>
                       <td className="text-ink-muted-48">{site.address}</td>
                     </tr>

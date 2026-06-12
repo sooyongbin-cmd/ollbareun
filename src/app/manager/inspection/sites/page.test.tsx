@@ -44,6 +44,10 @@ describe("inspection sites page", () => {
     await user.click(screen.getByRole("button", { name: "조회" }));
 
     expect(await screen.findByText("정문")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "정문" })).toHaveAttribute(
+      "href",
+      "/manager/inspection/sites/site-1",
+    );
     await waitFor(() => {
       expect(fetch).toHaveBeenLastCalledWith("/api/inspection/sites?name=%EC%A0%95%EB%AC%B8");
     });

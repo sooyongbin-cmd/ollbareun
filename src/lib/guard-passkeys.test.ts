@@ -30,6 +30,7 @@ function query(result: unknown = { data: null, error: null }) {
     lte: vi.fn().mockReturnThis(),
     gte: vi.fn().mockReturnThis(),
     in: vi.fn().mockReturnThis(),
+    is: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
     limit: vi.fn().mockReturnThis(),
     maybeSingle: vi.fn().mockResolvedValue(result),
@@ -268,13 +269,15 @@ describe("guard passkey data flow", () => {
       error: null,
     });
     const assignmentQuery = query({ data: null, error: null });
-    const attendanceQuery = query({ data: null, error: null });
+    const openAttendanceQuery = query({ data: null, error: null });
+    const todayAttendanceQuery = query({ data: null, error: null });
     vi.mocked(getSupabase).mockReturnValue({
       from: vi
         .fn()
         .mockReturnValueOnce(employeeByIdQuery)
         .mockReturnValueOnce(assignmentQuery)
-        .mockReturnValueOnce(attendanceQuery),
+        .mockReturnValueOnce(openAttendanceQuery)
+        .mockReturnValueOnce(todayAttendanceQuery),
     } as never);
     vi.mocked(getSupabaseAdmin).mockReturnValue({
       from: vi

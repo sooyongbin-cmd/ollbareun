@@ -57,7 +57,7 @@ export default function GuardMainPage() {
     }
   }, [storedSession]);
 
-  const inspectionLabel = useMemo(() => {
+  const inspectionBaseLabel = useMemo(() => {
     if (role === "경비원") return "순찰";
     if (role === "미화원") return "청소구역";
     return null;
@@ -90,10 +90,15 @@ export default function GuardMainPage() {
             <GuardLocationGateLink href="/guard/main/attendance" hasAssignedWorksite={hasAssignedWorksite}>
               출근하기
             </GuardLocationGateLink>
-            {inspectionLabel !== null && (
-              <GuardLocationGateLink href="/guard/main/inspection" hasAssignedWorksite={hasAssignedWorksite}>
-                {inspectionLabel}
-              </GuardLocationGateLink>
+            {inspectionBaseLabel !== null && (
+              <>
+                <GuardLocationGateLink href="/guard/main/inspection" hasAssignedWorksite={hasAssignedWorksite}>
+                  {inspectionBaseLabel}(QR코드)
+                </GuardLocationGateLink>
+                <GuardLocationGateLink href="/guard/main/inspection-nfc" hasAssignedWorksite={hasAssignedWorksite}>
+                  {inspectionBaseLabel}(NFC태그)
+                </GuardLocationGateLink>
+              </>
             )}
             <GuardLocationGateLink href="/guard/main/special-remarks" hasAssignedWorksite={hasAssignedWorksite}>
               특이사항

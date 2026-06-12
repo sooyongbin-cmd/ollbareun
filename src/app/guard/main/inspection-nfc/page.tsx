@@ -166,6 +166,21 @@ function getInitialStatus() {
   return "NFC 태그를 가까이 대세요.";
 }
 
+function clearInitialSourceFromUrl() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has("payload") && !url.searchParams.has("s")) {
+    return;
+  }
+
+  url.searchParams.delete("payload");
+  url.searchParams.delete("s");
+  window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
+}
+
 export default function GuardInspectionNfcPage() {
   const [session] = useState<GuardSession | null>(() => loadGuardSession());
   const [nfcPayload, setNfcPayload] = useState<InspectionQrPayload | null>(null);
@@ -203,6 +218,7 @@ export default function GuardInspectionNfcPage() {
           employeeName,
           qrPayload: parsed,
         });
+        clearInitialSourceFromUrl();
         setAlertMessage("NFC 태그 점검이 저장되었습니다.");
       } catch (saveError) {
         handledPayloadRef.current = "";

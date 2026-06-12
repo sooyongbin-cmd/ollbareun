@@ -106,6 +106,79 @@ describe("guard inspection NFC page", () => {
     });
   });
 
+  it("removes the initial site query parameter after a successful save", async () => {
+    const fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.endsWith("/api/inspection/sites/site-1")) {
+        return Response.json({
+          site: {
+            id: "site-1",
+            worksite_id: "work-1",
+            worksite_name: "Worksite",
+            name: "Gate",
+            address: "Address",
+            gps_info: { latitude: 37.5, longitude: 127 },
+          },
+        });
+      }
+
+      if (url.endsWith("/api/inspection/logs")) {
+        return Response.json({ log: { id: "log-1" } });
+      }
+
+      return Response.json({}, { status: 404 });
+    });
+    vi.stubGlobal("fetch", fetch);
+    window.history.pushState({}, "", "/guard/main/inspection-nfc?s=site-1");
+
+    render(<GuardInspectionNfcPage />);
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        "/api/inspection/logs",
+        expect.objectContaining({ method: "POST" }),
+      );
+    });
+    expect(window.location.pathname).toBe("/guard/main/inspection-nfc");
+    expect(window.location.search).toBe("");
+  });
+
+  it("keeps the initial site query parameter when saving fails", async () => {
+    const fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.endsWith("/api/inspection/sites/site-1")) {
+        return Response.json({
+          site: {
+            id: "site-1",
+            worksite_id: "work-1",
+            worksite_name: "Worksite",
+            name: "Gate",
+            address: "Address",
+            gps_info: { latitude: 37.5, longitude: 127 },
+          },
+        });
+      }
+
+      if (url.endsWith("/api/inspection/logs")) {
+        return Response.json({ error: "save failed" }, { status: 400 });
+      }
+
+      return Response.json({}, { status: 404 });
+    });
+    vi.stubGlobal("fetch", fetch);
+    window.history.pushState({}, "", "/guard/main/inspection-nfc?s=site-1");
+
+    render(<GuardInspectionNfcPage />);
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        "/api/inspection/logs",
+        expect.objectContaining({ method: "POST" }),
+      );
+    });
+    expect(window.location.search).toBe("?s=site-1");
+  });
+
   it("saves inspection when Web NFC reads a URL record", async () => {
     const fetch = stubInspectionLogFetch();
     let reader: { scan: ReturnType<typeof vi.fn>; onreading: ((event: unknown) => void) | null } | null = null;

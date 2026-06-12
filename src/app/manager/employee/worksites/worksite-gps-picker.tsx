@@ -74,6 +74,7 @@ type WorksiteGpsPickerProps = {
   address: string;
   value: GpsInfo | null;
   onChange: (gps: GpsInfo | null) => void;
+  hideInput?: boolean;
 };
 
 type GeocodeResponse = {
@@ -159,7 +160,7 @@ function createMarkerImage() {
   });
 }
 
-export default function WorksiteGpsPicker({ address, value, onChange }: WorksiteGpsPickerProps) {
+export default function WorksiteGpsPicker({ address, value, onChange, hideInput = false }: WorksiteGpsPickerProps) {
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<KakaoMap | null>(null);
   const markerRef = useRef<KakaoMarker | null>(null);
@@ -326,23 +327,25 @@ export default function WorksiteGpsPicker({ address, value, onChange }: Worksite
         data-testid="worksite-map"
       />
 
-      <div className="space-y-2">
-        <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="worksite-gps-info">
-          GPS정보
-        </label>
-        <input
-          className="field"
-          id="worksite-gps-info"
-          inputMode="decimal"
-          placeholder="37.123456, 127.123456"
-          required
-          value={inputValue}
-          onChange={(event) => handleGpsInputChange(event.target.value)}
-        />
-        <p className="text-[13px] text-ink-muted-48">
-          {value ? `선택한 GPS정보: ${formatGpsInfo(value)}` : status || "지도에서 실제 근무지를 클릭하거나 GPS정보를 입력하세요."}
-        </p>
-      </div>
+      {!hideInput ? (
+        <div className="space-y-2">
+          <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="worksite-gps-info">
+            GPS정보
+          </label>
+          <input
+            className="field"
+            id="worksite-gps-info"
+            inputMode="decimal"
+            placeholder="37.123456, 127.123456"
+            required
+            value={inputValue}
+            onChange={(event) => handleGpsInputChange(event.target.value)}
+          />
+          <p className="text-[13px] text-ink-muted-48">
+            {value ? `선택한 GPS정보: ${formatGpsInfo(value)}` : status || "지도에서 실제 근무지를 클릭하거나 GPS정보를 입력하세요."}
+          </p>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -43,7 +43,7 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 function buildNfcUrl(siteId: string) {
-  return `${window.location.origin}/guard/main/inspection-nfc?s=${encodeURIComponent(siteId)}`;
+  return `${window.location.host}/guard/main/inspection-nfc?s=${encodeURIComponent(siteId)}`;
 }
 
 export default function InspectionSiteDetailPage({ params }: PageProps) {
@@ -280,7 +280,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
                 </div>
               </div>
 
-              <WorksiteGpsPicker address={address} value={gpsInfo} onChange={setGpsInfo} />
+              <WorksiteGpsPicker address={address} value={gpsInfo} onChange={setGpsInfo} hideInput />
             </div>
 
             <div className="flex flex-col gap-3 md:flex-row">

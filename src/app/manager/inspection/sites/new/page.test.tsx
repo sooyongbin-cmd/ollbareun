@@ -3,15 +3,18 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import InspectionSiteNewPage from "./page";
 
-vi.mock("qrcode", () => ({
-  default: {
-    toDataURL: vi.fn().mockResolvedValue("data:image/png;base64,qr"),
-  },
+const push = vi.fn();
+const refresh = vi.fn();
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push, refresh }),
 }));
 
 describe("inspection site new page", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    push.mockReset();
+    refresh.mockReset();
     document.head.innerHTML = "";
     delete window.kakao;
     vi.stubGlobal(
@@ -20,23 +23,23 @@ describe("inspection site new page", () => {
         const url = String(input);
         if (url.endsWith("/api/bootstrap")) {
           return Response.json({
-            worksites: [{ id: "work-1", name: "본사" }],
+            worksites: [{ id: "work-1", name: "Worksite" }],
           });
         }
         if (url.endsWith("/api/inspection/sites")) {
           expect(JSON.parse(String(init?.body))).toMatchObject({
             worksiteId: "work-1",
-            name: "정문",
-            address: "서울시 중구 세종대로 1",
+            name: "Gate",
+            address: "Seoul",
             gpsInfo: { latitude: 37.5, longitude: 127 },
           });
           return Response.json({
             site: {
               id: "site-1",
               worksite_id: "work-1",
-              worksite_name: "본사",
-              name: "정문",
-              address: "서울시 중구 세종대로 1",
+              worksite_name: "Worksite",
+              name: "Gate",
+              address: "Seoul",
               gps_info: { latitude: 37.5, longitude: 127 },
             },
           });
@@ -46,22 +49,27 @@ describe("inspection site new page", () => {
     );
   });
 
-  it("uses worksite choices, read-only address, map picker, save, and QR print activation", async () => {
+  it("saves a new inspection site without QR print and returns to the list after confirmation", async () => {
     const user = userEvent.setup();
     render(<InspectionSiteNewPage />);
 
-    expect(await screen.findByRole("option", { name: "본사" })).toBeInTheDocument();
+    expect(await screen.findByRole("option", { name: "Worksite" })).toBeInTheDocument();
     expect(screen.getByLabelText("현장주소")).toHaveAttribute("readonly");
-    expect(screen.getByRole("button", { name: "QR인쇄" })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "QR인쇄" })).not.toBeInTheDocument();
 
-    await user.type(screen.getByLabelText("현장명"), "정문");
+    await user.type(screen.getByLabelText("현장명"), "Gate");
     act(() => {
-      window.jusoCallBack?.("서울시 중구 세종대로 1", "서울시 중구 세종대로 1", "", "");
+      window.jusoCallBack?.("Seoul", "Seoul", "", "");
     });
     await user.type(screen.getByLabelText("GPS정보"), "37.5, 127");
     await user.click(screen.getByRole("button", { name: "저장" }));
 
     expect(await screen.findByText("현장이 저장되었습니다.")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "QR인쇄" })).toBeEnabled();
+    expect(push).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "확인" }));
+
+    expect(push).toHaveBeenCalledWith("/manager/inspection/sites");
+    expect(refresh).toHaveBeenCalled();
   });
 });

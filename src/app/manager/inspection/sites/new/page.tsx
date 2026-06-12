@@ -1,12 +1,11 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { buildInspectionQrPayload, type InspectionSiteRow } from "@/lib/inspection";
 import type { GpsInfo } from "@/lib/gps";
 import WorksiteGpsPicker from "../../../employee/worksites/worksite-gps-picker";
 import { SaveIcon } from "@/components/icons/save-icon";
 import AlertModal from "@/components/modals/alert-modal";
-import { saveInspectionQrImage } from "../../save-inspection-qr";
 
 declare global {
   interface Window {
@@ -41,16 +40,15 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
 }
 
 export default function InspectionSiteNewPage() {
+  const router = useRouter();
   const [worksites, setWorksites] = useState<Worksite[]>([]);
   const [worksiteId, setWorksiteId] = useState("");
   const [siteName, setSiteName] = useState("");
   const [address, setAddress] = useState("");
   const [gpsInfo, setGpsInfo] = useState<GpsInfo | null>(null);
-  const [savedSite, setSavedSite] = useState<InspectionSiteRow | null>(null);
   const [alertMessage, setAlertMessage] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [printing, setPrinting] = useState(false);
 
   const selectedWorksite = useMemo(
     () => worksites.find((worksite) => worksite.id === worksiteId) ?? null,
@@ -93,7 +91,6 @@ export default function InspectionSiteNewPage() {
       const selectedAddress =
         roadFullAddr?.trim() || [roadAddrPart1, addrDetail, roadAddrPart2].filter(Boolean).join(" ").trim();
       setAddress(selectedAddress);
-      setSavedSite(null);
     };
 
     return () => {
@@ -112,7 +109,6 @@ export default function InspectionSiteNewPage() {
 
   function handleGpsChange(nextGpsInfo: GpsInfo | null) {
     setGpsInfo(nextGpsInfo);
-    setSavedSite(null);
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -126,13 +122,12 @@ export default function InspectionSiteNewPage() {
 
     setSaving(true);
     try {
-      const payload = await postJson<{ site: InspectionSiteRow }>("/api/inspection/sites", {
+      await postJson("/api/inspection/sites", {
         worksiteId,
         name: siteName,
         address,
         gpsInfo,
       });
-      setSavedSite(payload.site);
       setAlertMessage("현장이 저장되었습니다.");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "현장을 등록하지 못했습니다.");
@@ -141,25 +136,10 @@ export default function InspectionSiteNewPage() {
     }
   }
 
-  async function handleQrPrint() {
-    if (!savedSite) {
-      return;
-    }
-
-    setPrinting(true);
-    setError("");
-    try {
-      await saveInspectionQrImage({
-        payload: buildInspectionQrPayload(savedSite),
-        worksiteName: savedSite.worksite_name,
-        siteName: savedSite.name,
-        fileName: `올바른_현장점검_${savedSite.worksite_name}_${savedSite.name}`,
-      });
-    } catch (printError) {
-      setError(printError instanceof Error ? printError.message : "QR 파일을 저장하지 못했습니다.");
-    } finally {
-      setPrinting(false);
-    }
+  function handleAlertClose() {
+    setAlertMessage("");
+    router.push("/manager/inspection/sites");
+    router.refresh();
   }
 
   return (
@@ -182,10 +162,7 @@ export default function InspectionSiteNewPage() {
                 className="field"
                 id="inspection-worksite"
                 value={worksiteId}
-                onChange={(event) => {
-                  setWorksiteId(event.target.value);
-                  setSavedSite(null);
-                }}
+                onChange={(event) => setWorksiteId(event.target.value)}
                 required
               >
                 {worksites.length === 0 ? <option value="">근무지 없음</option> : null}
@@ -206,10 +183,7 @@ export default function InspectionSiteNewPage() {
                 id="inspection-site-name"
                 name="name"
                 value={siteName}
-                onChange={(event) => {
-                  setSiteName(event.target.value);
-                  setSavedSite(null);
-                }}
+                onChange={(event) => setSiteName(event.target.value)}
                 placeholder="현장 이름을 입력하세요."
                 required
               />
@@ -246,14 +220,6 @@ export default function InspectionSiteNewPage() {
             >
               <SaveIcon size={20} />
             </button>
-            <button
-              className="button-secondary w-full justify-center md:w-auto"
-              disabled={!savedSite || printing}
-              onClick={handleQrPrint}
-              type="button"
-            >
-              QR인쇄
-            </button>
           </div>
         </form>
 
@@ -262,7 +228,7 @@ export default function InspectionSiteNewPage() {
 
       <AlertModal
         isOpen={Boolean(alertMessage)}
-        onClose={() => setAlertMessage("")}
+        onClose={handleAlertClose}
         title="알림"
         description={alertMessage}
       />

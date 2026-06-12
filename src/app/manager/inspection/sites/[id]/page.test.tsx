@@ -79,12 +79,13 @@ describe("inspection site detail page", () => {
     );
   });
 
-  it("loads, saves, and returns to the list after confirming the success message", async () => {
+  it("loads without showing the GPS input and returns to the list after save confirmation", async () => {
     const user = userEvent.setup();
     render(<InspectionSiteDetailPage params={Promise.resolve({ id: "site-1" })} />);
 
     expect(await screen.findByDisplayValue("Gate")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Seoul")).toHaveAttribute("readonly");
+    expect(screen.queryByLabelText("GPS정보")).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "저장" }));
     expect(await screen.findByText("현장이 저장되었습니다.")).toBeInTheDocument();
@@ -96,13 +97,13 @@ describe("inspection site detail page", () => {
     expect(refresh).toHaveBeenCalled();
   });
 
-  it("prints QR and copies the short NFC URL", async () => {
+  it("prints QR and copies the protocol-free short NFC URL", async () => {
     const user = userEvent.setup();
     render(<InspectionSiteDetailPage params={Promise.resolve({ id: "site-1" })} />);
 
     expect(await screen.findByDisplayValue("Gate")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "NFC(URL)" }));
-    const nfcUrl = "http://localhost:3000/guard/main/inspection-nfc?s=site-1";
+    const nfcUrl = "localhost:3000/guard/main/inspection-nfc?s=site-1";
     expect(await screen.findByDisplayValue(nfcUrl)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "복사" }));
     expect(await screen.findByText("복사되었습니다.")).toBeInTheDocument();

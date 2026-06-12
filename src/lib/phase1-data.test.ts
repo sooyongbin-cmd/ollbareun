@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { authenticateGuard, createAssignment } from "./phase1-data";
+import { authenticateGuard, clockOut, createAssignment } from "./phase1-data";
 import { getSupabase } from "./supabase";
 
 vi.mock("./supabase", () => ({
@@ -94,10 +94,104 @@ describe("guard authentication data rules", () => {
         error: null,
       }),
     };
-    const attendanceQuery = {
+    const openAttendanceQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      is: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+    };
+    const todayAttendanceQuery = {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+    };
+    const supabase = {
+      from: vi
+        .fn()
+        .mockReturnValueOnce(employeeQuery)
+        .mockReturnValueOnce(assignmentQuery)
+        .mockReturnValueOnce(worksiteQuery)
+        .mockReturnValueOnce(openAttendanceQuery)
+        .mockReturnValueOnce(todayAttendanceQuery),
+    };
+    vi.mocked(getSupabase).mockReturnValue(supabase as never);
+
+    await expect(authenticateGuard({ name: "홍길동", phone: "010-1234-5678" })).resolves.toMatchObject({
+      assignment: { id: "assign-1" },
+      worksite: { id: "work-1" },
+    });
+    expect(assignmentQuery.eq).toHaveBeenCalledWith("employee_id", "emp-1");
+    expect(assignmentQuery.lte).toHaveBeenCalledWith("start_date", "2026-05-26");
+    expect(assignmentQuery.gte).toHaveBeenCalledWith("end_date", "2026-05-26");
+  });
+
+  it("loads an open previous-day attendance record into the guard session", async () => {
+    const employeeQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({
+        data: {
+          id: "emp-1",
+          name: "Guard",
+          phone: "010-1234-5678",
+          phone_normalized: "01012345678",
+          is_retired: false,
+          role: "Guard",
+          created_at: "2026-05-21T00:00:00Z",
+        },
+        error: null,
+      }),
+    };
+    const assignmentQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({
+        data: {
+          id: "assign-1",
+          employee_id: "emp-1",
+          worksite_id: "work-1",
+          start_date: "2026-05-25",
+          end_date: "2026-05-27",
+          created_at: "2026-05-21T00:00:00Z",
+        },
+        error: null,
+      }),
+    };
+    const worksiteQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({
+        data: {
+          id: "work-1",
+          name: "Worksite",
+          gps_info: { latitude: 37.5, longitude: 127 },
+          radius_meters: 100,
+          created_at: "2026-05-21T00:00:00Z",
+        },
+        error: null,
+      }),
+    };
+    const attendanceQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      is: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({
+        data: {
+          id: "attendance-1",
+          employee_id: "emp-1",
+          worksite_id: "work-1",
+          work_date: "2026-05-25",
+          clock_in_at: "2026-05-25T23:00:00.000Z",
+          clock_out_at: null,
+        },
+        error: null,
+      }),
     };
     const supabase = {
       from: vi
@@ -109,13 +203,16 @@ describe("guard authentication data rules", () => {
     };
     vi.mocked(getSupabase).mockReturnValue(supabase as never);
 
-    await expect(authenticateGuard({ name: "홍길동", phone: "010-1234-5678" })).resolves.toMatchObject({
-      assignment: { id: "assign-1" },
-      worksite: { id: "work-1" },
+    await expect(authenticateGuard({ name: "Guard", phone: "010-1234-5678" })).resolves.toMatchObject({
+      attendance: {
+        id: "attendance-1",
+        work_date: "2026-05-25",
+        clock_out_at: null,
+      },
     });
-    expect(assignmentQuery.eq).toHaveBeenCalledWith("employee_id", "emp-1");
-    expect(assignmentQuery.lte).toHaveBeenCalledWith("start_date", "2026-05-26");
-    expect(assignmentQuery.gte).toHaveBeenCalledWith("end_date", "2026-05-26");
+    expect(attendanceQuery.eq).toHaveBeenCalledWith("employee_id", "emp-1");
+    expect(attendanceQuery.is).toHaveBeenCalledWith("clock_out_at", null);
+    expect(attendanceQuery.order).toHaveBeenCalledWith("clock_in_at", { ascending: false });
   });
 
   it("rejects overlapping assignment periods for the same employee", async () => {
@@ -145,5 +242,56 @@ describe("guard authentication data rules", () => {
     ).rejects.toThrow("이미 겹치는 근무기간 배정이 있습니다.");
     expect(overlapQuery.lte).toHaveBeenCalledWith("start_date", "2026-05-27");
     expect(overlapQuery.gte).toHaveBeenCalledWith("end_date", "2026-05-25");
+  });
+
+  it("clocks out the latest open attendance record from a previous day", async () => {
+    const attendanceQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      is: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({
+        data: {
+          id: "attendance-1",
+          employee_id: "emp-1",
+          worksite_id: "work-1",
+          work_date: "2026-05-25",
+          clock_in_at: "2026-05-25T23:00:00.000Z",
+          clock_out_at: null,
+        },
+        error: null,
+      }),
+    };
+    const updateQuery = {
+      update: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({
+        data: {
+          id: "attendance-1",
+          employee_id: "emp-1",
+          worksite_id: "work-1",
+          work_date: "2026-05-25",
+          clock_in_at: "2026-05-25T23:00:00.000Z",
+          clock_out_at: "2026-05-26T00:00:00.000Z",
+        },
+        error: null,
+      }),
+    };
+    const supabase = {
+      from: vi.fn().mockReturnValueOnce(attendanceQuery).mockReturnValueOnce(updateQuery),
+    };
+    vi.mocked(getSupabase).mockReturnValue(supabase as never);
+
+    await expect(clockOut({ employeeId: "emp-1", latitude: 37.5, longitude: 127 })).resolves.toMatchObject({
+      id: "attendance-1",
+      work_date: "2026-05-25",
+      clock_out_at: "2026-05-26T00:00:00.000Z",
+    });
+    expect(attendanceQuery.eq).toHaveBeenCalledWith("employee_id", "emp-1");
+    expect(attendanceQuery.is).toHaveBeenCalledWith("clock_out_at", null);
+    expect(attendanceQuery.order).toHaveBeenCalledWith("clock_in_at", { ascending: false });
+    expect(updateQuery.eq).toHaveBeenCalledWith("id", "attendance-1");
   });
 });

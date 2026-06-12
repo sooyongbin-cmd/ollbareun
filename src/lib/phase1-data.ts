@@ -439,27 +439,51 @@ async function loadGuardSessionByEmployee(employee: EmployeeRow) {
 
   throwIfError(assignmentError);
 
-  const [worksiteResult, attendanceResult] = await Promise.all([
+  const [worksiteResult, attendance] = await Promise.all([
     assignment
       ? supabase.from("worksites").select("*").eq("id", assignment.worksite_id).single()
       : Promise.resolve({ data: null, error: null }),
-    supabase
-      .from("attendance_records")
-      .select("*")
-      .eq("employee_id", employee.id)
-      .eq("work_date", todayDate())
-      .maybeSingle(),
+    findGuardSessionAttendance(supabase, employee.id),
   ]);
 
   throwIfError(worksiteResult.error);
-  throwIfError(attendanceResult.error);
 
   return {
     employee: employee as EmployeeRow,
     assignment: assignment as AssignmentRow | null,
     worksite: worksiteResult.data as WorksiteRow | null,
-    attendance: attendanceResult.data as AttendanceRow | null,
+    attendance,
   };
+}
+
+async function findLatestOpenAttendance(supabase: ReturnType<typeof getSupabase>, employeeId: string) {
+  const { data, error } = await supabase
+    .from("attendance_records")
+    .select("*")
+    .eq("employee_id", employeeId)
+    .is("clock_out_at", null)
+    .order("clock_in_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  throwIfError(error);
+  return data as AttendanceRow | null;
+}
+
+async function findTodayAttendance(supabase: ReturnType<typeof getSupabase>, employeeId: string) {
+  const { data, error } = await supabase
+    .from("attendance_records")
+    .select("*")
+    .eq("employee_id", employeeId)
+    .eq("work_date", todayDate())
+    .maybeSingle();
+
+  throwIfError(error);
+  return data as AttendanceRow | null;
+}
+
+async function findGuardSessionAttendance(supabase: ReturnType<typeof getSupabase>, employeeId: string) {
+  return (await findLatestOpenAttendance(supabase, employeeId)) ?? (await findTodayAttendance(supabase, employeeId));
 }
 
 export async function loadGuardSessionByEmployeeId(employeeIdInput: unknown) {
@@ -553,28 +577,24 @@ export async function clockOut(input: {
   const longitude = requireNumber(input.longitude, "경도");
   const supabase = getSupabase();
 
-  const { data: attendance, error: attendanceError } = await supabase
-    .from("attendance_records")
-    .select("*")
-    .eq("employee_id", employee_id)
-    .eq("work_date", todayDate())
-    .maybeSingle();
+  const attendance = await findLatestOpenAttendance(supabase, employee_id);
 
-  throwIfError(attendanceError);
-
-  const decision = canClockOut(
-    attendance
-      ? {
-          id: attendance.id,
-          employeeId: attendance.employee_id,
-          worksiteId: attendance.worksite_id,
-          clockInAt: attendance.clock_in_at,
-          clockOutAt: attendance.clock_out_at,
-        }
-      : null,
-  );
+  const attendanceRecord = attendance?.clock_in_at
+    ? {
+        id: attendance.id,
+        employeeId: attendance.employee_id,
+        worksiteId: attendance.worksite_id,
+        clockInAt: attendance.clock_in_at,
+        clockOutAt: attendance.clock_out_at,
+      }
+    : null;
+  const decision = canClockOut(attendanceRecord);
 
   if (!decision.allowed) {
+    throw new Error(decision.reason);
+  }
+
+  if (!attendance) {
     throw new Error(decision.reason);
   }
 

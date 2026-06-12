@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { PowerIcon } from "@/components/icons/power-icon";
+import { clearStoredGuardSession, readStoredGuardSession } from "../guard-session-storage";
 
-const guardSessionStorageKey = "ollbareun.guard.session";
 const guardLogoutPushResultStorageKey = "ollbareun.guard.logout.pushResult";
 
 type LogoutPushResult = {
@@ -17,18 +17,11 @@ type LogoutPushResult = {
 };
 
 function readGuardSessionInfo() {
-  try {
-    const stored = window.sessionStorage.getItem(guardSessionStorageKey);
-    if (!stored) return { employeeId: null, sessionLogId: null };
-
-    const session = JSON.parse(stored);
-    return {
-      employeeId: typeof session.employee?.id === "string" ? session.employee.id : null,
-      sessionLogId: typeof session.sessionLogId === "string" ? session.sessionLogId : null,
-    };
-  } catch {
-    return { employeeId: null, sessionLogId: null };
-  }
+  const session = readStoredGuardSession<{ employee?: { id?: unknown }; sessionLogId?: unknown }>();
+  return {
+    employeeId: typeof session?.employee?.id === "string" ? session.employee.id : null,
+    sessionLogId: typeof session?.sessionLogId === "string" ? session.sessionLogId : null,
+  };
 }
 
 async function getCurrentPushEndpoint() {
@@ -116,7 +109,7 @@ export default function GuardLogoutButton() {
     }
 
     try {
-      window.sessionStorage.removeItem(guardSessionStorageKey);
+      clearStoredGuardSession();
     } catch {
       session = "failed";
       // Navigation below still completes logout for browsers with unavailable storage.

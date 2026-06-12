@@ -21,7 +21,6 @@ describe("guard login page", () => {
     push.mockReset();
     replace.mockReset();
     signInWithPasskey.mockReset();
-    window.sessionStorage.clear();
     vi.restoreAllMocks();
     Object.defineProperty(window, "location", {
       value: {
@@ -158,7 +157,12 @@ describe("guard login page", () => {
       method: "POST",
       headers: { Authorization: "Bearer token-1" },
     });
-    expect(window.sessionStorage.getItem("ollbareun.guard.session")).toContain("emp-1");
+    const storedSession = JSON.parse(window.localStorage.getItem("ollbareun.guard.session") ?? "{}");
+    expect(storedSession).toMatchObject({
+      employee: { id: "emp-1" },
+      createdAt: expect.any(String),
+      lastActiveAt: expect.any(String),
+    });
   });
 
   it("shows login pending modal during passkey login", async () => {

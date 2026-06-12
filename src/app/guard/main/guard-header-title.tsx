@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useSyncExternalStore } from "react";
+import { readStoredGuardSessionSnapshot, subscribeToGuardSessionChange } from "../guard-session-storage";
 
 type GuardSession = {
   employee?: {
@@ -8,23 +9,12 @@ type GuardSession = {
   } | null;
 };
 
-const guardSessionStorageKey = "ollbareun.guard.session";
-
 function readGuardSessionSnapshot() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-  try {
-    return window.sessionStorage.getItem(guardSessionStorageKey);
-  } catch {
-    return null;
-  }
+  return readStoredGuardSessionSnapshot();
 }
 
 function subscribeToSessionChange(onStoreChange: () => void) {
-  if (typeof window === "undefined") return () => {};
-  void onStoreChange;
-  return () => {};
+  return subscribeToGuardSessionChange(onStoreChange);
 }
 
 export default function GuardHeaderTitle() {

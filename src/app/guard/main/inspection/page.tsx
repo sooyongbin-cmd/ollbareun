@@ -5,6 +5,7 @@ import type { IScannerControls } from "@zxing/browser";
 import { useEffect, useRef, useState } from "react";
 import { parseInspectionQrPayload, type InspectionQrPayload } from "@/lib/inspection";
 import AlertModal from "@/components/modals/alert-modal";
+import { readStoredGuardSession } from "../../guard-session-storage";
 
 type GuardSession = {
   employee?: {
@@ -12,23 +13,6 @@ type GuardSession = {
     name?: string;
   };
 };
-
-function loadGuardSession() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  const stored = window.sessionStorage.getItem("ollbareun.guard.session");
-  if (!stored) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(stored) as GuardSession;
-  } catch {
-    return null;
-  }
-}
 
 async function postInspectionLog(input: {
   employeeId: string;
@@ -52,7 +36,6 @@ async function postInspectionLog(input: {
 export default function GuardInspectionPage() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const controlsRef = useRef<IScannerControls | null>(null);
-  const [session] = useState<GuardSession | null>(() => loadGuardSession());
   const [qrPayload, setQrPayload] = useState<InspectionQrPayload | null>(null);
   const [status, setStatus] = useState("카메라를 준비하고 있습니다.");
   const [error, setError] = useState("");
@@ -115,8 +98,9 @@ export default function GuardInspectionPage() {
   }, []);
 
   async function handleCapture() {
-    const employeeId = session?.employee?.id;
-    const employeeName = session?.employee?.name;
+    const activeSession = readStoredGuardSession<GuardSession>({ touch: true });
+    const employeeId = activeSession?.employee?.id;
+    const employeeName = activeSession?.employee?.name;
 
     if (!employeeId || !employeeName || !qrPayload) {
       setError("점검자 정보 또는 QR 정보가 없습니다.");

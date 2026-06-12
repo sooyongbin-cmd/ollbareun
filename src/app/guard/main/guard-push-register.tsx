@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AlertModal from "@/components/modals/alert-modal";
+import { readStoredGuardSession } from "../guard-session-storage";
 
-const guardSessionStorageKey = "ollbareun.guard.session";
 const guardPushRegistrationStorageKey = "ollbareun.guard.pushRegistration";
 
 type PushStepStatus = "waiting" | "running" | "success" | "warning" | "error";
@@ -112,21 +112,11 @@ function getStepStatusLabel(status: PushStepStatus) {
 }
 
 function readStoredGuardSessionInfo(): StoredGuardSessionInfo {
-  try {
-    const stored = window.sessionStorage.getItem(guardSessionStorageKey);
-    if (!stored) {
-      return { employeeId: null, sessionLogId: null };
-    }
-
-    const session = JSON.parse(stored);
-    return {
-      employeeId: typeof session.employee?.id === "string" ? session.employee.id : null,
-      sessionLogId: typeof session.sessionLogId === "string" ? session.sessionLogId : null,
-    };
-  } catch (err) {
-    console.error("Error reading guard session for push registration:", err);
-    return { employeeId: null, sessionLogId: null };
-  }
+  const session = readStoredGuardSession<{ employee?: { id?: unknown }; sessionLogId?: unknown }>({ touch: true });
+  return {
+    employeeId: typeof session?.employee?.id === "string" ? session.employee.id : null,
+    sessionLogId: typeof session?.sessionLogId === "string" ? session.sessionLogId : null,
+  };
 }
 
 function readStoredGuardPushRegistration(): StoredGuardPushRegistration | null {

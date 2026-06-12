@@ -7,6 +7,7 @@ import { type GpsInfo } from "@/lib/gps";
 import AttendanceMapSection from "./attendance-map-section";
 import GuardLocationPermissionPrompt from "../guard-location-permission-prompt";
 import { locationPermissionGrantedEvent, queryGeolocationPermission } from "../location-permission";
+import { readStoredGuardSession as readGuardSessionFromStorage, writeStoredGuardSession as writeGuardSessionToStorage } from "../../guard-session-storage";
 
 type EmployeeRow = {
   id: string;
@@ -47,7 +48,6 @@ type GuardSession = {
   attendance: AttendanceRow | null;
 };
 
-const guardSessionStorageKey = "ollbareun.guard.session";
 const geolocationOptions: PositionOptions = { enableHighAccuracy: true, maximumAge: 3000, timeout: 8000 };
 
 function asWorksite(row: WorksiteRow): Worksite {
@@ -75,28 +75,11 @@ function asAttendance(row: AttendanceRow | null): AttendanceRecord | null {
 }
 
 function readStoredGuardSession(): GuardSession | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  try {
-    const storedSession = window.sessionStorage.getItem(guardSessionStorageKey);
-    return storedSession ? (JSON.parse(storedSession) as GuardSession) : null;
-  } catch {
-    return null;
-  }
+  return readGuardSessionFromStorage<GuardSession>({ touch: true });
 }
 
 function writeStoredGuardSession(session: GuardSession) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  try {
-    window.sessionStorage.setItem(guardSessionStorageKey, JSON.stringify(session));
-  } catch {
-    // Keep the current screen usable even if session storage is unavailable.
-  }
+  writeGuardSessionToStorage(session);
 }
 
 async function postJson<T>(url: string, body: unknown): Promise<T> {
@@ -190,7 +173,9 @@ export default function GuardAttendancePage() {
   }, []);
 
   async function handleClockIn() {
-    if (!guard?.employee || !guard.worksite) {
+    const activeGuard = readStoredGuardSession();
+    if (!activeGuard?.employee || !activeGuard.worksite) {
+      setGuard(activeGuard);
       return;
     }
 
@@ -210,12 +195,12 @@ export default function GuardAttendancePage() {
       setLongitude(nextLongitude);
 
       const result = await postJson<{ attendance: AttendanceRow }>("/api/attendance/clock-in", {
-        employeeId: guard.employee.id,
-        worksiteId: guard.worksite.id,
+        employeeId: activeGuard.employee.id,
+        worksiteId: activeGuard.worksite.id,
         latitude: nextLatitude,
         longitude: nextLongitude,
       });
-      const nextGuard = { ...guard, attendance: result.attendance };
+      const nextGuard = { ...activeGuard, attendance: result.attendance };
       setGuard(nextGuard);
       writeStoredGuardSession(nextGuard);
       setMessage("출근 처리되었습니다.");
@@ -225,17 +210,19 @@ export default function GuardAttendancePage() {
   }
 
   async function handleClockOut() {
-    if (!guard?.employee) {
+    const activeGuard = readStoredGuardSession();
+    if (!activeGuard?.employee) {
+      setGuard(activeGuard);
       return;
     }
 
     setError("");
     const result = await postJson<{ attendance: AttendanceRow }>("/api/attendance/clock-out", {
-      employeeId: guard.employee.id,
-      latitude: latitude || guard.worksite?.gps_info.latitude,
-      longitude: longitude || guard.worksite?.gps_info.longitude,
+      employeeId: activeGuard.employee.id,
+      latitude: latitude || activeGuard.worksite?.gps_info.latitude,
+      longitude: longitude || activeGuard.worksite?.gps_info.longitude,
     });
-    const nextGuard = { ...guard, attendance: result.attendance };
+    const nextGuard = { ...activeGuard, attendance: result.attendance };
     setGuard(nextGuard);
     writeStoredGuardSession(nextGuard);
     setMessage("퇴근 처리되었습니다.");

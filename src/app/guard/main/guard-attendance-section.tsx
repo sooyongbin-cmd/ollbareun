@@ -4,6 +4,12 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 import { distanceMeters, canClockIn, canClockOut, type AttendanceRecord, type Worksite } from "@/lib/phase1";
 import type { GpsInfo } from "@/lib/gps";
 import AlertModal from "@/components/modals/alert-modal";
+import {
+  readStoredGuardSession,
+  readStoredGuardSessionSnapshot,
+  subscribeToGuardSessionChange,
+  writeStoredGuardSession,
+} from "../guard-session-storage";
 
 type EmployeeRow = {
   id: string;
@@ -31,23 +37,12 @@ type GuardSession = {
   worksite?: WorksiteRow | null;
 };
 
-const guardSessionStorageKey = "ollbareun.guard.session";
-
 function readGuardSessionSnapshot() {
-  if (typeof window === "undefined") return null;
-  try {
-    return window.sessionStorage.getItem(guardSessionStorageKey);
-  } catch {
-    return null;
-  }
+  return readStoredGuardSessionSnapshot();
 }
 
 function subscribeToSessionChange(onStoreChange: () => void) {
-  if (typeof window === "undefined") return () => {};
-  window.addEventListener("storage", (event) => {
-    if (event.key === guardSessionStorageKey) onStoreChange();
-  });
-  return () => {};
+  return subscribeToGuardSessionChange(onStoreChange);
 }
 
 function formatTime(isoString: string | null | undefined) {
@@ -104,14 +99,15 @@ export default function GuardAttendanceSection() {
       : null;
 
   async function handleClockIn() {
-    if (!session?.employee || !session.worksite || processing) return;
+    const activeSession = readStoredGuardSession<GuardSession>({ touch: true });
+    if (!activeSession?.employee || !activeSession.worksite || processing) return;
 
     const worksite: Worksite = {
-      id: session.worksite.id,
-      name: session.worksite.name,
-      latitude: session.worksite.gps_info.latitude,
-      longitude: session.worksite.gps_info.longitude,
-      radiusMeters: session.worksite.radius_meters,
+      id: activeSession.worksite.id,
+      name: activeSession.worksite.name,
+      latitude: activeSession.worksite.gps_info.latitude,
+      longitude: activeSession.worksite.gps_info.longitude,
+      radiusMeters: activeSession.worksite.radius_meters,
     };
 
     const decision = canClockIn({
@@ -128,14 +124,14 @@ export default function GuardAttendanceSection() {
     try {
       setProcessing(true);
       const result = await postJson<{ attendance: AttendanceRow }>("/api/attendance/clock-in", {
-        employeeId: session.employee.id,
-        worksiteId: session.worksite.id,
+        employeeId: activeSession.employee.id,
+        worksiteId: activeSession.worksite.id,
         latitude: currentGps?.latitude,
         longitude: currentGps?.longitude,
       });
       
-      const nextSession = { ...session, attendance: result.attendance };
-      window.sessionStorage.setItem(guardSessionStorageKey, JSON.stringify(nextSession));
+      const nextSession = { ...activeSession, attendance: result.attendance };
+      writeStoredGuardSession(nextSession);
       setLocalAttendance(result.attendance);
       setAlertMessage({ title: "알림", message: "출근 처리되었습니다." });
     } catch (err) {
@@ -146,7 +142,8 @@ export default function GuardAttendanceSection() {
   }
 
   async function handleClockOut() {
-    if (!session?.employee || !attendance || processing) return;
+    const activeSession = readStoredGuardSession<GuardSession>({ touch: true });
+    if (!activeSession?.employee || !attendance || processing) return;
 
     const record: AttendanceRecord = {
       id: attendance.id,
@@ -165,13 +162,13 @@ export default function GuardAttendanceSection() {
     try {
       setProcessing(true);
       const result = await postJson<{ attendance: AttendanceRow }>("/api/attendance/clock-out", {
-        employeeId: session.employee.id,
-        latitude: currentGps?.latitude ?? session.worksite?.gps_info?.latitude,
-        longitude: currentGps?.longitude ?? session.worksite?.gps_info?.longitude,
+        employeeId: activeSession.employee.id,
+        latitude: currentGps?.latitude ?? activeSession.worksite?.gps_info?.latitude,
+        longitude: currentGps?.longitude ?? activeSession.worksite?.gps_info?.longitude,
       });
       
-      const nextSession = { ...session, attendance: result.attendance };
-      window.sessionStorage.setItem(guardSessionStorageKey, JSON.stringify(nextSession));
+      const nextSession = { ...activeSession, attendance: result.attendance };
+      writeStoredGuardSession(nextSession);
       setLocalAttendance(result.attendance);
       setAlertMessage({ title: "알림", message: "퇴근 처리되었습니다." });
     } catch (err) {

@@ -3,6 +3,7 @@
 import { MicIcon, SquareIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import AlertModal from "@/components/modals/alert-modal";
+import { readStoredGuardSession } from "../../guard-session-storage";
 
 type GuardSession = {
   employee?: {
@@ -46,23 +47,6 @@ declare global {
   interface Window {
     SpeechRecognition?: SpeechRecognitionConstructor;
     webkitSpeechRecognition?: SpeechRecognitionConstructor;
-  }
-}
-
-function loadGuardSession() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  const stored = window.sessionStorage.getItem("ollbareun.guard.session");
-  if (!stored) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(stored) as GuardSession;
-  } catch {
-    return null;
   }
 }
 
@@ -116,7 +100,6 @@ export default function GuardSpecialRemarksPage() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const [session] = useState<GuardSession | null>(() => loadGuardSession());
   const [content, setContent] = useState("");
   const [photoDataUrl, setPhotoDataUrl] = useState("");
   const [cameraStatus, setCameraStatus] = useState("카메라를 준비하고 있습니다.");
@@ -212,10 +195,11 @@ export default function GuardSpecialRemarksPage() {
   }
 
   async function handleReport(provider: "resend" | "formspree") {
-    const employeeId = session?.employee?.id;
-    const employeeName = session?.employee?.name;
-    const worksiteId = session?.worksite?.id;
-    const worksiteName = session?.worksite?.name;
+    const activeSession = readStoredGuardSession<GuardSession>({ touch: true });
+    const employeeId = activeSession?.employee?.id;
+    const employeeName = activeSession?.employee?.name;
+    const worksiteId = activeSession?.worksite?.id;
+    const worksiteName = activeSession?.worksite?.name;
 
     if (!employeeId || !employeeName || !worksiteName) {
       setError("점검자 또는 근무지 정보가 없습니다.");

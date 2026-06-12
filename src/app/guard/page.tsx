@@ -8,6 +8,10 @@ import { getSupabasePasskeyClient } from "@/lib/supabase-passkey-client";
 import { isCurrentInAppBrowser, isStandaloneGuardApp } from "./in-app-browser";
 import InAppBrowserGuide from "./in-app-browser-guide";
 import GuardBrowserGate from "./guard-browser-gate";
+import {
+  hasActiveStoredGuardSession,
+  writeStoredGuardSession,
+} from "./guard-session-storage";
 
 type EmployeeRow = {
   id: string;
@@ -66,7 +70,6 @@ type BeforeInstallPromptEvent = Event & {
 type GuardLaunchState = "checking" | "in-app" | "standalone" | "installable-browser" | "browser-installed-or-unavailable";
 
 const guardNameStorageKey = "ollbareun.guard.name";
-const guardSessionStorageKey = "ollbareun.guard.session";
 const guardLogoutPushResultStorageKey = "ollbareun.guard.logout.pushResult";
 
 async function postJson<T>(url: string, body: unknown): Promise<T> {
@@ -108,32 +111,8 @@ function writeStoredGuardName(name: string) {
   }
 }
 
-function writeStoredGuardSession(session: GuardSession) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  try {
-    window.sessionStorage.setItem(guardSessionStorageKey, JSON.stringify(session));
-  } catch {
-    // Navigation can still continue; the main page will ask for login again if storage fails.
-  }
-}
-
 function hasStoredGuardSession() {
-  if (typeof window === "undefined") {
-    return false;
-  }
-
-  try {
-    const stored = window.sessionStorage.getItem(guardSessionStorageKey);
-    if (!stored) return false;
-
-    const session = JSON.parse(stored);
-    return typeof session.employee?.id === "string" && session.employee.id.trim() !== "";
-  } catch {
-    return false;
-  }
+  return hasActiveStoredGuardSession({ touch: true });
 }
 
 function readLogoutPushResult(): LogoutPushResult | null {

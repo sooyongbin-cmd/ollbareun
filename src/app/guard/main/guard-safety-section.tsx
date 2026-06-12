@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
+import { readStoredGuardSessionSnapshot, subscribeToGuardSessionChange } from "../guard-session-storage";
 
 type EducationResourceRow = {
   id: string;
@@ -19,23 +20,12 @@ type GuardSession = {
   };
 };
 
-const guardSessionStorageKey = "ollbareun.guard.session";
-
 function readGuardSessionSnapshot() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-  try {
-    return window.sessionStorage.getItem(guardSessionStorageKey);
-  } catch {
-    return null;
-  }
+  return readStoredGuardSessionSnapshot();
 }
 
 function subscribeToSessionChange(onStoreChange: () => void) {
-  if (typeof window === "undefined") return () => {};
-  void onStoreChange;
-  return () => {};
+  return subscribeToGuardSessionChange(onStoreChange);
 }
 
 export default function GuardSafetySection() {

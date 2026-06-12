@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { readStoredGuardSession } from "../../guard-session-storage";
 
 type EducationResourceRow = {
   id: string;
@@ -53,7 +54,6 @@ declare global {
   }
 }
 
-const guardSessionStorageKey = "ollbareun.guard.session";
 const youtubeApiScriptId = "youtube-iframe-api";
 const youtubePlayerReadyState = 0;
 const requiredPlaybackRate = 1;
@@ -76,21 +76,8 @@ function createInitialWatchProgress(): WatchProgress {
 }
 
 function readGuardEmployeeId() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  try {
-    const storedSession = window.sessionStorage.getItem(guardSessionStorageKey);
-    if (!storedSession) {
-      return null;
-    }
-
-    const session = JSON.parse(storedSession) as GuardSession;
-    return typeof session.employee?.id === "string" && session.employee.id.trim() ? session.employee.id.trim() : null;
-  } catch {
-    return null;
-  }
+  const session = readStoredGuardSession<GuardSession>({ touch: true });
+  return typeof session?.employee?.id === "string" && session.employee.id.trim() ? session.employee.id.trim() : null;
 }
 
 function getYoutubeEmbedUrl(youtubeLink: string, origin?: string) {

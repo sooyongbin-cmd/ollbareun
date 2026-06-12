@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { getSupabasePasskeyClient } from "@/lib/supabase-passkey-client";
+import { readStoredGuardSession } from "../../guard-session-storage";
 
 type GuardSession = {
   employee?: {
@@ -32,19 +33,8 @@ type PasskeyRequest = {
   status: "pending" | "approved" | "rejected" | "registered" | "revoked";
 } | null;
 
-const guardSessionStorageKey = "ollbareun.guard.session";
-
 function readGuardSession() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  try {
-    const storedSession = window.sessionStorage.getItem(guardSessionStorageKey);
-    return storedSession ? (JSON.parse(storedSession) as GuardSession) : null;
-  } catch {
-    return null;
-  }
+  return readStoredGuardSession<GuardSession>({ touch: true });
 }
 
 function readGuardEmployeeId() {

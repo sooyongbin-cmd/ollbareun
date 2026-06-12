@@ -8,6 +8,7 @@ import {
   type InspectionSiteRow,
 } from "@/lib/inspection";
 import AlertModal from "@/components/modals/alert-modal";
+import { readStoredGuardSession } from "../../guard-session-storage";
 
 type GuardSession = {
   employee?: {
@@ -41,23 +42,6 @@ type NfcWindow = Window &
 type InspectionSource =
   | { type: "payload"; value: string }
   | { type: "site"; value: string };
-
-function loadGuardSession() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  const stored = window.sessionStorage.getItem("ollbareun.guard.session");
-  if (!stored) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(stored) as GuardSession;
-  } catch {
-    return null;
-  }
-}
 
 async function postInspectionLog(input: {
   employeeId: string;
@@ -182,7 +166,6 @@ function clearInitialSourceFromUrl() {
 }
 
 export default function GuardInspectionNfcPage() {
-  const [session] = useState<GuardSession | null>(() => loadGuardSession());
   const [nfcPayload, setNfcPayload] = useState<InspectionQrPayload | null>(null);
   const [status, setStatus] = useState(() => getInitialStatus());
   const [error, setError] = useState("");
@@ -192,8 +175,9 @@ export default function GuardInspectionNfcPage() {
 
   const saveInspectionPayload = useCallback(
     async (rawPayload: unknown) => {
-      const employeeId = session?.employee?.id;
-      const employeeName = session?.employee?.name;
+      const activeSession = readStoredGuardSession<GuardSession>({ touch: true });
+      const employeeId = activeSession?.employee?.id;
+      const employeeName = activeSession?.employee?.name;
 
       if (!employeeId || !employeeName) {
         setError("점검자 정보가 없습니다.");
@@ -227,7 +211,7 @@ export default function GuardInspectionNfcPage() {
         setSaving(false);
       }
     },
-    [session],
+    [],
   );
 
   const saveInspectionSource = useCallback(

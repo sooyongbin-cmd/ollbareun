@@ -113,7 +113,7 @@ describe("special remark report Formspree delivery", () => {
     });
   });
 
-  it("stores the report and sends the photo file through Formspree", async () => {
+  it("stores the report and sends the photo URL through Formspree", async () => {
     const insertSingle = vi.fn(async () => ({
       data: {
         id: "report-1",
@@ -151,19 +151,16 @@ describe("special remark report Formspree delivery", () => {
       "https://formspree.io/f/mojzkwbp",
       expect.objectContaining({
         method: "POST",
-        headers: { Accept: "application/json" },
-        body: expect.any(FormData),
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: expect.stringContaining("문이 파손되었습니다."),
       }),
     );
     const [, init] = vi.mocked(fetch).mock.calls[0];
-    const body = init?.body as FormData;
-    const photo = body.get("photo") as File;
-    expect(body.get("message")).toContain("문이 파손되었습니다.");
-    expect(body.get("photoUrl")).toBeNull();
-    expect(photo).toBeInstanceOf(Blob);
-    expect(photo.name).toBe("special-remark-report.jpg");
-    expect(photo.type).toBe("image/jpeg");
-    expect(photo.size).toBe(3);
+    const body = JSON.parse(String(init?.body));
+    expect(body.message).toContain("문이 파손되었습니다.");
+    expect(body.message).toContain("https://example.supabase.co/storage/v1/object/public/special-remarks/employee-1/photo.jpg");
+    expect(body.photoUrl).toBe("https://example.supabase.co/storage/v1/object/public/special-remarks/employee-1/photo.jpg");
+    expect(body).not.toHaveProperty("photo");
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({
         email_status: "sent",

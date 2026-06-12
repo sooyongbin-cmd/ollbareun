@@ -11,8 +11,10 @@ type Worksite = {
 type InspectionLog = {
   id: string;
   inspected_at: string;
+  worksite_name: string;
   site_name: string;
   employee_name: string;
+  employee_role?: string;
 };
 
 function formatDateTime(value: string) {
@@ -154,15 +156,17 @@ export default function InspectionLogsPage() {
             <table className="apple-table">
               <thead>
                 <tr>
-                  <th className="text-left">점검날짜</th>
+                  <th className="text-left">점검일자</th>
+                  <th className="text-left">근무지</th>
                   <th className="text-left">현장명</th>
                   <th className="text-left">점검자</th>
+                  <th className="text-left">역할</th>
                 </tr>
               </thead>
               <tbody>
                 {logs.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="p-8 text-center text-ink-muted-48 italic">
+                    <td colSpan={5} className="p-8 text-center text-ink-muted-48 italic">
                       조회 결과에 해당하는 점검 기록이 없습니다.
                     </td>
                   </tr>
@@ -170,8 +174,10 @@ export default function InspectionLogsPage() {
                   logs.map((log) => (
                     <tr key={log.id} className="hover:bg-canvas-parchment transition-colors">
                       <td>{formatDateTime(log.inspected_at)}</td>
+                      <td>{log.worksite_name}</td>
                       <td className="font-semibold">{log.site_name}</td>
                       <td>{log.employee_name}</td>
+                      <td>{log.employee_role ?? "역할 없음"}</td>
                     </tr>
                   ))
                 )}

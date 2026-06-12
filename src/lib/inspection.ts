@@ -21,6 +21,7 @@ export type InspectionLogRow = {
   worksite_id: string | null;
   employee_id: string | null;
   employee_name: string;
+  employee_role?: string;
   worksite_name: string;
   site_name: string;
   site_gps_info: GpsInfo;
@@ -279,5 +280,22 @@ export async function listInspectionLogs(input: { worksiteId?: unknown } = {}) {
   const { data, error } = worksiteId ? await query.eq("worksite_id", worksiteId) : await query;
 
   throwIfError(error);
-  return (data ?? []) as InspectionLogRow[];
+  const logs = (data ?? []) as InspectionLogRow[];
+  const employeeIds = Array.from(new Set(logs.map((log) => log.employee_id).filter((id): id is string => Boolean(id))));
+
+  if (employeeIds.length === 0) {
+    return logs;
+  }
+
+  const { data: employees, error: employeeError } = await supabase
+    .from("employees")
+    .select("id,role")
+    .in("id", employeeIds);
+  throwIfError(employeeError);
+
+  const rolesByEmployeeId = new Map((employees ?? []).map((employee) => [employee.id, employee.role]));
+  return logs.map((log) => ({
+    ...log,
+    employee_role: log.employee_id ? rolesByEmployeeId.get(log.employee_id) ?? "역할 없음" : "역할 없음",
+  }));
 }

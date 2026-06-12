@@ -124,8 +124,8 @@ export default function InspectionSitesPage() {
             <table className="apple-table">
               <thead>
                 <tr>
-                  <th className="text-left">현장이름</th>
                   <th className="text-left">근무지</th>
+                  <th className="text-left">현장이름</th>
                   <th className="text-left">현장주소</th>
                 </tr>
               </thead>
@@ -139,12 +139,12 @@ export default function InspectionSitesPage() {
                 ) : (
                   sites.map((site) => (
                     <tr key={site.id} className="hover:bg-canvas-parchment transition-colors">
+                      <td>{site.worksite_name}</td>
                       <td className="font-semibold">
                         <Link className="text-primary hover:underline" href={`/manager/inspection/sites/${site.id}`}>
                           {site.name}
                         </Link>
                       </td>
-                      <td>{site.worksite_name}</td>
                       <td className="text-ink-muted-48">{site.address}</td>
                     </tr>
                   ))

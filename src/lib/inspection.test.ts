@@ -277,4 +277,31 @@ describe("inspection data helpers", () => {
     await expect(listInspectionLogs({ worksiteId: "work-1" })).resolves.toHaveLength(1);
     expect(logsQuery.eq).toHaveBeenCalledWith("worksite_id", "work-1");
   });
+
+  it("adds employee role to inspection logs", async () => {
+    const logsQuery = {
+      select: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({
+        data: [{ id: "log-1", employee_id: "emp-1", worksite_id: "work-1", site_name: "Gate", employee_name: "Alice" }],
+        error: null,
+      }),
+    };
+    const employeesQuery = {
+      select: vi.fn().mockReturnThis(),
+      in: vi.fn().mockResolvedValue({
+        data: [{ id: "emp-1", role: "경비원" }],
+        error: null,
+      }),
+    };
+    const supabase = {
+      from: vi.fn().mockReturnValueOnce(logsQuery).mockReturnValueOnce(employeesQuery),
+    };
+    vi.mocked(getSupabase).mockReturnValue(supabase as never);
+
+    await expect(listInspectionLogs({ worksiteId: "work-1" })).resolves.toMatchObject([
+      { id: "log-1", employee_role: "경비원" },
+    ]);
+    expect(employeesQuery.in).toHaveBeenCalledWith("id", ["emp-1"]);
+  });
 });

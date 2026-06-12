@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import InspectionSitesPage from "./page";
@@ -16,9 +16,9 @@ describe("inspection sites page", () => {
               {
                 id: "site-1",
                 worksite_id: "work-1",
-                worksite_name: "본사",
-                name: "정문",
-                address: "서울시 중구 세종대로 1",
+                worksite_name: "Worksite",
+                name: "Gate",
+                address: "Seoul",
                 gps_info: { latitude: 37.5, longitude: 127 },
               },
             ],
@@ -40,16 +40,19 @@ describe("inspection sites page", () => {
       "/manager/inspection/sites/new",
     );
 
-    await user.type(screen.getByLabelText("현장이름"), "정문");
+    await user.type(screen.getByLabelText("현장이름"), "Gate");
     await user.click(screen.getByRole("button", { name: "조회" }));
 
-    expect(await screen.findByText("정문")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "정문" })).toHaveAttribute(
+    expect(await screen.findByText("Gate")).toBeInTheDocument();
+    const dataRow = screen.getAllByRole("row")[1];
+    const cells = within(dataRow).getAllByRole("cell");
+    expect(cells.map((cell) => cell.textContent)).toEqual(["Worksite", "Gate", "Seoul"]);
+    expect(screen.getByRole("link", { name: "Gate" })).toHaveAttribute(
       "href",
       "/manager/inspection/sites/site-1",
     );
     await waitFor(() => {
-      expect(fetch).toHaveBeenLastCalledWith("/api/inspection/sites?name=%EC%A0%95%EB%AC%B8");
+      expect(fetch).toHaveBeenLastCalledWith("/api/inspection/sites?name=Gate");
     });
   });
 });

@@ -66,7 +66,7 @@ function parseStoredSession(value: string | null) {
   }
 }
 
-function hasEmployeeId(session: StoredGuardSession | null) {
+function hasEmployeeId(session: StoredGuardSession | null): session is StoredGuardSession & { employee: { id: string } } {
   return typeof session?.employee?.id === "string" && session.employee.id.trim() !== "";
 }
 

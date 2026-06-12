@@ -121,9 +121,10 @@ export default function GuardSpecialRemarksPage() {
   const [photoDataUrl, setPhotoDataUrl] = useState("");
   const [cameraStatus, setCameraStatus] = useState("카메라를 준비하고 있습니다.");
   const [listening, setListening] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [savingProvider, setSavingProvider] = useState<"resend" | "formspree" | null>(null);
   const [error, setError] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
+  const saving = savingProvider !== null;
 
   useEffect(() => {
     let cancelled = false;
@@ -210,7 +211,7 @@ export default function GuardSpecialRemarksPage() {
     }
   }
 
-  async function handleReport() {
+  async function handleReport(provider: "resend" | "formspree") {
     const employeeId = session?.employee?.id;
     const employeeName = session?.employee?.name;
     const worksiteId = session?.worksite?.id;
@@ -221,10 +222,14 @@ export default function GuardSpecialRemarksPage() {
       return;
     }
 
-    setSaving(true);
+    setSavingProvider(provider);
     setError("");
     try {
-      const response = await fetch("/api/guard/special-remarks/report", {
+      const endpoint =
+        provider === "formspree"
+          ? "/api/guard/special-remarks/report/formspree"
+          : "/api/guard/special-remarks/report";
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -248,7 +253,7 @@ export default function GuardSpecialRemarksPage() {
     } catch (reportError) {
       setError(reportError instanceof Error ? reportError.message : "특이사항 보고를 전송하지 못했습니다.");
     } finally {
-      setSaving(false);
+      setSavingProvider(null);
     }
   }
 
@@ -298,11 +303,19 @@ export default function GuardSpecialRemarksPage() {
           </button>
           <button
             className="button-primary w-full justify-center disabled:opacity-50"
-            disabled={saving || !content.trim()}
-            onClick={handleReport}
+            disabled
+            onClick={() => handleReport("resend")}
             type="button"
           >
-            {saving ? "보고 중..." : "이메일보고"}
+            이메일보고(resend)
+          </button>
+          <button
+            className="button-primary w-full justify-center disabled:opacity-50"
+            disabled={saving || !content.trim()}
+            onClick={() => handleReport("formspree")}
+            type="button"
+          >
+            {savingProvider === "formspree" ? "보고 중..." : "이메일(Formspree)"}
           </button>
         </section>
       </div>

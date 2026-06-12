@@ -53,7 +53,7 @@ describe("guard special remarks page", () => {
     });
   });
 
-  it("captures a photo and submits the special remark report", async () => {
+  it("captures a photo and shows the disabled Resend report button", async () => {
     const user = userEvent.setup();
     const fetch = vi.fn(async () => Response.json({ report: { id: "report-1" } }));
     vi.stubGlobal("fetch", fetch);
@@ -63,11 +63,24 @@ describe("guard special remarks page", () => {
     await user.click(screen.getByRole("button", { name: "촬영" }));
     expect(await screen.findByAltText("촬영된 첨부사진")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "이메일보고" }));
+    expect(screen.getByRole("button", { name: "이메일보고(resend)" })).toBeDisabled();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("submits the special remark report through Formspree", async () => {
+    const user = userEvent.setup();
+    const fetch = vi.fn(async () => Response.json({ report: { id: "report-1" } }));
+    vi.stubGlobal("fetch", fetch);
+    render(<GuardSpecialRemarksPage />);
+
+    await user.type(screen.getByLabelText("특이사항 내용"), "문이 파손되었습니다.");
+    await user.click(screen.getByRole("button", { name: "촬영" }));
+
+    await user.click(screen.getByRole("button", { name: "이메일(Formspree)" }));
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
-        "/api/guard/special-remarks/report",
+        "/api/guard/special-remarks/report/formspree",
         expect.objectContaining({
           method: "POST",
           body: expect.stringContaining("문이 파손되었습니다."),
@@ -75,7 +88,7 @@ describe("guard special remarks page", () => {
       );
     });
     expect(fetch).toHaveBeenCalledWith(
-      "/api/guard/special-remarks/report",
+      "/api/guard/special-remarks/report/formspree",
       expect.objectContaining({
         body: expect.stringContaining("data:image/jpeg;base64,AAAA"),
       }),

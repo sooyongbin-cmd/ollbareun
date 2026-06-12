@@ -3,6 +3,9 @@ import { getSupabaseAdmin } from "./supabase-admin";
 
 const STORAGE_BUCKET = "special-remarks";
 const MAX_PHOTO_BYTES = 500 * 1024;
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/mojzkwbp";
+
+type EmailProvider = "resend" | "formspree";
 
 export type SpecialRemarkReportRow = {
   id: string;
@@ -131,6 +134,7 @@ function buildEmailHtml(input: {
 async function sendRemarkEmail(input: {
   to: string;
   employeeName: string;
+  worksiteName: string;
   reportedAt: string;
   content: string;
   photoUrl: string | null;
@@ -166,6 +170,87 @@ async function sendRemarkEmail(input: {
   }
 }
 
+function buildFormspreeMessage(input: {
+  employeeName: string;
+  worksiteName: string;
+  reportedAt: string;
+  content: string;
+  photoUrl: string | null;
+}) {
+  return [
+    "특이사항보고",
+    "",
+    `현장관리자: ${input.employeeName}`,
+    `근무지: ${input.worksiteName}`,
+    `보고일시: ${formatKstDateTime(input.reportedAt)}`,
+    "",
+    "특이사항 내용:",
+    input.content,
+    "",
+    `첨부사진: ${input.photoUrl ?? "없음"}`,
+  ].join("\n");
+}
+
+function getFormspreeErrorMessage(payload: unknown) {
+  if (!payload || typeof payload !== "object") {
+    return "Formspree 이메일 발송에 실패했습니다.";
+  }
+
+  if ("error" in payload && typeof payload.error === "string") {
+    return payload.error;
+  }
+
+  if ("message" in payload && typeof payload.message === "string") {
+    return payload.message;
+  }
+
+  if ("errors" in payload && Array.isArray(payload.errors)) {
+    const message = payload.errors
+      .map((error) => {
+        if (error && typeof error === "object" && "message" in error) {
+          return String(error.message);
+        }
+        return "";
+      })
+      .find(Boolean);
+
+    if (message) {
+      return message;
+    }
+  }
+
+  return "Formspree 이메일 발송에 실패했습니다.";
+}
+
+async function sendRemarkEmailWithFormspree(input: {
+  to: string;
+  employeeName: string;
+  worksiteName: string;
+  reportedAt: string;
+  content: string;
+  photoUrl: string | null;
+}) {
+  const response = await fetch(FORMSPREE_ENDPOINT, {
+    method: "POST",
+    headers: { Accept: "application/json", "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: input.to,
+      _subject: "특이사항보고",
+      message: buildFormspreeMessage(input),
+      employeeName: input.employeeName,
+      worksiteName: input.worksiteName,
+      reportedAt: input.reportedAt,
+      content: input.content,
+      photoUrl: input.photoUrl,
+    }),
+  });
+
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null);
+    throw new Error(getFormspreeErrorMessage(payload));
+  }
+}
+
 export async function createSpecialRemarkReport(input: {
   employeeId: unknown;
   employeeName: unknown;
@@ -173,7 +258,7 @@ export async function createSpecialRemarkReport(input: {
   worksiteName: unknown;
   content: unknown;
   photoDataUrl?: unknown;
-}) {
+}, options: { emailProvider?: EmailProvider } = {}) {
   const employee_id = requireString(input.employeeId, "현장점검자");
   const employee_name = requireString(input.employeeName, "현장점검자명");
   const worksite_id = optionalString(input.worksiteId);
@@ -204,13 +289,21 @@ export async function createSpecialRemarkReport(input: {
   const report = data as SpecialRemarkReportRow;
 
   try {
-    await sendRemarkEmail({
+    const emailInput = {
       to: email_to,
       employeeName: employee_name,
+      worksiteName: worksite_name,
       reportedAt: report.reported_at,
       content,
       photoUrl: photo_url,
-    });
+    };
+
+    if (options.emailProvider === "formspree") {
+      await sendRemarkEmailWithFormspree(emailInput);
+    } else {
+      await sendRemarkEmail(emailInput);
+    }
+
     const { data: updated, error: updateError } = await supabase
       .from("inspection_special_reports")
       .update({

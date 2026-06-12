@@ -11,9 +11,14 @@ import {
   updateInspectionSite,
 } from "./inspection";
 import { getSupabase } from "./supabase";
+import { getSupabaseAdmin } from "./supabase-admin";
 
 vi.mock("./supabase", () => ({
   getSupabase: vi.fn(),
+}));
+
+vi.mock("./supabase-admin", () => ({
+  getSupabaseAdmin: vi.fn(),
 }));
 
 describe("inspection data helpers", () => {
@@ -123,7 +128,7 @@ describe("inspection data helpers", () => {
     const supabase = {
       from: vi.fn().mockReturnValueOnce(updateQuery).mockReturnValueOnce(worksiteQuery),
     };
-    vi.mocked(getSupabase).mockReturnValue(supabase as never);
+    vi.mocked(getSupabaseAdmin).mockReturnValue(supabase as never);
 
     await expect(
       updateInspectionSite({
@@ -151,7 +156,7 @@ describe("inspection data helpers", () => {
     const supabase = {
       from: vi.fn().mockReturnValue(deleteQuery),
     };
-    vi.mocked(getSupabase).mockReturnValue(supabase as never);
+    vi.mocked(getSupabaseAdmin).mockReturnValue(supabase as never);
 
     await expect(deleteInspectionSite("site-1")).resolves.toBeUndefined();
     expect(deleteQuery.delete).toHaveBeenCalled();

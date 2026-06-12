@@ -1,5 +1,6 @@
 import { requireGpsInfo, type GpsInfo } from "./gps";
 import { getSupabase } from "./supabase";
+import { getSupabaseAdmin } from "./supabase-admin";
 
 export const INSPECTION_QR_TYPE = "ollbareun-site-inspection";
 
@@ -196,7 +197,7 @@ export async function updateInspectionSite(input: {
   const name = requireString(input.name, "현장명");
   const address = requireString(input.address, "현장주소");
   const gps_info = requireGpsInfo(input.gpsInfo);
-  const supabase = getSupabase();
+  const supabase = getSupabaseAdmin();
 
   const { data, error } = await supabase
     .from("inspection_sites")
@@ -223,7 +224,7 @@ export async function updateInspectionSite(input: {
 
 export async function deleteInspectionSite(id: unknown) {
   const siteId = requireString(id, "현장");
-  const supabase = getSupabase();
+  const supabase = getSupabaseAdmin();
   const { error } = await supabase.from("inspection_sites").delete().eq("id", siteId);
   throwIfError(error);
 }

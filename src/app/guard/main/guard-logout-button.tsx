@@ -5,6 +5,7 @@ import { PowerIcon } from "@/components/icons/power-icon";
 import { clearStoredGuardSession, readStoredGuardSession } from "../guard-session-storage";
 
 const guardLogoutPushResultStorageKey = "ollbareun.guard.logout.pushResult";
+const guardPushRegistrationStorageKey = "ollbareun.guard.pushRegistration";
 
 type LogoutPushResult = {
   completedAt: string;
@@ -44,6 +45,14 @@ async function getCurrentPushEndpoint() {
 function writeLogoutPushResult(result: LogoutPushResult) {
   try {
     window.sessionStorage.setItem(guardLogoutPushResultStorageKey, JSON.stringify(result));
+  } catch {
+    // The logout navigation should continue even if storage is unavailable.
+  }
+}
+
+function clearPushRegistrationCache() {
+  try {
+    window.sessionStorage.removeItem(guardPushRegistrationStorageKey);
   } catch {
     // The logout navigation should continue even if storage is unavailable.
   }
@@ -110,6 +119,7 @@ export default function GuardLogoutButton() {
 
     try {
       clearStoredGuardSession();
+      clearPushRegistrationCache();
     } catch {
       session = "failed";
       // Navigation below still completes logout for browsers with unavailable storage.
@@ -134,11 +144,11 @@ export default function GuardLogoutButton() {
   return (
     <button
       type="button"
-      aria-label="로그아웃"
-      className="button-secondary inline-flex h-11 w-11 items-center justify-center !p-0"
+      className="button-secondary inline-flex justify-center gap-2"
       onClick={handleLogout}
     >
       <PowerIcon size={24} className="lucide lucide-power" />
+      <span>로그아웃</span>
     </button>
   );
 }

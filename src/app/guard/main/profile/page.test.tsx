@@ -2,9 +2,14 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import GuardProfilePage from "./page";
 
+const push = vi.fn();
 const signInWithPassword = vi.fn();
 const registerPasskey = vi.fn();
 const signOut = vi.fn();
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push }),
+}));
 
 vi.mock("@/lib/supabase-passkey-client", () => ({
   getSupabasePasskeyClient: () => ({
@@ -18,6 +23,8 @@ describe("guard profile page", () => {
     signInWithPassword.mockReset();
     registerPasskey.mockReset();
     signOut.mockReset();
+    push.mockReset();
+    window.localStorage.clear();
     window.sessionStorage.clear();
   });
 
@@ -50,7 +57,7 @@ describe("guard profile page", () => {
     render(<GuardProfilePage />);
 
     expect(await screen.findByRole("heading", { name: "개인프로필" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "패스키 등록" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "패스키등록" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "근무스케줄" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "월별출근현황" })).toBeInTheDocument();
     expect(screen.getByText("2026-05-01 ~ 2026-05-31")).toBeInTheDocument();
@@ -60,6 +67,90 @@ describe("guard profile page", () => {
     expect(screen.getByText("25시간 30분")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "패스키 등록 요청" })).toBeInTheDocument();
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  });
+
+  it("places logout directly above passkey registration at the bottom", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.startsWith("/api/guard/passkey-requests/me")) {
+          return Response.json({ request: null });
+        }
+        if (url.startsWith("/api/guard/profile")) {
+          return Response.json({ schedules: [], monthlyAttendance: [] });
+        }
+        return Response.json({}, { status: 404 });
+      }),
+    );
+    window.localStorage.setItem(
+      "ollbareun.guard.session",
+      JSON.stringify({ employee: { id: "emp-1", name: "Alice" }, createdAt: new Date().toISOString(), lastActiveAt: new Date().toISOString() }),
+    );
+
+    render(<GuardProfilePage />);
+
+    await screen.findByRole("heading", { name: "개인프로필" });
+    const sectionHeadings = screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent);
+    expect(sectionHeadings.at(-2)).toBe("로그아웃");
+    expect(sectionHeadings.at(-1)).toBe("패스키등록");
+  });
+
+  it("clears the guard session and push notification state when logging out from profile", async () => {
+    const unsubscribe = vi.fn().mockResolvedValue(true);
+    const getSubscription = vi.fn().mockResolvedValue({ endpoint: "https://push.example.test/current", unsubscribe });
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.startsWith("/api/guard/passkey-requests/me")) {
+        return Response.json({ request: null });
+      }
+      if (url.startsWith("/api/guard/profile")) {
+        return Response.json({ schedules: [], monthlyAttendance: [] });
+      }
+      if (url === "/api/notifications/unsubscribe" && init?.method === "POST") {
+        return Response.json({ deletedCount: 1 });
+      }
+      if (url === "/api/guard/session-logs/log-1/logout" && init?.method === "PATCH") {
+        return Response.json({ success: true });
+      }
+      return Response.json({}, { status: 404 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    Object.defineProperty(navigator, "serviceWorker", {
+      configurable: true,
+      value: {
+        getRegistration: vi.fn().mockResolvedValue({
+          pushManager: { getSubscription },
+        }),
+      },
+    });
+    window.localStorage.setItem(
+      "ollbareun.guard.session",
+      JSON.stringify({
+        employee: { id: "emp-1", name: "Alice" },
+        sessionLogId: "log-1",
+        createdAt: new Date().toISOString(),
+        lastActiveAt: new Date().toISOString(),
+      }),
+    );
+    window.sessionStorage.setItem(
+      "ollbareun.guard.pushRegistration",
+      JSON.stringify({ employeeId: "emp-1", endpoint: "https://push.example.test/current" }),
+    );
+
+    render(<GuardProfilePage />);
+    fireEvent.click(await screen.findByRole("button", { name: "로그아웃" }));
+
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/guard"));
+    expect(unsubscribe).toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledWith("/api/notifications/unsubscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ employeeId: "emp-1", endpoint: "https://push.example.test/current" }),
+    });
+    expect(window.localStorage.getItem("ollbareun.guard.session")).toBeNull();
+    expect(window.sessionStorage.getItem("ollbareun.guard.session")).toBeNull();
+    expect(window.sessionStorage.getItem("ollbareun.guard.pushRegistration")).toBeNull();
   });
 
   it("shows a session message when guard session is missing", () => {

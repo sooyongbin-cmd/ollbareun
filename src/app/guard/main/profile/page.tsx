@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getSupabasePasskeyClient } from "@/lib/supabase-passkey-client";
 import { readStoredGuardSession } from "../../guard-session-storage";
+import GuardLogoutButton from "../guard-logout-button";
 
 type GuardSession = {
   employee?: {
@@ -246,27 +247,6 @@ export default function GuardProfilePage() {
         {loading ? <p className="status-ok">개인프로필을 불러오는 중입니다...</p> : null}
 
         <section
-          aria-label="패스키 등록"
-          className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[16px]"
-        >
-          <h2 className="text-[24px] font-semibold">패스키 등록</h2>
-          <p className="mt-2 text-[14px] leading-relaxed text-ink-muted-48">{getPasskeyStatusText()}</p>
-          {passkeyMessage ? <p className="mt-3 text-[14px] leading-relaxed text-primary">{passkeyMessage}</p> : null}
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-            {!passkeyRequest || passkeyRequest.status === "rejected" || passkeyRequest.status === "revoked" ? (
-              <button className="button-primary" disabled={passkeyLoading || !employeeId} onClick={handlePasskeyRequest} type="button">
-                패스키 등록 요청
-              </button>
-            ) : null}
-            {passkeyRequest?.status === "approved" ? (
-              <button className="button-primary" disabled={passkeyLoading} onClick={handlePasskeyRegistration} type="button">
-                이 기기에 패스키 등록
-              </button>
-            ) : null}
-          </div>
-        </section>
-
-        <section
           aria-label="근무스케줄"
           className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[16px]"
         >
@@ -332,6 +312,37 @@ export default function GuardProfilePage() {
               </tbody>
             </table>
           </ProfileTableShell>
+        </section>
+
+        <section
+          aria-label="로그아웃"
+          className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[16px]"
+        >
+          <h2 className="text-[24px] font-semibold">로그아웃</h2>
+          <div className="mt-4">
+            <GuardLogoutButton />
+          </div>
+        </section>
+
+        <section
+          aria-label="패스키 등록"
+          className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[16px]"
+        >
+          <h2 className="text-[24px] font-semibold">패스키등록</h2>
+          <p className="mt-2 text-[14px] leading-relaxed text-ink-muted-48">{getPasskeyStatusText()}</p>
+          {passkeyMessage ? <p className="mt-3 text-[14px] leading-relaxed text-primary">{passkeyMessage}</p> : null}
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+            {!passkeyRequest || passkeyRequest.status === "rejected" || passkeyRequest.status === "revoked" ? (
+              <button className="button-primary" disabled={passkeyLoading || !employeeId} onClick={handlePasskeyRequest} type="button">
+                패스키 등록 요청
+              </button>
+            ) : null}
+            {passkeyRequest?.status === "approved" ? (
+              <button className="button-primary" disabled={passkeyLoading} onClick={handlePasskeyRegistration} type="button">
+                이 기기에 패스키 등록
+              </button>
+            ) : null}
+          </div>
         </section>
       </div>
     </div>

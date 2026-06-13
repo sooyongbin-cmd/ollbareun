@@ -1,4 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act } from "react";
+import { hydrateRoot } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import GuardProfilePage from "./page";
 
@@ -162,6 +165,43 @@ describe("guard profile page", () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
+  it("hydrates without text mismatch when a stored guard session exists on refresh", async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.startsWith("/api/guard/passkey-requests/me")) {
+        return Response.json({ request: null });
+      }
+      if (url.startsWith("/api/guard/profile")) {
+        return Response.json({ schedules: [], monthlyAttendance: [] });
+      }
+      return Response.json({}, { status: 404 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const container = document.createElement("div");
+    container.innerHTML = renderToString(<GuardProfilePage />);
+    document.body.appendChild(container);
+    window.localStorage.setItem(
+      "ollbareun.guard.session",
+      JSON.stringify({ employee: { id: "emp-1", name: "Alice" }, createdAt: new Date().toISOString(), lastActiveAt: new Date().toISOString() }),
+    );
+
+    let root: ReturnType<typeof hydrateRoot> | null = null;
+    await act(async () => {
+      root = hydrateRoot(container, <GuardProfilePage />);
+    });
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    const errorText = consoleError.mock.calls.map((call) => call.join(" ")).join("\n");
+    expect(errorText).not.toContain("Hydration failed");
+
+    await act(async () => {
+      root?.unmount();
+    });
+    container.remove();
+    consoleError.mockRestore();
+  });
+
   it("requests passkey registration from the profile page", async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
@@ -183,7 +223,9 @@ describe("guard profile page", () => {
     );
 
     render(<GuardProfilePage />);
-    fireEvent.click(await screen.findByRole("button", { name: "패스키 등록 요청" }));
+    const passkeyRequestButton = await screen.findByRole("button", { name: "패스키 등록 요청" });
+    await waitFor(() => expect(passkeyRequestButton).not.toBeDisabled());
+    fireEvent.click(passkeyRequestButton);
 
     expect(await screen.findByText("관리자 승인 대기 중입니다.")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith("/api/guard/passkey-requests", {

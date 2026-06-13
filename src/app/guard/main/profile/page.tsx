@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { getSupabasePasskeyClient } from "@/lib/supabase-passkey-client";
-import { readStoredGuardSession } from "../../guard-session-storage";
+import {
+  readStoredGuardSessionSnapshot,
+  subscribeToGuardSessionChange,
+} from "../../guard-session-storage";
 import {
   decreaseGuardFontZoomPercent,
   decreaseGuardZoomPercent,
@@ -46,15 +49,18 @@ type PasskeyRequest = {
   status: "pending" | "approved" | "rejected" | "registered" | "revoked";
 } | null;
 
-function readGuardSession() {
-  return readStoredGuardSession<GuardSession>({ touch: true });
-}
+function readGuardEmployeeIdSnapshot() {
+  const snapshot = readStoredGuardSessionSnapshot();
+  if (!snapshot) return null;
 
-function readGuardEmployeeId() {
-  const session = readGuardSession();
-  return typeof session?.employee?.id === "string" && session.employee.id.trim()
-    ? session.employee.id.trim()
-    : null;
+  try {
+    const session = JSON.parse(snapshot) as GuardSession;
+    return typeof session.employee?.id === "string" && session.employee.id.trim()
+      ? session.employee.id.trim()
+      : null;
+  } catch {
+    return null;
+  }
 }
 
 function ProfileTableShell({
@@ -165,13 +171,18 @@ function GuardFontZoomControlSection() {
 }
 
 export default function GuardProfilePage() {
-  const employeeId = useMemo(() => readGuardEmployeeId(), []);
+  const employeeId = useSyncExternalStore(
+    subscribeToGuardSessionChange,
+    readGuardEmployeeIdSnapshot,
+    () => null,
+  );
   const [profile, setProfile] = useState<GuardProfilePayload | null>(null);
   const [passkeyRequest, setPasskeyRequest] = useState<PasskeyRequest>(null);
-  const [loading, setLoading] = useState(Boolean(employeeId));
-  const [passkeyLoading, setPasskeyLoading] = useState(Boolean(employeeId));
+  const [loading, setLoading] = useState(false);
+  const [passkeyLoading, setPasskeyLoading] = useState(false);
   const [passkeyMessage, setPasskeyMessage] = useState("");
-  const [error, setError] = useState(employeeId ? "" : "경비원 정보를 찾을 수 없습니다. 다시 로그인하세요.");
+  const [error, setError] = useState("");
+  const displayedError = error || (!employeeId ? "경비원 정보를 찾을 수 없습니다. 다시 로그인하세요." : "");
 
   useEffect(() => {
     if (!employeeId) {
@@ -353,7 +364,7 @@ export default function GuardProfilePage() {
         <GuardZoomControlSection />
         <GuardFontZoomControlSection />
 
-        {error ? <p className="status-warn">{error}</p> : null}
+        {displayedError ? <p className="status-warn">{displayedError}</p> : null}
         {loading ? <p className="status-ok">개인프로필을 불러오는 중입니다...</p> : null}
 
         <section

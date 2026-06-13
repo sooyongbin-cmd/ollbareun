@@ -8,15 +8,10 @@ import {
 } from "../../guard-session-storage";
 import {
   decreaseGuardFontZoomPercent,
-  decreaseGuardZoomPercent,
   getGuardFontZoomPercent,
-  getGuardZoomPercent,
   increaseGuardFontZoomPercent,
-  increaseGuardZoomPercent,
   setGuardFontZoomPercent,
-  setGuardZoomPercent,
   subscribeToGuardFontZoomChange,
-  subscribeToGuardZoomChange,
 } from "../../guard-zoom";
 import GuardLogoutButton from "../guard-logout-button";
 
@@ -125,27 +120,6 @@ function GuardZoomSettingSection({
         </div>
       </div>
     </section>
-  );
-}
-
-function GuardZoomControlSection() {
-  const zoomPercent = useSyncExternalStore(
-    subscribeToGuardZoomChange,
-    getGuardZoomPercent,
-    () => 100,
-  );
-
-  return (
-    <GuardZoomSettingSection
-      decreaseLabel="화면 축소"
-      increaseLabel="화면 확대"
-      label="확대/축소"
-      nextZoomPercent={increaseGuardZoomPercent(zoomPercent)}
-      onChange={setGuardZoomPercent}
-      previousZoomPercent={decreaseGuardZoomPercent(zoomPercent)}
-      title="화면확대축소"
-      zoomPercent={zoomPercent}
-    />
   );
 }
 
@@ -361,7 +335,6 @@ export default function GuardProfilePage() {
           <h1 className="text-[40px] font-semibold leading-[1.1]">개인프로필</h1>
         </header>
 
-        <GuardZoomControlSection />
         <GuardFontZoomControlSection />
 
         {displayedError ? <p className="status-warn">{displayedError}</p> : null}

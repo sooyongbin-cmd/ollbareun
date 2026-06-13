@@ -254,7 +254,7 @@ describe("guard profile page", () => {
 
     expect(await screen.findByText("개인프로필을 불러오지 못했습니다.")).toBeInTheDocument();
   });
-  it("places the screen zoom section at the top and stores zoom changes", async () => {
+  it("hides the screen zoom section on the profile page", async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
       if (url.startsWith("/api/guard/passkey-requests/me")) {
@@ -275,21 +275,12 @@ describe("guard profile page", () => {
 
     await screen.findByRole("heading", { level: 1 });
     const sectionHeadings = screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent);
-    expect(sectionHeadings[0]).toBe("화면확대축소");
-    expect(screen.getAllByText("100%")[0]).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "화면 확대" }));
-
-    expect(screen.getByText("110%")).toBeInTheDocument();
-    expect(window.localStorage.getItem("ollbareun.guard.zoomPercent")).toBe("110");
-
-    fireEvent.click(screen.getByRole("button", { name: "화면 축소" }));
-
-    expect(screen.getAllByText("100%")[0]).toBeInTheDocument();
-    expect(window.localStorage.getItem("ollbareun.guard.zoomPercent")).toBe("100");
+    expect(sectionHeadings).not.toContain("화면확대축소");
+    expect(screen.queryByRole("button", { name: "화면 확대" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "화면 축소" })).not.toBeInTheDocument();
   });
 
-  it("places the font zoom section below screen zoom and stores font zoom independently", async () => {
+  it("places the font zoom section at the top and stores font zoom independently", async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
       if (url.startsWith("/api/guard/passkey-requests/me")) {
@@ -311,8 +302,8 @@ describe("guard profile page", () => {
 
     await screen.findByRole("heading", { level: 1 });
     const sectionHeadings = screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent);
-    expect(sectionHeadings[0]).toBe("화면확대축소");
-    expect(sectionHeadings[1]).toBe("글자확대축소");
+    expect(sectionHeadings[0]).toBe("글자확대축소");
+    expect(sectionHeadings).not.toContain("화면확대축소");
     expect(screen.getAllByText("100%")[0]).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "글자 확대" }));

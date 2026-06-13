@@ -41,6 +41,7 @@ function stubInspectionLogFetch() {
 describe("guard inspection NFC page", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
     window.sessionStorage.clear();
     setGuardSession();
     window.history.pushState({}, "", "/guard/main/inspection-nfc");
@@ -106,7 +107,8 @@ describe("guard inspection NFC page", () => {
     });
   });
 
-  it("removes the initial site query parameter after a successful save", async () => {
+  it("removes the initial site query parameter and reloads after confirming a successful save", async () => {
+    const reload = vi.spyOn(window.history, "go").mockImplementation(() => undefined);
     const fetch = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
       if (url.endsWith("/api/inspection/sites/site-1")) {
@@ -141,6 +143,10 @@ describe("guard inspection NFC page", () => {
     });
     expect(window.location.pathname).toBe("/guard/main/inspection-nfc");
     expect(window.location.search).toBe("");
+    act(() => {
+      screen.getByRole("button", { name: "확인" }).click();
+    });
+    expect(reload).toHaveBeenCalledWith(0);
   });
 
   it("keeps the initial site query parameter when saving fails", async () => {

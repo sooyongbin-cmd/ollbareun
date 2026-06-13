@@ -263,6 +263,11 @@ export default function GuardInspectionNfcPage() {
       });
   }, [saveInspectionSource]);
 
+  function handleSuccessAlertClose() {
+    setAlertMessage("");
+    window.history.go(0);
+  }
+
   return (
     <div className="mx-auto max-w-[980px] w-full px-5 py-[80px]">
       <div className="max-w-[600px] mx-auto space-y-6">
@@ -290,7 +295,7 @@ export default function GuardInspectionNfcPage() {
 
       <AlertModal
         isOpen={Boolean(alertMessage)}
-        onClose={() => setAlertMessage("")}
+        onClose={handleSuccessAlertClose}
         title="알림"
         description={alertMessage}
       />

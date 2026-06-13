@@ -234,7 +234,7 @@ describe("guard profile page", () => {
     await screen.findByRole("heading", { level: 1 });
     const sectionHeadings = screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent);
     expect(sectionHeadings[0]).toBe("화면확대축소");
-    expect(screen.getByText("100%")).toBeInTheDocument();
+    expect(screen.getAllByText("100%")[0]).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "화면 확대" }));
 
@@ -243,7 +243,45 @@ describe("guard profile page", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "화면 축소" }));
 
-    expect(screen.getByText("100%")).toBeInTheDocument();
+    expect(screen.getAllByText("100%")[0]).toBeInTheDocument();
     expect(window.localStorage.getItem("ollbareun.guard.zoomPercent")).toBe("100");
+  });
+
+  it("places the font zoom section below screen zoom and stores font zoom independently", async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.startsWith("/api/guard/passkey-requests/me")) {
+        return Response.json({ request: null });
+      }
+      if (url.startsWith("/api/guard/profile")) {
+        return Response.json({ schedules: [], monthlyAttendance: [] });
+      }
+      return Response.json({}, { status: 404 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    window.localStorage.setItem(
+      "ollbareun.guard.session",
+      JSON.stringify({ employee: { id: "emp-1", name: "Alice" }, createdAt: new Date().toISOString(), lastActiveAt: new Date().toISOString() }),
+    );
+    window.localStorage.setItem("ollbareun.guard.zoomPercent", "125");
+
+    render(<GuardProfilePage />);
+
+    await screen.findByRole("heading", { level: 1 });
+    const sectionHeadings = screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent);
+    expect(sectionHeadings[0]).toBe("화면확대축소");
+    expect(sectionHeadings[1]).toBe("글자확대축소");
+    expect(screen.getAllByText("100%")[0]).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "글자 확대" }));
+
+    expect(screen.getByText("110%")).toBeInTheDocument();
+    expect(window.localStorage.getItem("ollbareun.guard.fontZoomPercent")).toBe("110");
+    expect(window.localStorage.getItem("ollbareun.guard.zoomPercent")).toBe("125");
+
+    fireEvent.click(screen.getByRole("button", { name: "글자 축소" }));
+
+    expect(window.localStorage.getItem("ollbareun.guard.fontZoomPercent")).toBe("100");
+    expect(window.localStorage.getItem("ollbareun.guard.zoomPercent")).toBe("125");
   });
 });

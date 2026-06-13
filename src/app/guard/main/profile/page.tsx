@@ -4,10 +4,15 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { getSupabasePasskeyClient } from "@/lib/supabase-passkey-client";
 import { readStoredGuardSession } from "../../guard-session-storage";
 import {
+  decreaseGuardFontZoomPercent,
   decreaseGuardZoomPercent,
+  getGuardFontZoomPercent,
   getGuardZoomPercent,
+  increaseGuardFontZoomPercent,
   increaseGuardZoomPercent,
+  setGuardFontZoomPercent,
   setGuardZoomPercent,
+  subscribeToGuardFontZoomChange,
   subscribeToGuardZoomChange,
 } from "../../guard-zoom";
 import GuardLogoutButton from "../guard-logout-button";
@@ -64,39 +69,49 @@ function ProfileTableShell({
   );
 }
 
-function GuardZoomControlSection() {
-  const zoomPercent = useSyncExternalStore(
-    subscribeToGuardZoomChange,
-    getGuardZoomPercent,
-    () => 100,
-  );
-  const nextZoomPercent = increaseGuardZoomPercent(zoomPercent);
-  const previousZoomPercent = decreaseGuardZoomPercent(zoomPercent);
-
+function GuardZoomSettingSection({
+  title,
+  label,
+  zoomPercent,
+  previousZoomPercent,
+  nextZoomPercent,
+  decreaseLabel,
+  increaseLabel,
+  onChange,
+}: {
+  title: string;
+  label: string;
+  zoomPercent: number;
+  previousZoomPercent: number;
+  nextZoomPercent: number;
+  decreaseLabel: string;
+  increaseLabel: string;
+  onChange: (zoomPercent: number) => void;
+}) {
   return (
     <section
-      aria-label="화면확대축소"
+      aria-label={title}
       className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[16px]"
     >
-      <h2 className="text-[24px] font-semibold">화면확대축소</h2>
+      <h2 className="text-[24px] font-semibold">{title}</h2>
       <div className="mt-4 flex items-center justify-between gap-4 rounded-[12px] bg-surface-black px-4 py-3 text-canvas">
-        <span className="text-[16px] font-semibold">확대/축소</span>
+        <span className="text-[16px] font-semibold">{label}</span>
         <div className="flex items-center gap-3">
           <button
-            aria-label="화면 축소"
+            aria-label={decreaseLabel}
             className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-[24px] leading-none transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
             disabled={previousZoomPercent === zoomPercent}
-            onClick={() => setGuardZoomPercent(previousZoomPercent)}
+            onClick={() => onChange(previousZoomPercent)}
             type="button"
           >
             -
           </button>
           <span className="min-w-[64px] text-center text-[16px] font-semibold">{zoomPercent}%</span>
           <button
-            aria-label="화면 확대"
+            aria-label={increaseLabel}
             className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-[24px] leading-none transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
             disabled={nextZoomPercent === zoomPercent}
-            onClick={() => setGuardZoomPercent(nextZoomPercent)}
+            onClick={() => onChange(nextZoomPercent)}
             type="button"
           >
             +
@@ -104,6 +119,48 @@ function GuardZoomControlSection() {
         </div>
       </div>
     </section>
+  );
+}
+
+function GuardZoomControlSection() {
+  const zoomPercent = useSyncExternalStore(
+    subscribeToGuardZoomChange,
+    getGuardZoomPercent,
+    () => 100,
+  );
+
+  return (
+    <GuardZoomSettingSection
+      decreaseLabel="화면 축소"
+      increaseLabel="화면 확대"
+      label="확대/축소"
+      nextZoomPercent={increaseGuardZoomPercent(zoomPercent)}
+      onChange={setGuardZoomPercent}
+      previousZoomPercent={decreaseGuardZoomPercent(zoomPercent)}
+      title="화면확대축소"
+      zoomPercent={zoomPercent}
+    />
+  );
+}
+
+function GuardFontZoomControlSection() {
+  const fontZoomPercent = useSyncExternalStore(
+    subscribeToGuardFontZoomChange,
+    getGuardFontZoomPercent,
+    () => 100,
+  );
+
+  return (
+    <GuardZoomSettingSection
+      decreaseLabel="글자 축소"
+      increaseLabel="글자 확대"
+      label="확대/축소"
+      nextZoomPercent={increaseGuardFontZoomPercent(fontZoomPercent)}
+      onChange={setGuardFontZoomPercent}
+      previousZoomPercent={decreaseGuardFontZoomPercent(fontZoomPercent)}
+      title="글자확대축소"
+      zoomPercent={fontZoomPercent}
+    />
   );
 }
 
@@ -294,6 +351,7 @@ export default function GuardProfilePage() {
         </header>
 
         <GuardZoomControlSection />
+        <GuardFontZoomControlSection />
 
         {error ? <p className="status-warn">{error}</p> : null}
         {loading ? <p className="status-ok">개인프로필을 불러오는 중입니다...</p> : null}

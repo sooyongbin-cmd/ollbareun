@@ -1,6 +1,8 @@
 export const guardZoomStorageKey = "ollbareun.guard.zoomPercent";
+export const guardFontZoomStorageKey = "ollbareun.guard.fontZoomPercent";
 
 const guardZoomChangedEvent = "ollbareun.guard.zoom.changed";
+const guardFontZoomChangedEvent = "ollbareun.guard.fontZoom.changed";
 const defaultGuardZoomPercent = 100;
 const guardZoomSteps = [80, 90, 100, 110, 125, 150, 175, 200] as const;
 
@@ -50,9 +52,41 @@ export function setGuardZoomPercent(zoomPercent: number) {
   window.dispatchEvent(new Event(guardZoomChangedEvent));
 }
 
+export function getGuardFontZoomPercent(): GuardZoomPercent {
+  if (!isBrowser()) {
+    return defaultGuardZoomPercent;
+  }
+
+  try {
+    return normalizeGuardZoomPercent(window.localStorage.getItem(guardFontZoomStorageKey));
+  } catch {
+    return defaultGuardZoomPercent;
+  }
+}
+
+export function setGuardFontZoomPercent(zoomPercent: number) {
+  if (!isBrowser()) {
+    return;
+  }
+
+  const normalized = normalizeGuardZoomPercent(zoomPercent);
+
+  try {
+    window.localStorage.setItem(guardFontZoomStorageKey, String(normalized));
+  } catch {
+    // Keep the control usable when storage is unavailable.
+  }
+
+  window.dispatchEvent(new Event(guardFontZoomChangedEvent));
+}
+
 export function increaseGuardZoomPercent(zoomPercent: number): GuardZoomPercent {
   const index = getStepIndex(zoomPercent);
   return guardZoomSteps[Math.min(index + 1, guardZoomSteps.length - 1)];
+}
+
+export function increaseGuardFontZoomPercent(zoomPercent: number): GuardZoomPercent {
+  return increaseGuardZoomPercent(zoomPercent);
 }
 
 export function decreaseGuardZoomPercent(zoomPercent: number): GuardZoomPercent {
@@ -60,8 +94,16 @@ export function decreaseGuardZoomPercent(zoomPercent: number): GuardZoomPercent 
   return guardZoomSteps[Math.max(index - 1, 0)];
 }
 
+export function decreaseGuardFontZoomPercent(zoomPercent: number): GuardZoomPercent {
+  return decreaseGuardZoomPercent(zoomPercent);
+}
+
 export function getGuardZoomScale(zoomPercent: number) {
   return normalizeGuardZoomPercent(zoomPercent) / 100;
+}
+
+export function getGuardFontZoomScale(zoomPercent: number) {
+  return getGuardZoomScale(zoomPercent);
 }
 
 export function subscribeToGuardZoomChange(onStoreChange: () => void) {
@@ -80,6 +122,26 @@ export function subscribeToGuardZoomChange(onStoreChange: () => void) {
 
   return () => {
     window.removeEventListener(guardZoomChangedEvent, onStoreChange);
+    window.removeEventListener("storage", handleStorage);
+  };
+}
+
+export function subscribeToGuardFontZoomChange(onStoreChange: () => void) {
+  if (!isBrowser()) {
+    return () => {};
+  }
+
+  function handleStorage(event: StorageEvent) {
+    if (event.key === guardFontZoomStorageKey) {
+      onStoreChange();
+    }
+  }
+
+  window.addEventListener(guardFontZoomChangedEvent, onStoreChange);
+  window.addEventListener("storage", handleStorage);
+
+  return () => {
+    window.removeEventListener(guardFontZoomChangedEvent, onStoreChange);
     window.removeEventListener("storage", handleStorage);
   };
 }

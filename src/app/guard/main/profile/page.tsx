@@ -335,6 +335,7 @@ export default function GuardProfilePage() {
           <h1 className="text-[40px] font-semibold leading-[1.1]">개인프로필</h1>
         </header>
 
+        <GuardZoomControlSection />
         <GuardFontZoomControlSection />
 
         {displayedError ? <p className="status-warn">{displayedError}</p> : null}

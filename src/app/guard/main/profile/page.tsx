@@ -1,8 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { getSupabasePasskeyClient } from "@/lib/supabase-passkey-client";
 import { readStoredGuardSession } from "../../guard-session-storage";
+import {
+  decreaseGuardZoomPercent,
+  getGuardZoomPercent,
+  increaseGuardZoomPercent,
+  setGuardZoomPercent,
+  subscribeToGuardZoomChange,
+} from "../../guard-zoom";
 import GuardLogoutButton from "../guard-logout-button";
 
 type GuardSession = {
@@ -54,6 +61,49 @@ function ProfileTableShell({
     <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-[16px] border border-hairline bg-canvas">
       {children}
     </div>
+  );
+}
+
+function GuardZoomControlSection() {
+  const zoomPercent = useSyncExternalStore(
+    subscribeToGuardZoomChange,
+    getGuardZoomPercent,
+    () => 100,
+  );
+  const nextZoomPercent = increaseGuardZoomPercent(zoomPercent);
+  const previousZoomPercent = decreaseGuardZoomPercent(zoomPercent);
+
+  return (
+    <section
+      aria-label="화면확대축소"
+      className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[16px]"
+    >
+      <h2 className="text-[24px] font-semibold">화면확대축소</h2>
+      <div className="mt-4 flex items-center justify-between gap-4 rounded-[12px] bg-surface-black px-4 py-3 text-canvas">
+        <span className="text-[16px] font-semibold">확대/축소</span>
+        <div className="flex items-center gap-3">
+          <button
+            aria-label="화면 축소"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-[24px] leading-none transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
+            disabled={previousZoomPercent === zoomPercent}
+            onClick={() => setGuardZoomPercent(previousZoomPercent)}
+            type="button"
+          >
+            -
+          </button>
+          <span className="min-w-[64px] text-center text-[16px] font-semibold">{zoomPercent}%</span>
+          <button
+            aria-label="화면 확대"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-[24px] leading-none transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
+            disabled={nextZoomPercent === zoomPercent}
+            onClick={() => setGuardZoomPercent(nextZoomPercent)}
+            type="button"
+          >
+            +
+          </button>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -242,6 +292,8 @@ export default function GuardProfilePage() {
         <header>
           <h1 className="text-[40px] font-semibold leading-[1.1]">개인프로필</h1>
         </header>
+
+        <GuardZoomControlSection />
 
         {error ? <p className="status-warn">{error}</p> : null}
         {loading ? <p className="status-ok">개인프로필을 불러오는 중입니다...</p> : null}

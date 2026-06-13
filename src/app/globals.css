@@ -203,6 +203,10 @@ button:focus-visible {
 }
 
 /* Guard-only readable font scale */
+.guard-zoom-scope {
+  zoom: var(--guard-zoom-scale, 1);
+}
+
 .guard-font-scale {
   font-size: 22px;
 }

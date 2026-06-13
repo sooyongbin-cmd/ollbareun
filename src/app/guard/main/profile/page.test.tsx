@@ -212,4 +212,38 @@ describe("guard profile page", () => {
 
     expect(await screen.findByText("개인프로필을 불러오지 못했습니다.")).toBeInTheDocument();
   });
+  it("places the screen zoom section at the top and stores zoom changes", async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.startsWith("/api/guard/passkey-requests/me")) {
+        return Response.json({ request: null });
+      }
+      if (url.startsWith("/api/guard/profile")) {
+        return Response.json({ schedules: [], monthlyAttendance: [] });
+      }
+      return Response.json({}, { status: 404 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    window.localStorage.setItem(
+      "ollbareun.guard.session",
+      JSON.stringify({ employee: { id: "emp-1", name: "Alice" }, createdAt: new Date().toISOString(), lastActiveAt: new Date().toISOString() }),
+    );
+
+    render(<GuardProfilePage />);
+
+    await screen.findByRole("heading", { level: 1 });
+    const sectionHeadings = screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent);
+    expect(sectionHeadings[0]).toBe("화면확대축소");
+    expect(screen.getByText("100%")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "화면 확대" }));
+
+    expect(screen.getByText("110%")).toBeInTheDocument();
+    expect(window.localStorage.getItem("ollbareun.guard.zoomPercent")).toBe("110");
+
+    fireEvent.click(screen.getByRole("button", { name: "화면 축소" }));
+
+    expect(screen.getByText("100%")).toBeInTheDocument();
+    expect(window.localStorage.getItem("ollbareun.guard.zoomPercent")).toBe("100");
+  });
 });

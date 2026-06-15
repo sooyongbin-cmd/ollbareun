@@ -24,6 +24,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
       config: await updateSystemConfig({
         systemCode: decodeURIComponent(systemCode),
         parentSystemCode: body.parentSystemCode,
+        description: body.description,
         content: body.content,
       }),
     });

@@ -18,6 +18,7 @@ export async function POST(request: Request) {
       config: await createSystemConfig({
         systemCode: body.systemCode,
         parentSystemCode: body.parentSystemCode,
+        description: body.description,
         content: body.content,
       }),
     });

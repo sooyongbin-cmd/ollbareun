@@ -8,6 +8,7 @@ type SystemConfigFormProps = {
   initialConfig?: {
     system_code: string;
     parent_system_code: string | null;
+    description: string | null;
     content: string;
   };
 };
@@ -16,6 +17,7 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
   const router = useRouter();
   const [systemCode, setSystemCode] = useState(initialConfig?.system_code ?? "");
   const [parentSystemCode, setParentSystemCode] = useState(initialConfig?.parent_system_code ?? "");
+  const [description, setDescription] = useState(initialConfig?.description ?? "");
   const [content, setContent] = useState(initialConfig?.content ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -34,6 +36,7 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
           body: JSON.stringify({
             systemCode,
             parentSystemCode,
+            description,
             content,
           }),
         },
@@ -103,6 +106,18 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
           id="parent-system-code"
           onChange={(event) => setParentSystemCode(event.target.value)}
           value={parentSystemCode}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="system-config-description">
+          설명
+        </label>
+        <textarea
+          className="field min-h-[96px] resize-y"
+          id="system-config-description"
+          onChange={(event) => setDescription(event.target.value)}
+          value={description}
         />
       </div>
 

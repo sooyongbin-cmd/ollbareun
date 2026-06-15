@@ -13,6 +13,7 @@ describe("system configs page", () => {
             {
               system_code: "manager_email",
               parent_system_code: null,
+              description: "Manager notification email address",
               content: "admin@example.com",
             },
           ],
@@ -26,10 +27,11 @@ describe("system configs page", () => {
 
     expect(await screen.findByRole("heading", { name: "시스템설정" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "등록" })).toHaveAttribute("href", "/manager/system/configs/new");
-    expect(screen.getByRole("link", { name: "manager_email" })).toHaveAttribute(
+    expect(await screen.findByRole("link", { name: "manager_email" })).toHaveAttribute(
       "href",
       "/manager/system/configs/manager_email",
     );
+    expect(screen.getByText("Manager notification email address")).toBeInTheDocument();
     expect(screen.getByText("admin@example.com")).toBeInTheDocument();
   });
 });

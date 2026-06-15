@@ -3,10 +3,13 @@ import { getSupabaseAdmin } from "./supabase-admin";
 export type SystemConfigRow = {
   system_code: string;
   parent_system_code: string | null;
+  description: string | null;
   content: string;
   created_at?: string;
   updated_at?: string;
 };
+
+const systemConfigSelect = "system_code,parent_system_code,description,content,created_at,updated_at";
 
 function requireString(value: unknown, label: string) {
   if (typeof value !== "string" || value.trim() === "") {
@@ -30,7 +33,7 @@ export async function listSystemConfigs() {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("system_configs")
-    .select("system_code,parent_system_code,content,created_at,updated_at")
+    .select(systemConfigSelect)
     .order("system_code", { ascending: true });
 
   throwIfError(error);
@@ -42,7 +45,7 @@ export async function getSystemConfig(systemCodeInput: unknown) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("system_configs")
-    .select("system_code,parent_system_code,content,created_at,updated_at")
+    .select(systemConfigSelect)
     .eq("system_code", systemCode)
     .single();
 
@@ -57,10 +60,12 @@ export async function getSystemConfigContent(systemCodeInput: unknown) {
 export async function createSystemConfig(input: {
   systemCode: unknown;
   parentSystemCode?: unknown;
+  description?: unknown;
   content: unknown;
 }) {
   const system_code = requireString(input.systemCode, "시스템코드");
   const parent_system_code = optionalString(input.parentSystemCode);
+  const description = optionalString(input.description);
   const content = requireString(input.content, "내용");
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
@@ -68,9 +73,10 @@ export async function createSystemConfig(input: {
     .insert({
       system_code,
       parent_system_code,
+      description,
       content,
     })
-    .select("system_code,parent_system_code,content,created_at,updated_at")
+    .select(systemConfigSelect)
     .single();
 
   throwIfError(error);
@@ -80,21 +86,24 @@ export async function createSystemConfig(input: {
 export async function updateSystemConfig(input: {
   systemCode: unknown;
   parentSystemCode?: unknown;
+  description?: unknown;
   content: unknown;
 }) {
   const system_code = requireString(input.systemCode, "시스템코드");
   const parent_system_code = optionalString(input.parentSystemCode);
+  const description = optionalString(input.description);
   const content = requireString(input.content, "내용");
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("system_configs")
     .update({
       parent_system_code,
+      description,
       content,
       updated_at: new Date().toISOString(),
     })
     .eq("system_code", system_code)
-    .select("system_code,parent_system_code,content,created_at,updated_at")
+    .select(systemConfigSelect)
     .single();
 
   throwIfError(error);

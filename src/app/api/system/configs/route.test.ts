@@ -30,6 +30,7 @@ describe("/api/system/configs", () => {
         body: JSON.stringify({
           systemCode: "manager_email",
           parentSystemCode: "",
+          description: "Manager notification email address",
           content: "admin@example.com",
         }),
       }),
@@ -39,6 +40,7 @@ describe("/api/system/configs", () => {
     expect(createSystemConfig).toHaveBeenCalledWith({
       systemCode: "manager_email",
       parentSystemCode: "",
+      description: "Manager notification email address",
       content: "admin@example.com",
     });
   });

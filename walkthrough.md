@@ -195,4 +195,36 @@ npx supabase functions deploy education-reminders --project-ref wexcijqchwwkxpkw
 * **TypeScript 컴파일 검사**: `npx tsc --noEmit` 성공 (오류 없음)
 * **단위 테스트 검증**: Vitest 테스트 294건 모두 통과 완료 (`npm test`)
 * **생산 빌드 검증**: `npm run build` 컴파일 성공
+* **Git Commit & Push**: `main` 브랜치로 푸시 완료 (`47ffd8b..c2daf78`)
+
+---
+
+# 특이사항 상세 화면 내 GPS 좌표의 Reverse Geocoding 주소 변환 및 입력창 안내 텍스트 수정 완료 보고서
+
+## 변경 사항 및 조치 내용 (Resolution & Implementation Details)
+
+- **상황 1**: 관리자용 특이사항 상세 화면(`/manager/inspection/special-remarks/[id]`)의 "보고 위치 (GPS)" 영역에 단순 위도/경도 숫자 좌표쌍이 노출되던 것을, 사용성이 높고 직관적인 도로명/지번 한글 주소로 변환하여 표출되도록 개선이 필요했습니다.
+- **상황 2**: 현장 점검자용 특이사항 보고 화면(`/guard/main/special-remarks`)의 특이사항 내용 입력창 placeholder를 현재 위치 수집을 안내할 수 있는 메시지로 수정이 필요했습니다.
+- **수정 파일**:
+  - [NEW] [route.ts](file:///d:/ollba/ollba_20260610/src/app/api/kakao/reverse-geocode/route.ts) / [route.test.ts](file:///d:/ollba/ollba_20260610/src/app/api/kakao/reverse-geocode/route.test.ts)
+  - [MODIFY] [page.tsx](file:///d:/ollba/ollba_20260610/src/app/manager/inspection/special-remarks/[id]/page.tsx)
+  - [MODIFY] [page.test.tsx](file:///d:/ollba/ollba_20260610/src/app/manager/inspection/special-remarks/[id]/page.test.tsx)
+  - [MODIFY] [page.tsx](file:///d:/ollba/ollba_20260610/src/app/guard/main/special-remarks/page.tsx)
+- **조치 내용**:
+  1. **Reverse Geocoding API 라우트 신설**: Kakao Local API의 `coord2address.json` 인터페이스와 연계하여 위도/경도를 도로명 주소(우선순위) 또는 지번 주소로 실시간 변환해주는 `/api/kakao/reverse-geocode` GET 엔드포인트를 구현 및 연동했습니다.
+  2. **API 및 페이지 렌더링 연동**: 특이사항 상세 조회 시 `gps_info` 정보가 들어오면 비동기 이펙트로 위 API를 호출하여 한글 주소 데이터를 바인딩하도록 로직을 구현했습니다. 주소 조회 중인 상태에는 `"주소 조회 중..."`을 노출하며, API 장애나 매핑 실패 시에는 숫자로 구성된 raw 좌표값으로 안전하게 롤백(fallback)되도록 예외 처리를 마련했습니다.
+  3. **입력창 Placeholder 개선**: 점검자의 특이사항 입력창의 placeholder 속성을 기존 `"특이사항 내용을 입력하세요."`에서 `"현재 위치와 함께 특이사항을 입력하세요."`로 직관적으로 변경했습니다.
+  4. **테스트 및 검증**:
+     - 신규 API 엔드포인트의 400, 404, 500 에러 및 정상 주소 반환 케이스에 대한 유닛 테스트 작성 및 패스.
+     - 상세조회 페이지의 모의 fetch 스텁에 reverse-geocode 모의 응답을 추가하고, 상세조회 시 한글 주소가 DOM 내 정상 표출되는지 Assert 검증 추가 및 패스.
+
+---
+
+## 검증 및 배포 결과 (Verification Results)
+
+* **TypeScript 컴파일 검사**: `npx tsc --noEmit` 성공 (오류 없음)
+* **단위 테스트 검증**: Vitest 테스트 299건 모두 통과 완료 (`npm test`)
+* **생산 빌드 검증**: `npm run build` 컴파일 성공
+
+
 

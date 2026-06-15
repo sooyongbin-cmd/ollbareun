@@ -282,7 +282,7 @@ export default function GuardSpecialRemarksPage() {
               id="special-remark-content"
               value={content}
               onChange={(event) => setContent(event.target.value)}
-              placeholder="특이사항 내용을 입력하세요."
+              placeholder="현재 위치와 함께 특이사항을 입력하세요."
             />
           </div>
 

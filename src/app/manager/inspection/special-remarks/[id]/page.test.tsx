@@ -62,7 +62,7 @@ describe("manager special remark detail page", () => {
     expect(push).toHaveBeenCalledWith("/manager/inspection/special-remarks");
   });
 
-  it("shows GPS coordinates when gps_info is present", async () => {
+  it("shows geocoded address when gps_info is present", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: RequestInfo | URL) => {
@@ -79,13 +79,18 @@ describe("manager special remark detail page", () => {
             },
           });
         }
+        if (url.includes("/api/kakao/reverse-geocode")) {
+          return Response.json({
+            address: "서울특별시 중구 세종대로 110",
+          });
+        }
         return Response.json({}, { status: 404 });
       }),
     );
 
     render(<SpecialRemarkDetailPage params={Promise.resolve({ id: "report-2" })} />);
 
-    expect(await screen.findByText("37.566500, 126.978000")).toBeInTheDocument();
+    expect(await screen.findByText("서울특별시 중구 세종대로 110")).toBeInTheDocument();
     expect(screen.getByText("이순신")).toBeInTheDocument();
     expect(screen.queryByText("기록 없음")).not.toBeInTheDocument();
   });

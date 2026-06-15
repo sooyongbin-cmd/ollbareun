@@ -51,6 +51,8 @@ export default function SpecialRemarkDetailPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
+  const [address, setAddress] = useState("");
+  const [loadingAddress, setLoadingAddress] = useState(false);
 
   useEffect(() => {
     let ignore = false;
@@ -82,6 +84,40 @@ export default function SpecialRemarkDetailPage({ params }: PageProps) {
       ignore = true;
     };
   }, [params]);
+
+  useEffect(() => {
+    if (!report || !report.gps_info) {
+      return;
+    }
+
+    const { latitude, longitude } = report.gps_info;
+    let ignore = false;
+
+    async function loadAddress() {
+      setLoadingAddress(true);
+      try {
+        const response = await fetch(
+          `/api/kakao/reverse-geocode?lat=${encodeURIComponent(latitude)}&lng=${encodeURIComponent(longitude)}`
+        );
+        const payload = await response.json();
+        if (!ignore && response.ok && payload.address) {
+          setAddress(payload.address);
+        }
+      } catch (err) {
+        console.error("Reverse geocoding error:", err);
+      } finally {
+        if (!ignore) {
+          setLoadingAddress(false);
+        }
+      }
+    }
+
+    void loadAddress();
+
+    return () => {
+      ignore = true;
+    };
+  }, [report]);
 
   async function handleDelete() {
     if (!reportId || !window.confirm("특이사항 보고를 삭제하시겠습니까?")) {
@@ -138,7 +174,7 @@ export default function SpecialRemarkDetailPage({ params }: PageProps) {
                 <p className="text-[13px] font-semibold text-ink-muted-48">보고 위치 (GPS)</p>
                 <p className="mt-1 text-[17px] font-semibold">
                   {report.gps_info
-                    ? `${report.gps_info.latitude.toFixed(6)}, ${report.gps_info.longitude.toFixed(6)}`
+                    ? address || (loadingAddress ? "주소 조회 중..." : `${report.gps_info.latitude.toFixed(6)}, ${report.gps_info.longitude.toFixed(6)}`)
                     : "기록 없음"}
                 </p>
               </div>

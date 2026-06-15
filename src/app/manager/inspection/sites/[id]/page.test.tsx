@@ -137,6 +137,73 @@ describe("inspection site detail page", () => {
     expect(click).toHaveBeenCalled();
   });
 
+  it("shows error when attempting NFC write on unsupported browser", async () => {
+    const user = userEvent.setup();
+    render(<InspectionSiteDetailPage params={Promise.resolve({ id: "site-1" })} />);
+
+    expect(await screen.findByDisplayValue("Gate")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "NFC(URL)" }));
+    
+    const writeBtn = screen.getByRole("button", { name: "NFC 쓰기" });
+    expect(writeBtn).toBeInTheDocument();
+
+    await user.click(writeBtn);
+    expect(await screen.findByText(/지원하지 않습니다/)).toBeInTheDocument();
+  });
+
+  it("successfully writes NFC and closes popup when NDEFReader is supported", async () => {
+    const user = userEvent.setup();
+    let resolveWrite: () => void = () => {};
+    const mockWrite = vi.fn().mockImplementation(() => new Promise<void>((resolve) => {
+      resolveWrite = resolve;
+    }));
+    vi.stubGlobal("NDEFReader", class {
+      write = mockWrite;
+    });
+
+    render(<InspectionSiteDetailPage params={Promise.resolve({ id: "site-1" })} />);
+    expect(await screen.findByDisplayValue("Gate")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "NFC(URL)" }));
+    await user.click(screen.getByRole("button", { name: "NFC 쓰기" }));
+
+    expect(screen.getByText("NFC 카드 쓰기")).toBeInTheDocument();
+    expect(screen.getByText("인식 대기 중...")).toBeInTheDocument();
+
+    expect(mockWrite).toHaveBeenCalled();
+    const writtenUrl = mockWrite.mock.calls[0][0];
+    expect(writtenUrl).toContain("localhost:3000/guard/main/inspection-nfc?s=site-1");
+
+    // Resolve the promise to transition to success state
+    resolveWrite();
+
+    expect(await screen.findByText("NFC 쓰기 완료!")).toBeInTheDocument();
+
+    vi.unstubAllGlobals();
+  });
+
+  it("shows error when NFC write fails", async () => {
+    const user = userEvent.setup();
+    const mockWrite = vi.fn().mockRejectedValue(new Error("Tag connection lost"));
+    vi.stubGlobal("NDEFReader", class {
+      write = mockWrite;
+    });
+
+    render(<InspectionSiteDetailPage params={Promise.resolve({ id: "site-1" })} />);
+    expect(await screen.findByDisplayValue("Gate")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "NFC(URL)" }));
+    await user.click(screen.getByRole("button", { name: "NFC 쓰기" }));
+
+    expect(await screen.findByText("NFC 쓰기 실패")).toBeInTheDocument();
+    expect(screen.getByText("Tag connection lost")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "취소" }));
+    expect(screen.queryByText("NFC 카드 쓰기")).not.toBeInTheDocument();
+
+    vi.unstubAllGlobals();
+  });
+
   it("shows a success message before returning to the list after deleting a site", async () => {
     const user = userEvent.setup();
     vi.spyOn(window, "confirm").mockReturnValue(true);

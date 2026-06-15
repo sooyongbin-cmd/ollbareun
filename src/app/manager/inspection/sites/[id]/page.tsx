@@ -19,6 +19,9 @@ declare global {
       roadAddrPart2?: string,
       ...rest: string[]
     ) => void;
+    NDEFReader?: new () => {
+      write(url: string, options?: { signal: AbortSignal }): Promise<void>;
+    };
   }
 }
 
@@ -64,6 +67,18 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
   const [shouldReturnToList, setShouldReturnToList] = useState(false);
   const [nfcUrl, setNfcUrl] = useState("");
   const [copyMessage, setCopyMessage] = useState("");
+  const [isWritingNfc, setIsWritingNfc] = useState(false);
+  const [nfcWriteStatus, setNfcWriteStatus] = useState<"" | "scanning" | "success" | "error">("");
+  const [nfcWriteError, setNfcWriteError] = useState("");
+  const [nfcAbortController, setNfcAbortController] = useState<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (nfcAbortController) {
+        nfcAbortController.abort();
+      }
+    };
+  }, [nfcAbortController]);
 
   useEffect(() => {
     let ignore = false;
@@ -208,6 +223,61 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
     setCopyMessage("복사되었습니다.");
   }
 
+  async function handleWriteNfc() {
+    if (typeof window === "undefined") return;
+
+    setNfcWriteError("");
+    setNfcWriteStatus("scanning");
+    setIsWritingNfc(true);
+
+    if (!window.NDEFReader) {
+      setNfcWriteStatus("error");
+      setNfcWriteError("이 브라우저/기기는 NFC 쓰기 기능을 지원하지 않습니다. (Android Chrome 등을 사용해 주세요.)");
+      return;
+    }
+
+    const controller = new AbortController();
+    setNfcAbortController(controller);
+
+    try {
+      const NDEFReader = window.NDEFReader;
+      const ndef = new NDEFReader();
+
+      const protocol = window.location.protocol ? `${window.location.protocol}//` : "https://";
+      const fullUrl = nfcUrl.startsWith("http://") || nfcUrl.startsWith("https://")
+        ? nfcUrl
+        : `${protocol}${nfcUrl}`;
+
+      await ndef.write(fullUrl, { signal: controller.signal });
+
+      setNfcWriteStatus("success");
+      setTimeout(() => {
+        setIsWritingNfc(false);
+        setNfcUrl("");
+        setNfcWriteStatus("");
+      }, 1500);
+    } catch (err: unknown) {
+      const errorName = err && typeof err === "object" && "name" in err ? (err as { name: string }).name : "";
+      const errorMessage = err && typeof err === "object" && "message" in err ? String((err as { message: unknown }).message) : "NFC 카드 쓰기 중 오류가 발생했습니다.";
+
+      if (errorName !== "AbortError") {
+        setNfcWriteStatus("error");
+        setNfcWriteError(errorMessage || "NFC 카드 쓰기 중 오류가 발생했습니다.");
+      }
+    } finally {
+      setNfcAbortController(null);
+    }
+  }
+
+  function handleCancelNfcWrite() {
+    if (nfcAbortController) {
+      nfcAbortController.abort();
+    }
+    setIsWritingNfc(false);
+    setNfcWriteStatus("");
+    setNfcWriteError("");
+  }
+
   function handleAlertClose() {
     setAlertMessage("");
     if (shouldReturnToList) {
@@ -334,8 +404,71 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
               <button className="button-primary flex-1" onClick={handleCopyNfcUrl} type="button">
                 복사
               </button>
+              <button className="button-secondary flex-1" onClick={handleWriteNfc} type="button">
+                NFC 쓰기
+              </button>
               <button className="button-secondary flex-1" onClick={() => setNfcUrl("")} type="button">
                 닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {isWritingNfc ? (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-overlay-scrim px-5">
+          <div className="w-full max-w-[480px] rounded-[18px] bg-canvas p-6 shadow-product border border-hairline text-center">
+            <h3 className="text-[20px] font-semibold">NFC 카드 쓰기</h3>
+            
+            {nfcWriteStatus === "scanning" && (
+              <div className="mt-6 space-y-4">
+                <div className="mx-auto h-12 w-12 animate-pulse rounded-full bg-primary/20 flex items-center justify-center text-primary text-[24px]">
+                  📡
+                </div>
+                <p className="text-[16px] text-ink-muted-48 leading-relaxed">
+                  NFC 카드(스티커)를 디바이스 뒷면이나<br />NFC 리더기 근처에 대어 주세요.
+                </p>
+                <p className="text-[13px] text-ink-muted-48 animate-pulse">
+                  인식 대기 중...
+                </p>
+              </div>
+            )}
+
+            {nfcWriteStatus === "success" && (
+              <div className="mt-6 space-y-4">
+                <div className="mx-auto h-12 w-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-[24px]">
+                  ✓
+                </div>
+                <p className="text-[16px] font-semibold text-green-600">
+                  NFC 쓰기 완료!
+                </p>
+                <p className="text-[14px] text-ink-muted-48">
+                  성공적으로 작성되었습니다. 창을 닫습니다.
+                </p>
+              </div>
+            )}
+
+            {nfcWriteStatus === "error" && (
+              <div className="mt-6 space-y-4">
+                <div className="mx-auto h-12 w-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-[24px]">
+                  ⚠
+                </div>
+                <p className="text-[16px] font-semibold text-red-600">
+                  NFC 쓰기 실패
+                </p>
+                <p className="text-[14px] text-ink-muted-48 leading-relaxed px-2">
+                  {nfcWriteError}
+                </p>
+              </div>
+            )}
+
+            <div className="mt-8">
+              <button 
+                className="button-secondary w-full justify-center" 
+                onClick={handleCancelNfcWrite} 
+                type="button"
+              >
+                {nfcWriteStatus === "success" ? "닫기" : "취소"}
               </button>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import webpush from "web-push";
+import { buildPushPayload } from "@block65/webcrypto-web-push";
 
 declare const Deno: {
   env: {
@@ -112,14 +112,9 @@ function getErrorReason(error: unknown) {
   return "알 수 없는 전송 오류";
 }
 
-function configureWebPush() {
+async function sendEducationReminderNotifications(supabase: ReturnType<typeof createClient>): Promise<EducationReminderResult> {
   const vapidPublicKey = requireEnv("NEXT_PUBLIC_VAPID_PUBLIC_KEY");
   const vapidPrivateKey = requireEnv("VAPID_PRIVATE_KEY");
-  webpush.setVapidDetails("mailto:admin@ollbareun.com", vapidPublicKey, vapidPrivateKey);
-}
-
-async function sendEducationReminderNotifications(supabase: ReturnType<typeof createClient>): Promise<EducationReminderResult> {
-  configureWebPush();
 
   const [employeesResult, resourcesResult, completionsResult] = await Promise.all([
     supabase.from("employees").select("id, name, is_retired"),
@@ -207,7 +202,8 @@ async function sendEducationReminderNotifications(supabase: ReturnType<typeof cr
 
       for (const sub of employeeSubs) {
         try {
-          await webpush.sendNotification(
+          const pushPayload = await buildPushPayload(
+            { data: payload },
             {
               endpoint: sub.endpoint,
               keys: {
@@ -215,8 +211,16 @@ async function sendEducationReminderNotifications(supabase: ReturnType<typeof cr
                 auth: sub.auth,
               },
             },
-            payload,
+            {
+              subject: "mailto:admin@ollbareun.com",
+              publicKey: vapidPublicKey,
+              privateKey: vapidPrivateKey,
+            }
           );
+          const res = await fetch(sub.endpoint, pushPayload);
+          if (!res.ok) {
+            throw { statusCode: res.status };
+          }
           successCount++;
           employeeNotified = true;
         } catch (error) {

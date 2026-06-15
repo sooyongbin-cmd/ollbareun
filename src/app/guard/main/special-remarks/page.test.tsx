@@ -4,6 +4,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import GuardSpecialRemarksPage from "./page";
 
 const realCreateElement = document.createElement.bind(document);
+const push = vi.fn();
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push }),
+}));
 
 const guardSession = {
   employee: {
@@ -93,6 +98,10 @@ describe("guard special remarks page", () => {
         body: expect.stringContaining("data:image/jpeg;base64,AAAA"),
       }),
     );
+
+    expect(await screen.findByText("특이사항 보고가 전송되었습니다.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "확인" }));
+    expect(push).toHaveBeenCalledWith("/guard/main");
   });
 
   it("submits the special remark report with GPS coordinates if geolocation is available", async () => {
@@ -137,6 +146,10 @@ describe("guard special remarks page", () => {
         }),
       );
     });
+
+    expect(await screen.findByText("특이사항 보고가 전송되었습니다.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "확인" }));
+    expect(push).toHaveBeenCalledWith("/guard/main");
   });
 
   it("compresses captured photos until they are under 500KB", async () => {

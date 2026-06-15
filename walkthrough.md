@@ -151,3 +151,48 @@ npx supabase functions deploy education-reminders --project-ref wexcijqchwwkxpkw
 
 * **Supabase Edge Function 배포**: 성공
 * **Git Commit & Push**: `main` 브랜치로 병합 및 푸시 완료 (`6d5dd92..fbe73b3`)
+
+---
+
+# 특이사항 이메일 템플릿(Formspree & Resend) 내 GPS 정보 포함 기능 구현 완료 보고서
+
+## 변경 사항 및 조치 내용 (Resolution & Implementation Details)
+
+- **상황**: 특이사항 발생 시 수집된 GPS 정보가 데이터베이스(`inspection_special_reports`)에는 올바르게 저장되고 있었으나, Formspree 및 Resend(이메일)를 통해 발송되는 이메일 본문과 텍스트 메시지에는 포함되지 않고 있었습니다.
+- **수정 파일**: [special-remark-reports.ts](file:///d:/ollba/ollba_20260610/src/lib/special-remark-reports.ts)
+- **조치 내용**:
+  1. `buildEmailHtml` 함수가 `gpsInfo`를 전달받아, 이메일 내역에 **보고 위치 (GPS)** 항목으로 `위도, 경도` 정보를 표출할 수 있도록 템플릿 구조를 변경했습니다. (GPS 정보가 없을 경우 `기록 없음` 표출)
+  2. `buildFormspreeMessage` 함수 역시 `gpsInfo` 매개변수를 갖도록 확장하고, Formspree로 전송되는 텍스트 본문 리스트에 `보고위치 (GPS): 위도, 경도` 포맷을 추가했습니다.
+  3. `createSpecialRemarkReport` 메인 함수에서 DB에 최종 입력되는 `gps_info` 객체를 이메일 전송 함수의 인자인 `emailInput`에 `gpsInfo`라는 이름으로 올바르게 패싱하도록 맵핑 관계를 추가 및 연동했습니다.
+
+---
+
+## 검증 및 배포 결과 (Verification Results)
+
+* **TypeScript 컴파일 검사**: `npx tsc --noEmit` 성공 (오류 없음)
+* **단위 테스트 검증**: Vitest 테스트 294건 모두 통과 완료 (`npm test`)
+* **생산 빌드 검증**: `npm run build` 컴파일 성공
+* **Git Commit & Push**: `main` 브랜치로 푸시 완료 (`55f0016..47ffd8b`)
+
+---
+
+# 특이사항 보고 후 복귀 화면 이동 처리 기능 구현 완료 보고서
+
+## 변경 사항 및 조치 내용 (Resolution & Implementation Details)
+
+- **상황**: 특이사항 작성 및 성공 전송 시 표시되는 성공 알림 모달(AlertModal)을 닫거나 확인했을 때, 페이지가 그대로 유지되는 대신 경비원 메인 화면(`/guard/main`)으로 정상 복귀할 수 있도록 제어 흐름 수정이 필요했습니다.
+- **수정 파일**:
+  - [page.tsx](file:///d:/ollba/ollba_20260610/src/app/guard/main/special-remarks/page.tsx)
+  - [page.test.tsx](file:///d:/ollba/ollba_20260610/src/app/guard/main/special-remarks/page.test.tsx)
+- **조치 내용**:
+  1. **페이지 로직 보완**: `GuardSpecialRemarksPage` 내 `useRouter`를 사용해 `AlertModal`의 `onClose` 핸들러에서 `setAlertMessage("")` 처리 후 `router.push("/guard/main")`를 호출하여 이전 메인 화면으로 리다이렉트하도록 수정했습니다.
+  2. **테스트 코드 보완**: `next/navigation`의 `useRouter`를 모킹(`push` spy 함수 제공)하고, Formspree 전송 성공 시나리오(`submits the special remark report through Formspree`, `submits the special remark report with GPS coordinates if geolocation is available`)에 "확인" 버튼 클릭 및 `expect(push).toHaveBeenCalledWith("/guard/main")` 검증 단계를 추가하여 기능의 정상 작동 여부를 자동 검증하도록 개선했습니다.
+
+---
+
+## 검증 및 배포 결과 (Verification Results)
+
+* **TypeScript 컴파일 검사**: `npx tsc --noEmit` 성공 (오류 없음)
+* **단위 테스트 검증**: Vitest 테스트 294건 모두 통과 완료 (`npm test`)
+* **생산 빌드 검증**: `npm run build` 컴파일 성공
+

@@ -1,6 +1,7 @@
 "use client";
 
 import { MicIcon, SquareIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import AlertModal from "@/components/modals/alert-modal";
 import { readStoredGuardSession } from "../../guard-session-storage";
@@ -97,6 +98,7 @@ function captureCompressedPhoto(video: HTMLVideoElement) {
 }
 
 export default function GuardSpecialRemarksPage() {
+  const router = useRouter();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -327,7 +329,10 @@ export default function GuardSpecialRemarksPage() {
 
       <AlertModal
         isOpen={Boolean(alertMessage)}
-        onClose={() => setAlertMessage("")}
+        onClose={() => {
+          setAlertMessage("");
+          router.push("/guard/main");
+        }}
         title="알림"
         description={alertMessage}
       />

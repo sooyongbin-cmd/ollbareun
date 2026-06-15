@@ -324,12 +324,17 @@ Deno.serve(async (request) => {
 
   try {
     const result = await sendEducationReminderNotifications(supabase);
+    const errorMessage = result.failedCount > 0 && result.failedEmployees.length > 0
+      ? result.failedEmployees.map((fe) => `${fe.employeeName}: ${fe.reason}`).join(", ")
+      : null;
+
     await supabase
       .from("push_notification_runs")
       .update({
         status: "sent",
         sent_at: new Date().toISOString(),
         result,
+        error_message: errorMessage,
         updated_at: new Date().toISOString(),
       })
       .eq("id", run.id);

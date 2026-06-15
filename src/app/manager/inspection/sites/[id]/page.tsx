@@ -12,7 +12,10 @@ import { saveInspectionQrImage } from "../../save-inspection-qr";
 
 declare global {
   interface NDEFReader {
-    write(url: string, options?: { signal: AbortSignal }): Promise<void>;
+    write(
+      message: string | { records: Array<{ recordType: string; data: string }> },
+      options?: { signal: AbortSignal }
+    ): Promise<void>;
     scan(options?: { signal: AbortSignal }): Promise<void>;
     onreading: ((event: any) => void) | null;
     onreadingerror: (() => void) | null;
@@ -252,7 +255,17 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
         ? nfcUrl
         : `${protocol}${nfcUrl}`;
 
-      await ndef.write(fullUrl, { signal: controller.signal });
+      await ndef.write(
+        {
+          records: [
+            {
+              recordType: "url",
+              data: fullUrl,
+            },
+          ],
+        },
+        { signal: controller.signal },
+      );
 
       setNfcWriteStatus("success");
       setTimeout(() => {

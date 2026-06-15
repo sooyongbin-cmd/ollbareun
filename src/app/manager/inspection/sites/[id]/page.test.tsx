@@ -171,8 +171,15 @@ describe("inspection site detail page", () => {
     expect(screen.getByText("인식 대기 중...")).toBeInTheDocument();
 
     expect(mockWrite).toHaveBeenCalled();
-    const writtenUrl = mockWrite.mock.calls[0][0];
-    expect(writtenUrl).toContain("localhost:3000/guard/main/inspection-nfc?s=site-1");
+    const writtenMessage = mockWrite.mock.calls[0][0];
+    expect(writtenMessage).toEqual({
+      records: [
+        {
+          recordType: "url",
+          data: expect.stringContaining("localhost:3000/guard/main/inspection-nfc?s=site-1"),
+        },
+      ],
+    });
 
     // Resolve the promise to transition to success state
     resolveWrite();

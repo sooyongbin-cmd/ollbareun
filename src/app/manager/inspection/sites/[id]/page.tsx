@@ -11,6 +11,12 @@ import { SaveIcon } from "@/components/icons/save-icon";
 import { saveInspectionQrImage } from "../../save-inspection-qr";
 
 declare global {
+  interface NDEFReader {
+    write(url: string, options?: { signal: AbortSignal }): Promise<void>;
+    scan(options?: { signal: AbortSignal }): Promise<void>;
+    onreading: ((event: any) => void) | null;
+    onreadingerror: (() => void) | null;
+  }
   interface Window {
     jusoCallBack?: (
       roadFullAddr?: string,
@@ -19,9 +25,7 @@ declare global {
       roadAddrPart2?: string,
       ...rest: string[]
     ) => void;
-    NDEFReader?: new () => {
-      write(url: string, options?: { signal: AbortSignal }): Promise<void>;
-    };
+    NDEFReader?: new () => NDEFReader;
   }
 }
 

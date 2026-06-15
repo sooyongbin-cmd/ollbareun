@@ -1,11 +1,14 @@
 import { getSupabase } from "@/lib/supabase";
 import webpush from "web-push";
 
-// Configure web-push with VAPID details if available
-const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
-const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY || "";
+function configureWebPush() {
+  const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
+  const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY || "";
 
-if (vapidPublicKey && vapidPrivateKey) {
+  if (!vapidPublicKey || !vapidPrivateKey) {
+    throw new Error("VAPID 키가 구성되지 않았습니다.");
+  }
+
   webpush.setVapidDetails(
     "mailto:admin@ollbareun.com",
     vapidPublicKey,
@@ -21,15 +24,12 @@ type NotificationRequest = {
 
 export async function POST(request: Request) {
   try {
+    configureWebPush();
     const body = await request.json();
     const notifications = body.notifications as NotificationRequest[];
 
     if (!Array.isArray(notifications) || notifications.length === 0) {
       return Response.json({ error: "notifications 배열이 유효하지 않거나 비어 있습니다." }, { status: 400 });
-    }
-
-    if (!vapidPublicKey || !vapidPrivateKey) {
-      return Response.json({ error: "VAPID 키가 구성되지 않았습니다." }, { status: 500 });
     }
 
     const supabase = getSupabase();

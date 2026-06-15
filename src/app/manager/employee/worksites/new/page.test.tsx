@@ -99,7 +99,7 @@ describe("worksite new page", () => {
         services: {
           Geocoder: vi.fn(function Geocoder() {
             return {};
-          }),
+          }) as any,
           Status: {
             OK: "OK",
           },
@@ -174,7 +174,7 @@ describe("worksite new page", () => {
         services: {
           Geocoder: vi.fn(function Geocoder() {
             return {};
-          }),
+          }) as any,
           Status: {
             OK: "OK",
           },
@@ -264,7 +264,7 @@ describe("worksite new page", () => {
         services: {
           Geocoder: vi.fn(function Geocoder() {
             return {};
-          }),
+          }) as any,
           Status: {
             OK: "OK",
           },

@@ -287,7 +287,7 @@ describe("guard main navigation", () => {
 
   it("requests location permission on click and navigates when the user allows it", async () => {
     const user = userEvent.setup();
-    const getCurrentPosition = vi.fn((success: PositionCallback) => {
+    const getCurrentPosition = vi.fn((success: any) => {
       success({
         coords: {
           latitude: 37.5665,
@@ -299,7 +299,7 @@ describe("guard main navigation", () => {
           speed: null,
         },
         timestamp: Date.now(),
-      });
+      } as any);
     });
     const query = vi.fn(async () => ({ state: "prompt" }));
 
@@ -467,7 +467,7 @@ describe("guard main navigation", () => {
     const circles: unknown[] = [];
     const latLngs: Array<{ latitude: number; longitude: number }> = [];
     const boundsExtensions: Array<{ latitude: number; longitude: number }> = [];
-    const watchPosition = vi.fn((success: PositionCallback) => {
+    const watchPosition = vi.fn((success: any) => {
       success({
         coords: {
           latitude: 37.567,
@@ -479,7 +479,7 @@ describe("guard main navigation", () => {
           speed: null,
         },
         timestamp: Date.now(),
-      });
+      } as any);
       return 7;
     });
     const clearWatch = vi.fn();
@@ -575,8 +575,8 @@ describe("guard main navigation", () => {
   });
 
   it("enables clock-in when watched position enters the worksite radius", async () => {
-    let watchSuccess: PositionCallback | null = null;
-    const watchPosition = vi.fn((success: PositionCallback) => {
+    let watchSuccess: any = null;
+    const watchPosition = vi.fn((success: any) => {
       watchSuccess = success;
       success({
         coords: {
@@ -589,7 +589,7 @@ describe("guard main navigation", () => {
           speed: null,
         },
         timestamp: Date.now(),
-      });
+      } as any);
       return 11;
     });
     const clearWatch = vi.fn();
@@ -615,7 +615,7 @@ describe("guard main navigation", () => {
         speed: null,
       },
       timestamp: Date.now(),
-    });
+    } as any);
 
     await waitFor(() => {
       expect(screen.getByRole("button", { name: "출근" })).toBeEnabled();
@@ -624,7 +624,7 @@ describe("guard main navigation", () => {
 
   it("remeasures the current position when clocking in and posts the fresh coordinates", async () => {
     const user = userEvent.setup();
-    const watchPosition = vi.fn((success: PositionCallback) => {
+    const watchPosition = vi.fn((success: any) => {
       success({
         coords: {
           latitude: 37.5665,
@@ -636,10 +636,10 @@ describe("guard main navigation", () => {
           speed: null,
         },
         timestamp: Date.now(),
-      });
+      } as any);
       return 12;
     });
-    const getCurrentPosition = vi.fn((success: PositionCallback) => {
+    const getCurrentPosition = vi.fn((success: any) => {
       success({
         coords: {
           latitude: 37.5666,
@@ -651,7 +651,7 @@ describe("guard main navigation", () => {
           speed: null,
         },
         timestamp: Date.now(),
-      });
+      } as any);
     });
     const clearWatch = vi.fn();
     const fetch = vi.fn(async () =>

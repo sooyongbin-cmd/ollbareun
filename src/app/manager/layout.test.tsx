@@ -4,6 +4,7 @@ import ManagerLayout from "./layout";
 
 function SuspendedManagerChild() {
   throw new Promise(() => undefined);
+  return null;
 }
 
 describe("manager layout loading state", () => {

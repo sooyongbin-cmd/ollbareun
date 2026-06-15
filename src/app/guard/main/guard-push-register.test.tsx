@@ -244,4 +244,36 @@ describe("GuardPushRegister", () => {
 
     expect(push).toHaveBeenCalledWith("/guard/main/safety");
   });
+
+  it("unsubscribes and creates a new subscription when VAPID key mismatches", async () => {
+    writeGuardSession("employee-1");
+    
+    const unsubscribeMock = vi.fn().mockResolvedValue(true);
+    const oldSubscription = {
+      endpoint: "https://push.example.test/old-endpoint",
+      options: {
+        applicationServerKey: new Uint8Array([9, 8, 7]).buffer,
+      },
+      unsubscribe: unsubscribeMock,
+      toJSON: () => ({
+        endpoint: "https://push.example.test/old-endpoint",
+        keys: { p256dh: "old-p256dh", auth: "old-auth" },
+      }),
+    };
+    
+    getSubscriptionMock.mockResolvedValue(oldSubscription);
+    const newSubscription = createSubscription("https://push.example.test/new-endpoint");
+    subscribeMock.mockResolvedValue(newSubscription);
+
+    await runPushRegistration();
+
+    expect(unsubscribeMock).toHaveBeenCalledTimes(1);
+    expect(subscribeMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/notifications/subscribe",
+      expect.objectContaining({
+        body: expect.stringContaining("https://push.example.test/new-endpoint"),
+      }),
+    );
+  });
 });

@@ -320,6 +320,25 @@ export default function GuardPushRegister() {
 
         const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
         let subscription = await registration.pushManager.getSubscription();
+
+        if (subscription && subscription.options && subscription.options.applicationServerKey) {
+          const subscriptionKeyBytes = new Uint8Array(subscription.options.applicationServerKey);
+          let keysMatch = applicationServerKey.length === subscriptionKeyBytes.length;
+          if (keysMatch) {
+            for (let i = 0; i < applicationServerKey.length; i++) {
+              if (applicationServerKey[i] !== subscriptionKeyBytes[i]) {
+                keysMatch = false;
+                break;
+              }
+            }
+          }
+          if (!keysMatch) {
+            console.log("VAPID public key mismatched. Unsubscribing existing push subscription...");
+            await subscription.unsubscribe();
+            subscription = null;
+          }
+        }
+
         const hadExistingSubscription = Boolean(subscription);
 
         if (!subscription) {

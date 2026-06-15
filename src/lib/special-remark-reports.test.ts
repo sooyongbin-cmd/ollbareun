@@ -175,6 +175,47 @@ describe("special remark report Formspree delivery", () => {
     expect(result).toMatchObject({ id: "report-1", email_status: "sent" });
   });
 
+  it("includes gps_info in the database record when gpsInfo is provided", async () => {
+    const insertSingle = vi.fn(async () => ({
+      data: {
+        id: "report-1",
+        reported_at: "2026-06-12T00:00:00.000Z",
+      },
+      error: null,
+    }));
+    const updateSingle = vi.fn(async () => ({
+      data: {
+        id: "report-1",
+        email_status: "sent",
+        email_sent_at: "2026-06-12T00:00:01.000Z",
+        email_error: null,
+      },
+      error: null,
+    }));
+    const insert = vi.fn(() => ({ select: () => ({ single: insertSingle }) }));
+    const updateEq = vi.fn(() => ({ select: () => ({ single: updateSingle }) }));
+    const update = vi.fn(() => ({ eq: updateEq }));
+    from.mockReturnValue({ insert, update });
+
+    await createSpecialRemarkReport(
+      {
+        employeeId: "employee-1",
+        employeeName: "홍길동",
+        worksiteId: "work-1",
+        worksiteName: "본사",
+        content: "문이 파손되었습니다.",
+        gpsInfo: { latitude: 37.5665, longitude: 126.978 },
+      },
+      { emailProvider: "formspree" },
+    );
+
+    expect(insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        gps_info: { latitude: 37.5665, longitude: 126.978 },
+      }),
+    );
+  });
+
   it("marks the stored report failed when Formspree rejects the submission", async () => {
     vi.stubGlobal(
       "fetch",

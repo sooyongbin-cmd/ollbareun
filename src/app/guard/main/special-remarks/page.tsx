@@ -208,6 +208,26 @@ export default function GuardSpecialRemarksPage() {
 
     setSavingProvider(provider);
     setError("");
+
+    let gpsInfo = null;
+    if (typeof window !== "undefined" && navigator.geolocation) {
+      try {
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            maximumAge: 3000,
+            timeout: 6000,
+          });
+        });
+        gpsInfo = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        };
+      } catch (gpsError) {
+        console.warn("GPS 정보를 가져오지 못했습니다. GPS 없이 보고서를 제출합니다.", gpsError);
+      }
+    }
+
     try {
       const endpoint =
         provider === "formspree"
@@ -223,6 +243,7 @@ export default function GuardSpecialRemarksPage() {
           worksiteName,
           content,
           photoDataUrl,
+          gpsInfo,
         }),
       });
       const payload = await response.json();

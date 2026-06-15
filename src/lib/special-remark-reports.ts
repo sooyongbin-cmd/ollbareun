@@ -20,6 +20,7 @@ export type SpecialRemarkReportRow = {
   email_sent_at: string | null;
   email_error: string | null;
   reported_at: string;
+  gps_info: { latitude: number; longitude: number } | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -258,6 +259,7 @@ export async function createSpecialRemarkReport(input: {
   worksiteName: unknown;
   content: unknown;
   photoDataUrl?: unknown;
+  gpsInfo?: unknown;
 }, options: { emailProvider?: EmailProvider } = {}) {
   const employee_id = requireString(input.employeeId, "현장점검자");
   const employee_name = requireString(input.employeeName, "현장점검자명");
@@ -267,6 +269,18 @@ export async function createSpecialRemarkReport(input: {
   const email_to = await getSystemConfigContent("manager_email");
   const photo_url = await uploadPhoto({ employeeId: employee_id, photoDataUrl: input.photoDataUrl });
   const reported_at = new Date().toISOString();
+
+  let gps_info = null;
+  if (input.gpsInfo && typeof input.gpsInfo === "object") {
+    const rawGps = input.gpsInfo as { latitude?: unknown; longitude?: unknown };
+    if (typeof rawGps.latitude === "number" && typeof rawGps.longitude === "number") {
+      gps_info = {
+        latitude: rawGps.latitude,
+        longitude: rawGps.longitude,
+      };
+    }
+  }
+
   const supabase = getSupabaseAdmin();
 
   const { data, error } = await supabase
@@ -281,6 +295,7 @@ export async function createSpecialRemarkReport(input: {
       email_to,
       email_status: "pending",
       reported_at,
+      gps_info,
     })
     .select("*")
     .single();

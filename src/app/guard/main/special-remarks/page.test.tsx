@@ -95,6 +95,50 @@ describe("guard special remarks page", () => {
     );
   });
 
+  it("submits the special remark report with GPS coordinates if geolocation is available", async () => {
+    const user = userEvent.setup();
+    const fetch = vi.fn(async () => Response.json({ report: { id: "report-1" } }));
+    vi.stubGlobal("fetch", fetch);
+
+    // Mock geolocation
+    const mockGetCurrentPosition = vi.fn((success: PositionCallback) => {
+      success({
+        coords: {
+          latitude: 37.5665,
+          longitude: 126.978,
+          accuracy: 10,
+          altitude: null,
+          altitudeAccuracy: null,
+          heading: null,
+          speed: null,
+        } as any,
+        timestamp: Date.now(),
+      } as any);
+    });
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: {
+        getCurrentPosition: mockGetCurrentPosition,
+      },
+    });
+
+    render(<GuardSpecialRemarksPage />);
+
+    await user.type(screen.getByLabelText("특이사항 내용"), "문이 파손되었습니다.");
+    await user.click(screen.getByRole("button", { name: "촬영" }));
+    await user.click(screen.getByRole("button", { name: "이메일(Formspree)" }));
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        "/api/guard/special-remarks/report/formspree",
+        expect.objectContaining({
+          method: "POST",
+          body: expect.stringContaining('"gpsInfo":{"latitude":37.5665,"longitude":126.978}'),
+        }),
+      );
+    });
+  });
+
   it("compresses captured photos until they are under 500KB", async () => {
     const user = userEvent.setup();
     const largeDataUrl = `data:image/jpeg;base64,${"A".repeat(700 * 1024)}`;

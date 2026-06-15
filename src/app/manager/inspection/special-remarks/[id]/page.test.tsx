@@ -48,6 +48,8 @@ describe("manager special remark detail page", () => {
     expect(screen.getByText("점검일시")).toBeInTheDocument();
     expect(screen.getByText("점검자")).toBeInTheDocument();
     expect(screen.getByText("홍길동")).toBeInTheDocument();
+    expect(screen.getByText("보고 위치 (GPS)")).toBeInTheDocument();
+    expect(screen.getByText("기록 없음")).toBeInTheDocument();
     expect(screen.getByText(/두번째 줄 전체 내용/)).toBeInTheDocument();
     expect(screen.getByAltText("첨부사진")).toHaveAttribute("src", "https://example.com/photo.jpg");
 
@@ -58,5 +60,33 @@ describe("manager special remark detail page", () => {
       expect(fetch).toHaveBeenCalledWith("/api/inspection/special-remarks/report-1", { method: "DELETE" });
     });
     expect(push).toHaveBeenCalledWith("/manager/inspection/special-remarks");
+  });
+
+  it("shows GPS coordinates when gps_info is present", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url === "/api/inspection/special-remarks/report-2") {
+          return Response.json({
+            report: {
+              id: "report-2",
+              reported_at: "2026-06-11T00:10:00Z",
+              employee_name: "이순신",
+              content: "이상 무",
+              photo_url: null,
+              gps_info: { latitude: 37.5665, longitude: 126.978 },
+            },
+          });
+        }
+        return Response.json({}, { status: 404 });
+      }),
+    );
+
+    render(<SpecialRemarkDetailPage params={Promise.resolve({ id: "report-2" })} />);
+
+    expect(await screen.findByText("37.566500, 126.978000")).toBeInTheDocument();
+    expect(screen.getByText("이순신")).toBeInTheDocument();
+    expect(screen.queryByText("기록 없음")).not.toBeInTheDocument();
   });
 });

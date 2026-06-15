@@ -14,6 +14,7 @@ type SpecialRemarkReport = {
   employee_name: string;
   content: string;
   photo_url: string | null;
+  gps_info: { latitude: number; longitude: number } | null;
 };
 
 function formatDateTime(value: string) {
@@ -124,7 +125,7 @@ export default function SpecialRemarkDetailPage({ params }: PageProps) {
           <p className="status-warn text-center">{error}</p>
         ) : report ? (
           <div className="space-y-5">
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-3">
               <div className="rounded-[12px] border border-hairline bg-canvas p-4">
                 <p className="text-[13px] font-semibold text-ink-muted-48">점검일시</p>
                 <p className="mt-1 text-[17px] font-semibold">{formatDateTime(report.reported_at)}</p>
@@ -132,6 +133,14 @@ export default function SpecialRemarkDetailPage({ params }: PageProps) {
               <div className="rounded-[12px] border border-hairline bg-canvas p-4">
                 <p className="text-[13px] font-semibold text-ink-muted-48">점검자</p>
                 <p className="mt-1 text-[17px] font-semibold">{report.employee_name}</p>
+              </div>
+              <div className="rounded-[12px] border border-hairline bg-canvas p-4">
+                <p className="text-[13px] font-semibold text-ink-muted-48">보고 위치 (GPS)</p>
+                <p className="mt-1 text-[17px] font-semibold">
+                  {report.gps_info
+                    ? `${report.gps_info.latitude.toFixed(6)}, ${report.gps_info.longitude.toFixed(6)}`
+                    : "기록 없음"}
+                </p>
               </div>
             </div>
 

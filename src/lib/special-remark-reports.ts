@@ -114,6 +114,7 @@ function buildEmailHtml(input: {
   reportedAt: string;
   content: string;
   photoUrl: string | null;
+  gpsInfo: { latitude: number; longitude: number } | null;
 }) {
   const employeeName = escapeHtml(input.employeeName);
   const content = escapeHtml(input.content);
@@ -121,11 +122,15 @@ function buildEmailHtml(input: {
   const photoMarkup = input.photoUrl
     ? `<p>첨부사진 : <a href="${photoUrl}">${photoUrl}</a></p><p><img src="${photoUrl}" alt="첨부사진" style="max-width: 640px; width: 100%; height: auto;" /></p>`
     : "<p>첨부사진 : 없음</p>";
+  const gpsMarkup = input.gpsInfo
+    ? `<p>보고 위치 (GPS) : ${input.gpsInfo.latitude.toFixed(6)}, ${input.gpsInfo.longitude.toFixed(6)}</p>`
+    : "<p>보고 위치 (GPS) : 기록 없음</p>";
 
   return `
     <h1>특이사항보고</h1>
     <p>현장점검자 : ${employeeName}</p>
     <p>점검일시 : ${formatKstDateTime(input.reportedAt)}</p>
+    ${gpsMarkup}
     <p>특이사항 내용 :</p>
     <p style="white-space: pre-wrap;">${content}</p>
     ${photoMarkup}
@@ -139,6 +144,7 @@ async function sendRemarkEmail(input: {
   reportedAt: string;
   content: string;
   photoUrl: string | null;
+  gpsInfo: { latitude: number; longitude: number } | null;
 }) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM;
@@ -177,13 +183,18 @@ function buildFormspreeMessage(input: {
   reportedAt: string;
   content: string;
   photoUrl: string | null;
+  gpsInfo: { latitude: number; longitude: number } | null;
 }) {
+  const gpsString = input.gpsInfo
+    ? `${input.gpsInfo.latitude.toFixed(6)}, ${input.gpsInfo.longitude.toFixed(6)}`
+    : "기록 없음";
   return [
     "특이사항보고",
     "",
     `현장관리자: ${input.employeeName}`,
     `근무지: ${input.worksiteName}`,
     `보고일시: ${formatKstDateTime(input.reportedAt)}`,
+    `보고위치 (GPS): ${gpsString}`,
     "",
     "특이사항 내용:",
     input.content,
@@ -230,6 +241,7 @@ async function sendRemarkEmailWithFormspree(input: {
   reportedAt: string;
   content: string;
   photoUrl: string | null;
+  gpsInfo: { latitude: number; longitude: number } | null;
 }) {
   const response = await fetch(FORMSPREE_ENDPOINT, {
     method: "POST",
@@ -242,6 +254,7 @@ async function sendRemarkEmailWithFormspree(input: {
         reportedAt: input.reportedAt,
         content: input.content,
         photoUrl: input.photoUrl,
+        gpsInfo: input.gpsInfo,
       }),
     }),
   });
@@ -311,6 +324,7 @@ export async function createSpecialRemarkReport(input: {
       reportedAt: report.reported_at,
       content,
       photoUrl: photo_url,
+      gpsInfo: gps_info,
     };
 
     if (options.emailProvider === "formspree") {

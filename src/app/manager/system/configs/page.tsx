@@ -81,8 +81,8 @@ export default function SystemConfigsPage() {
                 <tr>
                   <th className="text-left">시스템코드</th>
                   <th className="text-left">상위시스템코드</th>
-                  <th className="text-left">설명</th>
                   <th className="text-left">내용</th>
+                  <th className="text-left">설명</th>
                 </tr>
               </thead>
               <tbody>
@@ -101,8 +101,8 @@ export default function SystemConfigsPage() {
                         </Link>
                       </td>
                       <td>{config.parent_system_code ?? "-"}</td>
-                      <td className="max-w-[360px] whitespace-pre-wrap">{config.description ?? "-"}</td>
                       <td className="max-w-[520px] whitespace-pre-wrap">{config.content}</td>
+                      <td className="max-w-[360px] whitespace-pre-wrap">{config.description ?? "-"}</td>
                     </tr>
                   ))
                 )}

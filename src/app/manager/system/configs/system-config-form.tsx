@@ -110,18 +110,6 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
       </div>
 
       <div className="space-y-2">
-        <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="system-config-description">
-          설명
-        </label>
-        <textarea
-          className="field min-h-[96px] resize-y"
-          id="system-config-description"
-          onChange={(event) => setDescription(event.target.value)}
-          value={description}
-        />
-      </div>
-
-      <div className="space-y-2">
         <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="system-config-content">
           내용
         </label>
@@ -130,6 +118,18 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
           id="system-config-content"
           onChange={(event) => setContent(event.target.value)}
           value={content}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="system-config-description">
+          설명
+        </label>
+        <textarea
+          className="field min-h-[96px] resize-y"
+          id="system-config-description"
+          onChange={(event) => setDescription(event.target.value)}
+          value={description}
         />
       </div>
 

@@ -49,6 +49,10 @@ describe("manager layout loading state", () => {
       "href",
       "/manager/safty/completions",
     );
+    expect(screen.getAllByRole("link", { name: "자동알림" })[0]).toHaveAttribute(
+      "href",
+      "/manager/safty/notifications",
+    );
     expect(screen.queryByRole("link", { name: "교육자료(cloudflare)" })).not.toBeInTheDocument();
     expect(screen.queryByText("교육 대상 관리 목록/등록/수정")).not.toBeInTheDocument();
   });

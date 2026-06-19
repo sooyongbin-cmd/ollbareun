@@ -197,9 +197,8 @@ export default function ManagerSafetyNotificationsPage() {
                       <td className="whitespace-nowrap font-semibold">{run.scheduled_time}</td>
                       <td className="whitespace-nowrap">
                         {run.status === "sent" ? (
-                          <span className="inline-flex items-center gap-1 text-green-600 font-semibold">
+                          <span className="inline-flex items-center text-green-600 font-semibold" title={getStatusLabel(run.status)}>
                             <FontAwesomeIcon icon={byPrefixAndName.fas['check']} />
-                            {getStatusLabel(run.status)}
                           </span>
                         ) : (
                           getStatusLabel(run.status)

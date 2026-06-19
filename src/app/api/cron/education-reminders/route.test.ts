@@ -9,6 +9,7 @@ vi.mock("@/lib/education-reminder-notifications", () => ({
 describe("GET /api/cron/education-reminders", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env.EDUCATION_REMINDER_CRON_SECRET = "cron-secret";
     vi.mocked(sendEducationReminderNotifications).mockResolvedValue({
       success: true,
       successCount: 1,
@@ -26,6 +27,18 @@ describe("GET /api/cron/education-reminders", () => {
     const response = await GET(
       new Request("http://localhost/api/cron/education-reminders", {
         headers: { "user-agent": "vercel-cron/1.0" },
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({ success: true, successCount: 1 });
+    expect(sendEducationReminderNotifications).toHaveBeenCalledWith();
+  });
+
+  it("runs from the Supabase Edge Function with the shared cron secret", async () => {
+    const response = await GET(
+      new Request("http://localhost/api/cron/education-reminders", {
+        headers: { "x-cron-secret": "cron-secret" },
       }),
     );
 

@@ -1,7 +1,14 @@
 import { sendEducationReminderNotifications } from "@/lib/education-reminder-notifications";
 
 export async function GET(request: Request) {
-  if (request.headers.get("user-agent") !== "vercel-cron/1.0") {
+  const isVercelCron = request.headers.get("user-agent") === "vercel-cron/1.0";
+  const configuredCronSecret = process.env.EDUCATION_REMINDER_CRON_SECRET;
+  const hasValidCronSecret = Boolean(
+    configuredCronSecret
+      && request.headers.get("x-cron-secret") === configuredCronSecret,
+  );
+
+  if (!isVercelCron && !hasValidCronSecret) {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 

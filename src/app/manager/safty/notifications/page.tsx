@@ -51,15 +51,17 @@ function summarizeResult(result: unknown) {
 
 export default function ManagerSafetyNotificationsPage() {
   const [runs, setRuns] = useState<PushNotificationRunRow[]>([]);
+  const [notificationCode, setNotificationCode] = useState("");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const queryString = useMemo(() => {
     const params = new URLSearchParams();
+    if (notificationCode) params.set("notificationCode", notificationCode);
     if (status) params.set("status", status);
     return params.toString();
-  }, [status]);
+  }, [notificationCode, status]);
 
   useEffect(() => {
     let ignore = false;
@@ -109,22 +111,38 @@ export default function ManagerSafetyNotificationsPage() {
       </header>
 
       <section aria-label="자동알림 검색" className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50">
-        <div className="max-w-[220px] space-y-2">
-          <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="notification-status">
-            상태
-          </label>
-          <select
-            className="field"
-            id="notification-status"
-            onChange={(event) => setStatus(event.target.value)}
-            value={status}
-          >
-            <option value="">전체</option>
-            <option value="processing">처리중</option>
-            <option value="sent">발송완료</option>
-            <option value="failed">실패</option>
-            <option value="skipped">건너뜀</option>
-          </select>
+        <div className="flex flex-wrap gap-4">
+          <div className="w-[220px] space-y-2">
+            <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="notification-code">
+              알림코드
+            </label>
+            <select
+              className="field"
+              id="notification-code"
+              onChange={(event) => setNotificationCode(event.target.value)}
+              value={notificationCode}
+            >
+              <option value="">전체</option>
+              <option value="education_reminder">education_reminder</option>
+            </select>
+          </div>
+          <div className="w-[220px] space-y-2">
+            <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="notification-status">
+              상태
+            </label>
+            <select
+              className="field"
+              id="notification-status"
+              onChange={(event) => setStatus(event.target.value)}
+              value={status}
+            >
+              <option value="">전체</option>
+              <option value="processing">처리중</option>
+              <option value="sent">발송완료</option>
+              <option value="failed">실패</option>
+              <option value="skipped">건너뜀</option>
+            </select>
+          </div>
         </div>
       </section>
 
@@ -145,7 +163,6 @@ export default function ManagerSafetyNotificationsPage() {
                 <tr>
                   <th className="text-left">예약일</th>
                   <th className="text-left">예약시간</th>
-                  <th className="text-left">알림코드</th>
                   <th className="text-left">상태</th>
                   <th className="text-left">발송시각</th>
                   <th className="text-left">발송결과</th>
@@ -155,7 +172,7 @@ export default function ManagerSafetyNotificationsPage() {
               <tbody>
                 {runs.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="p-8 text-center text-ink-muted-48 italic">
+                    <td colSpan={6} className="p-8 text-center text-ink-muted-48 italic">
                       조회 결과에 해당하는 자동알림 로그가 없습니다.
                     </td>
                   </tr>
@@ -164,7 +181,6 @@ export default function ManagerSafetyNotificationsPage() {
                     <tr key={run.id} className="hover:bg-canvas-parchment transition-colors">
                       <td className="whitespace-nowrap">{run.scheduled_date}</td>
                       <td className="whitespace-nowrap font-semibold">{run.scheduled_time}</td>
-                      <td className="font-semibold">{run.notification_code}</td>
                       <td>{getStatusLabel(run.status)}</td>
                       <td className="whitespace-nowrap">{formatDateTime(run.sent_at)}</td>
                       <td className="min-w-[220px] text-ink-muted-80">{summarizeResult(run.result)}</td>

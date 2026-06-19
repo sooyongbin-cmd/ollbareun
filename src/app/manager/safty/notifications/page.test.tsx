@@ -63,6 +63,24 @@ describe("manager safety notifications page", () => {
     });
   });
 
+  it("reloads when the notification code filter changes", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn().mockResolvedValue(Response.json({ runs: [] }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<ManagerSafetyNotificationsPage />);
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/api/notifications/runs");
+    });
+
+    await user.selectOptions(screen.getByLabelText("알림코드"), "education_reminder");
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenLastCalledWith("/api/notifications/runs?notificationCode=education_reminder");
+    });
+  });
+
   it("shows an empty state", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ runs: [] })));
 

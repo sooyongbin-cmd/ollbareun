@@ -1,7 +1,21 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { Check } from "lucide-react";
 import ManagerLoadingMessage from "../../manager-loading-message";
+
+const byPrefixAndName = {
+  fas: {
+    check: "check" as const,
+  },
+};
+
+function FontAwesomeIcon({ icon, className }: { icon: typeof byPrefixAndName.fas.check; className?: string }) {
+  if (icon === "check") {
+    return <Check className={className} size={16} />;
+  }
+  return null;
+}
 
 type PushNotificationRunStatus = "processing" | "sent" | "failed" | "skipped";
 
@@ -181,7 +195,16 @@ export default function ManagerSafetyNotificationsPage() {
                     <tr key={run.id} className="hover:bg-canvas-parchment transition-colors">
                       <td className="whitespace-nowrap">{run.scheduled_date}</td>
                       <td className="whitespace-nowrap font-semibold">{run.scheduled_time}</td>
-                      <td>{getStatusLabel(run.status)}</td>
+                      <td className="whitespace-nowrap">
+                        {run.status === "sent" ? (
+                          <span className="inline-flex items-center gap-1 text-green-600 font-semibold">
+                            <FontAwesomeIcon icon={byPrefixAndName.fas['check']} />
+                            {getStatusLabel(run.status)}
+                          </span>
+                        ) : (
+                          getStatusLabel(run.status)
+                        )}
+                      </td>
                       <td className="whitespace-nowrap">{formatDateTime(run.sent_at)}</td>
                       <td className="min-w-[220px] text-ink-muted-80">{summarizeResult(run.result)}</td>
                       <td className="min-w-[180px] text-ink-muted-48">{run.error_message ?? "-"}</td>

@@ -69,4 +69,21 @@ describe("manager dashboard page", () => {
     expect(within(liveSection).getByRole("columnheader", { name: "출근상태" })).toBeInTheDocument();
     expect(within(liveSection).getByText("김철수")).toBeInTheDocument();
   });
+
+  it("keeps both daily charts within the mobile content width", async () => {
+    render(<ManagerPage />);
+
+    const attendanceChart = await screen.findByRole("img", { name: "출근율 일별 차트 그래프" });
+    const educationChart = screen.getByRole("img", { name: "안전교육 이수율 일별 차트 그래프" });
+    const chartGrid = attendanceChart.closest("[data-chart-grid]");
+    const chartCards = screen.getAllByTestId("daily-rate-chart");
+
+    expect(chartGrid).toHaveClass("min-w-0");
+    expect(chartCards).toHaveLength(2);
+    chartCards.forEach((card) => expect(card).toHaveClass("min-w-0", "max-w-full"));
+    [attendanceChart, educationChart].forEach((chart) => {
+      expect(chart).toHaveClass("h-auto", "w-full", "max-w-full");
+      expect(chart).not.toHaveClass("min-w-[560px]");
+    });
+  });
 });

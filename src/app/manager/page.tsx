@@ -93,16 +93,19 @@ function DailyRateChart({
   const latest = data.at(-1)?.[valueKey] ?? 0;
 
   return (
-    <section className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[24px]">
+    <section
+      data-testid="daily-rate-chart"
+      className="min-w-0 max-w-full rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[24px]"
+    >
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-[24px] font-semibold">{title}</h2>
         <span className="text-[20px] font-semibold text-primary">{latest}%</span>
       </div>
-      <div className="mt-4 overflow-x-auto rounded-[14px] border border-hairline bg-canvas p-3">
+      <div className="mt-4 min-w-0 max-w-full overflow-hidden rounded-[14px] border border-hairline bg-canvas p-3">
         {data.length === 0 ? (
           <p className="p-6 text-[15px] text-ink-muted-48">차트 자료가 없습니다.</p>
         ) : (
-          <svg className="min-w-[560px]" viewBox="0 0 560 180" role="img" aria-label={`${title} 그래프`}>
+          <svg className="h-auto w-full max-w-full" viewBox="0 0 560 180" role="img" aria-label={`${title} 그래프`}>
             {[0, 25, 50, 75, 100].map((tick) => {
               const y = 14 + 138 - (138 * tick) / 100;
               return (
@@ -193,7 +196,7 @@ export default function ManagerPage() {
             </p>
           </section>
 
-          <section className="grid gap-5 xl:grid-cols-2">
+          <section data-chart-grid className="grid min-w-0 gap-5 xl:grid-cols-2">
             <DailyRateChart title="출근율 일별 차트" data={data.dailyRates} valueKey="attendanceRate" />
             <DailyRateChart title="안전교육 이수율 일별 차트" data={data.dailyRates} valueKey="educationRate" />
           </section>

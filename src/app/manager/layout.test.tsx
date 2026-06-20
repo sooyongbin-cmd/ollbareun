@@ -1,4 +1,5 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import ManagerLayout from "./layout";
 
@@ -8,6 +9,78 @@ function SuspendedManagerChild() {
 }
 
 describe("manager layout loading state", () => {
+  it("opens and closes the mobile manager menu from the header button", async () => {
+    const user = userEvent.setup();
+    render(
+      <ManagerLayout>
+        <div>관리자 본문</div>
+      </ManagerLayout>,
+    );
+
+    const openButton = screen.getByRole("button", { name: "관리자 메뉴 열기" });
+    expect(openButton).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("dialog", { name: "관리자 메뉴" })).not.toBeInTheDocument();
+
+    await user.click(openButton);
+
+    expect(openButton).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("dialog", { name: "관리자 메뉴" })).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: "교육자료관리" })).toHaveLength(2);
+
+    await user.click(screen.getByRole("button", { name: "관리자 메뉴 닫기" }));
+
+    expect(screen.queryByRole("dialog", { name: "관리자 메뉴" })).not.toBeInTheDocument();
+  });
+
+  it("locks scrolling and closes the mobile menu with Escape", async () => {
+    const user = userEvent.setup();
+    render(
+      <ManagerLayout>
+        <div>관리자 본문</div>
+      </ManagerLayout>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "관리자 메뉴 열기" }));
+
+    expect(document.body.style.overflow).toBe("hidden");
+
+    await user.keyboard("{Escape}");
+
+    expect(screen.queryByRole("dialog", { name: "관리자 메뉴" })).not.toBeInTheDocument();
+    expect(document.body.style.overflow).toBe("");
+  });
+
+  it("closes the mobile menu from the backdrop", async () => {
+    const user = userEvent.setup();
+    render(
+      <ManagerLayout>
+        <div>관리자 본문</div>
+      </ManagerLayout>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "관리자 메뉴 열기" }));
+    await user.click(screen.getByRole("button", { name: "관리자 메뉴 배경 닫기" }));
+
+    expect(screen.queryByRole("dialog", { name: "관리자 메뉴" })).not.toBeInTheDocument();
+  });
+
+  it("closes the mobile menu after selecting a navigation link", async () => {
+    const user = userEvent.setup();
+    render(
+      <ManagerLayout>
+        <div>관리자 본문</div>
+      </ManagerLayout>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "관리자 메뉴 열기" }));
+    const mobileMenu = screen.getByRole("dialog", { name: "관리자 메뉴" });
+    const mobileLink = within(mobileMenu).getByRole("link", { name: "교육자료관리" });
+    mobileLink.addEventListener("click", (event) => event.preventDefault(), { once: true });
+    fireEvent.click(mobileLink);
+
+    expect(screen.queryByRole("dialog", { name: "관리자 메뉴" })).not.toBeInTheDocument();
+  });
+
   it("uses the wider manager content width", () => {
     const { container } = render(
       <ManagerLayout>
@@ -19,7 +92,7 @@ describe("manager layout loading state", () => {
       element.className.includes("max-w-[1180px]"),
     );
 
-    expect(widerContainers).toHaveLength(3);
+    expect(widerContainers).toHaveLength(2);
   });
 
   it("shows the data lookup message while manager content is suspended", () => {

@@ -6,6 +6,13 @@ import {
 } from "./special-remark-reports";
 import { getSystemConfigContent } from "./system-configs";
 
+const nodemailerMock = vi.hoisted(() => {
+  const sendMail = vi.fn();
+  return {
+    sendMail,
+    createTransport: vi.fn(() => ({ sendMail })),
+  };
+});
 const single = vi.fn();
 const selectEq = vi.fn();
 const deleteEq = vi.fn();
@@ -27,6 +34,12 @@ vi.mock("./supabase-admin", () => ({
 
 vi.mock("./system-configs", () => ({
   getSystemConfigContent: vi.fn(),
+}));
+
+vi.mock("nodemailer", () => ({
+  default: {
+    createTransport: nodemailerMock.createTransport,
+  },
 }));
 
 describe("special remark report storage deletion", () => {
@@ -97,6 +110,166 @@ describe("special remark report storage deletion", () => {
 
     expect(remove).not.toHaveBeenCalled();
     expect(from).not.toHaveBeenCalled();
+  });
+});
+
+describe("special remark report Naver SMTP delivery", () => {
+  const previousEnv = process.env;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.env = {
+      ...previousEnv,
+      NAVER_SMTP_USER: "sender@naver.com",
+      NAVER_SMTP_PASSWORD: "naver-secret",
+      NAVER_SMTP_FROM: "올바름 <sender@naver.com>",
+      NAVER_SMTP_PORT: "465",
+    };
+    vi.mocked(getSystemConfigContent).mockResolvedValue("admin@example.com");
+    upload.mockResolvedValue({ error: null });
+    getPublicUrl.mockReturnValue({
+      data: {
+        publicUrl: "https://example.supabase.co/storage/v1/object/public/special-remarks/employee-1/photo.jpg",
+      },
+    });
+    nodemailerMock.sendMail.mockResolvedValue({ messageId: "naver-message-1" });
+  });
+
+  it("stores the report and sends the same HTML report through Naver SMTP", async () => {
+    const insertSingle = vi.fn(async () => ({
+      data: {
+        id: "report-1",
+        reported_at: "2026-06-12T00:00:00.000Z",
+      },
+      error: null,
+    }));
+    const updateSingle = vi.fn(async () => ({
+      data: {
+        id: "report-1",
+        email_status: "sent",
+        email_sent_at: "2026-06-12T00:00:01.000Z",
+        email_error: null,
+      },
+      error: null,
+    }));
+    const insert = vi.fn(() => ({ select: () => ({ single: insertSingle }) }));
+    const updateEq = vi.fn(() => ({ select: () => ({ single: updateSingle }) }));
+    const update = vi.fn(() => ({ eq: updateEq }));
+    from.mockReturnValue({ insert, update });
+
+    const result = await createSpecialRemarkReport(
+      {
+        employeeId: "employee-1",
+        employeeName: "홍길동",
+        worksiteId: "work-1",
+        worksiteName: "본사",
+        content: "문이 파손되었습니다.",
+        photoDataUrl: "data:image/jpeg;base64,AAAA",
+        gpsInfo: { latitude: 37.5665, longitude: 126.978 },
+      },
+      { emailProvider: "naver" },
+    );
+
+    expect(nodemailerMock.createTransport).toHaveBeenCalledWith({
+      host: "smtp.naver.com",
+      port: 465,
+      secure: true,
+      auth: {
+        user: "sender@naver.com",
+        pass: "naver-secret",
+      },
+    });
+    expect(nodemailerMock.sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        from: "올바름 <sender@naver.com>",
+        to: "admin@example.com",
+        subject: "특이사항보고",
+        html: expect.stringContaining("문이 파손되었습니다."),
+      }),
+    );
+    expect(nodemailerMock.sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        html: expect.stringContaining("보고 위치 (GPS) : 37.566500, 126.978000"),
+      }),
+    );
+    expect(result).toMatchObject({ id: "report-1", email_status: "sent" });
+  });
+
+  it("requires Naver SMTP environment variables", async () => {
+    process.env = {
+      ...previousEnv,
+      NAVER_SMTP_USER: "",
+      NAVER_SMTP_PASSWORD: "",
+      NAVER_SMTP_FROM: "",
+      NAVER_SMTP_PORT: "465",
+    };
+    const insertSingle = vi.fn(async () => ({
+      data: {
+        id: "report-1",
+        reported_at: "2026-06-12T00:00:00.000Z",
+      },
+      error: null,
+    }));
+    const insert = vi.fn(() => ({ select: () => ({ single: insertSingle }) }));
+    const failedEq = vi.fn(async () => ({ error: null }));
+    const update = vi.fn(() => ({ eq: failedEq }));
+    from.mockReturnValue({ insert, update });
+
+    await expect(
+      createSpecialRemarkReport(
+        {
+          employeeId: "employee-1",
+          employeeName: "홍길동",
+          worksiteId: "work-1",
+          worksiteName: "본사",
+          content: "문이 파손되었습니다.",
+        },
+        { emailProvider: "naver" },
+      ),
+    ).rejects.toThrow("NAVER SMTP 환경변수가 설정되지 않았습니다.");
+
+    expect(nodemailerMock.createTransport).not.toHaveBeenCalled();
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email_status: "failed",
+        email_error: "NAVER SMTP 환경변수가 설정되지 않았습니다.",
+      }),
+    );
+  });
+
+  it("requires a valid Naver SMTP port", async () => {
+    process.env = {
+      ...previousEnv,
+      NAVER_SMTP_USER: "sender@naver.com",
+      NAVER_SMTP_PASSWORD: "naver-secret",
+      NAVER_SMTP_PORT: "abc",
+    };
+    const insertSingle = vi.fn(async () => ({
+      data: {
+        id: "report-1",
+        reported_at: "2026-06-12T00:00:00.000Z",
+      },
+      error: null,
+    }));
+    const insert = vi.fn(() => ({ select: () => ({ single: insertSingle }) }));
+    const failedEq = vi.fn(async () => ({ error: null }));
+    const update = vi.fn(() => ({ eq: failedEq }));
+    from.mockReturnValue({ insert, update });
+
+    await expect(
+      createSpecialRemarkReport(
+        {
+          employeeId: "employee-1",
+          employeeName: "홍길동",
+          worksiteId: "work-1",
+          worksiteName: "본사",
+          content: "문이 파손되었습니다.",
+        },
+        { emailProvider: "naver" },
+      ),
+    ).rejects.toThrow("NAVER_SMTP_PORT 환경변수가 올바르지 않습니다.");
+
+    expect(nodemailerMock.createTransport).not.toHaveBeenCalled();
   });
 });
 

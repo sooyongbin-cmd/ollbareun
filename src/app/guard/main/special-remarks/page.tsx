@@ -106,7 +106,7 @@ export default function GuardSpecialRemarksPage() {
   const [photoDataUrl, setPhotoDataUrl] = useState("");
   const [cameraStatus, setCameraStatus] = useState("카메라를 준비하고 있습니다.");
   const [listening, setListening] = useState(false);
-  const [savingProvider, setSavingProvider] = useState<"resend" | "formspree" | null>(null);
+  const [savingProvider, setSavingProvider] = useState<"resend" | "formspree" | "naver" | null>(null);
   const [error, setError] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const saving = savingProvider !== null;
@@ -196,7 +196,7 @@ export default function GuardSpecialRemarksPage() {
     }
   }
 
-  async function handleReport(provider: "resend" | "formspree") {
+  async function handleReport(provider: "resend" | "formspree" | "naver") {
     const activeSession = readStoredGuardSession<GuardSession>({ touch: true });
     const employeeId = activeSession?.employee?.id;
     const employeeName = activeSession?.employee?.name;
@@ -234,7 +234,9 @@ export default function GuardSpecialRemarksPage() {
       const endpoint =
         provider === "formspree"
           ? "/api/guard/special-remarks/report/formspree"
-          : "/api/guard/special-remarks/report";
+          : provider === "naver"
+            ? "/api/guard/special-remarks/report/naver"
+            : "/api/guard/special-remarks/report";
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -323,6 +325,14 @@ export default function GuardSpecialRemarksPage() {
             type="button"
           >
             {savingProvider === "formspree" ? "보고 중..." : "이메일(Formspree)"}
+          </button>
+          <button
+            className="button-primary w-full justify-center disabled:opacity-50"
+            disabled={saving || !content.trim()}
+            onClick={() => handleReport("naver")}
+            type="button"
+          >
+            {savingProvider === "naver" ? "보고 중..." : "이메일(NAVER)"}
           </button>
         </section>
       </div>

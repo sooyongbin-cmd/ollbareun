@@ -1,3 +1,4 @@
+import nodemailer from "nodemailer";
 import { getSystemConfigContent } from "./system-configs";
 import { getSupabaseAdmin } from "./supabase-admin";
 
@@ -5,7 +6,7 @@ const STORAGE_BUCKET = "special-remarks";
 const MAX_PHOTO_BYTES = 500 * 1024;
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/mojzkwbp";
 
-type EmailProvider = "resend" | "formspree";
+type EmailProvider = "resend" | "formspree" | "naver";
 
 export type SpecialRemarkReportRow = {
   id: string;
@@ -265,6 +266,52 @@ async function sendRemarkEmailWithFormspree(input: {
   }
 }
 
+function getNaverSmtpPort() {
+  const rawPort = process.env.NAVER_SMTP_PORT;
+  const port = Number(rawPort);
+
+  if (!rawPort || !Number.isInteger(port) || port <= 0) {
+    throw new Error("NAVER_SMTP_PORT 환경변수가 올바르지 않습니다.");
+  }
+
+  return port;
+}
+
+async function sendRemarkEmailWithNaver(input: {
+  to: string;
+  employeeName: string;
+  worksiteName: string;
+  reportedAt: string;
+  content: string;
+  photoUrl: string | null;
+  gpsInfo: { latitude: number; longitude: number } | null;
+}) {
+  const user = process.env.NAVER_SMTP_USER;
+  const password = process.env.NAVER_SMTP_PASSWORD;
+
+  if (!user || !password) {
+    throw new Error("NAVER SMTP 환경변수가 설정되지 않았습니다.");
+  }
+
+  const port = getNaverSmtpPort();
+  const transporter = nodemailer.createTransport({
+    host: "smtp.naver.com",
+    port,
+    secure: port === 465,
+    auth: {
+      user,
+      pass: password,
+    },
+  });
+
+  await transporter.sendMail({
+    from: process.env.NAVER_SMTP_FROM || user,
+    to: input.to,
+    subject: "특이사항보고",
+    html: buildEmailHtml(input),
+  });
+}
+
 export async function createSpecialRemarkReport(input: {
   employeeId: unknown;
   employeeName: unknown;
@@ -329,6 +376,8 @@ export async function createSpecialRemarkReport(input: {
 
     if (options.emailProvider === "formspree") {
       await sendRemarkEmailWithFormspree(emailInput);
+    } else if (options.emailProvider === "naver") {
+      await sendRemarkEmailWithNaver(emailInput);
     } else {
       await sendRemarkEmail(emailInput);
     }

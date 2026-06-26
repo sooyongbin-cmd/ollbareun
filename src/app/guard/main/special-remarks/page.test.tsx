@@ -21,6 +21,23 @@ const guardSession = {
   },
 };
 
+function createMockGeolocationPosition(): GeolocationPosition {
+  return {
+    coords: {
+      latitude: 37.5665,
+      longitude: 126.978,
+      accuracy: 10,
+      altitude: null,
+      altitudeAccuracy: null,
+      heading: null,
+      speed: null,
+      toJSON: () => ({}),
+    },
+    timestamp: Date.now(),
+    toJSON: () => ({}),
+  };
+}
+
 describe("guard special remarks page", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -104,25 +121,42 @@ describe("guard special remarks page", () => {
     expect(push).toHaveBeenCalledWith("/guard/main");
   });
 
+  it("submits the special remark report through Naver mail", async () => {
+    const user = userEvent.setup();
+    const fetch = vi.fn(async () => Response.json({ report: { id: "report-1" } }));
+    vi.stubGlobal("fetch", fetch);
+    render(<GuardSpecialRemarksPage />);
+
+    await user.type(screen.getByLabelText("특이사항 내용"), "문이 파손되었습니다.");
+    await user.click(screen.getByRole("button", { name: "촬영" }));
+
+    expect(screen.getByRole("button", { name: "이메일(NAVER)" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "이메일(NAVER)" }));
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        "/api/guard/special-remarks/report/naver",
+        expect.objectContaining({
+          method: "POST",
+          body: expect.stringContaining("문이 파손되었습니다."),
+        }),
+      );
+    });
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/guard/special-remarks/report/naver",
+      expect.objectContaining({
+        body: expect.stringContaining("data:image/jpeg;base64,AAAA"),
+      }),
+    );
+  });
+
   it("submits the special remark report with GPS coordinates if geolocation is available", async () => {
     const user = userEvent.setup();
     const fetch = vi.fn(async () => Response.json({ report: { id: "report-1" } }));
     vi.stubGlobal("fetch", fetch);
 
-    // Mock geolocation
     const mockGetCurrentPosition = vi.fn((success: PositionCallback) => {
-      success({
-        coords: {
-          latitude: 37.5665,
-          longitude: 126.978,
-          accuracy: 10,
-          altitude: null,
-          altitudeAccuracy: null,
-          heading: null,
-          speed: null,
-        } as any,
-        timestamp: Date.now(),
-      } as any);
+      success(createMockGeolocationPosition());
     });
     Object.defineProperty(navigator, "geolocation", {
       configurable: true,
@@ -150,6 +184,38 @@ describe("guard special remarks page", () => {
     expect(await screen.findByText("특이사항 보고가 전송되었습니다.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "확인" }));
     expect(push).toHaveBeenCalledWith("/guard/main");
+  });
+
+  it("submits the Naver report with GPS coordinates if geolocation is available", async () => {
+    const user = userEvent.setup();
+    const fetch = vi.fn(async () => Response.json({ report: { id: "report-1" } }));
+    vi.stubGlobal("fetch", fetch);
+
+    const mockGetCurrentPosition = vi.fn((success: PositionCallback) => {
+      success(createMockGeolocationPosition());
+    });
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: {
+        getCurrentPosition: mockGetCurrentPosition,
+      },
+    });
+
+    render(<GuardSpecialRemarksPage />);
+
+    await user.type(screen.getByLabelText("특이사항 내용"), "문이 파손되었습니다.");
+    await user.click(screen.getByRole("button", { name: "촬영" }));
+    await user.click(screen.getByRole("button", { name: "이메일(NAVER)" }));
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        "/api/guard/special-remarks/report/naver",
+        expect.objectContaining({
+          method: "POST",
+          body: expect.stringContaining('"gpsInfo":{"latitude":37.5665,"longitude":126.978}'),
+        }),
+      );
+    });
   });
 
   it("compresses captured photos until they are under 500KB", async () => {

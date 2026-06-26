@@ -32,7 +32,7 @@ export default function GuardMainLayout({
       <footer className="bg-canvas-parchment border-t border-hairline py-[64px] px-5">
         <div className="mx-auto max-w-[980px] w-full grid md:grid-cols-4 gap-8">
           <div className="col-span-2">
-            <h4 className="text-[14px] font-semibold text-ink-muted-80 mb-4">올바른 관리시스템</h4>
+            <h4 className="text-[14px] font-semibold text-ink-muted-80 mb-4">올바름 관리시스템</h4>
             <p className="text-[12px] text-ink-muted-48 leading-relaxed max-w-[400px]">
               본 시스템은 실시간 근태 관리 및 안전 교육 이수 현황을 관리하기 위한 기업용 솔루션입니다.
               사용 중 문의사항은 관리자에게 연락 바랍니다.
@@ -41,7 +41,7 @@ export default function GuardMainLayout({
           <div>
             <h4 className="text-[14px] font-semibold text-ink-muted-80 mb-4">법적 고지</h4>
             <p className="text-[12px] text-ink-muted-48 leading-relaxed">
-              © 2026 올바른. All rights reserved.
+              © 2026 올바름. All rights reserved.
               개인정보처리방침 | 서비스이용약관
             </p>
           </div>

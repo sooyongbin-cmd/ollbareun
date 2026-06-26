@@ -71,7 +71,7 @@ export default function EducationReportPage() {
 
   async function handleExport() {
     await saveRowsAsXls({
-      fileName: `올바른_교육_전체직원_${year}`,
+      fileName: `올바름_교육_전체직원_${year}`,
       headers: ["근무자", "교육이수건수/전체건수"],
       rows: rows.map((row) => [row.employeeName, `${row.completedCount}/${row.totalCount}`]),
     });

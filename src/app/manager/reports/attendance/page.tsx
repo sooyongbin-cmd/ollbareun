@@ -49,7 +49,7 @@ export default function AttendanceReportPage() {
 
   async function handleExport() {
     await saveRowsAsXls({
-      fileName: `올바른_근태_${employeeName.trim() || "전체"}_${year}`,
+      fileName: `올바름_근태_${employeeName.trim() || "전체"}_${year}`,
       headers: ["날짜", "출근시각", "퇴근시각", "근무시간"],
       rows: rows.map((row) => [row.date, row.clockInTime, row.clockOutTime, row.workDuration]),
     });

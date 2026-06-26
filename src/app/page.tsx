@@ -48,7 +48,7 @@ export default function Home() {
               <rect width="32" height="32" rx="8" fill="#006a62" />
               <path d="M9 16L14 21L23 11" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            <h1 className="text-[20px] font-bold text-[#000508] tracking-tight">올바른</h1>
+            <h1 className="text-[20px] font-bold text-[#000508] tracking-tight">올바름</h1>
           </div>
 
           {/* Consultation Button */}
@@ -79,7 +79,7 @@ export default function Home() {
             <br />
             공간을 채우는 투명함.
             <br />
-            사회적기업 올바른이 함께합니다.
+            사회적기업 올바름이 함께합니다.
           </h2>
         </div>
       </section>
@@ -137,10 +137,10 @@ export default function Home() {
           <div className="absolute -right-8 -top-8 w-36 h-36 rounded-full bg-white/5 pointer-events-none animate-pulse" />
 
           <h2 className="text-[28px] md:text-[36px] font-bold tracking-tight">
-            사회적기업 올바른과 함께하면
+            사회적기업 올바름과 함께하면
           </h2>
           <p className="max-w-3xl text-[15px] md:text-[17px] opacity-90 leading-relaxed font-normal">
-            사회적기업 제품 우선구매 제도는 공공기관이 사회적기업의 제품을 우선 구매하도록 촉진하는 제도입니다. 올바른과 함께하시면 법정 우선구매 목표 달성에 기여하고 우수한 품질의 서비스와 사회적 가치를 동시에 실현할 수 있습니다.
+            사회적기업 제품 우선구매 제도는 공공기관이 사회적기업의 제품을 우선 구매하도록 촉진하는 제도입니다. 올바름과 함께하시면 법정 우선구매 목표 달성에 기여하고 우수한 품질의 서비스와 사회적 가치를 동시에 실현할 수 있습니다.
           </p>
           <button
             type="button"
@@ -207,7 +207,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12">
           {/* Column 1 */}
           <div className="space-y-4">
-            <h3 className="text-[24px] font-bold text-white">올바른 (All-Barun)</h3>
+            <h3 className="text-[24px] font-bold text-white">올바름 (All-Barun)</h3>
             <p className="text-[#778891] text-[14px] leading-relaxed max-w-sm">
               사회적가치를 창출하며 깨끗하고 안전한 공간을 만드는 프리미엄 시설관리 전문 기업입니다.
             </p>
@@ -350,7 +350,7 @@ export default function Home() {
               <div className="space-y-2">
                 <h3 className="text-[16px] font-bold text-[#006a62]">1. 공공기관 법정 의무구매 목표 달성</h3>
                 <p className="text-[14px] text-[#43474a] leading-relaxed">
-                  사회적기업 육성법 제12조 및 동법 시행령 제12조에 의거하여, 모든 공공기관은 총 구매액의 일정 비율 이상을 사회적기업의 제품 및 용역 서비스로 구매해야 합니다. 올바른과 연계하시면 당해 목표 실적을 손쉽게 채우실 수 있습니다.
+                  사회적기업 육성법 제12조 및 동법 시행령 제12조에 의거하여, 모든 공공기관은 총 구매액의 일정 비율 이상을 사회적기업의 제품 및 용역 서비스로 구매해야 합니다. 올바름과 연계하시면 당해 목표 실적을 손쉽게 채우실 수 있습니다.
                 </p>
               </div>
 
@@ -364,7 +364,7 @@ export default function Home() {
               <div className="space-y-2">
                 <h3 className="text-[16px] font-bold text-[#006a62]">3. 기업 ESG 경영 가점 확보</h3>
                 <p className="text-[14px] text-[#43474a] leading-relaxed">
-                  사회적 책임을 중시하는 최근 경영 트렌드에 따라, 취약계층 일자리를 제공하고 지역 사회공헌 지표가 우수한 올바른과의 거래를 통해 기업의 친환경(E)·사회적 책임(S)·투명경영(G) 실적 지표를 크게 개선할 수 있습니다.
+                  사회적 책임을 중시하는 최근 경영 트렌드에 따라, 취약계층 일자리를 제공하고 지역 사회공헌 지표가 우수한 올바름과의 거래를 통해 기업의 친환경(E)·사회적 책임(S)·투명경영(G) 실적 지표를 크게 개선할 수 있습니다.
                 </p>
               </div>
             </div>

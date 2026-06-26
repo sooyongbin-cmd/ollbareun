@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "올바른 관리시스템",
+  title: "올바름 관리시스템",
   description: "현장을 위한 가장 완벽한 근태 관리 Phase 1 MVP",
 };
 

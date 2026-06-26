@@ -62,7 +62,7 @@ export default function GuardInstallPrompt() {
         </div>
         <div className="min-w-0 flex-1">
           <h2 id="guard-install-title" className="text-[17px] font-semibold text-ink">
-            올바른 경비원 설치
+            올바름 경비원 설치
           </h2>
           <p className="mt-1 text-[13px] leading-5 text-ink-muted-48">휴대폰 홈 화면에 아이콘을 추가합니다.</p>
         </div>

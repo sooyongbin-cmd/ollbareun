@@ -208,7 +208,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
         payload: buildInspectionQrPayload(savedSite),
         worksiteName: savedSite.worksite_name,
         siteName: savedSite.name,
-        fileName: `올바른_현장점검_${savedSite.worksite_name}_${savedSite.name}`,
+        fileName: `올바름_현장점검_${savedSite.worksite_name}_${savedSite.name}`,
       });
     } catch (printError) {
       setError(printError instanceof Error ? printError.message : "QR 파일을 저장하지 못했습니다.");

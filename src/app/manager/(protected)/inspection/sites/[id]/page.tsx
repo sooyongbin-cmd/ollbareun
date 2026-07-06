@@ -11,13 +11,19 @@ import { SaveIcon } from "@/components/icons/save-icon";
 import { saveInspectionQrImage } from "../../save-inspection-qr";
 
 declare global {
+  interface NDEFReadingEvent {
+    message: {
+      records: Array<{ recordType: string; data?: DataView | string }>;
+    };
+  }
+
   interface NDEFReader {
     write(
       message: string | { records: Array<{ recordType: string; data: string }> },
       options?: { signal: AbortSignal }
     ): Promise<void>;
     scan(options?: { signal: AbortSignal }): Promise<void>;
-    onreading: ((event: any) => void) | null;
+    onreading: ((event: NDEFReadingEvent) => void) | null;
     onreadingerror: (() => void) | null;
   }
   interface Window {

@@ -4,6 +4,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import WorksiteNewPage from "./page";
 
 const push = vi.fn();
+const MockGeocoder = vi.fn(function Geocoder() {
+  return {};
+}) as unknown as typeof kakao.maps.services.Geocoder;
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push }),
@@ -97,9 +100,7 @@ describe("worksite new page", () => {
           addListener: vi.fn(),
         },
         services: {
-          Geocoder: vi.fn(function Geocoder() {
-            return {};
-          }) as any,
+          Geocoder: MockGeocoder,
           Status: {
             OK: "OK",
           },
@@ -172,9 +173,7 @@ describe("worksite new page", () => {
           }),
         },
         services: {
-          Geocoder: vi.fn(function Geocoder() {
-            return {};
-          }) as any,
+          Geocoder: MockGeocoder,
           Status: {
             OK: "OK",
           },
@@ -262,9 +261,7 @@ describe("worksite new page", () => {
           addListener: vi.fn(),
         },
         services: {
-          Geocoder: vi.fn(function Geocoder() {
-            return {};
-          }) as any,
+          Geocoder: MockGeocoder,
           Status: {
             OK: "OK",
           },

@@ -1,2 +1,8 @@
 [functions.education-reminders]
 verify_jwt = false
+
+[auth.external.kakao]
+enabled = true
+client_id = "env(KAKAO_CLIENT_ID)"
+secret = "env(KAKAO_CLIENT_SECRET)"
+redirect_uri = ""

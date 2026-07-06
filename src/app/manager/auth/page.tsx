@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getManagerUser, sanitizeManagerNextPath } from "@/lib/manager-auth";
-import ManagerKakaoLogin from "./manager-kakao-login";
+import ManagerEmailLogin from "./manager-email-login";
 
 export default async function ManagerAuthPage({
   searchParams,
@@ -14,5 +14,5 @@ export default async function ManagerAuthPage({
     redirect(sanitizeManagerNextPath(next));
   }
 
-  return <ManagerKakaoLogin />;
+  return <ManagerEmailLogin />;
 }

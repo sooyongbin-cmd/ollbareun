@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createManagerAuthRedirectUrl, getManagerUser } from "./manager-auth";
 
 describe("manager auth helpers", () => {
-  it("builds the manager Kakao auth URL with a safe relative next path", () => {
+  it("builds the manager auth URL with a safe relative next path", () => {
     expect(createManagerAuthRedirectUrl("/manager/employee/employees")).toBe(
       "/manager/auth?next=%2Fmanager%2Femployee%2Femployees",
     );
@@ -14,7 +14,7 @@ describe("manager auth helpers", () => {
   });
 
   it("returns the authenticated manager user from Supabase", async () => {
-    const user = { id: "user-1", app_metadata: { provider: "kakao" } };
+    const user = { id: "user-1", app_metadata: { provider: "email" } };
     const supabase = {
       auth: {
         getUser: async () => ({ data: { user }, error: null }),

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
-import { sanitizeManagerNextPath } from "@/lib/manager-auth";
+import { countAdminUsers, createInitialSuperAdmin, sanitizeManagerNextPath } from "@/lib/manager-auth";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
@@ -16,6 +16,16 @@ export async function GET(request: Request) {
 
   if (error) {
     return NextResponse.redirect(new URL("/manager/auth?error=callback", requestUrl.origin));
+  }
+
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !userData.user) {
+    return NextResponse.redirect(new URL("/manager/auth?error=callback", requestUrl.origin));
+  }
+
+  if ((await countAdminUsers()) === 0) {
+    await createInitialSuperAdmin(userData.user);
   }
 
   return NextResponse.redirect(new URL(nextPath, requestUrl.origin));

@@ -1,5 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
+import { getSupabaseAdmin } from "./supabase-admin";
 import { createSupabaseServerClient } from "./supabase-server";
 
 type SupabaseAuthReader = {
@@ -10,6 +11,32 @@ type SupabaseAuthReader = {
     }>;
   };
 };
+
+type AdminUserReader = {
+  from: (table: "admin_users") => {
+    select: (
+      columns: string,
+      options?: { count: "exact"; head: true },
+    ) => PromiseLike<{ count: number | null; error: { message?: string } | null }> & {
+      eq: (column: string, value: string) => {
+        maybeSingle: () => PromiseLike<{
+          data: { user_id: string; role: string } | null;
+          error: { message?: string; code?: string } | null;
+        }>;
+      };
+    };
+    insert: (row: { user_id: string; email: string; role: "super_admin" }) => {
+      select: (columns: string) => {
+        single: () => PromiseLike<{
+          data: { user_id: string; role: string } | null;
+          error: { message?: string } | null;
+        }>;
+      };
+    };
+  };
+};
+
+type AdminUserWriter = AdminUserReader;
 
 const MANAGER_HOME_PATH = "/manager";
 const MANAGER_AUTH_PATH = "/manager/auth";
@@ -34,7 +61,7 @@ export function createManagerAuthRedirectUrl(nextPath: string | null | undefined
   return `${MANAGER_AUTH_PATH}?next=${encodeURIComponent(safeNextPath)}`;
 }
 
-export async function getManagerUser(supabase?: SupabaseAuthReader) {
+export async function getManagerUser(supabase?: SupabaseAuthReader, adminClient?: AdminUserReader) {
   const authClient = supabase ?? (await createSupabaseServerClient());
   const { data, error } = await authClient.auth.getUser();
 
@@ -42,7 +69,9 @@ export async function getManagerUser(supabase?: SupabaseAuthReader) {
     return null;
   }
 
-  return data.user;
+  const adminUser = await getAdminUserByAuthUserId(data.user.id, adminClient);
+
+  return adminUser ? data.user : null;
 }
 
 export async function requireManagerUser(nextPath = MANAGER_HOME_PATH) {
@@ -53,4 +82,58 @@ export async function requireManagerUser(nextPath = MANAGER_HOME_PATH) {
   }
 
   return user;
+}
+
+function throwIfAdminUserError(error: { message?: string; code?: string } | null) {
+  if (error) {
+    throw new Error(error.message?.trim() || error.code?.trim() || "관리자 정보를 확인하지 못했습니다.");
+  }
+}
+
+function getAdminUserReader() {
+  return getSupabaseAdmin() as unknown as AdminUserReader;
+}
+
+function getAdminUserWriter() {
+  return getSupabaseAdmin() as unknown as AdminUserWriter;
+}
+
+export async function countAdminUsers(adminClientInput?: AdminUserReader) {
+  const adminClient = adminClientInput ?? getAdminUserReader();
+  const result = await adminClient.from("admin_users").select("id", { count: "exact", head: true });
+
+  throwIfAdminUserError(result.error);
+  return result.count ?? 0;
+}
+
+export async function getAdminUserByAuthUserId(userId: string, adminClientInput?: AdminUserReader) {
+  const adminClient = adminClientInput ?? getAdminUserReader();
+  const query = adminClient.from("admin_users").select("user_id,role");
+  const { data, error } = await query.eq("user_id", userId).maybeSingle();
+
+  throwIfAdminUserError(error);
+  return data;
+}
+
+export async function createInitialSuperAdmin(
+  user: Pick<User, "id" | "email">,
+  adminClientInput?: AdminUserWriter,
+) {
+  if (!user.email?.trim()) {
+    throw new Error("최초 관리자 이메일을 확인하지 못했습니다.");
+  }
+
+  const adminClient = adminClientInput ?? getAdminUserWriter();
+  const { data, error } = await adminClient
+    .from("admin_users")
+    .insert({
+      user_id: user.id,
+      email: user.email.trim(),
+      role: "super_admin",
+    })
+    .select("user_id,role")
+    .single();
+
+  throwIfAdminUserError(error);
+  return data;
 }

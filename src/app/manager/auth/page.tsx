@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getManagerUser, sanitizeManagerNextPath } from "@/lib/manager-auth";
+import { countAdminUsers, getManagerUser, sanitizeManagerNextPath } from "@/lib/manager-auth";
 import ManagerEmailLogin from "./manager-email-login";
 
 export default async function ManagerAuthPage({
@@ -14,5 +14,7 @@ export default async function ManagerAuthPage({
     redirect(sanitizeManagerNextPath(next));
   }
 
-  return <ManagerEmailLogin />;
+  const initialAdminSetupRequired = (await countAdminUsers()) === 0;
+
+  return <ManagerEmailLogin initialAdminSetupRequired={initialAdminSetupRequired} />;
 }

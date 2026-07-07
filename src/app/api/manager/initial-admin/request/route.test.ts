@@ -58,7 +58,7 @@ describe("initial admin request route", () => {
     expect(admin.signInWithOtp).toHaveBeenCalledWith({
       email: "owner@example.com",
       options: {
-        emailRedirectTo: "http://localhost/auth/callback?next=%2Fmanager%2Fsystem%2Flogs",
+        emailRedirectTo: "http://localhost/auth/callback?next=%2Fmanager%2Fsystem%2Flogs&setup=initial_admin",
         shouldCreateUser: true,
       },
     });

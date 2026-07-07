@@ -63,7 +63,7 @@ describe("auth callback route", () => {
     expect(response.headers.get("location")).toBe("http://localhost/manager/system/logs");
   });
 
-  it("registers the authenticated callback user as super_admin when admin_users is empty", async () => {
+  it("registers the authenticated callback user as super_admin when admin_users is empty after setup verification", async () => {
     const exchangeCodeForSession = vi.fn().mockResolvedValue({ error: null });
     const getUser = vi.fn().mockResolvedValue({ data: { user: { id: "user-1", email: "owner@example.com" } }, error: null });
     const admin = createAdminClient(0);
@@ -72,7 +72,33 @@ describe("auth callback route", () => {
     } as never);
     vi.mocked(getSupabaseAdmin).mockReturnValue(admin.client as never);
 
-    const response = await GET(new Request("http://localhost/auth/callback?code=abc&next=%2Fmanager"));
+    const response = await GET(
+      new Request("http://localhost/auth/callback?code=abc&next=%2Fmanager&setup=initial_admin"),
+    );
+
+    expect(admin.insert).toHaveBeenCalledWith({
+      user_id: "user-1",
+      email: "owner@example.com",
+      role: "super_admin",
+    });
+    expect(response.headers.get("location")).toBe("http://localhost/manager");
+  });
+
+  it("uses the exchanged session user for initial admin setup when the setup code was already verified", async () => {
+    const exchangeCodeForSession = vi.fn().mockResolvedValue({
+      data: { user: { id: "user-1", email: "owner@example.com" } },
+      error: null,
+    });
+    const getUser = vi.fn().mockResolvedValue({ data: { user: null }, error: new Error("missing session") });
+    const admin = createAdminClient(0);
+    vi.mocked(createSupabaseServerClient).mockResolvedValue({
+      auth: { exchangeCodeForSession, getUser },
+    } as never);
+    vi.mocked(getSupabaseAdmin).mockReturnValue(admin.client as never);
+
+    const response = await GET(
+      new Request("http://localhost/auth/callback?code=abc&next=%2Fmanager&setup=initial_admin"),
+    );
 
     expect(admin.insert).toHaveBeenCalledWith({
       user_id: "user-1",

@@ -33,6 +33,7 @@ export async function POST(request: Request) {
 
     const redirectTo = new URL("/auth/callback", requestUrl.origin);
     redirectTo.searchParams.set("next", nextPath);
+    redirectTo.searchParams.set("setup", "initial_admin");
 
     const { error } = await adminClient.auth.signInWithOtp({
       email,

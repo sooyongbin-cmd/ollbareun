@@ -6,25 +6,29 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
   const nextPath = sanitizeManagerNextPath(requestUrl.searchParams.get("next"));
+  const isInitialAdminSetup = requestUrl.searchParams.get("setup") === "initial_admin";
 
   if (!code) {
     return NextResponse.redirect(new URL("/manager/auth?error=callback", requestUrl.origin));
   }
 
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  const { data: sessionData, error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
     return NextResponse.redirect(new URL("/manager/auth?error=callback", requestUrl.origin));
   }
 
-  const { data: userData, error: userError } = await supabase.auth.getUser();
+  const exchangedUser = sessionData?.user ?? null;
+  const { data: userData, error: userError } = exchangedUser
+    ? { data: { user: exchangedUser }, error: null }
+    : await supabase.auth.getUser();
 
   if (userError || !userData.user) {
     return NextResponse.redirect(new URL("/manager/auth?error=callback", requestUrl.origin));
   }
 
-  if ((await countAdminUsers()) === 0) {
+  if (isInitialAdminSetup && (await countAdminUsers()) === 0) {
     await createInitialSuperAdmin(userData.user);
   }
 

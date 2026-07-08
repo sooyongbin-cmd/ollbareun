@@ -20,15 +20,15 @@ type AdminUserReader = {
     ) => PromiseLike<{ count: number | null; error: { message?: string } | null }> & {
       eq: (column: string, value: string) => {
         maybeSingle: () => PromiseLike<{
-          data: { user_id: string; role: string } | null;
+          data: { user_id?: string; id?: string; role: string } | null;
           error: { message?: string; code?: string } | null;
         }>;
       };
     };
-    insert: (row: { user_id: string; email: string; role: "super_admin" }) => {
+    insert: (row: { user_id?: string; id?: string; email: string; role: "super_admin" }) => {
       select: (columns: string) => {
         single: () => PromiseLike<{
-          data: { user_id: string; role: string } | null;
+          data: { user_id?: string; id?: string; role: string } | null;
           error: { message?: string } | null;
         }>;
       };
@@ -90,6 +90,20 @@ function throwIfAdminUserError(error: { message?: string; code?: string } | null
   }
 }
 
+function isMissingUserIdColumn(error: { message?: string; code?: string } | null) {
+  if (!error) {
+    return false;
+  }
+
+  const message = error.message ?? "";
+  return (
+    error.code === "PGRST204" ||
+    error.code === "42703" ||
+    message.includes("'user_id' column") ||
+    message.includes("admin_users.user_id")
+  );
+}
+
 function getAdminUserReader() {
   return getSupabaseAdmin() as unknown as AdminUserReader;
 }
@@ -110,6 +124,14 @@ export async function getAdminUserByAuthUserId(userId: string, adminClientInput?
   const adminClient = adminClientInput ?? getAdminUserReader();
   const query = adminClient.from("admin_users").select("user_id,role");
   const { data, error } = await query.eq("user_id", userId).maybeSingle();
+
+  if (isMissingUserIdColumn(error)) {
+    const fallbackQuery = adminClient.from("admin_users").select("id,role");
+    const fallback = await fallbackQuery.eq("id", userId).maybeSingle();
+
+    throwIfAdminUserError(fallback.error);
+    return fallback.data ? { user_id: fallback.data.id, role: fallback.data.role } : null;
+  }
 
   throwIfAdminUserError(error);
   return data;
@@ -133,6 +155,21 @@ export async function createInitialSuperAdmin(
     })
     .select("user_id,role")
     .single();
+
+  if (isMissingUserIdColumn(error)) {
+    const fallback = await adminClient
+      .from("admin_users")
+      .insert({
+        id: user.id,
+        email: user.email.trim(),
+        role: "super_admin",
+      })
+      .select("id,role")
+      .single();
+
+    throwIfAdminUserError(fallback.error);
+    return fallback.data;
+  }
 
   throwIfAdminUserError(error);
   return data;

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { getSystemConfigContent } from "@/lib/system-configs";
 import { POST } from "./route";
@@ -7,28 +8,26 @@ vi.mock("@/lib/supabase-admin", () => ({
   getSupabaseAdmin: vi.fn(),
 }));
 
+vi.mock("@/lib/supabase-server", () => ({
+  createSupabaseServerClient: vi.fn(),
+}));
+
 vi.mock("@/lib/system-configs", () => ({
   getSystemConfigContent: vi.fn(),
 }));
 
-function createAdminClient({ count = 0, signInError = null }: { count?: number; signInError?: Error | null } = {}) {
-  const signInWithOtp = vi.fn().mockResolvedValue({ data: {}, error: signInError });
-
+function createAdminClient({ count = 0 }: { count?: number } = {}) {
   return {
-    signInWithOtp,
-    client: {
-      auth: { signInWithOtp },
-      from: (table: string) => {
-        expect(table).toBe("admin_users");
+    from: (table: string) => {
+      expect(table).toBe("admin_users");
 
-        return {
-          select: async (_columns: string, options: { count: "exact"; head: true }) => {
-            expect(options).toEqual({ count: "exact", head: true });
+      return {
+        select: async (_columns: string, options: { count: "exact"; head: true }) => {
+          expect(options).toEqual({ count: "exact", head: true });
 
-            return { count, error: null };
-          },
-        };
-      },
+          return { count, error: null };
+        },
+      };
     },
   };
 }
@@ -39,46 +38,53 @@ describe("initial admin request route", () => {
     vi.mocked(getSystemConfigContent).mockResolvedValue("setup-code");
   });
 
-  it("sends an OTP that can create the first admin auth user when the setup code matches", async () => {
-    const admin = createAdminClient();
-    vi.mocked(getSupabaseAdmin).mockReturnValue(admin.client as never);
+  it("returns a verified Google OAuth URL when the setup code matches", async () => {
+    const signInWithOAuth = vi.fn().mockResolvedValue({
+      data: { url: "https://accounts.google.com/o/oauth2/v2/auth" },
+      error: null,
+    });
+    vi.mocked(getSupabaseAdmin).mockReturnValue(createAdminClient() as never);
+    vi.mocked(createSupabaseServerClient).mockResolvedValue({
+      auth: { signInWithOAuth },
+    } as never);
 
     const response = await POST(
       new Request("http://localhost/api/manager/initial-admin/request", {
         method: "POST",
         body: JSON.stringify({
-          email: " owner@example.com ",
           setupCode: " setup-code ",
           nextPath: "/manager/system/logs",
         }),
       }),
     );
 
+    await expect(response.json()).resolves.toEqual({ url: "https://accounts.google.com/o/oauth2/v2/auth" });
     expect(response.status).toBe(200);
-    expect(admin.signInWithOtp).toHaveBeenCalledWith({
-      email: "owner@example.com",
+    expect(signInWithOAuth).toHaveBeenCalledWith({
+      provider: "google",
       options: {
-        emailRedirectTo: "http://localhost/auth/callback?next=%2Fmanager%2Fsystem%2Flogs&setup=initial_admin",
-        shouldCreateUser: true,
+        redirectTo: "http://localhost/auth/callback?next=%2Fmanager%2Fsystem%2Flogs&setup=initial_admin",
       },
     });
   });
 
-  it("rejects an incorrect setup code without sending an OTP", async () => {
-    const admin = createAdminClient();
-    vi.mocked(getSupabaseAdmin).mockReturnValue(admin.client as never);
+  it("rejects an incorrect setup code without creating a Google OAuth URL", async () => {
+    const signInWithOAuth = vi.fn();
+    vi.mocked(getSupabaseAdmin).mockReturnValue(createAdminClient() as never);
+    vi.mocked(createSupabaseServerClient).mockResolvedValue({
+      auth: { signInWithOAuth },
+    } as never);
 
     const response = await POST(
       new Request("http://localhost/api/manager/initial-admin/request", {
         method: "POST",
         body: JSON.stringify({
-          email: "owner@example.com",
           setupCode: "wrong-code",
         }),
       }),
     );
 
     expect(response.status).toBe(401);
-    expect(admin.signInWithOtp).not.toHaveBeenCalled();
+    expect(signInWithOAuth).not.toHaveBeenCalled();
   });
 });

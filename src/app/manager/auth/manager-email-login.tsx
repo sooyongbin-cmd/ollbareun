@@ -11,17 +11,25 @@ function getNextPath() {
   return new URLSearchParams(window.location.search).get("next") ?? "/manager";
 }
 
+function createCallbackUrl(setup?: "initial_admin") {
+  const redirectTo = new URL("/auth/callback", window.location.origin);
+  redirectTo.searchParams.set("next", getNextPath());
+
+  if (setup) {
+    redirectTo.searchParams.set("setup", setup);
+  }
+
+  return redirectTo.toString();
+}
+
 export default function ManagerEmailLogin({ initialAdminSetupRequired = false }: ManagerEmailLoginProps) {
-  const [email, setEmail] = useState("");
   const [setupCode, setSetupCode] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
 
-  async function signInWithEmail(event: FormEvent<HTMLFormElement>) {
+  async function signInWithGoogle(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErrorMessage("");
-    setSuccessMessage("");
     setIsSending(true);
 
     try {
@@ -30,41 +38,32 @@ export default function ManagerEmailLogin({ initialAdminSetupRequired = false }:
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            email: email.trim(),
             setupCode: setupCode.trim(),
             nextPath: getNextPath(),
           }),
         });
-        const result = (await response.json()) as { error?: string };
+        const result = (await response.json()) as { url?: string; error?: string };
 
-        if (!response.ok) {
-          throw new Error(result.error || "최초 관리자 인증 메일을 보내지 못했습니다.");
+        if (!response.ok || !result.url) {
+          throw new Error(result.error || "Google 인증을 시작하지 못했습니다.");
         }
 
-        setSuccessMessage("인증 메일을 보냈습니다. 메일 인증 후 최초 관리자로 등록됩니다.");
+        window.location.assign(result.url);
         return;
       }
 
-      const nextPath = getNextPath();
-      const redirectTo = new URL("/auth/callback", window.location.origin);
-      redirectTo.searchParams.set("next", nextPath);
-
-      const { error } = await createSupabaseBrowserClient().auth.signInWithOtp({
-        email: email.trim(),
+      const { error } = await createSupabaseBrowserClient().auth.signInWithOAuth({
+        provider: "google",
         options: {
-          emailRedirectTo: redirectTo.toString(),
-          shouldCreateUser: false,
+          redirectTo: createCallbackUrl(),
         },
       });
 
       if (error) {
-        throw new Error("인증 메일을 보내지 못했습니다. 등록된 관리자 이메일인지 확인해주세요.");
+        throw new Error("Google 인증을 시작하지 못했습니다. 등록된 관리자 계정인지 확인해주세요.");
       }
-
-      setSuccessMessage("인증 메일을 보냈습니다. 메일의 링크를 눌러 관리자 화면으로 돌아오세요.");
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "인증 요청을 처리하지 못했습니다.");
-    } finally {
+      setErrorMessage(error instanceof Error ? error.message : "Google 인증 요청을 처리하지 못했습니다.");
       setIsSending(false);
     }
   }
@@ -76,32 +75,16 @@ export default function ManagerEmailLogin({ initialAdminSetupRequired = false }:
           <div className="space-y-3">
             <p className="text-[14px] font-semibold text-primary">관리자 인증</p>
             <h1 className="text-[30px] font-semibold leading-tight">
-              {initialAdminSetupRequired ? "최초 관리자 등록" : "관리자 이메일 인증"}
+              {initialAdminSetupRequired ? "최초 관리자 등록" : "관리자 Google 인증"}
             </h1>
             <p className="text-[15px] leading-7 text-ink/70">
               {initialAdminSetupRequired
-                ? "등록된 관리자가 없어 최초 관리자 등록코드로 이메일 인증을 시작합니다."
-                : "등록된 관리자 이메일로 받은 인증 링크를 통해 관리자 화면에 접근할 수 있습니다."}
+                ? "등록된 관리자가 없어 최초 관리자 등록코드 확인 후 Google 인증을 시작합니다."
+                : "등록된 관리자 Google 계정으로 인증 후 관리자 화면에 접근할 수 있습니다."}
             </p>
           </div>
 
-          <form className="space-y-4" onSubmit={signInWithEmail}>
-            <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-ink-muted-48" htmlFor="manager-email">
-                관리자 이메일
-              </label>
-              <input
-                id="manager-email"
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                required
-                autoComplete="email"
-                className="field"
-                placeholder="admin@example.com"
-              />
-            </div>
-
+          <form className="space-y-4" onSubmit={signInWithGoogle}>
             {initialAdminSetupRequired ? (
               <div className="space-y-2">
                 <label className="text-[14px] font-semibold text-ink-muted-48" htmlFor="initial-admin-setup-code">
@@ -125,14 +108,13 @@ export default function ManagerEmailLogin({ initialAdminSetupRequired = false }:
               className="button-primary h-12 w-full justify-center disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSending
-                ? "발송 중..."
+                ? "이동 중..."
                 : initialAdminSetupRequired
-                  ? "최초 관리자 인증 메일 받기"
-                  : "인증 메일 받기"}
+                  ? "Google로 최초 관리자 등록"
+                  : "Google로 관리자 로그인"}
             </button>
           </form>
 
-          {successMessage ? <p className="text-[14px] leading-6 text-primary">{successMessage}</p> : null}
           {errorMessage ? <p className="text-[14px] text-red-600">{errorMessage}</p> : null}
         </div>
       </main>

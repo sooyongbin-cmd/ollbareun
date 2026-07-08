@@ -34,6 +34,7 @@ describe("manager google login", () => {
         redirectTo: "http://localhost/auth/callback?next=%2Fmanager%2Fsystem%2Flogs",
       },
     });
+    expect(window.sessionStorage.getItem("ollbareun.manager.browserSession")).toBe("active");
   });
 
   it("requests a verified initial admin Google OAuth URL with the setup code", async () => {
@@ -65,6 +66,7 @@ describe("manager google login", () => {
         nextPath: "/manager/system/logs",
       }),
     });
+    expect(window.sessionStorage.getItem("ollbareun.manager.browserSession")).toBe("active");
     expect(assign).toHaveBeenCalledWith("https://accounts.google.com/o/oauth2/v2/auth");
   });
 });

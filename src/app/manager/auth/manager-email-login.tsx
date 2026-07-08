@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { markManagerBrowserSessionActive } from "../manager-browser-session-storage";
 
 type ManagerEmailLoginProps = {
   initialAdminSetupRequired?: boolean;
@@ -31,6 +32,7 @@ export default function ManagerEmailLogin({ initialAdminSetupRequired = false }:
     event.preventDefault();
     setErrorMessage("");
     setIsSending(true);
+    markManagerBrowserSessionActive();
 
     try {
       if (initialAdminSetupRequired) {

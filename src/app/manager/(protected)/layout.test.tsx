@@ -1,7 +1,16 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import ManagerLayout from "./layout";
+
+const replace = vi.fn();
+const signOut = vi.fn();
+
+vi.mock("@/lib/supabase-browser", () => ({
+  createSupabaseBrowserClient: () => ({
+    auth: { signOut },
+  }),
+}));
 
 function SuspendedManagerChild() {
   throw new Promise(() => undefined);
@@ -9,6 +18,19 @@ function SuspendedManagerChild() {
 }
 
 describe("manager layout loading state", () => {
+  beforeEach(() => {
+    replace.mockReset();
+    signOut.mockReset();
+    document.cookie = "sb-test-auth-token=; Max-Age=0; path=/";
+    Object.defineProperty(window, "location", {
+      value: {
+        assign: replace,
+      },
+      writable: true,
+    });
+    window.sessionStorage.setItem("ollbareun.manager.browserSession", "active");
+  });
+
   it("opens and closes the mobile manager menu from the header button", async () => {
     const user = userEvent.setup();
     render(
@@ -103,6 +125,20 @@ describe("manager layout loading state", () => {
     );
 
     expect(screen.getByText("자료조회중입니다...")).toBeInTheDocument();
+  });
+
+  it("signs out and returns to manager auth when the browser session marker is missing", async () => {
+    window.sessionStorage.removeItem("ollbareun.manager.browserSession");
+    document.cookie = "sb-test-auth-token=value; path=/";
+
+    render(
+      <ManagerLayout>
+        <div>manager body</div>
+      </ManagerLayout>,
+    );
+
+    expect(signOut).toHaveBeenCalled();
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/manager/auth"));
   });
 
   it("renames the safety education menu and links education resources", () => {

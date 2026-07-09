@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { UserResponse } from "@supabase/supabase-js";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import Link from "next/link";
 
 export default function ManagerHeader() {
   const [email, setEmail] = useState("");
@@ -25,12 +26,14 @@ export default function ManagerHeader() {
 
   return (
     <h2 className="text-[21px] font-semibold">
-      관리자
-      {email ? (
-        <span className="text-[11px] font-normal text-ink/60 ml-1.5">
-          ({email})
-        </span>
-      ) : null}
+      <Link href="/manager" className="hover:opacity-80 transition-opacity">
+        관리자
+        {email ? (
+          <span className="text-[11px] font-normal text-ink/60 ml-1.5">
+            ({email})
+          </span>
+        ) : null}
+      </Link>
     </h2>
   );
 }

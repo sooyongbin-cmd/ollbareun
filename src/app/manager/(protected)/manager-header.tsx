@@ -25,7 +25,12 @@ export default function ManagerHeader() {
 
   return (
     <h2 className="text-[21px] font-semibold">
-      관리자{email ? `(${email})` : ""}
+      관리자
+      {email ? (
+        <span className="text-[11px] font-normal text-ink/60 ml-1.5">
+          ({email})
+        </span>
+      ) : null}
     </h2>
   );
 }

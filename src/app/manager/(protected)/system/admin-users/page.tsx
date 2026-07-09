@@ -289,12 +289,30 @@ export default function AdminUsersPage() {
                       {isSuperAdmin ? (
                         <td className="text-right">
                           <button
-                            className="button-secondary px-3 py-2 text-[13px] text-red-600 hover:text-red-700"
+                            aria-label="삭제"
+                            className="button-secondary w-full md:w-auto text-red-600 hover:text-red-700"
                             disabled={actionLoadingId === admin.id}
                             onClick={() => void handleDelete(admin.id)}
                             type="button"
                           >
-                            삭제
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="20"
+                              height="20"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              aria-hidden="true"
+                            >
+                              <path d="M10 11v6"></path>
+                              <path d="M14 11v6"></path>
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                              <path d="M3 6h18"></path>
+                              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
                           </button>
                         </td>
                       ) : null}

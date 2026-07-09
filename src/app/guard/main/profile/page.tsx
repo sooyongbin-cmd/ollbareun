@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
+import LoadingBoard from "@/components/loading-board";
 import { getSupabasePasskeyClient } from "@/lib/supabase-passkey-client";
 import {
   readStoredGuardSessionSnapshot,
@@ -338,7 +339,7 @@ export default function GuardProfilePage() {
         <GuardFontZoomControlSection />
 
         {displayedError ? <p className="status-warn">{displayedError}</p> : null}
-        {loading ? <p className="status-ok">개인프로필을 불러오는 중입니다...</p> : null}
+        {loading ? <LoadingBoard label="개인프로필을 불러오는 중입니다." /> : null}
 
         <section
           aria-label="근무스케줄"

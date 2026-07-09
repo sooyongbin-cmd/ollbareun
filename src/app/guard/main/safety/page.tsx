@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import LoadingBoard from "@/components/loading-board";
 import { readStoredGuardSession } from "../../guard-session-storage";
 
 type EducationResourceRow = {
@@ -433,7 +434,7 @@ export default function GuardSafetyEducationPage() {
           </div>
 
           {loading ? (
-            <p className="mt-6 text-[16px] text-ink-muted-48">자료조회중입니다...</p>
+            <LoadingBoard className="mt-6" />
           ) : listError ? (
             <p className="mt-6 text-[16px] text-status-warn">{listError}</p>
           ) : (

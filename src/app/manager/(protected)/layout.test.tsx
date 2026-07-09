@@ -117,14 +117,16 @@ describe("manager layout loading state", () => {
     expect(widerContainers).toHaveLength(2);
   });
 
-  it("shows the data lookup message while manager content is suspended", () => {
+  it("shows the loading board while manager content is suspended", () => {
     render(
       <ManagerLayout>
         <SuspendedManagerChild />
       </ManagerLayout>,
     );
 
-    expect(screen.getByText("자료조회중입니다...")).toBeInTheDocument();
+    const loadingBoard = screen.getByRole("status", { name: "자료를 불러오는 중입니다." });
+    expect(loadingBoard).toBeInTheDocument();
+    expect(loadingBoard.querySelector('img[src="/loading_board.gif"]')).toBeInTheDocument();
   });
 
   it("signs out and returns to manager auth when the browser session marker is missing", async () => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import LoadingBoard from "@/components/loading-board";
 import Link from "next/link";
 import { readStoredGuardSessionSnapshot, subscribeToGuardSessionChange } from "../guard-session-storage";
 
@@ -92,7 +93,7 @@ export default function GuardSafetySection() {
         <div className="flex items-center gap-2 text-[15px] text-ink-muted-80">
           <span className="font-semibold text-ink-muted-48">이수 현황 :</span>
           {loading ? (
-            <span className="animate-pulse bg-hairline rounded h-5 w-12" />
+            <LoadingBoard className="min-h-6 min-w-12" label="안전교육 이수 현황을 불러오는 중입니다." />
           ) : (
             <span className="font-bold text-[20px] text-ink">
               {eduStatus ? `${eduStatus.completed} / ${eduStatus.total}` : "정보 없음"}

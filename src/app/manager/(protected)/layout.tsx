@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import ManagerBrowserSessionGate from "./manager-browser-session-gate";
 import ManagerLoadingMessage from "./manager-loading-message";
 import ManagerSidebar from "./manager-sidebar";
+import ManagerHeader from "./manager-header";
 
 export default function ManagerLayout({
   children,
@@ -13,7 +14,7 @@ export default function ManagerLayout({
       <ManagerBrowserSessionGate />
       <nav className="h-[52px] bg-canvas-parchment/80 backdrop-blur-md sticky top-0 z-40 border-b border-hairline/30">
         <div className="mx-auto max-w-[1180px] w-full h-full flex items-center justify-between px-5">
-          <h2 className="text-[21px] font-semibold">관리자</h2>
+          <ManagerHeader />
         </div>
       </nav>
 

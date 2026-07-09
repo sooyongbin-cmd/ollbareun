@@ -1,0 +1,31 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import type { UserResponse } from "@supabase/supabase-js";
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+
+export default function ManagerHeader() {
+  const [email, setEmail] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    const supabase = createSupabaseBrowserClient();
+    if (supabase.auth && typeof supabase.auth.getUser === "function") {
+      supabase.auth.getUser().then((response: UserResponse) => {
+        const user = response.data?.user;
+        if (active && user?.email) {
+          setEmail(user.email);
+        }
+      }).catch(() => {});
+    }
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  return (
+    <h2 className="text-[21px] font-semibold">
+      관리자{email ? `(${email})` : ""}
+    </h2>
+  );
+}

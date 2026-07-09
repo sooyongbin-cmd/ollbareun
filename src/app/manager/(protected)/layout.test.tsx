@@ -126,7 +126,7 @@ describe("manager layout loading state", () => {
 
     const loadingBoard = screen.getByRole("status", { name: "자료를 불러오는 중입니다." });
     expect(loadingBoard).toBeInTheDocument();
-    expect(loadingBoard.querySelector('img[src="/loading_board.gif"]')).toBeInTheDocument();
+    expect(loadingBoard.querySelector('img[src="/loading.gif"]')).toBeInTheDocument();
   });
 
   it("signs out and returns to manager auth when the browser session marker is missing", async () => {

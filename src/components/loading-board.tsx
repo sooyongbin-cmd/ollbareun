@@ -19,7 +19,7 @@ export default function LoadingBoard({
       className={`inline-flex items-center justify-center ${sizeClassName} ${className}`.trim()}
       role="status"
     >
-      <img alt="" aria-hidden="true" className="h-full max-h-16 min-h-6 w-auto object-contain" src="/loading_board.gif" />
+      <img alt="" aria-hidden="true" className="h-full max-h-16 min-h-6 w-auto object-contain" src="/loading.gif" />
       <span className="sr-only">{label}</span>
     </div>
   );

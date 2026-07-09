@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
@@ -68,5 +68,27 @@ describe("manager google login", () => {
     });
     expect(window.sessionStorage.getItem("ollbareun.manager.browserSession")).toBe("active");
     expect(assign).toHaveBeenCalledWith("https://accounts.google.com/o/oauth2/v2/auth");
+  });
+
+  it("renders PWA installation banner on beforeinstallprompt in login page", async () => {
+    vi.mocked(createSupabaseBrowserClient).mockReturnValue({
+      auth: {} as never,
+    } as never);
+
+    render(<ManagerEmailLogin initialAdminSetupRequired={false} />);
+
+    const installEvent = new Event("beforeinstallprompt") as Event & {
+      prompt: () => Promise<void>;
+      userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+    };
+    installEvent.prompt = vi.fn();
+    installEvent.userChoice = Promise.resolve({ outcome: "accepted" });
+    installEvent.preventDefault = vi.fn();
+
+    act(() => {
+      window.dispatchEvent(installEvent);
+    });
+
+    expect(screen.getByRole("dialog", { name: "올바름 관리자 설치" })).toBeInTheDocument();
   });
 });

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ManagerLayout from "./layout";
@@ -249,5 +249,27 @@ describe("manager layout loading state", () => {
       "href",
       "/manager/system/configs",
     );
+  });
+
+  it("renders PWA installation banner on beforeinstallprompt", () => {
+    render(
+      <ManagerLayout>
+        <div>관리자 본문</div>
+      </ManagerLayout>,
+    );
+
+    const installEvent = new Event("beforeinstallprompt") as Event & {
+      prompt: () => Promise<void>;
+      userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+    };
+    installEvent.prompt = vi.fn();
+    installEvent.userChoice = Promise.resolve({ outcome: "accepted" });
+    installEvent.preventDefault = vi.fn();
+
+    act(() => {
+      window.dispatchEvent(installEvent);
+    });
+
+    expect(screen.getByRole("dialog", { name: "올바름 관리자 설치" })).toBeInTheDocument();
   });
 });

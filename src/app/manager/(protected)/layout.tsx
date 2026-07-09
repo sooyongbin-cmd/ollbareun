@@ -3,6 +3,8 @@ import ManagerBrowserSessionGate from "./manager-browser-session-gate";
 import ManagerLoadingMessage from "./manager-loading-message";
 import ManagerSidebar from "./manager-sidebar";
 import ManagerHeader from "./manager-header";
+import ManagerInAppBrowserChecker from "../manager-in-app-browser-checker";
+import ManagerInstallPrompt from "../manager-install-prompt";
 
 export default function ManagerLayout({
   children,
@@ -27,6 +29,8 @@ export default function ManagerLayout({
           </section>
         </div>
       </div>
+      <ManagerInAppBrowserChecker />
+      <ManagerInstallPrompt />
     </div>
   );
 }

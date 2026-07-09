@@ -3,6 +3,8 @@
 import { useState, type FormEvent } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { markManagerBrowserSessionActive } from "../manager-browser-session-storage";
+import ManagerInAppBrowserChecker from "../manager-in-app-browser-checker";
+import ManagerInstallPrompt from "../manager-install-prompt";
 
 type ManagerEmailLoginProps = {
   initialAdminSetupRequired?: boolean;
@@ -127,6 +129,8 @@ export default function ManagerEmailLogin({ initialAdminSetupRequired = false, e
           {errorMessage ? <p className="text-[14px] text-red-600">{errorMessage}</p> : null}
         </div>
       </main>
+      <ManagerInAppBrowserChecker />
+      <ManagerInstallPrompt />
     </div>
   );
 }

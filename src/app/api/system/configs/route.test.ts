@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createSystemConfig, listSystemConfigs } from "@/lib/system-configs";
+import { getManagerUser } from "@/lib/manager-auth";
 import { GET, POST } from "./route";
 
 vi.mock("@/lib/system-configs", () => ({
@@ -7,9 +8,21 @@ vi.mock("@/lib/system-configs", () => ({
   listSystemConfigs: vi.fn(),
 }));
 
+vi.mock("@/lib/manager-auth", () => ({
+  getManagerUser: vi.fn(),
+}));
+
 describe("/api/system/configs", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(getManagerUser).mockResolvedValue({ id: "manager-1" } as never);
+  });
+
+  it("denies GET if not logged in", async () => {
+    vi.mocked(getManagerUser).mockResolvedValue(null);
+
+    const response = await GET();
+    expect(response.status).toBe(401);
   });
 
   it("returns system configs", async () => {
@@ -19,6 +32,18 @@ describe("/api/system/configs", () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({ configs: [{ system_code: "manager_email" }] });
+  });
+
+  it("denies POST if not logged in", async () => {
+    vi.mocked(getManagerUser).mockResolvedValue(null);
+
+    const response = await POST(
+      new Request("http://localhost/api/system/configs", {
+        method: "POST",
+        body: JSON.stringify({}),
+      }),
+    );
+    expect(response.status).toBe(401);
   });
 
   it("creates a system config", async () => {

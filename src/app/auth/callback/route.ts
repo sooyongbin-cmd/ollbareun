@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
-import { countAdminUsers, createInitialSuperAdmin, sanitizeManagerNextPath } from "@/lib/manager-auth";
+import {
+  countAdminUsers,
+  createInitialSuperAdmin,
+  sanitizeManagerNextPath,
+  getAdminUserByAuthUserId,
+  getAdminUserByEmail,
+  linkPreapprovedAdminUser,
+} from "@/lib/manager-auth";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
@@ -28,9 +35,31 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL("/manager/auth?error=callback", requestUrl.origin));
   }
 
+  const user = userData.user;
+
   if (isInitialAdminSetup && (await countAdminUsers()) === 0) {
-    await createInitialSuperAdmin(userData.user);
+    await createInitialSuperAdmin(user);
+    return NextResponse.redirect(new URL(nextPath, requestUrl.origin));
   }
 
-  return NextResponse.redirect(new URL(nextPath, requestUrl.origin));
+  // 1. Look up by user_id
+  const adminByUserId = await getAdminUserByAuthUserId(user.id).catch(() => null);
+  if (adminByUserId) {
+    return NextResponse.redirect(new URL(nextPath, requestUrl.origin));
+  }
+
+  // 2. Look up by email
+  const email = user.email?.trim().toLowerCase();
+  if (email) {
+    const adminByEmail = await getAdminUserByEmail(email).catch(() => null);
+    if (adminByEmail && !adminByEmail.user_id) {
+      await linkPreapprovedAdminUser(user);
+      return NextResponse.redirect(new URL(nextPath, requestUrl.origin));
+    }
+  }
+
+  // Not registered as admin, sign out to clear session
+  await supabase.auth.signOut();
+
+  return NextResponse.redirect(new URL("/manager/auth?error=unauthorized", requestUrl.origin));
 }

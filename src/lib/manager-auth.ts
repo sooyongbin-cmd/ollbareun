@@ -2,6 +2,7 @@ import type { User } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import { getSupabaseAdmin } from "./supabase-admin";
 import { createSupabaseServerClient } from "./supabase-server";
+import { sendAdminActivationEmail } from "./manager-security-email";
 
 type SupabaseAuthReader = {
   auth: {
@@ -25,12 +26,30 @@ type AdminUserReader = {
         }>;
       };
     };
-    insert: (row: { user_id?: string; id?: string; email: string; role: "super_admin" }) => {
+    insert: (row: { user_id?: string | null; id?: string; email: string; role: "super_admin" | "admin" }) => {
       select: (columns: string) => {
         single: () => PromiseLike<{
-          data: { user_id?: string; id?: string; role: string } | null;
+          data: { user_id?: string | null; id?: string; role: string } | null;
           error: { message?: string } | null;
         }>;
+      };
+    };
+    update: (row: { user_id?: string | null; first_login_at?: string; updated_at?: string }) => {
+      eq: (column: string, value: string) => {
+        is: (column: string, value: null) => {
+          select: (columns: string) => {
+            single: () => PromiseLike<{
+              data: { user_id?: string | null; id?: string; role: string } | null;
+              error: { message?: string } | null;
+            }>;
+          };
+        };
+        select: (columns: string) => {
+          single: () => PromiseLike<{
+            data: { user_id?: string | null; id?: string; role: string } | null;
+            error: { message?: string } | null;
+          }>;
+        };
       };
     };
   };
@@ -141,7 +160,9 @@ export async function createInitialSuperAdmin(
   user: Pick<User, "id" | "email">,
   adminClientInput?: AdminUserWriter,
 ) {
-  if (!user.email?.trim()) {
+  const email = user.email?.trim().toLowerCase();
+
+  if (!email) {
     throw new Error("최초 관리자 이메일을 확인하지 못했습니다.");
   }
 
@@ -150,7 +171,7 @@ export async function createInitialSuperAdmin(
     .from("admin_users")
     .insert({
       user_id: user.id,
-      email: user.email.trim(),
+      email,
       role: "super_admin",
     })
     .select("user_id,role")
@@ -161,7 +182,7 @@ export async function createInitialSuperAdmin(
       .from("admin_users")
       .insert({
         id: user.id,
-        email: user.email.trim(),
+        email,
         role: "super_admin",
       })
       .select("id,role")
@@ -173,4 +194,89 @@ export async function createInitialSuperAdmin(
 
   throwIfAdminUserError(error);
   return data;
+}
+
+export async function getAdminUserByEmail(email: string, adminClientInput?: AdminUserReader) {
+  if (!email?.trim()) return null;
+  const adminClient = adminClientInput ?? getAdminUserReader();
+  const query = adminClient.from("admin_users").select("user_id,role");
+  const { data, error } = await query.eq("email", email.trim().toLowerCase()).maybeSingle();
+
+  throwIfAdminUserError(error);
+  return data;
+}
+
+export async function linkPreapprovedAdminUser(
+  user: Pick<User, "id" | "email">,
+  adminClientInput?: AdminUserWriter,
+) {
+  const email = user.email?.trim().toLowerCase();
+  if (!email) {
+    throw new Error("관리자 이메일을 확인할 수 없습니다.");
+  }
+
+  const adminClient = adminClientInput ?? getAdminUserWriter();
+  const { data: adminRow, error: findError } = await adminClient
+    .from("admin_users")
+    .select("user_id,role")
+    .eq("email", email)
+    .maybeSingle();
+
+  throwIfAdminUserError(findError);
+
+  if (adminRow && !adminRow.user_id) {
+    const now = new Date().toISOString();
+    const { data: updatedRow, error: updateError } = await adminClient
+      .from("admin_users")
+      .update({
+        user_id: user.id,
+        first_login_at: now,
+        updated_at: now,
+      })
+      .eq("email", email)
+      .is("user_id", null)
+      .select("user_id,role")
+      .single();
+
+    throwIfAdminUserError(updateError);
+
+    try {
+      await sendAdminActivationEmail(email);
+    } catch (e) {
+      console.warn("관리자 계정 활성화 알림 발송 실패:", e);
+    }
+
+    return updatedRow;
+  }
+
+  return null;
+}
+
+export async function getManagerUserWithRole(supabase?: SupabaseAuthReader, adminClient?: AdminUserReader) {
+  const authClient = supabase ?? (await createSupabaseServerClient());
+  const { data, error } = await authClient.auth.getUser();
+
+  if (error || !data.user) {
+    return null;
+  }
+
+  const adminUser = await getAdminUserByAuthUserId(data.user.id, adminClient);
+  if (!adminUser) {
+    return null;
+  }
+
+  return {
+    user: data.user,
+    adminUser,
+  };
+}
+
+export async function requireSuperAdminUser(nextPath = MANAGER_HOME_PATH) {
+  const result = await getManagerUserWithRole();
+
+  if (!result || result.adminUser.role !== "super_admin") {
+    redirect(createManagerAuthRedirectUrl(nextPath));
+  }
+
+  return result.user;
 }

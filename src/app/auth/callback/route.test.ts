@@ -25,12 +25,16 @@ function createAdminClient(count: number) {
         expect(table).toBe("admin_users");
 
         return {
-          select: async (_columns: string, options?: { count: "exact"; head: true }) => {
+          select: (_: string, options?: { count: "exact"; head: true }) => {
             if (options) {
-              return { count, error: null };
+              return Promise.resolve({ count, error: null }) as never;
             }
 
-            return { data: [], error: null };
+            return {
+              eq: () => ({
+                maybeSingle: async () => ({ data: { user_id: "user-1", role: "super_admin" }, error: null }),
+              }),
+            } as never;
           },
           insert,
         };
@@ -47,9 +51,10 @@ describe("auth callback route", () => {
   it("exchanges the OAuth code and redirects to the manager next path", async () => {
     const exchangeCodeForSession = vi.fn().mockResolvedValue({ error: null });
     const getUser = vi.fn().mockResolvedValue({ data: { user: { id: "user-1", email: "admin@example.com" } }, error: null });
+    const signOut = vi.fn();
     const admin = createAdminClient(1);
     vi.mocked(createSupabaseServerClient).mockResolvedValue({
-      auth: { exchangeCodeForSession, getUser },
+      auth: { exchangeCodeForSession, getUser, signOut },
     } as never);
     vi.mocked(getSupabaseAdmin).mockReturnValue(admin.client as never);
 
@@ -113,5 +118,125 @@ describe("auth callback route", () => {
 
     expect(response.status).toBe(307);
     expect(response.headers.get("location")).toBe("http://localhost/manager/auth?error=callback");
+  });
+
+  it("redirects to next path when user_id is already registered in admin_users", async () => {
+    const exchangeCodeForSession = vi.fn().mockResolvedValue({ error: null });
+    const getUser = vi.fn().mockResolvedValue({ data: { user: { id: "user-registered", email: "admin@example.com" } }, error: null });
+    const signOut = vi.fn();
+    vi.mocked(createSupabaseServerClient).mockResolvedValue({
+      auth: { exchangeCodeForSession, getUser, signOut },
+    } as never);
+
+    const adminClient = {
+      from: (table: string) => {
+        expect(table).toBe("admin_users");
+        return {
+          select: () => ({
+            eq: (col: string, val: string) => {
+              expect(col).toBe("user_id");
+              expect(val).toBe("user-registered");
+              return {
+                maybeSingle: async () => ({ data: { user_id: "user-registered", role: "admin" }, error: null }),
+              };
+            },
+          }),
+        };
+      },
+    };
+    vi.mocked(getSupabaseAdmin).mockReturnValue(adminClient as never);
+
+    const response = await GET(
+      new Request("http://localhost/auth/callback?code=abc&next=%2Fmanager%2Fdashboard"),
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe("http://localhost/manager/dashboard");
+    expect(signOut).not.toHaveBeenCalled();
+  });
+
+  it("links user_id when not found by user_id but email matches a pre-registered row", async () => {
+    const exchangeCodeForSession = vi.fn().mockResolvedValue({ error: null });
+    const getUser = vi.fn().mockResolvedValue({ data: { user: { id: "user-new", email: "pre@example.com" } }, error: null });
+    const signOut = vi.fn();
+    vi.mocked(createSupabaseServerClient).mockResolvedValue({
+      auth: { exchangeCodeForSession, getUser, signOut },
+    } as never);
+
+    const updateMock = vi.fn().mockReturnValue({
+      eq: () => ({
+        is: () => ({
+          select: () => ({
+            single: async () => ({ data: { user_id: "user-new", role: "admin" }, error: null }),
+          }),
+        }),
+      }),
+    });
+
+    const adminClient = {
+      from: (table: string) => {
+        expect(table).toBe("admin_users");
+        return {
+          select: () => {
+            return {
+              eq: (col: string, val: string) => {
+                if (col === "user_id") {
+                  return {
+                    maybeSingle: async () => ({ data: null, error: null }),
+                  };
+                }
+                expect(col).toBe("email");
+                expect(val).toBe("pre@example.com");
+                return {
+                  maybeSingle: async () => ({ data: { user_id: null, role: "admin" }, error: null }),
+                };
+              },
+            };
+          },
+          update: updateMock,
+        };
+      },
+    };
+    vi.mocked(getSupabaseAdmin).mockReturnValue(adminClient as never);
+
+    const response = await GET(
+      new Request("http://localhost/auth/callback?code=abc&next=%2Fmanager%2Fdashboard"),
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe("http://localhost/manager/dashboard");
+    expect(updateMock).toHaveBeenCalled();
+    expect(signOut).not.toHaveBeenCalled();
+  });
+
+  it("signs out and redirects to unauthorized when email is not pre-registered", async () => {
+    const exchangeCodeForSession = vi.fn().mockResolvedValue({ error: null });
+    const getUser = vi.fn().mockResolvedValue({ data: { user: { id: "user-unauth", email: "unauth@example.com" } }, error: null });
+    const signOut = vi.fn();
+    vi.mocked(createSupabaseServerClient).mockResolvedValue({
+      auth: { exchangeCodeForSession, getUser, signOut },
+    } as never);
+
+    const adminClient = {
+      from: (table: string) => {
+        expect(table).toBe("admin_users");
+        return {
+          select: () => ({
+            eq: () => ({
+              maybeSingle: async () => ({ data: null, error: null }),
+            }),
+          }),
+        };
+      },
+    };
+    vi.mocked(getSupabaseAdmin).mockReturnValue(adminClient as never);
+
+    const response = await GET(
+      new Request("http://localhost/auth/callback?code=abc&next=%2Fmanager%2Fdashboard"),
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe("http://localhost/manager/auth?error=unauthorized");
+    expect(signOut).toHaveBeenCalled();
   });
 });

@@ -47,6 +47,7 @@ const menu = [
     children: [
       { label: "로그현황", href: "/manager/system/logs" },
       { label: "패스키 요청 관리", href: "/manager/system/passkeys" },
+      { label: "관리자관리", href: "/manager/system/admin-users" },
       { label: "시스템설정", href: "/manager/system/configs" },
     ],
   },

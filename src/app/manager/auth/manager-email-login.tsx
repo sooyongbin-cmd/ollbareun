@@ -6,6 +6,7 @@ import { markManagerBrowserSessionActive } from "../manager-browser-session-stor
 
 type ManagerEmailLoginProps = {
   initialAdminSetupRequired?: boolean;
+  errorParam?: string;
 };
 
 function getNextPath() {
@@ -23,9 +24,15 @@ function createCallbackUrl(setup?: "initial_admin") {
   return redirectTo.toString();
 }
 
-export default function ManagerEmailLogin({ initialAdminSetupRequired = false }: ManagerEmailLoginProps) {
+export default function ManagerEmailLogin({ initialAdminSetupRequired = false, errorParam }: ManagerEmailLoginProps) {
   const [setupCode, setSetupCode] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState(
+    errorParam === "unauthorized"
+      ? "등록되지 않은 관리자 계정입니다. 관리자 등록을 먼저 완료해주세요."
+      : errorParam === "callback"
+        ? "인증 중 오류가 발생했습니다. 다시 시도해주세요."
+        : ""
+  );
   const [isSending, setIsSending] = useState(false);
 
   async function signInWithGoogle(event: FormEvent<HTMLFormElement>) {

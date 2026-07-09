@@ -1,7 +1,13 @@
 import { createSystemConfig, listSystemConfigs } from "@/lib/system-configs";
+import { getManagerUser } from "@/lib/manager-auth";
 
 export async function GET() {
   try {
+    const manager = await getManagerUser();
+    if (!manager) {
+      return Response.json({ error: "인증 정보가 올바르지 않습니다." }, { status: 401 });
+    }
+
     return Response.json({ configs: await listSystemConfigs() });
   } catch (error) {
     return Response.json(
@@ -13,6 +19,11 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const manager = await getManagerUser();
+    if (!manager) {
+      return Response.json({ error: "인증 정보가 올바르지 않습니다." }, { status: 401 });
+    }
+
     const body = await request.json();
     return Response.json({
       config: await createSystemConfig({

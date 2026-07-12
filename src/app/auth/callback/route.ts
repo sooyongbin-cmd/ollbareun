@@ -61,5 +61,10 @@ export async function GET(request: Request) {
   // Not registered as admin, sign out to clear session
   await supabase.auth.signOut();
 
-  return NextResponse.redirect(new URL("/manager/auth?error=unauthorized", requestUrl.origin));
+  const redirectUrl = new URL("/manager/auth?error=unauthorized", requestUrl.origin);
+  if (email) {
+    redirectUrl.searchParams.set("email", email);
+  }
+
+  return NextResponse.redirect(redirectUrl);
 }

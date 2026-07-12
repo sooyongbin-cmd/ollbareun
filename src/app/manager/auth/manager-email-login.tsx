@@ -9,6 +9,7 @@ import ManagerInstallPrompt from "../manager-install-prompt";
 type ManagerEmailLoginProps = {
   initialAdminSetupRequired?: boolean;
   errorParam?: string;
+  emailParam?: string;
 };
 
 function getNextPath() {
@@ -26,15 +27,24 @@ function createCallbackUrl(setup?: "initial_admin") {
   return redirectTo.toString();
 }
 
-export default function ManagerEmailLogin({ initialAdminSetupRequired = false, errorParam }: ManagerEmailLoginProps) {
+export default function ManagerEmailLogin({
+  initialAdminSetupRequired = false,
+  errorParam,
+  emailParam,
+}: ManagerEmailLoginProps) {
   const [setupCode, setSetupCode] = useState("");
-  const [errorMessage, setErrorMessage] = useState(
-    errorParam === "unauthorized"
-      ? "등록되지 않은 관리자 계정입니다. 관리자 등록을 먼저 완료해주세요."
-      : errorParam === "callback"
-        ? "인증 중 오류가 발생했습니다. 다시 시도해주세요."
-        : ""
-  );
+  const [errorMessage, setErrorMessage] = useState(() => {
+    if (emailParam) {
+      return `사용자(${emailParam})가 관리자로 등록되지 않았습니다.`;
+    }
+    if (errorParam === "unauthorized") {
+      return "등록되지 않은 관리자 계정입니다. 관리자 등록을 먼저 완료해주세요.";
+    }
+    if (errorParam === "callback") {
+      return "인증 중 오류가 발생했습니다. 다시 시도해주세요.";
+    }
+    return "";
+  });
   const [isSending, setIsSending] = useState(false);
 
   async function signInWithGoogle(event: FormEvent<HTMLFormElement>) {

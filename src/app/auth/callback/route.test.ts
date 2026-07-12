@@ -236,7 +236,7 @@ describe("auth callback route", () => {
     );
 
     expect(response.status).toBe(307);
-    expect(response.headers.get("location")).toBe("http://localhost/manager/auth?error=unauthorized");
+    expect(response.headers.get("location")).toBe("http://localhost/manager/auth?error=unauthorized&email=unauth%40example.com");
     expect(signOut).toHaveBeenCalled();
   });
 });

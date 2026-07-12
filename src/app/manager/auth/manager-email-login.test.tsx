@@ -91,4 +91,25 @@ describe("manager google login", () => {
 
     expect(screen.getByRole("dialog", { name: "올바름 관리자 설치" })).toBeInTheDocument();
   });
+
+  it("renders default unauthorized error message when errorParam is unauthorized and emailParam is missing", () => {
+    render(<ManagerEmailLogin initialAdminSetupRequired={false} errorParam="unauthorized" />);
+    expect(screen.getByText("등록되지 않은 관리자 계정입니다. 관리자 등록을 먼저 완료해주세요.")).toBeInTheDocument();
+  });
+
+  it("renders default callback error message when errorParam is callback and emailParam is missing", () => {
+    render(<ManagerEmailLogin initialAdminSetupRequired={false} errorParam="callback" />);
+    expect(screen.getByText("인증 중 오류가 발생했습니다. 다시 시도해주세요.")).toBeInTheDocument();
+  });
+
+  it("renders customized unregistered admin message when emailParam is provided", () => {
+    render(
+      <ManagerEmailLogin
+        initialAdminSetupRequired={false}
+        errorParam="callback"
+        emailParam="admin-unregistered@example.com"
+      />
+    );
+    expect(screen.getByText("사용자(admin-unregistered@example.com)가 관리자로 등록되지 않았습니다.")).toBeInTheDocument();
+  });
 });

@@ -5,9 +5,9 @@ import ManagerEmailLogin from "./manager-email-login";
 export default async function ManagerAuthPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string; error?: string }>;
+  searchParams: Promise<{ next?: string; error?: string; email?: string }>;
 }) {
-  const { next, error } = await searchParams;
+  const { next, error, email } = await searchParams;
   const user = await getManagerUser();
 
   if (user) {
@@ -16,5 +16,11 @@ export default async function ManagerAuthPage({
 
   const initialAdminSetupRequired = (await countAdminUsers()) === 0;
 
-  return <ManagerEmailLogin initialAdminSetupRequired={initialAdminSetupRequired} errorParam={error} />;
+  return (
+    <ManagerEmailLogin
+      initialAdminSetupRequired={initialAdminSetupRequired}
+      errorParam={error}
+      emailParam={email}
+    />
+  );
 }

@@ -5,6 +5,7 @@ import GuardZoomScope from "./guard-zoom-scope";
 
 export const metadata: Metadata = {
   title: "사회적기업 올바름",
+  manifest: "/guard/manifest.webmanifest",
 };
 
 export default function GuardLayout({

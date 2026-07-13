@@ -53,9 +53,9 @@ export default function ManagerInstallPrompt() {
   return (
     <div className="fixed inset-x-0 bottom-0 z-[100] px-4 pb-4 sm:pb-6" role="dialog" aria-labelledby="manager-install-title">
       <div className="mx-auto flex w-full max-w-[600px] items-center gap-4 rounded-[18px] border border-hairline bg-canvas p-4 shadow-product">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px] bg-primary text-[20px] font-semibold text-canvas">
-          앱
-        </div>
+        {/* A fixed-size PWA icon does not need Next.js image optimization. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="h-12 w-12 shrink-0 rounded-[14px]" src="/manager-icon-192.png" alt="" width={48} height={48} />
         <div className="min-w-0 flex-1">
           <h2 id="manager-install-title" className="text-[17px] font-semibold text-ink">
             올바름 관리자 설치

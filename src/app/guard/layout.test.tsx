@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import GuardLayout from "./layout";
+import GuardLayout, { metadata } from "./layout";
 import { guardFontZoomStorageKey, guardZoomStorageKey } from "./guard-zoom";
 
 vi.mock("./guard-install-prompt", () => ({
@@ -14,6 +14,10 @@ vi.mock("./in-app-browser-checker", () => ({
 describe("guard layout zoom scope", () => {
   beforeEach(() => {
     window.localStorage.clear();
+  });
+
+  it("links only the guard manifest", () => {
+    expect(metadata.manifest).toBe("/guard/manifest.webmanifest");
   });
 
   it("wraps all guard content in the zoom scope", () => {

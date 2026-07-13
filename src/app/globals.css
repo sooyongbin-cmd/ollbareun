@@ -202,63 +202,63 @@ button:focus-visible {
   font-size: 17px;
 }
 
-/* Shared manager design-QA scale */
-.manager-content {
+/* Shared application design-QA scale */
+.app-content {
   font-size: 14px;
 }
 
-.manager-content h1 {
+.app-content h1 {
   font-size: 28px;
   font-weight: 700;
   line-height: 1.2;
 }
 
-.manager-content h2 {
+.app-content h2 {
   font-size: 18px;
   font-weight: 600;
   line-height: 1.35;
 }
 
-.manager-content h1 + p {
+.app-content h1 + p {
   margin-top: 12px;
   font-size: 14px;
   font-weight: 400;
   line-height: 1.5;
 }
 
-.manager-content label,
-.manager-content .field,
-.manager-content .button-primary,
-.manager-content .button-secondary,
-.manager-content .status-ok,
-.manager-content .status-warn {
+.app-content label,
+.app-content .field,
+.app-content .button-primary,
+.app-content .button-secondary,
+.app-content .status-ok,
+.app-content .status-warn {
   font-size: 14px;
 }
 
-.manager-content .apple-table {
+.app-content .apple-table {
   min-width: 680px;
 }
 
-.manager-content .apple-table th {
+.app-content .apple-table th {
   font-size: 12px;
   white-space: nowrap;
 }
 
-.manager-content .apple-table td {
+.app-content .apple-table td {
   font-size: 14px;
 }
 
-.manager-content [class~="justify-between"][class~="text-ink-muted-48"] {
+.app-content [class~="justify-between"][class~="text-ink-muted-48"] {
   font-size: 12px;
   font-weight: 400;
 }
 
-.manager-content :is(section, form)[class~="rounded-[18px]"][class~="bg-canvas-parchment"] {
+.app-content :is(section, form)[class~="rounded-[18px]"][class~="bg-canvas-parchment"] {
   padding: 24px;
 }
 
 @media (width >= 48rem) {
-  .manager-content :is(section, form)[class~="rounded-[18px]"][class~="bg-canvas-parchment"] {
+  .app-content :is(section, form)[class~="rounded-[18px]"][class~="bg-canvas-parchment"] {
     padding: 32px;
   }
 }

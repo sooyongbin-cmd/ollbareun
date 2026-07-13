@@ -18,12 +18,6 @@ describe("manager google login", () => {
     });
   });
 
-  it("uses the shared manager design scope", () => {
-    const { container } = render(<ManagerEmailLogin initialAdminSetupRequired={false} />);
-
-    expect(container.querySelector("main.manager-content")).toBeInTheDocument();
-  });
-
   it("starts Supabase Google OAuth with a manager callback URL", async () => {
     const signInWithOAuth = vi.fn().mockResolvedValue({ data: {}, error: null });
     vi.mocked(createSupabaseBrowserClient).mockReturnValue({

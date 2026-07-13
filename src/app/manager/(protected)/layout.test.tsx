@@ -115,7 +115,6 @@ describe("manager layout loading state", () => {
     );
 
     expect(widerContainers).toHaveLength(2);
-    expect(container.querySelector(".manager-content")).toBeInTheDocument();
   });
 
   it("shows the loading board while manager content is suspended", () => {

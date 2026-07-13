@@ -171,7 +171,7 @@ export default function EmployeeRosterPage() {
     <section className="space-y-[24px]">
       <header>
         <div className="space-y-3">
-          <h1 className="employee-roster-title text-[28px] leading-[1.2]">직원명부관리</h1>
+          <h1 className="text-[28px] leading-[1.2]">직원명부관리</h1>
           <p className="max-w-[640px] text-[14px] font-normal leading-relaxed text-ink-muted-48">
             등록된 직원의 이름과 연락처를 검색해 확인합니다.
           </p>
@@ -190,7 +190,7 @@ export default function EmployeeRosterPage() {
                 이름
               </label>
               <select
-                className="field employee-roster-field appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"
+                className="field appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"
                 id="employee-roster-name-search"
                 value={nameQuery}
                 onChange={(event) => setNameQuery(event.target.value)}
@@ -208,7 +208,7 @@ export default function EmployeeRosterPage() {
                 역할
               </label>
               <select
-                className="field employee-roster-field appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"
+                className="field appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"
                 id="employee-roster-role-search"
                 value={roleQuery}
                 onChange={(event) => setRoleQuery(event.target.value)}
@@ -236,7 +236,7 @@ export default function EmployeeRosterPage() {
           </label>
 
           <Link
-            className="button-primary employee-roster-action w-full gap-2 text-center md:w-auto"
+            className="button-primary w-full gap-2 text-center md:w-auto"
             href="/manager/employee/employees/new"
           >
             <span>직원 등록</span>
@@ -261,7 +261,7 @@ export default function EmployeeRosterPage() {
           <p className="mt-6 text-[16px] text-status-warn">{error}</p>
         ) : (
           <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-[16px] border border-hairline bg-canvas">
-            <table className="apple-table employee-roster-table min-w-[680px]">
+            <table className="apple-table">
               <thead>
                 <tr>
                   <SortableHeader

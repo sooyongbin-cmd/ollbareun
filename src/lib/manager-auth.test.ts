@@ -3,7 +3,6 @@ import {
   createInitialSuperAdmin,
   createManagerAuthRedirectUrl,
   getManagerUser,
-  getManagerUserWithRole,
   getAdminUserByEmail,
   linkPreapprovedAdminUser,
 } from "./manager-auth";
@@ -100,17 +99,6 @@ function createLegacyAdminInsertClient() {
 }
 
 describe("manager auth helpers", () => {
-  it("temporarily bypasses manager login for testing", async () => {
-    await expect(getManagerUser()).resolves.toMatchObject({
-      id: "temporary-manager-test-user",
-      email: "manager-test@local.invalid",
-    });
-    await expect(getManagerUserWithRole()).resolves.toMatchObject({
-      user: { id: "temporary-manager-test-user" },
-      adminUser: { role: "super_admin" },
-    });
-  });
-
   it("builds the manager auth URL with a safe relative next path", () => {
     expect(createManagerAuthRedirectUrl("/manager/employee/employees")).toBe(
       "/manager/auth?next=%2Fmanager%2Femployee%2Femployees",

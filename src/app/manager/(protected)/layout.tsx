@@ -24,7 +24,7 @@ export default function ManagerLayout({
         <div className="grid min-w-0 gap-[48px] lg:grid-cols-[240px_1fr]">
           <ManagerSidebar />
 
-          <section className="min-w-0">
+          <section className="manager-content min-w-0">
             <Suspense fallback={<ManagerLoadingMessage />}>{children}</Suspense>
           </section>
         </div>

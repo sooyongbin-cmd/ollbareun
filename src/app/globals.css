@@ -202,23 +202,65 @@ button:focus-visible {
   font-size: 17px;
 }
 
-/* Employee roster design-QA scale */
-.employee-roster-title {
-  font-weight: 700;
-}
-
-.employee-roster-field,
-.employee-roster-action {
+/* Shared manager design-QA scale */
+.manager-content {
   font-size: 14px;
 }
 
-.employee-roster-table th {
+.manager-content h1 {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.manager-content h2 {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.manager-content h1 + p {
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.manager-content label,
+.manager-content .field,
+.manager-content .button-primary,
+.manager-content .button-secondary,
+.manager-content .status-ok,
+.manager-content .status-warn {
+  font-size: 14px;
+}
+
+.manager-content .apple-table {
+  min-width: 680px;
+}
+
+.manager-content .apple-table th {
   font-size: 12px;
   white-space: nowrap;
 }
 
-.employee-roster-table td {
+.manager-content .apple-table td {
   font-size: 14px;
+}
+
+.manager-content [class~="justify-between"][class~="text-ink-muted-48"] {
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.manager-content :is(section, form)[class~="rounded-[18px]"][class~="bg-canvas-parchment"] {
+  padding: 24px;
+}
+
+@media (width >= 48rem) {
+  .manager-content :is(section, form)[class~="rounded-[18px]"][class~="bg-canvas-parchment"] {
+    padding: 32px;
+  }
 }
 
 /* Guard-only readable font scale */

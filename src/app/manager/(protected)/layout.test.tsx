@@ -115,6 +115,7 @@ describe("manager layout loading state", () => {
     );
 
     expect(widerContainers).toHaveLength(2);
+    expect(widerContainers[1]).toHaveClass("py-10", "md:py-[80px]");
   });
 
   it("shows the loading board while manager content is suspended", () => {

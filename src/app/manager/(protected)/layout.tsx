@@ -20,7 +20,7 @@ export default function ManagerLayout({
         </div>
       </nav>
 
-      <div className="mx-auto w-full max-w-[1180px] px-6 py-[80px]">
+      <div className="mx-auto w-full max-w-[1180px] px-6 py-10 md:py-[80px]">
         <div className="grid min-w-0 gap-[48px] lg:grid-cols-[240px_1fr]">
           <ManagerSidebar />
 

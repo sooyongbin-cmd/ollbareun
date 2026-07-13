@@ -129,15 +129,15 @@ export default function EducationReportPage() {
               <tbody>
                 {rows.length === 0 ? (
                   <tr>
-                    <td colSpan={2} className="p-8 text-center text-ink-muted-48 italic">
+                    <td data-responsive-empty colSpan={2} className="p-8 text-center text-ink-muted-48 italic">
                       조회 결과가 없습니다.
                     </td>
                   </tr>
                 ) : (
                   rows.map((row) => (
                     <tr key={row.employeeName}>
-                      <td className="font-semibold">{row.employeeName}</td>
-                      <td>{row.completedCount}/{row.totalCount}</td>
+                      <td data-label="근무자" className="font-semibold">{row.employeeName}</td>
+                      <td data-label="교육이수건수/전체건수">{row.completedCount}/{row.totalCount}</td>
                     </tr>
                   ))
                 )}

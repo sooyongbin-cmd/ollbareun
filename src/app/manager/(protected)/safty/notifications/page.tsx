@@ -186,16 +186,16 @@ export default function ManagerSafetyNotificationsPage() {
               <tbody>
                 {runs.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="p-8 text-center text-ink-muted-48 italic">
+                    <td data-responsive-empty colSpan={6} className="p-8 text-center text-ink-muted-48 italic">
                       조회 결과에 해당하는 자동알림 로그가 없습니다.
                     </td>
                   </tr>
                 ) : (
                   runs.map((run) => (
                     <tr key={run.id} className="hover:bg-canvas-parchment transition-colors">
-                      <td className="whitespace-nowrap">{run.scheduled_date}</td>
-                      <td className="whitespace-nowrap font-semibold">{run.scheduled_time}</td>
-                      <td className="whitespace-nowrap">
+                      <td data-label="예약일" className="whitespace-nowrap">{run.scheduled_date}</td>
+                      <td data-label="예약시간" className="whitespace-nowrap font-semibold">{run.scheduled_time}</td>
+                      <td data-label="상태" className="whitespace-nowrap">
                         {run.status === "sent" ? (
                           <span className="inline-flex items-center text-green-600 font-semibold" title={getStatusLabel(run.status)}>
                             <FontAwesomeIcon icon={byPrefixAndName.fas['check']} />
@@ -204,9 +204,9 @@ export default function ManagerSafetyNotificationsPage() {
                           getStatusLabel(run.status)
                         )}
                       </td>
-                      <td className="whitespace-nowrap">{formatDateTime(run.sent_at)}</td>
-                      <td className="min-w-[220px] text-ink-muted-80">{summarizeResult(run.result)}</td>
-                      <td className="min-w-[180px] text-ink-muted-48">{run.error_message ?? "-"}</td>
+                      <td data-label="발송시각" className="whitespace-nowrap">{formatDateTime(run.sent_at)}</td>
+                      <td data-label="발송결과" className="min-w-[220px] text-ink-muted-80">{summarizeResult(run.result)}</td>
+                      <td data-label="오류내용" className="min-w-[180px] text-ink-muted-48">{run.error_message ?? "-"}</td>
                     </tr>
                   ))
                 )}

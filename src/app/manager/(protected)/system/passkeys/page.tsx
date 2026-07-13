@@ -141,21 +141,23 @@ export default function ManagerPasskeyRequestsPage() {
               <tbody>
                 {requests.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-8 text-center text-ink-muted-48 italic">
+                    <td data-responsive-empty colSpan={5} className="p-8 text-center text-ink-muted-48 italic">
                       패스키 요청 목록이 없습니다.
                     </td>
                   </tr>
                 ) : (
                   requests.map((request) => (
                     <tr key={request.id}>
-                      <td className="font-semibold">
-                        {request.employeeName}
-                        {request.employeeRetired ? <span className="ml-2 text-[12px] text-status-warn">퇴직</span> : null}
+                      <td data-label="경비원" className="font-semibold">
+                        <div>
+                          {request.employeeName}
+                          {request.employeeRetired ? <span className="ml-2 text-[12px] text-status-warn">퇴직</span> : null}
+                        </div>
                       </td>
-                      <td>{request.employeePhone}</td>
-                      <td>{formatDateTime(request.requestedAt)}</td>
-                      <td>{getStatusLabel(request.status)}</td>
-                      <td className="text-right">
+                      <td data-label="연락처">{request.employeePhone}</td>
+                      <td data-label="요청일">{formatDateTime(request.requestedAt)}</td>
+                      <td data-label="상태">{getStatusLabel(request.status)}</td>
+                      <td data-label="작업" className="text-right">
                         <div className="inline-flex gap-2">
                           {request.status === "pending" ? (
                             <>

@@ -166,18 +166,18 @@ export default function InspectionLogsPage() {
               <tbody>
                 {logs.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-8 text-center text-ink-muted-48 italic">
+                    <td data-responsive-empty colSpan={5} className="p-8 text-center text-ink-muted-48 italic">
                       조회 결과에 해당하는 점검 기록이 없습니다.
                     </td>
                   </tr>
                 ) : (
                   logs.map((log) => (
                     <tr key={log.id} className="hover:bg-canvas-parchment transition-colors">
-                      <td>{formatDateTime(log.inspected_at)}</td>
-                      <td>{log.worksite_name}</td>
-                      <td className="font-semibold">{log.site_name}</td>
-                      <td>{log.employee_name}</td>
-                      <td>{log.employee_role ?? "역할 없음"}</td>
+                      <td data-label="점검일자">{formatDateTime(log.inspected_at)}</td>
+                      <td data-label="근무지">{log.worksite_name}</td>
+                      <td data-label="현장명" className="font-semibold">{log.site_name}</td>
+                      <td data-label="점검자">{log.employee_name}</td>
+                      <td data-label="역할">{log.employee_role ?? "역할 없음"}</td>
                     </tr>
                   ))
                 )}

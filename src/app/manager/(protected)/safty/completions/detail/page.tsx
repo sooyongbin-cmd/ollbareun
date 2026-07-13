@@ -270,15 +270,15 @@ export default function EducationCompletionsDetailPage() {
               <tbody>
                 {sortedCompletions.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="p-8 text-center text-ink-muted-48 italic">
+                    <td data-responsive-empty colSpan={4} className="p-8 text-center text-ink-muted-48 italic">
                       조회 결과에 해당하는 교육이수 기록이 없습니다.
                     </td>
                   </tr>
                 ) : (
                   sortedCompletions.map((completion) => (
                     <tr key={`${completion.employee_id}:${completion.resource_id}`} className="hover:bg-canvas-parchment transition-colors">
-                      <td className="font-semibold">{completion.employee_name}</td>
-                      <td className="text-ink-muted-48">
+                      <td data-label="직원" className="font-semibold">{completion.employee_name}</td>
+                      <td data-label="교재" className="text-ink-muted-48">
                         <div className="space-y-1">
                           <div>{completion.resource_title}</div>
                           {completion.resource_youtube_link ? (
@@ -293,7 +293,7 @@ export default function EducationCompletionsDetailPage() {
                           ) : null}
                         </div>
                       </td>
-                      <td>
+                      <td data-label="완료여부">
                         <span
                           className={`inline-flex rounded-full px-3 py-1 text-[12px] font-semibold ${
                             completion.is_completed ? "bg-primary/10 text-primary" : "bg-ink/10 text-ink-muted-48"
@@ -302,7 +302,7 @@ export default function EducationCompletionsDetailPage() {
                           {completion.is_completed ? "완료" : "미완료"}
                         </span>
                       </td>
-                      <td className="text-ink-muted-48">
+                      <td data-label="완료일자" className="text-ink-muted-48">
                         {completion.completed_at
                           ? new Date(completion.completed_at).toLocaleString("ko-KR", {
                               year: "numeric",

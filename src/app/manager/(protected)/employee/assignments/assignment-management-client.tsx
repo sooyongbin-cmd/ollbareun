@@ -249,7 +249,7 @@ export default function AssignmentManagementClient() {
               <tbody>
                 {sortedAssignments.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="p-8 text-center text-ink-muted-48 italic">
+                    <td data-responsive-empty colSpan={3} className="p-8 text-center text-ink-muted-48 italic">
                       조회 결과가 없습니다.
                     </td>
                   </tr>
@@ -269,9 +269,9 @@ export default function AssignmentManagementClient() {
                       role="link"
                       tabIndex={0}
                     >
-                      <td className="font-semibold">{formatPeriod(assignment)}</td>
-                      <td>{assignment.worksite_name}</td>
-                      <td className="text-ink-muted-48">{assignment.employee_name}</td>
+                      <td data-label="날짜" className="font-semibold">{formatPeriod(assignment)}</td>
+                      <td data-label="근무지">{assignment.worksite_name}</td>
+                      <td data-label="이름" className="text-ink-muted-48">{assignment.employee_name}</td>
                     </tr>
                   ))
                 )}

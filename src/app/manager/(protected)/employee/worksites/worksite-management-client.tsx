@@ -215,7 +215,7 @@ export default function WorksiteManagementClient() {
               <tbody>
                 {sortedWorksites.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="p-8 text-center text-ink-muted-48 italic">
+                    <td data-responsive-empty colSpan={4} className="p-8 text-center text-ink-muted-48 italic">
                       조회 결과에 해당하는 근무지가 없습니다.
                     </td>
                   </tr>
@@ -224,7 +224,7 @@ export default function WorksiteManagementClient() {
                     const count = worksiteCounts[worksite.id] ?? 0;
                     return (
                       <tr key={worksite.id} className="hover:bg-canvas-parchment transition-colors">
-                        <td className="font-semibold">
+                        <td data-label="근무지명" className="font-semibold">
                           <Link
                             className="text-primary hover:underline"
                             href={`/manager/employee/worksites/save/${worksite.id}`}
@@ -232,7 +232,7 @@ export default function WorksiteManagementClient() {
                             {worksite.name}
                           </Link>
                         </td>
-                        <td className="text-center">
+                        <td data-label="배정인원수" className="text-center">
                           {count > 0 ? (
                             <Link
                               className="text-primary font-semibold hover:underline"
@@ -244,8 +244,8 @@ export default function WorksiteManagementClient() {
                             <span className="text-ink-muted-48">{count}</span>
                           )}
                         </td>
-                        <td className="text-ink-muted-48">{formatGpsInfo(worksite.gps_info)}</td>
-                        <td className="text-right">{worksite.radius_meters}m</td>
+                        <td data-label="GPS정보" className="text-ink-muted-48">{formatGpsInfo(worksite.gps_info)}</td>
+                        <td data-label="허용반경" className="text-right">{worksite.radius_meters}m</td>
                       </tr>
                     );
                   })

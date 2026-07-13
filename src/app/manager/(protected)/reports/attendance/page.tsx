@@ -117,17 +117,17 @@ export default function AttendanceReportPage() {
               <tbody>
                 {rows.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="p-8 text-center text-ink-muted-48 italic">
+                    <td data-responsive-empty colSpan={4} className="p-8 text-center text-ink-muted-48 italic">
                       {searched ? "조회 결과가 없습니다." : "직원이름과 연도를 입력한 뒤 조회하세요."}
                     </td>
                   </tr>
                 ) : (
                   rows.map((row) => (
                     <tr key={`${row.date}-${row.clockInTime}`}>
-                      <td>{row.date}</td>
-                      <td>{row.clockInTime}</td>
-                      <td>{row.clockOutTime}</td>
-                      <td>{row.workDuration}</td>
+                      <td data-label="날짜">{row.date}</td>
+                      <td data-label="출근시각">{row.clockInTime}</td>
+                      <td data-label="퇴근시각">{row.clockOutTime}</td>
+                      <td data-label="근무시간">{row.workDuration}</td>
                     </tr>
                   ))
                 )}

@@ -314,14 +314,14 @@ export default function EmployeeRosterPage() {
               <tbody>
                 {sortedEmployees.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-8 text-center text-ink-muted-48 italic">
+                    <td data-responsive-empty colSpan={5} className="p-8 text-center text-ink-muted-48 italic">
                       조회 결과에 해당하는 직원이 없습니다.
                     </td>
                   </tr>
                 ) : (
                   sortedEmployees.map((employee) => (
                     <tr key={employee.id} className="hover:bg-canvas-parchment transition-colors">
-                      <td className="font-semibold">
+                      <td data-label="이름" className="font-semibold">
                         <Link
                           className="text-primary hover:underline"
                           href={`/manager/employee/employees/save/${employee.id}`}
@@ -329,12 +329,12 @@ export default function EmployeeRosterPage() {
                           {employee.name}
                         </Link>
                       </td>
-                      <td className="text-ink-muted-48">{employee.phone}</td>
-                      <td className="text-ink-muted-48">{employee.role}</td>
-                      <td className="text-ink-muted-48">
+                      <td data-label="연락처" className="text-ink-muted-48">{employee.phone}</td>
+                      <td data-label="역할" className="text-ink-muted-48">{employee.role}</td>
+                      <td data-label="근무지" className="text-ink-muted-48">
                         {worksiteById.get(worksiteByEmployeeId.get(employee.id) ?? "") ?? "-"}
                       </td>
-                      <td className="text-right">
+                      <td data-label="상태" className="text-right">
                         <span
                           className={`inline-flex rounded-full px-3 py-1 text-[12px] font-semibold ${
                             employee.is_retired

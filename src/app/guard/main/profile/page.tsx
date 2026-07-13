@@ -357,15 +357,15 @@ export default function GuardProfilePage() {
               <tbody>
                 {!loading && (profile?.schedules.length ?? 0) === 0 ? (
                   <tr>
-                    <td colSpan={2} className="p-8 text-center text-ink-muted-48 italic">
+                    <td data-responsive-empty colSpan={2} className="p-8 text-center text-ink-muted-48 italic">
                       근무스케줄이 없습니다.
                     </td>
                   </tr>
                 ) : (
                   profile?.schedules.map((schedule) => (
                     <tr key={schedule.id}>
-                      <td>{schedule.period}</td>
-                      <td>{schedule.worksiteName}</td>
+                      <td data-label="기간">{schedule.period}</td>
+                      <td data-label="근무지">{schedule.worksiteName}</td>
                     </tr>
                   ))
                 )}
@@ -391,16 +391,16 @@ export default function GuardProfilePage() {
               <tbody>
                 {!loading && (profile?.monthlyAttendance.length ?? 0) === 0 ? (
                   <tr>
-                    <td colSpan={3} className="p-8 text-center text-ink-muted-48 italic">
+                    <td data-responsive-empty colSpan={3} className="p-8 text-center text-ink-muted-48 italic">
                       최근 1년 출근현황이 없습니다.
                     </td>
                   </tr>
                 ) : (
                   profile?.monthlyAttendance.map((row) => (
                     <tr key={row.yearMonth}>
-                      <td>{row.yearMonth}</td>
-                      <td>{row.attendanceDays}일</td>
-                      <td>{row.workHoursTotal}</td>
+                      <td data-label="연월">{row.yearMonth}</td>
+                      <td data-label="출근일수">{row.attendanceDays}일</td>
+                      <td data-label="근무시간합">{row.workHoursTotal}</td>
                     </tr>
                   ))
                 )}

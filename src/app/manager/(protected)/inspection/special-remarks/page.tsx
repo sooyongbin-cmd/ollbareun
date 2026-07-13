@@ -144,14 +144,14 @@ export default function SpecialRemarksPage() {
               <tbody>
                 {reports.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="p-8 text-center text-ink-muted-48 italic">
+                    <td data-responsive-empty colSpan={4} className="p-8 text-center text-ink-muted-48 italic">
                       조회 결과에 해당하는 특이사항이 없습니다.
                     </td>
                   </tr>
                 ) : (
                   reports.map((report) => (
                     <tr key={report.id} className="hover:bg-canvas-parchment transition-colors">
-                      <td>
+                      <td data-label="점검일시">
                         <Link
                           className="text-primary font-semibold hover:opacity-80"
                           href={`/manager/inspection/special-remarks/${encodeURIComponent(report.id)}`}
@@ -159,9 +159,9 @@ export default function SpecialRemarksPage() {
                           {formatDateTime(report.reported_at)}
                         </Link>
                       </td>
-                      <td>{report.employee_name}</td>
-                      <td className="max-w-[420px]">{summarizeContent(report.content)}</td>
-                      <td>
+                      <td data-label="점검자">{report.employee_name}</td>
+                      <td data-label="특이사항내용" className="max-w-[420px]">{summarizeContent(report.content)}</td>
+                      <td data-label="첨부사진">
                         {report.photo_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img

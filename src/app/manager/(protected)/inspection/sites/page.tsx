@@ -132,20 +132,20 @@ export default function InspectionSitesPage() {
               <tbody>
                 {sites.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="p-8 text-center text-ink-muted-48 italic">
+                    <td data-responsive-empty colSpan={3} className="p-8 text-center text-ink-muted-48 italic">
                       조회 결과에 해당하는 현장이 없습니다.
                     </td>
                   </tr>
                 ) : (
                   sites.map((site) => (
                     <tr key={site.id} className="hover:bg-canvas-parchment transition-colors">
-                      <td>{site.worksite_name}</td>
-                      <td className="font-semibold">
+                      <td data-label="근무지">{site.worksite_name}</td>
+                      <td data-label="현장이름" className="font-semibold">
                         <Link className="text-primary hover:underline" href={`/manager/inspection/sites/${site.id}`}>
                           {site.name}
                         </Link>
                       </td>
-                      <td className="text-ink-muted-48">{site.address}</td>
+                      <td data-label="현장주소" className="text-ink-muted-48">{site.address}</td>
                     </tr>
                   ))
                 )}

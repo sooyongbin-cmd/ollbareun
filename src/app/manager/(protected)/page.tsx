@@ -217,15 +217,15 @@ export default function ManagerPage() {
                 <tbody>
                   {data.worksiteAssignments.length === 0 ? (
                     <tr>
-                      <td colSpan={2} className="p-8 text-center text-ink-muted-48 italic">
+                      <td data-responsive-empty colSpan={2} className="p-8 text-center text-ink-muted-48 italic">
                         등록된 근무지가 없습니다.
                       </td>
                     </tr>
                   ) : (
                     data.worksiteAssignments.map((worksite) => (
                       <tr key={worksite.worksiteId} className="hover:bg-canvas-parchment transition-colors">
-                        <td className="font-semibold">{worksite.worksiteName}</td>
-                        <td className="text-center">
+                        <td data-label="근무지명" className="font-semibold">{worksite.worksiteName}</td>
+                        <td data-label="배정인원수" className="text-center">
                           {worksite.assignedCount > 0 ? (
                             <Link
                               className="text-primary font-semibold hover:underline"
@@ -264,18 +264,18 @@ export default function ManagerPage() {
                 <tbody>
                   {data.liveAttendance.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="p-8 text-center text-ink-muted-48 italic">
+                      <td data-responsive-empty colSpan={5} className="p-8 text-center text-ink-muted-48 italic">
                         현재 출근 기록이 없습니다.
                       </td>
                     </tr>
                   ) : (
                     data.liveAttendance.map((row, index) => (
                       <tr key={`${row.employeeName}-${row.clockInAt ?? index}`} className="hover:bg-canvas-parchment transition-colors">
-                        <td className="font-semibold">{row.employeeName}</td>
-                        <td>{row.worksiteName}</td>
-                        <td>{formatTime(row.clockInAt)}</td>
-                        <td>{row.educationStatus}</td>
-                        <td>
+                        <td data-label="성명" className="font-semibold">{row.employeeName}</td>
+                        <td data-label="현장명">{row.worksiteName}</td>
+                        <td data-label="출근시간">{formatTime(row.clockInAt)}</td>
+                        <td data-label="교육여부">{row.educationStatus}</td>
+                        <td data-label="출근상태">
                           <span
                             className={`inline-flex rounded-full px-3 py-1 text-[12px] font-semibold ${
                               row.attendanceStatus === "출근" ? "bg-primary/10 text-primary" : "bg-ink/10 text-ink-muted-48"

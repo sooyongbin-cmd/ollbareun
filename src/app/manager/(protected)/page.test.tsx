@@ -55,9 +55,14 @@ describe("manager dashboard page", () => {
     expect(within(assignmentSection).getByRole("columnheader", { name: "배정인원수" })).toBeInTheDocument();
     expect(within(assignmentSection).getByText("문현동현장")).toBeInTheDocument();
     expect(within(assignmentSection).getByText("센텀현장")).toBeInTheDocument();
+    expect(within(assignmentSection).getByText("문현동현장").closest("td")).toHaveAttribute("data-label", "근무지명");
     expect(within(assignmentSection).getByRole("link", { name: "2" })).toHaveAttribute(
       "href",
       "/manager/employee/assignments?worksite=%EB%AC%B8%ED%98%84%EB%8F%99%ED%98%84%EC%9E%A5",
+    );
+    expect(within(assignmentSection).getByRole("link", { name: "2" }).closest("td")).toHaveAttribute(
+      "data-label",
+      "배정인원수",
     );
     expect(within(assignmentSection).getByText("0")).toBeInTheDocument();
 

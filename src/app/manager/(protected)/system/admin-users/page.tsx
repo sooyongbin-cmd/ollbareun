@@ -248,15 +248,15 @@ export default function AdminUsersPage() {
               <tbody>
                 {admins.length === 0 ? (
                   <tr>
-                    <td colSpan={isSuperAdmin ? 6 : 5} className="p-8 text-center text-ink-muted-48 italic">
+                    <td data-responsive-empty colSpan={isSuperAdmin ? 6 : 5} className="p-8 text-center text-ink-muted-48 italic">
                       등록된 관리자가 없습니다.
                     </td>
                   </tr>
                 ) : (
                   admins.map((admin) => (
                     <tr key={admin.id}>
-                      <td className="font-semibold">{admin.email}</td>
-                      <td>
+                      <td data-label="이메일" className="font-semibold">{admin.email}</td>
+                      <td data-label="역할">
                         {isSuperAdmin ? (
                           <select
                             value={admin.role}
@@ -273,7 +273,7 @@ export default function AdminUsersPage() {
                           admin.role === "super_admin" ? "최고 관리자" : "일반 관리자"
                         )}
                       </td>
-                      <td>
+                      <td data-label="활성화 여부">
                         {admin.user_id ? (
                           <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-[12px] font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
                             활성화됨
@@ -284,10 +284,10 @@ export default function AdminUsersPage() {
                           </span>
                         )}
                       </td>
-                      <td>{formatDateTime(admin.first_login_at)}</td>
-                      <td>{formatDateTime(admin.created_at)}</td>
+                      <td data-label="최초 로그인 시각">{formatDateTime(admin.first_login_at)}</td>
+                      <td data-label="등록일">{formatDateTime(admin.created_at)}</td>
                       {isSuperAdmin ? (
-                        <td className="text-right">
+                        <td data-label="작업" className="text-right">
                           <button
                             aria-label="삭제"
                             className="button-secondary w-full md:w-auto text-red-600 hover:text-red-700"

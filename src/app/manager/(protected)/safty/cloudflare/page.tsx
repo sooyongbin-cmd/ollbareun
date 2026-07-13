@@ -170,26 +170,28 @@ export default function CloudflareVideosPage() {
               <tbody>
                 {filteredVideos.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-8 text-center text-ink-muted-48 italic">
+                    <td data-responsive-empty colSpan={5} className="p-8 text-center text-ink-muted-48 italic">
                       조회 결과에 해당하는 Cloudflare 동영상이 없습니다.
                     </td>
                   </tr>
                 ) : (
                   filteredVideos.map((video) => (
                     <tr key={video.uid} className="hover:bg-canvas-parchment transition-colors">
-                      <td>
-                        <Link
-                          className="font-semibold text-primary hover:underline"
-                          href={`/manager/safty/cloudflare/watch/${video.uid}`}
-                        >
-                          {video.title}
-                        </Link>
-                        <div className="mt-1 text-[12px] text-ink-muted-48">{video.uid}</div>
+                      <td data-label="제목/UID">
+                        <div>
+                          <Link
+                            className="font-semibold text-primary hover:underline"
+                            href={`/manager/safty/cloudflare/watch/${video.uid}`}
+                          >
+                            {video.title}
+                          </Link>
+                          <div className="mt-1 text-[12px] text-ink-muted-48">{video.uid}</div>
+                        </div>
                       </td>
-                      <td className="font-semibold text-ink-muted-80">{getStatusText(video)}</td>
-                      <td className="text-ink-muted-48">{formatDate(video.uploaded)}</td>
-                      <td className="text-ink-muted-48">{formatBytes(video.size)}</td>
-                      <td>
+                      <td data-label="상태" className="font-semibold text-ink-muted-80">{getStatusText(video)}</td>
+                      <td data-label="업로드일" className="text-ink-muted-48">{formatDate(video.uploaded)}</td>
+                      <td data-label="크기" className="text-ink-muted-48">{formatBytes(video.size)}</td>
+                      <td data-label="시청">
                         <Link
                           className="text-primary font-semibold hover:underline"
                           href={`/manager/safty/cloudflare/watch/${video.uid}`}

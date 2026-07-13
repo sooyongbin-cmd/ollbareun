@@ -252,28 +252,28 @@ export default function ManagerSystemLogsPage() {
               <tbody>
                 {logs.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="p-8 text-center text-ink-muted-48 italic">
+                    <td data-responsive-empty colSpan={7} className="p-8 text-center text-ink-muted-48 italic">
                       조회 결과에 해당하는 로그가 없습니다.
                     </td>
                   </tr>
                 ) : (
                   logs.map((log) => (
                     <tr key={log.id} className="hover:bg-canvas-parchment transition-colors">
-                      <td className="whitespace-nowrap">
+                      <td data-label="로그인 시각" className="whitespace-nowrap">
                         <DateTimeCell value={log.login_at} />
                       </td>
-                      <td className="font-semibold">{log.guard_name}</td>
-                      <td className="text-center">
+                      <td data-label="경비원" className="font-semibold">{log.guard_name}</td>
+                      <td data-label="로그인 결과" className="text-center">
                         <StatusIcon status={log.login_status} />
                       </td>
-                      <td className="text-center">
+                      <td data-label="main Push 결과" className="text-center">
                         <MainPushStatus status={log.main_push_status} />
                       </td>
-                      <td className="whitespace-nowrap">
+                      <td data-label="로그아웃 시각" className="whitespace-nowrap">
                         <DateTimeCell value={log.logout_at} />
                       </td>
-                      <td className="min-w-[220px] text-ink-muted-48">{getLogoutPushSummary(log)}</td>
-                      <td className="min-w-[180px] text-ink-muted-48">{getDetailSummary(log)}</td>
+                      <td data-label="로그아웃 Push 결과" className="min-w-[220px] text-ink-muted-48">{getLogoutPushSummary(log)}</td>
+                      <td data-label="오류/상세" className="min-w-[180px] text-ink-muted-48">{getDetailSummary(log)}</td>
                     </tr>
                   ))
                 )}

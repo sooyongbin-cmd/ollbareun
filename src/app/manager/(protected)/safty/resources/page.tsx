@@ -218,14 +218,14 @@ export default function EducationResourcesPage() {
               <tbody>
                 {sortedResources.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="p-8 text-center text-ink-muted-48 italic">
+                    <td data-responsive-empty colSpan={3} className="p-8 text-center text-ink-muted-48 italic">
                       조회 결과에 해당하는 교육자료가 없습니다.
                     </td>
                   </tr>
                 ) : (
                   sortedResources.map((resource) => (
                     <tr key={resource.id} className="hover:bg-canvas-parchment transition-colors">
-                      <td className="font-semibold">
+                      <td data-label="제목" className="font-semibold">
                         <Link
                           className="text-primary hover:underline"
                           href={`/manager/safty/resources/save/${resource.id}`}
@@ -233,7 +233,7 @@ export default function EducationResourcesPage() {
                           {resource.title}
                         </Link>
                       </td>
-                      <td className="text-ink-muted-48">
+                      <td data-label="유튜브 링크" className="text-ink-muted-48">
                         <a
                           className="underline-offset-4 hover:underline"
                           href={resource.youtube_link}
@@ -243,7 +243,7 @@ export default function EducationResourcesPage() {
                           {resource.youtube_link}
                         </a>
                       </td>
-                      <td className="font-semibold text-ink-muted-80">
+                      <td data-label="이수현황" className="font-semibold text-ink-muted-80">
                         <Link
                           className="text-primary hover:underline"
                           href={`/manager/safty/completions/detail?resourceId=${encodeURIComponent(resource.id)}`}

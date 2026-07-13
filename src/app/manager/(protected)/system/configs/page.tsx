@@ -88,21 +88,21 @@ export default function SystemConfigsPage() {
               <tbody>
                 {configs.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="p-8 text-center text-ink-muted-48 italic">
+                    <td data-responsive-empty colSpan={4} className="p-8 text-center text-ink-muted-48 italic">
                       등록된 시스템설정이 없습니다.
                     </td>
                   </tr>
                 ) : (
                   configs.map((config) => (
                     <tr key={config.system_code} className="hover:bg-canvas-parchment transition-colors">
-                      <td className="font-semibold">
+                      <td data-label="시스템코드" className="font-semibold">
                         <Link className="text-primary hover:opacity-80" href={`/manager/system/configs/${encodeURIComponent(config.system_code)}`}>
                           {config.system_code}
                         </Link>
                       </td>
-                      <td>{config.parent_system_code ?? "-"}</td>
-                      <td className="max-w-[520px] whitespace-pre-wrap">{config.content}</td>
-                      <td className="max-w-[360px] whitespace-pre-wrap">{config.description ?? "-"}</td>
+                      <td data-label="상위시스템코드">{config.parent_system_code ?? "-"}</td>
+                      <td data-label="내용" className="max-w-[520px] whitespace-pre-wrap">{config.content}</td>
+                      <td data-label="설명" className="max-w-[360px] whitespace-pre-wrap">{config.description ?? "-"}</td>
                     </tr>
                   ))
                 )}

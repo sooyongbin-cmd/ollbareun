@@ -439,7 +439,7 @@ export default function GuardSafetyEducationPage() {
             <p className="mt-6 text-[16px] text-status-warn">{listError}</p>
           ) : (
             <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-[16px] border border-hairline bg-canvas">
-              <table className="apple-table">
+              <table className="apple-table" data-responsive-single-column>
                 <thead>
                   <tr>
                     <th className="text-left">제목</th>
@@ -448,14 +448,14 @@ export default function GuardSafetyEducationPage() {
                 <tbody>
                   {sortedResources.length === 0 ? (
                     <tr>
-                      <td colSpan={1} className="p-8 text-center text-ink-muted-48 italic">
+                      <td data-responsive-empty colSpan={1} className="p-8 text-center text-ink-muted-48 italic">
                         이수하지 않은 안전교육 자료가 없습니다.
                       </td>
                     </tr>
                   ) : (
                     sortedResources.map((resource) => (
                       <tr key={resource.id} className="hover:bg-canvas-parchment transition-colors">
-                        <td className="font-semibold">
+                        <td data-label="제목" className="font-semibold">
                           <button
                             className="text-left text-primary hover:underline"
                             type="button"

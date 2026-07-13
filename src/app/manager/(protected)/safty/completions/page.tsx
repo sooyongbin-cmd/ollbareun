@@ -303,7 +303,7 @@ export default function EducationCompletionsPage() {
               <tbody>
                 {sortedEmployees.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="p-8 text-center text-ink-muted-48 italic">
+                    <td data-responsive-empty colSpan={4} className="p-8 text-center text-ink-muted-48 italic">
                       조회 결과에 해당하는 직원이 없습니다.
                     </td>
                   </tr>
@@ -314,8 +314,8 @@ export default function EducationCompletionsPage() {
                     const deliveryStatus = pushDeliveryStatusByEmployeeId.get(employee.id);
                     return (
                       <tr key={employee.id} className="hover:bg-canvas-parchment transition-colors">
-                        <td className="font-semibold">{employee.name}</td>
-                        <td>
+                        <td data-label="직원" className="font-semibold">{employee.name}</td>
+                        <td data-label="이수현황">
                           <Link
                             className="text-primary hover:underline font-semibold"
                             href={`/manager/safty/completions/detail?name=${encodeURIComponent(employee.name)}`}
@@ -323,7 +323,7 @@ export default function EducationCompletionsPage() {
                             {completedCount}/{totalResourceCount}
                           </Link>
                         </td>
-                        <td>
+                        <td data-label="구독상태">
                           <span
                             className={
                               isSubscribed
@@ -334,7 +334,7 @@ export default function EducationCompletionsPage() {
                             {isSubscribed ? "구독중" : "미구독"}
                           </span>
                         </td>
-                        <td>
+                        <td data-label="알림결과">
                           {deliveryStatus ? (
                             <span
                               className={

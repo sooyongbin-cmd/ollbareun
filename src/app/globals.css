@@ -202,6 +202,25 @@ button:focus-visible {
   font-size: 17px;
 }
 
+/* Employee roster design-QA scale */
+.employee-roster-title {
+  font-weight: 700;
+}
+
+.employee-roster-field,
+.employee-roster-action {
+  font-size: 14px;
+}
+
+.employee-roster-table th {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.employee-roster-table td {
+  font-size: 14px;
+}
+
 /* Guard-only readable font scale */
 .guard-zoom-scope {
   zoom: var(--guard-zoom-scale, 1);

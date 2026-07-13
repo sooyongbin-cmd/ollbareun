@@ -91,11 +91,13 @@ describe("employee roster page", () => {
     const searchSection = await screen.findByRole("region", { name: "직원 검색" });
     const listSection = await screen.findByRole("region", { name: "직원 목록" });
 
+    expect(within(searchSection).getByRole("heading", { name: "직원 검색" })).toBeInTheDocument();
     expect(searchSection).toContainElement(screen.getByLabelText("이름"));
     expect(searchSection).toContainElement(screen.getByLabelText("역할"));
     expect(searchSection).toContainElement(screen.getByRole("checkbox", { name: "퇴직" }));
     expect(screen.getByRole("checkbox", { name: "퇴직" })).not.toBeChecked();
     expect(searchSection).toContainElement(screen.getByRole("link", { name: "직원 등록" }));
+    expect(within(listSection).getByRole("heading", { name: "직원 목록" })).toBeInTheDocument();
     expect(listSection).toContainElement(screen.getByText("전체 직원 2"));
     expect(listSection).toContainElement(screen.getByText("검색 결과 1"));
     expect(listSection).toContainElement(screen.getByRole("table"));

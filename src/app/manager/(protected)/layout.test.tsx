@@ -12,6 +12,11 @@ vi.mock("@/lib/supabase-browser", () => ({
   }),
 }));
 
+// 브라우저 세션 게이트 자체의 기존 동작은 우회 스위치와 별도로 계속 검증합니다.
+vi.mock("@/lib/manager-auth-bypass", () => ({
+  TEMPORARY_MANAGER_AUTH_BYPASS: false,
+}));
+
 function SuspendedManagerChild() {
   throw new Promise(() => undefined);
   return null;

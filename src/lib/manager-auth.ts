@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getSupabaseAdmin } from "./supabase-admin";
 import { createSupabaseServerClient } from "./supabase-server";
 import { sendAdminActivationEmail } from "./manager-security-email";
+import { TEMPORARY_MANAGER_AUTH_BYPASS } from "./manager-auth-bypass";
 
 type SupabaseAuthReader = {
   auth: {
@@ -59,6 +60,19 @@ type AdminUserWriter = AdminUserReader;
 
 const MANAGER_HOME_PATH = "/manager";
 const MANAGER_AUTH_PATH = "/manager/auth";
+const TEMPORARY_MANAGER_TEST_USER = {
+  id: "temporary-manager-test-user",
+  email: "manager-test@local.invalid",
+  app_metadata: { provider: "temporary-test-bypass" },
+  user_metadata: {},
+  aud: "authenticated",
+  created_at: "1970-01-01T00:00:00.000Z",
+} as User;
+
+const TEMPORARY_MANAGER_TEST_ADMIN = {
+  user_id: TEMPORARY_MANAGER_TEST_USER.id,
+  role: "super_admin",
+};
 
 export function sanitizeManagerNextPath(nextPath: string | null | undefined): string {
   if (!nextPath) {
@@ -81,6 +95,11 @@ export function createManagerAuthRedirectUrl(nextPath: string | null | undefined
 }
 
 export async function getManagerUser(supabase?: SupabaseAuthReader, adminClient?: AdminUserReader) {
+  // TEMPORARY: 테스트 중에는 실제 Supabase 로그인/관리자 조회를 건너뜁니다.
+  if (TEMPORARY_MANAGER_AUTH_BYPASS && !supabase && !adminClient) {
+    return TEMPORARY_MANAGER_TEST_USER;
+  }
+
   const authClient = supabase ?? (await createSupabaseServerClient());
   const { data, error } = await authClient.auth.getUser();
 
@@ -253,6 +272,14 @@ export async function linkPreapprovedAdminUser(
 }
 
 export async function getManagerUserWithRole(supabase?: SupabaseAuthReader, adminClient?: AdminUserReader) {
+  // TEMPORARY: 테스트 중에는 관리자 API도 최고 관리자 권한으로 사용할 수 있게 합니다.
+  if (TEMPORARY_MANAGER_AUTH_BYPASS && !supabase && !adminClient) {
+    return {
+      user: TEMPORARY_MANAGER_TEST_USER,
+      adminUser: TEMPORARY_MANAGER_TEST_ADMIN,
+    };
+  }
+
   const authClient = supabase ?? (await createSupabaseServerClient());
   const { data, error } = await authClient.auth.getUser();
 

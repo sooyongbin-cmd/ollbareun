@@ -257,6 +257,44 @@ button:focus-visible {
   padding: 24px;
 }
 
+/* Shared mobile typography hierarchy */
+@media (width < 48rem) {
+  .app-content h1 {
+    font-size: 22px;
+  }
+
+  .app-content h2 {
+    font-size: 16px;
+  }
+
+  .app-content,
+  .app-content h1 + p,
+  .app-content label,
+  .app-content .field,
+  .app-content .button-primary,
+  .app-content .button-secondary,
+  .app-content .status-ok,
+  .app-content .status-warn,
+  .app-content .apple-table td {
+    font-size: 14px;
+  }
+
+  .app-content :is(p, li, dt, dd) {
+    font-size: 14px;
+  }
+
+  .app-content .apple-table th {
+    font-size: 12px;
+  }
+
+  .app-content :is(small, caption, figcaption),
+  .app-content .text-\[11px\],
+  .app-content .text-\[12px\] {
+    font-size: 12px;
+    font-weight: 400;
+  }
+}
+
 @media (width >= 48rem) {
   .app-content :is(section, form)[class~="rounded-[18px]"][class~="bg-canvas-parchment"] {
     padding: 32px;

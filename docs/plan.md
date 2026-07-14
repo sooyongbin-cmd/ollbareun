@@ -2,7 +2,7 @@
 
 > **에이전트 작업자 가이드:** 필수 하위 기술: 이 계획을 작업 단위별(task-by-task)로 구현하기 위해 superpowers:subagent-driven-development(권장) 또는 superpowers:executing-plans를 사용하십시오. 진행 상황은 체크박스(`- [ ]`) 구문을 사용하여 추적합니다.
 
-**목표:** `screen-design.md`에 정의된 `직원명부관리` 화면을 독립적인 라우트(route)로 생성하고, 관리자 메뉴에서 직접 이동할 수 있도록 연결한다.
+**목표:** `docs/screen-design.md`에 정의된 `직원명부관리` 화면을 독립적인 라우트(route)로 생성하고, 관리자 메뉴에서 직접 이동할 수 있도록 연결한다.
 
 **아키텍처:** 기존 `Phase1App`의 bootstrap 기반 데이터 흐름을 그대로 재사용한다. 새로운 라우트 `/manager/employee/employees`는 전용 page 파일에서 `Phase1App`의 새로운 관리자 뷰(manager view)를 렌더링하며, 목록 필터링은 클라이언트 상태에서만 처리한다. 메뉴 링크는 기존 관리자 사이드바의 직원 관리 섹션에 추가하여 명확한 진입점을 제공한다.
 
@@ -71,7 +71,7 @@ export default function EmployeeRosterPage() {
 - [ ] **단계 5: 커밋**
 
 ```bash
-git add src/app/manager/employee/employees/page.tsx src/app/phase1-app.tsx src/app/phase1-app.test.tsx plan.md
+git add src/app/manager/employee/employees/page.tsx src/app/phase1-app.tsx src/app/phase1-app.test.tsx docs/plan.md
 git commit -m "feat: add employee roster page"
 ```
 

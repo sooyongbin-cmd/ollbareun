@@ -60,6 +60,6 @@
 
 ### Task 6: Publish
 
-- [ ] Exclude pre-existing `walkthrough.md` and `supabase/.temp/cli-latest` changes.
+- [ ] Exclude pre-existing `docs/walkthrough.md` and `supabase/.temp/cli-latest` changes.
 - [ ] Commit only this fix.
 - [ ] Push `main` to `origin/main`.

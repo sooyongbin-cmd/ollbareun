@@ -10,7 +10,7 @@
 - Backend/Data: Supabase Auth + Postgres + Storage
 - 초기 배포: PWA 우선, App Store/Play Store 배포는 후순위
 - Supabase 프로젝트 `ollbareun` 사용
-- tailwind v4 and shadcn ui 를 사용하고, 디자인에 대한 방향성은 design_guide_wanted.md 파일을 준수해줘.
+- tailwind v4 and shadcn ui 를 사용하고, 디자인에 대한 방향성은 docs/design_guide_wanted.md 파일을 준수해줘.
 
 ## Current Execution
 

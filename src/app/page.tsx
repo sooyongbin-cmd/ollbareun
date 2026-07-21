@@ -212,9 +212,11 @@ export default function Home() {
               사회적가치를 창출하며 깨끗하고 안전한 공간을 만드는 프리미엄 시설관리 전문 기업입니다.
             </p>
             <div className="text-[14px] text-[#778891] space-y-1.5 pt-2">
-              <p>📞 전화: 010-2593-5689</p>
-              <p>✉️ 이메일: cyberbin@naver.com</p>
-              <p>📍 주소: 부산시 중구 중앙동 5가 7</p>
+              <p className="font-bold">주식회사 올바름</p>
+              <p><span className="font-bold">주소 :</span> 부산광역시 강서구 유통단지1로 41, 118동 222호(대저2동)</p>
+              <p><span className="font-bold">대표자 :</span> 윤지욱</p>
+              <p><span className="font-bold">연락처 :</span> 051-465-7767</p>
+              <p><span className="font-bold">인·지정연도 :</span> 2021</p>
             </div>
           </div>
 

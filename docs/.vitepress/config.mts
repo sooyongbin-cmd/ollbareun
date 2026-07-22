@@ -2,6 +2,7 @@ import { defineConfig } from 'vitepress'
 
 export default defineConfig({
   base: '/docs/',
+  srcDir: './documents',
   lang: 'ko-KR',
   title: '올바름 HRM 프로젝트 문서',
   description: '올바름 HRM 개발 산출물',

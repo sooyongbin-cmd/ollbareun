@@ -47,6 +47,6 @@ next-env.d.ts
 /public/sw.js.map
 
 # vitepress
-documentation/.vitepress/cache
-documentation/.vitepress/dist
+docs/.vitepress/cache
+docs/.vitepress/dist
 

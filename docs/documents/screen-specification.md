@@ -114,7 +114,7 @@
 
 ### WEB-001 회사소개 홈페이지
 
-<img src="../images/web-001-company-home.png" alt="WEB-001 회사소개 홈페이지 화면" width="240">
+<img src="./images/web-001-company-home.png" alt="WEB-001 회사소개 홈페이지 화면" width="240">
 
 - 목적: 외부 방문자에게 올바름의 기업 가치, 시설관리 서비스와 사회적 가치를 소개한다.
 - 주요 구성:
@@ -134,7 +134,7 @@
 
 ### WEB-003 우선구매 혜택 안내 모달
 
-<img src="../images/web-003-benefits-modal.png" alt="WEB-003 우선구매 혜택 안내 모달" width="240">
+<img src="./images/web-003-benefits-modal.png" alt="WEB-003 우선구매 혜택 안내 모달" width="240">
 
 - 목적: 사회적기업 제품 우선구매 제도와 올바름 서비스 이용 혜택을 상세히 안내한다.
 - 주요 내용:
@@ -148,7 +148,7 @@
 
 ### COM-001 서비스 선택
 
-<img src="../images/com-001-service-selection.png" alt="COM-001 서비스 선택 화면" width="240">
+<img src="./images/com-001-service-selection.png" alt="COM-001 서비스 선택 화면" width="240">
 
 - 목적: 이용자가 관리자 또는 현장 근무자 서비스를 선택한다.
 - 주요 구성:
@@ -161,7 +161,7 @@
 
 ### COM-002 오프라인 안내
 
-<img src="../images/com-002.png" alt="COM-002 화면" width="240">
+<img src="./images/com-002.png" alt="COM-002 화면" width="240">
 
 - 목적: 네트워크를 사용할 수 없을 때 현재 상태와 복구 방법을 안내한다.
 - 표시: 오프라인 안내 문구, 네트워크 확인 요청, 재시도 버튼
@@ -169,7 +169,7 @@
 
 ### M-AUTH-001 관리자 로그인
 
-<img src="../images/m-auth-001.png" alt="M-AUTH-001 화면" width="240">
+<img src="./images/m-auth-001.png" alt="M-AUTH-001 화면" width="240">
 
 - 목적: 등록된 관리자의 신원을 확인하고 관리자 화면에 진입시킨다.
 - 인증 방식: 구글로그인
@@ -184,7 +184,7 @@
 
 ### G-AUTH-001 근무자 로그인
 
-<img src="../images/g-auth-001.png" alt="G-AUTH-001 화면" width="240">
+<img src="./images/g-auth-001.png" alt="G-AUTH-001 화면" width="240">
 
 - 목적: 이름과 연락처를 이용한 현장 근무자 간편 인증을 제공한다.
 - 입력: 이름, 연락처
@@ -214,7 +214,7 @@
 
 ### M-001 관리자 대시보드
 
-<img src="../images/m-001.png" alt="M-001 화면" width="240">
+<img src="./images/m-001.png" alt="M-001 화면" width="240">
 
 - 목적: 인력, 출근, 교육 현황을 한 화면에서 파악한다.
 - 상단 요약 카드: 전체 재직 인원, 현재 출근 인원, 교육 미이수 인원
@@ -227,7 +227,7 @@
 
 ### M-EMP-001 직원 목록
 
-<img src="../images/m-emp-001.png" alt="M-EMP-001 화면" width="240">
+<img src="./images/m-emp-001.png" alt="M-EMP-001 화면" width="240">
 
 - 목적: 직원 정보를 조회하고 등록·수정 화면으로 이동한다.
 - 조회 조건: 이름, 연락처, 직무, 퇴직 여부
@@ -237,9 +237,9 @@
 
 ### M-EMP-002 직원 등록 / M-EMP-003 직원 수정
 
-<img src="../images/m-emp-002.png" alt="M-EMP-002 화면" width="240">
+<img src="./images/m-emp-002.png" alt="M-EMP-002 화면" width="240">
 
-<img src="../images/m-emp-003.png" alt="M-EMP-003 화면" width="240">
+<img src="./images/m-emp-003.png" alt="M-EMP-003 화면" width="240">
 
 | 항목 | 유형 | 필수 | 기준 |
 | --- | --- | --- | --- |
@@ -254,7 +254,7 @@
 
 ### M-WS-001 근무지 목록
 
-<img src="../images/m-ws-001.png" alt="M-WS-001 화면" width="240">
+<img src="./images/m-ws-001.png" alt="M-WS-001 화면" width="240">
 
 - 조회 조건: 근무지명, 주소
 - 목록 항목: 근무지명, 주소, 위도·경도, 출근 인정 반경
@@ -263,9 +263,9 @@
 
 ### M-WS-002 근무지 등록 / M-WS-003 근무지 수정
 
-<img src="../images/m-ws-002.png" alt="M-WS-002 화면" width="240">
+<img src="./images/m-ws-002.png" alt="M-WS-002 화면" width="240">
 
-<img src="../images/m-ws-003.png" alt="M-WS-003 화면" width="240">
+<img src="./images/m-ws-003.png" alt="M-WS-003 화면" width="240">
 
 | 항목 | 유형 | 필수 | 기준 |
 | --- | --- | --- | --- |
@@ -281,7 +281,7 @@
 
 ### M-ASG-001 근무 배정 목록
 
-<img src="../images/m-asg-001.png" alt="M-ASG-001 화면" width="240">
+<img src="./images/m-asg-001.png" alt="M-ASG-001 화면" width="240">
 
 - 조회 항목: 직원, 근무지, 시작일, 종료일
 - 목록 항목: 직원명, 근무지명, 배정 기간
@@ -290,9 +290,9 @@
 
 ### M-ASG-002 근무 배정 등록 / M-ASG-003 근무 배정 수정
 
-<img src="../images/m-asg-002.png" alt="M-ASG-002 화면" width="240">
+<img src="./images/m-asg-002.png" alt="M-ASG-002 화면" width="240">
 
-<img src="../images/m-asg-003.png" alt="M-ASG-003 화면" width="240">
+<img src="./images/m-asg-003.png" alt="M-ASG-003 화면" width="240">
 
 - 입력: 직원 선택, 근무지 선택, 시작일, 종료일
 - 버튼: 저장, 취소, 삭제(수정 화면)
@@ -302,7 +302,7 @@
 
 ### M-EDU-001 교육자료 목록
 
-<img src="../images/m-edu-001.png" alt="M-EDU-001 화면" width="240">
+<img src="./images/m-edu-001.png" alt="M-EDU-001 화면" width="240">
 
 - 목록 항목: 제목, 영상 정보, 등록일, 수정일
 - 버튼: 신규 등록, 수정/상세, 영상 관리
@@ -310,9 +310,9 @@
 
 ### M-EDU-002 교육자료 등록 / M-EDU-003 교육자료 수정
 
-<img src="../images/m-edu-002.png" alt="M-EDU-002 화면" width="240">
+<img src="./images/m-edu-002.png" alt="M-EDU-002 화면" width="240">
 
-<img src="../images/m-edu-003.png" alt="M-EDU-003 화면" width="240">
+<img src="./images/m-edu-003.png" alt="M-EDU-003 화면" width="240">
 
 - 입력: 교육 제목, 영상 URL 또는 영상 식별 정보
 - 버튼: 저장, 취소, 삭제(수정 화면)
@@ -321,9 +321,9 @@
 
 ### M-EDU-004 교육 이수 현황 / M-EDU-005 교육 이수 상세
 
-<img src="../images/m-edu-004.png" alt="M-EDU-004 화면" width="240">
+<img src="./images/m-edu-004.png" alt="M-EDU-004 화면" width="240">
 
-<img src="../images/m-edu-005.png" alt="M-EDU-005 화면" width="240">
+<img src="./images/m-edu-005.png" alt="M-EDU-005 화면" width="240">
 
 - 요약 목록: 직원명, 전체 교육 수, 이수 수, 미이수 수, 이수율
 - 상세 목록: 교육자료명, 이수 상태, 이수 일시
@@ -332,7 +332,7 @@
 
 ### M-EDU-006 교육 알림 관리
 
-<img src="../images/m-edu-006.png" alt="M-EDU-006 화면" width="240">
+<img src="./images/m-edu-006.png" alt="M-EDU-006 화면" width="240">
 
 - 대상 목록: 직원명, 미이수 건수, 푸시 구독 여부
 - 발송 영역: 대상 선택, 교육 독려 알림 발송
@@ -343,11 +343,11 @@
 
 ### M-VID-001~003 교육영상 관리
 
-<img src="../images/m-vid-001.png" alt="M-VID-001 화면" width="240">
+<img src="./images/m-vid-001.png" alt="M-VID-001 화면" width="240">
 
-<img src="../images/m-vid-002.png" alt="M-VID-002 화면" width="240">
+<img src="./images/m-vid-002.png" alt="M-VID-002 화면" width="240">
 
-<img src="../images/m-vid-003.png" alt="M-VID-003 화면" width="240">
+<img src="./images/m-vid-003.png" alt="M-VID-003 화면" width="240">
 
 - 영상 목록: 제목/UID, 처리 상태, 등록 시각, 재생 이동
 - 영상 등록: 업로드 파일 선택, 업로드 진행 상태, 완료 결과
@@ -355,7 +355,7 @@
 
 ### M-INS-001 점검 현장 목록
 
-<img src="../images/m-ins-001.png" alt="M-INS-001 화면" width="240">
+<img src="./images/m-ins-001.png" alt="M-INS-001 화면" width="240">
 
 - 조회 조건: 현장명
 - 목록 항목: 현장명, 연결 근무지, 주소, 등록일
@@ -364,9 +364,9 @@
 
 ### M-INS-002 점검 현장 등록 / M-INS-003 점검 현장 상세
 
-<img src="../images/m-ins-002.png" alt="M-INS-002 화면" width="240">
+<img src="./images/m-ins-002.png" alt="M-INS-002 화면" width="240">
 
-<img src="../images/m-ins-003.png" alt="M-INS-003 화면" width="240">
+<img src="./images/m-ins-003.png" alt="M-INS-003 화면" width="240">
 
 - 입력: 연결 근무지, 현장명, 주소, 위도, 경도
 - 상세 추가 영역:
@@ -378,7 +378,7 @@
 
 ### M-INS-004 점검 이력
 
-<img src="../images/m-ins-004.png" alt="M-INS-004 화면" width="240">
+<img src="./images/m-ins-004.png" alt="M-INS-004 화면" width="240">
 
 - 조회 조건: 근무지
 - 목록 항목: 점검 시각, 근무자, 직무, 근무지, 현장
@@ -387,9 +387,9 @@
 
 ### M-REM-001 특이사항 목록 / M-REM-002 특이사항 상세
 
-<img src="../images/m-rem-001.png" alt="M-REM-001 화면" width="240">
+<img src="./images/m-rem-001.png" alt="M-REM-001 화면" width="240">
 
-<img src="../images/m-rem-002.png" alt="M-REM-002 화면" width="240">
+<img src="./images/m-rem-002.png" alt="M-REM-002 화면" width="240">
 
 - 목록 조회 조건: 연도
 - 목록 항목: 보고 시각, 보고자, 근무지, 내용 요약, 사진 여부, 전달 상태
@@ -399,7 +399,7 @@
 
 ### M-RPT-001 근태 리포트
 
-<img src="../images/m-rpt-001.png" alt="M-RPT-001 화면" width="240">
+<img src="./images/m-rpt-001.png" alt="M-RPT-001 화면" width="240">
 
 - 조회 조건: 직원 이름, 연도
 - 결과: 근무일, 직원, 근무지, 출근·퇴근 시각, 근무시간
@@ -408,7 +408,7 @@
 
 ### M-RPT-002 교육 이수 리포트
 
-<img src="../images/m-rpt-002.png" alt="M-RPT-002 화면" width="240">
+<img src="./images/m-rpt-002.png" alt="M-RPT-002 화면" width="240">
 
 - 조회 조건: 연도
 - 결과: 직원명, 해당 연도 이수 건수, 전체 교육 건수, 이수율
@@ -417,7 +417,7 @@
 
 ### M-SYS-001 근무자 로그
 
-<img src="../images/m-sys-001.png" alt="M-SYS-001 화면" width="240">
+<img src="./images/m-sys-001.png" alt="M-SYS-001 화면" width="240">
 
 - 목록 항목: 근무자, 로그인 시각, 메인 진입 시각, 로그아웃 시각
 - 정렬: 최신 로그인순
@@ -425,7 +425,7 @@
 
 ### M-SYS-002 시스템 설정 목록
 
-<img src="../images/m-sys-002.png" alt="M-SYS-002 화면" width="240">
+<img src="./images/m-sys-002.png" alt="M-SYS-002 화면" width="240">
 
 - 목록 항목: 시스템 코드, 설명, 설정 내용 요약
 - 버튼: 신규 등록
@@ -433,9 +433,9 @@
 
 ### M-SYS-003 시스템 설정 등록 / M-SYS-004 시스템 설정 수정
 
-<img src="../images/m-sys-003.png" alt="M-SYS-003 화면" width="240">
+<img src="./images/m-sys-003.png" alt="M-SYS-003 화면" width="240">
 
-<img src="../images/m-sys-004.png" alt="M-SYS-004 화면" width="240">
+<img src="./images/m-sys-004.png" alt="M-SYS-004 화면" width="240">
 
 - 입력: 시스템 코드, 설정 내용, 설명
 - 버튼: 저장, 취소, 삭제(수정 화면)
@@ -443,7 +443,7 @@
 
 ### M-SYS-006 관리자 계정 관리
 
-<img src="../images/m-sys-006.png" alt="M-SYS-006 화면" width="240">
+<img src="./images/m-sys-006.png" alt="M-SYS-006 화면" width="240">
 
 - 대상: 최고 관리자
 - 목록 항목: 이메일, 역할, 등록 상태, 생성·수정 시각
@@ -463,7 +463,7 @@
 
 ### G-001 근무자 메인
 
-<img src="../images/g-001.png" alt="G-001 화면" width="240">
+<img src="./images/g-001.png" alt="G-001 화면" width="240">
 
 - 목적: 오늘의 근무 상태와 주요 업무 메뉴를 제공한다.
 - 표시: 인사말, 근무자명, 오늘 근무지, 배정 기간, 현재 출근 상태
@@ -473,7 +473,7 @@
 
 ### G-ATT-001 출퇴근
 
-<img src="../images/g-att-001.png" alt="G-ATT-001 화면" width="240">
+<img src="./images/g-att-001.png" alt="G-ATT-001 화면" width="240">
 
 - 표시: 근무자명, 오늘 근무지, 인정 반경, 현재 출퇴근 상태, 출근·퇴근 시각
 - 위치 영역: 위치 확인 상태, 근무지까지 거리, 반경 충족 여부
@@ -486,7 +486,7 @@
 
 ### G-EDU-001 안전교육
 
-<img src="../images/g-edu-001.png" alt="G-EDU-001 화면" width="240">
+<img src="./images/g-edu-001.png" alt="G-EDU-001 화면" width="240">
 
 - 자료 카드: 교육 제목, 영상, 이수 상태
 - 동작: 영상 재생, 교육 이수 완료
@@ -497,7 +497,7 @@
 
 ### G-INS-001 QR 현장점검
 
-<img src="../images/g-ins-001.png" alt="G-INS-001 화면" width="240">
+<img src="./images/g-ins-001.png" alt="G-INS-001 화면" width="240">
 
 - 구성: 카메라 스캔 영역, 직접 입력/재시도, 점검 결과
 - 처리 순서:
@@ -510,7 +510,7 @@
 
 ### G-INS-002 NFC 현장점검
 
-<img src="../images/g-ins-002.png" alt="G-INS-002 화면" width="240">
+<img src="./images/g-ins-002.png" alt="G-INS-002 화면" width="240">
 
 - 구성: NFC 점검 안내, 태그 읽기 상태, 감지 결과
 - 처리: 태그의 점검 정보를 읽어 현장 확인 후 점검 기록을 저장한다.
@@ -518,7 +518,7 @@
 
 ### G-REM-001 특이사항 보고
 
-<img src="../images/g-rem-001.png" alt="G-REM-001 화면" width="240">
+<img src="./images/g-rem-001.png" alt="G-REM-001 화면" width="240">
 
 | 항목 | 유형 | 필수 | 설명 |
 | --- | --- | --- | --- |
@@ -533,7 +533,7 @@
 
 ### G-PRF-001 개인 프로필
 
-<img src="../images/g-prf-001.png" alt="G-PRF-001 화면" width="240">
+<img src="./images/g-prf-001.png" alt="G-PRF-001 화면" width="240">
 
 - 기본 정보: 근무자명
 - 근무 일정: 배정 기간, 근무지

@@ -9,8 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs --outDir public/docs",
-    "docs:preview": "vitepress preview docs --outDir public/docs"
+    "docs:build": "vitepress build docs --outDir public/docs/documents",
+    "docs:preview": "vitepress preview docs --outDir public/docs/documents"
   },
   "dependencies": {
     "@serwist/next": "^9.5.11",

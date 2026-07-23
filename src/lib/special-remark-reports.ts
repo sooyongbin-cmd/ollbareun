@@ -16,8 +16,8 @@ export type SpecialRemarkReportRow = {
   worksite_name: string;
   content: string;
   photo_url: string | null;
-  email_to: string;
-  email_status: "pending" | "sent" | "failed";
+  email_to: string | null;
+  email_status: "pending" | "sent" | "failed" | "not_requested";
   email_sent_at: string | null;
   email_error: string | null;
   reported_at: string;
@@ -320,13 +320,14 @@ export async function createSpecialRemarkReport(input: {
   content: unknown;
   photoDataUrl?: unknown;
   gpsInfo?: unknown;
-}, options: { emailProvider?: EmailProvider } = {}) {
+}, options: { emailProvider?: EmailProvider; sendEmail?: boolean } = {}) {
   const employee_id = requireString(input.employeeId, "현장점검자");
   const employee_name = requireString(input.employeeName, "현장점검자명");
   const worksite_id = optionalString(input.worksiteId);
   const worksite_name = requireString(input.worksiteName, "근무지");
   const content = requireString(input.content, "특이사항 내용");
-  const email_to = await getSystemConfigContent("manager_email");
+  const shouldSendEmail = options.sendEmail !== false;
+  const email_to = shouldSendEmail ? await getSystemConfigContent("manager_email") : null;
   const photo_url = await uploadPhoto({ employeeId: employee_id, photoDataUrl: input.photoDataUrl });
   const reported_at = new Date().toISOString();
 
@@ -353,7 +354,7 @@ export async function createSpecialRemarkReport(input: {
       content,
       photo_url,
       email_to,
-      email_status: "pending",
+      email_status: shouldSendEmail ? "pending" : "not_requested",
       reported_at,
       gps_info,
     })
@@ -363,9 +364,13 @@ export async function createSpecialRemarkReport(input: {
   throwIfError(error);
   const report = data as SpecialRemarkReportRow;
 
+  if (!shouldSendEmail) {
+    return report;
+  }
+
   try {
     const emailInput = {
-      to: email_to,
+      to: email_to!,
       employeeName: employee_name,
       worksiteName: worksite_name,
       reportedAt: report.reported_at,

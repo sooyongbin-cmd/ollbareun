@@ -8,6 +8,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { findManagerNavigation } from "./manager-navigation";
+import ManagerPushConnect from "./manager-push-connect";
 
 export default function ManagerHeader() {
   const pathname = usePathname();
@@ -57,8 +58,10 @@ export default function ManagerHeader() {
         <span className="truncate font-medium text-foreground">{current.item.label}</span>
       </nav>
 
+      <ManagerPushConnect />
+
       {email ? (
-        <div className="ml-auto flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
+        <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
           <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
             <UserRound aria-hidden="true" className="size-3.5" />
           </span>

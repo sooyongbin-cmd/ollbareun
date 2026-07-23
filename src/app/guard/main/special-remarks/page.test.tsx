@@ -150,6 +150,65 @@ describe("guard special remarks page", () => {
     );
   });
 
+  it("stores the report and sends manager push notifications", async () => {
+    const user = userEvent.setup();
+    const fetch = vi.fn(async () =>
+      Response.json({
+        report: { id: "report-1" },
+        delivery: { successCount: 2, failedCount: 1, unregisteredCount: 1 },
+      }),
+    );
+    vi.stubGlobal("fetch", fetch);
+    render(<GuardSpecialRemarksPage />);
+
+    await user.type(screen.getByLabelText("특이사항 내용"), "문이 파손되었습니다.");
+    await user.click(screen.getByRole("button", { name: "푸쉬알림" }));
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        "/api/guard/special-remarks/report/push",
+        expect.objectContaining({
+          method: "POST",
+          body: expect.stringContaining("문이 파손되었습니다."),
+        }),
+      );
+    });
+    expect(
+      await screen.findByText(
+        "특이사항 보고가 저장되었습니다. 푸시 전송 성공 2건, 실패 1건, 미등록 관리자 1명입니다.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("shows that the report was saved when manager push delivery fails", async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        Response.json({
+          report: { id: "report-1" },
+          delivery: {
+            successCount: 0,
+            failedCount: 0,
+            unregisteredCount: 0,
+            error: "VAPID 오류",
+          },
+        }),
+      ),
+    );
+    render(<GuardSpecialRemarksPage />);
+
+    await user.type(screen.getByLabelText("특이사항 내용"), "문이 파손되었습니다.");
+    await user.click(screen.getByRole("button", { name: "푸쉬알림" }));
+
+    expect(
+      await screen.findByText(
+        "특이사항 보고는 저장되었지만 관리자 푸시알림 전송에 실패했습니다. VAPID 오류",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("특이사항 내용")).toHaveValue("");
+  });
+
   it("submits the special remark report with GPS coordinates if geolocation is available", async () => {
     const user = userEvent.setup();
     const fetch = vi.fn(async () => Response.json({ report: { id: "report-1" } }));

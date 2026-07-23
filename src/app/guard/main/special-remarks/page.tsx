@@ -1,6 +1,6 @@
 "use client";
 
-import { MicIcon, SquareIcon } from "lucide-react";
+import { BellIcon, MicIcon, SquareIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import AlertModal from "@/components/modals/alert-modal";
@@ -106,7 +106,7 @@ export default function GuardSpecialRemarksPage() {
   const [photoDataUrl, setPhotoDataUrl] = useState("");
   const [cameraStatus, setCameraStatus] = useState("카메라를 준비하고 있습니다.");
   const [listening, setListening] = useState(false);
-  const [savingProvider, setSavingProvider] = useState<"resend" | "formspree" | "naver" | null>(null);
+  const [savingProvider, setSavingProvider] = useState<"resend" | "formspree" | "naver" | "push" | null>(null);
   const [error, setError] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const saving = savingProvider !== null;
@@ -196,7 +196,7 @@ export default function GuardSpecialRemarksPage() {
     }
   }
 
-  async function handleReport(provider: "resend" | "formspree" | "naver") {
+  async function handleReport(provider: "resend" | "formspree" | "naver" | "push") {
     const activeSession = readStoredGuardSession<GuardSession>({ touch: true });
     const employeeId = activeSession?.employee?.id;
     const employeeName = activeSession?.employee?.name;
@@ -236,6 +236,8 @@ export default function GuardSpecialRemarksPage() {
           ? "/api/guard/special-remarks/report/formspree"
           : provider === "naver"
             ? "/api/guard/special-remarks/report/naver"
+            : provider === "push"
+              ? "/api/guard/special-remarks/report/push"
             : "/api/guard/special-remarks/report";
       const response = await fetch(endpoint, {
         method: "POST",
@@ -256,7 +258,28 @@ export default function GuardSpecialRemarksPage() {
         throw new Error(payload.error ?? "특이사항 보고를 전송하지 못했습니다.");
       }
 
-      setAlertMessage("특이사항 보고가 전송되었습니다.");
+      if (provider === "push") {
+        const delivery = payload.delivery as
+          | {
+              successCount?: number;
+              failedCount?: number;
+              unregisteredCount?: number;
+              error?: string;
+            }
+          | undefined;
+
+        if (delivery?.error) {
+          setAlertMessage(
+            `특이사항 보고는 저장되었지만 관리자 푸시알림 전송에 실패했습니다. ${delivery.error}`,
+          );
+        } else {
+          setAlertMessage(
+            `특이사항 보고가 저장되었습니다. 푸시 전송 성공 ${delivery?.successCount ?? 0}건, 실패 ${delivery?.failedCount ?? 0}건, 미등록 관리자 ${delivery?.unregisteredCount ?? 0}명입니다.`,
+          );
+        }
+      } else {
+        setAlertMessage("특이사항 보고가 전송되었습니다.");
+      }
       setContent("");
       setPhotoDataUrl("");
     } catch (reportError) {
@@ -333,6 +356,15 @@ export default function GuardSpecialRemarksPage() {
             type="button"
           >
             {savingProvider === "naver" ? "보고 중..." : "이메일(NAVER)"}
+          </button>
+          <button
+            className="button-primary w-full justify-center gap-2 disabled:opacity-50"
+            disabled={saving || !content.trim()}
+            onClick={() => handleReport("push")}
+            type="button"
+          >
+            <BellIcon aria-hidden="true" size={18} />
+            {savingProvider === "push" ? "전송 중..." : "푸쉬알림"}
           </button>
         </section>
       </div>

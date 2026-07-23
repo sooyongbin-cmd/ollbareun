@@ -113,6 +113,51 @@ describe("special remark report storage deletion", () => {
   });
 });
 
+describe("special remark push-only storage", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    upload.mockResolvedValue({ error: null });
+  });
+
+  it("stores the report without loading email configuration or sending email", async () => {
+    const insertSingle = vi.fn(async () => ({
+      data: {
+        id: "report-1",
+        employee_name: "홍길동",
+        worksite_name: "본사",
+        content: "문이 파손되었습니다.",
+        email_to: null,
+        email_status: "not_requested",
+        reported_at: "2026-07-23T00:00:00.000Z",
+      },
+      error: null,
+    }));
+    const insert = vi.fn(() => ({ select: () => ({ single: insertSingle }) }));
+    from.mockReturnValue({ insert });
+
+    const result = await createSpecialRemarkReport(
+      {
+        employeeId: "employee-1",
+        employeeName: "홍길동",
+        worksiteId: "work-1",
+        worksiteName: "본사",
+        content: "문이 파손되었습니다.",
+      },
+      { sendEmail: false },
+    );
+
+    expect(insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email_to: null,
+        email_status: "not_requested",
+      }),
+    );
+    expect(getSystemConfigContent).not.toHaveBeenCalled();
+    expect(nodemailerMock.sendMail).not.toHaveBeenCalled();
+    expect(result.email_status).toBe("not_requested");
+  });
+});
+
 describe("special remark report Naver SMTP delivery", () => {
   const previousEnv = process.env;
 

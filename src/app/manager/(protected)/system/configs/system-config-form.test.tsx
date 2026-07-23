@@ -10,12 +10,16 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("system config form", () => {
-  it("places content before description", () => {
+  it("shows fields in description, content, system code, parent system code order", () => {
     render(<SystemConfigForm mode="create" />);
 
-    const content = screen.getByLabelText("내용");
-    const description = screen.getByLabelText("설명");
+    const fields = screen.getAllByRole("textbox");
 
-    expect(content.compareDocumentPosition(description) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(fields).toEqual([
+      screen.getByLabelText("설명"),
+      screen.getByLabelText("내용"),
+      screen.getByLabelText("시스템코드"),
+      screen.getByLabelText("상위시스템코드"),
+    ]);
   });
 });

@@ -85,6 +85,30 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
   return (
     <form className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50 space-y-5" onSubmit={handleSubmit}>
       <div className="space-y-2">
+        <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="system-config-description">
+          설명
+        </label>
+        <textarea
+          className="field min-h-[96px] resize-y"
+          id="system-config-description"
+          onChange={(event) => setDescription(event.target.value)}
+          value={description}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="system-config-content">
+          내용
+        </label>
+        <textarea
+          className="field min-h-[180px] resize-y"
+          id="system-config-content"
+          onChange={(event) => setContent(event.target.value)}
+          value={content}
+        />
+      </div>
+
+      <div className="space-y-2">
         <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="system-code">
           시스템코드
         </label>
@@ -106,30 +130,6 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
           id="parent-system-code"
           onChange={(event) => setParentSystemCode(event.target.value)}
           value={parentSystemCode}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="system-config-content">
-          내용
-        </label>
-        <textarea
-          className="field min-h-[180px] resize-y"
-          id="system-config-content"
-          onChange={(event) => setContent(event.target.value)}
-          value={content}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="system-config-description">
-          설명
-        </label>
-        <textarea
-          className="field min-h-[96px] resize-y"
-          id="system-config-description"
-          onChange={(event) => setDescription(event.target.value)}
-          value={description}
         />
       </div>
 

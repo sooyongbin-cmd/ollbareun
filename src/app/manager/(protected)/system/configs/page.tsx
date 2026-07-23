@@ -79,10 +79,10 @@ export default function SystemConfigsPage() {
             <table className="apple-table">
               <thead>
                 <tr>
+                  <th className="text-left">설명</th>
+                  <th className="text-left">내용</th>
                   <th className="text-left">시스템코드</th>
                   <th className="text-left">상위시스템코드</th>
-                  <th className="text-left">내용</th>
-                  <th className="text-left">설명</th>
                 </tr>
               </thead>
               <tbody>
@@ -95,14 +95,14 @@ export default function SystemConfigsPage() {
                 ) : (
                   configs.map((config) => (
                     <tr key={config.system_code} className="hover:bg-canvas-parchment transition-colors">
+                      <td data-label="설명" className="max-w-[360px] whitespace-pre-wrap">{config.description ?? "-"}</td>
+                      <td data-label="내용" className="max-w-[520px] whitespace-pre-wrap">{config.content}</td>
                       <td data-label="시스템코드" className="font-semibold">
                         <Link className="text-primary hover:opacity-80" href={`/manager/system/configs/${encodeURIComponent(config.system_code)}`}>
                           {config.system_code}
                         </Link>
                       </td>
                       <td data-label="상위시스템코드">{config.parent_system_code ?? "-"}</td>
-                      <td data-label="내용" className="max-w-[520px] whitespace-pre-wrap">{config.content}</td>
-                      <td data-label="설명" className="max-w-[360px] whitespace-pre-wrap">{config.description ?? "-"}</td>
                     </tr>
                   ))
                 )}

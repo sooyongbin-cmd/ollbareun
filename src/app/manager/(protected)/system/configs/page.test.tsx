@@ -27,9 +27,12 @@ describe("system configs page", () => {
 
     expect(await screen.findByRole("heading", { name: "시스템설정" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "등록" })).toHaveAttribute("href", "/manager/system/configs/new");
-    const contentHeader = screen.getByRole("columnheader", { name: "내용" });
-    const descriptionHeader = screen.getByRole("columnheader", { name: "설명" });
-    expect(contentHeader.compareDocumentPosition(descriptionHeader) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getAllByRole("columnheader").map((header) => header.textContent)).toEqual([
+      "설명",
+      "내용",
+      "시스템코드",
+      "상위시스템코드",
+    ]);
     expect(await screen.findByRole("link", { name: "manager_email" })).toHaveAttribute(
       "href",
       "/manager/system/configs/manager_email",

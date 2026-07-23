@@ -4,6 +4,7 @@ import {
   buildDashboardSummary,
   canClockIn,
   canClockOut,
+  canClockOutAtWorksite,
   isWithinWorksiteRadius,
   normalizePhone,
   type AttendanceRecord,
@@ -79,6 +80,39 @@ describe("Phase 1 attendance rules", () => {
     ).toEqual({
       allowed: false,
       reason: "이미 퇴근 처리되었습니다.",
+    });
+  });
+
+  it("allows clock-out only inside the assigned worksite radius", () => {
+    const attendance = {
+      id: "att-1",
+      employeeId: "emp-1",
+      worksiteId: "site-1",
+      clockInAt: "2026-05-20T00:00:00Z",
+    };
+
+    expect(
+      canClockOutAtWorksite({
+        attendance,
+        worksite,
+        currentLatitude: 35.1384,
+        currentLongitude: 129.0642,
+      }),
+    ).toEqual({
+      allowed: true,
+      reason: "근무지 반경 안에 있습니다.",
+    });
+
+    expect(
+      canClockOutAtWorksite({
+        attendance,
+        worksite,
+        currentLatitude: 35.15,
+        currentLongitude: 129.08,
+      }),
+    ).toEqual({
+      allowed: false,
+      reason: "근무지 반경 100m 이내에서만 퇴근이 가능합니다.",
     });
   });
 });

@@ -279,8 +279,24 @@ describe("guard authentication data rules", () => {
         error: null,
       }),
     };
+    const worksiteQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({
+        data: {
+          id: "work-1",
+          name: "본사",
+          gps_info: { latitude: 37.5, longitude: 127 },
+          radius_meters: 100,
+        },
+        error: null,
+      }),
+    };
     const supabase = {
-      from: vi.fn().mockReturnValueOnce(attendanceQuery).mockReturnValueOnce(updateQuery),
+      from: vi.fn()
+        .mockReturnValueOnce(attendanceQuery)
+        .mockReturnValueOnce(worksiteQuery)
+        .mockReturnValueOnce(updateQuery),
     };
     vi.mocked(getSupabase).mockReturnValue(supabase as never);
 
@@ -292,6 +308,7 @@ describe("guard authentication data rules", () => {
     expect(attendanceQuery.eq).toHaveBeenCalledWith("employee_id", "emp-1");
     expect(attendanceQuery.is).toHaveBeenCalledWith("clock_out_at", null);
     expect(attendanceQuery.order).toHaveBeenCalledWith("clock_in_at", { ascending: false });
+    expect(worksiteQuery.eq).toHaveBeenCalledWith("id", "work-1");
     expect(updateQuery.eq).toHaveBeenCalledWith("id", "attendance-1");
   });
 });

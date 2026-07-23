@@ -1,4 +1,4 @@
-import { canClockIn, canClockOut, normalizePhone } from "./phase1";
+import { canClockIn, canClockOut, canClockOutAtWorksite, normalizePhone } from "./phase1";
 import { requireGpsInfo, type GpsInfo } from "./gps";
 import { getSupabase } from "./supabase";
 
@@ -596,6 +596,31 @@ export async function clockOut(input: {
 
   if (!attendance) {
     throw new Error(decision.reason);
+  }
+
+  const { data: worksite, error: worksiteError } = await supabase
+    .from("worksites")
+    .select("*")
+    .eq("id", attendance.worksite_id)
+    .single();
+
+  throwIfError(worksiteError);
+
+  const locationDecision = canClockOutAtWorksite({
+    attendance: attendanceRecord,
+    worksite: {
+      id: worksite.id,
+      name: worksite.name,
+      latitude: worksite.gps_info.latitude,
+      longitude: worksite.gps_info.longitude,
+      radiusMeters: worksite.radius_meters,
+    },
+    currentLatitude: latitude,
+    currentLongitude: longitude,
+  });
+
+  if (!locationDecision.allowed) {
+    throw new Error(locationDecision.reason);
   }
 
   const { data, error } = await supabase

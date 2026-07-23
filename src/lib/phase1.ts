@@ -31,6 +31,10 @@ type ClockInInput = {
   currentLongitude: number;
 };
 
+type ClockOutAtWorksiteInput = ClockInInput & {
+  attendance?: AttendanceRecord | null;
+};
+
 export function normalizePhone(phone: string): string {
   return phone.replace(/\D/g, "");
 }
@@ -118,6 +122,28 @@ export function canClockOut(attendance?: AttendanceRecord | null): Decision {
   }
 
   return { allowed: true, reason: "퇴근할 수 있습니다." };
+}
+
+export function canClockOutAtWorksite(input: ClockOutAtWorksiteInput): Decision {
+  const attendanceDecision = canClockOut(input.attendance);
+  if (!attendanceDecision.allowed) {
+    return attendanceDecision;
+  }
+
+  if (
+    isWithinWorksiteRadius(
+      input.worksite,
+      input.currentLatitude,
+      input.currentLongitude,
+    )
+  ) {
+    return { allowed: true, reason: "근무지 반경 안에 있습니다." };
+  }
+
+  return {
+    allowed: false,
+    reason: `근무지 반경 ${input.worksite.radiusMeters}m 이내에서만 퇴근이 가능합니다.`,
+  };
 }
 
 export function buildDashboardSummary(

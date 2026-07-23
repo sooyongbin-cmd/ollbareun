@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { canClockIn, canClockOut, type AttendanceRecord, type Worksite } from "@/lib/phase1";
+import { canClockIn, canClockOut, canClockOutAtWorksite, type AttendanceRecord, type Worksite } from "@/lib/phase1";
 import { type GpsInfo } from "@/lib/gps";
 import AttendanceMapSection from "./attendance-map-section";
 import GuardLocationPermissionPrompt from "../guard-location-permission-prompt";
@@ -122,7 +122,23 @@ export default function GuardAttendancePage() {
           reason: guard?.worksite ? "현재 위치를 입력하거나 확인하세요." : "오늘 배정된 근무지가 없습니다.",
         };
 
-  const clockOutDecision = canClockOut(asAttendance(guard?.attendance ?? null));
+  const attendance = asAttendance(guard?.attendance ?? null);
+  const attendanceClockOutDecision = canClockOut(attendance);
+  const clockOutDecision =
+    attendanceClockOutDecision.allowed && guard?.worksite && latitude && longitude
+      ? canClockOutAtWorksite({
+          attendance,
+          worksite: asWorksite(guard.worksite),
+          currentLatitude: Number(latitude),
+          currentLongitude: Number(longitude),
+        })
+      : attendanceClockOutDecision.allowed
+        ? {
+            allowed: false,
+            reason: guard?.worksite ? "현재 위치를 입력하거나 확인하세요." : "오늘 배정된 근무지가 없습니다.",
+          }
+        : attendanceClockOutDecision;
+  const activeDecision = guard?.attendance?.clock_in_at ? clockOutDecision : clockInDecision;
 
   useEffect(() => {
     const geolocation = navigator.geolocation;
@@ -211,21 +227,49 @@ export default function GuardAttendancePage() {
 
   async function handleClockOut() {
     const activeGuard = readStoredGuardSession();
-    if (!activeGuard?.employee) {
+    if (!activeGuard?.employee || !activeGuard.worksite) {
       setGuard(activeGuard);
       return;
     }
 
-    setError("");
-    const result = await postJson<{ attendance: AttendanceRow }>("/api/attendance/clock-out", {
-      employeeId: activeGuard.employee.id,
-      latitude: latitude || activeGuard.worksite?.gps_info.latitude,
-      longitude: longitude || activeGuard.worksite?.gps_info.longitude,
-    });
-    const nextGuard = { ...activeGuard, attendance: result.attendance };
-    setGuard(nextGuard);
-    writeStoredGuardSession(nextGuard);
-    setMessage("퇴근 처리되었습니다.");
+    const geolocation = navigator.geolocation;
+    if (!geolocation) {
+      setError("이 브라우저에서는 위치 확인을 사용할 수 없습니다.");
+      return;
+    }
+
+    try {
+      setError("");
+      const position = await readCurrentPosition(geolocation);
+      const nextLatitude = String(position.coords.latitude);
+      const nextLongitude = String(position.coords.longitude);
+      const decision = canClockOutAtWorksite({
+        attendance: asAttendance(activeGuard.attendance),
+        worksite: asWorksite(activeGuard.worksite),
+        currentLatitude: position.coords.latitude,
+        currentLongitude: position.coords.longitude,
+      });
+
+      setLatitude(nextLatitude);
+      setLongitude(nextLongitude);
+
+      if (!decision.allowed) {
+        setError(decision.reason);
+        return;
+      }
+
+      const result = await postJson<{ attendance: AttendanceRow }>("/api/attendance/clock-out", {
+        employeeId: activeGuard.employee.id,
+        latitude: nextLatitude,
+        longitude: nextLongitude,
+      });
+      const nextGuard = { ...activeGuard, attendance: result.attendance };
+      setGuard(nextGuard);
+      writeStoredGuardSession(nextGuard);
+      setMessage("퇴근 처리되었습니다.");
+    } catch (clockOutError) {
+      setError(clockOutError instanceof Error ? clockOutError.message : "퇴근 처리에 실패했습니다.");
+    }
   }
 
   return (
@@ -242,11 +286,11 @@ export default function GuardAttendancePage() {
 
               <div
                 className={`p-4 rounded-xl text-center text-[15px] font-medium transition-colors ${
-                  clockInDecision.allowed ? "bg-primary/5 text-primary" : "bg-status-warn text-ink"
+                  activeDecision.allowed ? "bg-primary/5 text-primary" : "bg-status-warn text-ink"
                 }`}
                 id="attendance-decision-section"
               >
-                {clockInDecision.reason}
+                {activeDecision.reason}
               </div>
 
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3" id="attendance-actions-section">

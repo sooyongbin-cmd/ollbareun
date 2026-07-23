@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 import { saveRowsAsXls } from "../export-xls";
 
@@ -17,11 +17,48 @@ function currentYear() {
 
 export default function AttendanceReportPage() {
   const [employeeName, setEmployeeName] = useState("");
+  const [employeeNames, setEmployeeNames] = useState<string[]>([]);
+  const [employeeNamesLoading, setEmployeeNamesLoading] = useState(true);
   const [year, setYear] = useState(currentYear());
   const [rows, setRows] = useState<AttendanceReportRow[]>([]);
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadEmployeeNames() {
+      try {
+        const response = await fetch("/api/bootstrap");
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload.error ?? "직원 목록을 불러오지 못했습니다.");
+        }
+
+        if (!ignore) {
+          const names = (payload.employees ?? [])
+            .filter((employee: { is_retired?: boolean }) => !employee.is_retired)
+            .map((employee: { name: string }) => employee.name);
+          setEmployeeNames(Array.from(new Set<string>(names)).sort((left, right) => left.localeCompare(right, "ko-KR")));
+        }
+      } catch (loadError) {
+        if (!ignore) {
+          setError(loadError instanceof Error ? loadError.message : "직원 목록을 불러오지 못했습니다.");
+        }
+      } finally {
+        if (!ignore) {
+          setEmployeeNamesLoading(false);
+        }
+      }
+    }
+
+    void loadEmployeeNames();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   async function handleSearch() {
     setLoading(true);
@@ -67,13 +104,20 @@ export default function AttendanceReportPage() {
             <label className="ml-1 text-[14px] font-semibold text-ink-muted-48" htmlFor="attendance-employee-name">
               직원이름
             </label>
-            <input
+            <select
               className="field"
+              disabled={employeeNamesLoading}
               id="attendance-employee-name"
               value={employeeName}
               onChange={(event) => setEmployeeName(event.target.value)}
-              placeholder="직원이름을 입력하세요."
-            />
+            >
+              <option value="">{employeeNamesLoading ? "직원 목록 로딩 중..." : "전체"}</option>
+              {employeeNames.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="space-y-2">
             <label className="ml-1 text-[14px] font-semibold text-ink-muted-48" htmlFor="attendance-year">
@@ -118,7 +162,7 @@ export default function AttendanceReportPage() {
                 {rows.length === 0 ? (
                   <tr>
                     <td data-responsive-empty colSpan={4} className="p-8 text-center text-ink-muted-48 italic">
-                      {searched ? "조회 결과가 없습니다." : "직원이름과 연도를 입력한 뒤 조회하세요."}
+                      {searched ? "조회 결과가 없습니다." : "직원과 연도를 선택한 뒤 조회하세요."}
                     </td>
                   </tr>
                 ) : (

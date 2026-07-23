@@ -1,4 +1,5 @@
-import { loadAttendanceReport } from "@/lib/manager-reports";
+import { completeAttendanceRecord, loadAttendanceReport } from "@/lib/manager-reports";
+import { getManagerUser } from "@/lib/manager-auth";
 
 export async function GET(request: Request) {
   try {
@@ -10,6 +11,28 @@ export async function GET(request: Request) {
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "근태내역을 불러오지 못했습니다." },
+      { status: 400 },
+    );
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const manager = await getManagerUser();
+    if (!manager) {
+      return Response.json({ error: "인증 정보가 올바르지 않습니다." }, { status: 401 });
+    }
+
+    const body = await request.json();
+    return Response.json({
+      attendance: await completeAttendanceRecord({
+        recordId: body.recordId,
+        clockOutDateTime: body.clockOutDateTime,
+      }),
+    });
+  } catch (error) {
+    return Response.json(
+      { error: error instanceof Error ? error.message : "퇴근처리에 실패했습니다." },
       { status: 400 },
     );
   }

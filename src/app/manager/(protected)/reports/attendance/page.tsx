@@ -5,14 +5,19 @@ import ManagerLoadingMessage from "../../manager-loading-message";
 import { saveRowsAsXls } from "../export-xls";
 
 type AttendanceReportRow = {
-  date: string;
-  clockInTime: string;
-  clockOutTime: string;
+  id: string;
+  clockInDateTime: string;
+  clockOutDateTime: string | null;
   workDuration: string;
 };
 
 function currentYear() {
   return new Date().getFullYear();
+}
+
+function currentKstDateTimeLocal() {
+  const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  return now.toISOString().slice(0, 16);
 }
 
 export default function AttendanceReportPage() {
@@ -24,6 +29,10 @@ export default function AttendanceReportPage() {
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [selectedRow, setSelectedRow] = useState<AttendanceReportRow | null>(null);
+  const [clockOutDateTime, setClockOutDateTime] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [modalError, setModalError] = useState("");
 
   useEffect(() => {
     let ignore = false;
@@ -87,9 +96,49 @@ export default function AttendanceReportPage() {
   async function handleExport() {
     await saveRowsAsXls({
       fileName: `올바름_근태_${employeeName.trim() || "전체"}_${year}`,
-      headers: ["날짜", "출근시각", "퇴근시각", "근무시간"],
-      rows: rows.map((row) => [row.date, row.clockInTime, row.clockOutTime, row.workDuration]),
+      headers: ["출근일시", "퇴근일시", "근무시간"],
+      rows: rows.map((row) => [row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration]),
     });
+  }
+
+  function openClockOutModal(row: AttendanceReportRow) {
+    setSelectedRow(row);
+    setClockOutDateTime(currentKstDateTimeLocal());
+    setModalError("");
+  }
+
+  function closeClockOutModal() {
+    if (saving) return;
+    setSelectedRow(null);
+    setModalError("");
+  }
+
+  async function handleClockOutSave() {
+    if (!selectedRow) return;
+
+    setSaving(true);
+    setModalError("");
+    try {
+      const response = await fetch("/api/manager/reports/attendance", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recordId: selectedRow.id,
+          clockOutDateTime,
+        }),
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error ?? "퇴근처리에 실패했습니다.");
+      }
+
+      setSelectedRow(null);
+      await handleSearch();
+    } catch (saveError) {
+      setModalError(saveError instanceof Error ? saveError.message : "퇴근처리에 실패했습니다.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -152,10 +201,10 @@ export default function AttendanceReportPage() {
             <table className="apple-table">
               <thead>
                 <tr>
-                  <th className="text-left">날짜</th>
-                  <th className="text-left">출근시각</th>
-                  <th className="text-left">퇴근시각</th>
+                  <th className="text-left">출근일시</th>
+                  <th className="text-left">퇴근일시</th>
                   <th className="text-left">근무시간</th>
+                  <th className="text-left">퇴근처리</th>
                 </tr>
               </thead>
               <tbody>
@@ -167,11 +216,19 @@ export default function AttendanceReportPage() {
                   </tr>
                 ) : (
                   rows.map((row) => (
-                    <tr key={`${row.date}-${row.clockInTime}`}>
-                      <td data-label="날짜">{row.date}</td>
-                      <td data-label="출근시각">{row.clockInTime}</td>
-                      <td data-label="퇴근시각">{row.clockOutTime}</td>
+                    <tr key={row.id}>
+                      <td data-label="출근일시">{row.clockInDateTime}</td>
+                      <td data-label="퇴근일시">{row.clockOutDateTime ?? "-"}</td>
                       <td data-label="근무시간">{row.workDuration}</td>
+                      <td data-label="퇴근처리">
+                        {row.clockOutDateTime ? (
+                          <span className="text-ink-muted-48">완료</span>
+                        ) : (
+                          <button className="button-secondary h-[40px]" type="button" onClick={() => openClockOutModal(row)}>
+                            퇴근처리
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   ))
                 )}
@@ -180,6 +237,44 @@ export default function AttendanceReportPage() {
           </div>
         )}
       </section>
+
+      {selectedRow && (
+        <div
+          aria-labelledby="clock-out-modal-title"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-overlay-scrim px-5"
+          role="dialog"
+        >
+          <div className="w-full max-w-[440px] rounded-[18px] border border-hairline bg-canvas p-6 shadow-product">
+            <h2 className="text-[24px] font-semibold" id="clock-out-modal-title">
+              퇴근처리
+            </h2>
+            <p className="mt-2 text-[15px] text-ink-muted-48">출근일시: {selectedRow.clockInDateTime}</p>
+            <div className="mt-6 space-y-2">
+              <label className="ml-1 text-[14px] font-semibold text-ink-muted-48" htmlFor="clock-out-date-time">
+                퇴근일시
+              </label>
+              <input
+                autoFocus
+                className="field"
+                id="clock-out-date-time"
+                type="datetime-local"
+                value={clockOutDateTime}
+                onChange={(event) => setClockOutDateTime(event.target.value)}
+              />
+            </div>
+            {modalError && <p className="status-warn mt-4">{modalError}</p>}
+            <div className="mt-8 flex gap-3">
+              <button className="button-primary flex-1" type="button" disabled={saving || !clockOutDateTime} onClick={handleClockOutSave}>
+                {saving ? "저장 중..." : "저장"}
+              </button>
+              <button className="button-secondary flex-1" type="button" disabled={saving} onClick={closeClockOutModal}>
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

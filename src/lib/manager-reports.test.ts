@@ -1,5 +1,10 @@
-import { describe, expect, it } from "vitest";
-import { buildAttendanceReport, buildEducationReport } from "./manager-reports";
+import { describe, expect, it, vi } from "vitest";
+import { buildAttendanceReport, buildEducationReport, completeAttendanceRecord } from "./manager-reports";
+import { getSupabaseAdmin } from "./supabase-admin";
+
+vi.mock("./supabase-admin", () => ({
+  getSupabaseAdmin: vi.fn(),
+}));
 
 describe("manager reports", () => {
   it("filters attendance by employee name and year and formats duration", () => {
@@ -12,18 +17,21 @@ describe("manager reports", () => {
       ],
       attendance: [
         {
+          id: "attendance-1",
           employee_id: "emp-1",
           work_date: "2026-03-02",
           clock_in_at: "2026-03-02T00:00:00.000Z",
           clock_out_at: "2026-03-02T09:30:00.000Z",
         },
         {
+          id: "attendance-2",
           employee_id: "emp-2",
           work_date: "2026-03-02",
           clock_in_at: "2026-03-02T00:00:00.000Z",
           clock_out_at: null,
         },
         {
+          id: "attendance-3",
           employee_id: "emp-1",
           work_date: "2025-03-02",
           clock_in_at: "2025-03-02T00:00:00.000Z",
@@ -34,9 +42,9 @@ describe("manager reports", () => {
 
     expect(rows).toEqual([
       {
-        date: "2026-03-02",
-        clockInTime: "09:00",
-        clockOutTime: "18:30",
+        id: "attendance-1",
+        clockInDateTime: "2026-03-02 09:00",
+        clockOutDateTime: "2026-03-02 18:30",
         workDuration: "9시간 30분",
       },
     ]);
@@ -62,5 +70,63 @@ describe("manager reports", () => {
       { employeeName: "김철수", completedCount: 1, totalCount: 2 },
       { employeeName: "이영희", completedCount: 0, totalCount: 2 },
     ]);
+  });
+
+  it("stores a manager-entered KST clock-out date and time", async () => {
+    const findSingle = vi.fn().mockResolvedValue({
+      data: {
+        id: "attendance-1",
+        clock_in_at: "2026-06-04T00:00:00.000Z",
+        clock_out_at: null,
+      },
+      error: null,
+    });
+    const updateSingle = vi.fn().mockResolvedValue({
+      data: {
+        id: "attendance-1",
+        clock_out_at: "2026-06-04T10:00:00.000Z",
+      },
+      error: null,
+    });
+    const update = vi.fn().mockReturnValue({
+      eq: vi.fn().mockReturnValue({
+        is: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({ single: updateSingle }),
+        }),
+      }),
+    });
+    const from = vi
+      .fn()
+      .mockReturnValueOnce({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({ single: findSingle }),
+        }),
+      })
+      .mockReturnValueOnce({ update });
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from } as never);
+
+    await expect(
+      completeAttendanceRecord({
+        recordId: "attendance-1",
+        clockOutDateTime: "2026-06-04T19:00",
+      }),
+    ).resolves.toEqual({
+      id: "attendance-1",
+      clock_out_at: "2026-06-04T10:00:00.000Z",
+    });
+
+    expect(update).toHaveBeenCalledWith({
+      clock_out_at: "2026-06-04T10:00:00.000Z",
+      updated_at: expect.any(String),
+    });
+  });
+
+  it("rejects an invalid calendar date for clock-out processing", async () => {
+    await expect(
+      completeAttendanceRecord({
+        recordId: "attendance-1",
+        clockOutDateTime: "2026-02-31T19:00",
+      }),
+    ).rejects.toThrow("퇴근일시를 올바르게 입력하세요.");
   });
 });

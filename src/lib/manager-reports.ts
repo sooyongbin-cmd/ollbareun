@@ -114,57 +114,53 @@ export function buildAttendanceReport(input: {
     }));
 }
 
-function kstDateTimeLocalToIso(value: unknown) {
+function kstDateTimeLocalToIso(value: unknown, label: string) {
   if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) {
-    throw new Error("퇴근일시를 올바르게 입력하세요.");
+    throw new Error(`${label}를 올바르게 입력하세요.`);
   }
 
   const date = new Date(`${value}:00+09:00`);
   if (Number.isNaN(date.getTime())) {
-    throw new Error("퇴근일시를 올바르게 입력하세요.");
+    throw new Error(`${label}를 올바르게 입력하세요.`);
   }
 
   const normalizedKstValue = new Date(date.getTime() + 9 * 60 * 60 * 1000).toISOString().slice(0, 16);
   if (normalizedKstValue !== value) {
-    throw new Error("퇴근일시를 올바르게 입력하세요.");
+    throw new Error(`${label}를 올바르게 입력하세요.`);
   }
 
   return date.toISOString();
 }
 
-export async function completeAttendanceRecord(input: { recordId: unknown; clockOutDateTime: unknown }) {
+export async function updateAttendanceRecord(input: {
+  recordId: unknown;
+  clockInDateTime: unknown;
+  clockOutDateTime: unknown;
+}) {
   if (typeof input.recordId !== "string" || !input.recordId.trim()) {
     throw new Error("근태 기록을 확인할 수 없습니다.");
   }
 
-  const clockOutAt = kstDateTimeLocalToIso(input.clockOutDateTime);
-  const supabase = getSupabaseAdmin();
-  const { data: attendance, error: findError } = await supabase
-    .from("attendance_records")
-    .select("id,clock_in_at,clock_out_at")
-    .eq("id", input.recordId)
-    .single();
-
-  throwIfError(findError);
-  if (!attendance?.clock_in_at) {
-    throw new Error("출근일시가 없는 근태 기록입니다.");
-  }
-  if (attendance.clock_out_at) {
-    throw new Error("이미 퇴근처리된 근태 기록입니다.");
-  }
-  if (new Date(clockOutAt).getTime() < new Date(attendance.clock_in_at).getTime()) {
+  const clockInAt = kstDateTimeLocalToIso(input.clockInDateTime, "출근일시");
+  const clockOutAt =
+    input.clockOutDateTime === null || input.clockOutDateTime === undefined || input.clockOutDateTime === ""
+      ? null
+      : kstDateTimeLocalToIso(input.clockOutDateTime, "퇴근일시");
+  if (clockOutAt && new Date(clockOutAt).getTime() < new Date(clockInAt).getTime()) {
     throw new Error("퇴근일시는 출근일시 이후여야 합니다.");
   }
 
+  const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("attendance_records")
     .update({
+      work_date: String(input.clockInDateTime).slice(0, 10),
+      clock_in_at: clockInAt,
       clock_out_at: clockOutAt,
       updated_at: new Date().toISOString(),
     })
     .eq("id", input.recordId)
-    .is("clock_out_at", null)
-    .select("id,clock_out_at")
+    .select("id,work_date,clock_in_at,clock_out_at")
     .single();
 
   throwIfError(error);

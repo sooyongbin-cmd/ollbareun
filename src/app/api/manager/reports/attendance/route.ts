@@ -1,4 +1,4 @@
-import { completeAttendanceRecord, loadAttendanceReport } from "@/lib/manager-reports";
+import { loadAttendanceReport, updateAttendanceRecord } from "@/lib/manager-reports";
 import { getManagerUser } from "@/lib/manager-auth";
 
 export async function GET(request: Request) {
@@ -25,14 +25,15 @@ export async function PATCH(request: Request) {
 
     const body = await request.json();
     return Response.json({
-      attendance: await completeAttendanceRecord({
+      attendance: await updateAttendanceRecord({
         recordId: body.recordId,
+        clockInDateTime: body.clockInDateTime,
         clockOutDateTime: body.clockOutDateTime,
       }),
     });
   } catch (error) {
     return Response.json(
-      { error: error instanceof Error ? error.message : "퇴근처리에 실패했습니다." },
+      { error: error instanceof Error ? error.message : "근태 기록 수정에 실패했습니다." },
       { status: 400 },
     );
   }

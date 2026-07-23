@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildAttendanceReport, buildEducationReport, completeAttendanceRecord } from "./manager-reports";
+import { buildAttendanceReport, buildEducationReport, updateAttendanceRecord } from "./manager-reports";
 import { getSupabaseAdmin } from "./supabase-admin";
 
 vi.mock("./supabase-admin", () => ({
@@ -72,61 +72,83 @@ describe("manager reports", () => {
     ]);
   });
 
-  it("stores a manager-entered KST clock-out date and time", async () => {
-    const findSingle = vi.fn().mockResolvedValue({
-      data: {
-        id: "attendance-1",
-        clock_in_at: "2026-06-04T00:00:00.000Z",
-        clock_out_at: null,
-      },
-      error: null,
-    });
+  it("stores manager-entered KST clock-in and clock-out date-time values", async () => {
     const updateSingle = vi.fn().mockResolvedValue({
       data: {
         id: "attendance-1",
+        work_date: "2026-06-04",
+        clock_in_at: "2026-06-03T23:30:00.000Z",
         clock_out_at: "2026-06-04T10:00:00.000Z",
       },
       error: null,
     });
     const update = vi.fn().mockReturnValue({
       eq: vi.fn().mockReturnValue({
-        is: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnValue({ single: updateSingle }),
-        }),
+        select: vi.fn().mockReturnValue({ single: updateSingle }),
       }),
     });
-    const from = vi
-      .fn()
-      .mockReturnValueOnce({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({ single: findSingle }),
-        }),
-      })
-      .mockReturnValueOnce({ update });
+    const from = vi.fn().mockReturnValue({ update });
     vi.mocked(getSupabaseAdmin).mockReturnValue({ from } as never);
 
     await expect(
-      completeAttendanceRecord({
+      updateAttendanceRecord({
         recordId: "attendance-1",
+        clockInDateTime: "2026-06-04T08:30",
         clockOutDateTime: "2026-06-04T19:00",
       }),
     ).resolves.toEqual({
       id: "attendance-1",
+      work_date: "2026-06-04",
+      clock_in_at: "2026-06-03T23:30:00.000Z",
       clock_out_at: "2026-06-04T10:00:00.000Z",
     });
 
     expect(update).toHaveBeenCalledWith({
+      work_date: "2026-06-04",
+      clock_in_at: "2026-06-03T23:30:00.000Z",
       clock_out_at: "2026-06-04T10:00:00.000Z",
       updated_at: expect.any(String),
     });
   });
 
-  it("rejects an invalid calendar date for clock-out processing", async () => {
-    await expect(
-      completeAttendanceRecord({
-        recordId: "attendance-1",
-        clockOutDateTime: "2026-02-31T19:00",
+  it("allows clearing the clock-out date-time", async () => {
+    const updateSingle = vi.fn().mockResolvedValue({
+      data: {
+        id: "attendance-1",
+        work_date: "2026-06-04",
+        clock_in_at: "2026-06-04T00:00:00.000Z",
+        clock_out_at: null,
+      },
+      error: null,
+    });
+    const update = vi.fn().mockReturnValue({
+      eq: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({ single: updateSingle }),
       }),
-    ).rejects.toThrow("퇴근일시를 올바르게 입력하세요.");
+    });
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from: vi.fn().mockReturnValue({ update }) } as never);
+
+    await updateAttendanceRecord({
+      recordId: "attendance-1",
+      clockInDateTime: "2026-06-04T09:00",
+      clockOutDateTime: "",
+    });
+
+    expect(update).toHaveBeenCalledWith({
+      work_date: "2026-06-04",
+      clock_in_at: "2026-06-04T00:00:00.000Z",
+      clock_out_at: null,
+      updated_at: expect.any(String),
+    });
+  });
+
+  it("rejects an invalid calendar date for attendance editing", async () => {
+    await expect(
+      updateAttendanceRecord({
+        recordId: "attendance-1",
+        clockInDateTime: "2026-02-31T09:00",
+        clockOutDateTime: "",
+      }),
+    ).rejects.toThrow("출근일시를 올바르게 입력하세요.");
   });
 });

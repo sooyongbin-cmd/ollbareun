@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { completeAttendanceRecord, loadAttendanceReport } from "@/lib/manager-reports";
+import { loadAttendanceReport, updateAttendanceRecord } from "@/lib/manager-reports";
 import { getManagerUser } from "@/lib/manager-auth";
 import { GET, PATCH } from "./route";
 
 vi.mock("@/lib/manager-reports", () => ({
-  completeAttendanceRecord: vi.fn(),
   loadAttendanceReport: vi.fn(),
+  updateAttendanceRecord: vi.fn(),
 }));
 
 vi.mock("@/lib/manager-auth", () => ({
@@ -27,36 +27,46 @@ describe("/api/manager/reports/attendance", () => {
     expect(loadAttendanceReport).toHaveBeenCalledWith({ employeeName: "", year: "2026" });
   });
 
-  it("denies clock-out processing if the manager is not logged in", async () => {
+  it("denies attendance editing if the manager is not logged in", async () => {
     vi.mocked(getManagerUser).mockResolvedValue(null);
 
     const response = await PATCH(
       new Request("http://localhost/api/manager/reports/attendance", {
         method: "PATCH",
-        body: JSON.stringify({ recordId: "attendance-1", clockOutDateTime: "2026-06-04T19:00" }),
+        body: JSON.stringify({
+          recordId: "attendance-1",
+          clockInDateTime: "2026-06-04T08:30",
+          clockOutDateTime: "2026-06-04T19:00",
+        }),
       }),
     );
 
     expect(response.status).toBe(401);
-    expect(completeAttendanceRecord).not.toHaveBeenCalled();
+    expect(updateAttendanceRecord).not.toHaveBeenCalled();
   });
 
-  it("saves the manager-entered clock-out date and time", async () => {
-    vi.mocked(completeAttendanceRecord).mockResolvedValue({
+  it("saves the manager-entered clock-in and clock-out date-time values", async () => {
+    vi.mocked(updateAttendanceRecord).mockResolvedValue({
       id: "attendance-1",
+      clock_in_at: "2026-06-03T23:30:00.000Z",
       clock_out_at: "2026-06-04T10:00:00.000Z",
     } as never);
 
     const response = await PATCH(
       new Request("http://localhost/api/manager/reports/attendance", {
         method: "PATCH",
-        body: JSON.stringify({ recordId: "attendance-1", clockOutDateTime: "2026-06-04T19:00" }),
+        body: JSON.stringify({
+          recordId: "attendance-1",
+          clockInDateTime: "2026-06-04T08:30",
+          clockOutDateTime: "2026-06-04T19:00",
+        }),
       }),
     );
 
     expect(response.status).toBe(200);
-    expect(completeAttendanceRecord).toHaveBeenCalledWith({
+    expect(updateAttendanceRecord).toHaveBeenCalledWith({
       recordId: "attendance-1",
+      clockInDateTime: "2026-06-04T08:30",
       clockOutDateTime: "2026-06-04T19:00",
     });
   });

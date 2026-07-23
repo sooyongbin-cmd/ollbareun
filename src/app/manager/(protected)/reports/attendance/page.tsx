@@ -30,6 +30,7 @@ export default function AttendanceReportPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedRow, setSelectedRow] = useState<AttendanceReportRow | null>(null);
+  const [clockInDateTime, setClockInDateTime] = useState("");
   const [clockOutDateTime, setClockOutDateTime] = useState("");
   const [saving, setSaving] = useState(false);
   const [modalError, setModalError] = useState("");
@@ -101,19 +102,20 @@ export default function AttendanceReportPage() {
     });
   }
 
-  function openClockOutModal(row: AttendanceReportRow) {
+  function openEditModal(row: AttendanceReportRow) {
     setSelectedRow(row);
-    setClockOutDateTime(currentKstDateTimeLocal());
+    setClockInDateTime(row.clockInDateTime.replace(" ", "T"));
+    setClockOutDateTime(row.clockOutDateTime?.replace(" ", "T") ?? currentKstDateTimeLocal());
     setModalError("");
   }
 
-  function closeClockOutModal() {
+  function closeEditModal() {
     if (saving) return;
     setSelectedRow(null);
     setModalError("");
   }
 
-  async function handleClockOutSave() {
+  async function handleAttendanceSave() {
     if (!selectedRow) return;
 
     setSaving(true);
@@ -124,18 +126,19 @@ export default function AttendanceReportPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           recordId: selectedRow.id,
+          clockInDateTime,
           clockOutDateTime,
         }),
       });
       const payload = await response.json();
       if (!response.ok) {
-        throw new Error(payload.error ?? "퇴근처리에 실패했습니다.");
+        throw new Error(payload.error ?? "근태 기록 수정에 실패했습니다.");
       }
 
       setSelectedRow(null);
       await handleSearch();
     } catch (saveError) {
-      setModalError(saveError instanceof Error ? saveError.message : "퇴근처리에 실패했습니다.");
+      setModalError(saveError instanceof Error ? saveError.message : "근태 기록 수정에 실패했습니다.");
     } finally {
       setSaving(false);
     }
@@ -204,7 +207,7 @@ export default function AttendanceReportPage() {
                   <th className="text-left">출근일시</th>
                   <th className="text-left">퇴근일시</th>
                   <th className="text-left">근무시간</th>
-                  <th className="text-left">퇴근처리</th>
+                  <th className="text-left">수정</th>
                 </tr>
               </thead>
               <tbody>
@@ -220,14 +223,10 @@ export default function AttendanceReportPage() {
                       <td data-label="출근일시">{row.clockInDateTime}</td>
                       <td data-label="퇴근일시">{row.clockOutDateTime ?? "-"}</td>
                       <td data-label="근무시간">{row.workDuration}</td>
-                      <td data-label="퇴근처리">
-                        {row.clockOutDateTime ? (
-                          <span className="text-ink-muted-48">완료</span>
-                        ) : (
-                          <button className="button-secondary h-[40px]" type="button" onClick={() => openClockOutModal(row)}>
-                            퇴근처리
-                          </button>
-                        )}
+                      <td data-label="수정">
+                        <button className="button-secondary h-[40px]" type="button" onClick={() => openEditModal(row)}>
+                          수정
+                        </button>
                       </td>
                     </tr>
                   ))
@@ -240,22 +239,33 @@ export default function AttendanceReportPage() {
 
       {selectedRow && (
         <div
-          aria-labelledby="clock-out-modal-title"
+          aria-labelledby="attendance-edit-modal-title"
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-center justify-center bg-overlay-scrim px-5"
           role="dialog"
         >
           <div className="w-full max-w-[440px] rounded-[18px] border border-hairline bg-canvas p-6 shadow-product">
-            <h2 className="text-[24px] font-semibold" id="clock-out-modal-title">
-              퇴근처리
+            <h2 className="text-[24px] font-semibold" id="attendance-edit-modal-title">
+              근태 기록 수정
             </h2>
-            <p className="mt-2 text-[15px] text-ink-muted-48">출근일시: {selectedRow.clockInDateTime}</p>
             <div className="mt-6 space-y-2">
+              <label className="ml-1 text-[14px] font-semibold text-ink-muted-48" htmlFor="clock-in-date-time">
+                출근일시
+              </label>
+              <input
+                autoFocus
+                className="field"
+                id="clock-in-date-time"
+                type="datetime-local"
+                value={clockInDateTime}
+                onChange={(event) => setClockInDateTime(event.target.value)}
+              />
+            </div>
+            <div className="mt-4 space-y-2">
               <label className="ml-1 text-[14px] font-semibold text-ink-muted-48" htmlFor="clock-out-date-time">
                 퇴근일시
               </label>
               <input
-                autoFocus
                 className="field"
                 id="clock-out-date-time"
                 type="datetime-local"
@@ -265,10 +275,15 @@ export default function AttendanceReportPage() {
             </div>
             {modalError && <p className="status-warn mt-4">{modalError}</p>}
             <div className="mt-8 flex gap-3">
-              <button className="button-primary flex-1" type="button" disabled={saving || !clockOutDateTime} onClick={handleClockOutSave}>
+              <button
+                className="button-primary flex-1"
+                type="button"
+                disabled={saving || !clockInDateTime}
+                onClick={handleAttendanceSave}
+              >
                 {saving ? "저장 중..." : "저장"}
               </button>
-              <button className="button-secondary flex-1" type="button" disabled={saving} onClick={closeClockOutModal}>
+              <button className="button-secondary flex-1" type="button" disabled={saving} onClick={closeEditModal}>
                 취소
               </button>
             </div>

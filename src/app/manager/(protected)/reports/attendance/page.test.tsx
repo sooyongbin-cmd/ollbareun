@@ -54,9 +54,10 @@ describe("attendance report page", () => {
     );
     expect(await screen.findByText("2026-06-04 09:00")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "엑셀" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "수정" })).toBeEnabled();
   });
 
-  it("opens the clock-out modal for an unfinished row and saves the selected date and time", async () => {
+  it("opens the edit modal for an unfinished row and saves both date-time values", async () => {
     const user = userEvent.setup();
     let saved = false;
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -72,9 +73,9 @@ describe("attendance report page", () => {
         rows: [
           {
             id: "attendance-1",
-            clockInDateTime: "2026-06-04 09:00",
+            clockInDateTime: saved ? "2026-06-04 08:30" : "2026-06-04 09:00",
             clockOutDateTime: saved ? "2026-06-04 19:00" : null,
-            workDuration: saved ? "10시간" : "-",
+            workDuration: saved ? "10시간 30분" : "-",
           },
         ],
       });
@@ -84,15 +85,19 @@ describe("attendance report page", () => {
     render(<AttendanceReportPage />);
     await screen.findByRole("option", { name: "김철수" });
     await user.click(screen.getByRole("button", { name: "조회" }));
-    await user.click(await screen.findByRole("button", { name: "퇴근처리" }));
+    await user.click(await screen.findByRole("button", { name: "수정" }));
 
-    const dialog = screen.getByRole("dialog", { name: "퇴근처리" });
-    const input = screen.getByLabelText("퇴근일시");
+    const dialog = screen.getByRole("dialog", { name: "근태 기록 수정" });
+    const clockInInput = screen.getByLabelText("출근일시");
+    const clockOutInput = screen.getByLabelText("퇴근일시");
     expect(dialog).toBeInTheDocument();
-    expect(input).not.toHaveValue("");
+    expect(clockInInput).toHaveValue("2026-06-04T09:00");
+    expect(clockOutInput).not.toHaveValue("");
 
-    await user.clear(input);
-    await user.type(input, "2026-06-04T19:00");
+    await user.clear(clockInInput);
+    await user.type(clockInInput, "2026-06-04T08:30");
+    await user.clear(clockOutInput);
+    await user.type(clockOutInput, "2026-06-04T19:00");
     await user.click(screen.getByRole("button", { name: "저장" }));
 
     await waitFor(() =>
@@ -102,13 +107,15 @@ describe("attendance report page", () => {
           method: "PATCH",
           body: JSON.stringify({
             recordId: "attendance-1",
+            clockInDateTime: "2026-06-04T08:30",
             clockOutDateTime: "2026-06-04T19:00",
           }),
         }),
       ),
     );
+    expect(await screen.findByText("2026-06-04 08:30")).toBeInTheDocument();
     expect(await screen.findByText("2026-06-04 19:00")).toBeInTheDocument();
-    expect(screen.queryByRole("dialog", { name: "퇴근처리" })).not.toBeInTheDocument();
-    expect(screen.getByText("완료")).toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: "근태 기록 수정" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "수정" })).toBeEnabled();
   });
 });

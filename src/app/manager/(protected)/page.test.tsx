@@ -41,30 +41,35 @@ describe("manager dashboard page", () => {
     );
   });
 
-  it("renders summary, daily charts, and live attendance list", async () => {
+  it("renders four summary cards, a comparison chart, and both data tables", async () => {
     render(<ManagerPage />);
 
     expect(await screen.findByRole("heading", { name: "관리자 대시보드" })).toBeInTheDocument();
-    expect(screen.getByText("전체인원 12명 현재출근 7명 교육미이수 3명")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "출근율 일별 차트" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "안전교육 이수율 일별 차트" })).toBeInTheDocument();
+
+    const summary = screen.getByRole("region", { name: "운영 요약" });
+    expect(within(summary).getByText("전체 직원")).toBeInTheDocument();
+    expect(within(summary).getByText("12명")).toBeInTheDocument();
+    expect(within(summary).getByText("현재 출근")).toBeInTheDocument();
+    expect(within(summary).getByText("7명")).toBeInTheDocument();
+    expect(within(summary).getByText("교육 미이수")).toBeInTheDocument();
+    expect(within(summary).getByText("3명")).toBeInTheDocument();
+    expect(within(summary).getByText("오늘 출근율")).toBeInTheDocument();
+    expect(within(summary).getByText("60%")).toBeInTheDocument();
+
+    expect(screen.getByRole("heading", { name: "최근 30일 운영 추이" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: "최근 30일 출근율과 안전교육 이수율 비교 차트" }),
+    ).toHaveAttribute("data-testid", "dashboard-trend-chart");
 
     const assignmentSection = screen.getByRole("region", { name: "현장별 인원 배치" });
-    expect(within(assignmentSection).getByRole("heading", { name: "현장별 인원 배치" })).toBeInTheDocument();
     expect(within(assignmentSection).getByRole("columnheader", { name: "근무지명" })).toBeInTheDocument();
     expect(within(assignmentSection).getByRole("columnheader", { name: "배정인원수" })).toBeInTheDocument();
     expect(within(assignmentSection).getByText("문현동현장")).toBeInTheDocument();
     expect(within(assignmentSection).getByText("센텀현장")).toBeInTheDocument();
-    expect(within(assignmentSection).getByText("문현동현장").closest("td")).toHaveAttribute("data-label", "근무지명");
     expect(within(assignmentSection).getByRole("link", { name: "2" })).toHaveAttribute(
       "href",
       "/manager/employee/assignments?worksite=%EB%AC%B8%ED%98%84%EB%8F%99%ED%98%84%EC%9E%A5",
     );
-    expect(within(assignmentSection).getByRole("link", { name: "2" }).closest("td")).toHaveAttribute(
-      "data-label",
-      "배정인원수",
-    );
-    expect(within(assignmentSection).getByText("0")).toBeInTheDocument();
 
     const liveSection = screen.getByRole("region", { name: "실시간출근현황 리스트" });
     expect(within(liveSection).getByRole("columnheader", { name: "성명" })).toBeInTheDocument();
@@ -73,22 +78,62 @@ describe("manager dashboard page", () => {
     expect(within(liveSection).getByRole("columnheader", { name: "교육여부" })).toBeInTheDocument();
     expect(within(liveSection).getByRole("columnheader", { name: "출근상태" })).toBeInTheDocument();
     expect(within(liveSection).getByText("김철수")).toBeInTheDocument();
+    expect(within(liveSection).getByText("완료")).toBeInTheDocument();
+    expect(within(liveSection).getByText("출근")).toBeInTheDocument();
   });
 
-  it("keeps both daily charts within the mobile content width", async () => {
+  it("keeps the integrated chart within the content width", async () => {
     render(<ManagerPage />);
 
-    const attendanceChart = await screen.findByRole("img", { name: "출근율 일별 차트 그래프" });
-    const educationChart = screen.getByRole("img", { name: "안전교육 이수율 일별 차트 그래프" });
-    const chartGrid = attendanceChart.closest("[data-chart-grid]");
-    const chartCards = screen.getAllByTestId("daily-rate-chart");
-
-    expect(chartGrid).toHaveClass("min-w-0");
-    expect(chartCards).toHaveLength(2);
-    chartCards.forEach((card) => expect(card).toHaveClass("min-w-0", "max-w-full"));
-    [attendanceChart, educationChart].forEach((chart) => {
-      expect(chart).toHaveClass("h-auto", "w-full", "max-w-full");
-      expect(chart).not.toHaveClass("min-w-[560px]");
+    const chart = await screen.findByRole("img", {
+      name: "최근 30일 출근율과 안전교육 이수율 비교 차트",
     });
+
+    expect(chart).toHaveClass("h-[300px]", "w-full", "aspect-auto");
+    expect(screen.getAllByTestId("dashboard-trend-chart")).toHaveLength(1);
+  });
+
+  it("shows a dashboard-shaped loading state", () => {
+    vi.stubGlobal("fetch", vi.fn(() => new Promise(() => undefined)));
+
+    render(<ManagerPage />);
+
+    expect(
+      screen.getByRole("status", { name: "대시보드를 불러오는 중입니다." }),
+    ).toBeInTheDocument();
+  });
+
+  it("shows an alert when the dashboard request fails", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => Response.json({ error: "자료 조회 실패" }, { status: 500 })),
+    );
+
+    render(<ManagerPage />);
+
+    const alert = await screen.findByRole("alert");
+    expect(within(alert).getByText("대시보드를 표시할 수 없습니다.")).toBeInTheDocument();
+    expect(within(alert).getByText("자료 조회 실패")).toBeInTheDocument();
+  });
+
+  it("handles missing rates and empty table data", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        Response.json({
+          summary: dashboardPayload.summary,
+          liveAttendance: [],
+          worksiteAssignments: [],
+        }),
+      ),
+    );
+
+    render(<ManagerPage />);
+
+    expect(await screen.findByText("오늘 출근율")).toBeInTheDocument();
+    expect(within(screen.getByRole("region", { name: "운영 요약" })).getByText("0%")).toBeInTheDocument();
+    expect(screen.getByText("표시할 추이 데이터가 없습니다.")).toBeInTheDocument();
+    expect(screen.getByText("등록된 근무지가 없습니다.")).toBeInTheDocument();
+    expect(screen.getByText("현재 출근 기록이 없습니다.")).toBeInTheDocument();
   });
 });

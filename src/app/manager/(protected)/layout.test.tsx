@@ -3,35 +3,62 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ManagerLayout from "./layout";
 
-const replace = vi.fn();
-const signOut = vi.fn();
+const navigationMock = vi.hoisted(() => ({ pathname: "/manager" }));
+const authMocks = vi.hoisted(() => ({
+  replace: vi.fn(),
+  signOut: vi.fn(),
+  getUser: vi.fn(async () => ({ data: { user: { email: "admin@ollbareun.test" } }, error: null })),
+}));
+
+vi.mock("next/navigation", () => ({
+  usePathname: () => navigationMock.pathname,
+}));
 
 vi.mock("@/lib/supabase-browser", () => ({
   createSupabaseBrowserClient: () => ({
-    auth: { signOut },
+    auth: {
+      signOut: authMocks.signOut,
+      getUser: authMocks.getUser,
+    },
   }),
 }));
 
 function SuspendedManagerChild() {
   throw new Promise(() => undefined);
-  return null;
 }
 
-describe("manager layout loading state", () => {
+function setViewportWidth(width: number) {
+  Object.defineProperty(window, "innerWidth", {
+    configurable: true,
+    value: width,
+  });
+}
+
+async function waitForMobileSidebar() {
+  await waitFor(() => {
+    expect(document.querySelector('[data-slot="sidebar"][data-state]')).not.toBeInTheDocument();
+  });
+}
+
+describe("manager layout", () => {
   beforeEach(() => {
-    replace.mockReset();
-    signOut.mockReset();
+    navigationMock.pathname = "/manager";
+    authMocks.replace.mockReset();
+    authMocks.signOut.mockReset();
+    authMocks.getUser.mockClear();
+    setViewportWidth(1024);
     document.cookie = "sb-test-auth-token=; Max-Age=0; path=/";
     Object.defineProperty(window, "location", {
+      configurable: true,
       value: {
-        assign: replace,
+        assign: authMocks.replace,
       },
       writable: true,
     });
     window.sessionStorage.setItem("ollbareun.manager.browserSession", "active");
   });
 
-  it("opens and closes the mobile manager menu from the header button", async () => {
+  it("collapses the desktop sidebar and exposes icon tooltips", async () => {
     const user = userEvent.setup();
     render(
       <ManagerLayout>
@@ -39,95 +66,95 @@ describe("manager layout loading state", () => {
       </ManagerLayout>,
     );
 
-    const openButton = screen.getByRole("button", { name: "관리자 메뉴 열기" });
-    expect(openButton).toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByRole("dialog", { name: "관리자 메뉴" })).not.toBeInTheDocument();
+    const desktopSidebar = document.querySelector('[data-slot="sidebar"][data-state="expanded"]');
+    expect(desktopSidebar).toBeInTheDocument();
 
-    await user.click(openButton);
+    await user.click(screen.getByRole("button", { name: "관리자 메뉴 열기 또는 접기" }));
 
-    expect(openButton).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByRole("dialog", { name: "관리자 메뉴" })).toBeInTheDocument();
-    expect(screen.getAllByRole("link", { name: "교육자료관리" })).toHaveLength(2);
+    expect(document.querySelector('[data-slot="sidebar"][data-state="collapsed"]')).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "관리자 메뉴 닫기" }));
+    await user.hover(screen.getByRole("link", { name: "대시보드" }));
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("대시보드");
+  });
 
+  it("opens and closes the mobile manager sheet", async () => {
+    const user = userEvent.setup();
+    setViewportWidth(375);
+    render(
+      <ManagerLayout>
+        <div>관리자 본문</div>
+      </ManagerLayout>,
+    );
+    await waitForMobileSidebar();
+
+    await user.click(screen.getByRole("button", { name: "관리자 메뉴 열기 또는 접기" }));
+
+    const dialog = await screen.findByRole("dialog", { name: "관리자 메뉴" });
+    expect(dialog).toBeInTheDocument();
+    expect(within(dialog).getByRole("link", { name: "교육자료관리" })).toBeInTheDocument();
+
+    await user.click(within(dialog).getByRole("button", { name: "닫기" }));
     expect(screen.queryByRole("dialog", { name: "관리자 메뉴" })).not.toBeInTheDocument();
   });
 
-  it("locks scrolling and closes the mobile menu with Escape", async () => {
+  it("locks scrolling and closes the mobile sheet with Escape", async () => {
     const user = userEvent.setup();
+    setViewportWidth(375);
     render(
       <ManagerLayout>
         <div>관리자 본문</div>
       </ManagerLayout>,
     );
+    await waitForMobileSidebar();
 
-    await user.click(screen.getByRole("button", { name: "관리자 메뉴 열기" }));
+    await user.click(screen.getByRole("button", { name: "관리자 메뉴 열기 또는 접기" }));
+    await screen.findByRole("dialog", { name: "관리자 메뉴" });
 
     expect(document.body.style.overflow).toBe("hidden");
-
     await user.keyboard("{Escape}");
 
     expect(screen.queryByRole("dialog", { name: "관리자 메뉴" })).not.toBeInTheDocument();
     expect(document.body.style.overflow).toBe("");
   });
 
-  it("closes the mobile menu from the backdrop", async () => {
+  it("closes the mobile sheet after selecting a navigation link", async () => {
     const user = userEvent.setup();
+    setViewportWidth(375);
     render(
       <ManagerLayout>
         <div>관리자 본문</div>
       </ManagerLayout>,
     );
+    await waitForMobileSidebar();
 
-    await user.click(screen.getByRole("button", { name: "관리자 메뉴 열기" }));
-    await user.click(screen.getByRole("button", { name: "관리자 메뉴 배경 닫기" }));
-
-    expect(screen.queryByRole("dialog", { name: "관리자 메뉴" })).not.toBeInTheDocument();
-  });
-
-  it("closes the mobile menu after selecting a navigation link", async () => {
-    const user = userEvent.setup();
-    render(
-      <ManagerLayout>
-        <div>관리자 본문</div>
-      </ManagerLayout>,
-    );
-
-    await user.click(screen.getByRole("button", { name: "관리자 메뉴 열기" }));
-    const mobileMenu = screen.getByRole("dialog", { name: "관리자 메뉴" });
-    const mobileLink = within(mobileMenu).getByRole("link", { name: "교육자료관리" });
-    mobileLink.addEventListener("click", (event) => event.preventDefault(), { once: true });
-    fireEvent.click(mobileLink);
+    await user.click(screen.getByRole("button", { name: "관리자 메뉴 열기 또는 접기" }));
+    const dialog = await screen.findByRole("dialog", { name: "관리자 메뉴" });
+    const link = within(dialog).getByRole("link", { name: "교육자료관리" });
+    link.addEventListener("click", (event) => event.preventDefault(), { once: true });
+    fireEvent.click(link);
 
     expect(screen.queryByRole("dialog", { name: "관리자 메뉴" })).not.toBeInTheDocument();
   });
 
-  it("uses the wider manager content width", () => {
+  it("renders the full-width inset content container", () => {
     const { container } = render(
       <ManagerLayout>
         <div>관리자 본문</div>
       </ManagerLayout>,
     );
 
-    const widerContainers = Array.from(container.querySelectorAll("div")).filter((element) =>
-      element.className.includes("max-w-[1180px]"),
-    );
-
-    expect(widerContainers).toHaveLength(2);
-    expect(widerContainers[1]).toHaveClass("py-10", "md:py-[80px]");
+    const content = container.querySelector("section.max-w-\\[1600px\\]");
+    expect(content).toHaveClass("w-full", "min-w-0", "p-4", "md:p-6", "lg:p-8");
   });
 
-  it("shows the loading board while manager content is suspended", () => {
+  it("shows the existing loading board while manager content is suspended", () => {
     render(
       <ManagerLayout>
         <SuspendedManagerChild />
       </ManagerLayout>,
     );
 
-    const loadingBoard = screen.getByRole("status", { name: "자료를 불러오는 중입니다." });
-    expect(loadingBoard).toBeInTheDocument();
-    expect(loadingBoard.querySelector('img[src="/loading.gif"]')).toBeInTheDocument();
+    expect(screen.getByRole("status", { name: "자료를 불러오는 중입니다." })).toBeInTheDocument();
   });
 
   it("signs out and returns to manager auth when the browser session marker is missing", async () => {
@@ -140,119 +167,71 @@ describe("manager layout loading state", () => {
       </ManagerLayout>,
     );
 
-    expect(signOut).toHaveBeenCalled();
-    await waitFor(() => expect(replace).toHaveBeenCalledWith("/manager/auth"));
+    expect(authMocks.signOut).toHaveBeenCalled();
+    await waitFor(() => expect(authMocks.replace).toHaveBeenCalledWith("/manager/auth"));
   });
 
-  it("renames the safety education menu and links education resources", () => {
+  it("keeps all manager navigation groups and destinations", () => {
     render(
       <ManagerLayout>
         <div>관리자 본문</div>
       </ManagerLayout>,
     );
 
-    // Both mobile and desktop menus contain "안전교육"
-    expect(screen.getAllByText("안전교육")[0]).toBeInTheDocument();
-    expect(screen.queryByText("안전교육 관리")).not.toBeInTheDocument();
-    expect(screen.getAllByRole("link", { name: "교육자료관리" })[0]).toHaveAttribute(
+    expect(screen.getByText("직원관리")).toBeInTheDocument();
+    expect(screen.getByText("현장점검")).toBeInTheDocument();
+    expect(screen.getByText("안전교육")).toBeInTheDocument();
+    expect(screen.getByText("리포트출력")).toBeInTheDocument();
+    expect(screen.getByText("시스템")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "대시보드" })).toHaveAttribute("href", "/manager");
+    expect(screen.getByRole("link", { name: "교육자료관리" })).toHaveAttribute(
       "href",
       "/manager/safty/resources",
     );
-    expect(screen.getAllByRole("link", { name: "교육이수관리" })[0]).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "교육이수관리" })).toHaveAttribute(
       "href",
       "/manager/safty/completions",
     );
-    expect(screen.getAllByRole("link", { name: "자동알림" })[0]).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "자동알림" })).toHaveAttribute(
       "href",
       "/manager/safty/notifications",
     );
-    expect(screen.queryByRole("link", { name: "교육자료(cloudflare)" })).not.toBeInTheDocument();
-    expect(screen.queryByText("교육 대상 관리 목록/등록/수정")).not.toBeInTheDocument();
-  });
-
-  it("adds system logs to the manager menu", () => {
-    render(
-      <ManagerLayout>
-        <div>관리자 본문</div>
-      </ManagerLayout>,
-    );
-
-    expect(screen.getAllByText("직원관리")[0]).toBeInTheDocument();
-    expect(screen.queryByText("직원 관리")).not.toBeInTheDocument();
-    expect(screen.getAllByText("리포트출력")[0]).toBeInTheDocument();
-    expect(screen.queryByText("리포트 출력")).not.toBeInTheDocument();
-    expect(screen.getAllByText("시스템")[0]).toBeInTheDocument();
-    expect(screen.getAllByRole("link", { name: "로그현황" })[0]).toHaveAttribute("href", "/manager/system/logs");
-  });
-
-  it("links the dashboard menu to manager home", () => {
-    render(
-      <ManagerLayout>
-        <div>관리자 본문</div>
-      </ManagerLayout>,
-    );
-
-    expect(screen.getAllByRole("link", { name: "대시보드" })[0]).toHaveAttribute("href", "/manager");
-  });
-
-  it("removes dashboard submenus and keeps only the requested report links", () => {
-    render(
-      <ManagerLayout>
-        <div>관리자 본문</div>
-      </ManagerLayout>,
-    );
-
-    expect(screen.queryByText("요약 카드")).not.toBeInTheDocument();
-    expect(screen.queryByText("출퇴근 추이 차트")).not.toBeInTheDocument();
-    expect(screen.queryByText("안전교육 이수율 추이 차트")).not.toBeInTheDocument();
-    expect(screen.queryByText("실시간 출퇴근 현황")).not.toBeInTheDocument();
-    expect(screen.queryByText("주차 / 야간 / 직원이름 검색")).not.toBeInTheDocument();
-    expect(screen.queryByText("출퇴근 기록")).not.toBeInTheDocument();
-    expect(screen.queryByText("자동 양식 생성")).not.toBeInTheDocument();
-    expect(screen.getAllByRole("link", { name: "근태내역" })[0]).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "로그현황" })).toHaveAttribute(
       "href",
-      "/manager/reports/attendance",
+      "/manager/system/logs",
     );
-    expect(screen.getAllByRole("link", { name: "교육이수자료" })[0]).toHaveAttribute(
-      "href",
-      "/manager/reports/education",
-    );
-  });
-
-  it("adds inspection menu between employee management and safety education", () => {
-    render(
-      <ManagerLayout>
-        <div>관리자 본문</div>
-      </ManagerLayout>,
-    );
-
-    const menuLabels = screen
-      .getAllByRole("listitem")
-      .slice(0, 5)
-      .map((item) => item.textContent ?? "");
-
-    expect(menuLabels[1]).toContain("직원관리");
-    expect(menuLabels[2]).toContain("현장점검");
-    expect(menuLabels[3]).toContain("안전교육");
-    expect(screen.getAllByRole("link", { name: "현장관리" })[0]).toHaveAttribute(
-      "href",
-      "/manager/inspection/sites",
-    );
-    expect(screen.getAllByRole("link", { name: "현장점검현황" })[0]).toHaveAttribute(
-      "href",
-      "/manager/inspection/logs",
-    );
-    expect(screen.getAllByRole("link", { name: "특이사항" })[0]).toHaveAttribute(
-      "href",
-      "/manager/inspection/special-remarks",
-    );
-    expect(screen.getAllByRole("link", { name: "시스템설정" })[0]).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "시스템설정" })).toHaveAttribute(
       "href",
       "/manager/system/configs",
     );
   });
 
-  it("renders PWA installation banner on beforeinstallprompt", () => {
+  it("marks the current route active and shows its breadcrumb", () => {
+    navigationMock.pathname = "/manager/inspection/logs";
+
+    render(
+      <ManagerLayout>
+        <div>관리자 본문</div>
+      </ManagerLayout>,
+    );
+
+    expect(screen.getByRole("link", { name: "현장점검현황" })).toHaveAttribute("data-active", "true");
+    const breadcrumb = screen.getByRole("navigation", { name: "현재 위치" });
+    expect(within(breadcrumb).getByText("현장점검")).toBeInTheDocument();
+    expect(within(breadcrumb).getByText("현장점검현황")).toBeInTheDocument();
+  });
+
+  it("shows the signed-in manager email in the header", async () => {
+    render(
+      <ManagerLayout>
+        <div>관리자 본문</div>
+      </ManagerLayout>,
+    );
+
+    expect(await screen.findByText("admin@ollbareun.test")).toBeInTheDocument();
+  });
+
+  it("renders the PWA installation banner on beforeinstallprompt", () => {
     render(
       <ManagerLayout>
         <div>관리자 본문</div>

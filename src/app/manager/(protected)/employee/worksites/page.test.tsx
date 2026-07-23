@@ -8,6 +8,7 @@ import WorksiteManagementPage from "./page";
 
 vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
+  usePathname: () => "/manager/employee/worksites",
 }));
 
 function renderWithManagerLayout(ui: ReactElement) {

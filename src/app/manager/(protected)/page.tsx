@@ -1,8 +1,49 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import ManagerLoadingMessage from "./manager-loading-message";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
+  CircleAlert,
+  GraduationCap,
+  MapPinned,
+  TrendingUp,
+  UserRoundCheck,
+  Users,
+} from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 type DashboardPayload = {
   summary: {
@@ -40,99 +81,182 @@ const emptyDashboard: DashboardPayload = {
   worksiteAssignments: [],
 };
 
+const chartConfig = {
+  attendanceRate: {
+    label: "출근율",
+    color: "var(--chart-1)",
+  },
+  educationRate: {
+    label: "교육 이수율",
+    color: "var(--chart-2)",
+  },
+} satisfies ChartConfig;
+
 function formatTime(value: string | null) {
   if (!value) {
     return "-";
   }
 
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "-";
-  }
-
-  return date.toLocaleTimeString("ko-KR", {
+  return new Intl.DateTimeFormat("ko-KR", {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
-  });
+    timeZone: "Asia/Seoul",
+  }).format(new Date(value));
 }
 
-function DailyRateChart({
-  title,
-  data,
-  valueKey,
-}: {
-  title: string;
-  data: DashboardPayload["dailyRates"];
-  valueKey: "attendanceRate" | "educationRate";
-}) {
-  const points = useMemo(() => {
-    if (data.length === 0) {
-      return "";
-    }
+function formatShortDate(value: string) {
+  const [, month = "", day = ""] = value.split("-");
+  return `${Number(month)}/${Number(day)}`;
+}
 
-    const width = 560;
-    const height = 180;
-    const left = 32;
-    const right = 12;
-    const top = 14;
-    const bottom = 28;
-    const graphWidth = width - left - right;
-    const graphHeight = height - top - bottom;
-    const divisor = Math.max(1, data.length - 1);
+function formatLongDate(value: string) {
+  const date = new Date(`${value}T00:00:00+09:00`);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
 
-    return data
-      .map((row, index) => {
-        const x = left + (graphWidth * index) / divisor;
-        const y = top + graphHeight - (graphHeight * row[valueKey]) / 100;
-        return `${x},${y}`;
-      })
-      .join(" ");
-  }, [data, valueKey]);
+  return new Intl.DateTimeFormat("ko-KR", {
+    month: "long",
+    day: "numeric",
+    weekday: "short",
+    timeZone: "Asia/Seoul",
+  }).format(date);
+}
 
-  const latest = data.at(-1)?.[valueKey] ?? 0;
-
+function DashboardSkeleton() {
   return (
-    <section
-      data-testid="daily-rate-chart"
-      className="min-w-0 max-w-full rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[24px]"
-    >
-      <div className="flex items-center justify-between gap-4">
-        <h2 className="text-[24px] font-semibold">{title}</h2>
-        <span className="text-[20px] font-semibold text-primary">{latest}%</span>
+    <div role="status" aria-label="대시보드를 불러오는 중입니다." className="space-y-6">
+      <span className="sr-only">대시보드를 불러오는 중입니다.</span>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }, (_, index) => (
+          <Card key={index} className="gap-4">
+            <CardHeader>
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-9 w-20" />
+            </CardHeader>
+          </Card>
+        ))}
       </div>
-      <div className="mt-4 min-w-0 max-w-full overflow-hidden rounded-[14px] border border-hairline bg-canvas p-3">
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-5 w-40" />
+          <Skeleton className="h-4 w-64 max-w-full" />
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="h-[300px] w-full" />
+        </CardContent>
+      </Card>
+      <div className="grid gap-6 xl:grid-cols-2">
+        {Array.from({ length: 2 }, (_, index) => (
+          <Card key={index}>
+            <CardHeader>
+              <Skeleton className="h-5 w-36" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-52 w-full" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DashboardTrendChart({ data }: { data: DashboardPayload["dailyRates"] }) {
+  return (
+    <Card>
+      <CardHeader className="border-b">
+        <CardTitle>
+          <h2 className="text-base">최근 30일 운영 추이</h2>
+        </CardTitle>
+        <CardDescription>출근율과 안전교육 이수율을 날짜별로 비교합니다.</CardDescription>
+        <CardAction>
+          <Badge variant="outline" className="gap-1 text-muted-foreground">
+            <TrendingUp aria-hidden="true" className="size-3" />
+            30일
+          </Badge>
+        </CardAction>
+      </CardHeader>
+      <CardContent className="pt-6">
         {data.length === 0 ? (
-          <p className="p-6 text-[15px] text-ink-muted-48">차트 자료가 없습니다.</p>
+          <div className="flex h-[300px] items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
+            표시할 추이 데이터가 없습니다.
+          </div>
         ) : (
-          <svg className="h-auto w-full max-w-full" viewBox="0 0 560 180" role="img" aria-label={`${title} 그래프`}>
-            {[0, 25, 50, 75, 100].map((tick) => {
-              const y = 14 + 138 - (138 * tick) / 100;
-              return (
-                <g key={tick}>
-                  <line x1="32" x2="548" y1={y} y2={y} stroke="#e0e0e0" strokeWidth="1" />
-                  <text x="0" y={y + 4} fill="#7a7a7a" fontSize="11">
-                    {tick}%
-                  </text>
-                </g>
-              );
-            })}
-            <polyline fill="none" points={points} stroke="#0066cc" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
-            {data.map((row, index) => {
-              const x = 32 + (516 * index) / Math.max(1, data.length - 1);
-              const y = 14 + 138 - (138 * row[valueKey]) / 100;
-              return <circle key={row.date} cx={x} cy={y} fill="#0066cc" r="3" />;
-            })}
-            <text x="32" y="174" fill="#7a7a7a" fontSize="11">
-              {data[0]?.date}
-            </text>
-            <text x="490" y="174" fill="#7a7a7a" fontSize="11">
-              {data.at(-1)?.date}
-            </text>
-          </svg>
+          <ChartContainer
+            config={chartConfig}
+            className="h-[300px] w-full aspect-auto"
+            role="img"
+            aria-label="최근 30일 출근율과 안전교육 이수율 비교 차트"
+            data-testid="dashboard-trend-chart"
+          >
+            <AreaChart accessibilityLayer data={data} margin={{ left: 0, right: 12, top: 8 }}>
+              <defs>
+                <linearGradient id="attendance-fill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--color-attendanceRate)" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="var(--color-attendanceRate)" stopOpacity={0.02} />
+                </linearGradient>
+                <linearGradient id="education-fill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--color-educationRate)" stopOpacity={0.2} />
+                  <stop offset="95%" stopColor="var(--color-educationRate)" stopOpacity={0.02} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid vertical={false} />
+              <XAxis
+                axisLine={false}
+                dataKey="date"
+                minTickGap={28}
+                tickFormatter={formatShortDate}
+                tickLine={false}
+              />
+              <YAxis
+                axisLine={false}
+                domain={[0, 100]}
+                tickCount={6}
+                tickFormatter={(value) => `${value}%`}
+                tickLine={false}
+                width={42}
+              />
+              <ChartTooltip
+                cursor={false}
+                content={
+                  <ChartTooltipContent
+                    indicator="line"
+                    labelFormatter={(_, payload) =>
+                      formatLongDate(String(payload[0]?.payload?.date ?? ""))
+                    }
+                    formatter={(value, name) => (
+                      <div className="flex w-full min-w-32 items-center justify-between gap-4">
+                        <span className="text-muted-foreground">
+                          {chartConfig[name as keyof typeof chartConfig]?.label ?? name}
+                        </span>
+                        <span className="font-mono font-medium tabular-nums">{Number(value)}%</span>
+                      </div>
+                    )}
+                  />
+                }
+              />
+              <ChartLegend content={<ChartLegendContent />} />
+              <Area
+                dataKey="attendanceRate"
+                fill="url(#attendance-fill)"
+                stroke="var(--color-attendanceRate)"
+                strokeWidth={2}
+                type="monotone"
+              />
+              <Area
+                dataKey="educationRate"
+                fill="url(#education-fill)"
+                stroke="var(--color-educationRate)"
+                strokeWidth={2}
+                type="monotone"
+              />
+            </AreaChart>
+          </ChartContainer>
         )}
-      </div>
-    </section>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -148,9 +272,11 @@ export default function ManagerPage() {
       try {
         const response = await fetch("/api/manager/dashboard");
         const payload = await response.json();
+
         if (!response.ok) {
           throw new Error(payload.error ?? "대시보드 자료를 불러오지 못했습니다.");
         }
+
         if (!ignore) {
           setData({
             summary: payload.summary ?? emptyDashboard.summary,
@@ -177,122 +303,191 @@ export default function ManagerPage() {
     };
   }, []);
 
+  if (loading) {
+    return <DashboardSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <CircleAlert aria-hidden="true" />
+        <AlertTitle>대시보드를 표시할 수 없습니다.</AlertTitle>
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    );
+  }
+
+  const todayAttendanceRate = data.dailyRates.at(-1)?.attendanceRate ?? 0;
+  const summaryCards = [
+    {
+      label: "전체 직원",
+      value: `${data.summary.totalEmployees}명`,
+      description: "현재 재직 중인 직원",
+      icon: Users,
+    },
+    {
+      label: "현재 출근",
+      value: `${data.summary.currentlyClockedIn}명`,
+      description: "오늘 출근 후 근무 중",
+      icon: UserRoundCheck,
+    },
+    {
+      label: "교육 미이수",
+      value: `${data.summary.educationUncompleted}명`,
+      description: "필수 안전교육 확인 필요",
+      icon: GraduationCap,
+    },
+    {
+      label: "오늘 출근율",
+      value: `${todayAttendanceRate}%`,
+      description: "전체 재직 직원 기준",
+      icon: TrendingUp,
+    },
+  ];
+
   return (
-    <section className="space-y-[32px]">
-      <header>
-        <h1 className="text-[40px] font-semibold leading-[1.1]">관리자 대시보드</h1>
-      </header>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">관리자 대시보드</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          직원 배치와 출근, 안전교육 현황을 한눈에 확인합니다.
+        </p>
+      </div>
 
-      {loading ? (
-        <ManagerLoadingMessage />
-      ) : error ? (
-        <p className="status-warn">{error}</p>
-      ) : (
-        <>
-          <section aria-label="요약내용" className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[32px]">
-            <p className="text-[28px] font-semibold leading-relaxed">
-              전체인원 {data.summary.totalEmployees}명 현재출근 {data.summary.currentlyClockedIn}명 교육미이수{" "}
-              {data.summary.educationUncompleted}명
-            </p>
-          </section>
+      <section aria-label="운영 요약" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {summaryCards.map((card) => (
+          <Card key={card.label} className="gap-4 bg-gradient-to-t from-primary/[0.035] to-card">
+            <CardHeader>
+              <CardDescription>{card.label}</CardDescription>
+              <CardTitle className="text-2xl tabular-nums md:text-3xl">{card.value}</CardTitle>
+              <CardAction>
+                <span className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <card.icon aria-hidden="true" className="size-4" />
+                </span>
+              </CardAction>
+            </CardHeader>
+            <CardContent className="text-xs text-muted-foreground">{card.description}</CardContent>
+          </Card>
+        ))}
+      </section>
 
-          <section data-chart-grid className="grid min-w-0 gap-5 xl:grid-cols-2">
-            <DailyRateChart title="출근율 일별 차트" data={data.dailyRates} valueKey="attendanceRate" />
-            <DailyRateChart title="안전교육 이수율 일별 차트" data={data.dailyRates} valueKey="educationRate" />
-          </section>
+      <DashboardTrendChart data={data.dailyRates} />
 
-          <section
-            aria-label="현장별 인원 배치"
-            className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[32px]"
-          >
-            <h2 className="text-[24px] font-semibold">현장별 인원 배치</h2>
-            <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-[16px] border border-hairline bg-canvas">
-              <table className="apple-table">
-                <thead>
-                  <tr>
-                    <th className="text-left">근무지명</th>
-                    <th className="text-center">배정인원수</th>
-                  </tr>
-                </thead>
-                <tbody>
+      <div className="grid min-w-0 gap-6 xl:grid-cols-2">
+        <Card role="region" aria-label="현장별 인원 배치" className="min-w-0">
+          <CardHeader className="border-b">
+            <CardTitle>
+              <h2 className="flex items-center gap-2 text-base">
+                <MapPinned aria-hidden="true" className="size-4 text-primary" />
+                현장별 인원 배치
+              </h2>
+            </CardTitle>
+            <CardDescription>현재 배정 기간에 포함된 인원을 집계합니다.</CardDescription>
+          </CardHeader>
+          <CardContent className="min-w-0 px-0">
+            <div className="min-w-0 overflow-x-auto">
+              <Table className="min-w-[420px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>근무지명</TableHead>
+                    <TableHead className="text-right">배정인원수</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {data.worksiteAssignments.length === 0 ? (
-                    <tr>
-                      <td data-responsive-empty colSpan={2} className="p-8 text-center text-ink-muted-48 italic">
+                    <TableRow>
+                      <TableCell colSpan={2} className="h-28 text-center text-muted-foreground">
                         등록된 근무지가 없습니다.
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ) : (
                     data.worksiteAssignments.map((worksite) => (
-                      <tr key={worksite.worksiteId} className="hover:bg-canvas-parchment transition-colors">
-                        <td data-label="근무지명" className="font-semibold">{worksite.worksiteName}</td>
-                        <td data-label="배정인원수" className="text-center">
+                      <TableRow key={worksite.worksiteId}>
+                        <TableCell className="font-medium">{worksite.worksiteName}</TableCell>
+                        <TableCell className="text-right">
                           {worksite.assignedCount > 0 ? (
                             <Link
-                              className="text-primary font-semibold hover:underline"
+                              className="font-semibold text-primary hover:underline"
                               href={`/manager/employee/assignments?worksite=${encodeURIComponent(worksite.worksiteName)}`}
                             >
                               {worksite.assignedCount}
                             </Link>
                           ) : (
-                            <span className="text-ink-muted-48">{worksite.assignedCount}</span>
+                            <span className="text-muted-foreground">{worksite.assignedCount}</span>
                           )}
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))
                   )}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
-          </section>
+          </CardContent>
+        </Card>
 
-          <section
-            aria-label="실시간출근현황 리스트"
-            className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[32px]"
-          >
-            <h2 className="text-[24px] font-semibold">실시간출근현황</h2>
-            <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-[16px] border border-hairline bg-canvas">
-              <table className="apple-table">
-                <thead>
-                  <tr>
-                    <th className="text-left">성명</th>
-                    <th className="text-left">현장명</th>
-                    <th className="text-left">출근시간</th>
-                    <th className="text-left">교육여부</th>
-                    <th className="text-left">출근상태</th>
-                  </tr>
-                </thead>
-                <tbody>
+        <Card role="region" aria-label="실시간출근현황 리스트" className="min-w-0">
+          <CardHeader className="border-b">
+            <CardTitle>
+              <h2 className="flex items-center gap-2 text-base">
+                <UserRoundCheck aria-hidden="true" className="size-4 text-primary" />
+                실시간 출근 현황
+              </h2>
+            </CardTitle>
+            <CardDescription>오늘 출근 기록을 최근 시간순으로 표시합니다.</CardDescription>
+          </CardHeader>
+          <CardContent className="min-w-0 px-0">
+            <div className="min-w-0 overflow-x-auto">
+              <Table className="min-w-[680px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>성명</TableHead>
+                    <TableHead>현장명</TableHead>
+                    <TableHead>출근시간</TableHead>
+                    <TableHead>교육여부</TableHead>
+                    <TableHead>출근상태</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {data.liveAttendance.length === 0 ? (
-                    <tr>
-                      <td data-responsive-empty colSpan={5} className="p-8 text-center text-ink-muted-48 italic">
+                    <TableRow>
+                      <TableCell colSpan={5} className="h-28 text-center text-muted-foreground">
                         현재 출근 기록이 없습니다.
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ) : (
                     data.liveAttendance.map((row, index) => (
-                      <tr key={`${row.employeeName}-${row.clockInAt ?? index}`} className="hover:bg-canvas-parchment transition-colors">
-                        <td data-label="성명" className="font-semibold">{row.employeeName}</td>
-                        <td data-label="현장명">{row.worksiteName}</td>
-                        <td data-label="출근시간">{formatTime(row.clockInAt)}</td>
-                        <td data-label="교육여부">{row.educationStatus}</td>
-                        <td data-label="출근상태">
-                          <span
-                            className={`inline-flex rounded-full px-3 py-1 text-[12px] font-semibold ${
-                              row.attendanceStatus === "출근" ? "bg-primary/10 text-primary" : "bg-ink/10 text-ink-muted-48"
-                            }`}
+                      <TableRow key={`${row.employeeName}-${row.clockInAt ?? index}`}>
+                        <TableCell className="font-medium">{row.employeeName}</TableCell>
+                        <TableCell>{row.worksiteName}</TableCell>
+                        <TableCell className="font-mono text-xs">{formatTime(row.clockInAt)}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={
+                              row.educationStatus === "완료"
+                                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                                : "border-amber-200 bg-amber-50 text-amber-700"
+                            }
+                          >
+                            {row.educationStatus}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={row.attendanceStatus === "출근" ? "default" : "secondary"}
                           >
                             {row.attendanceStatus}
-                          </span>
-                        </td>
-                      </tr>
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
                     ))
                   )}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
-          </section>
-        </>
-      )}
-    </section>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }

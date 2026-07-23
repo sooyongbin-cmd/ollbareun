@@ -21,6 +21,10 @@ describe("responsive data table contract", () => {
   const tableSources = listTsxFiles(appDirectory)
     .map((filePath) => ({ filePath, source: readFileSync(filePath, "utf8") }))
     .filter(({ source }) => /<table\b[^>]*\bapple-table\b/.test(source));
+  const allSources = listTsxFiles(appDirectory).map((filePath) => ({
+    filePath,
+    source: readFileSync(filePath, "utf8"),
+  }));
 
   it("marks every data cell with a mobile label or empty-state marker", () => {
     const violations = tableSources.flatMap(({ filePath, source }) =>
@@ -39,7 +43,14 @@ describe("responsive data table contract", () => {
       0,
     );
 
-    expect(tableCount).toBe(22);
+    const shadcnTableCount = allSources.reduce(
+      (count, { source }) => count + [...source.matchAll(/<Table(?:\s|>)/g)].length,
+      0,
+    );
+
+    expect(tableCount).toBe(20);
+    expect(shadcnTableCount).toBe(2);
+    expect(tableCount + shadcnTableCount).toBe(22);
   });
 
   it("marks the one-column safety table to suppress duplicate mobile labels", () => {

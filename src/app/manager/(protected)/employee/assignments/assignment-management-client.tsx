@@ -76,17 +76,23 @@ export default function AssignmentManagementClient() {
     };
   }, []);
 
+  const worksiteOptions = useMemo(() => {
+    const names = new Set(assignments.map((assignment) => assignment.worksite_name));
+    if (initialWorksite) {
+      names.add(initialWorksite);
+    }
+    return Array.from(names).sort((left, right) => left.localeCompare(right, "ko-KR"));
+  }, [assignments, initialWorksite]);
+
   const filteredAssignments = useMemo(() => {
     const normalizedDate = dateQuery.trim();
-    const normalizedWorksite = worksiteQuery.trim().toLowerCase();
     const normalizedName = nameQuery.trim().toLowerCase();
 
     return assignments.filter((assignment) => {
       const matchesDate =
         !normalizedDate ||
         (assignment.start_date <= normalizedDate && normalizedDate <= assignment.end_date);
-      const matchesWorksite =
-        !normalizedWorksite || assignment.worksite_name.toLowerCase().includes(normalizedWorksite);
+      const matchesWorksite = !worksiteQuery || assignment.worksite_name === worksiteQuery;
       const matchesName =
         !normalizedName || assignment.employee_name.toLowerCase().includes(normalizedName);
 
@@ -167,13 +173,19 @@ export default function AssignmentManagementClient() {
               <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-worksite-search">
                 근무지
               </label>
-              <input
+              <select
                 className="field"
                 id="assignment-worksite-search"
                 value={worksiteQuery}
                 onChange={(event) => setWorksiteQuery(event.target.value)}
-                placeholder="근무지 이름 입력"
-              />
+              >
+                <option value="">전체</option>
+                {worksiteOptions.map((worksite) => (
+                  <option key={worksite} value={worksite}>
+                    {worksite}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="space-y-2">
               <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-name-search">

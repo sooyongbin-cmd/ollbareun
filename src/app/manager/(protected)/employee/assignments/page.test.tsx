@@ -65,12 +65,23 @@ describe("assignment management page", () => {
     const row = await screen.findByRole("link", { name: "홍길동" });
     expect(within(row).getByText("2026-05-21 ~ 2026-05-23")).toBeInTheDocument();
     expect(within(row).getByText("본사")).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "근무지" })).toHaveValue("");
+    expect(screen.getAllByRole("option").map((option) => option.textContent)).toEqual([
+      "전체",
+      "본사",
+      "서울지점",
+    ]);
 
     await user.type(screen.getByLabelText("날짜"), "2026-05-22");
     expect(await screen.findByRole("link", { name: "홍길동" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "김철수" })).not.toBeInTheDocument();
 
     await user.clear(screen.getByLabelText("날짜"));
+    await user.selectOptions(screen.getByLabelText("근무지"), "서울지점");
+    expect(screen.queryByRole("link", { name: "홍길동" })).not.toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: "김철수" })).toBeInTheDocument();
+
+    await user.selectOptions(screen.getByLabelText("근무지"), "");
     await user.type(screen.getByLabelText("이름"), "김철수");
     await user.click(await screen.findByRole("link", { name: "김철수" }));
     expect(push).toHaveBeenCalledWith("/manager/employee/assignments/save/assign-2");

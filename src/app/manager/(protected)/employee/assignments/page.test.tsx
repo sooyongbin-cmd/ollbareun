@@ -35,6 +35,7 @@ describe("assignment management page", () => {
                 end_date: "2026-05-23",
                 employee_name: "홍길동",
                 worksite_name: "본사",
+                days_off_count: 2,
               },
               {
                 id: "assign-2",
@@ -42,6 +43,7 @@ describe("assignment management page", () => {
                 end_date: "2026-05-25",
                 employee_name: "김철수",
                 worksite_name: "서울지점",
+                days_off_count: 0,
               },
             ],
           });
@@ -61,10 +63,12 @@ describe("assignment management page", () => {
       "href",
       "/manager/employee/assignments/new",
     );
+    expect(screen.getByRole("columnheader", { name: "휴무" })).toBeInTheDocument();
 
     const row = await screen.findByRole("link", { name: "홍길동" });
     expect(within(row).getByText("2026-05-21 ~ 2026-05-23")).toBeInTheDocument();
     expect(within(row).getByText("본사")).toBeInTheDocument();
+    expect(within(row).getByText("2일")).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "근무지" })).toHaveValue("");
     expect(screen.getAllByRole("option").map((option) => option.textContent)).toEqual([
       "전체",
@@ -111,7 +115,7 @@ describe("assignment management page", () => {
     );
   });
 
-  it("sorts assignments by date, worksite name, and employee name", async () => {
+  it("sorts assignments by date, worksite name, employee name, and days off", async () => {
     const user = userEvent.setup();
 
     const { container } = renderWithManagerLayout(<AssignmentManagementPage />);
@@ -131,6 +135,14 @@ describe("assignment management page", () => {
     trs = container.querySelectorAll("tbody tr");
     expect(within(trs[0] as HTMLElement).getByText("홍길동")).toBeInTheDocument();
     expect(within(trs[1] as HTMLElement).getByText("김철수")).toBeInTheDocument();
+
+    // Click "휴무" to sort ASC: assign-2 (0일) first, then assign-1 (2일)
+    const daysOffHeader = screen.getByRole("columnheader", { name: "휴무" });
+    await user.click(daysOffHeader);
+
+    trs = container.querySelectorAll("tbody tr");
+    expect(within(trs[0] as HTMLElement).getByText("김철수")).toBeInTheDocument();
+    expect(within(trs[1] as HTMLElement).getByText("홍길동")).toBeInTheDocument();
 
     // Click "이름" to sort ASC: 김철수 (김) first, then 홍길동 (홍)
     const nameHeader = screen.getByRole("columnheader", { name: "이름" });

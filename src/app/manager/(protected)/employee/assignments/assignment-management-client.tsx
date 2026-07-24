@@ -16,6 +16,7 @@ type AssignmentRow = {
   end_date: string;
   employee_name: string;
   worksite_name: string;
+  days_off_count?: number;
 };
 
 type AssignmentResponse = {
@@ -47,7 +48,7 @@ export default function AssignmentManagementClient() {
   const [dateQuery, setDateQuery] = useState("");
   const [worksiteQuery, setWorksiteQuery] = useState(initialWorksite);
   const [nameQuery, setNameQuery] = useState("");
-  const [sortKey, setSortKey] = useState<"date" | "worksite" | "name">("date");
+  const [sortKey, setSortKey] = useState<"date" | "worksite" | "name" | "daysOff">("date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -119,6 +120,13 @@ export default function AssignmentManagementClient() {
         return sortDirection === "asc"
           ? left.worksite_name.localeCompare(right.worksite_name, "ko-KR")
           : right.worksite_name.localeCompare(left.worksite_name, "ko-KR");
+      } else if (sortKey === "daysOff") {
+        const leftCount = left.days_off_count ?? 0;
+        const rightCount = right.days_off_count ?? 0;
+        if (leftCount === rightCount) {
+          return left.start_date.localeCompare(right.start_date);
+        }
+        return sortDirection === "asc" ? leftCount - rightCount : rightCount - leftCount;
       } else {
         if (left.employee_name === right.employee_name) {
           return left.start_date.localeCompare(right.start_date);
@@ -130,7 +138,7 @@ export default function AssignmentManagementClient() {
     });
   }, [filteredAssignments, sortKey, sortDirection]);
 
-  const handleSort = (key: "date" | "worksite" | "name") => {
+  const handleSort = (key: "date" | "worksite" | "name" | "daysOff") => {
     if (sortKey === key) {
       setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
     } else {
@@ -259,12 +267,21 @@ export default function AssignmentManagementClient() {
                   >
                     이름
                   </SortableHeader>
+                  <SortableHeader
+                    sortKey="daysOff"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="text-left"
+                  >
+                    휴무
+                  </SortableHeader>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {sortedAssignments.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={3} className="p-8 text-center text-muted-foreground italic">
+                    <TableCell data-responsive-empty colSpan={4} className="p-8 text-center text-muted-foreground italic">
                       조회 결과가 없습니다.
                     </TableCell>
                   </TableRow>
@@ -287,6 +304,7 @@ export default function AssignmentManagementClient() {
                       <TableCell data-label="날짜" className="font-semibold">{formatPeriod(assignment)}</TableCell>
                       <TableCell data-label="근무지">{assignment.worksite_name}</TableCell>
                       <TableCell data-label="이름" className="text-muted-foreground">{assignment.employee_name}</TableCell>
+                      <TableCell data-label="휴무">{`${assignment.days_off_count ?? 0}일`}</TableCell>
                     </TableRow>
                   ))
                 )}

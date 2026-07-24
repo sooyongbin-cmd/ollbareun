@@ -34,6 +34,7 @@ export type AssignmentRow = {
 export type AssignmentListRow = AssignmentRow & {
   employee_name: string;
   worksite_name: string;
+  days_off_count: number;
 };
 
 export type AttendanceRow = {
@@ -325,23 +326,34 @@ export async function createAssignment(input: {
 
 export async function listAssignments() {
   const supabase = getSupabase();
-  const [assignmentsResult, employeesResult, worksitesResult] = await Promise.all([
+  const [assignmentsResult, employeesResult, worksitesResult, daysOffResult] = await Promise.all([
     supabase.from("work_assignments").select("*").order("start_date", { ascending: false }).order("created_at", { ascending: false }),
     supabase.from("employees").select("id,name"),
     supabase.from("worksites").select("id,name"),
+    supabase.from("work_assignment_days_off").select("work_assignment_id"),
   ]);
 
   throwIfError(assignmentsResult.error);
   throwIfError(employeesResult.error);
   throwIfError(worksitesResult.error);
+  throwIfError(daysOffResult.error);
 
   const employeesById = new Map((employeesResult.data ?? []).map((employee) => [employee.id, employee.name]));
   const worksitesById = new Map((worksitesResult.data ?? []).map((worksite) => [worksite.id, worksite.name]));
 
+  const daysOffCountByAssignmentId = new Map<string, number>();
+  for (const row of (daysOffResult.data ?? []) as { work_assignment_id: string }[]) {
+    daysOffCountByAssignmentId.set(
+      row.work_assignment_id,
+      (daysOffCountByAssignmentId.get(row.work_assignment_id) ?? 0) + 1,
+    );
+  }
+
   return (assignmentsResult.data ?? []).map((assignment) => ({
     ...assignment,
     employee_name: employeesById.get(assignment.employee_id) ?? "직원 없음",
-    worksite_name: worksitesById.get(assignment.worksite_id) ?? "근무지 없음",
+    worksite_name: worksitesById.get(assignment.worksite_id) ?? "근무지 없음",
+    days_off_count: daysOffCountByAssignmentId.get(assignment.id) ?? 0,
   })) as AssignmentListRow[];
 }
 

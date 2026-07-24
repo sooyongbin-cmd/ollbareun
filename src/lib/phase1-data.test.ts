@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { authenticateGuard, clockIn, clockOut, createAssignment } from "./phase1-data";
+import { authenticateGuard, clockIn, clockOut, createAssignment, listAssignments } from "./phase1-data";
 import { getSupabase } from "./supabase";
 import { isAssignmentDayOff } from "./assignment-days-off";
 
@@ -350,5 +350,85 @@ describe("guard authentication data rules", () => {
       }),
     ).rejects.toThrow("오늘은 휴무일로 지정되어 출근할 수 없습니다.");
     expect(isAssignmentDayOff).toHaveBeenCalledWith("assign-1", "2026-05-26");
+  });
+
+  it("listAssignments counts days off per assignment", async () => {
+    const assignmentsQuery = {
+      select: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      then: (onfulfilled: (val: unknown) => unknown) =>
+        Promise.resolve({
+          data: [
+            { id: "assign-1", employee_id: "emp-1", worksite_id: "work-1", start_date: "2026-05-21", end_date: "2026-05-23" },
+            { id: "assign-2", employee_id: "emp-2", worksite_id: "work-2", start_date: "2026-05-24", end_date: "2026-05-25" },
+          ],
+          error: null,
+        }).then(onfulfilled),
+    };
+
+    const employeesQuery = {
+      select: vi.fn().mockResolvedValue({
+        data: [
+          { id: "emp-1", name: "홍길동" },
+          { id: "emp-2", name: "김철수" },
+        ],
+        error: null,
+      }),
+    };
+
+    const worksitesQuery = {
+      select: vi.fn().mockResolvedValue({
+        data: [
+          { id: "work-1", name: "본사" },
+          { id: "work-2", name: "서울지점" },
+        ],
+        error: null,
+      }),
+    };
+
+    const daysOffQuery = {
+      select: vi.fn().mockResolvedValue({
+        data: [
+          { work_assignment_id: "assign-1", day_off_date: "2026-05-22" },
+          { work_assignment_id: "assign-1", day_off_date: "2026-05-23" },
+        ],
+        error: null,
+      }),
+    };
+
+    const supabase = {
+      from: vi.fn((table: string) => {
+        if (table === "work_assignments") return assignmentsQuery;
+        if (table === "employees") return employeesQuery;
+        if (table === "worksites") return worksitesQuery;
+        if (table === "work_assignment_days_off") return daysOffQuery;
+        throw new Error(`Unexpected table: ${table}`);
+      }),
+    };
+    vi.mocked(getSupabase).mockReturnValue(supabase as never);
+
+    const result = await listAssignments();
+    expect(result).toEqual([
+      {
+        id: "assign-1",
+        employee_id: "emp-1",
+        worksite_id: "work-1",
+        start_date: "2026-05-21",
+        end_date: "2026-05-23",
+        employee_name: "홍길동",
+        worksite_name: "본사",
+        days_off_count: 2,
+      },
+      {
+        id: "assign-2",
+        employee_id: "emp-2",
+        worksite_id: "work-2",
+        start_date: "2026-05-24",
+        end_date: "2026-05-25",
+        employee_name: "김철수",
+        worksite_name: "서울지점",
+        days_off_count: 0,
+      },
+    ]);
   });
 });

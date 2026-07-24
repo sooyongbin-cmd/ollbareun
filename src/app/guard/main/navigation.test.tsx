@@ -101,6 +101,13 @@ describe("guard main navigation", () => {
     expect(screen.getByText("브라우저 지원 확인")).toBeInTheDocument();
     expect(screen.getByText("서버 저장")).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "출근하기" })[0]).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "출근하기" })[0]).toHaveAttribute(
+      "data-variant",
+      "outline",
+    );
+    expect(screen.getAllByRole("button", { name: "출근하기" })[0]).not.toHaveClass(
+      "text-primary-foreground",
+    );
     expect(screen.getByRole("link", { name: "교육 받기" })).toHaveAttribute("href", "/guard/main/safety");
     expect(screen.getByRole("button", { name: "순찰(QR코드)" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "순찰(NFC태그)" })).toBeInTheDocument();

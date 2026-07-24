@@ -140,7 +140,7 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
 
       <div className="flex flex-col gap-3 md:flex-row md:justify-end">
         {mode === "edit" ? (
-          <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50" disabled={saving} onClick={handleDelete} type="button">
+          <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50" disabled={saving} onClick={handleDelete} type="button" variant="outline">
             삭제
           </Button>
         ) : null}

@@ -305,11 +305,11 @@ export default function GuardAttendancePage() {
                   출근
                 </Button>
                 <Button
-                  className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                   data-testid="clock-out"
                   type="button"
                   disabled={!clockOutDecision.allowed}
                   onClick={handleClockOut}
+                  variant="outline"
                 >
                   퇴근
                 </Button>

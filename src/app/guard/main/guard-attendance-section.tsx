@@ -210,7 +210,8 @@ export default function GuardAttendanceSection() {
         <Button
           onClick={handleClockIn}
           disabled={isClockedIn || processing}
-          className={`${!isClockedIn ? 'inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50' : 'inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'} flex w-full justify-center text-center disabled:opacity-50`}
+          className="w-full text-center"
+          variant={!isClockedIn ? "default" : "outline"}
         >
           {processing && !isClockedIn ? "처리 중..." : "출근하기"}
         </Button>
@@ -218,7 +219,8 @@ export default function GuardAttendanceSection() {
         <Button
           onClick={handleClockOut}
           disabled={!isClockedIn || isClockedOut || processing}
-          className={`${isClockedIn && !isClockedOut ? 'inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50' : 'inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'} flex w-full justify-center text-center disabled:opacity-50`}
+          className="w-full text-center"
+          variant={isClockedIn && !isClockedOut ? "default" : "outline"}
         >
           {processing && isClockedIn && !isClockedOut ? "처리 중..." : "퇴근하기"}
         </Button>

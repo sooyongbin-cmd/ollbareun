@@ -190,7 +190,7 @@ export default function AttendanceReportPage() {
               onChange={(event) => setYear(Number(event.target.value))}
             />
           </div>
-          <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-[48px]" type="button" onClick={handleSearch} disabled={loading}>
+          <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-[48px]" type="button" onClick={handleSearch} disabled={loading} variant="outline">
             조회
           </Button>
           <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-[48px]" type="button" onClick={handleExport} disabled={rows.length === 0}>
@@ -229,7 +229,7 @@ export default function AttendanceReportPage() {
                       <TableCell data-label="퇴근일시">{row.clockOutDateTime ?? "-"}</TableCell>
                       <TableCell data-label="근무시간">{row.workDuration}</TableCell>
                       <TableCell data-label="수정">
-                        <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-[40px]" type="button" onClick={() => openEditModal(row)}>
+                        <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-[40px]" type="button" onClick={() => openEditModal(row)} variant="outline">
                           수정
                         </Button>
                       </TableCell>
@@ -283,7 +283,7 @@ export default function AttendanceReportPage() {
               >
                 {saving ? "저장 중..." : "저장"}
               </Button>
-              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 flex-1" type="button" disabled={saving} onClick={closeEditModal}>
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 flex-1" type="button" disabled={saving} onClick={closeEditModal} variant="outline">
                 취소
               </Button>
             </div>

@@ -372,7 +372,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
                 </label>
                 <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_132px]">
                   <Input className="w-full" id="inspection-address" value={address} readOnly required />
-                  <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full whitespace-nowrap md:w-full" type="button" onClick={openAddressPopup}>
+                  <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full whitespace-nowrap md:w-full" type="button" onClick={openAddressPopup} variant="outline">
                     주소 검색
                   </Button>
                 </div>
@@ -391,10 +391,11 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
                 disabled={printing || !savedSite}
                 onClick={handleQrPrint}
                 type="button"
+                variant="outline"
               >
                 QR코드
               </Button>
-              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full justify-center md:w-auto" onClick={handleNfcUrl} type="button">
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full justify-center md:w-auto" onClick={handleNfcUrl} type="button" variant="outline">
                 NFC(URL)
               </Button>
               <Button
@@ -402,6 +403,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
                 disabled={deleting}
                 onClick={handleDelete}
                 type="button"
+                variant="outline"
               >
                 삭제
               </Button>
@@ -431,10 +433,10 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
               <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 flex-1" onClick={handleCopyNfcUrl} type="button">
                 복사
               </Button>
-              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 flex-1" onClick={handleWriteNfc} type="button">
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 flex-1" onClick={handleWriteNfc} type="button" variant="outline">
                 NFC 쓰기
               </Button>
-              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 flex-1" onClick={() => setNfcUrl("")} type="button">
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 flex-1" onClick={() => setNfcUrl("")} type="button" variant="outline">
                 닫기
               </Button>
             </div>
@@ -495,6 +497,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
                 className="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                 onClick={handleCancelNfcWrite}
                 type="button"
+                variant="outline"
               >
                 {nfcWriteStatus === "success" ? "닫기" : "취소"}
               </Button>

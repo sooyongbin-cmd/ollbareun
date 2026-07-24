@@ -298,6 +298,7 @@ export default function AdminUsersPage() {
                             disabled={actionLoadingId === admin.id}
                             onClick={() => void handleDelete(admin.id)}
                             type="button"
+                            variant="outline"
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"

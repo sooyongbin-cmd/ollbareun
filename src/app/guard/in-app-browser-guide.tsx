@@ -24,8 +24,10 @@ export default function InAppBrowserGuide({ variant = "inline", onDismiss }: InA
         <Button
           type="button"
           onClick={onDismiss}
-          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors p-1"
+          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
           aria-label="알림 닫기"
+          size="icon"
+          variant="ghost"
         >
           <X className="h-5 w-5" />
         </Button>

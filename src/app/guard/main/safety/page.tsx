@@ -459,8 +459,9 @@ export default function GuardSafetyEducationPage() {
                       <TableRow key={resource.id} className="hover:bg-muted/40 transition-colors">
                         <TableCell data-label="제목" className="font-semibold">
                           <Button
-                            className="text-left text-primary hover:underline"
+                            className="h-auto justify-start whitespace-normal p-0 text-left"
                             type="button"
+                            variant="link"
                             onClick={() => {
                               setSelectedResource(resource);
                               setMessage("");

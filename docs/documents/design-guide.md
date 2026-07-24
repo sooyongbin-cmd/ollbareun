@@ -112,7 +112,7 @@
 
 | 컴포넌트 | 적용 기준 |
 | --- | --- |
-| `Button` | 저장·등록·실행 등 주요 동작에 사용하며 중요도에 따라 variant를 선택한다. |
+| `Button` | 저장·등록·실행 등 주요 동작에 사용하며 배경색과 글자색이 함께 정의된 variant를 명시적으로 선택한다. |
 | `Card` | 요약 정보, 차트, 표, 입력 그룹처럼 독립된 정보 단위에 사용한다. |
 | `Input` / `Textarea` | 연결된 라벨, 필수 여부, 도움말, 오류 문구와 함께 사용한다. |
 | `Table` | 구조화된 업무 목록에 사용하고 머리글, 빈 상태를 제공하며 모바일에서는 행 단위 Card로 전환한다. |
@@ -122,6 +122,15 @@
 | `AlertDialog` | 삭제 등 복구가 어려운 동작의 최종 확인에 사용한다. |
 | `Sheet` | 모바일 메뉴, 필터, 보조 작업 패널에 사용한다. |
 | `Skeleton` | 실제 콘텐츠 구조를 반영한 로딩 상태에 사용한다. |
+
+### 6.1 버튼 variant와 색상 대비
+
+- shadcn/ui `Button`의 기본 variant는 `bg-primary`와 `text-primary-foreground`를 하나의 시각 계약으로 제공한다. 기본 variant에서 배경만 `bg-background`, `bg-white`, `bg-muted`, `bg-secondary`, `bg-transparent` 등으로 덮어쓰지 않는다. 배경만 밝게 바꾸면 기본의 밝은 글자색이 남아 버튼 문구가 보이지 않을 수 있다.
+- 주요 실행 동작은 `default`, 밝은 배경의 보조 동작은 `outline`, 조용한 아이콘·도구 동작은 `ghost`, 텍스트형 이동은 `link`, 위험 동작은 `destructive`를 사용한다.
+- `className`은 너비, 간격, 정렬처럼 variant가 제공하지 않는 레이아웃 조정에 우선 사용한다. 배경색·글자색·테두리를 조합해 기존 variant를 화면마다 다시 만들지 않는다.
+- 링크를 버튼처럼 표시할 때도 `Button asChild`에 용도에 맞는 variant를 명시한다.
+- 기본, hover, focus, disabled 상태 모두에서 텍스트와 배경은 WCAG AA 수준의 대비를 유지한다.
+- 시스템 전역 회귀 테스트는 밝은 배경이나 입력형 테두리를 직접 지정한 `Button`에 명시적 variant가 있는지 검사한다.
 
 ## 7. 접근성 및 반응형
 

@@ -107,6 +107,7 @@ function GuardZoomSettingSection({
             disabled={previousZoomPercent === zoomPercent}
             onClick={() => onChange(previousZoomPercent)}
             type="button"
+            variant="ghost"
           >
             -
           </Button>
@@ -117,6 +118,7 @@ function GuardZoomSettingSection({
             disabled={nextZoomPercent === zoomPercent}
             onClick={() => onChange(nextZoomPercent)}
             type="button"
+            variant="ghost"
           >
             +
           </Button>

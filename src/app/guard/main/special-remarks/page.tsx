@@ -313,7 +313,7 @@ export default function GuardSpecialRemarksPage() {
             />
           </div>
 
-          <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full justify-center gap-2" onClick={handleSpeech} type="button">
+          <Button className="w-full gap-2" onClick={handleSpeech} type="button" variant="outline">
             {listening ? <SquareIcon size={18} /> : <MicIcon size={18} />}
             {listening ? "음성 중지" : "음성 입력"}
           </Button>
@@ -332,7 +332,7 @@ export default function GuardSpecialRemarksPage() {
             <img alt="촬영된 첨부사진" className="w-full rounded-[12px] border border-border" src={photoDataUrl} />
           ) : null}
           {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p> : null}
-          <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full justify-center" onClick={handleCapture} type="button">
+          <Button className="w-full" onClick={handleCapture} type="button" variant="outline">
             촬영
           </Button>
           <Button

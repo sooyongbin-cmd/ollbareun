@@ -176,6 +176,7 @@ export default function ManagerPasskeyRequestsPage() {
                                 disabled={actionLoadingId === request.id}
                                 onClick={() => void runAction(request.id, "reject")}
                                 type="button"
+                                variant="outline"
                               >
                                 거절
                               </Button>
@@ -187,6 +188,7 @@ export default function ManagerPasskeyRequestsPage() {
                               disabled={actionLoadingId === request.id}
                               onClick={() => void runAction(request.id, "revoke")}
                               type="button"
+                              variant="outline"
                             >
                               해제
                             </Button>

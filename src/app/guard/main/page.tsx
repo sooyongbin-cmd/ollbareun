@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { useMemo, useSyncExternalStore } from "react";
 import GuardWorksiteSection from "./guard-worksite-section";
 import GuardAttendanceSection from "./guard-attendance-section";
@@ -93,9 +94,9 @@ export default function GuardMainPage() {
             <GuardLocationGateLink href="/guard/main/special-remarks" hasAssignedWorksite={hasAssignedWorksite}>
               특이사항
             </GuardLocationGateLink>
-            <Link className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full justify-center" href="/guard/main/profile">
-              개인프로필
-            </Link>
+            <Button asChild className="w-full" variant="outline">
+              <Link href="/guard/main/profile">개인프로필</Link>
+            </Button>
           </div>
         </section>
         <GuardSafetySection />

@@ -145,8 +145,9 @@ export default function GuardLogoutButton() {
   return (
     <Button
       type="button"
-      className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 inline-flex justify-center gap-2"
+      className="gap-2"
       onClick={handleLogout}
+      variant="outline"
     >
       <PowerIcon size={24} className="lucide lucide-power" />
       <span>로그아웃</span>

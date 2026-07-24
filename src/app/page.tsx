@@ -307,6 +307,7 @@ export default function Home() {
                 <Button
                   type="button"
                   onClick={() => setCounselingOpen(false)}
+                  variant="outline"
                   className="w-1/2 py-3 rounded-lg border border-input hover:bg-muted text-muted-foreground font-semibold text-[15px] transition-colors"
                 >
                   취소

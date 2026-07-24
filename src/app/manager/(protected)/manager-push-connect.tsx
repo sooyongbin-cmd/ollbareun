@@ -94,6 +94,7 @@ export default function ManagerPushConnect() {
       onClick={handleConnect}
       title={statusMessage}
       type="button"
+      variant="outline"
     >
       {status === "connecting" ? (
         <LoaderCircle aria-hidden="true" className="size-3.5 animate-spin" />

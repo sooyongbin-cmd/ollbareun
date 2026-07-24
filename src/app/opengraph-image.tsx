@@ -34,7 +34,7 @@ export default async function OpenGraphImage() {
           width: "100%",
           height: "100%",
           overflow: "hidden",
-          background: "linear-gradient(135deg, #003f3a 0%, #006a62 55%, #009590 100%)",
+          background: "linear-gradient(135deg, #003f7f 0%, #0066cc 55%, #2f8de4 100%)",
           color: "white",
           fontFamily: "Pretendard",
           padding: "68px 76px",
@@ -73,11 +73,11 @@ export default async function OpenGraphImage() {
               height: 76,
               borderRadius: 20,
               background: "white",
-              boxShadow: "0 14px 34px rgba(0, 30, 27, 0.25)",
+              boxShadow: "0 14px 34px rgba(0, 39, 79, 0.25)",
             }}
           >
             <svg width="50" height="50" viewBox="0 0 50 50">
-              <rect width="50" height="50" rx="14" fill="#006a62" />
+              <rect width="50" height="50" rx="14" fill="#0066cc" />
               <path
                 d="M13 25L21 33L37 16"
                 fill="none"
@@ -100,7 +100,7 @@ export default async function OpenGraphImage() {
               style={{
                 display: "flex",
                 marginTop: 7,
-                color: "#b9eee9",
+                color: "#d8ebff",
                 fontSize: 17,
                 letterSpacing: 2.4,
               }}
@@ -129,7 +129,7 @@ export default async function OpenGraphImage() {
             display: "flex",
             alignItems: "center",
             marginTop: "auto",
-            color: "#d9f5f2",
+            color: "#e8f3ff",
             fontSize: 25,
             letterSpacing: -0.5,
           }}
@@ -141,7 +141,7 @@ export default async function OpenGraphImage() {
               height: 4,
               marginRight: 16,
               borderRadius: 9999,
-              background: "#83f2e5",
+              background: "#8ec8ff",
             }}
           />
           프리미엄 시설관리 전문기업

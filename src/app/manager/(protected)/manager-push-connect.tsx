@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Bell, BellOff, LoaderCircle } from "lucide-react";
 
@@ -86,7 +87,7 @@ export default function ManagerPushConnect() {
           : "푸시 알림 연결";
 
   return (
-    <button
+    <Button
       aria-label={label}
       className="ml-auto inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border border-border bg-background px-2.5 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-wait disabled:opacity-70"
       disabled={status === "connecting"}
@@ -97,7 +98,7 @@ export default function ManagerPushConnect() {
       {status === "connecting" ? (
         <LoaderCircle aria-hidden="true" className="size-3.5 animate-spin" />
       ) : status === "error" ? (
-        <BellOff aria-hidden="true" className="size-3.5 text-status-warn" />
+        <BellOff aria-hidden="true" className="size-3.5 text-destructive" />
       ) : (
         <Bell aria-hidden="true" className="size-3.5" />
       )}
@@ -105,6 +106,6 @@ export default function ManagerPushConnect() {
       <span className="sr-only" aria-live="polite">
         {statusMessage}
       </span>
-    </button>
+    </Button>
   );
 }

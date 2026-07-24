@@ -56,9 +56,9 @@ const managerIcons: MetadataRoute.Manifest["icons"] = [
 
 export function guardPwaManifest(): MetadataRoute.Manifest {
   return {
-    name: "올바름 경비원",
-    short_name: "올바름 경비원",
-    description: "올바름 경비원 모바일 근태 앱",
+    name: "올바름 현장 근로자",
+    short_name: "올바름 근로자",
+    description: "올바름 현장 근로자 모바일 업무 앱",
     id: "/guard",
     start_url: "/guard",
     scope: "/guard",
@@ -80,7 +80,7 @@ export function managerPwaManifest(): MetadataRoute.Manifest {
     scope: "/manager",
     display: "standalone",
     background_color: "#ffffff",
-    theme_color: "#006a62",
+    theme_color: "#0066cc",
     icons: managerIcons,
   };
 }
@@ -89,7 +89,7 @@ export function legacyPwaManifest(): MetadataRoute.Manifest {
   return {
     name: "사회적기업 올바름",
     short_name: "사회적기업 올바름",
-    description: "올바름 경비원 모바일 근태 앱",
+    description: "올바름 현장 근로자 모바일 업무 앱",
     id: "https://ollbareun.vercel.app/manager",
     start_url: "/guard",
     scope: "/guard",

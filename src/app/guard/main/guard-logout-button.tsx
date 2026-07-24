@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { PowerIcon } from "@/components/icons/power-icon";
 import { clearStoredGuardSession, readStoredGuardSession } from "../guard-session-storage";
@@ -142,13 +143,13 @@ export default function GuardLogoutButton() {
   }
 
   return (
-    <button
+    <Button
       type="button"
-      className="button-secondary inline-flex justify-center gap-2"
+      className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 inline-flex justify-center gap-2"
       onClick={handleLogout}
     >
       <PowerIcon size={24} className="lucide lucide-power" />
       <span>로그아웃</span>
-    </button>
+    </Button>
   );
 }

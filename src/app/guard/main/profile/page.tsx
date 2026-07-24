@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import LoadingBoard from "@/components/loading-board";
 import { getSupabasePasskeyClient } from "@/lib/supabase-passkey-client";
@@ -65,7 +67,7 @@ function ProfileTableShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-[16px] border border-hairline bg-canvas">
+    <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
       {children}
     </div>
   );
@@ -93,13 +95,13 @@ function GuardZoomSettingSection({
   return (
     <section
       aria-label={title}
-      className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[16px]"
+      className="rounded-xl border border-border/50 bg-muted/40 p-[16px]"
     >
       <h2 className="text-[24px] font-semibold">{title}</h2>
-      <div className="mt-4 flex items-center justify-between gap-4 rounded-[12px] bg-surface-black px-4 py-3 text-canvas">
+      <div className="mt-4 flex items-center justify-between gap-4 rounded-[12px] bg-black px-4 py-3 text-background">
         <span className="text-[16px] font-semibold">{label}</span>
         <div className="flex items-center gap-3">
-          <button
+          <Button
             aria-label={decreaseLabel}
             className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-[24px] leading-none transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
             disabled={previousZoomPercent === zoomPercent}
@@ -107,9 +109,9 @@ function GuardZoomSettingSection({
             type="button"
           >
             -
-          </button>
+          </Button>
           <span className="min-w-[64px] text-center text-[16px] font-semibold">{zoomPercent}%</span>
-          <button
+          <Button
             aria-label={increaseLabel}
             className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-[24px] leading-none transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
             disabled={nextZoomPercent === zoomPercent}
@@ -117,7 +119,7 @@ function GuardZoomSettingSection({
             type="button"
           >
             +
-          </button>
+          </Button>
         </div>
       </div>
     </section>
@@ -338,80 +340,80 @@ export default function GuardProfilePage() {
 
         <GuardFontZoomControlSection />
 
-        {displayedError ? <p className="status-warn">{displayedError}</p> : null}
+        {displayedError ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{displayedError}</p> : null}
         {loading ? <LoadingBoard label="개인프로필을 불러오는 중입니다." /> : null}
 
         <section
           aria-label="근무스케줄"
-          className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[16px]"
+          className="rounded-xl border border-border/50 bg-muted/40 p-[16px]"
         >
           <h2 className="text-[24px] font-semibold">근무스케줄</h2>
           <ProfileTableShell>
-            <table className="apple-table">
-              <thead>
-                <tr>
-                  <th className="text-left">기간</th>
-                  <th className="text-left">근무지</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-left">기간</TableHead>
+                  <TableHead className="text-left">근무지</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {!loading && (profile?.schedules.length ?? 0) === 0 ? (
-                  <tr>
-                    <td data-responsive-empty colSpan={2} className="p-8 text-center text-ink-muted-48 italic">
+                  <TableRow>
+                    <TableCell data-responsive-empty colSpan={2} className="p-8 text-center text-muted-foreground italic">
                       근무스케줄이 없습니다.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   profile?.schedules.map((schedule) => (
-                    <tr key={schedule.id}>
-                      <td data-label="기간">{schedule.period}</td>
-                      <td data-label="근무지">{schedule.worksiteName}</td>
-                    </tr>
+                    <TableRow key={schedule.id}>
+                      <TableCell data-label="기간">{schedule.period}</TableCell>
+                      <TableCell data-label="근무지">{schedule.worksiteName}</TableCell>
+                    </TableRow>
                   ))
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </ProfileTableShell>
         </section>
 
         <section
           aria-label="월별출근현황"
-          className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[16px]"
+          className="rounded-xl border border-border/50 bg-muted/40 p-[16px]"
         >
           <h2 className="text-[24px] font-semibold">월별출근현황</h2>
           <ProfileTableShell>
-            <table className="apple-table">
-              <thead>
-                <tr>
-                  <th className="text-left">연월</th>
-                  <th className="text-left">출근일수</th>
-                  <th className="text-left">근무시간합</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-left">연월</TableHead>
+                  <TableHead className="text-left">출근일수</TableHead>
+                  <TableHead className="text-left">근무시간합</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {!loading && (profile?.monthlyAttendance.length ?? 0) === 0 ? (
-                  <tr>
-                    <td data-responsive-empty colSpan={3} className="p-8 text-center text-ink-muted-48 italic">
+                  <TableRow>
+                    <TableCell data-responsive-empty colSpan={3} className="p-8 text-center text-muted-foreground italic">
                       최근 1년 출근현황이 없습니다.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   profile?.monthlyAttendance.map((row) => (
-                    <tr key={row.yearMonth}>
-                      <td data-label="연월">{row.yearMonth}</td>
-                      <td data-label="출근일수">{row.attendanceDays}일</td>
-                      <td data-label="근무시간합">{row.workHoursTotal}</td>
-                    </tr>
+                    <TableRow key={row.yearMonth}>
+                      <TableCell data-label="연월">{row.yearMonth}</TableCell>
+                      <TableCell data-label="출근일수">{row.attendanceDays}일</TableCell>
+                      <TableCell data-label="근무시간합">{row.workHoursTotal}</TableCell>
+                    </TableRow>
                   ))
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </ProfileTableShell>
         </section>
 
         <section
           aria-label="로그아웃"
-          className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[16px]"
+          className="rounded-xl border border-border/50 bg-muted/40 p-[16px]"
         >
           <h2 className="text-[24px] font-semibold">로그아웃</h2>
           <div className="mt-4">
@@ -421,21 +423,21 @@ export default function GuardProfilePage() {
 
         <section
           aria-label="패스키 등록"
-          className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[16px]"
+          className="rounded-xl border border-border/50 bg-muted/40 p-[16px]"
         >
           <h2 className="text-[24px] font-semibold">패스키등록</h2>
-          <p className="mt-2 text-[14px] leading-relaxed text-ink-muted-48">{getPasskeyStatusText()}</p>
+          <p className="mt-2 text-[14px] leading-relaxed text-muted-foreground">{getPasskeyStatusText()}</p>
           {passkeyMessage ? <p className="mt-3 text-[14px] leading-relaxed text-primary">{passkeyMessage}</p> : null}
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">
             {!passkeyRequest || passkeyRequest.status === "rejected" || passkeyRequest.status === "revoked" ? (
-              <button className="button-primary" disabled={passkeyLoading || !employeeId} onClick={handlePasskeyRequest} type="button">
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50" disabled={passkeyLoading || !employeeId} onClick={handlePasskeyRequest} type="button">
                 패스키 등록 요청
-              </button>
+              </Button>
             ) : null}
             {passkeyRequest?.status === "approved" ? (
-              <button className="button-primary" disabled={passkeyLoading} onClick={handlePasskeyRegistration} type="button">
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50" disabled={passkeyLoading} onClick={handlePasskeyRegistration} type="button">
                 이 기기에 패스키 등록
-              </button>
+              </Button>
             ) : null}
           </div>
         </section>

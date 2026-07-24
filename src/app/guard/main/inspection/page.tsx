@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { BrowserQRCodeReader } from "@zxing/browser";
 import type { IScannerControls } from "@zxing/browser";
 import { useEffect, useRef, useState } from "react";
@@ -128,39 +129,39 @@ export default function GuardInspectionPage() {
       <div className="max-w-[600px] mx-auto space-y-6">
         <header>
           <h1 className="text-[36px] font-semibold leading-[1.1]">현장점검</h1>
-          <p className="mt-2 text-[18px] text-ink-muted-48">현장 QR을 스캔한 뒤 촬영 버튼으로 점검을 저장합니다.</p>
+          <p className="mt-2 text-[18px] text-muted-foreground">현장 QR을 스캔한 뒤 촬영 버튼으로 점검을 저장합니다.</p>
         </header>
 
-        <section className="bg-canvas-parchment rounded-[18px] p-[24px] border border-hairline/50 space-y-5">
+        <section className="bg-muted/40 rounded-xl p-[24px] border border-border/50 space-y-5">
           <video
             ref={videoRef}
-            className="aspect-[4/3] w-full rounded-[12px] border border-hairline bg-ink object-cover"
+            className="aspect-[4/3] w-full rounded-[12px] border border-border bg-foreground object-cover"
             muted
             playsInline
           />
 
-          <div className="rounded-[12px] border border-hairline/50 bg-canvas p-4 space-y-2">
-            <p className="text-[14px] font-semibold text-ink-muted-48">{status}</p>
+          <div className="rounded-[12px] border border-border/50 bg-background p-4 space-y-2">
+            <p className="text-[14px] font-semibold text-muted-foreground">{status}</p>
             {qrPayload ? (
               <div className="grid gap-1 text-[15px]">
                 <span className="font-semibold">{qrPayload.siteName}</span>
-                <span className="text-ink-muted-48">{qrPayload.worksiteName}</span>
-                <span className="text-ink-muted-48">
+                <span className="text-muted-foreground">{qrPayload.worksiteName}</span>
+                <span className="text-muted-foreground">
                   {qrPayload.gpsInfo.latitude.toFixed(6)}, {qrPayload.gpsInfo.longitude.toFixed(6)}
                 </span>
               </div>
             ) : null}
-            {error ? <p className="status-warn">{error}</p> : null}
+            {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p> : null}
           </div>
 
-          <button
-            className="button-primary w-full justify-center disabled:opacity-50"
+          <Button
+            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full justify-center disabled:opacity-50"
             disabled={!qrPayload || saving}
             onClick={handleCapture}
             type="button"
           >
             촬영
-          </button>
+          </Button>
         </section>
       </div>
 

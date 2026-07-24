@@ -1,5 +1,8 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
@@ -98,19 +101,19 @@ export default function SpecialRemarksPage() {
     <section className="space-y-[24px]">
       <header>
         <h1 className="text-[40px] font-semibold leading-[1.1]">특이사항</h1>
-        <p className="mt-2 max-w-[640px] text-[21px] font-normal text-ink-muted-48">
+        <p className="mt-2 max-w-[640px] text-[21px] font-normal text-muted-foreground">
           경비원이 보고한 특이사항과 첨부사진을 확인합니다.
         </p>
       </header>
 
-      <section aria-label="특이사항 검색" className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50">
+      <section aria-label="특이사항 검색" className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
         <form className="flex flex-col gap-4 md:flex-row md:items-end" onSubmit={handleSearch}>
           <div className="space-y-2 w-full md:max-w-[240px]">
-            <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="special-remark-year">
+            <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="special-remark-year">
               조회연도
             </label>
-            <input
-              className="field"
+            <Input
+              className="w-full"
               id="special-remark-year"
               inputMode="numeric"
               maxLength={4}
@@ -119,65 +122,65 @@ export default function SpecialRemarksPage() {
               value={year}
             />
           </div>
-          <button className="button-secondary min-w-[96px]" type="submit">
+          <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 min-w-[96px]" type="submit">
             조회
-          </button>
+          </Button>
         </form>
       </section>
 
-      <section aria-label="특이사항 목록" className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50">
+      <section aria-label="특이사항 목록" className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
         {loading ? (
           <ManagerLoadingMessage />
         ) : error ? (
-          <p className="status-warn text-center">{error}</p>
+          <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive text-center">{error}</p>
         ) : (
-          <div className="min-w-0 overflow-x-auto overflow-y-hidden rounded-[16px] border border-hairline bg-canvas">
-            <table className="apple-table">
-              <thead>
-                <tr>
-                  <th className="text-left">점검일시</th>
-                  <th className="text-left">점검자</th>
-                  <th className="text-left">특이사항내용</th>
-                  <th className="text-left">첨부사진</th>
-                </tr>
-              </thead>
-              <tbody>
+          <div className="min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-left">점검일시</TableHead>
+                  <TableHead className="text-left">점검자</TableHead>
+                  <TableHead className="text-left">특이사항내용</TableHead>
+                  <TableHead className="text-left">첨부사진</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {reports.length === 0 ? (
-                  <tr>
-                    <td data-responsive-empty colSpan={4} className="p-8 text-center text-ink-muted-48 italic">
+                  <TableRow>
+                    <TableCell data-responsive-empty colSpan={4} className="p-8 text-center text-muted-foreground italic">
                       조회 결과에 해당하는 특이사항이 없습니다.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   reports.map((report) => (
-                    <tr key={report.id} className="hover:bg-canvas-parchment transition-colors">
-                      <td data-label="점검일시">
+                    <TableRow key={report.id} className="hover:bg-muted/40 transition-colors">
+                      <TableCell data-label="점검일시">
                         <Link
                           className="text-primary font-semibold hover:opacity-80"
                           href={`/manager/inspection/special-remarks/${encodeURIComponent(report.id)}`}
                         >
                           {formatDateTime(report.reported_at)}
                         </Link>
-                      </td>
-                      <td data-label="점검자">{report.employee_name}</td>
-                      <td data-label="특이사항내용" className="max-w-[420px]">{summarizeContent(report.content)}</td>
-                      <td data-label="첨부사진">
+                      </TableCell>
+                      <TableCell data-label="점검자">{report.employee_name}</TableCell>
+                      <TableCell data-label="특이사항내용" className="max-w-[420px]">{summarizeContent(report.content)}</TableCell>
+                      <TableCell data-label="첨부사진">
                         {report.photo_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
                             alt="첨부사진 썸네일"
-                            className="h-14 w-20 rounded-[8px] border border-hairline object-cover"
+                            className="h-14 w-20 rounded-[8px] border border-border object-cover"
                             src={report.photo_url}
                           />
                         ) : (
-                          <span className="text-ink-muted-48">-</span>
+                          <span className="text-muted-foreground">-</span>
                         )}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         )}
       </section>

@@ -60,9 +60,9 @@ export const managerNavigationGroups: ManagerNavigationGroup[] = [
     label: "안전교육",
     icon: GraduationCap,
     items: [
-      { label: "교육자료관리", href: "/manager/safty/resources", icon: BookOpen },
-      { label: "교육이수관리", href: "/manager/safty/completions", icon: GraduationCap },
-      { label: "자동알림", href: "/manager/safty/notifications", icon: BellRing },
+      { label: "교육자료관리", href: "/manager/safety/resources", icon: BookOpen },
+      { label: "교육이수관리", href: "/manager/safety/completions", icon: GraduationCap },
+      { label: "자동알림", href: "/manager/safety/notifications", icon: BellRing },
     ],
   },
   {

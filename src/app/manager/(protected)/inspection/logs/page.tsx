@@ -1,5 +1,7 @@
 "use client";
 
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useEffect, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 
@@ -114,75 +116,75 @@ export default function InspectionLogsPage() {
     <section className="space-y-[24px]">
       <header>
         <h1 className="text-[40px] font-semibold leading-[1.1]">현장점검현황</h1>
-        <p className="mt-2 max-w-[640px] text-[21px] font-normal text-ink-muted-48">
+        <p className="mt-2 max-w-[640px] text-[21px] font-normal text-muted-foreground">
           근무지별 현장점검 기록을 확인합니다.
         </p>
       </header>
 
       <section
         aria-label="현장점검현황 검색"
-        className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50"
+        className="bg-muted/40 rounded-xl p-[32px] border border-border/50"
       >
         <div className="space-y-2 max-w-[420px]">
-          <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="inspection-log-worksite">
+          <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="inspection-log-worksite">
             근무지
           </label>
-          <select
-            className="field"
+          <NativeSelect
+            className="w-full"
             id="inspection-log-worksite"
             value={worksiteId}
             onChange={(event) => setWorksiteId(event.target.value)}
           >
-            <option value="">전체</option>
+            <NativeSelectOption value="">전체</NativeSelectOption>
             {worksites.map((worksite) => (
-              <option key={worksite.id} value={worksite.id}>
+              <NativeSelectOption key={worksite.id} value={worksite.id}>
                 {worksite.name}
-              </option>
+              </NativeSelectOption>
             ))}
-          </select>
+          </NativeSelect>
         </div>
       </section>
 
       <section
         aria-label="현장점검현황 목록"
-        className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50"
+        className="bg-muted/40 rounded-xl p-[32px] border border-border/50"
       >
         {loading ? (
           <ManagerLoadingMessage />
         ) : error ? (
-          <p className="status-warn text-center">{error}</p>
+          <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive text-center">{error}</p>
         ) : (
-          <div className="min-w-0 overflow-x-auto overflow-y-hidden rounded-[16px] border border-hairline bg-canvas">
-            <table className="apple-table">
-              <thead>
-                <tr>
-                  <th className="text-left">점검일자</th>
-                  <th className="text-left">근무지</th>
-                  <th className="text-left">현장명</th>
-                  <th className="text-left">점검자</th>
-                  <th className="text-left">역할</th>
-                </tr>
-              </thead>
-              <tbody>
+          <div className="min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-left">점검일자</TableHead>
+                  <TableHead className="text-left">근무지</TableHead>
+                  <TableHead className="text-left">현장명</TableHead>
+                  <TableHead className="text-left">점검자</TableHead>
+                  <TableHead className="text-left">역할</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {logs.length === 0 ? (
-                  <tr>
-                    <td data-responsive-empty colSpan={5} className="p-8 text-center text-ink-muted-48 italic">
+                  <TableRow>
+                    <TableCell data-responsive-empty colSpan={5} className="p-8 text-center text-muted-foreground italic">
                       조회 결과에 해당하는 점검 기록이 없습니다.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   logs.map((log) => (
-                    <tr key={log.id} className="hover:bg-canvas-parchment transition-colors">
-                      <td data-label="점검일자">{formatDateTime(log.inspected_at)}</td>
-                      <td data-label="근무지">{log.worksite_name}</td>
-                      <td data-label="현장명" className="font-semibold">{log.site_name}</td>
-                      <td data-label="점검자">{log.employee_name}</td>
-                      <td data-label="역할">{log.employee_role ?? "역할 없음"}</td>
-                    </tr>
+                    <TableRow key={log.id} className="hover:bg-muted/40 transition-colors">
+                      <TableCell data-label="점검일자">{formatDateTime(log.inspected_at)}</TableCell>
+                      <TableCell data-label="근무지">{log.worksite_name}</TableCell>
+                      <TableCell data-label="현장명" className="font-semibold">{log.site_name}</TableCell>
+                      <TableCell data-label="점검자">{log.employee_name}</TableCell>
+                      <TableCell data-label="역할">{log.employee_role ?? "역할 없음"}</TableCell>
+                    </TableRow>
                   ))
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         )}
       </section>

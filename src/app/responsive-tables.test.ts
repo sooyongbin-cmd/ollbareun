@@ -20,18 +20,12 @@ describe("responsive data table contract", () => {
   const appDirectory = path.resolve(process.cwd(), "src/app");
   const tableSources = listTsxFiles(appDirectory)
     .map((filePath) => ({ filePath, source: readFileSync(filePath, "utf8") }))
-    .filter(({ source }) => /<table\b[^>]*\bapple-table\b/.test(source));
-  const allSources = listTsxFiles(appDirectory).map((filePath) => ({
-    filePath,
-    source: readFileSync(filePath, "utf8"),
-  }));
+    .filter(({ source }) => /<Table(?:\s|>)/.test(source));
 
-  it("marks every data cell with a mobile label or empty-state marker", () => {
+  it("uses the shadcn table primitives instead of raw table markup", () => {
     const violations = tableSources.flatMap(({ filePath, source }) =>
-      [...source.matchAll(/<td\b[^>]*>/g)]
-        .map(([tag]) => tag)
-        .filter((tag) => !/\bdata-label=/.test(tag) && !/\bdata-responsive-empty\b/.test(tag))
-        .map((tag) => `${path.relative(process.cwd(), filePath)}: ${tag}`),
+      [...source.matchAll(/<(?:table|thead|tbody|tr|th|td)\b/g)]
+        .map(([tag]) => `${path.relative(process.cwd(), filePath)}: ${tag}`),
     );
 
     expect(violations).toEqual([]);
@@ -39,23 +33,16 @@ describe("responsive data table contract", () => {
 
   it("covers all current application data tables", () => {
     const tableCount = tableSources.reduce(
-      (count, { source }) => count + [...source.matchAll(/<table\b[^>]*\bapple-table\b/g)].length,
-      0,
-    );
-
-    const shadcnTableCount = allSources.reduce(
       (count, { source }) => count + [...source.matchAll(/<Table(?:\s|>)/g)].length,
       0,
     );
 
-    expect(tableCount).toBe(20);
-    expect(shadcnTableCount).toBe(2);
-    expect(tableCount + shadcnTableCount).toBe(22);
+    expect(tableCount).toBe(22);
   });
 
   it("marks the one-column safety table to suppress duplicate mobile labels", () => {
     const singleColumnTableCount = tableSources.reduce(
-      (count, { source }) => count + [...source.matchAll(/<table\b[^>]*\bdata-responsive-single-column\b/g)].length,
+      (count, { source }) => count + [...source.matchAll(/<Table\b[^>]*\bdata-responsive-single-column\b/g)].length,
       0,
     );
 

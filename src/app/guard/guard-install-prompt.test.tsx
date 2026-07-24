@@ -18,7 +18,7 @@ describe("GuardInstallPrompt", () => {
       window.dispatchEvent(installEvent);
     });
 
-    expect(screen.getByRole("dialog", { name: "올바름 경비원 설치" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "올바름 현장 근로자 설치" })).toBeInTheDocument();
     expect(screen.getByText("휴대폰 홈 화면에 아이콘을 추가합니다.")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "설치" }));

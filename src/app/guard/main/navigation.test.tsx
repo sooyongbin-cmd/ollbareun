@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -10,6 +12,7 @@ const replace = vi.fn();
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push, replace }),
+  usePathname: () => "/guard/main",
 }));
 
 const guardSession = {
@@ -86,7 +89,7 @@ describe("guard main navigation", () => {
       </GuardMainLayout>,
     );
 
-    expect(screen.getByRole("link", { name: "경비원" })).toHaveAttribute("href", "/guard/main");
+    expect(screen.getByRole("link", { name: "현장 근로자" })).toHaveAttribute("href", "/guard/main");
   });
 
   it("keeps the main page as an entry point to attendance", () => {

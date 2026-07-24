@@ -1,5 +1,8 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import ManagerLoadingMessage from "../../../manager-loading-message";
@@ -104,26 +107,26 @@ export default function AssignmentNewPage() {
     <section className="space-y-[24px]">
       <header>
         <h1 className="text-[40px] font-semibold leading-[1.1]">배정등록</h1>
-        <p className="text-[21px] font-normal text-ink-muted-48 mt-2 max-w-[600px]">
+        <p className="text-[21px] font-normal text-muted-foreground mt-2 max-w-[600px]">
           직원에게 근무지를 배정합니다.
         </p>
       </header>
 
-      <section className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50">
+      <section className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
         {loading ? (
           <ManagerLoadingMessage />
         ) : (
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="grid gap-4 lg:grid-cols-[minmax(360px,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
               <div className="space-y-2 lg:min-w-[360px]">
-                <p className="text-[14px] font-semibold text-ink-muted-48 ml-1">근무기간</p>
+                <p className="text-[14px] font-semibold text-muted-foreground ml-1">근무기간</p>
                 <div className="grid gap-2 sm:grid-cols-2">
                   <label className="sr-only" htmlFor="assignment-start-date">
                     시작일
                   </label>
-                  <input
+                  <Input
                     aria-label="시작일"
-                    className="field"
+                    className="w-full"
                     id="assignment-start-date"
                     name="startDate"
                     type="date"
@@ -133,9 +136,9 @@ export default function AssignmentNewPage() {
                   <label className="sr-only" htmlFor="assignment-end-date">
                     종료일
                   </label>
-                  <input
+                  <Input
                     aria-label="종료일"
-                    className="field"
+                    className="w-full"
                     id="assignment-end-date"
                     name="endDate"
                     type="date"
@@ -145,45 +148,45 @@ export default function AssignmentNewPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-worksite">
+                <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="assignment-worksite">
                   근무지
                 </label>
-                <select className="field appearance-none" id="assignment-worksite" name="worksiteId" required>
-                  <option value="">선택</option>
+                <NativeSelect className="w-full appearance-none" id="assignment-worksite" name="worksiteId" required>
+                  <NativeSelectOption value="">선택</NativeSelectOption>
                   {data.worksites.map((worksite) => (
-                    <option key={worksite.id} value={worksite.id}>
+                    <NativeSelectOption key={worksite.id} value={worksite.id}>
                       {worksite.name}
-                    </option>
+                    </NativeSelectOption>
                   ))}
-                </select>
+                </NativeSelect>
               </div>
               <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-employee">
+                <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="assignment-employee">
                   직원
                 </label>
-                <select className="field appearance-none" id="assignment-employee" name="employeeId" required>
-                  <option value="">선택</option>
+                <NativeSelect className="w-full appearance-none" id="assignment-employee" name="employeeId" required>
+                  <NativeSelectOption value="">선택</NativeSelectOption>
                   {data.employees.map((employee) => (
-                    <option key={employee.id} value={employee.id}>
+                    <NativeSelectOption key={employee.id} value={employee.id}>
                       {employee.name}
-                    </option>
+                    </NativeSelectOption>
                   ))}
-                </select>
+                </NativeSelect>
               </div>
             </div>
 
-            <button
+            <Button
               aria-label="저장"
-              className="button-primary w-full md:w-auto"
+              className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full md:w-auto"
               data-testid="assignment-submit"
               type="submit"
             >
               <SaveIcon size={20} />
-            </button>
+            </Button>
           </form>
         )}
 
-        {error ? <p className="status-warn mt-6 text-center">{error}</p> : null}
+        {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mt-6 text-center">{error}</p> : null}
       </section>
 
       <AlertModal

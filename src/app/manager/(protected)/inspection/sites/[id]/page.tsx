@@ -1,5 +1,10 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { buildInspectionQrPayload, type InspectionSiteRow } from "@/lib/inspection";
@@ -314,45 +319,45 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
     <section className="space-y-[24px]">
       <header>
         <h1 className="text-[40px] font-semibold leading-[1.1]">현장상세</h1>
-        <p className="text-[21px] font-normal text-ink-muted-48 mt-2 max-w-[640px]">
+        <p className="text-[21px] font-normal text-muted-foreground mt-2 max-w-[640px]">
           현장 정보를 수정하고 QR코드와 NFC URL을 생성합니다.
         </p>
       </header>
 
-      <section className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50">
+      <section className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
         {loading ? (
           <ManagerLoadingMessage />
         ) : error && !savedSite ? (
-          <p className="status-warn text-center">{error}</p>
+          <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive text-center">{error}</p>
         ) : (
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="inspection-worksite">
+                <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="inspection-worksite">
                   근무지
                 </label>
-                <select
-                  className="field"
+                <NativeSelect
+                  className="w-full"
                   id="inspection-worksite"
                   value={worksiteId}
                   onChange={(event) => setWorksiteId(event.target.value)}
                   required
                 >
-                  {worksites.length === 0 ? <option value="">근무지 없음</option> : null}
+                  {worksites.length === 0 ? <NativeSelectOption value="">근무지 없음</NativeSelectOption> : null}
                   {worksites.map((worksite) => (
-                    <option key={worksite.id} value={worksite.id}>
+                    <NativeSelectOption key={worksite.id} value={worksite.id}>
                       {worksite.name}
-                    </option>
+                    </NativeSelectOption>
                   ))}
-                </select>
+                </NativeSelect>
               </div>
 
               <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="inspection-site-name">
+                <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="inspection-site-name">
                   현장명
                 </label>
-                <input
-                  className="field"
+                <Input
+                  className="w-full"
                   id="inspection-site-name"
                   name="name"
                   value={siteName}
@@ -362,14 +367,14 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="inspection-address">
+                <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="inspection-address">
                   현장주소
                 </label>
                 <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_132px]">
-                  <input className="field" id="inspection-address" value={address} readOnly required />
-                  <button className="button-secondary w-full whitespace-nowrap md:w-full" type="button" onClick={openAddressPopup}>
+                  <Input className="w-full" id="inspection-address" value={address} readOnly required />
+                  <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full whitespace-nowrap md:w-full" type="button" onClick={openAddressPopup}>
                     주소 검색
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -377,34 +382,34 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
             </div>
 
             <div className="flex flex-col gap-3 md:flex-row">
-              <button className="button-primary w-full justify-center md:w-auto" disabled={saving} type="submit">
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full justify-center md:w-auto" disabled={saving} type="submit">
                 <SaveIcon size={20} />
                 <span>저장</span>
-              </button>
-              <button
-                className="button-secondary w-full justify-center md:w-auto"
+              </Button>
+              <Button
+                className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full justify-center md:w-auto"
                 disabled={printing || !savedSite}
                 onClick={handleQrPrint}
                 type="button"
               >
                 QR코드
-              </button>
-              <button className="button-secondary w-full justify-center md:w-auto" onClick={handleNfcUrl} type="button">
+              </Button>
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full justify-center md:w-auto" onClick={handleNfcUrl} type="button">
                 NFC(URL)
-              </button>
-              <button
-                className="button-secondary w-full justify-center md:w-auto"
+              </Button>
+              <Button
+                className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full justify-center md:w-auto"
                 disabled={deleting}
                 onClick={handleDelete}
                 type="button"
               >
                 삭제
-              </button>
+              </Button>
             </div>
           </form>
         )}
 
-        {error && savedSite ? <p className="status-warn mt-6 text-center">{error}</p> : null}
+        {error && savedSite ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mt-6 text-center">{error}</p> : null}
       </section>
 
       <AlertModal
@@ -414,44 +419,44 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
         description={alertMessage}
       />
 
-      {nfcUrl ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay-scrim px-5">
-          <div className="w-full max-w-[560px] rounded-[18px] bg-canvas p-6 shadow-product border border-hairline">
-            <h2 className="text-[24px] font-semibold">NFC(URL)</h2>
-            <p className="mt-3 text-[16px] text-ink-muted-48 leading-relaxed">
-              NFC Tools의 URL 레코드에 아래 주소를 붙여넣으세요.
-            </p>
-            <textarea className="field mt-4 min-h-[112px]" readOnly value={nfcUrl} />
+      <Dialog open={Boolean(nfcUrl)} onOpenChange={(open) => !open && setNfcUrl("")}>
+        <DialogContent className="max-w-[560px]">
+          <DialogHeader>
+            <DialogTitle>NFC(URL)</DialogTitle>
+            <DialogDescription>NFC Tools의 URL 레코드에 아래 주소를 붙여넣으세요.</DialogDescription>
+          </DialogHeader>
+            <Textarea className="w-full mt-4 min-h-[112px]" readOnly value={nfcUrl} />
             {copyMessage ? <p className="mt-3 text-[14px] font-semibold text-primary">{copyMessage}</p> : null}
             <div className="mt-6 flex flex-col gap-3 md:flex-row">
-              <button className="button-primary flex-1" onClick={handleCopyNfcUrl} type="button">
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 flex-1" onClick={handleCopyNfcUrl} type="button">
                 복사
-              </button>
-              <button className="button-secondary flex-1" onClick={handleWriteNfc} type="button">
+              </Button>
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 flex-1" onClick={handleWriteNfc} type="button">
                 NFC 쓰기
-              </button>
-              <button className="button-secondary flex-1" onClick={() => setNfcUrl("")} type="button">
+              </Button>
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 flex-1" onClick={() => setNfcUrl("")} type="button">
                 닫기
-              </button>
+              </Button>
             </div>
-          </div>
-        </div>
-      ) : null}
+        </DialogContent>
+      </Dialog>
 
-      {isWritingNfc ? (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-overlay-scrim px-5">
-          <div className="w-full max-w-[480px] rounded-[18px] bg-canvas p-6 shadow-product border border-hairline text-center">
-            <h3 className="text-[20px] font-semibold">NFC 카드 쓰기</h3>
+      <Dialog open={isWritingNfc} onOpenChange={(open) => !open && handleCancelNfcWrite()}>
+        <DialogContent className="max-w-[480px] text-center" showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>NFC 카드 쓰기</DialogTitle>
+            <DialogDescription>상태 안내에 따라 NFC 카드를 기기에 가까이 대어주세요.</DialogDescription>
+          </DialogHeader>
             
             {nfcWriteStatus === "scanning" && (
               <div className="mt-6 space-y-4">
                 <div className="mx-auto h-12 w-12 animate-pulse rounded-full bg-primary/20 flex items-center justify-center text-primary text-[24px]">
                   📡
                 </div>
-                <p className="text-[16px] text-ink-muted-48 leading-relaxed">
+                <p className="text-[16px] text-muted-foreground leading-relaxed">
                   NFC 카드(스티커)를 디바이스 뒷면이나<br />NFC 리더기 근처에 대어 주세요.
                 </p>
-                <p className="text-[13px] text-ink-muted-48 animate-pulse">
+                <p className="text-[13px] text-muted-foreground animate-pulse">
                   인식 대기 중...
                 </p>
               </div>
@@ -459,13 +464,13 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
 
             {nfcWriteStatus === "success" && (
               <div className="mt-6 space-y-4">
-                <div className="mx-auto h-12 w-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-[24px]">
+                <div className="mx-auto h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[24px]">
                   ✓
                 </div>
-                <p className="text-[16px] font-semibold text-green-600">
+                <p className="text-[16px] font-semibold text-primary">
                   NFC 쓰기 완료!
                 </p>
-                <p className="text-[14px] text-ink-muted-48">
+                <p className="text-[14px] text-muted-foreground">
                   성공적으로 작성되었습니다. 창을 닫습니다.
                 </p>
               </div>
@@ -473,30 +478,29 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
 
             {nfcWriteStatus === "error" && (
               <div className="mt-6 space-y-4">
-                <div className="mx-auto h-12 w-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-[24px]">
+                <div className="mx-auto h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center text-destructive text-[24px]">
                   ⚠
                 </div>
-                <p className="text-[16px] font-semibold text-red-600">
+                <p className="text-[16px] font-semibold text-destructive">
                   NFC 쓰기 실패
                 </p>
-                <p className="text-[14px] text-ink-muted-48 leading-relaxed px-2">
+                <p className="text-[14px] text-muted-foreground leading-relaxed px-2">
                   {nfcWriteError}
                 </p>
               </div>
             )}
 
             <div className="mt-8">
-              <button 
-                className="button-secondary w-full justify-center" 
-                onClick={handleCancelNfcWrite} 
+              <Button
+                className="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                onClick={handleCancelNfcWrite}
                 type="button"
               >
                 {nfcWriteStatus === "success" ? "닫기" : "취소"}
-              </button>
+              </Button>
             </div>
-          </div>
-        </div>
-      ) : null}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

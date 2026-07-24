@@ -107,6 +107,7 @@ describe("inspection site detail page", () => {
     expect(await screen.findByDisplayValue(nfcUrl)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "복사" }));
     expect(await screen.findByText("복사되었습니다.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "닫기" }));
 
     const originalCreateElement = document.createElement.bind(document);
     const anchor = originalCreateElement("a");

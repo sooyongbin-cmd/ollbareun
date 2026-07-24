@@ -1,7 +1,17 @@
 import type { NextConfig } from "next";
 import withSerwistInit from "@serwist/next";
 
-const nextConfig: NextConfig = {};
+const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: "/manager/safty/:path*",
+        destination: "/manager/safety/:path*",
+        permanent: true,
+      },
+    ];
+  },
+};
 
 const withSerwist = withSerwistInit({
   swSrc: "src/app/sw.ts",

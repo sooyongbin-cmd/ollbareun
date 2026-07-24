@@ -7,7 +7,7 @@ describe("PWA manifests", () => {
     const manager = managerPwaManifest();
 
     expect(guard).toMatchObject({
-      name: "올바름 경비원",
+      name: "올바름 현장 근로자",
       id: "/guard",
       start_url: "/guard",
       scope: "/guard",

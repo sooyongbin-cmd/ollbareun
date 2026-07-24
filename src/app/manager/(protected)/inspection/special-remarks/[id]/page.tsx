@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ManagerLoadingMessage from "../../../manager-loading-message";
@@ -149,29 +150,29 @@ export default function SpecialRemarkDetailPage({ params }: PageProps) {
     <section className="space-y-[24px]">
       <header>
         <h1 className="text-[40px] font-semibold leading-[1.1]">특이사항 상세</h1>
-        <p className="mt-2 max-w-[640px] text-[21px] font-normal text-ink-muted-48">
+        <p className="mt-2 max-w-[640px] text-[21px] font-normal text-muted-foreground">
           보고된 특이사항의 전체 내용과 첨부사진을 확인합니다.
         </p>
       </header>
 
-      <section className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50">
+      <section className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
         {loading ? (
           <ManagerLoadingMessage />
         ) : error && !report ? (
-          <p className="status-warn text-center">{error}</p>
+          <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive text-center">{error}</p>
         ) : report ? (
           <div className="space-y-5">
             <div className="grid gap-4 md:grid-cols-3">
-              <div className="rounded-[12px] border border-hairline bg-canvas p-4">
-                <p className="text-[13px] font-semibold text-ink-muted-48">점검일시</p>
+              <div className="rounded-[12px] border border-border bg-background p-4">
+                <p className="text-[13px] font-semibold text-muted-foreground">점검일시</p>
                 <p className="mt-1 text-[17px] font-semibold">{formatDateTime(report.reported_at)}</p>
               </div>
-              <div className="rounded-[12px] border border-hairline bg-canvas p-4">
-                <p className="text-[13px] font-semibold text-ink-muted-48">점검자</p>
+              <div className="rounded-[12px] border border-border bg-background p-4">
+                <p className="text-[13px] font-semibold text-muted-foreground">점검자</p>
                 <p className="mt-1 text-[17px] font-semibold">{report.employee_name}</p>
               </div>
-              <div className="rounded-[12px] border border-hairline bg-canvas p-4">
-                <p className="text-[13px] font-semibold text-ink-muted-48">보고 위치 (GPS)</p>
+              <div className="rounded-[12px] border border-border bg-background p-4">
+                <p className="text-[13px] font-semibold text-muted-foreground">보고 위치 (GPS)</p>
                 <p className="mt-1 text-[17px] font-semibold">
                   {report.gps_info
                     ? address || (loadingAddress ? "주소 조회 중..." : `${report.gps_info.latitude.toFixed(6)}, ${report.gps_info.longitude.toFixed(6)}`)
@@ -180,27 +181,27 @@ export default function SpecialRemarkDetailPage({ params }: PageProps) {
               </div>
             </div>
 
-            <div className="rounded-[12px] border border-hairline bg-canvas p-4">
-              <p className="text-[13px] font-semibold text-ink-muted-48">특이사항내용</p>
+            <div className="rounded-[12px] border border-border bg-background p-4">
+              <p className="text-[13px] font-semibold text-muted-foreground">특이사항내용</p>
               <p className="mt-3 whitespace-pre-wrap text-[16px] leading-relaxed">{report.content}</p>
             </div>
 
-            <div className="rounded-[12px] border border-hairline bg-canvas p-4">
-              <p className="text-[13px] font-semibold text-ink-muted-48">첨부사진</p>
+            <div className="rounded-[12px] border border-border bg-background p-4">
+              <p className="text-[13px] font-semibold text-muted-foreground">첨부사진</p>
               {report.photo_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img alt="첨부사진" className="mt-3 max-h-[70vh] w-full rounded-[12px] object-contain" src={report.photo_url} />
               ) : (
-                <p className="mt-3 text-ink-muted-48">첨부사진이 없습니다.</p>
+                <p className="mt-3 text-muted-foreground">첨부사진이 없습니다.</p>
               )}
             </div>
 
-            {error ? <p className="status-warn">{error}</p> : null}
+            {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p> : null}
 
             <div className="flex justify-end">
-              <button className="button-secondary" disabled={deleting} onClick={handleDelete} type="button">
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50" disabled={deleting} onClick={handleDelete} type="button">
                 삭제
-              </button>
+              </Button>
             </div>
           </div>
         ) : null}

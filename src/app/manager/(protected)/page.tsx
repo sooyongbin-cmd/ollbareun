@@ -465,8 +465,8 @@ export default function ManagerPage() {
                             variant="outline"
                             className={
                               row.educationStatus === "완료"
-                                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                                : "border-amber-200 bg-amber-50 text-amber-700"
+                                ? "border-primary/20 bg-primary/10 text-primary"
+                                : "border-destructive/20 bg-destructive/10 text-destructive"
                             }
                           >
                             {row.educationStatus}

@@ -1,5 +1,9 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useEffect, useState, useCallback, type FormEvent } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import ManagerLoadingMessage from "../../manager-loading-message";
@@ -169,96 +173,96 @@ export default function AdminUsersPage() {
       <header>
         <div className="space-y-3">
           <h1 className="text-[40px] font-semibold leading-[1.1]">관리자 관리</h1>
-          <p className="max-w-[640px] text-[21px] font-normal text-ink-muted-48">
+          <p className="max-w-[640px] text-[21px] font-normal text-muted-foreground">
             사전 등록된 관리자 목록을 조회하고 새 관리자를 사전에 등록하거나 권한을 설정합니다.
           </p>
         </div>
       </header>
 
-      {error ? <p className="status-warn">{error}</p> : null}
-      {successMessage ? <p className="status-success text-green-600 font-semibold">{successMessage}</p> : null}
+      {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p> : null}
+      {successMessage ? <p className="font-semibold text-primary">{successMessage}</p> : null}
 
       {/* Admin registration form (Visible & interactive only for super_admin) */}
-      <section className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[32px]">
+      <section className="rounded-xl border border-border/50 bg-muted/40 p-[32px]">
         <h2 className="text-[20px] font-semibold mb-4">새 관리자 사전 등록</h2>
         {isSuperAdmin ? (
           <form onSubmit={handleRegister} className="flex flex-col gap-4 sm:flex-row sm:items-end">
             <div className="flex-1 space-y-2">
-              <label htmlFor="new-admin-email" className="text-[14px] font-semibold text-ink-muted-48">
+              <label htmlFor="new-admin-email" className="text-[14px] font-semibold text-muted-foreground">
                 관리자 Google 이메일
               </label>
-              <input
+              <Input
                 id="new-admin-email"
                 type="email"
                 required
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
                 placeholder="admin@example.com"
-                className="field w-full"
+                className="w-full w-full"
                 disabled={registering}
               />
             </div>
             <div className="w-full sm:w-[180px] space-y-2">
-              <label htmlFor="new-admin-role" className="text-[14px] font-semibold text-ink-muted-48">
+              <label htmlFor="new-admin-role" className="text-[14px] font-semibold text-muted-foreground">
                 역할 설정
               </label>
-              <select
+              <NativeSelect
                 id="new-admin-role"
                 value={newRole}
                 onChange={(e) => setNewRole(e.target.value as "admin" | "super_admin")}
-                className="field w-full"
+                className="w-full w-full"
                 disabled={registering}
               >
-                <option value="admin">일반 관리자 (admin)</option>
-                <option value="super_admin">최고 관리자 (super_admin)</option>
-              </select>
+                <NativeSelectOption value="admin">일반 관리자 (admin)</NativeSelectOption>
+                <NativeSelectOption value="super_admin">최고 관리자 (super_admin)</NativeSelectOption>
+              </NativeSelect>
             </div>
-            <button
+            <Button
               type="submit"
               disabled={registering}
-              className="button-primary h-11 px-6 justify-center disabled:opacity-60"
+              className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-11 px-6 justify-center disabled:opacity-60"
             >
               {registering ? "등록 중..." : "사전 등록 추가"}
-            </button>
+            </Button>
           </form>
         ) : (
-          <p className="text-[14px] text-ink-muted-48 italic">
+          <p className="text-[14px] text-muted-foreground italic">
             * 새로운 관리자 사전 등록은 최고 관리자(super_admin) 권한을 가진 계정으로만 수행할 수 있습니다.
           </p>
         )}
       </section>
 
       {/* Admin list table */}
-      <section className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[32px]">
+      <section className="rounded-xl border border-border/50 bg-muted/40 p-[32px]">
         {loading ? (
           <ManagerLoadingMessage />
         ) : (
-          <div className="min-w-0 overflow-x-auto overflow-y-hidden rounded-[16px] border border-hairline bg-canvas">
-            <table className="apple-table">
-              <thead>
-                <tr>
-                  <th className="text-left">이메일</th>
-                  <th className="text-left">역할</th>
-                  <th className="text-left">활성화 여부</th>
-                  <th className="text-left">최초 로그인 시각</th>
-                  <th className="text-left">등록일</th>
-                  {isSuperAdmin ? <th className="text-right">작업</th> : null}
-                </tr>
-              </thead>
-              <tbody>
+          <div className="min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-left">이메일</TableHead>
+                  <TableHead className="text-left">역할</TableHead>
+                  <TableHead className="text-left">활성화 여부</TableHead>
+                  <TableHead className="text-left">최초 로그인 시각</TableHead>
+                  <TableHead className="text-left">등록일</TableHead>
+                  {isSuperAdmin ? <TableHead className="text-right">작업</TableHead> : null}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {admins.length === 0 ? (
-                  <tr>
-                    <td data-responsive-empty colSpan={isSuperAdmin ? 6 : 5} className="p-8 text-center text-ink-muted-48 italic">
+                  <TableRow>
+                    <TableCell data-responsive-empty colSpan={isSuperAdmin ? 6 : 5} className="p-8 text-center text-muted-foreground italic">
                       등록된 관리자가 없습니다.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   admins.map((admin) => (
-                    <tr key={admin.id}>
-                      <td data-label="이메일" className="font-semibold">{admin.email}</td>
-                      <td data-label="역할">
+                    <TableRow key={admin.id}>
+                      <TableCell data-label="이메일" className="font-semibold">{admin.email}</TableCell>
+                      <TableCell data-label="역할">
                         {isSuperAdmin ? (
-                          <select
+                          <NativeSelect
                             value={admin.role}
                             onChange={(e) =>
                               void handleChangeRole(admin.id, e.target.value as "admin" | "super_admin")
@@ -266,16 +270,16 @@ export default function AdminUsersPage() {
                             disabled={actionLoadingId === admin.id}
                             className="bg-transparent border-0 font-medium text-[14px] text-primary focus:ring-0 p-0 cursor-pointer"
                           >
-                            <option value="admin">일반 관리자</option>
-                            <option value="super_admin">최고 관리자</option>
-                          </select>
+                            <NativeSelectOption value="admin">일반 관리자</NativeSelectOption>
+                            <NativeSelectOption value="super_admin">최고 관리자</NativeSelectOption>
+                          </NativeSelect>
                         ) : (
                           admin.role === "super_admin" ? "최고 관리자" : "일반 관리자"
                         )}
-                      </td>
-                      <td data-label="활성화 여부">
+                      </TableCell>
+                      <TableCell data-label="활성화 여부">
                         {admin.user_id ? (
-                          <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-[12px] font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                          <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-[12px] font-medium text-primary ring-1 ring-inset ring-primary/20">
                             활성화됨
                           </span>
                         ) : (
@@ -283,14 +287,14 @@ export default function AdminUsersPage() {
                             대기 중
                           </span>
                         )}
-                      </td>
-                      <td data-label="최초 로그인 시각">{formatDateTime(admin.first_login_at)}</td>
-                      <td data-label="등록일">{formatDateTime(admin.created_at)}</td>
+                      </TableCell>
+                      <TableCell data-label="최초 로그인 시각">{formatDateTime(admin.first_login_at)}</TableCell>
+                      <TableCell data-label="등록일">{formatDateTime(admin.created_at)}</TableCell>
                       {isSuperAdmin ? (
-                        <td data-label="작업" className="text-right">
-                          <button
+                        <TableCell data-label="작업" className="text-right">
+                          <Button
                             aria-label="삭제"
-                            className="button-secondary w-full md:w-auto text-red-600 hover:text-red-700"
+                            className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full md:w-auto text-destructive hover:text-destructive/80"
                             disabled={actionLoadingId === admin.id}
                             onClick={() => void handleDelete(admin.id)}
                             type="button"
@@ -313,14 +317,14 @@ export default function AdminUsersPage() {
                               <path d="M3 6h18"></path>
                               <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                             </svg>
-                          </button>
-                        </td>
+                          </Button>
+                        </TableCell>
                       ) : null}
-                    </tr>
+                    </TableRow>
                   ))
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         )}
       </section>

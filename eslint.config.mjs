@@ -14,7 +14,7 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     "public/sw.js",
     "supabase/functions/**",
-    "documentation/.vitepress/**",
+    "docs/.vitepress/**",
     "public/docs/**",
   ]),
 ]);

@@ -321,29 +321,29 @@ export default function AttendanceMapSection({
   if (!worksite) {
     return (
       <section
-        className="bg-canvas rounded-[18px] p-6 border border-hairline shadow-sm"
+        className="bg-background rounded-xl p-6 border border-border shadow-sm"
         id="attendance-map-section"
       >
         <h3 className="text-[17px] font-semibold">지도</h3>
-        <p className="mt-3 text-[14px] text-ink-muted-48">오늘 배정된 근무지가 없어 지도를 표시할 수 없습니다.</p>
+        <p className="mt-3 text-[14px] text-muted-foreground">오늘 배정된 근무지가 없어 지도를 표시할 수 없습니다.</p>
       </section>
     );
   }
 
   return (
-    <section className="bg-canvas rounded-[18px] p-6 border border-hairline shadow-sm" id="attendance-map-section">
+    <section className="bg-background rounded-xl p-6 border border-border shadow-sm" id="attendance-map-section">
       <div className="mb-4 flex flex-col gap-1">
         <h3 className="text-[17px] font-semibold">지도</h3>
-        <p className="text-[13px] text-ink-muted-48">근무지 : {worksite.name}</p>
-        <p className="text-[13px] text-ink-muted-48">{formatCurrentDistance(worksite, currentGps)}</p>
+        <p className="text-[13px] text-muted-foreground">근무지 : {worksite.name}</p>
+        <p className="text-[13px] text-muted-foreground">{formatCurrentDistance(worksite, currentGps)}</p>
       </div>
       <div
         ref={mapElementRef}
-        className="h-[320px] w-full overflow-hidden rounded-[16px] border border-hairline bg-canvas-parchment"
+        className="h-[320px] w-full overflow-hidden rounded-lg border border-border bg-muted/40"
         data-testid="attendance-map"
         id="attendance-map-canvas"
       />
-      <div className="mt-3 flex flex-wrap gap-3 text-[13px] text-ink-muted-48">
+      <div className="mt-3 flex flex-wrap gap-3 text-[13px] text-muted-foreground">
         <span className="inline-flex items-center gap-2">
           <span className="h-3 w-3 rounded-full bg-primary" />
           현재 위치
@@ -353,7 +353,7 @@ export default function AttendanceMapSection({
           지오펜스 ({worksite.radius_meters}m)
         </span>
       </div>
-      {status ? <p className="status-warn mt-3 text-center">{status}</p> : null}
+      {status ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mt-3 text-center">{status}</p> : null}
     </section>
   );
 }

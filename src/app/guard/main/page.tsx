@@ -75,7 +75,7 @@ export default function GuardMainPage() {
       <div className="max-w-[600px] mx-auto">
         <GuardWorksiteSection />
         
-        <section className="bg-canvas-parchment rounded-[18px] p-[16px] border border-hairline/50">
+        <section className="bg-muted/40 rounded-xl p-[16px] border border-border/50">
           <div className="flex flex-col gap-3">
             <GuardLocationGateLink href="/guard/main/attendance" hasAssignedWorksite={hasAssignedWorksite}>
               출근하기
@@ -93,7 +93,7 @@ export default function GuardMainPage() {
             <GuardLocationGateLink href="/guard/main/special-remarks" hasAssignedWorksite={hasAssignedWorksite}>
               특이사항
             </GuardLocationGateLink>
-            <Link className="button-secondary w-full justify-center" href="/guard/main/profile">
+            <Link className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full justify-center" href="/guard/main/profile">
               개인프로필
             </Link>
           </div>

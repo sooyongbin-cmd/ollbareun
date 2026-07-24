@@ -1,5 +1,10 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 import { saveRowsAsXls } from "../export-xls";
@@ -150,33 +155,33 @@ export default function AttendanceReportPage() {
         <h1 className="text-[40px] font-semibold leading-[1.1]">근태내역</h1>
       </header>
 
-      <section aria-label="근태내역 조회" className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[32px]">
+      <section aria-label="근태내역 조회" className="rounded-xl border border-border/50 bg-muted/40 p-[32px]">
         <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_160px_auto_auto] md:items-end">
           <div className="space-y-2">
-            <label className="ml-1 text-[14px] font-semibold text-ink-muted-48" htmlFor="attendance-employee-name">
+            <label className="ml-1 text-[14px] font-semibold text-muted-foreground" htmlFor="attendance-employee-name">
               직원이름
             </label>
-            <select
-              className="field"
+            <NativeSelect
+              className="w-full"
               disabled={employeeNamesLoading}
               id="attendance-employee-name"
               value={employeeName}
               onChange={(event) => setEmployeeName(event.target.value)}
             >
-              <option value="">{employeeNamesLoading ? "직원 목록 로딩 중..." : "전체"}</option>
+              <NativeSelectOption value="">{employeeNamesLoading ? "직원 목록 로딩 중..." : "전체"}</NativeSelectOption>
               {employeeNames.map((name) => (
-                <option key={name} value={name}>
+                <NativeSelectOption key={name} value={name}>
                   {name}
-                </option>
+                </NativeSelectOption>
               ))}
-            </select>
+            </NativeSelect>
           </div>
           <div className="space-y-2">
-            <label className="ml-1 text-[14px] font-semibold text-ink-muted-48" htmlFor="attendance-year">
+            <label className="ml-1 text-[14px] font-semibold text-muted-foreground" htmlFor="attendance-year">
               연도
             </label>
-            <input
-              className="field"
+            <Input
+              className="w-full"
               id="attendance-year"
               min="2000"
               max="2100"
@@ -185,76 +190,71 @@ export default function AttendanceReportPage() {
               onChange={(event) => setYear(Number(event.target.value))}
             />
           </div>
-          <button className="button-secondary h-[48px]" type="button" onClick={handleSearch} disabled={loading}>
+          <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-[48px]" type="button" onClick={handleSearch} disabled={loading}>
             조회
-          </button>
-          <button className="button-primary h-[48px]" type="button" onClick={handleExport} disabled={rows.length === 0}>
+          </Button>
+          <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-[48px]" type="button" onClick={handleExport} disabled={rows.length === 0}>
             엑셀
-          </button>
+          </Button>
         </div>
       </section>
 
-      <section aria-label="근태내역 목록" className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[32px]">
+      <section aria-label="근태내역 목록" className="rounded-xl border border-border/50 bg-muted/40 p-[32px]">
         {loading ? (
           <ManagerLoadingMessage />
         ) : error ? (
-          <p className="status-warn">{error}</p>
+          <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p>
         ) : (
-          <div className="min-w-0 overflow-x-auto overflow-y-hidden rounded-[16px] border border-hairline bg-canvas">
-            <table className="apple-table">
-              <thead>
-                <tr>
-                  <th className="text-left">출근일시</th>
-                  <th className="text-left">퇴근일시</th>
-                  <th className="text-left">근무시간</th>
-                  <th className="text-left">수정</th>
-                </tr>
-              </thead>
-              <tbody>
+          <div className="min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-left">출근일시</TableHead>
+                  <TableHead className="text-left">퇴근일시</TableHead>
+                  <TableHead className="text-left">근무시간</TableHead>
+                  <TableHead className="text-left">수정</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {rows.length === 0 ? (
-                  <tr>
-                    <td data-responsive-empty colSpan={4} className="p-8 text-center text-ink-muted-48 italic">
+                  <TableRow>
+                    <TableCell data-responsive-empty colSpan={4} className="p-8 text-center text-muted-foreground italic">
                       {searched ? "조회 결과가 없습니다." : "직원과 연도를 선택한 뒤 조회하세요."}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   rows.map((row) => (
-                    <tr key={row.id}>
-                      <td data-label="출근일시">{row.clockInDateTime}</td>
-                      <td data-label="퇴근일시">{row.clockOutDateTime ?? "-"}</td>
-                      <td data-label="근무시간">{row.workDuration}</td>
-                      <td data-label="수정">
-                        <button className="button-secondary h-[40px]" type="button" onClick={() => openEditModal(row)}>
+                    <TableRow key={row.id}>
+                      <TableCell data-label="출근일시">{row.clockInDateTime}</TableCell>
+                      <TableCell data-label="퇴근일시">{row.clockOutDateTime ?? "-"}</TableCell>
+                      <TableCell data-label="근무시간">{row.workDuration}</TableCell>
+                      <TableCell data-label="수정">
+                        <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-[40px]" type="button" onClick={() => openEditModal(row)}>
                           수정
-                        </button>
-                      </td>
-                    </tr>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
                   ))
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         )}
       </section>
 
-      {selectedRow && (
-        <div
-          aria-labelledby="attendance-edit-modal-title"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-overlay-scrim px-5"
-          role="dialog"
-        >
-          <div className="w-full max-w-[440px] rounded-[18px] border border-hairline bg-canvas p-6 shadow-product">
-            <h2 className="text-[24px] font-semibold" id="attendance-edit-modal-title">
-              근태 기록 수정
-            </h2>
+      <Dialog open={selectedRow !== null} onOpenChange={(open) => !open && closeEditModal()}>
+        <DialogContent className="max-w-[440px]">
+          <DialogHeader>
+            <DialogTitle>근태 기록 수정</DialogTitle>
+            <DialogDescription>출근일시와 퇴근일시를 확인한 뒤 저장하세요.</DialogDescription>
+          </DialogHeader>
             <div className="mt-6 space-y-2">
-              <label className="ml-1 text-[14px] font-semibold text-ink-muted-48" htmlFor="clock-in-date-time">
+              <label className="ml-1 text-[14px] font-semibold text-muted-foreground" htmlFor="clock-in-date-time">
                 출근일시
               </label>
-              <input
+              <Input
                 autoFocus
-                className="field"
+                className="w-full"
                 id="clock-in-date-time"
                 type="datetime-local"
                 value={clockInDateTime}
@@ -262,34 +262,33 @@ export default function AttendanceReportPage() {
               />
             </div>
             <div className="mt-4 space-y-2">
-              <label className="ml-1 text-[14px] font-semibold text-ink-muted-48" htmlFor="clock-out-date-time">
+              <label className="ml-1 text-[14px] font-semibold text-muted-foreground" htmlFor="clock-out-date-time">
                 퇴근일시
               </label>
-              <input
-                className="field"
+              <Input
+                className="w-full"
                 id="clock-out-date-time"
                 type="datetime-local"
                 value={clockOutDateTime}
                 onChange={(event) => setClockOutDateTime(event.target.value)}
               />
             </div>
-            {modalError && <p className="status-warn mt-4">{modalError}</p>}
+            {modalError && <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mt-4">{modalError}</p>}
             <div className="mt-8 flex gap-3">
-              <button
-                className="button-primary flex-1"
+              <Button
+                className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 flex-1"
                 type="button"
                 disabled={saving || !clockInDateTime}
                 onClick={handleAttendanceSave}
               >
                 {saving ? "저장 중..." : "저장"}
-              </button>
-              <button className="button-secondary flex-1" type="button" disabled={saving} onClick={closeEditModal}>
+              </Button>
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 flex-1" type="button" disabled={saving} onClick={closeEditModal}>
                 취소
-              </button>
+              </Button>
             </div>
-          </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

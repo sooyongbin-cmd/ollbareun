@@ -1,6 +1,10 @@
 import React from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { TableHead } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
+
 interface SortableHeaderProps<T extends string> {
   sortKey: T;
   currentSortKey: T;
@@ -21,22 +25,28 @@ export function SortableHeader<T extends string>({
   const isActive = sortKey === currentSortKey;
 
   return (
-    <th
-      className={`cursor-pointer select-none hover:bg-canvas-parchment transition-colors ${className}`}
+    <TableHead
+      aria-sort={isActive ? (sortDirection === "asc" ? "ascending" : "descending") : "none"}
+      className={cn("select-none", className)}
       onClick={() => onSort(sortKey)}
     >
-      <div className="flex items-center gap-1">
+      <Button
+        aria-label={`${String(children)} 기준 ${isActive && sortDirection === "asc" ? "내림차순" : "오름차순"} 정렬`}
+        className="-ml-3 h-8 px-3 text-muted-foreground hover:text-foreground"
+        type="button"
+        variant="ghost"
+      >
         <span>{children}</span>
         {isActive ? (
           sortDirection === "asc" ? (
-            <ChevronUp size={16} className="text-ink-muted-48" />
+            <ChevronUp aria-hidden="true" className="size-4" />
           ) : (
-            <ChevronDown size={16} className="text-ink-muted-48" />
+            <ChevronDown aria-hidden="true" className="size-4" />
           )
         ) : (
-          <ChevronUp size={16} className="text-ink-muted-48/20" aria-hidden="true" />
+          <ChevronUp aria-hidden="true" className="size-4 opacity-30" />
         )}
-      </div>
-    </th>
+      </Button>
+    </TableHead>
   );
 }

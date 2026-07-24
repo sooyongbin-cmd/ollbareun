@@ -6,7 +6,8 @@ describe("root layout", () => {
     const layout = RootLayout({ children: <main>화면 내용</main> });
     const body = layout.props.children;
 
-    expect(body.props.className).toContain("app-content");
+    expect(body.props.className).toContain("bg-background");
+    expect(body.props.className).toContain("text-foreground");
   });
 
   it("provides complete social sharing metadata", () => {

@@ -273,22 +273,22 @@ export default function GuardInspectionNfcPage() {
       <div className="max-w-[600px] mx-auto space-y-6">
         <header>
           <h1 className="text-[36px] font-semibold leading-[1.1]">순찰(NFC태그)</h1>
-          <p className="mt-2 text-[18px] text-ink-muted-48">NFC 스티커를 태그하면 점검 기록을 저장합니다.</p>
+          <p className="mt-2 text-[18px] text-muted-foreground">NFC 스티커를 태그하면 점검 기록을 저장합니다.</p>
         </header>
 
-        <section className="bg-canvas-parchment rounded-[18px] p-[24px] border border-hairline/50 space-y-5">
-          <div className="rounded-[12px] border border-hairline/50 bg-canvas p-4 space-y-2">
-            <p className="text-[14px] font-semibold text-ink-muted-48">{saving ? "저장 중..." : status}</p>
+        <section className="bg-muted/40 rounded-xl p-[24px] border border-border/50 space-y-5">
+          <div className="rounded-[12px] border border-border/50 bg-background p-4 space-y-2">
+            <p className="text-[14px] font-semibold text-muted-foreground">{saving ? "저장 중..." : status}</p>
             {nfcPayload ? (
               <div className="grid gap-1 text-[15px]">
                 <span className="font-semibold">{nfcPayload.siteName}</span>
-                <span className="text-ink-muted-48">{nfcPayload.worksiteName}</span>
-                <span className="text-ink-muted-48">
+                <span className="text-muted-foreground">{nfcPayload.worksiteName}</span>
+                <span className="text-muted-foreground">
                   {nfcPayload.gpsInfo.latitude.toFixed(6)}, {nfcPayload.gpsInfo.longitude.toFixed(6)}
                 </span>
               </div>
             ) : null}
-            {error ? <p className="status-warn">{error}</p> : null}
+            {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p> : null}
           </div>
         </section>
       </div>

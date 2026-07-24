@@ -1,5 +1,8 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import ManagerLoadingMessage from "../../../../manager-loading-message";
@@ -152,70 +155,70 @@ export default function AssignmentSavePage() {
   return (
     <section className="space-y-[24px]">
       <header>
-        <p className="text-[14px] font-semibold text-ink-muted-48 uppercase">관리자 화면</p>
+        <p className="text-[14px] font-semibold text-muted-foreground uppercase">관리자 화면</p>
         <div className="space-y-3">
           <h1 className="text-[40px] font-semibold leading-[1.1]">배정수정</h1>
-          <p className="text-[21px] font-normal text-ink-muted-48 max-w-[640px]">
+          <p className="text-[21px] font-normal text-muted-foreground max-w-[640px]">
             선택한 배정의 직원, 근무지, 근무기간을 수정합니다.
           </p>
         </div>
       </header>
 
-      <section className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50">
+      <section className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
         {loading ? (
           <ManagerLoadingMessage />
         ) : error ? (
-          <p className="text-[16px] text-status-warn">{error}</p>
+          <p className="text-[16px] text-destructive">{error}</p>
         ) : (
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="grid gap-4 md:grid-cols-4">
               <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-employee">
+                <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="assignment-employee">
                   직원
                 </label>
-                <select
-                  className="field appearance-none"
+                <NativeSelect
+                  className="w-full appearance-none"
                   id="assignment-employee"
                   value={employeeId}
                   onChange={(event) => setEmployeeId(event.target.value)}
                   required
                 >
-                  <option value="">선택</option>
+                  <NativeSelectOption value="">선택</NativeSelectOption>
                   {employees.map((employee) => (
-                    <option key={employee.id} value={employee.id}>
+                    <NativeSelectOption key={employee.id} value={employee.id}>
                       {employee.name}
-                    </option>
+                    </NativeSelectOption>
                   ))}
-                </select>
+                </NativeSelect>
               </div>
               <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-worksite">
+                <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="assignment-worksite">
                   근무지
                 </label>
-                <select
-                  className="field appearance-none"
+                <NativeSelect
+                  className="w-full appearance-none"
                   id="assignment-worksite"
                   value={worksiteId}
                   onChange={(event) => setWorksiteId(event.target.value)}
                   required
                 >
-                  <option value="">선택</option>
+                  <NativeSelectOption value="">선택</NativeSelectOption>
                   {worksites.map((worksite) => (
-                    <option key={worksite.id} value={worksite.id}>
+                    <NativeSelectOption key={worksite.id} value={worksite.id}>
                       {worksite.name}
-                    </option>
+                    </NativeSelectOption>
                   ))}
-                </select>
+                </NativeSelect>
               </div>
               <div className="space-y-2 md:col-span-2">
-                <p className="text-[14px] font-semibold text-ink-muted-48 ml-1">근무기간</p>
+                <p className="text-[14px] font-semibold text-muted-foreground ml-1">근무기간</p>
                 <div className="grid grid-cols-2 gap-2">
                   <label className="sr-only" htmlFor="assignment-start-date">
                     시작일
                   </label>
-                  <input
+                  <Input
                     aria-label="시작일"
-                    className="field"
+                    className="w-full"
                     id="assignment-start-date"
                     type="date"
                     value={startDate}
@@ -225,9 +228,9 @@ export default function AssignmentSavePage() {
                   <label className="sr-only" htmlFor="assignment-end-date">
                     종료일
                   </label>
-                  <input
+                  <Input
                     aria-label="종료일"
-                    className="field"
+                    className="w-full"
                     id="assignment-end-date"
                     type="date"
                     value={endDate}
@@ -239,22 +242,22 @@ export default function AssignmentSavePage() {
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <button aria-label="저장" className="button-primary w-full md:w-auto" type="submit">
+              <Button aria-label="저장" className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full md:w-auto" type="submit">
                 <SaveIcon size={20} />
-              </button>
-              <button
+              </Button>
+              <Button
                 aria-label="삭제"
-                className="button-secondary w-full md:w-auto"
+                className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full md:w-auto"
                 type="button"
                 onClick={() => setDeleteConfirmOpen(true)}
               >
                 <DeleteIcon size={20} />
-              </button>
+              </Button>
             </div>
           </form>
         )}
 
-        {error ? <p className="mt-6 text-[16px] text-status-warn">{error}</p> : null}
+        {error ? <p className="mt-6 text-[16px] text-destructive">{error}</p> : null}
       </section>
 
       <ConfirmModal

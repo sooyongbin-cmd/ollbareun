@@ -92,15 +92,15 @@ function getStepBadgeClass(status: PushStepStatus) {
     return "bg-primary/10 text-primary";
   }
   if (status === "running") {
-    return "bg-status-warn/10 text-status-warn";
+    return "bg-destructive/10 text-destructive";
   }
   if (status === "warning") {
-    return "bg-canvas text-ink-muted-48";
+    return "bg-background text-muted-foreground";
   }
   if (status === "error") {
-    return "bg-status-warn/15 text-status-warn";
+    return "bg-destructive/15 text-destructive";
   }
-  return "bg-canvas text-ink-muted-48";
+  return "bg-background text-muted-foreground";
 }
 
 function getStepStatusLabel(status: PushStepStatus) {
@@ -472,21 +472,21 @@ export default function GuardPushRegister() {
 
   return (
     <>
-      <section className="mb-6 bg-canvas-parchment rounded-[18px] p-[24px] border border-hairline/50">
+      <section className="mb-6 bg-muted/40 rounded-xl p-[24px] border border-border/50">
         <div className="flex flex-col gap-2">
           <p className="text-[13px] font-semibold text-primary">Push 알림</p>
           <h3 className="text-[21px] font-semibold">{pushStatusTitle}</h3>
-          <p className="text-[14px] leading-relaxed text-ink-muted-48">{pushStatusDetail}</p>
+          <p className="text-[14px] leading-relaxed text-muted-foreground">{pushStatusDetail}</p>
         </div>
 
         <ol className="mt-5 grid gap-3">
           {pushSteps.map((step) => (
             <li
               key={step.id}
-              className="grid gap-2 rounded-[12px] border border-hairline/40 bg-canvas px-4 py-3 md:grid-cols-[150px_1fr_auto] md:items-center"
+              className="grid gap-2 rounded-[12px] border border-border/40 bg-background px-4 py-3 md:grid-cols-[150px_1fr_auto] md:items-center"
             >
-              <span className="text-[14px] font-semibold text-ink">{step.label}</span>
-              <span className="text-[13px] leading-relaxed text-ink-muted-48">{step.detail}</span>
+              <span className="text-[14px] font-semibold text-foreground">{step.label}</span>
+              <span className="text-[13px] leading-relaxed text-muted-foreground">{step.detail}</span>
               <span
                 className={`inline-flex w-fit items-center rounded-full px-3 py-1 text-[12px] font-semibold ${getStepBadgeClass(step.status)}`}
               >

@@ -3,6 +3,7 @@ import GuardSessionGate from "./guard-session-gate";
 import GuardSessionSummary from "./guard-session-summary";
 import GuardHeaderTitle from "./guard-header-title";
 import { GuardIcon } from "@/components/icons/guard-icon";
+import GuardBottomNavigation from "./guard-bottom-navigation";
 
 export default function GuardMainLayout({
   children,
@@ -10,10 +11,10 @@ export default function GuardMainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="min-h-screen bg-canvas text-ink font-apple selection:bg-primary/20">
+    <main className="min-h-screen bg-background pb-20 font-sans text-foreground selection:bg-primary/20">
       <GuardSessionGate />
 
-      <nav className="h-[52px] bg-canvas-parchment/80 backdrop-blur-md sticky z-40 border-b border-hairline/30">
+      <nav className="sticky top-0 z-40 h-14 border-b bg-background/95 backdrop-blur">
         <div className="mx-auto max-w-[980px] w-full h-full flex items-center justify-between px-5">
           <div className="flex min-w-0 items-center gap-3">
             <h2 className="shrink-0 text-[21px] font-semibold">
@@ -29,24 +30,7 @@ export default function GuardMainLayout({
 
       {children}
 
-      <footer className="bg-canvas-parchment border-t border-hairline py-[64px] px-5">
-        <div className="mx-auto max-w-[980px] w-full grid md:grid-cols-4 gap-8">
-          <div className="col-span-2">
-            <h4 className="text-[14px] font-semibold text-ink-muted-80 mb-4">올바름 관리시스템</h4>
-            <p className="text-[12px] text-ink-muted-48 leading-relaxed max-w-[400px]">
-              본 시스템은 실시간 근태 관리 및 안전 교육 이수 현황을 관리하기 위한 기업용 솔루션입니다.
-              사용 중 문의사항은 관리자에게 연락 바랍니다.
-            </p>
-          </div>
-          <div>
-            <h4 className="text-[14px] font-semibold text-ink-muted-80 mb-4">법적 고지</h4>
-            <p className="text-[12px] text-ink-muted-48 leading-relaxed">
-              © 2026 올바름. All rights reserved.
-              개인정보처리방침 | 서비스이용약관
-            </p>
-          </div>
-        </div>
-      </footer>
+      <GuardBottomNavigation />
     </main>
   );
 }

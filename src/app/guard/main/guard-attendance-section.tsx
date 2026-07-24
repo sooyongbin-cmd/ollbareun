@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { distanceMeters, canClockIn, canClockOut, type AttendanceRecord, type Worksite } from "@/lib/phase1";
 import type { GpsInfo } from "@/lib/gps";
@@ -182,49 +183,49 @@ export default function GuardAttendanceSection() {
   const isClockedOut = !!attendance?.clock_out_at;
 
   return (
-    <section className="mb-6 bg-canvas rounded-[18px] p-6 border border-hairline shadow-sm space-y-5">
-      <h3 className="text-[14px] font-semibold text-ink-muted-48">출근 상황</h3>
+    <section className="mb-6 bg-background rounded-xl p-6 border border-border shadow-sm space-y-5">
+      <h3 className="text-[14px] font-semibold text-muted-foreground">출근 상황</h3>
       
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
-          <p className="text-[12px] text-ink-muted-48">출근 시각</p>
-          <p className="text-[20px] font-bold text-ink">{formatTime(attendance?.clock_in_at)}</p>
+          <p className="text-[12px] text-muted-foreground">출근 시각</p>
+          <p className="text-[20px] font-bold text-foreground">{formatTime(attendance?.clock_in_at)}</p>
         </div>
         <div className="space-y-1">
-          <p className="text-[12px] text-ink-muted-48">퇴근 시각</p>
-          <p className="text-[20px] font-bold text-ink">{formatTime(attendance?.clock_out_at)}</p>
+          <p className="text-[12px] text-muted-foreground">퇴근 시각</p>
+          <p className="text-[20px] font-bold text-foreground">{formatTime(attendance?.clock_out_at)}</p>
         </div>
       </div>
 
-      <div className="space-y-2 border-t border-hairline/30 pt-4">
+      <div className="space-y-2 border-t border-border/30 pt-4">
         <div className="flex items-center justify-between text-[13px]">
-          <span className="text-ink-muted-48 font-semibold">근무지와의 거리</span>
-          <span className={`font-bold ${distance !== null && distance > (session?.worksite?.radius_meters ?? 100) ? "text-status-warn" : "text-primary"}`}>
+          <span className="text-muted-foreground font-semibold">근무지와의 거리</span>
+          <span className={`font-bold ${distance !== null && distance > (session?.worksite?.radius_meters ?? 100) ? "text-destructive" : "text-primary"}`}>
             {distance !== null ? `${Math.round(distance)}m` : locError || "출근 화면에서 확인"}
           </span>
         </div>
       </div>
 
-      <div className="pt-4 border-t border-hairline/30 grid grid-cols-2 gap-3">
-        <button
+      <div className="pt-4 border-t border-border/30 grid grid-cols-2 gap-3">
+        <Button
           onClick={handleClockIn}
           disabled={isClockedIn || processing}
-          className={`${!isClockedIn ? 'button-primary' : 'button-secondary'} flex w-full justify-center text-center disabled:opacity-50`}
+          className={`${!isClockedIn ? 'inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50' : 'inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'} flex w-full justify-center text-center disabled:opacity-50`}
         >
           {processing && !isClockedIn ? "처리 중..." : "출근하기"}
-        </button>
+        </Button>
         
-        <button
+        <Button
           onClick={handleClockOut}
           disabled={!isClockedIn || isClockedOut || processing}
-          className={`${isClockedIn && !isClockedOut ? 'button-primary' : 'button-secondary'} flex w-full justify-center text-center disabled:opacity-50`}
+          className={`${isClockedIn && !isClockedOut ? 'inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50' : 'inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'} flex w-full justify-center text-center disabled:opacity-50`}
         >
           {processing && isClockedIn && !isClockedOut ? "처리 중..." : "퇴근하기"}
-        </button>
+        </Button>
       </div>
 
       {isClockedOut && (
-        <p className="text-[13px] text-ink-muted-48 font-medium text-center">
+        <p className="text-[13px] text-muted-foreground font-medium text-center">
           오늘의 근무가 모두 완료되었습니다.
         </p>
       )}

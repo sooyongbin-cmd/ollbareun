@@ -155,405 +155,29 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: 0;
 }
 
-/* Button & UI Scale Micro-interaction */
-.apple-pressable {
-  transition: transform 160ms ease;
-}
-
-.apple-pressable:active {
-  transform: scale(0.95);
-}
-
-/* Component: button-primary */
-.button-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--color-primary);
-  color: var(--color-text-inverse);
-  font-size: 17px;
-  font-weight: 400;
-  padding: 11px 22px;
-  border-radius: var(--radius-pill);
-  transition: background-color 160ms ease, transform 160ms ease;
-  cursor: pointer;
-  border: none;
-  text-decoration: none;
-}
-
-.button-primary:hover:not(:disabled) {
-  background-color: var(--color-primary-hover);
-}
-
-.button-primary:active:not(:disabled) {
-  transform: scale(0.95);
-}
-
-.button-primary:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-/* Component: button-secondary-pill */
-.button-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: transparent;
-  color: var(--color-primary);
-  font-size: 17px;
-  font-weight: 400;
-  padding: 11px 22px;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--color-primary);
-  transition: background-color 160ms ease, transform 160ms ease;
-  cursor: pointer;
-  text-decoration: none;
-}
-
-.button-secondary:hover:not(:disabled) {
-  background-color: var(--color-primary-soft);
-}
-
-.button-secondary:active:not(:disabled) {
-  transform: scale(0.95);
-}
-
-/* Component: field */
-.field {
-  width: 100%;
-  background-color: var(--color-canvas);
-  border: 1px solid var(--color-hairline);
-  border-radius: 12px;
-  padding: 12px 16px;
-  font-size: 17px;
-  color: var(--color-ink);
-  outline: none;
-  transition: border-color 160ms ease, box-shadow 160ms ease;
-}
-
-.field:focus {
-  border-color: var(--color-primary-focus);
-  box-shadow: 0 0 0 4px var(--color-primary-ring);
-}
-
-.button-primary:focus-visible,
-.button-secondary:focus-visible,
-.field:focus-visible,
-a:focus-visible,
-button:focus-visible {
-  outline: 2px solid var(--color-primary-focus);
-  outline-offset: 3px;
-}
-
-/* Status variants */
-.status-ok {
-  color: var(--color-status-ok-text);
-  background-color: var(--color-status-ok-bg);
-  padding: 12px 16px;
-  border-radius: 12px;
-  font-size: 14px;
-}
-
-.status-warn {
-  color: var(--color-status-warn-text);
-  background-color: var(--color-status-warn-bg);
-  padding: 12px 16px;
-  border-radius: 12px;
-  font-size: 14px;
-}
-
-/* Table styling */
-.apple-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.apple-table th {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-ink-muted-48);
-  text-transform: uppercase;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--color-hairline);
-}
-
-.apple-table td {
-  padding: 16px;
-  border-bottom: 1px solid var(--color-divider-soft);
-  font-size: 17px;
-}
-
-/* Shared application design-QA scale */
-.app-content {
-  font-size: 14px;
-}
-
-.app-content h1 {
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.app-content h2 {
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1.35;
-}
-
-.app-content h1 + p {
-  margin-top: 12px;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1.5;
-}
-
-.app-content label,
-.app-content .field,
-.app-content .button-primary,
-.app-content .button-secondary,
-.app-content .status-ok,
-.app-content .status-warn {
-  font-size: 14px;
-}
-
-.app-content .apple-table {
-  min-width: 680px;
-}
-
-.app-content .apple-table th {
-  font-size: 12px;
-  white-space: nowrap;
-}
-
-.app-content .apple-table td {
-  font-size: 14px;
-}
-
-.app-content [class~="justify-between"][class~="text-ink-muted-48"] {
-  font-size: 12px;
-  font-weight: 400;
-}
-
-.app-content :is(section, form)[class~="rounded-[18px]"][class~="bg-canvas-parchment"] {
-  padding: 24px;
-}
-
-/* Shared mobile typography hierarchy */
-@media (width < 48rem) {
-  .app-content .apple-table {
-    display: block;
-    min-width: 0;
-    table-layout: fixed;
-  }
-
-  .app-content .apple-table thead {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    clip-path: inset(50%);
-    white-space: nowrap;
-    border: 0;
-  }
-
-  .app-content .apple-table tbody {
-    display: grid;
-  }
-
-  .app-content .apple-table tbody tr {
-    display: block;
-    min-width: 0;
-    padding-block: 6px;
-    border-bottom: 1px solid var(--color-hairline);
-  }
-
-  .app-content .apple-table tbody tr:last-child {
-    border-bottom: 0;
-  }
-
-  .app-content .apple-table tbody td {
-    display: grid;
-    grid-template-columns: minmax(0, 34%) minmax(0, 1fr);
-    gap: 12px;
-    min-width: 0;
-    max-width: none;
-    padding: 10px 12px;
-    border-bottom: 0;
-    text-align: left;
-    white-space: normal;
-    overflow-wrap: anywhere;
-  }
-
-  .app-content .apple-table tbody td::before {
-    content: attr(data-label);
-    align-self: start;
-    color: var(--color-ink-muted-48);
-    font-size: 12px;
-    font-weight: 600;
-    line-height: 1.45;
-    overflow-wrap: anywhere;
-  }
-
-  .app-content .apple-table tbody td > * {
-    min-width: 0;
-    max-width: 100%;
-    overflow-wrap: anywhere;
-  }
-
-  .app-content .apple-table tbody td[data-responsive-empty] {
-    display: block;
-    padding: 32px 16px;
-    text-align: center;
-  }
-
-  .app-content .apple-table tbody td[data-responsive-empty]::before,
-  .app-content .apple-table[data-responsive-single-column] tbody td::before {
-    content: none;
-  }
-
-  .app-content .apple-table[data-responsive-single-column] tbody td {
-    display: block;
-  }
-
-  .app-content h1 {
-    font-size: 22px;
-  }
-
-  .app-content h2 {
-    font-size: 16px;
-  }
-
-  .app-content,
-  .app-content h1 + p,
-  .app-content label,
-  .app-content .field,
-  .app-content .button-primary,
-  .app-content .button-secondary,
-  .app-content .status-ok,
-  .app-content .status-warn,
-  .app-content .apple-table td {
-    font-size: 14px;
-  }
-
-  .app-content :is(p, li, dt, dd) {
-    font-size: 14px;
-  }
-
-  .app-content .apple-table th {
-    font-size: 12px;
-  }
-
-  .app-content :is(small, caption, figcaption),
-  .app-content .text-\[11px\],
-  .app-content .text-\[12px\] {
-    font-size: 12px;
-    font-weight: 400;
-  }
-}
-
-@media (width >= 48rem) {
-  .app-content :is(section, form)[class~="rounded-[18px]"][class~="bg-canvas-parchment"] {
-    padding: 32px;
-  }
-}
-
-/* Guard-only readable font scale */
+/* Guard-only readable font and viewport scale */
 .guard-zoom-scope {
   zoom: var(--guard-zoom-scale, 1);
 }
 
 .guard-font-scale {
-  font-size: calc(22px * var(--guard-font-scale, 1));
+  font-size: calc(1rem * var(--guard-font-scale, 1));
 }
 
-.guard-font-scale .button-primary,
-.guard-font-scale .button-secondary,
-.guard-font-scale .field {
-  font-size: calc(22px * var(--guard-font-scale, 1));
+.guard-font-scale :where(
+  [data-slot="button"],
+  [data-slot="input"],
+  [data-slot="textarea"],
+  [data-slot="native-select"],
+  [data-slot="alert"],
+  [data-slot="badge"],
+  [data-slot="table-cell"]
+) {
+  font-size: calc(1rem * var(--guard-font-scale, 1));
 }
 
-.guard-font-scale .status-ok,
-.guard-font-scale .status-warn {
-  font-size: calc(18px * var(--guard-font-scale, 1));
-}
-
-.guard-font-scale .apple-table th {
-  font-size: calc(16px * var(--guard-font-scale, 1));
-}
-
-.guard-font-scale .apple-table td {
-  font-size: calc(22px * var(--guard-font-scale, 1));
-}
-
-.guard-font-scale .text-\[12px\] {
-  font-size: calc(16px * var(--guard-font-scale, 1));
-}
-
-.guard-font-scale .text-\[13px\] {
-  font-size: calc(17px * var(--guard-font-scale, 1));
-}
-
-.guard-font-scale .text-\[14px\] {
-  font-size: calc(18px * var(--guard-font-scale, 1));
-}
-
-.guard-font-scale .text-\[15px\] {
-  font-size: calc(20px * var(--guard-font-scale, 1));
-}
-
-.guard-font-scale .text-\[16px\] {
-  font-size: calc(21px * var(--guard-font-scale, 1));
-}
-
-.guard-font-scale .text-\[17px\] {
-  font-size: calc(22px * var(--guard-font-scale, 1));
-}
-
-.guard-font-scale .text-\[18px\] {
-  font-size: calc(23px * var(--guard-font-scale, 1));
-}
-
-.guard-font-scale .text-\[19px\] {
-  font-size: calc(25px * var(--guard-font-scale, 1));
-}
-
-.guard-font-scale .text-\[20px\],
-.guard-font-scale .text-xl {
-  font-size: calc(26px * var(--guard-font-scale, 1));
-}
-
-.guard-font-scale .text-\[21px\] {
-  font-size: calc(27px * var(--guard-font-scale, 1));
-}
-
-.guard-font-scale .text-\[24px\] {
-  font-size: calc(31px * var(--guard-font-scale, 1));
-}
-
-.guard-font-scale .text-\[36px\] {
-  font-size: calc(47px * var(--guard-font-scale, 1));
-}
-
-.guard-font-scale .text-\[40px\] {
-  font-size: calc(52px * var(--guard-font-scale, 1));
-}
-
-.guard-font-scale .leading-5 {
-  line-height: calc(26px * var(--guard-font-scale, 1));
-}
-
-.guard-font-scale .leading-6 {
-  line-height: calc(31px * var(--guard-font-scale, 1));
-}
-
-@media (width >= 40rem) {
-  .guard-font-scale .sm\:text-\[13px\] {
-    font-size: calc(17px * var(--guard-font-scale, 1));
-  }
+.guard-font-scale :where([data-slot="button"], [data-slot="input"], [data-slot="native-select"]) {
+  min-height: calc(3rem * var(--guard-font-scale, 1));
 }
 
 :root {
@@ -592,12 +216,16 @@ button:focus-visible {
 }
 
 @layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
   .manager-shell {
     @apply bg-background text-foreground;
     font-family: var(--font-apple);
-  }
-
-  .manager-shell * {
-    @apply border-border outline-ring/50;
   }
 }

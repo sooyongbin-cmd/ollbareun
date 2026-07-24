@@ -41,7 +41,7 @@ npm test
 ### 4. 자동알림(Edge Function) 오류 및 발송 실패 원인 로깅 개선
 * **수정 파일**: [index.ts](file:///d:/ollba/ollba_20260610/supabase/functions/education-reminders/index.ts)
 * **VAPID 키 런타임 오류 수정 및 배포**: 로컬 및 엣지 환경에서 `Vapid public key should be 65 bytes long when decoded` 오류를 발생시키던 잘못 구성된 VAPID 키셋을 `npx web-push generate-vapid-keys`로 생성한 정상적인 65바이트 EC 키 쌍으로 변경하고, 이를 Supabase Remote Secret 및 로컬 `.env.local`에 동기화 적용 후 Edge Function을 재배포(`education-reminders`)하였습니다.
-* **실패 대상 개별 로깅 추가**: 자동알림 크론 동작 시, 전체 실행은 성공(`sent`)했으나 특정 직원으로의 푸시 알림 전송이 실패한 경우(예: 기기 세션 만료, 410 Gone 등) 개별 실패 원인을 취합하여 `error_message` 컬럼에 기록하도록 로직을 보완했습니다 (예: `홍길동: 기기 토큰 만료 또는 세션 만료 (HTTP 410)`). 이를 통해 관리자 화면(`/manager/safty/notifications`)의 "오류내용" 컬럼에서 개별 실패 원인을 투명하게 확인할 수 있습니다.
+* **실패 대상 개별 로깅 추가**: 자동알림 크론 동작 시, 전체 실행은 성공(`sent`)했으나 특정 직원으로의 푸시 알림 전송이 실패한 경우(예: 기기 세션 만료, 410 Gone 등) 개별 실패 원인을 취합하여 `error_message` 컬럼에 기록하도록 로직을 보완했습니다 (예: `홍길동: 기기 토큰 만료 또는 세션 만료 (HTTP 410)`). 이를 통해 관리자 화면(`/manager/safety/notifications`)의 "오류내용" 컬럼에서 개별 실패 원인을 투명하게 확인할 수 있습니다.
 
 ---
 

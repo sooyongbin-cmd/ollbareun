@@ -1,5 +1,7 @@
 "use client";
 
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -130,7 +132,7 @@ export default function WorksiteManagementClient() {
       <header>
         <div className="space-y-3">
           <h1 className="text-[40px] font-semibold leading-[1.1]">근무지관리</h1>
-          <p className="text-[21px] font-normal text-ink-muted-48 max-w-[640px]">
+          <p className="text-[21px] font-normal text-muted-foreground max-w-[640px]">
             등록된 근무지를 검색하고 배정 현황을 확인합니다.
           </p>
         </div>
@@ -138,15 +140,15 @@ export default function WorksiteManagementClient() {
 
       <section
         aria-label="근무지 검색"
-        className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50"
+        className="bg-muted/40 rounded-xl p-[32px] border border-border/50"
       >
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-2 flex-1">
-            <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="worksite-search">
+            <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="worksite-search">
               근무지
             </label>
-            <input
-              className="field"
+            <Input
+              className="w-full"
               id="worksite-search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
@@ -155,7 +157,7 @@ export default function WorksiteManagementClient() {
           </div>
 
           <Link
-            className="button-primary w-full text-center md:w-auto gap-2"
+            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2"
             href="/manager/employee/worksites/new"
           >
             <span>근무지 등록</span>
@@ -166,9 +168,9 @@ export default function WorksiteManagementClient() {
 
       <section
         aria-label="근무지 목록"
-        className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50"
+        className="bg-muted/40 rounded-xl p-[32px] border border-border/50"
       >
-        <div className="flex flex-wrap items-center justify-between gap-3 text-[14px] text-ink-muted-48">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-[14px] text-muted-foreground">
           <span>전체 근무지 {data.worksites.length}</span>
           <span>검색 결과 {filteredWorksites.length}</span>
         </div>
@@ -176,12 +178,12 @@ export default function WorksiteManagementClient() {
         {loading ? (
           <ManagerLoadingMessage className="mt-6" />
         ) : error ? (
-          <p className="mt-6 text-[16px] text-status-warn">{error}</p>
+          <p className="mt-6 text-[16px] text-destructive">{error}</p>
         ) : (
-          <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-[16px] border border-hairline bg-canvas">
-            <table className="apple-table">
-              <thead>
-                <tr>
+          <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow>
                   <SortableHeader
                     sortKey="name"
                     currentSortKey={sortKey}
@@ -200,7 +202,7 @@ export default function WorksiteManagementClient() {
                   >
                     배정인원수
                   </SortableHeader>
-                  <th className="text-left">GPS정보</th>
+                  <TableHead className="text-left">GPS정보</TableHead>
                   <SortableHeader
                     sortKey="radius"
                     currentSortKey={sortKey}
@@ -210,29 +212,29 @@ export default function WorksiteManagementClient() {
                   >
                     허용반경
                   </SortableHeader>
-                </tr>
-              </thead>
-              <tbody>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {sortedWorksites.length === 0 ? (
-                  <tr>
-                    <td data-responsive-empty colSpan={4} className="p-8 text-center text-ink-muted-48 italic">
+                  <TableRow>
+                    <TableCell data-responsive-empty colSpan={4} className="p-8 text-center text-muted-foreground italic">
                       조회 결과에 해당하는 근무지가 없습니다.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   sortedWorksites.map((worksite) => {
                     const count = worksiteCounts[worksite.id] ?? 0;
                     return (
-                      <tr key={worksite.id} className="hover:bg-canvas-parchment transition-colors">
-                        <td data-label="근무지명" className="font-semibold">
+                      <TableRow key={worksite.id} className="hover:bg-muted/40 transition-colors">
+                        <TableCell data-label="근무지명" className="font-semibold">
                           <Link
                             className="text-primary hover:underline"
                             href={`/manager/employee/worksites/save/${worksite.id}`}
                           >
                             {worksite.name}
                           </Link>
-                        </td>
-                        <td data-label="배정인원수" className="text-center">
+                        </TableCell>
+                        <TableCell data-label="배정인원수" className="text-center">
                           {count > 0 ? (
                             <Link
                               className="text-primary font-semibold hover:underline"
@@ -241,17 +243,17 @@ export default function WorksiteManagementClient() {
                               {count}
                             </Link>
                           ) : (
-                            <span className="text-ink-muted-48">{count}</span>
+                            <span className="text-muted-foreground">{count}</span>
                           )}
-                        </td>
-                        <td data-label="GPS정보" className="text-ink-muted-48">{formatGpsInfo(worksite.gps_info)}</td>
-                        <td data-label="허용반경" className="text-right">{worksite.radius_meters}m</td>
-                      </tr>
+                        </TableCell>
+                        <TableCell data-label="GPS정보" className="text-muted-foreground">{formatGpsInfo(worksite.gps_info)}</TableCell>
+                        <TableCell data-label="허용반경" className="text-right">{worksite.radius_meters}m</TableCell>
+                      </TableRow>
                     );
                   })
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         )}
       </section>

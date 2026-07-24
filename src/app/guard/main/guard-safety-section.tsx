@@ -86,36 +86,36 @@ export default function GuardSafetySection() {
   }, [completions, resources, employeeId]);
 
   return (
-    <section className="mb-6 bg-canvas rounded-[18px] p-6 border border-hairline shadow-sm space-y-4">
-      <h3 className="text-[14px] font-semibold text-ink-muted-48">안전교육 상황</h3>
+    <section className="mb-6 bg-background rounded-xl p-6 border border-border shadow-sm space-y-4">
+      <h3 className="text-[14px] font-semibold text-muted-foreground">안전교육 상황</h3>
       
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-[15px] text-ink-muted-80">
-          <span className="font-semibold text-ink-muted-48">이수 현황 :</span>
+        <div className="flex items-center gap-2 text-[15px] text-foreground/80">
+          <span className="font-semibold text-muted-foreground">이수 현황 :</span>
           {loading ? (
             <LoadingBoard className="min-h-6 min-w-12" label="안전교육 이수 현황을 불러오는 중입니다." />
           ) : (
-            <span className="font-bold text-[20px] text-ink">
+            <span className="font-bold text-[20px] text-foreground">
               {eduStatus ? `${eduStatus.completed} / ${eduStatus.total}` : "정보 없음"}
             </span>
           )}
         </div>
         <Link 
           href="/guard/main/safety" 
-          className="button-secondary text-[13px] py-2 px-4"
+          className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 text-[13px] py-2 px-4"
         >
           교육 받기
         </Link>
       </div>
       
       {eduStatus && eduStatus.completed < eduStatus.total && (
-        <p className="text-[13px] text-status-warn font-medium pt-2 border-t border-hairline/30">
+        <p className="text-[13px] text-destructive font-medium pt-2 border-t border-border/30">
           미이수 교육이 {eduStatus.total - eduStatus.completed}건 있습니다. 교육을 완료해주세요.
         </p>
       )}
       
       {eduStatus && eduStatus.completed === eduStatus.total && eduStatus.total > 0 && (
-        <p className="text-[13px] text-primary font-medium pt-2 border-t border-hairline/30">
+        <p className="text-[13px] text-primary font-medium pt-2 border-t border-border/30">
           모든 안전교육을 이수하였습니다.
         </p>
       )}

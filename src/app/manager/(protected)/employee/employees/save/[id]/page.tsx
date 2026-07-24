@@ -1,5 +1,9 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import ManagerLoadingMessage from "../../../../manager-loading-message";
@@ -126,29 +130,29 @@ export default function EmployeeSavePage() {
   return (
     <section className="space-y-[24px]">
       <header>
-        <p className="text-[14px] font-semibold text-ink-muted-48 uppercase">관리자 화면</p>
+        <p className="text-[14px] font-semibold text-muted-foreground uppercase">관리자 화면</p>
         <div className="space-y-3">
           <h1 className="text-[40px] font-semibold leading-[1.1]">직원수정</h1>
-          <p className="text-[21px] font-normal text-ink-muted-48 max-w-[640px]">
+          <p className="text-[21px] font-normal text-muted-foreground max-w-[640px]">
             선택한 직원의 이름과 연락처를 수정할 수 있습니다.
           </p>
         </div>
       </header>
 
-      <section className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50">
+      <section className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
         {loading ? (
           <ManagerLoadingMessage />
         ) : routeError ? (
-          <p className="text-[16px] text-status-warn">{routeError}</p>
+          <p className="text-[16px] text-destructive">{routeError}</p>
         ) : (
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="employee-name">
+                <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="employee-name">
                   직원이름
                 </label>
-                <input
-                  className="field"
+                <Input
+                  className="w-full"
                   id="employee-name"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
@@ -156,11 +160,11 @@ export default function EmployeeSavePage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="employee-phone">
+                <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="employee-phone">
                   연락처
                 </label>
-                <input
-                  className="field"
+                <Input
+                  className="w-full"
                   id="employee-phone"
                   value={phone}
                   onChange={(event) => setPhone(event.target.value)}
@@ -168,48 +172,47 @@ export default function EmployeeSavePage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="employee-role">
+                <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="employee-role">
                   역할
                 </label>
-                <select
-                  className="field appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"
+                <NativeSelect
+                  className="w-full appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"
                   id="employee-role"
                   value={role}
                   onChange={(event) => setRole(event.target.value as "경비원" | "미화원" | "파견")}
                   required
                 >
-                  <option value="경비원">경비원</option>
-                  <option value="미화원">미화원</option>
-                  <option value="파견">파견</option>
-                </select>
+                  <NativeSelectOption value="경비원">경비원</NativeSelectOption>
+                  <NativeSelectOption value="미화원">미화원</NativeSelectOption>
+                  <NativeSelectOption value="파견">파견</NativeSelectOption>
+                </NativeSelect>
               </div>
-              <label className="flex items-center gap-3 text-[14px] font-semibold text-ink-muted-48 ml-1">
-                <input
-                  type="checkbox"
+              <label className="flex items-center gap-3 text-[14px] font-semibold text-muted-foreground ml-1">
+                <Checkbox
                   checked={isRetired}
-                  onChange={(event) => setIsRetired(event.target.checked)}
+                  onCheckedChange={(checked) => setIsRetired(checked === true)}
                 />
                 퇴직
               </label>
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <button aria-label="저장" className="button-primary w-full md:w-auto" type="submit">
+              <Button aria-label="저장" className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full md:w-auto" type="submit">
                 <SaveIcon size={20} />
-              </button>
-              <button
+              </Button>
+              <Button
                 aria-label="삭제"
-                className="button-secondary w-full md:w-auto"
+                className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full md:w-auto"
                 type="button"
                 onClick={() => setDeleteConfirmOpen(true)}
               >
                 <DeleteIcon size={20} />
-              </button>
+              </Button>
             </div>
           </form>
         )}
 
-        {error ? <p className="mt-6 text-[16px] text-status-warn">{error}</p> : null}
+        {error ? <p className="mt-6 text-[16px] text-destructive">{error}</p> : null}
       </section>
 
       <ConfirmModal

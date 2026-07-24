@@ -35,7 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className="h-full antialiased selection:bg-primary/20">
-      <body className="app-content min-h-full flex flex-col font-apple bg-canvas text-ink">
+      <body className="min-h-full flex flex-col bg-background font-sans text-foreground">
         {children}
       </body>
     </html>

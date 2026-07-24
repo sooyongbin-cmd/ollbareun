@@ -1,5 +1,8 @@
 "use client";
 
+import { Checkbox } from "@/components/ui/checkbox";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
@@ -172,7 +175,7 @@ export default function EmployeeRosterPage() {
       <header>
         <div className="space-y-3">
           <h1 className="text-[28px] leading-[1.2]">직원명부관리</h1>
-          <p className="max-w-[640px] text-[14px] font-normal leading-relaxed text-ink-muted-48">
+          <p className="max-w-[640px] text-[14px] font-normal leading-relaxed text-muted-foreground">
             등록된 직원의 이름과 연락처를 검색해 확인합니다.
           </p>
         </div>
@@ -180,63 +183,61 @@ export default function EmployeeRosterPage() {
 
       <section
         aria-label="직원 검색"
-        className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[24px] md:p-[32px]"
+        className="rounded-xl border border-border/50 bg-muted/40 p-[24px] md:p-[32px]"
       >
         <h2 className="mb-4 text-[18px] font-semibold leading-snug">직원 검색</h2>
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="flex flex-1 flex-col gap-4 md:flex-row">
             <div className="flex-1 space-y-2">
-              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="employee-roster-name-search">
+              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="employee-roster-name-search">
                 이름
               </label>
-              <select
-                className="field appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"
+              <NativeSelect
+                className="w-full appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"
                 id="employee-roster-name-search"
                 value={nameQuery}
                 onChange={(event) => setNameQuery(event.target.value)}
               >
-                <option value="">전체 이름</option>
+                <NativeSelectOption value="">전체 이름</NativeSelectOption>
                 {uniqueNames.map((name) => (
-                  <option key={name} value={name}>
+                  <NativeSelectOption key={name} value={name}>
                     {name}
-                  </option>
+                  </NativeSelectOption>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="flex-1 space-y-2">
-              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="employee-roster-role-search">
+              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="employee-roster-role-search">
                 역할
               </label>
-              <select
-                className="field appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"
+              <NativeSelect
+                className="w-full appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"
                 id="employee-roster-role-search"
                 value={roleQuery}
                 onChange={(event) => setRoleQuery(event.target.value)}
               >
-                <option value="">전체 역할</option>
-                <option value="경비원">경비원</option>
-                <option value="미화원">미화원</option>
-                <option value="파견">파견</option>
-              </select>
+                <NativeSelectOption value="">전체 역할</NativeSelectOption>
+                <NativeSelectOption value="경비원">경비원</NativeSelectOption>
+                <NativeSelectOption value="미화원">미화원</NativeSelectOption>
+                <NativeSelectOption value="파견">파견</NativeSelectOption>
+              </NativeSelect>
             </div>
           </div>
 
-          <label className="flex h-[48px] items-center gap-2 text-[14px] font-semibold text-ink-muted-80 md:mb-0">
-            <input
+          <label className="flex h-[48px] items-center gap-2 text-[14px] font-semibold text-foreground/80 md:mb-0">
+            <Checkbox
               checked={showRetired}
-              className="h-4 w-4 accent-primary"
-              onChange={(event) => {
-                setShowRetired(event.target.checked);
+              onCheckedChange={(checked) => {
+                setShowRetired(checked === true);
                 setNameQuery("");
                 setRoleQuery("");
               }}
-              type="checkbox"
             />
             퇴직
           </label>
 
           <Link
-            className="button-primary w-full gap-2 text-center md:w-auto"
+            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full gap-2 text-center md:w-auto"
             href="/manager/employee/employees/new"
           >
             <span>직원 등록</span>
@@ -247,10 +248,10 @@ export default function EmployeeRosterPage() {
 
       <section
         aria-label="직원 목록"
-        className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[24px] md:p-[32px]"
+        className="rounded-xl border border-border/50 bg-muted/40 p-[24px] md:p-[32px]"
       >
         <h2 className="text-[18px] font-semibold leading-snug">직원 목록</h2>
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-[12px] font-normal text-ink-muted-48">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-[12px] font-normal text-muted-foreground">
           <span>전체 직원 {data.employees.length}</span>
           <span>검색 결과 {filteredEmployees.length}</span>
         </div>
@@ -258,12 +259,12 @@ export default function EmployeeRosterPage() {
         {loading ? (
           <ManagerLoadingMessage className="mt-6" />
         ) : error ? (
-          <p className="mt-6 text-[16px] text-status-warn">{error}</p>
+          <p className="mt-6 text-[16px] text-destructive">{error}</p>
         ) : (
-          <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-[16px] border border-hairline bg-canvas">
-            <table className="apple-table">
-              <thead>
-                <tr>
+          <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow>
                   <SortableHeader
                     sortKey="name"
                     currentSortKey={sortKey}
@@ -309,47 +310,47 @@ export default function EmployeeRosterPage() {
                   >
                     상태
                   </SortableHeader>
-                </tr>
-              </thead>
-              <tbody>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {sortedEmployees.length === 0 ? (
-                  <tr>
-                    <td data-responsive-empty colSpan={5} className="p-8 text-center text-ink-muted-48 italic">
+                  <TableRow>
+                    <TableCell data-responsive-empty colSpan={5} className="p-8 text-center text-muted-foreground italic">
                       조회 결과에 해당하는 직원이 없습니다.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   sortedEmployees.map((employee) => (
-                    <tr key={employee.id} className="hover:bg-canvas-parchment transition-colors">
-                      <td data-label="이름" className="font-semibold">
+                    <TableRow key={employee.id} className="hover:bg-muted/40 transition-colors">
+                      <TableCell data-label="이름" className="font-semibold">
                         <Link
                           className="text-primary hover:underline"
                           href={`/manager/employee/employees/save/${employee.id}`}
                         >
                           {employee.name}
                         </Link>
-                      </td>
-                      <td data-label="연락처" className="text-ink-muted-48">{employee.phone}</td>
-                      <td data-label="역할" className="text-ink-muted-48">{employee.role}</td>
-                      <td data-label="근무지" className="text-ink-muted-48">
+                      </TableCell>
+                      <TableCell data-label="연락처" className="text-muted-foreground">{employee.phone}</TableCell>
+                      <TableCell data-label="역할" className="text-muted-foreground">{employee.role}</TableCell>
+                      <TableCell data-label="근무지" className="text-muted-foreground">
                         {worksiteById.get(worksiteByEmployeeId.get(employee.id) ?? "") ?? "-"}
-                      </td>
-                      <td data-label="상태" className="text-right">
+                      </TableCell>
+                      <TableCell data-label="상태" className="text-right">
                         <span
                           className={`inline-flex rounded-full px-3 py-1 text-[12px] font-semibold ${
                             employee.is_retired
-                              ? "bg-ink/10 text-ink-muted-48"
+                              ? "bg-foreground/10 text-muted-foreground"
                               : "bg-primary/10 text-primary"
                           }`}
                         >
                           {employee.is_retired ? "퇴직" : "현직"}
                         </span>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         )}
       </section>

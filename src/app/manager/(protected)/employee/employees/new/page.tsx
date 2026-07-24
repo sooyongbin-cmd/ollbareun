@@ -1,5 +1,8 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { SaveIcon } from "@/components/icons/save-icon";
@@ -58,55 +61,55 @@ export default function EmployeeNewPage() {
     <section className="space-y-[24px]">
       <header>
         <h1 className="text-[40px] font-semibold leading-[1.1]">직원등록</h1>
-        <p className="text-[21px] font-normal text-ink-muted-48 mt-2 max-w-[600px]">
+        <p className="text-[21px] font-normal text-muted-foreground mt-2 max-w-[600px]">
           직원 이름과 연락처를 입력해 등록합니다.
         </p>
       </header>
 
-      <section className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50">
+      <section className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="employee-name">
+              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="employee-name">
                 직원이름
               </label>
-              <input className="field" id="employee-name" name="name" placeholder="직원 이름을 입력하세요." required />
+              <Input className="w-full" id="employee-name" name="name" placeholder="직원 이름을 입력하세요." required />
             </div>
             <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="employee-phone">
+              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="employee-phone">
                 연락처
               </label>
-              <input className="field" id="employee-phone" name="phone" placeholder="010-0000-0000" required />
+              <Input className="w-full" id="employee-phone" name="phone" placeholder="010-0000-0000" required />
             </div>
             <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="employee-role">
+              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="employee-role">
                 역할
               </label>
-              <select
-                className="field appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"
+              <NativeSelect
+                className="w-full appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"
                 id="employee-role"
                 name="role"
                 defaultValue="경비원"
                 required
               >
-                <option value="경비원">경비원</option>
-                <option value="미화원">미화원</option>
-                <option value="파견">파견</option>
-              </select>
+                <NativeSelectOption value="경비원">경비원</NativeSelectOption>
+                <NativeSelectOption value="미화원">미화원</NativeSelectOption>
+                <NativeSelectOption value="파견">파견</NativeSelectOption>
+              </NativeSelect>
             </div>
           </div>
 
-          <button
+          <Button
             aria-label="저장"
-            className="button-primary w-full md:w-auto"
+            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full md:w-auto"
             data-testid="employee-submit"
             type="submit"
           >
             <SaveIcon size={20} />
-          </button>
+          </Button>
         </form>
 
-        {error ? <p className="status-warn mt-6 text-center">{error}</p> : null}
+        {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mt-6 text-center">{error}</p> : null}
       </section>
 
       <AlertModal

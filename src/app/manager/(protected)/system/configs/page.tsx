@@ -1,5 +1,6 @@
 "use client";
 
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
@@ -56,58 +57,58 @@ export default function SystemConfigsPage() {
     <section className="space-y-[24px]">
       <header>
         <h1 className="text-[40px] font-semibold leading-[1.1]">시스템설정</h1>
-        <p className="mt-2 max-w-[640px] text-[21px] font-normal text-ink-muted-48">
+        <p className="mt-2 max-w-[640px] text-[21px] font-normal text-muted-foreground">
           시스템에서 사용하는 코드와 내용을 관리합니다.
         </p>
       </header>
 
-      <section aria-label="시스템설정 조회" className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50">
+      <section aria-label="시스템설정 조회" className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
         <div className="flex justify-end">
-          <Link className="button-primary" href="/manager/system/configs/new">
+          <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50" href="/manager/system/configs/new">
             등록
           </Link>
         </div>
       </section>
 
-      <section aria-label="시스템설정 목록" className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50">
+      <section aria-label="시스템설정 목록" className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
         {loading ? (
           <ManagerLoadingMessage />
         ) : error ? (
-          <p className="status-warn text-center">{error}</p>
+          <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive text-center">{error}</p>
         ) : (
-          <div className="min-w-0 overflow-x-auto overflow-y-hidden rounded-[16px] border border-hairline bg-canvas">
-            <table className="apple-table">
-              <thead>
-                <tr>
-                  <th className="text-left">설명</th>
-                  <th className="text-left">내용</th>
-                  <th className="text-left">시스템코드</th>
-                  <th className="text-left">상위시스템코드</th>
-                </tr>
-              </thead>
-              <tbody>
+          <div className="min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-left">설명</TableHead>
+                  <TableHead className="text-left">내용</TableHead>
+                  <TableHead className="text-left">시스템코드</TableHead>
+                  <TableHead className="text-left">상위시스템코드</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {configs.length === 0 ? (
-                  <tr>
-                    <td data-responsive-empty colSpan={4} className="p-8 text-center text-ink-muted-48 italic">
+                  <TableRow>
+                    <TableCell data-responsive-empty colSpan={4} className="p-8 text-center text-muted-foreground italic">
                       등록된 시스템설정이 없습니다.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   configs.map((config) => (
-                    <tr key={config.system_code} className="hover:bg-canvas-parchment transition-colors">
-                      <td data-label="설명" className="max-w-[360px] whitespace-pre-wrap">{config.description ?? "-"}</td>
-                      <td data-label="내용" className="max-w-[520px] whitespace-pre-wrap">{config.content}</td>
-                      <td data-label="시스템코드" className="font-semibold">
+                    <TableRow key={config.system_code} className="hover:bg-muted/40 transition-colors">
+                      <TableCell data-label="설명" className="max-w-[360px] whitespace-pre-wrap">{config.description ?? "-"}</TableCell>
+                      <TableCell data-label="내용" className="max-w-[520px] whitespace-pre-wrap">{config.content}</TableCell>
+                      <TableCell data-label="시스템코드" className="font-semibold">
                         <Link className="text-primary hover:opacity-80" href={`/manager/system/configs/${encodeURIComponent(config.system_code)}`}>
                           {config.system_code}
                         </Link>
-                      </td>
-                      <td data-label="상위시스템코드">{config.parent_system_code ?? "-"}</td>
-                    </tr>
+                      </TableCell>
+                      <TableCell data-label="상위시스템코드">{config.parent_system_code ?? "-"}</TableCell>
+                    </TableRow>
                   ))
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         )}
       </section>

@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { canClockIn, canClockOut, canClockOutAtWorksite, type AttendanceRecord, type Worksite } from "@/lib/phase1";
@@ -276,7 +277,7 @@ export default function GuardAttendancePage() {
     <div className="mx-auto max-w-[980px] w-full px-5 py-[80px]">
       <div className="max-w-[600px] mx-auto">
         {guard ? (
-          <section className="bg-canvas-parchment rounded-[18px] p-[16px] border border-hairline/50">
+          <section className="bg-muted/40 rounded-xl p-[16px] border border-border/50">
             <div className="space-y-[32px]">
               <AttendanceMapSection
                 currentLatitude={latitude}
@@ -286,7 +287,7 @@ export default function GuardAttendancePage() {
 
               <div
                 className={`p-4 rounded-xl text-center text-[15px] font-medium transition-colors ${
-                  activeDecision.allowed ? "bg-primary/5 text-primary" : "bg-status-warn text-ink"
+                  activeDecision.allowed ? "bg-primary/5 text-primary" : "bg-destructive text-foreground"
                 }`}
                 id="attendance-decision-section"
               >
@@ -294,38 +295,38 @@ export default function GuardAttendancePage() {
               </div>
 
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3" id="attendance-actions-section">
-                <button
-                  className="button-primary"
+                <Button
+                  className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                   data-testid="clock-in"
                   type="button"
                   disabled={!clockInDecision.allowed || !!guard.attendance?.clock_in_at}
                   onClick={handleClockIn}
                 >
                   출근
-                </button>
-                <button
-                  className="button-secondary"
+                </Button>
+                <Button
+                  className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                   data-testid="clock-out"
                   type="button"
                   disabled={!clockOutDecision.allowed}
                   onClick={handleClockOut}
                 >
                   퇴근
-                </button>
+                </Button>
               </div>
 
-              {message ? <p className="status-ok text-center">{message}</p> : null}
-              {error ? <p className="status-warn text-center">{error}</p> : null}
+              {message ? <p className="rounded-md border border-border bg-muted px-4 py-3 text-sm text-foreground text-center">{message}</p> : null}
+              {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive text-center">{error}</p> : null}
               <GuardLocationPermissionPrompt />
             </div>
           </section>
         ) : (
           <section
-            className="bg-canvas-parchment rounded-[18px] p-[16px] border border-hairline/50 text-center"
+            className="bg-muted/40 rounded-xl p-[16px] border border-border/50 text-center"
             id="attendance-auth-required-section"
           >
-            <p className="text-[17px] text-ink-muted-48">경비원 인증 후 이용할 수 있습니다.</p>
-            <Link className="button-primary mt-6 inline-flex" href="/guard">
+            <p className="text-[17px] text-muted-foreground">현장 근로자 인증 후 이용할 수 있습니다.</p>
+            <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 mt-6 inline-flex" href="/guard">
               인증하러 가기
             </Link>
           </section>

@@ -186,15 +186,15 @@ describe("manager layout", () => {
     expect(screen.getByRole("link", { name: "대시보드" })).toHaveAttribute("href", "/manager");
     expect(screen.getByRole("link", { name: "교육자료관리" })).toHaveAttribute(
       "href",
-      "/manager/safty/resources",
+      "/manager/safety/resources",
     );
     expect(screen.getByRole("link", { name: "교육이수관리" })).toHaveAttribute(
       "href",
-      "/manager/safty/completions",
+      "/manager/safety/completions",
     );
     expect(screen.getByRole("link", { name: "자동알림" })).toHaveAttribute(
       "href",
-      "/manager/safty/notifications",
+      "/manager/safety/notifications",
     );
     expect(screen.getByRole("link", { name: "로그현황" })).toHaveAttribute(
       "href",

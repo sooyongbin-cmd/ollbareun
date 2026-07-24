@@ -6,6 +6,7 @@ import { readStoredGuardSessionSnapshot, subscribeToGuardSessionChange } from ".
 type GuardSession = {
   employee?: {
     name?: unknown;
+    role?: unknown;
   };
   worksite?: {
     name?: unknown;
@@ -24,9 +25,10 @@ function parseGuardSummary(storedSession: string | null) {
   try {
     const session = JSON.parse(storedSession) as GuardSession;
     const name = typeof session.employee?.name === "string" ? session.employee.name : "";
+    const role = typeof session.employee?.role === "string" ? session.employee.role : "";
     const worksiteName = typeof session.worksite?.name === "string" ? session.worksite.name : "";
 
-    return name ? { name, worksiteName } : null;
+    return name ? { name, role, worksiteName } : null;
   } catch {
     return null;
   }
@@ -45,10 +47,11 @@ export default function GuardSessionSummary() {
   }
 
   return (
-    <div className="flex min-w-0 items-center gap-2 text-[12px] text-ink-muted-48 sm:text-[13px]">
-      <span className="truncate font-medium text-ink" title={summary.name}>
+    <div className="flex min-w-0 items-center gap-2 text-[12px] text-muted-foreground sm:text-[13px]">
+      <span className="truncate font-medium text-foreground" title={summary.name}>
         {summary.name}
       </span>
+      {summary.role ? <span className="rounded-full bg-secondary px-2 py-0.5 text-secondary-foreground">{summary.role}</span> : null}
       {summary.worksiteName ? (
         <span className="min-w-0 truncate" title={`오늘의 근무지 : ${summary.worksiteName}`}>
           (오늘의 근무지 : {summary.worksiteName})

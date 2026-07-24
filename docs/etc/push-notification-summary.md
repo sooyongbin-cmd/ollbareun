@@ -9,7 +9,7 @@
 ## 전체 흐름
 
 1. 관리자 화면에서 `교육알림` 버튼 클릭
-   - 파일: `src/app/manager/safty/completions/page.tsx`
+   - 파일: `src/app/manager/safety/completions/page.tsx`
    - 현재 검색 결과의 재직 직원 중 `미이수 건수 >= 1`인 사람만 발송 대상으로 선정합니다.
    - 대상 목록을 `/api/notifications/send`로 POST 요청합니다.
 

@@ -1,5 +1,8 @@
 "use client";
 
+import { Input } from "@/components/ui/input";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -145,7 +148,7 @@ export default function AssignmentManagementClient() {
       <header>
         <div className="space-y-3">
           <h1 className="text-[40px] font-semibold leading-[1.1]">근무지배정</h1>
-          <p className="text-[21px] font-normal text-ink-muted-48 max-w-[640px]">
+          <p className="text-[21px] font-normal text-muted-foreground max-w-[640px]">
             날짜, 근무지, 이름으로 배정 현황을 확인하고 필요하면 수정합니다.
           </p>
         </div>
@@ -153,16 +156,16 @@ export default function AssignmentManagementClient() {
 
       <section
         aria-label="배정 검색"
-        className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50"
+        className="bg-muted/40 rounded-xl p-[32px] border border-border/50"
       >
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="grid gap-4 flex-1 md:grid-cols-3">
             <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-date-search">
+              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="assignment-date-search">
                 날짜
               </label>
-              <input
-                className="field"
+              <Input
+                className="w-full"
                 id="assignment-date-search"
                 type="date"
                 value={dateQuery}
@@ -170,29 +173,29 @@ export default function AssignmentManagementClient() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-worksite-search">
+              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="assignment-worksite-search">
                 근무지
               </label>
-              <select
-                className="field"
+              <NativeSelect
+                className="w-full"
                 id="assignment-worksite-search"
                 value={worksiteQuery}
                 onChange={(event) => setWorksiteQuery(event.target.value)}
               >
-                <option value="">전체</option>
+                <NativeSelectOption value="">전체</NativeSelectOption>
                 {worksiteOptions.map((worksite) => (
-                  <option key={worksite} value={worksite}>
+                  <NativeSelectOption key={worksite} value={worksite}>
                     {worksite}
-                  </option>
+                  </NativeSelectOption>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="assignment-name-search">
+              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="assignment-name-search">
                 이름
               </label>
-              <input
-                className="field"
+              <Input
+                className="w-full"
                 id="assignment-name-search"
                 value={nameQuery}
                 onChange={(event) => setNameQuery(event.target.value)}
@@ -202,7 +205,7 @@ export default function AssignmentManagementClient() {
           </div>
 
           <Link
-            className="button-primary w-full text-center md:w-auto gap-2"
+            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2"
             href="/manager/employee/assignments/new"
           >
             <span>배정등록</span>
@@ -213,9 +216,9 @@ export default function AssignmentManagementClient() {
 
       <section
         aria-label="배정 목록"
-        className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50"
+        className="bg-muted/40 rounded-xl p-[32px] border border-border/50"
       >
-        <div className="flex flex-wrap items-center justify-between gap-3 text-[14px] text-ink-muted-48">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-[14px] text-muted-foreground">
           <span>전체 배정 {assignments.length}</span>
           <span>조회 결과 {filteredAssignments.length}</span>
         </div>
@@ -223,12 +226,12 @@ export default function AssignmentManagementClient() {
         {loading ? (
           <ManagerLoadingMessage className="mt-6" />
         ) : error ? (
-          <p className="mt-6 text-[16px] text-status-warn">{error}</p>
+          <p className="mt-6 text-[16px] text-destructive">{error}</p>
         ) : (
-          <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-[16px] border border-hairline bg-canvas">
-            <table className="apple-table">
-              <thead>
-                <tr>
+          <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow>
                   <SortableHeader
                     sortKey="date"
                     currentSortKey={sortKey}
@@ -256,21 +259,21 @@ export default function AssignmentManagementClient() {
                   >
                     이름
                   </SortableHeader>
-                </tr>
-              </thead>
-              <tbody>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {sortedAssignments.length === 0 ? (
-                  <tr>
-                    <td data-responsive-empty colSpan={3} className="p-8 text-center text-ink-muted-48 italic">
+                  <TableRow>
+                    <TableCell data-responsive-empty colSpan={3} className="p-8 text-center text-muted-foreground italic">
                       조회 결과가 없습니다.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   sortedAssignments.map((assignment) => (
-                    <tr
+                    <TableRow
                       key={assignment.id}
                       aria-label={assignment.employee_name}
-                      className="cursor-pointer hover:bg-canvas-parchment transition-colors"
+                      className="cursor-pointer hover:bg-muted/40 transition-colors"
                       onClick={() => openEditPage(assignment.id)}
                       onKeyDown={(event) => {
                         if (event.key === "Enter" || event.key === " ") {
@@ -281,14 +284,14 @@ export default function AssignmentManagementClient() {
                       role="link"
                       tabIndex={0}
                     >
-                      <td data-label="날짜" className="font-semibold">{formatPeriod(assignment)}</td>
-                      <td data-label="근무지">{assignment.worksite_name}</td>
-                      <td data-label="이름" className="text-ink-muted-48">{assignment.employee_name}</td>
-                    </tr>
+                      <TableCell data-label="날짜" className="font-semibold">{formatPeriod(assignment)}</TableCell>
+                      <TableCell data-label="근무지">{assignment.worksite_name}</TableCell>
+                      <TableCell data-label="이름" className="text-muted-foreground">{assignment.employee_name}</TableCell>
+                    </TableRow>
                   ))
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         )}
       </section>

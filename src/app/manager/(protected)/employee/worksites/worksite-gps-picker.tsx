@@ -1,5 +1,6 @@
 "use client";
 
+import { Input } from "@/components/ui/input";
 import { useEffect, useRef, useState } from "react";
 import { formatGpsInfo, parseGpsInfo, type GpsInfo } from "@/lib/gps";
 
@@ -322,18 +323,18 @@ export default function WorksiteGpsPicker({ address, value, onChange, hideInput 
     <div className="space-y-4">
       <div
         ref={mapElementRef}
-        className="h-[360px] w-full overflow-hidden rounded-[16px] border border-hairline bg-canvas"
+        className="h-[360px] w-full overflow-hidden rounded-lg border border-border bg-background"
         data-test-id="worksite-map"
         data-testid="worksite-map"
       />
 
       {!hideInput ? (
         <div className="space-y-2">
-          <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="worksite-gps-info">
+          <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="worksite-gps-info">
             GPS정보
           </label>
-          <input
-            className="field"
+          <Input
+            className="w-full"
             id="worksite-gps-info"
             inputMode="decimal"
             placeholder="37.123456, 127.123456"
@@ -341,7 +342,7 @@ export default function WorksiteGpsPicker({ address, value, onChange, hideInput 
             value={inputValue}
             onChange={(event) => handleGpsInputChange(event.target.value)}
           />
-          <p className="text-[13px] text-ink-muted-48">
+          <p className="text-[13px] text-muted-foreground">
             {value ? `선택한 GPS정보: ${formatGpsInfo(value)}` : status || "지도에서 실제 근무지를 클릭하거나 GPS정보를 입력하세요."}
           </p>
         </div>

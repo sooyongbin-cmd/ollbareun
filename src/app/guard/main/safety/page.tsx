@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import LoadingBoard from "@/components/loading-board";
 import { readStoredGuardSession } from "../../guard-session-storage";
@@ -420,43 +422,43 @@ export default function GuardSafetyEducationPage() {
       <section className="space-y-[24px]">
         <header>
           <h1 className="text-[40px] font-semibold leading-[1.1]">안전교육</h1>
-          <p className="text-[21px] font-normal text-ink-muted-48 mt-2 max-w-[640px]">
+          <p className="text-[21px] font-normal text-muted-foreground mt-2 max-w-[640px]">
             등록된 안전교육 자료의 제목과 유튜브 링크를 확인합니다.
           </p>
         </header>
 
         <section
           aria-label="안전교육 목록"
-          className="bg-canvas-parchment rounded-[18px] p-[16px] border border-hairline/50"
+          className="bg-muted/40 rounded-xl p-[16px] border border-border/50"
         >
-          <div className="flex flex-wrap items-center justify-between gap-3 text-[14px] text-ink-muted-48">
+          <div className="flex flex-wrap items-center justify-between gap-3 text-[14px] text-muted-foreground">
             <span>전체 안전교육 {sortedResources.length}</span>
           </div>
 
           {loading ? (
             <LoadingBoard className="mt-6" />
           ) : listError ? (
-            <p className="mt-6 text-[16px] text-status-warn">{listError}</p>
+            <p className="mt-6 text-[16px] text-destructive">{listError}</p>
           ) : (
-            <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-[16px] border border-hairline bg-canvas">
-              <table className="apple-table" data-responsive-single-column>
-                <thead>
-                  <tr>
-                    <th className="text-left">제목</th>
-                  </tr>
-                </thead>
-                <tbody>
+            <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
+              <Table className="w-full" data-responsive-single-column>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-left">제목</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {sortedResources.length === 0 ? (
-                    <tr>
-                      <td data-responsive-empty colSpan={1} className="p-8 text-center text-ink-muted-48 italic">
+                    <TableRow>
+                      <TableCell data-responsive-empty colSpan={1} className="p-8 text-center text-muted-foreground italic">
                         이수하지 않은 안전교육 자료가 없습니다.
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ) : (
                     sortedResources.map((resource) => (
-                      <tr key={resource.id} className="hover:bg-canvas-parchment transition-colors">
-                        <td data-label="제목" className="font-semibold">
-                          <button
+                      <TableRow key={resource.id} className="hover:bg-muted/40 transition-colors">
+                        <TableCell data-label="제목" className="font-semibold">
+                          <Button
                             className="text-left text-primary hover:underline"
                             type="button"
                             onClick={() => {
@@ -466,27 +468,27 @@ export default function GuardSafetyEducationPage() {
                             }}
                           >
                             {resource.title}
-                          </button>
-                        </td>
-                      </tr>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
                     ))
                   )}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           )}
         </section>
 
         <section
           aria-label="안전교육 영상"
-          className="bg-canvas-parchment rounded-[18px] p-0 border border-hairline/50"
+          className="bg-muted/40 rounded-xl p-0 border border-border/50"
         >
-          <div className="rounded-[16px] border border-hairline bg-canvas p-0">
+          <div className="rounded-lg border border-border bg-background p-0">
             {selectedResource && selectedEmbedUrl ? (
               <iframe
                 key={selectedResource.id}
                 ref={iframeRef}
-                className="aspect-video w-full rounded-[12px] border border-hairline bg-surface-black"
+                className="aspect-video w-full rounded-[12px] border border-border bg-black"
                 src={selectedEmbedUrl}
                 title={selectedResource.title}
                 onLoad={() => setLoadedIframeResourceId(selectedResource.id)}
@@ -494,14 +496,14 @@ export default function GuardSafetyEducationPage() {
                 allowFullScreen
               />
             ) : (
-              <p className="p-8 text-center text-ink-muted-48 italic">
+              <p className="p-8 text-center text-muted-foreground italic">
                 재생할 안전교육 링크를 선택하세요.
               </p>
             )}
           </div>
 
           {message ? <p className="mt-4 text-[16px] text-primary">{message}</p> : null}
-          {completionError ? <p className="mt-4 text-[16px] text-status-warn">{completionError}</p> : null}
+          {completionError ? <p className="mt-4 text-[16px] text-destructive">{completionError}</p> : null}
         </section>
       </section>
     </div>

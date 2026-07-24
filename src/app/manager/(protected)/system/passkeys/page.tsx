@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useEffect, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 
@@ -115,87 +117,87 @@ export default function ManagerPasskeyRequestsPage() {
       <header>
         <div className="space-y-3">
           <h1 className="text-[40px] font-semibold leading-[1.1]">패스키 요청 관리</h1>
-          <p className="max-w-[640px] text-[21px] font-normal text-ink-muted-48">
+          <p className="max-w-[640px] text-[21px] font-normal text-muted-foreground">
             경비원이 요청한 패스키 등록을 승인하거나 거절합니다.
           </p>
         </div>
       </header>
 
-      {error ? <p className="status-warn">{error}</p> : null}
+      {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p> : null}
 
-      <section className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[32px]">
+      <section className="rounded-xl border border-border/50 bg-muted/40 p-[32px]">
         {loading ? (
           <ManagerLoadingMessage />
         ) : (
-          <div className="min-w-0 overflow-x-auto overflow-y-hidden rounded-[16px] border border-hairline bg-canvas">
-            <table className="apple-table">
-              <thead>
-                <tr>
-                  <th className="text-left">경비원</th>
-                  <th className="text-left">연락처</th>
-                  <th className="text-left">요청일</th>
-                  <th className="text-left">상태</th>
-                  <th className="text-right">작업</th>
-                </tr>
-              </thead>
-              <tbody>
+          <div className="min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-left">경비원</TableHead>
+                  <TableHead className="text-left">연락처</TableHead>
+                  <TableHead className="text-left">요청일</TableHead>
+                  <TableHead className="text-left">상태</TableHead>
+                  <TableHead className="text-right">작업</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {requests.length === 0 ? (
-                  <tr>
-                    <td data-responsive-empty colSpan={5} className="p-8 text-center text-ink-muted-48 italic">
+                  <TableRow>
+                    <TableCell data-responsive-empty colSpan={5} className="p-8 text-center text-muted-foreground italic">
                       패스키 요청 목록이 없습니다.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   requests.map((request) => (
-                    <tr key={request.id}>
-                      <td data-label="경비원" className="font-semibold">
+                    <TableRow key={request.id}>
+                      <TableCell data-label="경비원" className="font-semibold">
                         <div>
                           {request.employeeName}
-                          {request.employeeRetired ? <span className="ml-2 text-[12px] text-status-warn">퇴직</span> : null}
+                          {request.employeeRetired ? <span className="ml-2 text-[12px] text-destructive">퇴직</span> : null}
                         </div>
-                      </td>
-                      <td data-label="연락처">{request.employeePhone}</td>
-                      <td data-label="요청일">{formatDateTime(request.requestedAt)}</td>
-                      <td data-label="상태">{getStatusLabel(request.status)}</td>
-                      <td data-label="작업" className="text-right">
+                      </TableCell>
+                      <TableCell data-label="연락처">{request.employeePhone}</TableCell>
+                      <TableCell data-label="요청일">{formatDateTime(request.requestedAt)}</TableCell>
+                      <TableCell data-label="상태">{getStatusLabel(request.status)}</TableCell>
+                      <TableCell data-label="작업" className="text-right">
                         <div className="inline-flex gap-2">
                           {request.status === "pending" ? (
                             <>
-                              <button
-                                className="button-primary px-3 py-2 text-[13px]"
+                              <Button
+                                className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 px-3 py-2 text-[13px]"
                                 disabled={actionLoadingId === request.id}
                                 onClick={() => void runAction(request.id, "approve")}
                                 type="button"
                               >
                                 승인
-                              </button>
-                              <button
-                                className="button-secondary px-3 py-2 text-[13px]"
+                              </Button>
+                              <Button
+                                className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 px-3 py-2 text-[13px]"
                                 disabled={actionLoadingId === request.id}
                                 onClick={() => void runAction(request.id, "reject")}
                                 type="button"
                               >
                                 거절
-                              </button>
+                              </Button>
                             </>
                           ) : null}
                           {request.status === "registered" || request.status === "approved" ? (
-                            <button
-                              className="button-secondary px-3 py-2 text-[13px]"
+                            <Button
+                              className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 px-3 py-2 text-[13px]"
                               disabled={actionLoadingId === request.id}
                               onClick={() => void runAction(request.id, "revoke")}
                               type="button"
                             >
                               해제
-                            </button>
+                            </Button>
                           ) : null}
                         </div>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         )}
       </section>

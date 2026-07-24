@@ -1,5 +1,8 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type { GpsInfo } from "@/lib/gps";
@@ -146,40 +149,40 @@ export default function InspectionSiteNewPage() {
     <section className="space-y-[24px]">
       <header>
         <h1 className="text-[40px] font-semibold leading-[1.1]">현장등록</h1>
-        <p className="text-[21px] font-normal text-ink-muted-48 mt-2 max-w-[640px]">
+        <p className="text-[21px] font-normal text-muted-foreground mt-2 max-w-[640px]">
           근무지에 속한 현장을 등록하고 점검 QR을 생성합니다.
         </p>
       </header>
 
-      <section className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50">
+      <section className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="inspection-worksite">
+              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="inspection-worksite">
                 근무지
               </label>
-              <select
-                className="field"
+              <NativeSelect
+                className="w-full"
                 id="inspection-worksite"
                 value={worksiteId}
                 onChange={(event) => setWorksiteId(event.target.value)}
                 required
               >
-                {worksites.length === 0 ? <option value="">근무지 없음</option> : null}
+                {worksites.length === 0 ? <NativeSelectOption value="">근무지 없음</NativeSelectOption> : null}
                 {worksites.map((worksite) => (
-                  <option key={worksite.id} value={worksite.id}>
+                  <NativeSelectOption key={worksite.id} value={worksite.id}>
                     {worksite.name}
-                  </option>
+                  </NativeSelectOption>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
 
             <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="inspection-site-name">
+              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="inspection-site-name">
                 현장명
               </label>
-              <input
-                className="field"
+              <Input
+                className="w-full"
                 id="inspection-site-name"
                 name="name"
                 value={siteName}
@@ -190,21 +193,21 @@ export default function InspectionSiteNewPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="inspection-address">
+              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="inspection-address">
                 현장주소
               </label>
               <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_132px]">
-                <input
-                  className="field"
+                <Input
+                  className="w-full"
                   id="inspection-address"
                   value={address}
                   placeholder="주소 검색으로 선택하세요."
                   readOnly
                   required
                 />
-                <button className="button-secondary w-full whitespace-nowrap md:w-full" type="button" onClick={openAddressPopup}>
+                <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full whitespace-nowrap md:w-full" type="button" onClick={openAddressPopup}>
                   주소 검색
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -212,18 +215,18 @@ export default function InspectionSiteNewPage() {
           </div>
 
           <div className="flex flex-col gap-3 md:flex-row">
-            <button
+            <Button
               aria-label="저장"
-              className="button-primary w-full justify-center md:w-auto"
+              className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full justify-center md:w-auto"
               disabled={saving || !selectedWorksite}
               type="submit"
             >
               <SaveIcon size={20} />
-            </button>
+            </Button>
           </div>
         </form>
 
-        {error ? <p className="status-warn mt-6 text-center">{error}</p> : null}
+        {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mt-6 text-center">{error}</p> : null}
       </section>
 
       <AlertModal

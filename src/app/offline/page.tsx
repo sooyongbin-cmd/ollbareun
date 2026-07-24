@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 
 export default function OfflinePage() {
@@ -10,10 +11,10 @@ export default function OfflinePage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4 bg-canvas font-apple text-center">
-      <div className="max-w-[400px] w-full bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50 shadow-sm">
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 bg-background font-sans text-center">
+      <div className="max-w-[400px] w-full bg-muted/40 rounded-xl p-[32px] border border-border/50 shadow-sm">
         <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 rounded-full bg-status-warn-bg flex items-center justify-center text-status-warn-text">
+          <div className="w-16 h-16 rounded-full bg-destructive-bg flex items-center justify-center text-destructive-text">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -32,20 +33,20 @@ export default function OfflinePage() {
           </div>
         </div>
 
-        <h1 className="text-[20px] font-semibold text-ink mb-2">
+        <h1 className="text-[20px] font-semibold text-foreground mb-2">
           인터넷 연결이 끊어졌습니다
         </h1>
-        <p className="text-[14px] text-ink-muted-48 mb-6 leading-relaxed">
+        <p className="text-[14px] text-muted-foreground mb-6 leading-relaxed">
           네트워크 연결 상태를 확인하고 아래의 {"'다시 시도'"} 버튼을 눌러주세요.
         </p>
 
-        <button
+        <Button
           onClick={handleRetry}
-          className="button-primary w-full flex items-center justify-center gap-2 py-3 cursor-pointer"
+          className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full flex items-center justify-center gap-2 py-3 cursor-pointer"
         >
           <RefreshCw className="w-4 h-4" />
           다시 시도
-        </button>
+        </Button>
       </div>
     </div>
   );

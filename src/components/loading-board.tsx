@@ -1,4 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
+import { LoaderCircle } from "lucide-react";
+
+import { cn } from "@/lib/utils";
 
 type LoadingBoardProps = {
   className?: string;
@@ -6,20 +8,17 @@ type LoadingBoardProps = {
 };
 
 export default function LoadingBoard({
-  className = "",
+  className,
   label = "자료를 불러오는 중입니다.",
 }: LoadingBoardProps) {
-  const hasCustomSize = /\b(?:h-|min-h-|max-h-|w-|min-w-|max-w-)/.test(className);
-  const sizeClassName = hasCustomSize ? "" : "min-h-[64px] min-w-[64px]";
-
   return (
     <div
       aria-label={label}
       aria-live="polite"
-      className={`inline-flex items-center justify-center ${sizeClassName} ${className}`.trim()}
+      className={cn("inline-flex min-h-16 min-w-16 items-center justify-center text-muted-foreground", className)}
       role="status"
     >
-      <img alt="" aria-hidden="true" className="h-full max-h-16 min-h-6 w-auto object-contain" src="/loading.gif" />
+      <LoaderCircle aria-hidden="true" className="size-7 animate-spin" />
       <span className="sr-only">{label}</span>
     </div>
   );

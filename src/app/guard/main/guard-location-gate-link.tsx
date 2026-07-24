@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import AlertModal from "@/components/modals/alert-modal";
@@ -84,14 +85,14 @@ export default function GuardLocationGateLink({ children, href, hasAssignedWorks
 
   return (
     <>
-      <button
-        className="button-secondary w-full justify-center"
+      <Button
+        className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full justify-center"
         disabled={isChecking}
         onClick={handleClick}
         type="button"
       >
         {children}
-      </button>
+      </Button>
       <AlertModal
         isOpen={blockedState !== null}
         onClose={() => setBlockedState(null)}

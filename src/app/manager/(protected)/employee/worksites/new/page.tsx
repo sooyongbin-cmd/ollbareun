@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import type { GpsInfo } from "@/lib/gps";
@@ -99,27 +101,27 @@ export default function WorksiteNewPage() {
     <section className="space-y-[24px]">
       <header>
         <h1 className="text-[40px] font-semibold leading-[1.1]">근무지등록</h1>
-        <p className="text-[21px] font-normal text-ink-muted-48 mt-2 max-w-[600px]">
+        <p className="text-[21px] font-normal text-muted-foreground mt-2 max-w-[600px]">
           근무지명, 주소, 실제 GPS정보, 허용 반경을 입력해 근무지를 등록합니다.
         </p>
       </header>
 
-      <section className="bg-canvas-parchment rounded-[18px] p-[32px] border border-hairline/50">
+      <section className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="worksite-name">
+              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="worksite-name">
                 근무지명
               </label>
-              <input className="field" id="worksite-name" name="name" placeholder="작업장 이름을 입력하세요." required />
+              <Input className="w-full" id="worksite-name" name="name" placeholder="작업장 이름을 입력하세요." required />
             </div>
             <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="worksite-address">
+              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="worksite-address">
                 근무지주소
               </label>
               <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_132px]">
-                <input
-                  className="field"
+                <Input
+                  className="w-full"
                   id="worksite-address"
                   name="address"
                   value={address}
@@ -127,31 +129,31 @@ export default function WorksiteNewPage() {
                   readOnly
                   required
                 />
-                <button className="button-secondary w-full whitespace-nowrap md:w-full" type="button" onClick={openAddressPopup}>
+                <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full whitespace-nowrap md:w-full" type="button" onClick={openAddressPopup}>
                   주소 검색
-                </button>
+                </Button>
               </div>
             </div>
             <WorksiteGpsPicker address={address} value={gpsInfo} onChange={setGpsInfo} />
             <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="worksite-radius">
+              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="worksite-radius">
                 허용반경(m)
               </label>
-              <input className="field" id="worksite-radius" name="radiusMeters" placeholder="100" required />
+              <Input className="w-full" id="worksite-radius" name="radiusMeters" placeholder="100" required />
             </div>
           </div>
 
-          <button
+          <Button
             aria-label="저장"
-            className="button-primary w-full md:w-auto"
+            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full md:w-auto"
             data-testid="worksite-submit"
             type="submit"
           >
             <SaveIcon size={20} />
-          </button>
+          </Button>
         </form>
 
-        {error ? <p className="status-warn mt-6 text-center">{error}</p> : null}
+        {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mt-6 text-center">{error}</p> : null}
       </section>
 
       <AlertModal

@@ -45,6 +45,16 @@ describe("guard main navigation", () => {
     push.mockReset();
     replace.mockReset();
     vi.restoreAllMocks();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.includes("/api/system/configs/USE_QR_CODE")) {
+          return Response.json({ config: { system_code: "USE_QR_CODE", content: "Y" } });
+        }
+        return Response.json({});
+      }),
+    );
     document.head.innerHTML = "";
     delete window.kakao;
     Object.defineProperty(navigator, "permissions", {
@@ -92,7 +102,7 @@ describe("guard main navigation", () => {
     expect(screen.getByRole("link", { name: "현장 근로자" })).toHaveAttribute("href", "/guard/main");
   });
 
-  it("keeps the main page as an entry point to attendance", () => {
+  it("keeps the main page as an entry point to attendance", async () => {
     window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
 
     render(<GuardMainPage />);
@@ -109,7 +119,7 @@ describe("guard main navigation", () => {
       "text-primary-foreground",
     );
     expect(screen.getByRole("link", { name: "교육 받기" })).toHaveAttribute("href", "/guard/main/safety");
-    expect(screen.getByRole("button", { name: "순찰(QR코드)" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "순찰(QR코드)" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "순찰(NFC태그)" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "특이사항" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "근무지확인" })).not.toBeInTheDocument();
@@ -176,7 +186,7 @@ describe("guard main navigation", () => {
 
     render(<GuardMainPage />);
 
-    await user.click(screen.getByRole("button", { name: "순찰(QR코드)" }));
+    await user.click(await screen.findByRole("button", { name: "순찰(QR코드)" }));
 
     await waitFor(() => {
       expect(push).toHaveBeenCalledWith("/guard/main/inspection");
@@ -278,7 +288,7 @@ describe("guard main navigation", () => {
 
     const worksiteRequiredButtons = [
       screen.getAllByRole("button", { name: "출근하기" })[0],
-      screen.getByRole("button", { name: "순찰(QR코드)" }),
+      await screen.findByRole("button", { name: "순찰(QR코드)" }),
       screen.getByRole("button", { name: "순찰(NFC태그)" }),
       screen.getByRole("button", { name: "특이사항" }),
     ];
@@ -352,7 +362,7 @@ describe("guard main navigation", () => {
 
     render(<GuardMainPage />);
 
-    await user.click(screen.getByRole("button", { name: "순찰(QR코드)" }));
+    await user.click(await screen.findByRole("button", { name: "순찰(QR코드)" }));
 
     expect(getCurrentPosition).toHaveBeenCalled();
     expect(push).not.toHaveBeenCalledWith("/guard/main/inspection");
@@ -710,7 +720,7 @@ describe("guard main navigation", () => {
     expect(document.getElementById("attendance-auth-required-section")).toBeInTheDocument();
   });
 
-  it("shows QR and NFC 청소구역 buttons for role 미화원", () => {
+  it("shows QR and NFC 청소구역 buttons for role 미화원", async () => {
     const cleanerSession = {
       ...guardSession,
       employee: {
@@ -722,7 +732,7 @@ describe("guard main navigation", () => {
 
     render(<GuardMainPage />);
 
-    expect(screen.getByRole("button", { name: "청소구역(QR코드)" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "청소구역(QR코드)" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "청소구역(NFC태그)" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "순찰(QR코드)" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "순찰(NFC태그)" })).not.toBeInTheDocument();
@@ -747,4 +757,43 @@ describe("guard main navigation", () => {
     expect(screen.queryByRole("button", { name: "청소구역(NFC태그)" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "현장점검" })).not.toBeInTheDocument();
   });
+
+  it("hides QR code patrol button by default when USE_QR_CODE config is not Y", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.includes("/api/system/configs/USE_QR_CODE")) {
+          return Response.json({ config: { system_code: "USE_QR_CODE", content: "N" } });
+        }
+        return Response.json({});
+      }),
+    );
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
+
+    render(<GuardMainPage />);
+
+    expect(screen.queryByRole("button", { name: "순찰(QR코드)" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "순찰(NFC태그)" })).toBeInTheDocument();
+  });
+
+  it("shows QR code patrol button when USE_QR_CODE config is Y", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.includes("/api/system/configs/USE_QR_CODE")) {
+          return Response.json({ config: { system_code: "USE_QR_CODE", content: "Y" } });
+        }
+        return Response.json({});
+      }),
+    );
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
+
+    render(<GuardMainPage />);
+
+    expect(await screen.findByRole("button", { name: "순찰(QR코드)" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "순찰(NFC태그)" })).toBeInTheDocument();
+  });
 });
+

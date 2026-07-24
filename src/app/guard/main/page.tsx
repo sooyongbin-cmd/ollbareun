@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { useMemo, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import GuardWorksiteSection from "./guard-worksite-section";
 import GuardAttendanceSection from "./guard-attendance-section";
 import GuardSafetySection from "./guard-safety-section";
@@ -32,6 +32,23 @@ function subscribeToSessionChange(onStoreChange: () => void) {
 }
 
 export default function GuardMainPage() {
+  const [useQrCode, setUseQrCode] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    fetch("/api/system/configs/USE_QR_CODE")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (isMounted && data?.config?.content?.trim() === "Y") {
+          setUseQrCode(true);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const storedSession = useSyncExternalStore(
     subscribeToSessionChange,
     readGuardSessionSnapshot,
@@ -83,9 +100,11 @@ export default function GuardMainPage() {
             </GuardLocationGateLink>
             {inspectionBaseLabel !== null && (
               <>
-                <GuardLocationGateLink href="/guard/main/inspection" hasAssignedWorksite={hasAssignedWorksite}>
-                  {inspectionBaseLabel}(QR코드)
-                </GuardLocationGateLink>
+                {useQrCode && (
+                  <GuardLocationGateLink href="/guard/main/inspection" hasAssignedWorksite={hasAssignedWorksite}>
+                    {inspectionBaseLabel}(QR코드)
+                  </GuardLocationGateLink>
+                )}
                 <GuardLocationGateLink href="/guard/main/inspection-nfc" hasAssignedWorksite={hasAssignedWorksite}>
                   {inspectionBaseLabel}(NFC태그)
                 </GuardLocationGateLink>

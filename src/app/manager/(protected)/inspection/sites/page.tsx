@@ -81,7 +81,7 @@ export default function InspectionSitesPage() {
       <header>
         <h1 className="text-[40px] font-semibold leading-[1.1]">현장관리</h1>
         <p className="mt-2 max-w-[640px] text-[21px] font-normal text-muted-foreground">
-          근무지별 현장을 등록하고 QR 점검 위치를 관리합니다.
+          근무지별 현장을 등록하고 점검 위치를 관리합니다.
         </p>
       </header>
 

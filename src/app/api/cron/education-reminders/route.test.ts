@@ -20,6 +20,8 @@ describe("GET /api/cron/education-reminders", () => {
       unregisteredEmployees: [],
       unregisteredEmployeeIds: [],
       failedEmployees: [],
+      dayOffExcludedCount: 0,
+      dayOffExcludedEmployeeIds: [],
     });
   });
 
@@ -32,7 +34,7 @@ describe("GET /api/cron/education-reminders", () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({ success: true, successCount: 1 });
-    expect(sendEducationReminderNotifications).toHaveBeenCalledWith();
+    expect(sendEducationReminderNotifications).toHaveBeenCalledWith({ excludeDaysOff: true });
   });
 
   it("runs from the Supabase Edge Function with the shared cron secret", async () => {
@@ -44,7 +46,7 @@ describe("GET /api/cron/education-reminders", () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({ success: true, successCount: 1 });
-    expect(sendEducationReminderNotifications).toHaveBeenCalledWith();
+    expect(sendEducationReminderNotifications).toHaveBeenCalledWith({ excludeDaysOff: true });
   });
 
   it("rejects non-cron requests", async () => {

@@ -8,6 +8,8 @@ export type EducationReminderResult = {
   unregisteredEmployees: string[];
   unregisteredEmployeeIds: string[];
   failedEmployees: { employeeId: string; employeeName: string; reason: string }[];
+  dayOffExcludedCount: number;
+  dayOffExcludedEmployeeIds: string[];
 };
 
 type RequestEducationRemindersInput = {

@@ -14,6 +14,8 @@ describe("requestEducationReminders", () => {
         unregisteredEmployees: [],
         unregisteredEmployeeIds: [],
         failedEmployees: [],
+        dayOffExcludedCount: 0,
+        dayOffExcludedEmployeeIds: [],
       }), { status: 200, headers: { "Content-Type": "application/json" } }),
     );
 

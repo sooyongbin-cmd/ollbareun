@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const result = await sendEducationReminderNotifications();
+    const result = await sendEducationReminderNotifications({ excludeDaysOff: true });
     return Response.json(result);
   } catch (error) {
     return Response.json(

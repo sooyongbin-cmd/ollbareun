@@ -147,3 +147,39 @@ export async function getAssignmentDayOffCounts() {
   }
   return counts;
 }
+
+export async function listEmployeeIdsOffOnDate(dateInput: unknown) {
+  const dayOffDate = requireDayOffDate(dateInput);
+  const supabase = getSupabaseAdmin();
+  const { data: daysOff, error: daysOffError } = await supabase
+    .from("work_assignment_days_off")
+    .select("work_assignment_id")
+    .eq("day_off_date", dayOffDate);
+
+  throwIfError(daysOffError);
+
+  const assignmentIds = [
+    ...new Set(
+      ((daysOff ?? []) as Pick<AssignmentDayOffRow, "work_assignment_id">[])
+        .map((row) => row.work_assignment_id)
+        .filter(Boolean),
+    ),
+  ];
+  if (assignmentIds.length === 0) {
+    return [];
+  }
+
+  const { data: assignments, error: assignmentsError } = await supabase
+    .from("work_assignments")
+    .select("employee_id")
+    .in("id", assignmentIds);
+
+  throwIfError(assignmentsError);
+  return [
+    ...new Set(
+      ((assignments ?? []) as { employee_id: string }[])
+        .map((assignment) => assignment.employee_id)
+        .filter(Boolean),
+    ),
+  ];
+}

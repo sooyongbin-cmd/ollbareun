@@ -2,6 +2,7 @@ import webpush from "web-push";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getSupabase } from "@/lib/supabase";
 import { sendEducationReminderNotifications } from "./education-reminder-notifications";
+import { listEmployeeIdsOffOnDate } from "./assignment-days-off";
 
 vi.mock("web-push", () => ({
   default: {
@@ -12,6 +13,10 @@ vi.mock("web-push", () => ({
 
 vi.mock("@/lib/supabase", () => ({
   getSupabase: vi.fn(),
+}));
+
+vi.mock("./assignment-days-off", () => ({
+  listEmployeeIdsOffOnDate: vi.fn(),
 }));
 
 function createSelectResult(data: unknown[]) {
@@ -25,6 +30,7 @@ describe("sendEducationReminderNotifications", () => {
     vi.clearAllMocks();
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY = "public-key";
     process.env.VAPID_PRIVATE_KEY = "private-key";
+    vi.mocked(listEmployeeIdsOffOnDate).mockResolvedValue([]);
 
     const from = vi.fn((table: string) => {
       if (table === "employees") {
@@ -74,6 +80,7 @@ describe("sendEducationReminderNotifications", () => {
     expect(result.successCount).toBe(1);
     expect(result.notifiedEmployeeIds).toEqual(["employee-1"]);
     expect(result.unregisteredEmployeeIds).toEqual([]);
+    expect(result.dayOffExcludedCount).toBe(0);
     expect(webpush.sendNotification).toHaveBeenCalledTimes(1);
 
     const payload = JSON.parse(vi.mocked(webpush.sendNotification).mock.calls[0][1] as string);
@@ -92,5 +99,26 @@ describe("sendEducationReminderNotifications", () => {
 
     expect(result.successCount).toBe(0);
     expect(webpush.sendNotification).not.toHaveBeenCalled();
+  });
+
+  it("excludes employees who are off when invoked by the periodic process", async () => {
+    vi.mocked(listEmployeeIdsOffOnDate).mockResolvedValue(["employee-1"]);
+
+    const result = await sendEducationReminderNotifications({ excludeDaysOff: true });
+
+    expect(webpush.sendNotification).not.toHaveBeenCalled();
+    expect(result.dayOffExcludedCount).toBe(1);
+    expect(result.dayOffExcludedEmployeeIds).toEqual(["employee-1"]);
+    expect(result.notifiedEmployeeIds).toEqual([]);
+    expect(listEmployeeIdsOffOnDate).toHaveBeenCalledWith(expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/));
+  });
+
+  it("keeps manual targeted reminders independent from the day-off filter", async () => {
+    vi.mocked(listEmployeeIdsOffOnDate).mockResolvedValue(["employee-1"]);
+
+    await sendEducationReminderNotifications({ employeeIds: ["employee-1"] });
+
+    expect(webpush.sendNotification).toHaveBeenCalledTimes(1);
+    expect(listEmployeeIdsOffOnDate).not.toHaveBeenCalled();
   });
 });

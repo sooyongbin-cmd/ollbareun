@@ -1,5 +1,7 @@
 import webpush from "web-push";
 import { getSupabase } from "@/lib/supabase";
+import { listEmployeeIdsOffOnDate } from "@/lib/assignment-days-off";
+import { formatKstDate } from "@/lib/education-reminder-schedule";
 
 type EmployeeRow = {
   id: string;
@@ -34,10 +36,13 @@ export type EducationReminderResult = {
   unregisteredEmployees: string[];
   unregisteredEmployeeIds: string[];
   failedEmployees: { employeeId: string; employeeName: string; reason: string }[];
+  dayOffExcludedCount: number;
+  dayOffExcludedEmployeeIds: string[];
 };
 
 export type SendEducationReminderNotificationsInput = {
   employeeIds?: string[];
+  excludeDaysOff?: boolean;
 };
 
 const educationReminderUrl = "/guard/main/safety";
@@ -82,10 +87,11 @@ export async function sendEducationReminderNotifications(
   const hasEmployeeFilter = Array.isArray(input.employeeIds);
   const selectedEmployeeIds = new Set((input.employeeIds ?? []).filter(Boolean));
 
-  const [employeesResult, resourcesResult, completionsResult] = await Promise.all([
+  const [employeesResult, resourcesResult, completionsResult, dayOffEmployeeIds] = await Promise.all([
     supabase.from("employees").select("id, name, is_retired"),
     supabase.from("education_resources").select("id"),
     supabase.from("education_completions").select("employee_id, resource_id, is_completed"),
+    input.excludeDaysOff ? listEmployeeIdsOffOnDate(formatKstDate()) : Promise.resolve([]),
   ]);
 
   if (employeesResult.error) throw new Error(employeesResult.error.message);
@@ -95,6 +101,7 @@ export async function sendEducationReminderNotifications(
   const employees = (employeesResult.data ?? []) as EmployeeRow[];
   const resources = (resourcesResult.data ?? []) as EducationResourceRow[];
   const completions = (completionsResult.data ?? []) as EducationCompletionRow[];
+  const dayOffEmployeeIdSet = new Set(dayOffEmployeeIds);
 
   const totalResourceCount = resources.length;
   const completedCountByEmployeeId = new Map<string, number>();
@@ -107,7 +114,7 @@ export async function sendEducationReminderNotifications(
     }
   });
 
-  const targets = employees
+  const eligibleTargets = employees
     .filter((employee) => !employee.is_retired)
     .filter((employee) => !hasEmployeeFilter || selectedEmployeeIds.has(employee.id))
     .map((employee) => ({
@@ -116,6 +123,10 @@ export async function sendEducationReminderNotifications(
       uncompletedCount: Math.max(totalResourceCount - (completedCountByEmployeeId.get(employee.id) ?? 0), 0),
     }))
     .filter((target) => target.uncompletedCount >= 1);
+  const dayOffExcludedEmployeeIds = eligibleTargets
+    .filter((target) => dayOffEmployeeIdSet.has(target.employeeId))
+    .map((target) => target.employeeId);
+  const targets = eligibleTargets.filter((target) => !dayOffEmployeeIdSet.has(target.employeeId));
 
   const targetEmployeeIds = targets.map((target) => target.employeeId);
   let subscriptions: PushSubscriptionRow[] = [];
@@ -218,5 +229,7 @@ export async function sendEducationReminderNotifications(
     unregisteredEmployees,
     unregisteredEmployeeIds,
     failedEmployees,
+    dayOffExcludedCount: dayOffExcludedEmployeeIds.length,
+    dayOffExcludedEmployeeIds,
   };
 }

@@ -19,6 +19,8 @@ describe("POST /api/education/reminders/send", () => {
       unregisteredEmployees: [],
       unregisteredEmployeeIds: [],
       failedEmployees: [],
+      dayOffExcludedCount: 0,
+      dayOffExcludedEmployeeIds: [],
     });
   });
 

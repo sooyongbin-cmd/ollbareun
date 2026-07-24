@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getAssignmentDayOffCounts, requireDayOffDate } from "./assignment-days-off";
+import {
+  getAssignmentDayOffCounts,
+  listEmployeeIdsOffOnDate,
+  requireDayOffDate,
+} from "./assignment-days-off";
 import { getSupabaseAdmin } from "./supabase-admin";
 
 vi.mock("./supabase-admin", () => ({
@@ -43,5 +47,44 @@ describe("assignment days off validation", () => {
       ]),
     );
     expect(supabaseAdmin.from).toHaveBeenCalledWith("work_assignment_days_off");
+  });
+
+  it("finds employees whose assignments are off on the requested date", async () => {
+    const daysOffQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({
+        data: [
+          { work_assignment_id: "assign-1" },
+          { work_assignment_id: "assign-2" },
+        ],
+        error: null,
+      }),
+    };
+    const assignmentsQuery = {
+      select: vi.fn().mockReturnThis(),
+      in: vi.fn().mockResolvedValue({
+        data: [
+          { employee_id: "employee-1" },
+          { employee_id: "employee-1" },
+          { employee_id: "employee-2" },
+        ],
+        error: null,
+      }),
+    };
+    const supabaseAdmin = {
+      from: vi.fn((table: string) => {
+        if (table === "work_assignment_days_off") return daysOffQuery;
+        if (table === "work_assignments") return assignmentsQuery;
+        throw new Error(`Unexpected table: ${table}`);
+      }),
+    };
+    vi.mocked(getSupabaseAdmin).mockReturnValue(supabaseAdmin as never);
+
+    await expect(listEmployeeIdsOffOnDate("2026-07-24")).resolves.toEqual([
+      "employee-1",
+      "employee-2",
+    ]);
+    expect(daysOffQuery.eq).toHaveBeenCalledWith("day_off_date", "2026-07-24");
+    expect(assignmentsQuery.in).toHaveBeenCalledWith("id", ["assign-1", "assign-2"]);
   });
 });

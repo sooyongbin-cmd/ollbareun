@@ -1,0 +1,1 @@
+import{_ as e,o as i,c as t,a2 as l}from"./chunks/framework.BUS5y9ZA.js";const _=JSON.parse('{"title":"올바름 HRM 프로젝트 문서","description":"","frontmatter":{},"headers":[],"relativePath":"index.md","filePath":"index.md"}'),r={name:"index.md"};function n(o,a,s,h,d,m){return i(),t("div",null,[...a[0]||(a[0]=[l("",4)])])}const f=e(r,[["render",n]]);export{_ as __pageData,f as default};

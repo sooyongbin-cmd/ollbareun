@@ -12,3 +12,5 @@
 6. [테스트 계획서](./test-plan.html)
 7. [배포 가이드](./deployment-guide.html)
 8. [운영 매뉴얼](./operations-manual.html)
+9. [상단 헤더 아이콘 제작 및 적용 가이드](./header_icon_design.html)
+10. [로그인 세션 관리](./manage_session.html)

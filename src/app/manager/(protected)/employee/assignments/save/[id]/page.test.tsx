@@ -46,6 +46,22 @@ describe("assignment save page", () => {
           });
         }
 
+        if (!init && url.endsWith("/api/manager/assignments/assign-1/days-off")) {
+          return Response.json({
+            daysOff: [{ day_off_date: "2026-05-22" }],
+          });
+        }
+
+        if (init?.method === "PUT" && url.endsWith("/api/manager/assignments/assign-1/days-off/2026-05-23")) {
+          return Response.json({
+            dayOff: { day_off_date: "2026-05-23" },
+          });
+        }
+
+        if (init?.method === "DELETE" && url.endsWith("/api/manager/assignments/assign-1/days-off/2026-05-22")) {
+          return new Response(null, { status: 204 });
+        }
+
         if (init?.method === "PATCH" && url.endsWith("/api/assignments/assign-1")) {
           expect(JSON.parse(String(init.body))).toEqual({
             employeeId: "emp-2",
@@ -108,5 +124,27 @@ describe("assignment save page", () => {
     expect(await screen.findByText("자료가 삭제되었습니다.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "확인" }));
     expect(push).toHaveBeenCalledWith("/manager/employee/assignments");
+  });
+
+  it("shows the assignment calendar and immediately toggles days off", async () => {
+    const user = userEvent.setup();
+
+    render(<AssignmentSavePage />);
+
+    expect(await screen.findByRole("heading", { name: "휴무일 지정" })).toBeInTheDocument();
+    expect(screen.getByText("일")).toBeInTheDocument();
+    expect(screen.getByText("토")).toBeInTheDocument();
+
+    const existingDayOff = screen.getByRole("button", { name: "2026-05-22 휴무일 해제" });
+    expect(existingDayOff).toHaveAttribute("aria-pressed", "true");
+    await user.click(existingDayOff);
+    expect(existingDayOff).toHaveAttribute("aria-pressed", "false");
+
+    const newDayOff = screen.getByRole("button", { name: "2026-05-23 휴무일 지정" });
+    await user.click(newDayOff);
+    expect(screen.getByRole("button", { name: "2026-05-23 휴무일 해제" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
   });
 });

@@ -1,4 +1,5 @@
 import { getSupabase } from "./supabase";
+import { getSupabaseAdmin } from "./supabase-admin";
 
 type EmployeeInput = {
   id: string;
@@ -12,10 +13,16 @@ type WorksiteInput = {
 };
 
 type AssignmentInput = {
+  id?: string;
   employee_id: string;
   worksite_id: string;
   start_date: string;
   end_date: string;
+};
+
+type AssignmentDayOffInput = {
+  work_assignment_id: string;
+  day_off_date: string;
 };
 
 type AttendanceInput = {
@@ -70,6 +77,7 @@ type BuildManagerDashboardInput = {
   attendance: AttendanceInput[];
   educationResources: EducationResourceInput[];
   educationCompletions: EducationCompletionInput[];
+  daysOff?: AssignmentDayOffInput[];
 };
 
 function toKstDate(value: Date) {
@@ -126,8 +134,17 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
   );
   const allResourceIds = input.educationResources.map((resource) => resource.id);
   const completedByEmployee = completedResourceIdsByEmployee(input.educationCompletions);
+  const todayDaysOff = new Set(
+    (input.daysOff ?? [])
+      .filter((dayOff) => dayOff.day_off_date === today)
+      .map((dayOff) => dayOff.work_assignment_id),
+  );
   const currentAssignmentCounts = input.assignments
-    .filter((assignment) => inDateRange(today, assignment.start_date, assignment.end_date))
+    .filter(
+      (assignment) =>
+        inDateRange(today, assignment.start_date, assignment.end_date) &&
+        (!assignment.id || !todayDaysOff.has(assignment.id)),
+    )
     .reduce<Record<string, number>>((counts, assignment) => {
       counts[assignment.worksite_id] = (counts[assignment.worksite_id] ?? 0) + 1;
       return counts;
@@ -209,17 +226,22 @@ function throwIfError(error: { message?: string } | null | undefined) {
 
 export async function loadManagerDashboardData() {
   const supabase = getSupabase();
+  const supabaseAdmin = getSupabaseAdmin();
   const today = toKstDate(new Date());
   const startDate = addDays(today, -29);
 
-  const [employeesResult, worksitesResult, assignmentsResult, attendanceResult, resourcesResult, completionsResult] =
+  const [employeesResult, worksitesResult, assignmentsResult, attendanceResult, resourcesResult, completionsResult, daysOffResult] =
     await Promise.all([
       supabase.from("employees").select("id,name,is_retired"),
       supabase.from("worksites").select("id,name"),
-      supabase.from("work_assignments").select("employee_id,worksite_id,start_date,end_date").lte("start_date", today).gte("end_date", startDate),
+      supabase.from("work_assignments").select("id,employee_id,worksite_id,start_date,end_date").lte("start_date", today).gte("end_date", startDate),
       supabase.from("attendance_records").select("employee_id,worksite_id,work_date,clock_in_at,clock_out_at").gte("work_date", startDate).lte("work_date", today),
       supabase.from("education_resources").select("id"),
       supabase.from("education_completions").select("employee_id,resource_id,is_completed,completed_at"),
+      supabaseAdmin
+        .from("work_assignment_days_off")
+        .select("work_assignment_id,day_off_date")
+        .eq("day_off_date", today),
     ]);
 
   throwIfError(employeesResult.error);
@@ -228,6 +250,7 @@ export async function loadManagerDashboardData() {
   throwIfError(attendanceResult.error);
   throwIfError(resourcesResult.error);
   throwIfError(completionsResult.error);
+  throwIfError(daysOffResult.error);
 
   return buildManagerDashboardData({
     employees: employeesResult.data ?? [],
@@ -236,5 +259,6 @@ export async function loadManagerDashboardData() {
     attendance: attendanceResult.data ?? [],
     educationResources: resourcesResult.data ?? [],
     educationCompletions: completionsResult.data ?? [],
+    daysOff: daysOffResult.data ?? [],
   });
 }

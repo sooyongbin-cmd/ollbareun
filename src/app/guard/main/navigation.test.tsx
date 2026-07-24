@@ -45,6 +45,7 @@ describe("guard main navigation", () => {
     push.mockReset();
     replace.mockReset();
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: RequestInfo | URL) => {

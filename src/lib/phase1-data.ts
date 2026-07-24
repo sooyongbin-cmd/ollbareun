@@ -1,6 +1,7 @@
 import { canClockIn, canClockOut, canClockOutAtWorksite, normalizePhone } from "./phase1";
 import { requireGpsInfo, type GpsInfo } from "./gps";
 import { getSupabase } from "./supabase";
+import { isAssignmentDayOff } from "./assignment-days-off";
 
 export type EmployeeRow = {
   id: string;
@@ -51,7 +52,8 @@ export type AttendanceRow = {
 };
 
 export function todayDate() {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  return new Date(now.getTime() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
 function requireString(value: unknown, label: string) {
@@ -438,6 +440,7 @@ async function loadGuardSessionByEmployee(employee: EmployeeRow) {
     .maybeSingle();
 
   throwIfError(assignmentError);
+  const isDayOff = assignment ? await isAssignmentDayOff(assignment.id, todayDate()) : false;
 
   const [worksiteResult, attendance] = await Promise.all([
     assignment
@@ -453,6 +456,7 @@ async function loadGuardSessionByEmployee(employee: EmployeeRow) {
     assignment: assignment as AssignmentRow | null,
     worksite: worksiteResult.data as WorksiteRow | null,
     attendance,
+    isDayOff,
   };
 }
 
@@ -518,6 +522,23 @@ export async function clockIn(input: {
   const latitude = requireNumber(input.latitude, "위도");
   const longitude = requireNumber(input.longitude, "경도");
   const supabase = getSupabase();
+
+  const { data: assignment, error: assignmentError } = await supabase
+    .from("work_assignments")
+    .select("*")
+    .eq("employee_id", employee_id)
+    .eq("worksite_id", worksite_id)
+    .lte("start_date", todayDate())
+    .gte("end_date", todayDate())
+    .maybeSingle();
+
+  throwIfError(assignmentError);
+  if (!assignment) {
+    throw new Error("오늘 배정된 근무지가 없습니다.");
+  }
+  if (await isAssignmentDayOff(assignment.id, todayDate())) {
+    throw new Error("오늘은 휴무일로 지정되어 출근할 수 없습니다.");
+  }
 
   const { data: worksite, error: worksiteError } = await supabase
     .from("worksites")

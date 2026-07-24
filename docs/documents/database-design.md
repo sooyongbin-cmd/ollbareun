@@ -19,6 +19,7 @@
 
 ```text
 employees 1 ── N work_assignments N ── 1 worksites
+work_assignments 1 ── N work_assignment_days_off
 employees 1 ── N attendance_records N ── 1 worksites
 employees 1 ── N education_completions N ── 1 education_resources
 worksites 1 ── N inspection_sites 1 ── N inspection_logs
@@ -35,6 +36,7 @@ auth.users 1 ── 0..1 admin_users
 | `employees` | `id`, `name`, `phone`, `phone_normalized`, `role`, `is_retired`, `created_at` | 직원 기본정보 |
 | `worksites` | `id`, `name`, `address`, `gps_info`, `radius_meters`, `created_at` | 근무지와 출근 인정 범위 |
 | `work_assignments` | `id`, `employee_id`, `worksite_id`, `start_date`, `end_date` | 직원별 근무지 배정 기간 |
+| `work_assignment_days_off` | `work_assignment_id`, `day_off_date`, `created_at` | 배정별 휴무일 |
 | `attendance_records` | `employee_id`, `worksite_id`, `work_date`, 출퇴근 시각·좌표 | 일별 근태 기록 |
 | `education_resources` | `id`, `title`, `youtube_link`, `created_at` | 안전교육 자료 |
 | `education_completions` | `employee_id`, `resource_id`, `is_completed`, `completed_at` | 직원별 교육 이수 |
@@ -51,6 +53,7 @@ auth.users 1 ── 0..1 admin_users
 
 - 직원 직무는 경비원, 미화원, 파견으로 관리한다.
 - 근무 배정은 `start_date <= end_date`여야 하며 동일 직원의 기간이 겹치지 않아야 한다.
+- 배정 휴무일은 해당 배정기간 안의 날짜만 허용하며 배정별 날짜를 중복 저장하지 않는다.
 - `gps_info`는 위도와 경도를 가진 JSON 객체여야 한다.
 - 교육 이수 완료 시 `completed_at`이 존재하고, 미완료 시에는 비어 있어야 한다.
 - 푸시 구독은 동일 직원·엔드포인트 조합을 중복 저장하지 않는다.

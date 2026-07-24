@@ -1,14 +1,20 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { authenticateGuard, clockOut, createAssignment } from "./phase1-data";
+import { authenticateGuard, clockIn, clockOut, createAssignment } from "./phase1-data";
 import { getSupabase } from "./supabase";
+import { isAssignmentDayOff } from "./assignment-days-off";
 
 vi.mock("./supabase", () => ({
   getSupabase: vi.fn(),
 }));
 
+vi.mock("./assignment-days-off", () => ({
+  isAssignmentDayOff: vi.fn().mockResolvedValue(false),
+}));
+
 describe("guard authentication data rules", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.mocked(isAssignmentDayOff).mockResolvedValue(false);
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-05-26T09:00:00+09:00"));
   });
@@ -125,6 +131,7 @@ describe("guard authentication data rules", () => {
     expect(assignmentQuery.eq).toHaveBeenCalledWith("employee_id", "emp-1");
     expect(assignmentQuery.lte).toHaveBeenCalledWith("start_date", "2026-05-26");
     expect(assignmentQuery.gte).toHaveBeenCalledWith("end_date", "2026-05-26");
+    expect(isAssignmentDayOff).toHaveBeenCalledWith("assign-1", "2026-05-26");
   });
 
   it("loads an open previous-day attendance record into the guard session", async () => {
@@ -310,5 +317,38 @@ describe("guard authentication data rules", () => {
     expect(attendanceQuery.order).toHaveBeenCalledWith("clock_in_at", { ascending: false });
     expect(worksiteQuery.eq).toHaveBeenCalledWith("id", "work-1");
     expect(updateQuery.eq).toHaveBeenCalledWith("id", "attendance-1");
+  });
+
+  it("rejects clock-in when today is an assignment day off", async () => {
+    const assignmentQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({
+        data: {
+          id: "assign-1",
+          employee_id: "emp-1",
+          worksite_id: "work-1",
+          start_date: "2026-05-25",
+          end_date: "2026-05-27",
+        },
+        error: null,
+      }),
+    };
+    vi.mocked(getSupabase).mockReturnValue({
+      from: vi.fn().mockReturnValue(assignmentQuery),
+    } as never);
+    vi.mocked(isAssignmentDayOff).mockResolvedValue(true);
+
+    await expect(
+      clockIn({
+        employeeId: "emp-1",
+        worksiteId: "work-1",
+        latitude: 37.5,
+        longitude: 127,
+      }),
+    ).rejects.toThrow("오늘은 휴무일로 지정되어 출근할 수 없습니다.");
+    expect(isAssignmentDayOff).toHaveBeenCalledWith("assign-1", "2026-05-26");
   });
 });

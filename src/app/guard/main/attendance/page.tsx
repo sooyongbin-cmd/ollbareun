@@ -43,6 +43,7 @@ type AttendanceRow = {
 };
 
 type GuardSession = {
+  isDayOff?: boolean;
   employee: EmployeeRow;
   assignment: AssignmentRow | null;
   worksite: WorksiteRow | null;
@@ -112,7 +113,12 @@ export default function GuardAttendancePage() {
   const [longitude, setLongitude] = useState("");
 
   const clockInDecision =
-    guard?.worksite && latitude && longitude
+    guard?.isDayOff
+      ? {
+          allowed: false,
+          reason: "오늘은 휴무일로 지정되어 출근할 수 없습니다.",
+        }
+      : guard?.worksite && latitude && longitude
       ? canClockIn({
           worksite: asWorksite(guard.worksite),
           currentLatitude: Number(latitude),

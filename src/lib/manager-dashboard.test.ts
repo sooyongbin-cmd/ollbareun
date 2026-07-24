@@ -111,4 +111,27 @@ describe("manager dashboard data", () => {
       { worksiteId: "work-3", worksiteName: "배정없음", assignedCount: 0 },
     ]);
   });
+
+  it("excludes today's days off from worksite assignment totals", () => {
+    const data = buildManagerDashboardData({
+      now: new Date("2026-06-04T03:00:00.000Z"),
+      employees: [
+        { id: "emp-1", name: "김철수", is_retired: false },
+        { id: "emp-2", name: "이영희", is_retired: false },
+      ],
+      worksites: [{ id: "work-1", name: "문현동현장" }],
+      assignments: [
+        { id: "assign-1", employee_id: "emp-1", worksite_id: "work-1", start_date: "2026-01-01", end_date: "2026-12-31" },
+        { id: "assign-2", employee_id: "emp-2", worksite_id: "work-1", start_date: "2026-01-01", end_date: "2026-12-31" },
+      ],
+      attendance: [],
+      educationResources: [],
+      educationCompletions: [],
+      daysOff: [{ work_assignment_id: "assign-2", day_off_date: "2026-06-04" }],
+    });
+
+    expect(data.worksiteAssignments).toEqual([
+      { worksiteId: "work-1", worksiteName: "문현동현장", assignedCount: 1 },
+    ]);
+  });
 });

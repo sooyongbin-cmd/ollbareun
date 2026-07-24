@@ -10,6 +10,7 @@ import { SaveIcon } from "@/components/icons/save-icon";
 import { DeleteIcon } from "@/components/icons/delete-icon";
 import ConfirmModal from "@/components/modals/confirm-modal";
 import AlertModal from "@/components/modals/alert-modal";
+import AssignmentDaysOffCalendar from "./assignment-days-off-calendar";
 
 type Assignment = {
   id: string;
@@ -31,6 +32,10 @@ type Worksite = {
 
 type AssignmentResponse = {
   assignment: Assignment;
+};
+
+type DaysOffResponse = {
+  daysOff: { day_off_date: string }[];
 };
 
 type Bootstrap = {
@@ -68,6 +73,11 @@ export default function AssignmentSavePage() {
   const [worksiteId, setWorksiteId] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [savedStartDate, setSavedStartDate] = useState("");
+  const [savedEndDate, setSavedEndDate] = useState("");
+  const [currentMonth, setCurrentMonth] = useState("");
+  const [daysOff, setDaysOff] = useState<Set<string>>(new Set());
+  const [pendingDayOff, setPendingDayOff] = useState<string | null>(null);
   const [loading, setLoading] = useState(Boolean(assignmentId));
   const [error, setError] = useState("");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -79,9 +89,10 @@ export default function AssignmentSavePage() {
 
     async function loadData() {
       try {
-        const [assignmentPayload, bootstrapPayload] = await Promise.all([
+        const [assignmentPayload, bootstrapPayload, daysOffPayload] = await Promise.all([
           fetchJson<AssignmentResponse>(`/api/assignments/${assignmentId}`),
           fetchJson<Bootstrap>("/api/bootstrap"),
+          fetchJson<DaysOffResponse>(`/api/manager/assignments/${assignmentId}/days-off`),
         ]);
 
         if (!ignore) {
@@ -89,6 +100,10 @@ export default function AssignmentSavePage() {
           setWorksiteId(assignmentPayload.assignment.worksite_id);
           setStartDate(assignmentPayload.assignment.start_date);
           setEndDate(assignmentPayload.assignment.end_date);
+          setSavedStartDate(assignmentPayload.assignment.start_date);
+          setSavedEndDate(assignmentPayload.assignment.end_date);
+          setCurrentMonth(assignmentPayload.assignment.start_date.slice(0, 7));
+          setDaysOff(new Set((daysOffPayload.daysOff ?? []).map((dayOff) => dayOff.day_off_date)));
           setEmployees(bootstrapPayload.employees ?? []);
           setWorksites(bootstrapPayload.worksites ?? []);
         }
@@ -151,6 +166,38 @@ export default function AssignmentSavePage() {
       setDeleting(false);
     }
   }
+
+  async function handleToggleDayOff(date: string) {
+    if (pendingDayOff) return;
+
+    const wasDayOff = daysOff.has(date);
+    const nextDaysOff = new Set(daysOff);
+    if (wasDayOff) {
+      nextDaysOff.delete(date);
+    } else {
+      nextDaysOff.add(date);
+    }
+
+    setDaysOff(nextDaysOff);
+    setPendingDayOff(date);
+    setError("");
+
+    try {
+      const url = `/api/manager/assignments/${assignmentId}/days-off/${encodeURIComponent(date)}`;
+      const response = await fetch(url, { method: wasDayOff ? "DELETE" : "PUT" });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.error ?? "휴무일을 처리하지 못했습니다.");
+      }
+    } catch (toggleError) {
+      setDaysOff(new Set(daysOff));
+      setError(toggleError instanceof Error ? toggleError.message : "휴무일을 처리하지 못했습니다.");
+    } finally {
+      setPendingDayOff(null);
+    }
+  }
+
+  const periodChanged = startDate !== savedStartDate || endDate !== savedEndDate;
 
   return (
     <section className="space-y-[24px]">
@@ -259,6 +306,19 @@ export default function AssignmentSavePage() {
         )}
 
         {error ? <p className="mt-6 text-[16px] text-destructive">{error}</p> : null}
+
+        {!loading && savedStartDate && savedEndDate && currentMonth ? (
+          <AssignmentDaysOffCalendar
+            currentMonth={currentMonth}
+            daysOff={daysOff}
+            disabled={periodChanged}
+            endDate={savedEndDate}
+            onMonthChange={setCurrentMonth}
+            onToggle={handleToggleDayOff}
+            pendingDate={pendingDayOff}
+            startDate={savedStartDate}
+          />
+        ) : null}
       </section>
 
       <ConfirmModal

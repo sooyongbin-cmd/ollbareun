@@ -33,6 +33,7 @@ type WorksiteRow = {
 };
 
 type GuardSession = {
+  isDayOff?: boolean;
   employee?: EmployeeRow | null;
   attendance?: AttendanceRow | null;
   worksite?: WorksiteRow | null;
@@ -102,6 +103,10 @@ export default function GuardAttendanceSection() {
   async function handleClockIn() {
     const activeSession = readStoredGuardSession<GuardSession>({ touch: true });
     if (!activeSession?.employee || !activeSession.worksite || processing) return;
+    if (activeSession.isDayOff) {
+      setAlertMessage({ title: "출근 불가", message: "오늘은 휴무일로 지정되어 출근할 수 없습니다." });
+      return;
+    }
 
     const worksite: Worksite = {
       id: activeSession.worksite.id,
@@ -209,7 +214,7 @@ export default function GuardAttendanceSection() {
       <div className="pt-4 border-t border-border/30 grid grid-cols-2 gap-3">
         <Button
           onClick={handleClockIn}
-          disabled={isClockedIn || processing}
+          disabled={isClockedIn || processing || session?.isDayOff === true}
           className="w-full text-center"
           variant={!isClockedIn ? "default" : "outline"}
         >
@@ -225,6 +230,12 @@ export default function GuardAttendanceSection() {
           {processing && isClockedIn && !isClockedOut ? "처리 중..." : "퇴근하기"}
         </Button>
       </div>
+
+      {session?.isDayOff && !isClockedIn ? (
+        <p className="text-center text-[13px] font-semibold text-primary">
+          오늘은 휴무일로 지정되어 출근할 수 없습니다.
+        </p>
+      ) : null}
 
       {isClockedOut && (
         <p className="text-[13px] text-muted-foreground font-medium text-center">

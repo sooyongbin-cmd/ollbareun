@@ -4,6 +4,7 @@ import { useMemo, useSyncExternalStore } from "react";
 import { readStoredGuardSessionSnapshot, subscribeToGuardSessionChange } from "../guard-session-storage";
 
 type GuardSession = {
+  isDayOff?: boolean;
   worksite?: {
     name?: unknown;
   } | null;
@@ -36,7 +37,7 @@ export default function GuardWorksiteSection() {
       const startDate = typeof session.assignment?.start_date === "string" ? session.assignment.start_date : null;
       const endDate = typeof session.assignment?.end_date === "string" ? session.assignment.end_date : null;
       
-      return { worksiteName, startDate, endDate };
+      return { worksiteName, startDate, endDate, isDayOff: session.isDayOff === true };
     } catch {
       return null;
     }
@@ -60,6 +61,11 @@ export default function GuardWorksiteSection() {
           {sessionData.worksiteName}
         </p>
       </div>
+      {sessionData.isDayOff ? (
+        <p className="rounded-md border border-primary/30 bg-primary/10 px-3 py-2 text-center text-sm font-semibold text-primary">
+          오늘은 지정된 휴무일입니다.
+        </p>
+      ) : null}
       {sessionData.startDate && (
         <div className="flex items-center gap-2 text-[13px] text-muted-foreground border-t border-border/30 pt-2">
           <span className="font-semibold w-[80px]">배정기간 :</span>

@@ -11,13 +11,9 @@
 - **Testing:** Vitest + React Testing Library (Unit/Integration), Playwright (E2E)
 
 ## 2. 코딩 컨벤션 및 디자인 원칙
-- **디자인 가이드 준수:** docs/screen-design.md 및 docs/design_guide_wanted.md에 정의된 시각적 요소를 엄격히 따릅니다.
-  - 주요 색상: primary, canvas, ink, hairline 등 커스텀 테마 사용.
-  - 폰트: font-apple 클래스를 기본으로 사용.
-  - 아이콘: lucide-react를 기본 아이콘 라이브러리로 사용하며, 크기와 색상은 텍스트 컨텍스트에 맞게 조정합니다.
+- **디자인 가이드 준수:** docs/documents/design-guide.md에 정의된 전사 공통 디자인 시스템 및 화면 설계 가이드를 최우선으로 준수합니다.
 - **컴포넌트 구조:** 
   - 클라이언트 컴포넌트는 필요한 경우에만 'use client'를 사용합니다.
-  - Phase1App과 같은 핵심 로직은 src/app/ 하위의 공통 컴포넌트로 관리하며, mode와 view 프로퍼티를 통해 분기합니다.
 - **데이터 관리:** /api/bootstrap 경로를 통한 초기 데이터 로드 패턴을 유지합니다.
 
 ## 3. 테스트 및 검증 지침 (TDD 필수)

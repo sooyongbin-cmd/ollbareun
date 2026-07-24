@@ -3,6 +3,7 @@ import GuardSessionGate from "./guard-session-gate";
 import GuardSessionSummary from "./guard-session-summary";
 import GuardHeaderTitle from "./guard-header-title";
 import { GuardIcon } from "@/components/icons/guard-icon";
+import { Separator } from "@/components/ui/separator";
 
 export default function GuardMainLayout({
   children,
@@ -10,43 +11,44 @@ export default function GuardMainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="min-h-screen bg-canvas text-ink font-apple selection:bg-primary/20">
+    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans selection:bg-primary/20 overflow-x-hidden">
       <GuardSessionGate />
 
-      <nav className="h-[52px] bg-canvas-parchment/80 backdrop-blur-md sticky z-40 border-b border-hairline/30">
-        <div className="mx-auto max-w-[980px] w-full h-full flex items-center justify-between px-5">
-          <div className="flex min-w-0 items-center gap-3">
-            <h2 className="shrink-0 text-[21px] font-semibold">
-              <Link href="/guard/main" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                <GuardIcon size={24} className="text-primary" />
-                <GuardHeaderTitle />
-              </Link>
-            </h2>
+      {/* Sticky top app bar */}
+      <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80">
+        <div className="mx-auto flex h-14 max-w-[600px] items-center justify-between px-4 sm:px-6">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <Link
+              href="/guard/main"
+              className="flex items-center gap-2 font-semibold text-lg hover:opacity-80 transition-opacity shrink-0"
+            >
+              <GuardIcon size={24} className="text-primary" />
+              <GuardHeaderTitle />
+            </Link>
             <GuardSessionSummary />
           </div>
         </div>
-      </nav>
+      </header>
 
-      {children}
+      {/* Main body content container */}
+      <main className="flex-1 w-full max-w-[600px] mx-auto px-4 sm:px-6 py-6 space-y-6">
+        {children}
+      </main>
 
-      <footer className="bg-canvas-parchment border-t border-hairline py-[64px] px-5">
-        <div className="mx-auto max-w-[980px] w-full grid md:grid-cols-4 gap-8">
-          <div className="col-span-2">
-            <h4 className="text-[14px] font-semibold text-ink-muted-80 mb-4">올바름 관리시스템</h4>
-            <p className="text-[12px] text-ink-muted-48 leading-relaxed max-w-[400px]">
-              본 시스템은 실시간 근태 관리 및 안전 교육 이수 현황을 관리하기 위한 기업용 솔루션입니다.
-              사용 중 문의사항은 관리자에게 연락 바랍니다.
-            </p>
-          </div>
+      {/* Compact footer with Separator */}
+      <footer className="w-full max-w-[600px] mx-auto px-4 sm:px-6 py-8 text-xs text-muted-foreground space-y-4">
+        <Separator />
+        <div className="flex flex-col sm:flex-row justify-between gap-3 leading-relaxed">
           <div>
-            <h4 className="text-[14px] font-semibold text-ink-muted-80 mb-4">법적 고지</h4>
-            <p className="text-[12px] text-ink-muted-48 leading-relaxed">
-              © 2026 올바름. All rights reserved.
-              개인정보처리방침 | 서비스이용약관
-            </p>
+            <p className="font-semibold text-foreground">올바름 관리시스템</p>
+            <p className="mt-0.5">기업용 실시간 근태관리 및 안전교육 솔루션</p>
+          </div>
+          <div className="text-left sm:text-right">
+            <p>© 2026 올바름. All rights reserved.</p>
+            <p className="mt-0.5">개인정보처리방침 · 서비스이용약관</p>
           </div>
         </div>
       </footer>
-    </main>
+    </div>
   );
 }

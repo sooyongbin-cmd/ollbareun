@@ -63,11 +63,11 @@ describe("guard profile page", () => {
     expect(screen.getByRole("heading", { name: "패스키등록" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "근무스케줄" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "월별출근현황" })).toBeInTheDocument();
-    expect(screen.getByText("2026-05-01 ~ 2026-05-31")).toBeInTheDocument();
-    expect(screen.getByText("본사")).toBeInTheDocument();
-    expect(screen.getByText("2026-05")).toBeInTheDocument();
-    expect(screen.getByText("3일")).toBeInTheDocument();
-    expect(screen.getByText("25시간 30분")).toBeInTheDocument();
+    expect(screen.getAllByText("2026-05-01 ~ 2026-05-31")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("본사")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("2026-05")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("3일")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("25시간 30분")[0]).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "패스키 등록 요청" })).toBeInTheDocument();
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
   });

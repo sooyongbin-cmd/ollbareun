@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PowerIcon } from "@/components/icons/power-icon";
+import { GuardActionButton } from "@/components/guard/guard-action-button";
 import { clearStoredGuardSession, readStoredGuardSession } from "../guard-session-storage";
 
 const guardLogoutPushResultStorageKey = "ollbareun.guard.logout.pushResult";
@@ -81,8 +83,10 @@ async function recordLogoutResult(sessionLogId: string | null, result: LogoutPus
 
 export default function GuardLogoutButton() {
   const router = useRouter();
+  const [loggingOut, setLoggingOut] = useState(false);
 
   async function handleLogout() {
+    setLoggingOut(true);
     const { employeeId, sessionLogId } = readGuardSessionInfo();
     let endpoint: string | null = null;
     let browserSubscription: LogoutPushResult["browserSubscription"] = "not-found";
@@ -142,13 +146,15 @@ export default function GuardLogoutButton() {
   }
 
   return (
-    <button
+    <GuardActionButton
       type="button"
-      className="button-secondary inline-flex justify-center gap-2"
+      variant="destructive"
+      isLoading={loggingOut}
+      loadingText="로그아웃 중..."
       onClick={handleLogout}
+      icon={<PowerIcon size={20} className="lucide lucide-power" />}
     >
-      <PowerIcon size={24} className="lucide lucide-power" />
-      <span>로그아웃</span>
-    </button>
+      로그아웃
+    </GuardActionButton>
   );
 }

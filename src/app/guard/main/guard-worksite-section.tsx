@@ -2,6 +2,8 @@
 
 import { useMemo, useSyncExternalStore } from "react";
 import { readStoredGuardSessionSnapshot, subscribeToGuardSessionChange } from "../guard-session-storage";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { MapPin } from "lucide-react";
 
 type GuardSession = {
   worksite?: {
@@ -44,32 +46,37 @@ export default function GuardWorksiteSection() {
 
   if (!sessionData?.worksiteName) {
     return (
-      <section className="mb-6 bg-canvas rounded-[18px] p-6 border border-hairline shadow-sm">
-        <p className="text-[17px] font-semibold text-ink-muted-48 text-center py-2">
+      <Card className="w-full shadow-sm border">
+        <CardContent className="py-6 text-center text-sm font-medium text-muted-foreground">
           배정된 근무지 정보가 없습니다
-        </p>
-      </section>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <section className="mb-6 bg-canvas rounded-[18px] p-6 border border-hairline shadow-sm space-y-2">
-      <div className="flex items-baseline gap-2">
-        <h3 className="text-[14px] font-semibold text-ink-muted-48">오늘의 근무지 :</h3>
-        <p className="text-[21px] font-bold text-primary">
-          {sessionData.worksiteName}
-        </p>
-      </div>
-      {sessionData.startDate && (
-        <div className="flex items-center gap-2 text-[13px] text-ink-muted-48 border-t border-hairline/30 pt-2">
-          <span className="font-semibold w-[80px]">배정기간 :</span>
-          <span className="font-medium">
-            {sessionData.startDate === sessionData.endDate 
-              ? sessionData.startDate 
-              : `${sessionData.startDate} ~ ${sessionData.endDate}`}
-          </span>
+    <Card className="w-full shadow-sm border">
+      <CardHeader className="pb-3">
+        <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+          <MapPin className="size-4 text-primary" />
+          <span>오늘의 근무지</span>
         </div>
+        <CardTitle className="text-xl font-bold text-primary">
+          {sessionData.worksiteName}
+        </CardTitle>
+      </CardHeader>
+      {sessionData.startDate && (
+        <CardContent className="pt-0 border-t border-border/40 text-xs text-muted-foreground mt-2">
+          <div className="flex items-center gap-2 pt-3">
+            <span className="font-medium shrink-0">배정기간 :</span>
+            <span className="font-semibold text-foreground">
+              {sessionData.startDate === sessionData.endDate 
+                ? sessionData.startDate 
+                : `${sessionData.startDate} ~ ${sessionData.endDate}`}
+            </span>
+          </div>
+        </CardContent>
       )}
-    </section>
+    </Card>
   );
 }

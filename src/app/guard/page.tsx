@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { GpsInfo } from "@/lib/gps";
-import AlertModal from "@/components/modals/alert-modal";
 import { getSupabasePasskeyClient } from "@/lib/supabase-passkey-client";
 import { isCurrentInAppBrowser, isStandaloneGuardApp } from "./in-app-browser";
 import InAppBrowserGuide from "./in-app-browser-guide";
@@ -12,6 +11,12 @@ import {
   hasActiveStoredGuardSession,
   writeStoredGuardSession,
 } from "./guard-session-storage";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { GuardActionButton } from "@/components/guard/guard-action-button";
+import { GuardNoticeDialog } from "@/components/guard/guard-notice-dialog";
+import { KeyRound } from "lucide-react";
 
 type EmployeeRow = {
   id: string;
@@ -302,8 +307,8 @@ export default function GuardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-canvas text-ink font-apple selection:bg-primary/20">
-      <div className="mx-auto flex min-h-screen w-full max-w-[600px] flex-col justify-center gap-6 px-5 py-10">
+    <main className="min-h-screen bg-background text-foreground flex items-center justify-center p-4 sm:p-6">
+      <div className="w-full max-w-[600px] space-y-6">
         {launchState === "in-app" && <InAppBrowserGuide />}
 
         {(launchState === "installable-browser" || launchState === "browser-installed-or-unavailable") && (
@@ -318,115 +323,133 @@ export default function GuardPage() {
 
         {launchState === "standalone" && (
           <>
-            <section
-              aria-label="근무자 로그인"
-              className="w-full rounded-[18px] border border-hairline/50 bg-canvas-parchment p-5"
-            >
-              <div className="text-center space-y-1 mb-6">
-                <p className="text-[15px] font-semibold text-primary">사회적기업 올바름</p>
-                <h1 className="text-[28px] font-bold text-ink">근무자 로그인</h1>
-              </div>
-              <form className="w-full space-y-6" onSubmit={handleGuardAuth}>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="guard-name">
-                      이름
-                    </label>
-                    <input
-                      className="field"
-                      defaultValue={savedGuardName}
-                      id="guard-name"
-                      key={savedGuardName}
-                      name="name"
-                      placeholder="이름을 입력하세요."
-                      required
-                    />
+            {/* Name / Phone Authentication Card */}
+            <Card className="w-full shadow-sm border" role="region" aria-label="근무자 로그인">
+              <CardHeader className="text-center space-y-1 pb-4">
+                <p className="text-sm font-semibold text-primary">사회적기업 올바름</p>
+                <CardTitle className="text-2xl font-bold">근무자 로그인</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form className="w-full space-y-5" onSubmit={handleGuardAuth}>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="guard-name">이름</Label>
+                      <Input
+                        id="guard-name"
+                        key={savedGuardName}
+                        name="name"
+                        defaultValue={savedGuardName}
+                        placeholder="이름을 입력하세요."
+                        required
+                        aria-invalid={Boolean(errorMessage)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="guard-phone">연락처</Label>
+                      <Input
+                        id="guard-phone"
+                        name="phone"
+                        placeholder="010-0000-0000"
+                        required
+                        aria-invalid={Boolean(errorMessage)}
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="guard-phone">
-                      연락처
-                    </label>
-                    <input className="field" id="guard-phone" name="phone" placeholder="010-0000-0000" required />
-                  </div>
-                </div>
-                <button
-                  className="button-primary w-full disabled:opacity-70"
-                  data-testid="guard-auth-submit"
-                  disabled={isGuardLoginPending}
-                  type="submit"
+
+                  <GuardActionButton
+                    type="submit"
+                    data-testid="guard-auth-submit"
+                    isLoading={isGuardLoginPending}
+                    loadingText={guardLoginProgress || "로그인 중..."}
+                  >
+                    로그인
+                  </GuardActionButton>
+
+                  {guardLoginProgress && (
+                    <p aria-live="polite" className="text-center text-xs text-muted-foreground">
+                      {guardLoginProgress}
+                    </p>
+                  )}
+                </form>
+              </CardContent>
+            </Card>
+
+            {/* Passkey Authentication Card */}
+            <Card className="w-full shadow-sm border" role="region" aria-label="패스키 로그인">
+              <CardContent className="pt-6 space-y-3">
+                <GuardActionButton
+                  variant="outline"
+                  onClick={handlePasskeyLogin}
+                  isLoading={isGuardLoginPending}
+                  icon={<KeyRound className="size-4" />}
                 >
-                  로그인
-                </button>
-                {guardLoginProgress && (
-                  <p aria-live="polite" className="-mt-3 text-center text-[13px] leading-relaxed text-ink-muted-48">
-                    {guardLoginProgress}
-                  </p>
-                )}
-              </form>
-            </section>
+                  패스키로 로그인
+                </GuardActionButton>
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  관리자 승인을 받은 뒤 이 기기에 패스키를 등록한 근무자만 사용할 수 있습니다.
+                </p>
+              </CardContent>
+            </Card>
 
-            <section className="w-full rounded-[18px] border border-hairline/50 bg-canvas-parchment p-5">
-              <button className="button-primary w-full" onClick={handlePasskeyLogin} type="button">
-                패스키로 로그인
-              </button>
-              <p className="mt-3 text-[13px] leading-relaxed text-ink-muted-48">
-                관리자 승인을 받은 뒤 이 기기에 패스키를 등록한 근무자만 사용할 수 있습니다.
-              </p>
-            </section>
-
-            <section className="w-full rounded-[18px] border border-hairline/50 bg-canvas-parchment p-6">
-              <div className="space-y-2">
-                <p className="text-[13px] font-semibold text-primary">로그아웃 Push 처리 결과</p>
-                <h2 className="text-[21px] font-semibold">
+            {/* Logout Push Result Log Card */}
+            <Card className="w-full shadow-sm border" role="region" aria-label="로그아웃 Push 처리 결과">
+              <CardHeader className="space-y-1">
+                <p className="text-xs font-semibold text-primary">로그아웃 Push 처리 결과</p>
+                <CardTitle className="text-lg font-semibold">
                   {logoutPushResult ? "마지막 로그아웃 처리 내역" : "처리 내역 없음"}
-                </h2>
-                <p className="text-[14px] leading-relaxed text-ink-muted-48">
+                </CardTitle>
+                <CardDescription className="text-xs leading-relaxed">
                   {logoutPushResult
                     ? `${formatLogoutResultTime(logoutPushResult.completedAt)}에 수행된 Push 알림 정리 결과입니다.`
                     : "로그아웃을 수행하면 브라우저 Push 구독 해제와 Supabase 구독정보 삭제 결과가 여기에 표시됩니다."}
-                </p>
-              </div>
+                </CardDescription>
+              </CardHeader>
 
               {logoutPushResult && (
-                <dl className="mt-5 grid gap-3 text-[14px]">
-                  <div className="rounded-[12px] border border-hairline/40 bg-canvas px-4 py-3">
-                    <dt className="font-semibold text-ink">브라우저 구독</dt>
-                    <dd className="mt-1 text-ink-muted-48">{getBrowserSubscriptionText(logoutPushResult.browserSubscription)}</dd>
-                  </div>
-                  <div className="rounded-[12px] border border-hairline/40 bg-canvas px-4 py-3">
-                    <dt className="font-semibold text-ink">서버 구독정보</dt>
-                    <dd className="mt-1 text-ink-muted-48">{getServerSubscriptionText(logoutPushResult.serverSubscription)}</dd>
-                  </div>
-                  <div className="rounded-[12px] border border-hairline/40 bg-canvas px-4 py-3">
-                    <dt className="font-semibold text-ink">로그인 세션</dt>
-                    <dd className="mt-1 text-ink-muted-48">{getSessionText(logoutPushResult.session)}</dd>
-                  </div>
-                  <div className="rounded-[12px] border border-hairline/40 bg-canvas px-4 py-3">
-                    <dt className="font-semibold text-ink">endpoint</dt>
-                    <dd className="mt-1 break-all text-ink-muted-48">{maskEndpoint(logoutPushResult.endpoint)}</dd>
-                  </div>
-                </dl>
+                <CardContent>
+                  <dl className="grid gap-2 text-xs">
+                    <div className="rounded-lg border bg-muted/30 p-3">
+                      <dt className="font-semibold text-foreground">브라우저 구독</dt>
+                      <dd className="mt-1 text-muted-foreground">{getBrowserSubscriptionText(logoutPushResult.browserSubscription)}</dd>
+                    </div>
+                    <div className="rounded-lg border bg-muted/30 p-3">
+                      <dt className="font-semibold text-foreground">서버 구독정보</dt>
+                      <dd className="mt-1 text-muted-foreground">{getServerSubscriptionText(logoutPushResult.serverSubscription)}</dd>
+                    </div>
+                    <div className="rounded-lg border bg-muted/30 p-3">
+                      <dt className="font-semibold text-foreground">로그인 세션</dt>
+                      <dd className="mt-1 text-muted-foreground">{getSessionText(logoutPushResult.session)}</dd>
+                    </div>
+                    <div className="rounded-lg border bg-muted/30 p-3">
+                      <dt className="font-semibold text-foreground">endpoint</dt>
+                      <dd className="mt-1 break-all text-muted-foreground">{maskEndpoint(logoutPushResult.endpoint)}</dd>
+                    </div>
+                  </dl>
+                </CardContent>
               )}
-            </section>
+            </Card>
           </>
         )}
       </div>
 
-      {isGuardLoginPending && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay-scrim px-5">
-          <div className="w-full max-w-[280px] rounded-[18px] bg-canvas p-6 text-center shadow-product border border-hairline animate-in fade-in zoom-in-95 duration-200">
-            <p className="text-[16px] font-semibold text-ink animate-pulse tracking-wide">
-              로그인진행중....
-            </p>
-          </div>
-        </div>
-      )}
+      {/* Progress Dialog */}
+      <GuardNoticeDialog
+        open={isGuardLoginPending}
+        dismissible={false}
+        title="로그인 진행 중"
+        description={`${guardLoginProgress || "로그인 요청을 처리하는 중입니다."}\n로그인진행중....`}
+        confirmLabel="처리 중..."
+      />
 
-      <AlertModal
-        isOpen={Boolean(errorMessage)}
-        onClose={() => setErrorMessage("")}
+      {/* Auth Error Dialog */}
+      <GuardNoticeDialog
+        open={Boolean(errorMessage)}
+        onOpenChange={(open) => {
+          if (!open) setErrorMessage("");
+        }}
         title="인증 오류"
         description={errorMessage}
+        onConfirm={() => setErrorMessage("")}
       />
     </main>
   );

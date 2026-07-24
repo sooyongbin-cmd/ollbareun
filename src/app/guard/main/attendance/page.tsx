@@ -8,6 +8,11 @@ import AttendanceMapSection from "./attendance-map-section";
 import GuardLocationPermissionPrompt from "../guard-location-permission-prompt";
 import { locationPermissionGrantedEvent, queryGeolocationPermission } from "../location-permission";
 import { readStoredGuardSession as readGuardSessionFromStorage, writeStoredGuardSession as writeGuardSessionToStorage } from "../../guard-session-storage";
+import { GuardPageHeader } from "@/components/guard/guard-page-header";
+import { GuardActionButton } from "@/components/guard/guard-action-button";
+import { GuardStatusAlert } from "@/components/guard/guard-status-alert";
+import { Card, CardContent } from "@/components/ui/card";
+import { LogIn, LogOut } from "lucide-react";
 
 type EmployeeRow = {
   id: string;
@@ -273,64 +278,72 @@ export default function GuardAttendancePage() {
   }
 
   return (
-    <div className="mx-auto max-w-[980px] w-full px-5 py-[80px]">
-      <div className="max-w-[600px] mx-auto">
-        {guard ? (
-          <section className="bg-canvas-parchment rounded-[18px] p-[16px] border border-hairline/50">
-            <div className="space-y-[32px]">
-              <AttendanceMapSection
-                currentLatitude={latitude}
-                currentLongitude={longitude}
-                worksite={guard.worksite}
-              />
+    <div className="w-full space-y-6">
+      <GuardPageHeader
+        title="출퇴근 처리"
+        description="현재 위치를 확인하여 출근 및 퇴근을 기록합니다."
+      />
 
-              <div
-                className={`p-4 rounded-xl text-center text-[15px] font-medium transition-colors ${
-                  activeDecision.allowed ? "bg-primary/5 text-primary" : "bg-status-warn text-ink"
-                }`}
-                id="attendance-decision-section"
+      {guard ? (
+        <Card className="w-full shadow-sm border">
+          <CardContent className="pt-6 space-y-6">
+            <AttendanceMapSection
+              currentLatitude={latitude}
+              currentLongitude={longitude}
+              worksite={guard.worksite}
+            />
+
+            <GuardStatusAlert
+              id="attendance-decision-section"
+              status={activeDecision.allowed ? "info" : "warning"}
+              title="출퇴근 판정 상태"
+              description={activeDecision.reason}
+            />
+
+            <div className="grid grid-cols-2 gap-3" id="attendance-actions-section">
+              <GuardActionButton
+                data-testid="clock-in"
+                type="button"
+                disabled={!clockInDecision.allowed || !!guard.attendance?.clock_in_at}
+                onClick={handleClockIn}
+                icon={<LogIn className="size-4" />}
+                variant={!guard.attendance?.clock_in_at && clockInDecision.allowed ? "default" : "outline"}
               >
-                {activeDecision.reason}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-3" id="attendance-actions-section">
-                <button
-                  className="button-primary"
-                  data-testid="clock-in"
-                  type="button"
-                  disabled={!clockInDecision.allowed || !!guard.attendance?.clock_in_at}
-                  onClick={handleClockIn}
-                >
-                  출근
-                </button>
-                <button
-                  className="button-secondary"
-                  data-testid="clock-out"
-                  type="button"
-                  disabled={!clockOutDecision.allowed}
-                  onClick={handleClockOut}
-                >
-                  퇴근
-                </button>
-              </div>
-
-              {message ? <p className="status-ok text-center">{message}</p> : null}
-              {error ? <p className="status-warn text-center">{error}</p> : null}
-              <GuardLocationPermissionPrompt />
+                출근
+              </GuardActionButton>
+              <GuardActionButton
+                data-testid="clock-out"
+                type="button"
+                disabled={!clockOutDecision.allowed}
+                onClick={handleClockOut}
+                icon={<LogOut className="size-4" />}
+                variant={clockOutDecision.allowed ? "default" : "outline"}
+              >
+                퇴근
+              </GuardActionButton>
             </div>
-          </section>
-        ) : (
-          <section
-            className="bg-canvas-parchment rounded-[18px] p-[16px] border border-hairline/50 text-center"
-            id="attendance-auth-required-section"
-          >
-            <p className="text-[17px] text-ink-muted-48">경비원 인증 후 이용할 수 있습니다.</p>
-            <Link className="button-primary mt-6 inline-flex" href="/guard">
-              인증하러 가기
-            </Link>
-          </section>
-        )}
-      </div>
+
+            {message ? (
+              <GuardStatusAlert status="success" title="처리 완료" description={message} />
+            ) : null}
+
+            {error ? (
+              <GuardStatusAlert status="error" title="오류 발생" description={error} />
+            ) : null}
+
+            <GuardLocationPermissionPrompt />
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="w-full shadow-sm border text-center" id="attendance-auth-required-section">
+          <CardContent className="py-12 space-y-4">
+            <p className="text-base text-muted-foreground">경비원 인증 후 이용할 수 있습니다.</p>
+            <GuardActionButton asChild className="max-w-[200px] mx-auto">
+              <Link href="/guard">인증하러 가기</Link>
+            </GuardActionButton>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

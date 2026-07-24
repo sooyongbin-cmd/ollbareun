@@ -1,8 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import LoadingBoard from "@/components/loading-board";
 import { readStoredGuardSession } from "../../guard-session-storage";
+import { GuardPageHeader } from "@/components/guard/guard-page-header";
+import { GuardStatusAlert } from "@/components/guard/guard-status-alert";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ShieldCheck, PlayCircle } from "lucide-react";
 
 type EducationResourceRow = {
   id: string;
@@ -171,6 +177,12 @@ export default function GuardSafetyEducationPage() {
   const watchProgressRef = useRef<WatchProgress>(createInitialWatchProgress());
   const completedResourceIdsRef = useRef(new Set<string>());
 
+  const handleIframeLoad = useCallback(() => {
+    if (selectedResource) {
+      setLoadedIframeResourceId(selectedResource.id);
+    }
+  }, [selectedResource]);
+
   const markEducationCompletion = useCallback(async (resourceId: string) => {
     const employeeId = readGuardEmployeeId();
     if (!employeeId) {
@@ -300,6 +312,7 @@ export default function GuardSafetyEducationPage() {
         }),
     [completedResourceIds, resources],
   );
+
   const selectedEmbedUrl = selectedResource
     ? getYoutubeEmbedUrl(selectedResource.youtube_link, typeof window !== "undefined" ? window.location.origin : "")
     : "";
@@ -416,94 +429,98 @@ export default function GuardSafetyEducationPage() {
   }, [loadedIframeResourceId, markEducationCompletion, playerReady, selectedResource]);
 
   return (
-    <div className="mx-auto max-w-[980px] w-full px-5 py-[56px]">
-      <section className="space-y-[24px]">
-        <header>
-          <h1 className="text-[40px] font-semibold leading-[1.1]">안전교육</h1>
-          <p className="text-[21px] font-normal text-ink-muted-48 mt-2 max-w-[640px]">
-            등록된 안전교육 자료의 제목과 유튜브 링크를 확인합니다.
-          </p>
-        </header>
+    <div className="w-full space-y-6">
+      <GuardPageHeader
+        title="안전교육"
+        description="미이수 법정 안전교육 영상을 시청하고 이수합니다."
+      />
 
-        <section
-          aria-label="안전교육 목록"
-          className="bg-canvas-parchment rounded-[18px] p-[16px] border border-hairline/50"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-3 text-[14px] text-ink-muted-48">
-            <span>전체 안전교육 {sortedResources.length}</span>
+      {/* Uncompleted Education List Card */}
+      <Card className="w-full shadow-sm border" aria-label="안전교육 목록">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base font-bold flex items-center gap-2">
+              <ShieldCheck className="size-4 text-primary" />
+              <span>미이수 안전교육 목록</span>
+            </CardTitle>
+            <Badge variant="secondary" className="text-xs">
+              미이수 {sortedResources.length}건
+            </Badge>
           </div>
+        </CardHeader>
 
+        <CardContent>
           {loading ? (
-            <LoadingBoard className="mt-6" />
+            <div className="space-y-2 py-2">
+              <Skeleton className="h-10 w-full rounded-md" />
+              <Skeleton className="h-10 w-full rounded-md" />
+            </div>
           ) : listError ? (
-            <p className="mt-6 text-[16px] text-status-warn">{listError}</p>
+            <GuardStatusAlert status="error" title="목록 오류" description={listError} />
+          ) : sortedResources.length === 0 ? (
+            <div className="py-8 text-center text-sm text-muted-foreground italic border rounded-lg bg-muted/20">
+              이수하지 않은 안전교육 자료가 없습니다.
+            </div>
           ) : (
-            <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-[16px] border border-hairline bg-canvas">
-              <table className="apple-table" data-responsive-single-column>
-                <thead>
-                  <tr>
-                    <th className="text-left">제목</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedResources.length === 0 ? (
-                    <tr>
-                      <td data-responsive-empty colSpan={1} className="p-8 text-center text-ink-muted-48 italic">
-                        이수하지 않은 안전교육 자료가 없습니다.
-                      </td>
-                    </tr>
-                  ) : (
-                    sortedResources.map((resource) => (
-                      <tr key={resource.id} className="hover:bg-canvas-parchment transition-colors">
-                        <td data-label="제목" className="font-semibold">
-                          <button
-                            className="text-left text-primary hover:underline"
-                            type="button"
-                            onClick={() => {
-                              setSelectedResource(resource);
-                              setMessage("");
-                              setCompletionError("");
-                            }}
-                          >
-                            {resource.title}
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+            <div className="divide-y rounded-lg border bg-background overflow-hidden">
+              {sortedResources.map((resource) => {
+                const isSelected = selectedResource?.id === resource.id;
+                return (
+                  <Button
+                    key={resource.id}
+                    type="button"
+                    variant="ghost"
+                    onClick={() => {
+                      setSelectedResource(resource);
+                      setMessage("");
+                      setCompletionError("");
+                    }}
+                    className={`w-full h-auto flex items-center justify-between p-3 text-left transition-colors hover:bg-muted/50 rounded-none border-b last:border-0 ${
+                      isSelected ? "bg-accent/60 font-semibold" : ""
+                    }`}
+                  >
+                    <span className="text-sm text-foreground truncate flex items-center gap-2">
+                      <PlayCircle className={`size-4 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
+                      {resource.title}
+                    </span>
+                    {isSelected && (
+                      <Badge aria-hidden="true" className="bg-primary text-primary-foreground text-xs shrink-0">
+                        선택됨
+                      </Badge>
+                    )}
+                  </Button>
+                );
+              })}
             </div>
           )}
-        </section>
+        </CardContent>
+      </Card>
 
-        <section
-          aria-label="안전교육 영상"
-          className="bg-canvas-parchment rounded-[18px] p-0 border border-hairline/50"
-        >
-          <div className="rounded-[16px] border border-hairline bg-canvas p-0">
-            {selectedResource && selectedEmbedUrl ? (
+      {/* Video Player Card */}
+      <Card role="region" aria-label="안전교육 영상" className="w-full shadow-sm border overflow-hidden p-0">
+        <CardContent className="p-4 space-y-4">
+          <div className="aspect-video w-full rounded-lg overflow-hidden bg-black/90 relative flex items-center justify-center">
+            {selectedResource ? (
               <iframe
-                key={selectedResource.id}
                 ref={iframeRef}
-                className="aspect-video w-full rounded-[12px] border border-hairline bg-surface-black"
-                src={selectedEmbedUrl}
                 title={selectedResource.title}
-                onLoad={() => setLoadedIframeResourceId(selectedResource.id)}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                src={selectedEmbedUrl}
+                className="w-full h-full border-0"
+                allow="autoplay; encrypted-media"
                 allowFullScreen
+                onLoad={handleIframeLoad}
               />
             ) : (
-              <p className="p-8 text-center text-ink-muted-48 italic">
-                재생할 안전교육 링크를 선택하세요.
-              </p>
+              <div className="text-sm text-white/70">
+                상단 목록에서 시청할 교육을 선택해주세요.
+              </div>
             )}
           </div>
 
-          {message ? <p className="mt-4 text-[16px] text-primary">{message}</p> : null}
-          {completionError ? <p className="mt-4 text-[16px] text-status-warn">{completionError}</p> : null}
-        </section>
-      </section>
+          {message ? <GuardStatusAlert status="success" title="이수 처리" description={message} /> : null}
+          {completionError ? <GuardStatusAlert status="error" title="이수 처리 오류" description={completionError} /> : null}
+        </CardContent>
+      </Card>
     </div>
   );
 }

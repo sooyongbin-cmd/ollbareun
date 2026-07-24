@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import AttendancePage from "./attendance/page";
@@ -127,7 +127,6 @@ describe("guard main navigation", () => {
   });
 
   it("navigates to attendance when location permission is granted", async () => {
-    const user = userEvent.setup();
     const query = vi.fn(async () => ({ state: "granted" }));
 
     Object.defineProperty(navigator, "geolocation", {
@@ -142,7 +141,7 @@ describe("guard main navigation", () => {
 
     render(<GuardMainPage />);
 
-    await user.click(screen.getAllByRole("button", { name: "출근하기" })[0]);
+    fireEvent.click(screen.getByRole("button", { name: "출퇴근" }));
 
     await waitFor(() => {
       expect(push).toHaveBeenCalledWith("/guard/main/attendance");
@@ -151,7 +150,6 @@ describe("guard main navigation", () => {
   });
 
   it("navigates to QR inspection when location permission is granted", async () => {
-    const user = userEvent.setup();
     const query = vi.fn(async () => ({ state: "granted" }));
 
     Object.defineProperty(navigator, "geolocation", {
@@ -166,7 +164,7 @@ describe("guard main navigation", () => {
 
     render(<GuardMainPage />);
 
-    await user.click(screen.getByRole("button", { name: "순찰(QR코드)" }));
+    fireEvent.click(screen.getByRole("button", { name: "순찰(QR코드)" }));
 
     await waitFor(() => {
       expect(push).toHaveBeenCalledWith("/guard/main/inspection");
@@ -175,7 +173,6 @@ describe("guard main navigation", () => {
   });
 
   it("navigates to NFC inspection when location permission is granted", async () => {
-    const user = userEvent.setup();
     const query = vi.fn(async () => ({ state: "granted" }));
 
     Object.defineProperty(navigator, "geolocation", {
@@ -190,7 +187,7 @@ describe("guard main navigation", () => {
 
     render(<GuardMainPage />);
 
-    await user.click(screen.getByRole("button", { name: "순찰(NFC태그)" }));
+    fireEvent.click(screen.getByRole("button", { name: "순찰(NFC태그)" }));
 
     await waitFor(() => {
       expect(push).toHaveBeenCalledWith("/guard/main/inspection-nfc");
@@ -199,7 +196,6 @@ describe("guard main navigation", () => {
   });
 
   it("navigates to special remarks when location permission is granted", async () => {
-    const user = userEvent.setup();
     const query = vi.fn(async () => ({ state: "granted" }));
 
     Object.defineProperty(navigator, "geolocation", {
@@ -214,7 +210,7 @@ describe("guard main navigation", () => {
 
     render(<GuardMainPage />);
 
-    await user.click(screen.getByRole("button", { name: "특이사항" }));
+    fireEvent.click(screen.getByRole("button", { name: "특이사항" }));
 
     await waitFor(() => {
       expect(push).toHaveBeenCalledWith("/guard/main/special-remarks");
@@ -223,7 +219,6 @@ describe("guard main navigation", () => {
   });
 
   it("blocks attendance navigation and shows guidance when location permission is denied", async () => {
-    const user = userEvent.setup();
     const query = vi.fn(async () => ({ state: "denied" }));
 
     Object.defineProperty(navigator, "geolocation", {
@@ -238,11 +233,12 @@ describe("guard main navigation", () => {
 
     render(<GuardMainPage />);
 
-    await user.click(screen.getAllByRole("button", { name: "출근하기" })[0]);
+    fireEvent.click(screen.getByRole("button", { name: "출퇴근" }));
 
     expect(push).not.toHaveBeenCalledWith("/guard/main/attendance");
-    expect(await screen.findByRole("heading", { name: "위치 권한이 필요합니다" })).toBeInTheDocument();
-    expect(screen.getByText(/설정에서 위치 권한을 허용/)).toBeInTheDocument();
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText(/위치 권한이 필요합니다/)).toBeInTheDocument();
+    expect(within(dialog).getByText(/설정에서 위치 권한을 허용/)).toBeInTheDocument();
   });
 
   it("blocks worksite-required navigation when no worksite is assigned", async () => {
@@ -267,7 +263,7 @@ describe("guard main navigation", () => {
     render(<GuardMainPage />);
 
     const worksiteRequiredButtons = [
-      screen.getAllByRole("button", { name: "출근하기" })[0],
+      screen.getByRole("button", { name: "출퇴근" }),
       screen.getByRole("button", { name: "순찰(QR코드)" }),
       screen.getByRole("button", { name: "순찰(NFC태그)" }),
       screen.getByRole("button", { name: "특이사항" }),
@@ -286,8 +282,7 @@ describe("guard main navigation", () => {
   });
 
   it("requests location permission on click and navigates when the user allows it", async () => {
-    const user = userEvent.setup();
-    const getCurrentPosition = vi.fn((success: any) => {
+    const getCurrentPosition = vi.fn((success: PositionCallback) => {
       success({
         coords: {
           latitude: 37.5665,
@@ -299,7 +294,7 @@ describe("guard main navigation", () => {
           speed: null,
         },
         timestamp: Date.now(),
-      } as any);
+      });
     });
     const query = vi.fn(async () => ({ state: "prompt" }));
 
@@ -315,9 +310,11 @@ describe("guard main navigation", () => {
 
     render(<GuardMainPage />);
 
-    await user.click(screen.getAllByRole("button", { name: "출근하기" })[0]);
+    fireEvent.click(screen.getByRole("button", { name: "출퇴근" }));
 
-    expect(getCurrentPosition).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(getCurrentPosition).toHaveBeenCalled();
+    });
     await waitFor(() => {
       expect(push).toHaveBeenCalledWith("/guard/main/attendance");
     });

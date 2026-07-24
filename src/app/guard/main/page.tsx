@@ -8,6 +8,14 @@ import GuardSafetySection from "./guard-safety-section";
 import GuardPushRegister from "./guard-push-register";
 import GuardLocationGateLink from "./guard-location-gate-link";
 import { readStoredGuardSessionSnapshot, subscribeToGuardSessionChange } from "../guard-session-storage";
+import {
+  GUARD_WORK_MENUS,
+  getGuardMenuTitle,
+  isGuardMenuVisibleForRole,
+} from "@/components/guard/guard-menu-config";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Briefcase } from "lucide-react";
 
 type GuardSession = {
   employee?: {
@@ -47,12 +55,6 @@ export default function GuardMainPage() {
     }
   }, [storedSession]);
 
-  const inspectionBaseLabel = useMemo(() => {
-    if (role === "경비원") return "순찰";
-    if (role === "미화원") return "청소구역";
-    return null;
-  }, [role]);
-
   const hasAssignedWorksite = useMemo(() => {
     if (!storedSession) return false;
     try {
@@ -70,38 +72,82 @@ export default function GuardMainPage() {
     }
   }, [storedSession]);
 
+  const visibleMenus = useMemo(() => {
+    return GUARD_WORK_MENUS.filter((menu) => isGuardMenuVisibleForRole(menu, role));
+  }, [role]);
+
   return (
-    <div className="mx-auto max-w-[980px] w-full px-5 py-[80px]">
-      <div className="max-w-[600px] mx-auto">
-        <GuardWorksiteSection />
-        
-        <section className="bg-canvas-parchment rounded-[18px] p-[16px] border border-hairline/50">
-          <div className="flex flex-col gap-3">
-            <GuardLocationGateLink href="/guard/main/attendance" hasAssignedWorksite={hasAssignedWorksite}>
-              출근하기
-            </GuardLocationGateLink>
-            {inspectionBaseLabel !== null && (
-              <>
-                <GuardLocationGateLink href="/guard/main/inspection" hasAssignedWorksite={hasAssignedWorksite}>
-                  {inspectionBaseLabel}(QR코드)
-                </GuardLocationGateLink>
-                <GuardLocationGateLink href="/guard/main/inspection-nfc" hasAssignedWorksite={hasAssignedWorksite}>
-                  {inspectionBaseLabel}(NFC태그)
-                </GuardLocationGateLink>
-              </>
-            )}
-            <GuardLocationGateLink href="/guard/main/special-remarks" hasAssignedWorksite={hasAssignedWorksite}>
-              특이사항
-            </GuardLocationGateLink>
-            <Link className="button-secondary w-full justify-center" href="/guard/main/profile">
-              개인프로필
-            </Link>
+    <div className="w-full space-y-6">
+      {/* 1. Today's Worksite Card */}
+      <GuardWorksiteSection />
+      
+      {/* 2. Main Task Buttons Card */}
+      <Card className="w-full shadow-sm border">
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+            <Briefcase className="size-4 text-primary" />
+            <span>주요 업무</span>
           </div>
-        </section>
-        <GuardSafetySection />
-        <GuardAttendanceSection />
-        <GuardPushRegister />
-      </div>
+          <CardTitle className="text-lg font-bold mt-1">업무 바로가기</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-3">
+            {visibleMenus.map((menu) => {
+              const title = getGuardMenuTitle(menu, role);
+              const IconComp = menu.icon;
+
+              if (menu.requiresLocation) {
+                return (
+                  <GuardLocationGateLink
+                    key={menu.href}
+                    href={menu.href}
+                    hasAssignedWorksite={hasAssignedWorksite}
+                    icon={<IconComp className="size-5" />}
+                  >
+                    {title}
+                  </GuardLocationGateLink>
+                );
+              }
+
+              if (menu.requiresWorksite) {
+                return (
+                  <GuardLocationGateLink
+                    key={menu.href}
+                    href={menu.href}
+                    hasAssignedWorksite={hasAssignedWorksite}
+                    icon={<IconComp className="size-5" />}
+                  >
+                    {title}
+                  </GuardLocationGateLink>
+                );
+              }
+
+              return (
+                <Button
+                  key={menu.href}
+                  asChild
+                  variant="outline"
+                  className="w-full min-h-[48px] text-base font-semibold justify-center gap-2 border-input bg-background shadow-xs hover:bg-accent"
+                >
+                  <Link href={menu.href}>
+                    <IconComp className="size-5 shrink-0" />
+                    <span>{title}</span>
+                  </Link>
+                </Button>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 3. Safety Education Status Card */}
+      <GuardSafetySection />
+
+      {/* 4. Attendance Status Card */}
+      <GuardAttendanceSection />
+
+      {/* 5. Push Registration Status Card */}
+      <GuardPushRegister />
     </div>
   );
 }

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import AlertModal from "@/components/modals/alert-modal";
+import { GuardNoticeDialog } from "@/components/guard/guard-notice-dialog";
+import { GuardActionButton } from "@/components/guard/guard-action-button";
 import {
   notifyLocationPermissionGranted,
   queryGeolocationPermission,
@@ -13,6 +14,7 @@ type GuardLocationGateLinkProps = {
   children: React.ReactNode;
   href: string;
   hasAssignedWorksite?: boolean;
+  icon?: React.ReactNode;
 };
 
 const geolocationOptions: PositionOptions = { enableHighAccuracy: true, maximumAge: 3000, timeout: 8000 };
@@ -40,7 +42,7 @@ function requestCurrentPosition() {
   });
 }
 
-export default function GuardLocationGateLink({ children, href, hasAssignedWorksite = true }: GuardLocationGateLinkProps) {
+export default function GuardLocationGateLink({ children, href, hasAssignedWorksite = true, icon }: GuardLocationGateLinkProps) {
   const router = useRouter();
   const [blockedState, setBlockedState] = useState<GeolocationPermissionState | null>(null);
   const [isMissingWorksite, setIsMissingWorksite] = useState(false);
@@ -84,27 +86,34 @@ export default function GuardLocationGateLink({ children, href, hasAssignedWorks
 
   return (
     <>
-      <button
-        className="button-secondary w-full justify-center"
-        disabled={isChecking}
+      <GuardActionButton
+        variant="outline"
+        isLoading={isChecking}
+        loadingText="위치 권한 확인 중..."
         onClick={handleClick}
-        type="button"
+        icon={icon}
       >
         {children}
-      </button>
-      <AlertModal
-        isOpen={blockedState !== null}
-        onClose={() => setBlockedState(null)}
+      </GuardActionButton>
+
+      <GuardNoticeDialog
+        open={blockedState !== null}
+        onOpenChange={(open) => {
+          if (!open) setBlockedState(null);
+        }}
         title="위치 권한이 필요합니다"
         description={blockedState ? getBlockedDescription(blockedState) : ""}
-        buttonLabel="확인"
+        onConfirm={() => setBlockedState(null)}
       />
-      <AlertModal
-        isOpen={isMissingWorksite}
-        onClose={() => setIsMissingWorksite(false)}
+
+      <GuardNoticeDialog
+        open={isMissingWorksite}
+        onOpenChange={(open) => {
+          if (!open) setIsMissingWorksite(false);
+        }}
         title="배정된 근무지가 없습니다"
         description="관리자에게 근무지 배정을 요청한 뒤 다시 시도해주세요."
-        buttonLabel="확인"
+        onConfirm={() => setIsMissingWorksite(false)}
       />
     </>
   );

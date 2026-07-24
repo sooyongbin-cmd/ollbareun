@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import GuardPage from "./page";
 
@@ -70,7 +70,7 @@ describe("guard login page", () => {
 
     const loginSection = await screen.findByRole("region", { name: "근무자 로그인" });
     const passkeyButton = await screen.findByRole("button", { name: "패스키로 로그인" });
-    const passkeySection = passkeyButton.closest("section");
+    const passkeySection = passkeyButton.closest("[role='region']");
 
     expect(loginSection).toContainElement(screen.getByLabelText("이름"));
     expect(loginSection).toContainElement(screen.getByLabelText("연락처"));
@@ -109,9 +109,10 @@ describe("guard login page", () => {
     fireEvent.change(screen.getByLabelText("연락처"), { target: { value: "010-0000-0000" } });
     fireEvent.click(screen.getByRole("button", { name: "로그인" }));
 
-    expect(await screen.findByText("로그인 요청을 전송하고 있습니다.")).toBeInTheDocument();
-    expect(screen.getByText("로그인진행중....")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "로그인" })).toBeDisabled();
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText(/로그인 요청을 전송하고 있습니다/)).toBeInTheDocument();
+    expect(within(dialog).getByText(/로그인진행중/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /로그인/, hidden: true })).toBeDisabled();
 
     resolveAuth(
       Response.json({
@@ -123,7 +124,7 @@ describe("guard login page", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("메인 화면으로 이동합니다.")).toBeInTheDocument();
+      expect(within(screen.getByRole("dialog")).getByText(/메인 화면으로 이동합니다/)).toBeInTheDocument();
     });
     expect(push).toHaveBeenCalledWith("/guard/main");
   });
@@ -182,7 +183,7 @@ describe("guard login page", () => {
     render(<GuardPage />);
     fireEvent.click(await screen.findByRole("button", { name: "패스키로 로그인" }));
 
-    expect(await screen.findByText("로그인진행중....")).toBeInTheDocument();
+    expect(await screen.findByText(/로그인진행중/)).toBeInTheDocument();
 
     resolveSession(
       Response.json({

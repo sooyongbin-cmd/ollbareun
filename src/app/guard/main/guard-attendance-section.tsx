@@ -3,7 +3,11 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { distanceMeters, canClockIn, canClockOut, type AttendanceRecord, type Worksite } from "@/lib/phase1";
 import type { GpsInfo } from "@/lib/gps";
-import AlertModal from "@/components/modals/alert-modal";
+import { GuardNoticeDialog } from "@/components/guard/guard-notice-dialog";
+import { GuardActionButton } from "@/components/guard/guard-action-button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Clock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import {
   readStoredGuardSession,
   readStoredGuardSessionSnapshot,
@@ -182,59 +186,81 @@ export default function GuardAttendanceSection() {
   const isClockedOut = !!attendance?.clock_out_at;
 
   return (
-    <section className="mb-6 bg-canvas rounded-[18px] p-6 border border-hairline shadow-sm space-y-5">
-      <h3 className="text-[14px] font-semibold text-ink-muted-48">출근 상황</h3>
+    <Card className="w-full shadow-sm border">
+      <CardHeader className="pb-3">
+        <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+          <Clock className="size-4 text-primary" />
+          <span>출근 상황</span>
+        </div>
+        <CardTitle className="text-lg font-bold flex items-center justify-between mt-1">
+          <span>오늘의 근태 기록</span>
+          {isClockedOut ? (
+            <Badge variant="outline" className="bg-muted text-muted-foreground">퇴근 완료</Badge>
+          ) : isClockedIn ? (
+            <Badge className="bg-emerald-600 text-white">근무 중</Badge>
+          ) : (
+            <Badge variant="secondary">출근 전</Badge>
+          )}
+        </CardTitle>
+      </CardHeader>
       
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <p className="text-[12px] text-ink-muted-48">출근 시각</p>
-          <p className="text-[20px] font-bold text-ink">{formatTime(attendance?.clock_in_at)}</p>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-2 gap-4 rounded-lg bg-muted/30 p-3 text-center border">
+          <div className="space-y-1 border-r border-border/40 pr-2">
+            <p className="text-xs text-muted-foreground">출근 시각</p>
+            <p className="text-lg font-bold text-foreground">{formatTime(attendance?.clock_in_at)}</p>
+          </div>
+          <div className="space-y-1 pl-2">
+            <p className="text-xs text-muted-foreground">퇴근 시각</p>
+            <p className="text-lg font-bold text-foreground">{formatTime(attendance?.clock_out_at)}</p>
+          </div>
         </div>
-        <div className="space-y-1">
-          <p className="text-[12px] text-ink-muted-48">퇴근 시각</p>
-          <p className="text-[20px] font-bold text-ink">{formatTime(attendance?.clock_out_at)}</p>
-        </div>
-      </div>
 
-      <div className="space-y-2 border-t border-hairline/30 pt-4">
-        <div className="flex items-center justify-between text-[13px]">
-          <span className="text-ink-muted-48 font-semibold">근무지와의 거리</span>
-          <span className={`font-bold ${distance !== null && distance > (session?.worksite?.radius_meters ?? 100) ? "text-status-warn" : "text-primary"}`}>
+        <div className="flex items-center justify-between text-xs py-1 border-b border-border/40">
+          <span className="text-muted-foreground font-medium">근무지와의 거리</span>
+          <span className={`font-bold ${distance !== null && distance > (session?.worksite?.radius_meters ?? 100) ? "text-destructive" : "text-primary"}`}>
             {distance !== null ? `${Math.round(distance)}m` : locError || "출근 화면에서 확인"}
           </span>
         </div>
-      </div>
 
-      <div className="pt-4 border-t border-hairline/30 grid grid-cols-2 gap-3">
-        <button
-          onClick={handleClockIn}
-          disabled={isClockedIn || processing}
-          className={`${!isClockedIn ? 'button-primary' : 'button-secondary'} flex w-full justify-center text-center disabled:opacity-50`}
-        >
-          {processing && !isClockedIn ? "처리 중..." : "출근하기"}
-        </button>
-        
-        <button
-          onClick={handleClockOut}
-          disabled={!isClockedIn || isClockedOut || processing}
-          className={`${isClockedIn && !isClockedOut ? 'button-primary' : 'button-secondary'} flex w-full justify-center text-center disabled:opacity-50`}
-        >
-          {processing && isClockedIn && !isClockedOut ? "처리 중..." : "퇴근하기"}
-        </button>
-      </div>
+        <div className="grid grid-cols-2 gap-3 pt-2">
+          <GuardActionButton
+            onClick={handleClockIn}
+            disabled={isClockedIn || processing}
+            isLoading={processing && !isClockedIn}
+            loadingText="처리 중..."
+            variant={!isClockedIn ? "default" : "outline"}
+          >
+            출근하기
+          </GuardActionButton>
+          
+          <GuardActionButton
+            onClick={handleClockOut}
+            disabled={!isClockedIn || isClockedOut || processing}
+            isLoading={processing && isClockedIn && !isClockedOut}
+            loadingText="처리 중..."
+            variant={isClockedIn && !isClockedOut ? "default" : "outline"}
+          >
+            퇴근하기
+          </GuardActionButton>
+        </div>
 
-      {isClockedOut && (
-        <p className="text-[13px] text-ink-muted-48 font-medium text-center">
-          오늘의 근무가 모두 완료되었습니다.
-        </p>
-      )}
+        {isClockedOut && (
+          <p className="text-xs text-muted-foreground font-medium text-center pt-1">
+            오늘의 근무가 모두 완료되었습니다.
+          </p>
+        )}
+      </CardContent>
 
-      <AlertModal
-        isOpen={Boolean(alertInfo)}
-        onClose={() => setAlertMessage(null)}
+      <GuardNoticeDialog
+        open={Boolean(alertInfo)}
+        onOpenChange={(open) => {
+          if (!open) setAlertMessage(null);
+        }}
         title={alertInfo?.title ?? "알림"}
         description={alertInfo?.message ?? ""}
+        onConfirm={() => setAlertMessage(null)}
       />
-    </section>
+    </Card>
   );
 }

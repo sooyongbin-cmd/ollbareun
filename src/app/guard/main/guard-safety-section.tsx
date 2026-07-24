@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import LoadingBoard from "@/components/loading-board";
 import Link from "next/link";
 import { readStoredGuardSessionSnapshot, subscribeToGuardSessionChange } from "../guard-session-storage";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { ShieldCheck, ChevronRight } from "lucide-react";
+import { GuardStatusAlert } from "@/components/guard/guard-status-alert";
 
 type EducationResourceRow = {
   id: string;
@@ -86,39 +90,48 @@ export default function GuardSafetySection() {
   }, [completions, resources, employeeId]);
 
   return (
-    <section className="mb-6 bg-canvas rounded-[18px] p-6 border border-hairline shadow-sm space-y-4">
-      <h3 className="text-[14px] font-semibold text-ink-muted-48">안전교육 상황</h3>
-      
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-[15px] text-ink-muted-80">
-          <span className="font-semibold text-ink-muted-48">이수 현황 :</span>
+    <Card className="w-full shadow-sm border">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+            <ShieldCheck className="size-4 text-primary" />
+            <span>안전교육 상황</span>
+          </div>
+          <Button asChild variant="ghost" size="sm" className="h-8 gap-1 text-xs px-2">
+            <Link href="/guard/main/safety">
+              <span>교육 받기</span>
+              <ChevronRight className="size-4" />
+            </Link>
+          </Button>
+        </div>
+        <CardTitle className="text-lg font-bold">
           {loading ? (
-            <LoadingBoard className="min-h-6 min-w-12" label="안전교육 이수 현황을 불러오는 중입니다." />
+            <Skeleton className="h-7 w-24 rounded-md mt-1" />
           ) : (
-            <span className="font-bold text-[20px] text-ink">
+            <span className="text-xl font-bold text-foreground">
               {eduStatus ? `${eduStatus.completed} / ${eduStatus.total}` : "정보 없음"}
             </span>
           )}
-        </div>
-        <Link 
-          href="/guard/main/safety" 
-          className="button-secondary text-[13px] py-2 px-4"
-        >
-          교육 받기
-        </Link>
-      </div>
+        </CardTitle>
+      </CardHeader>
       
-      {eduStatus && eduStatus.completed < eduStatus.total && (
-        <p className="text-[13px] text-status-warn font-medium pt-2 border-t border-hairline/30">
-          미이수 교육이 {eduStatus.total - eduStatus.completed}건 있습니다. 교육을 완료해주세요.
-        </p>
-      )}
-      
-      {eduStatus && eduStatus.completed === eduStatus.total && eduStatus.total > 0 && (
-        <p className="text-[13px] text-primary font-medium pt-2 border-t border-hairline/30">
-          모든 안전교육을 이수하였습니다.
-        </p>
-      )}
-    </section>
+      <CardContent className="space-y-3 pt-0">
+        {eduStatus && eduStatus.completed < eduStatus.total && (
+          <GuardStatusAlert
+            status="warning"
+            title="미이수 안내"
+            description={`미이수 교육이 ${eduStatus.total - eduStatus.completed}건 있습니다. 교육을 완료해주세요.`}
+          />
+        )}
+        
+        {eduStatus && eduStatus.completed === eduStatus.total && eduStatus.total > 0 && (
+          <GuardStatusAlert
+            status="success"
+            title="이수 완료"
+            description="모든 안전교육을 이수하였습니다."
+          />
+        )}
+      </CardContent>
+    </Card>
   );
 }

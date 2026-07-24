@@ -1,9 +1,15 @@
 "use client";
 
-import { BellIcon, MicIcon, SquareIcon } from "lucide-react";
+import { BellIcon, MicIcon, SquareIcon, Camera } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import AlertModal from "@/components/modals/alert-modal";
+import { GuardNoticeDialog } from "@/components/guard/guard-notice-dialog";
+import { GuardPageHeader } from "@/components/guard/guard-page-header";
+import { GuardActionButton } from "@/components/guard/guard-action-button";
+import { GuardStatusAlert } from "@/components/guard/guard-status-alert";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { readStoredGuardSession } from "../../guard-session-storage";
 
 type GuardSession = {
@@ -290,93 +296,142 @@ export default function GuardSpecialRemarksPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[980px] w-full px-5 py-[80px]">
-      <div className="max-w-[600px] mx-auto space-y-6">
-        <header>
-          <h1 className="text-[36px] font-semibold leading-[1.1]">특이사항</h1>
-          <p className="mt-2 text-[18px] text-ink-muted-48">근무 중 확인한 특이사항을 작성하고 관리자에게 보고합니다.</p>
-        </header>
+    <div className="w-full space-y-6">
+      <GuardPageHeader
+        title="특이사항 보고"
+        description="근무 중 확인한 특이사항을 작성하고 관리자에게 보고합니다."
+      />
 
-        <section className="bg-canvas-parchment rounded-[18px] p-[24px] border border-hairline/50 space-y-5">
+      {/* Report Content Card */}
+      <Card className="w-full shadow-sm border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-bold">보고 내용 작성</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div className="space-y-2">
-            <label className="text-[14px] font-semibold text-ink-muted-48 ml-1" htmlFor="special-remark-content">
-              특이사항 내용
-            </label>
-            <textarea
-              className="field min-h-[160px] resize-y"
+            <Label htmlFor="special-remark-content">특이사항 내용</Label>
+            <Textarea
               id="special-remark-content"
               value={content}
               onChange={(event) => setContent(event.target.value)}
               placeholder="현재 위치와 함께 특이사항을 입력하세요."
+              className="min-h-[140px]"
+              aria-invalid={Boolean(error && !content.trim())}
             />
           </div>
 
-          <button className="button-secondary w-full justify-center gap-2" onClick={handleSpeech} type="button">
-            {listening ? <SquareIcon size={18} /> : <MicIcon size={18} />}
+          <GuardActionButton
+            variant="outline"
+            onClick={handleSpeech}
+            icon={listening ? <SquareIcon className="size-4" /> : <MicIcon className="size-4" />}
+          >
             {listening ? "음성 중지" : "음성 입력"}
-          </button>
-        </section>
+          </GuardActionButton>
+        </CardContent>
+      </Card>
 
-        <section className="bg-canvas-parchment rounded-[18px] p-[24px] border border-hairline/50 space-y-5">
-          <video
-            ref={videoRef}
-            className="aspect-[4/3] w-full rounded-[12px] border border-hairline bg-ink object-cover"
-            muted
-            playsInline
-          />
-          <p className="text-[14px] font-semibold text-ink-muted-48">{cameraStatus}</p>
-          {photoDataUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img alt="촬영된 첨부사진" className="w-full rounded-[12px] border border-hairline" src={photoDataUrl} />
-          ) : null}
-          {error ? <p className="status-warn">{error}</p> : null}
-          <button className="button-secondary w-full justify-center" onClick={handleCapture} type="button">
+      {/* Camera & Photo Preview Card */}
+      <Card className="w-full shadow-sm border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-bold flex items-center gap-2">
+            <Camera className="size-4 text-primary" />
+            <span>현장 사진 첨부</span>
+          </CardTitle>
+          <CardDescription className="text-xs">{cameraStatus}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Camera Frame */}
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border bg-black">
+            <video
+              ref={videoRef}
+              aria-label="현장 촬영 카메라 화면"
+              className="h-full w-full object-cover"
+              muted
+              playsInline
+            />
+          </div>
+
+          {/* Captured Photo Preview */}
+          {photoDataUrl && (
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">촬영된 사진 미리보기</Label>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                alt="촬영된 첨부사진"
+                className="w-full rounded-lg border object-cover max-h-[240px]"
+                src={photoDataUrl}
+              />
+            </div>
+          )}
+
+          {error && (
+            <GuardStatusAlert status="error" title="보고 오류" description={error} />
+          )}
+
+          <GuardActionButton
+            variant="outline"
+            onClick={handleCapture}
+            icon={<Camera className="size-4" />}
+          >
             촬영
-          </button>
-          <button
-            className="button-primary w-full justify-center disabled:opacity-50"
-            disabled
-            onClick={() => handleReport("resend")}
-            type="button"
-          >
-            이메일보고(resend)
-          </button>
-          <button
-            className="button-primary w-full justify-center disabled:opacity-50"
-            disabled={saving || !content.trim()}
-            onClick={() => handleReport("formspree")}
-            type="button"
-          >
-            {savingProvider === "formspree" ? "보고 중..." : "이메일(Formspree)"}
-          </button>
-          <button
-            className="button-primary w-full justify-center disabled:opacity-50"
-            disabled={saving || !content.trim()}
-            onClick={() => handleReport("naver")}
-            type="button"
-          >
-            {savingProvider === "naver" ? "보고 중..." : "이메일(NAVER)"}
-          </button>
-          <button
-            className="button-primary w-full justify-center gap-2 disabled:opacity-50"
-            disabled={saving || !content.trim()}
-            onClick={() => handleReport("push")}
-            type="button"
-          >
-            <BellIcon aria-hidden="true" size={18} />
-            {savingProvider === "push" ? "전송 중..." : "푸쉬알림"}
-          </button>
-        </section>
-      </div>
+          </GuardActionButton>
 
-      <AlertModal
-        isOpen={Boolean(alertMessage)}
-        onClose={() => {
-          setAlertMessage("");
-          router.push("/guard/main");
+          {/* Delivery Channel Action Buttons */}
+          <div className="space-y-2 pt-2 border-t border-border/40">
+            <Label className="text-xs text-muted-foreground">보고서 전송 채널 선택</Label>
+            
+            <GuardActionButton
+              disabled
+              onClick={() => handleReport("resend")}
+            >
+              이메일보고(resend)
+            </GuardActionButton>
+
+            <GuardActionButton
+              disabled={saving || !content.trim()}
+              isLoading={savingProvider === "formspree"}
+              loadingText="보고 중..."
+              onClick={() => handleReport("formspree")}
+            >
+              이메일(Formspree)
+            </GuardActionButton>
+
+            <GuardActionButton
+              disabled={saving || !content.trim()}
+              isLoading={savingProvider === "naver"}
+              loadingText="보고 중..."
+              onClick={() => handleReport("naver")}
+            >
+              이메일(NAVER)
+            </GuardActionButton>
+
+            <GuardActionButton
+              disabled={saving || !content.trim()}
+              isLoading={savingProvider === "push"}
+              loadingText="전송 중..."
+              onClick={() => handleReport("push")}
+              icon={<BellIcon className="size-4" />}
+            >
+              푸쉬알림
+            </GuardActionButton>
+          </div>
+        </CardContent>
+      </Card>
+
+      <GuardNoticeDialog
+        open={Boolean(alertMessage)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setAlertMessage("");
+            router.push("/guard/main");
+          }
         }}
         title="알림"
         description={alertMessage}
+        onConfirm={() => {
+          setAlertMessage("");
+          router.push("/guard/main");
+        }}
       />
     </div>
   );

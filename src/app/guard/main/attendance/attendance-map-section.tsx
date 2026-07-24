@@ -3,6 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { type GpsInfo } from "@/lib/gps";
 import { distanceMeters } from "@/lib/phase1";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { GuardStatusAlert } from "@/components/guard/guard-status-alert";
+import { Map } from "lucide-react";
 
 type KakaoLatLng = {
   getLat: () => number;
@@ -320,40 +324,65 @@ export default function AttendanceMapSection({
 
   if (!worksite) {
     return (
-      <section
-        className="bg-canvas rounded-[18px] p-6 border border-hairline shadow-sm"
-        id="attendance-map-section"
-      >
-        <h3 className="text-[17px] font-semibold">지도</h3>
-        <p className="mt-3 text-[14px] text-ink-muted-48">오늘 배정된 근무지가 없어 지도를 표시할 수 없습니다.</p>
-      </section>
+      <Card className="w-full shadow-sm border" id="attendance-map-section">
+        <CardHeader>
+          <CardTitle className="text-base font-bold flex items-center gap-2">
+            <Map className="size-4 text-primary" />
+            <span>지도</span>
+          </CardTitle>
+          <CardDescription>
+            오늘 배정된 근무지가 없어 지도를 표시할 수 없습니다.
+          </CardDescription>
+        </CardHeader>
+      </Card>
     );
   }
 
   return (
-    <section className="bg-canvas rounded-[18px] p-6 border border-hairline shadow-sm" id="attendance-map-section">
-      <div className="mb-4 flex flex-col gap-1">
-        <h3 className="text-[17px] font-semibold">지도</h3>
-        <p className="text-[13px] text-ink-muted-48">근무지 : {worksite.name}</p>
-        <p className="text-[13px] text-ink-muted-48">{formatCurrentDistance(worksite, currentGps)}</p>
-      </div>
-      <div
-        ref={mapElementRef}
-        className="h-[320px] w-full overflow-hidden rounded-[16px] border border-hairline bg-canvas-parchment"
-        data-testid="attendance-map"
-        id="attendance-map-canvas"
-      />
-      <div className="mt-3 flex flex-wrap gap-3 text-[13px] text-ink-muted-48">
-        <span className="inline-flex items-center gap-2">
-          <span className="h-3 w-3 rounded-full bg-primary" />
-          현재 위치
-        </span>
-        <span className="inline-flex items-center gap-2">
-          <span className="h-3 w-3 rounded-full border border-primary bg-primary/10" />
-          지오펜스 ({worksite.radius_meters}m)
-        </span>
-      </div>
-      {status ? <p className="status-warn mt-3 text-center">{status}</p> : null}
-    </section>
+    <Card className="w-full shadow-sm border" id="attendance-map-section">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base font-bold flex items-center gap-2">
+            <Map className="size-4 text-primary" />
+            <span>근무지 위치 지도</span>
+          </CardTitle>
+          <Badge variant="outline" className="text-xs">
+            {formatCurrentDistance(worksite, currentGps)}
+          </Badge>
+        </div>
+        <CardDescription className="text-xs">
+          근무지 : {worksite.name}
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent className="space-y-3">
+        <div
+          ref={mapElementRef}
+          aria-label={`${worksite.name} 지도 및 현재 위치`}
+          className="h-[320px] w-full overflow-hidden rounded-lg border bg-muted/40"
+          data-testid="attendance-map"
+          id="attendance-map-canvas"
+        />
+
+        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground pt-1">
+          <span className="inline-flex items-center gap-1.5 font-medium">
+            <span className="h-2.5 w-2.5 rounded-full bg-blue-600" aria-hidden="true" />
+            현재 위치
+          </span>
+          <span className="inline-flex items-center gap-1.5 font-medium">
+            <span className="h-2.5 w-2.5 rounded-full border border-blue-600 bg-blue-100" aria-hidden="true" />
+            지오펜스 ({worksite.radius_meters}m)
+          </span>
+        </div>
+
+        {status && (
+          <GuardStatusAlert
+            status="error"
+            title="지도 상태"
+            description={status}
+          />
+        )}
+      </CardContent>
+    </Card>
   );
 }

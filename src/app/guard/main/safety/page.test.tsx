@@ -138,7 +138,7 @@ describe("guard safety education page", () => {
     render(<GuardSafetyEducationPage />);
 
     expect(await screen.findByRole("button", { name: fireTitle })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "제목" })).toBeInTheDocument();
+    expect(screen.getByText("미이수 안전교육 목록")).toBeInTheDocument();
     expect(screen.queryByRole("columnheader", { name: "링크" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "https://www.youtube.com/watch?v=fireSafety" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "https://youtu.be/patrolSafety" })).not.toBeInTheDocument();

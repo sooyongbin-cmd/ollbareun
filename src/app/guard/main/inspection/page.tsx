@@ -4,7 +4,13 @@ import { BrowserQRCodeReader } from "@zxing/browser";
 import type { IScannerControls } from "@zxing/browser";
 import { useEffect, useRef, useState } from "react";
 import { parseInspectionQrPayload, type InspectionQrPayload } from "@/lib/inspection";
-import AlertModal from "@/components/modals/alert-modal";
+import { GuardNoticeDialog } from "@/components/guard/guard-notice-dialog";
+import { GuardPageHeader } from "@/components/guard/guard-page-header";
+import { GuardActionButton } from "@/components/guard/guard-action-button";
+import { GuardStatusAlert } from "@/components/guard/guard-status-alert";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Camera } from "lucide-react";
 import { readStoredGuardSession } from "../../guard-session-storage";
 
 type GuardSession = {
@@ -124,51 +130,76 @@ export default function GuardInspectionPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[980px] w-full px-5 py-[80px]">
-      <div className="max-w-[600px] mx-auto space-y-6">
-        <header>
-          <h1 className="text-[36px] font-semibold leading-[1.1]">현장점검</h1>
-          <p className="mt-2 text-[18px] text-ink-muted-48">현장 QR을 스캔한 뒤 촬영 버튼으로 점검을 저장합니다.</p>
-        </header>
+    <div className="w-full space-y-6">
+      <GuardPageHeader
+        title="현장점검 (QR코드)"
+        description="현장 QR을 스캔한 뒤 촬영 버튼으로 점검을 저장합니다."
+      />
 
-        <section className="bg-canvas-parchment rounded-[18px] p-[24px] border border-hairline/50 space-y-5">
-          <video
-            ref={videoRef}
-            className="aspect-[4/3] w-full rounded-[12px] border border-hairline bg-ink object-cover"
-            muted
-            playsInline
-          />
+      <Card className="w-full shadow-sm border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-bold flex items-center gap-2">
+            <Camera className="size-4 text-primary" />
+            <span>QR 스캐너</span>
+          </CardTitle>
+          <CardDescription className="text-xs">{status}</CardDescription>
+        </CardHeader>
 
-          <div className="rounded-[12px] border border-hairline/50 bg-canvas p-4 space-y-2">
-            <p className="text-[14px] font-semibold text-ink-muted-48">{status}</p>
-            {qrPayload ? (
-              <div className="grid gap-1 text-[15px]">
-                <span className="font-semibold">{qrPayload.siteName}</span>
-                <span className="text-ink-muted-48">{qrPayload.worksiteName}</span>
-                <span className="text-ink-muted-48">
-                  {qrPayload.gpsInfo.latitude.toFixed(6)}, {qrPayload.gpsInfo.longitude.toFixed(6)}
-                </span>
-              </div>
-            ) : null}
-            {error ? <p className="status-warn">{error}</p> : null}
+        <CardContent className="space-y-4">
+          {/* Camera Video Frame */}
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border bg-black">
+            <video
+              ref={videoRef}
+              aria-label="QR 스캔 카메라 화면"
+              className="h-full w-full object-cover"
+              muted
+              playsInline
+            />
           </div>
 
-          <button
-            className="button-primary w-full justify-center disabled:opacity-50"
+          {/* QR Scanned Information */}
+          {qrPayload && (
+            <div className="rounded-lg border bg-muted/30 p-3 space-y-1.5 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-foreground text-sm">{qrPayload.siteName}</span>
+                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                  {qrPayload.worksiteName}
+                </Badge>
+              </div>
+              <p className="text-muted-foreground">
+                위치 좌표: {qrPayload.gpsInfo.latitude.toFixed(6)}, {qrPayload.gpsInfo.longitude.toFixed(6)}
+              </p>
+            </div>
+          )}
+
+          {error && (
+            <GuardStatusAlert
+              status="error"
+              title="스캔 오류"
+              description={error}
+            />
+          )}
+
+          <GuardActionButton
             disabled={!qrPayload || saving}
+            isLoading={saving}
+            loadingText="저장 중..."
             onClick={handleCapture}
-            type="button"
+            icon={<Camera className="size-4" />}
           >
             촬영
-          </button>
-        </section>
-      </div>
+          </GuardActionButton>
+        </CardContent>
+      </Card>
 
-      <AlertModal
-        isOpen={Boolean(alertMessage)}
-        onClose={() => setAlertMessage("")}
+      <GuardNoticeDialog
+        open={Boolean(alertMessage)}
+        onOpenChange={(open) => {
+          if (!open) setAlertMessage("");
+        }}
         title="알림"
         description={alertMessage}
+        onConfirm={() => setAlertMessage("")}
       />
     </div>
   );

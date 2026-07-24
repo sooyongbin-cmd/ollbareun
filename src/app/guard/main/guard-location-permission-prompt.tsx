@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import AlertModal from "@/components/modals/alert-modal";
+import { GuardNoticeDialog } from "@/components/guard/guard-notice-dialog";
 import {
   notifyLocationPermissionGranted,
   queryGeolocationPermission,
@@ -80,12 +80,13 @@ export default function GuardLocationPermissionPrompt() {
   }
 
   return (
-    <AlertModal
-      isOpen
-      onClose={handleClose}
+    <GuardNoticeDialog
+      open={Boolean(permissionState)}
+      dismissible={false}
+      onConfirm={handleClose}
       title="위치 권한이 필요합니다"
       description={dialogCopy.description}
-      buttonLabel={dialogCopy.buttonLabel}
+      confirmLabel={dialogCopy.buttonLabel}
     />
   );
 }

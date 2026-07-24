@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   buildInspectionQrPayload,
@@ -7,7 +8,13 @@ import {
   type InspectionQrPayload,
   type InspectionSiteRow,
 } from "@/lib/inspection";
-import AlertModal from "@/components/modals/alert-modal";
+import { GuardNoticeDialog } from "@/components/guard/guard-notice-dialog";
+import { GuardPageHeader } from "@/components/guard/guard-page-header";
+import { GuardActionButton } from "@/components/guard/guard-action-button";
+import { GuardStatusAlert } from "@/components/guard/guard-status-alert";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Radio, QrCode } from "lucide-react";
 import { readStoredGuardSession } from "../../guard-session-storage";
 
 type GuardSession = {
@@ -171,6 +178,7 @@ export default function GuardInspectionNfcPage() {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [nfcSupported] = useState(() => typeof window === "undefined" || "NDEFReader" in window);
   const handledPayloadRef = useRef("");
 
   const saveInspectionPayload = useCallback(
@@ -269,35 +277,83 @@ export default function GuardInspectionNfcPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[980px] w-full px-5 py-[80px]">
-      <div className="max-w-[600px] mx-auto space-y-6">
-        <header>
-          <h1 className="text-[36px] font-semibold leading-[1.1]">순찰(NFC태그)</h1>
-          <p className="mt-2 text-[18px] text-ink-muted-48">NFC 스티커를 태그하면 점검 기록을 저장합니다.</p>
-        </header>
+    <div className="w-full space-y-6">
+      <GuardPageHeader
+        title="현장점검 (NFC태그)"
+        description="NFC 스티커를 태그하면 점검 기록을 저장합니다."
+      />
 
-        <section className="bg-canvas-parchment rounded-[18px] p-[24px] border border-hairline/50 space-y-5">
-          <div className="rounded-[12px] border border-hairline/50 bg-canvas p-4 space-y-2">
-            <p className="text-[14px] font-semibold text-ink-muted-48">{saving ? "저장 중..." : status}</p>
-            {nfcPayload ? (
-              <div className="grid gap-1 text-[15px]">
-                <span className="font-semibold">{nfcPayload.siteName}</span>
-                <span className="text-ink-muted-48">{nfcPayload.worksiteName}</span>
-                <span className="text-ink-muted-48">
-                  {nfcPayload.gpsInfo.latitude.toFixed(6)}, {nfcPayload.gpsInfo.longitude.toFixed(6)}
-                </span>
-              </div>
-            ) : null}
-            {error ? <p className="status-warn">{error}</p> : null}
+      <Card className="w-full shadow-sm border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-bold flex items-center gap-2">
+            <Radio className="size-4 text-primary" />
+            <span>NFC 리더</span>
+          </CardTitle>
+          <CardDescription className="text-xs">
+            {saving ? "저장 중..." : status}
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent className="space-y-4">
+          {/* Tag Waiting Illustration Frame */}
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border bg-muted/30 flex flex-col items-center justify-center p-6 text-center">
+            <Radio className={`size-16 ${saving ? "text-primary animate-pulse" : "text-muted-foreground animate-ping"}`} />
+            <p className="mt-4 text-sm font-semibold text-foreground">
+              {saving ? "점검 기록을 저장하는 중입니다..." : "휴대폰 뒷면을 NFC 태그에 가까이 대주세요."}
+            </p>
           </div>
-        </section>
-      </div>
 
-      <AlertModal
-        isOpen={Boolean(alertMessage)}
-        onClose={handleSuccessAlertClose}
+          {/* NFC Scanned Information */}
+          {nfcPayload && (
+            <div className="rounded-lg border bg-muted/30 p-3 space-y-1.5 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-foreground text-sm">{nfcPayload.siteName}</span>
+                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                  {nfcPayload.worksiteName}
+                </Badge>
+              </div>
+              <p className="text-muted-foreground">
+                위치 좌표: {nfcPayload.gpsInfo.latitude.toFixed(6)}, {nfcPayload.gpsInfo.longitude.toFixed(6)}
+              </p>
+            </div>
+          )}
+
+          {error && (
+            <GuardStatusAlert
+              status="error"
+              title="NFC 오류"
+              description={error}
+            />
+          )}
+
+          {!nfcSupported && (
+            <GuardStatusAlert
+              status="warning"
+              title="NFC 미지원 안내"
+              description={
+                <div className="space-y-3 mt-1">
+                  <p>현재 기기/브라우저에서는 NFC를 직접 읽을 수 없습니다. QR 코드 점검을 이용해주세요.</p>
+                  <GuardActionButton asChild variant="outline">
+                    <Link href="/guard/main/inspection">
+                      <QrCode className="size-4" />
+                      <span>QR코드 점검으로 이동</span>
+                    </Link>
+                  </GuardActionButton>
+                </div>
+              }
+            />
+          )}
+        </CardContent>
+      </Card>
+
+      <GuardNoticeDialog
+        open={Boolean(alertMessage)}
+        onOpenChange={(open) => {
+          if (!open) handleSuccessAlertClose();
+        }}
         title="알림"
         description={alertMessage}
+        onConfirm={handleSuccessAlertClose}
       />
     </div>
   );

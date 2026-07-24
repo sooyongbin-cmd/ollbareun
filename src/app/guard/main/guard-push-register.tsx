@@ -2,8 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import AlertModal from "@/components/modals/alert-modal";
+import { GuardNoticeDialog } from "@/components/guard/guard-notice-dialog";
 import { readStoredGuardSession } from "../guard-session-storage";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Bell } from "lucide-react";
 
 const guardPushRegistrationStorageKey = "ollbareun.guard.pushRegistration";
 
@@ -87,28 +90,20 @@ function maskEndpoint(endpoint: string) {
   return `${endpoint.slice(0, 18)}...${endpoint.slice(-10)}`;
 }
 
-function getStepBadgeClass(status: PushStepStatus) {
+function renderStepBadge(status: PushStepStatus) {
   if (status === "success") {
-    return "bg-primary/10 text-primary";
+    return <Badge className="bg-emerald-600 text-white hover:bg-emerald-700">완료</Badge>;
   }
   if (status === "running") {
-    return "bg-status-warn/10 text-status-warn";
+    return <Badge className="bg-amber-500 text-white hover:bg-amber-600">진행중</Badge>;
   }
   if (status === "warning") {
-    return "bg-canvas text-ink-muted-48";
+    return <Badge variant="outline" className="text-amber-700 border-amber-300">확인필요</Badge>;
   }
   if (status === "error") {
-    return "bg-status-warn/15 text-status-warn";
+    return <Badge variant="destructive">실패</Badge>;
   }
-  return "bg-canvas text-ink-muted-48";
-}
-
-function getStepStatusLabel(status: PushStepStatus) {
-  if (status === "success") return "완료";
-  if (status === "running") return "진행중";
-  if (status === "warning") return "확인필요";
-  if (status === "error") return "실패";
-  return "대기";
+  return <Badge variant="secondary">대기</Badge>;
 }
 
 function readStoredGuardSessionInfo(): StoredGuardSessionInfo {
@@ -436,7 +431,6 @@ export default function GuardPushRegister() {
       }
     }
 
-    // Wait a bit for the page to settle before requesting permissions
     const timer = setTimeout(() => {
       registerPush();
     }, 1500);
@@ -444,7 +438,6 @@ export default function GuardPushRegister() {
     return () => clearTimeout(timer);
   }, [updateStep]);
 
-  // Listen to in-app messages broadcasted by the Service Worker when app is in the foreground
   useEffect(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
 
@@ -472,37 +465,44 @@ export default function GuardPushRegister() {
 
   return (
     <>
-      <section className="mb-6 bg-canvas-parchment rounded-[18px] p-[24px] border border-hairline/50">
-        <div className="flex flex-col gap-2">
-          <p className="text-[13px] font-semibold text-primary">Push 알림</p>
-          <h3 className="text-[21px] font-semibold">{pushStatusTitle}</h3>
-          <p className="text-[14px] leading-relaxed text-ink-muted-48">{pushStatusDetail}</p>
-        </div>
+      <Card className="w-full shadow-sm border">
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+            <Bell className="size-4 text-primary" />
+            <span>Push 알림 등록 상태</span>
+          </div>
+          <CardTitle className="text-lg font-bold mt-1">{pushStatusTitle}</CardTitle>
+          <CardDescription className="text-xs leading-relaxed">
+            {pushStatusDetail}
+          </CardDescription>
+        </CardHeader>
 
-        <ol className="mt-5 grid gap-3">
-          {pushSteps.map((step) => (
-            <li
-              key={step.id}
-              className="grid gap-2 rounded-[12px] border border-hairline/40 bg-canvas px-4 py-3 md:grid-cols-[150px_1fr_auto] md:items-center"
-            >
-              <span className="text-[14px] font-semibold text-ink">{step.label}</span>
-              <span className="text-[13px] leading-relaxed text-ink-muted-48">{step.detail}</span>
-              <span
-                className={`inline-flex w-fit items-center rounded-full px-3 py-1 text-[12px] font-semibold ${getStepBadgeClass(step.status)}`}
+        <CardContent>
+          <ol className="grid gap-2 text-xs">
+            {pushSteps.map((step) => (
+              <li
+                key={step.id}
+                className="flex items-center justify-between gap-2 rounded-lg border bg-muted/20 p-3"
               >
-                {getStepStatusLabel(step.status)}
-              </span>
-            </li>
-          ))}
-        </ol>
-      </section>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-foreground">{step.label}</p>
+                  <p className="text-[11px] text-muted-foreground truncate mt-0.5">{step.detail}</p>
+                </div>
+                <div className="shrink-0">{renderStepBadge(step.status)}</div>
+              </li>
+            ))}
+          </ol>
+        </CardContent>
+      </Card>
 
-      <AlertModal
-        isOpen={showInAppModal}
-        onClose={handleInAppModalClose}
+      <GuardNoticeDialog
+        open={showInAppModal}
+        onOpenChange={(open) => {
+          if (!open) handleInAppModalClose();
+        }}
         title={modalTitle}
         description={modalBody}
-        buttonLabel="확인"
+        onConfirm={handleInAppModalClose}
       />
     </>
   );

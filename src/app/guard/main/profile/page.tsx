@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import LoadingBoard from "@/components/loading-board";
 import { getSupabasePasskeyClient } from "@/lib/supabase-passkey-client";
 import {
   readStoredGuardSessionSnapshot,
@@ -15,6 +14,14 @@ import {
   subscribeToGuardFontZoomChange,
 } from "../../guard-zoom";
 import GuardLogoutButton from "../guard-logout-button";
+import { GuardPageHeader } from "@/components/guard/guard-page-header";
+import { GuardResponsiveTable } from "@/components/guard/guard-responsive-table";
+import { GuardStatusAlert } from "@/components/guard/guard-status-alert";
+import { GuardActionButton } from "@/components/guard/guard-action-button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Type, Calendar, History, KeyRound, LogOut, Minus, Plus } from "lucide-react";
 
 type GuardSession = {
   employee?: {
@@ -59,18 +66,6 @@ function readGuardEmployeeIdSnapshot() {
   }
 }
 
-function ProfileTableShell({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-[16px] border border-hairline bg-canvas">
-      {children}
-    </div>
-  );
-}
-
 function GuardZoomSettingSection({
   title,
   label,
@@ -91,36 +86,42 @@ function GuardZoomSettingSection({
   onChange: (zoomPercent: number) => void;
 }) {
   return (
-    <section
-      aria-label={title}
-      className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[16px]"
-    >
-      <h2 className="text-[24px] font-semibold">{title}</h2>
-      <div className="mt-4 flex items-center justify-between gap-4 rounded-[12px] bg-surface-black px-4 py-3 text-canvas">
-        <span className="text-[16px] font-semibold">{label}</span>
-        <div className="flex items-center gap-3">
-          <button
-            aria-label={decreaseLabel}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-[24px] leading-none transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
-            disabled={previousZoomPercent === zoomPercent}
-            onClick={() => onChange(previousZoomPercent)}
-            type="button"
-          >
-            -
-          </button>
-          <span className="min-w-[64px] text-center text-[16px] font-semibold">{zoomPercent}%</span>
-          <button
-            aria-label={increaseLabel}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-[24px] leading-none transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
-            disabled={nextZoomPercent === zoomPercent}
-            onClick={() => onChange(nextZoomPercent)}
-            type="button"
-          >
-            +
-          </button>
+    <Card className="w-full shadow-sm border" aria-label={title}>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base font-bold flex items-center gap-2">
+          <Type className="size-4 text-primary" />
+          <span>{title}</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center justify-between gap-4 rounded-lg bg-muted/40 p-4 border">
+          <span className="text-sm font-semibold text-foreground">{label}</span>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="icon-sm"
+              aria-label={decreaseLabel}
+              disabled={previousZoomPercent === zoomPercent}
+              onClick={() => onChange(previousZoomPercent)}
+              type="button"
+            >
+              <Minus className="size-4" />
+            </Button>
+            <span className="min-w-[60px] text-center text-sm font-bold">{zoomPercent}%</span>
+            <Button
+              variant="outline"
+              size="icon-sm"
+              aria-label={increaseLabel}
+              disabled={nextZoomPercent === zoomPercent}
+              onClick={() => onChange(nextZoomPercent)}
+              type="button"
+            >
+              <Plus className="size-4" />
+            </Button>
+          </div>
         </div>
-      </div>
-    </section>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -330,116 +331,134 @@ export default function GuardProfilePage() {
   }
 
   return (
-    <div className="mx-auto max-w-[980px] w-full px-5 py-[56px]">
-      <div className="max-w-[760px] mx-auto space-y-6">
-        <header>
-          <h1 className="text-[40px] font-semibold leading-[1.1]">개인프로필</h1>
-        </header>
+    <div className="w-full space-y-6">
+      <GuardPageHeader
+        title="개인프로필"
+        description="글자 확대 설정, 근무 스케줄 및 개인근태 내역을 확인합니다."
+      />
 
-        <GuardFontZoomControlSection />
+      {/* 1. Font Zoom Control Card (Top Priority) */}
+      <GuardFontZoomControlSection />
 
-        {displayedError ? <p className="status-warn">{displayedError}</p> : null}
-        {loading ? <LoadingBoard label="개인프로필을 불러오는 중입니다." /> : null}
+      {displayedError ? (
+        <GuardStatusAlert status="warning" title="세션 안내" description={displayedError} />
+      ) : null}
 
-        <section
-          aria-label="근무스케줄"
-          className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[16px]"
-        >
-          <h2 className="text-[24px] font-semibold">근무스케줄</h2>
-          <ProfileTableShell>
-            <table className="apple-table">
-              <thead>
-                <tr>
-                  <th className="text-left">기간</th>
-                  <th className="text-left">근무지</th>
-                </tr>
-              </thead>
-              <tbody>
-                {!loading && (profile?.schedules.length ?? 0) === 0 ? (
-                  <tr>
-                    <td data-responsive-empty colSpan={2} className="p-8 text-center text-ink-muted-48 italic">
-                      근무스케줄이 없습니다.
-                    </td>
-                  </tr>
-                ) : (
-                  profile?.schedules.map((schedule) => (
-                    <tr key={schedule.id}>
-                      <td data-label="기간">{schedule.period}</td>
-                      <td data-label="근무지">{schedule.worksiteName}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </ProfileTableShell>
-        </section>
+      {/* 2. Work Schedule Card */}
+      <Card className="w-full shadow-sm border" aria-label="근무스케줄">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-bold flex items-center gap-2">
+            <Calendar className="size-4 text-primary" />
+            <span>근무스케줄</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : (
+            <GuardResponsiveTable<ScheduleRow>
+              columns={[
+                { key: "period", header: "기간" },
+                { key: "worksiteName", header: "근무지" },
+              ]}
+              data={profile?.schedules ?? []}
+              keyExtractor={(item) => item.id}
+              renderCell={(item, key) => (key === "period" ? item.period : item.worksiteName)}
+              emptyMessage="근무스케줄이 없습니다."
+            />
+          )}
+        </CardContent>
+      </Card>
 
-        <section
-          aria-label="월별출근현황"
-          className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[16px]"
-        >
-          <h2 className="text-[24px] font-semibold">월별출근현황</h2>
-          <ProfileTableShell>
-            <table className="apple-table">
-              <thead>
-                <tr>
-                  <th className="text-left">연월</th>
-                  <th className="text-left">출근일수</th>
-                  <th className="text-left">근무시간합</th>
-                </tr>
-              </thead>
-              <tbody>
-                {!loading && (profile?.monthlyAttendance.length ?? 0) === 0 ? (
-                  <tr>
-                    <td data-responsive-empty colSpan={3} className="p-8 text-center text-ink-muted-48 italic">
-                      최근 1년 출근현황이 없습니다.
-                    </td>
-                  </tr>
-                ) : (
-                  profile?.monthlyAttendance.map((row) => (
-                    <tr key={row.yearMonth}>
-                      <td data-label="연월">{row.yearMonth}</td>
-                      <td data-label="출근일수">{row.attendanceDays}일</td>
-                      <td data-label="근무시간합">{row.workHoursTotal}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </ProfileTableShell>
-        </section>
+      {/* 3. Monthly Attendance Status Card */}
+      <Card className="w-full shadow-sm border" aria-label="월별출근현황">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-bold flex items-center gap-2">
+            <History className="size-4 text-primary" />
+            <span>월별출근현황</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : (
+            <GuardResponsiveTable<MonthlyAttendanceRow>
+              columns={[
+                { key: "yearMonth", header: "연월" },
+                { key: "attendanceDays", header: "출근일수" },
+                { key: "workHoursTotal", header: "근무시간합" },
+              ]}
+              data={profile?.monthlyAttendance ?? []}
+              keyExtractor={(item) => item.yearMonth}
+              renderCell={(item, key) => {
+                if (key === "yearMonth") return item.yearMonth;
+                if (key === "attendanceDays") return `${item.attendanceDays}일`;
+                return item.workHoursTotal;
+              }}
+              emptyMessage="최근 1년 출근현황이 없습니다."
+            />
+          )}
+        </CardContent>
+      </Card>
 
-        <section
-          aria-label="로그아웃"
-          className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[16px]"
-        >
-          <h2 className="text-[24px] font-semibold">로그아웃</h2>
-          <div className="mt-4">
-            <GuardLogoutButton />
-          </div>
-        </section>
+      {/* 4. Logout Card (Directly above Passkey Card) */}
+      <Card className="w-full shadow-sm border" aria-label="로그아웃">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-bold flex items-center gap-2">
+            <LogOut className="size-4 text-destructive" />
+            <span>로그아웃</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <GuardLogoutButton />
+        </CardContent>
+      </Card>
 
-        <section
-          aria-label="패스키 등록"
-          className="rounded-[18px] border border-hairline/50 bg-canvas-parchment p-[16px]"
-        >
-          <h2 className="text-[24px] font-semibold">패스키등록</h2>
-          <p className="mt-2 text-[14px] leading-relaxed text-ink-muted-48">{getPasskeyStatusText()}</p>
-          {passkeyMessage ? <p className="mt-3 text-[14px] leading-relaxed text-primary">{passkeyMessage}</p> : null}
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+      {/* 5. Passkey Registration Card */}
+      <Card className="w-full shadow-sm border" aria-label="패스키 등록">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-bold flex items-center gap-2">
+            <KeyRound className="size-4 text-primary" />
+            <span>패스키등록</span>
+          </CardTitle>
+          <CardDescription className="text-xs">
+            {getPasskeyStatusText()}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {passkeyMessage ? (
+            <GuardStatusAlert status="info" title="패스키 안내" description={passkeyMessage} />
+          ) : null}
+
+          <div className="flex flex-col gap-2 sm:flex-row">
             {!passkeyRequest || passkeyRequest.status === "rejected" || passkeyRequest.status === "revoked" ? (
-              <button className="button-primary" disabled={passkeyLoading || !employeeId} onClick={handlePasskeyRequest} type="button">
+              <GuardActionButton
+                disabled={passkeyLoading || !employeeId}
+                isLoading={passkeyLoading}
+                onClick={handlePasskeyRequest}
+              >
                 패스키 등록 요청
-              </button>
+              </GuardActionButton>
             ) : null}
+
             {passkeyRequest?.status === "approved" ? (
-              <button className="button-primary" disabled={passkeyLoading} onClick={handlePasskeyRegistration} type="button">
+              <GuardActionButton
+                disabled={passkeyLoading}
+                isLoading={passkeyLoading}
+                onClick={handlePasskeyRegistration}
+              >
                 이 기기에 패스키 등록
-              </button>
+              </GuardActionButton>
             ) : null}
           </div>
-        </section>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

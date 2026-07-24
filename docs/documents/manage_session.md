@@ -58,12 +58,3 @@ Supabase Dashboard의 **Authentication → Sessions**에서 다음 항목을 확
 - 삭제되거나 권한이 회수된 관리자의 보호 화면과 API 접근이 차단된다.
 - 근무자와 관리자의 명시적 로그아웃 이후 보호 화면에 다시 접근할 수 없다.
 
-## 7. 빌드
-
-프로젝트의 `npm run build`는 다음 순서로 실행된다.
-
-1. `npm run docs:build`
-2. `vitepress build docs --outDir public/docs/documents`
-3. `next build --webpack`
-
-따라서 전체 빌드를 실행하면 이 문서를 포함한 VitePress 결과물이 `public/docs/documents`에 먼저 생성된 후 Next.js production build가 실행된다.

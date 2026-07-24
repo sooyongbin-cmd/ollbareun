@@ -51,7 +51,6 @@ export default function GuardSessionSummary() {
       <span className="truncate font-medium text-foreground" title={summary.name}>
         {summary.name}
       </span>
-      {summary.role ? <span className="rounded-full bg-secondary px-2 py-0.5 text-secondary-foreground">{summary.role}</span> : null}
       {summary.worksiteName ? (
         <span className="min-w-0 truncate" title={`오늘의 근무지 : ${summary.worksiteName}`}>
           (오늘의 근무지 : {summary.worksiteName})

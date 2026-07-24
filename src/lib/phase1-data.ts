@@ -1,7 +1,7 @@
 import { canClockIn, canClockOut, canClockOutAtWorksite, normalizePhone } from "./phase1";
 import { requireGpsInfo, type GpsInfo } from "./gps";
 import { getSupabase } from "./supabase";
-import { isAssignmentDayOff } from "./assignment-days-off";
+import { getAssignmentDayOffCounts, isAssignmentDayOff } from "./assignment-days-off";
 
 export type EmployeeRow = {
   id: string;
@@ -326,28 +326,19 @@ export async function createAssignment(input: {
 
 export async function listAssignments() {
   const supabase = getSupabase();
-  const [assignmentsResult, employeesResult, worksitesResult, daysOffResult] = await Promise.all([
+  const [assignmentsResult, employeesResult, worksitesResult, daysOffCountByAssignmentId] = await Promise.all([
     supabase.from("work_assignments").select("*").order("start_date", { ascending: false }).order("created_at", { ascending: false }),
     supabase.from("employees").select("id,name"),
     supabase.from("worksites").select("id,name"),
-    supabase.from("work_assignment_days_off").select("work_assignment_id"),
+    getAssignmentDayOffCounts(),
   ]);
 
   throwIfError(assignmentsResult.error);
   throwIfError(employeesResult.error);
   throwIfError(worksitesResult.error);
-  throwIfError(daysOffResult.error);
 
   const employeesById = new Map((employeesResult.data ?? []).map((employee) => [employee.id, employee.name]));
   const worksitesById = new Map((worksitesResult.data ?? []).map((worksite) => [worksite.id, worksite.name]));
-
-  const daysOffCountByAssignmentId = new Map<string, number>();
-  for (const row of (daysOffResult.data ?? []) as { work_assignment_id: string }[]) {
-    daysOffCountByAssignmentId.set(
-      row.work_assignment_id,
-      (daysOffCountByAssignmentId.get(row.work_assignment_id) ?? 0) + 1,
-    );
-  }
 
   return (assignmentsResult.data ?? []).map((assignment) => ({
     ...assignment,

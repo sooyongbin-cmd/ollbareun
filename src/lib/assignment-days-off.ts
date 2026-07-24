@@ -132,3 +132,18 @@ export async function listDaysOffByDate(dateInput: unknown) {
   throwIfError(error);
   return (data ?? []) as Pick<AssignmentDayOffRow, "work_assignment_id" | "day_off_date">[];
 }
+
+export async function getAssignmentDayOffCounts() {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("work_assignment_days_off")
+    .select("work_assignment_id");
+
+  throwIfError(error);
+
+  const counts = new Map<string, number>();
+  for (const row of (data ?? []) as Pick<AssignmentDayOffRow, "work_assignment_id">[]) {
+    counts.set(row.work_assignment_id, (counts.get(row.work_assignment_id) ?? 0) + 1);
+  }
+  return counts;
+}

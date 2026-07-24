@@ -1,19 +1,21 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { authenticateGuard, clockIn, clockOut, createAssignment, listAssignments } from "./phase1-data";
 import { getSupabase } from "./supabase";
-import { isAssignmentDayOff } from "./assignment-days-off";
+import { getAssignmentDayOffCounts, isAssignmentDayOff } from "./assignment-days-off";
 
 vi.mock("./supabase", () => ({
   getSupabase: vi.fn(),
 }));
 
 vi.mock("./assignment-days-off", () => ({
+  getAssignmentDayOffCounts: vi.fn(),
   isAssignmentDayOff: vi.fn().mockResolvedValue(false),
 }));
 
 describe("guard authentication data rules", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.mocked(getAssignmentDayOffCounts).mockResolvedValue(new Map());
     vi.mocked(isAssignmentDayOff).mockResolvedValue(false);
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-05-26T09:00:00+09:00"));
@@ -386,26 +388,16 @@ describe("guard authentication data rules", () => {
       }),
     };
 
-    const daysOffQuery = {
-      select: vi.fn().mockResolvedValue({
-        data: [
-          { work_assignment_id: "assign-1", day_off_date: "2026-05-22" },
-          { work_assignment_id: "assign-1", day_off_date: "2026-05-23" },
-        ],
-        error: null,
-      }),
-    };
-
     const supabase = {
       from: vi.fn((table: string) => {
         if (table === "work_assignments") return assignmentsQuery;
         if (table === "employees") return employeesQuery;
         if (table === "worksites") return worksitesQuery;
-        if (table === "work_assignment_days_off") return daysOffQuery;
         throw new Error(`Unexpected table: ${table}`);
       }),
     };
     vi.mocked(getSupabase).mockReturnValue(supabase as never);
+    vi.mocked(getAssignmentDayOffCounts).mockResolvedValue(new Map([["assign-1", 2]]));
 
     const result = await listAssignments();
     expect(result).toEqual([

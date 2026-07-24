@@ -396,15 +396,15 @@ export default function ManagerPage() {
                 <TableBody>
                   {data.worksiteAssignments.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={2} className="h-28 text-center text-muted-foreground">
+                      <TableCell data-responsive-empty colSpan={2} className="h-28 text-center text-muted-foreground">
                         등록된 근무지가 없습니다.
                       </TableCell>
                     </TableRow>
                   ) : (
                     data.worksiteAssignments.map((worksite) => (
                       <TableRow key={worksite.worksiteId}>
-                        <TableCell className="font-medium">{worksite.worksiteName}</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell data-label="근무지명" className="font-medium">{worksite.worksiteName}</TableCell>
+                        <TableCell data-label="배정인원수" className="text-right">
                           {worksite.assignedCount > 0 ? (
                             <Link
                               className="font-semibold text-primary hover:underline"
@@ -450,17 +450,17 @@ export default function ManagerPage() {
                 <TableBody>
                   {data.liveAttendance.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="h-28 text-center text-muted-foreground">
+                      <TableCell data-responsive-empty colSpan={5} className="h-28 text-center text-muted-foreground">
                         현재 출근 기록이 없습니다.
                       </TableCell>
                     </TableRow>
                   ) : (
                     data.liveAttendance.map((row, index) => (
                       <TableRow key={`${row.employeeName}-${row.clockInAt ?? index}`}>
-                        <TableCell className="font-medium">{row.employeeName}</TableCell>
-                        <TableCell>{row.worksiteName}</TableCell>
-                        <TableCell className="font-mono text-xs">{formatTime(row.clockInAt)}</TableCell>
-                        <TableCell>
+                        <TableCell data-label="성명" className="font-medium">{row.employeeName}</TableCell>
+                        <TableCell data-label="현장명">{row.worksiteName}</TableCell>
+                        <TableCell data-label="출근시간" className="font-mono text-xs">{formatTime(row.clockInAt)}</TableCell>
+                        <TableCell data-label="교육여부">
                           <Badge
                             variant="outline"
                             className={
@@ -472,7 +472,7 @@ export default function ManagerPage() {
                             {row.educationStatus}
                           </Badge>
                         </TableCell>
-                        <TableCell>
+                        <TableCell data-label="출근상태">
                           <Badge
                             variant={row.attendanceStatus === "출근" ? "default" : "secondary"}
                           >

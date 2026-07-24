@@ -8,6 +8,7 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
     <div
       data-slot="table-container"
+      data-mobile-layout="cards"
       className="relative w-full overflow-x-auto"
     >
       <table

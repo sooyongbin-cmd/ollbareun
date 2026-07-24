@@ -18,6 +18,14 @@ function listTsxFiles(directory: string): string[] {
 
 describe("responsive data table contract", () => {
   const appDirectory = path.resolve(process.cwd(), "src/app");
+  const tableComponentSource = readFileSync(
+    path.resolve(process.cwd(), "src/components/ui/table.tsx"),
+    "utf8",
+  );
+  const globalStylesSource = readFileSync(
+    path.resolve(process.cwd(), "src/app/globals.css"),
+    "utf8",
+  );
   const tableSources = listTsxFiles(appDirectory)
     .map((filePath) => ({ filePath, source: readFileSync(filePath, "utf8") }))
     .filter(({ source }) => /<Table(?:\s|>)/.test(source));
@@ -29,6 +37,25 @@ describe("responsive data table contract", () => {
     );
 
     expect(violations).toEqual([]);
+  });
+
+  it("marks every data cell with a mobile label or empty-state marker", () => {
+    const violations = tableSources.flatMap(({ filePath, source }) =>
+      [...source.matchAll(/<TableCell\b[^>]*>/g)]
+        .map(([tag]) => tag)
+        .filter((tag) => !/\bdata-label=/.test(tag) && !/\bdata-responsive-empty\b/.test(tag))
+        .map((tag) => `${path.relative(process.cwd(), filePath)}: ${tag}`),
+    );
+
+    expect(violations).toEqual([]);
+  });
+
+  it("uses the shared mobile card layout for every shadcn table", () => {
+    expect(tableComponentSource).toContain('data-mobile-layout="cards"');
+    expect(globalStylesSource).toContain(
+      '[data-slot="table-container"][data-mobile-layout="cards"]',
+    );
+    expect(globalStylesSource).toContain('content: attr(data-label)');
   });
 
   it("covers all current application data tables", () => {

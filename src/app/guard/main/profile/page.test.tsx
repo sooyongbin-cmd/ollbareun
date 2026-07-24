@@ -154,6 +154,7 @@ describe("guard profile page", () => {
     expect(window.localStorage.getItem("ollbareun.guard.session")).toBeNull();
     expect(window.sessionStorage.getItem("ollbareun.guard.session")).toBeNull();
     expect(window.sessionStorage.getItem("ollbareun.guard.pushRegistration")).toBeNull();
+    expect(signOut).toHaveBeenCalled();
   });
 
   it("shows a session message when guard session is missing", () => {

@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, type FormEvent } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
-import { markManagerBrowserSessionActive } from "../manager-browser-session-storage";
 import ManagerInAppBrowserChecker from "../manager-in-app-browser-checker";
 import ManagerInstallPrompt from "../manager-install-prompt";
 
@@ -53,8 +52,6 @@ export default function ManagerEmailLogin({
     event.preventDefault();
     setErrorMessage("");
     setIsSending(true);
-    markManagerBrowserSessionActive();
-
     try {
       if (initialAdminSetupRequired) {
         const response = await fetch("/api/manager/initial-admin/request", {

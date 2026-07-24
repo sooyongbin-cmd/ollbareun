@@ -1,16 +1,24 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { listEducationCompletions, markEducationCompletion } from "@/lib/education-completions";
+import { requireActiveEmployee } from "@/lib/active-employee";
 import { GET, POST } from "./route";
 
 vi.mock("@/lib/education-completions", () => ({
   listEducationCompletions: vi.fn(),
   markEducationCompletion: vi.fn(),
 }));
+vi.mock("@/lib/active-employee", () => ({
+  requireActiveEmployee: vi.fn(),
+  getActiveEmployeeErrorStatus: (error: Error, fallback: number) =>
+    error.name === "InactiveEmployeeError" ? 403 : fallback,
+}));
 
 describe("education completions route", () => {
   beforeEach(() => {
     vi.mocked(listEducationCompletions).mockReset();
     vi.mocked(markEducationCompletion).mockReset();
+    vi.mocked(requireActiveEmployee).mockReset();
+    vi.mocked(requireActiveEmployee).mockResolvedValue({ id: "employee-1" });
   });
 
   it("lists education completions", async () => {
@@ -75,5 +83,24 @@ describe("education completions route", () => {
         completed_at: "2026-05-27T09:10:00.000Z",
       },
     });
+  });
+
+  it("rejects completion writes after employee access is revoked", async () => {
+    const error = new Error("퇴직 처리된 직원은 이용할 수 없습니다.");
+    error.name = "InactiveEmployeeError";
+    vi.mocked(requireActiveEmployee).mockRejectedValue(error);
+
+    const response = await POST(
+      new Request("http://localhost/api/education/completions", {
+        method: "POST",
+        body: JSON.stringify({
+          employeeId: "employee-1",
+          resourceId: "resource-1",
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(403);
+    expect(markEducationCompletion).not.toHaveBeenCalled();
   });
 });

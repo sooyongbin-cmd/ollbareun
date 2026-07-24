@@ -33,30 +33,24 @@ describe("guard session storage", () => {
     });
   });
 
-  it("keeps sessions active for 24 hours from the last activity time", () => {
+  it("keeps sessions active indefinitely", () => {
     vi.setSystemTime(new Date("2026-06-12T00:00:00.000Z"));
     writeStoredGuardSession(session);
 
-    vi.setSystemTime(new Date("2026-06-12T23:59:00.000Z"));
+    vi.setSystemTime(new Date("2036-06-12T00:00:00.000Z"));
     expect(hasActiveStoredGuardSession()).toBe(true);
-
-    vi.setSystemTime(new Date("2026-06-13T00:01:00.000Z"));
-    expect(hasActiveStoredGuardSession()).toBe(false);
-    expect(window.localStorage.getItem(guardSessionStorageKey)).toBeNull();
+    expect(window.localStorage.getItem(guardSessionStorageKey)).not.toBeNull();
   });
 
-  it("touches active sessions to extend the 24 hour window", () => {
+  it("touches active sessions without imposing an expiry", () => {
     vi.setSystemTime(new Date("2026-06-12T00:00:00.000Z"));
     writeStoredGuardSession(session);
 
     vi.setSystemTime(new Date("2026-06-12T23:00:00.000Z"));
     touchStoredGuardSession();
 
-    vi.setSystemTime(new Date("2026-06-13T22:59:00.000Z"));
+    vi.setSystemTime(new Date("2036-06-13T22:59:00.000Z"));
     expect(hasActiveStoredGuardSession()).toBe(true);
-
-    vi.setSystemTime(new Date("2026-06-13T23:01:00.000Z"));
-    expect(hasActiveStoredGuardSession()).toBe(false);
   });
 
   it("migrates a legacy sessionStorage session into localStorage", () => {

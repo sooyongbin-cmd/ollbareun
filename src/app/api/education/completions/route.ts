@@ -1,4 +1,5 @@
 import { listEducationCompletions, markEducationCompletion } from "@/lib/education-completions";
+import { getActiveEmployeeErrorStatus, requireActiveEmployee } from "@/lib/active-employee";
 
 export async function GET() {
   try {
@@ -14,6 +15,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    await requireActiveEmployee(body.employeeId);
     return Response.json({
       completion: await markEducationCompletion({
         employeeId: body.employeeId,
@@ -23,7 +25,7 @@ export async function POST(request: Request) {
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "교육이수 정보를 저장하지 못했습니다." },
-      { status: 400 },
+      { status: getActiveEmployeeErrorStatus(error, 400) },
     );
   }
 }

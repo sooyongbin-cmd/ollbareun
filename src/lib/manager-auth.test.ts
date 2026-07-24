@@ -7,6 +7,10 @@ import {
   linkPreapprovedAdminUser,
 } from "./manager-auth";
 
+vi.mock("./manager-security-email", () => ({
+  sendAdminActivationEmail: vi.fn().mockResolvedValue(undefined),
+}));
+
 function createAdminLookupClient(adminRow: unknown) {
   return {
     from: (table: string) => {

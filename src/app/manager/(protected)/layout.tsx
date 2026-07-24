@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import ManagerBrowserSessionGate from "./manager-browser-session-gate";
 import ManagerLoadingMessage from "./manager-loading-message";
 import ManagerSidebar from "./manager-sidebar";
 import ManagerHeader from "./manager-header";
@@ -14,7 +13,6 @@ export default function ManagerLayout({
 }) {
   return (
     <div className="manager-shell min-h-svh bg-background text-foreground selection:bg-primary/20">
-      <ManagerBrowserSessionGate />
       <SidebarProvider
         className="manager-shell"
         style={

@@ -55,7 +55,6 @@ describe("manager layout", () => {
       },
       writable: true,
     });
-    window.sessionStorage.setItem("ollbareun.manager.browserSession", "active");
   });
 
   it("collapses the desktop sidebar and exposes icon tooltips", async () => {
@@ -157,8 +156,7 @@ describe("manager layout", () => {
     expect(screen.getByRole("status", { name: "자료를 불러오는 중입니다." })).toBeInTheDocument();
   });
 
-  it("signs out and returns to manager auth when the browser session marker is missing", async () => {
-    window.sessionStorage.removeItem("ollbareun.manager.browserSession");
+  it("keeps the persisted manager session after the browser is reopened", async () => {
     document.cookie = "sb-test-auth-token=value; path=/";
 
     render(
@@ -167,7 +165,21 @@ describe("manager layout", () => {
       </ManagerLayout>,
     );
 
-    expect(authMocks.signOut).toHaveBeenCalled();
+    expect(authMocks.signOut).not.toHaveBeenCalled();
+    expect(authMocks.replace).not.toHaveBeenCalled();
+  });
+
+  it("signs out only when the manager selects logout", async () => {
+    const user = userEvent.setup();
+    render(
+      <ManagerLayout>
+        <div>manager body</div>
+      </ManagerLayout>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "로그아웃" }));
+
+    expect(authMocks.signOut).toHaveBeenCalledOnce();
     await waitFor(() => expect(authMocks.replace).toHaveBeenCalledWith("/manager/auth"));
   });
 

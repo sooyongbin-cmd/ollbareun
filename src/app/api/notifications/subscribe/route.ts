@@ -1,4 +1,5 @@
 import { getSupabase } from "@/lib/supabase";
+import { getActiveEmployeeErrorStatus, requireActiveEmployee } from "@/lib/active-employee";
 
 export async function POST(request: Request) {
   try {
@@ -7,6 +8,8 @@ export async function POST(request: Request) {
     if (!employeeId) {
       return Response.json({ error: "employeeId가 필요합니다." }, { status: 400 });
     }
+
+    await requireActiveEmployee(employeeId);
 
     if (
       !subscription ||
@@ -57,7 +60,7 @@ export async function POST(request: Request) {
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "구독 설정 저장 중 오류가 발생했습니다." },
-      { status: 500 },
+      { status: getActiveEmployeeErrorStatus(error, 500) },
     );
   }
 }

@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import type { UserResponse } from "@supabase/supabase-js";
-import { ChevronRight, UserRound } from "lucide-react";
+import { ChevronRight, LogOut, UserRound } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { findManagerNavigation } from "./manager-navigation";
@@ -13,6 +14,7 @@ import ManagerPushConnect from "./manager-push-connect";
 export default function ManagerHeader() {
   const pathname = usePathname();
   const [email, setEmail] = useState("");
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const current = findManagerNavigation(pathname);
 
   useEffect(() => {
@@ -41,6 +43,19 @@ export default function ManagerHeader() {
     };
   }, []);
 
+  async function handleSignOut() {
+    if (isSigningOut) {
+      return;
+    }
+
+    setIsSigningOut(true);
+    try {
+      await createSupabaseBrowserClient().auth.signOut();
+    } finally {
+      window.location.assign("/manager/auth");
+    }
+  }
+
   return (
     <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:px-6">
       <SidebarTrigger aria-label="관리자 메뉴 열기 또는 접기" className="-ml-1" />
@@ -68,6 +83,20 @@ export default function ManagerHeader() {
           <span className="hidden max-w-52 truncate md:inline">{email}</span>
         </div>
       ) : null}
+
+      <Button
+        type="button"
+        aria-label="로그아웃"
+        variant="ghost"
+        size="sm"
+        className="ml-auto gap-2"
+        disabled={isSigningOut}
+        onClick={handleSignOut}
+      >
+        <LogOut aria-hidden="true" className="size-4" />
+        <span className="hidden sm:inline">{isSigningOut ? "로그아웃 중" : "로그아웃"}</span>
+        <span className="sr-only sm:hidden">로그아웃</span>
+      </Button>
     </header>
   );
 }

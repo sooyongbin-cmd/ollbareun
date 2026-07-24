@@ -10,6 +10,10 @@ vi.mock("@/lib/manager-push-notifications", () => ({
 vi.mock("@/lib/special-remark-reports", () => ({
   createSpecialRemarkReport: vi.fn(),
 }));
+vi.mock("@/lib/active-employee", () => ({
+  requireActiveEmployee: vi.fn().mockResolvedValue({ id: "employee-1" }),
+  getActiveEmployeeErrorStatus: (_error: unknown, fallback: number) => fallback,
+}));
 
 describe("POST /api/guard/special-remarks/report/push", () => {
   beforeEach(() => {

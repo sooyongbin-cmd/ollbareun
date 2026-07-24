@@ -5,6 +5,10 @@ import { getSupabase } from "@/lib/supabase";
 vi.mock("@/lib/supabase", () => ({
   getSupabase: vi.fn(),
 }));
+vi.mock("@/lib/active-employee", () => ({
+  requireActiveEmployee: vi.fn().mockResolvedValue({ id: "emp-1" }),
+  getActiveEmployeeErrorStatus: (_error: unknown, fallback: number) => fallback,
+}));
 
 describe("POST /api/notifications/subscribe", () => {
   let mockSupabase: { from: ReturnType<typeof vi.fn> };

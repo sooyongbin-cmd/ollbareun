@@ -1,6 +1,5 @@
 export const guardSessionStorageKey = "ollbareun.guard.session";
 
-const guardSessionTtlMs = 24 * 60 * 60 * 1000;
 const guardSessionChangedEvent = "ollbareun.guard.session.changed";
 
 type StoredGuardSession = {
@@ -70,15 +69,6 @@ function hasEmployeeId(session: StoredGuardSession | null): session is StoredGua
   return typeof session?.employee?.id === "string" && session.employee.id.trim() !== "";
 }
 
-function parseTimestamp(value: unknown) {
-  if (typeof value !== "string") {
-    return null;
-  }
-
-  const time = new Date(value).getTime();
-  return Number.isNaN(time) ? null : time;
-}
-
 function withSessionTimestamps(session: StoredGuardSession, now: Date) {
   const nowIso = now.toISOString();
 
@@ -91,15 +81,6 @@ function withSessionTimestamps(session: StoredGuardSession, now: Date) {
 
 function isMissingSessionTimestamp(session: StoredGuardSession) {
   return typeof session.createdAt !== "string" || typeof session.lastActiveAt !== "string";
-}
-
-function isExpired(session: StoredGuardSession, now: Date) {
-  const lastActiveAt = parseTimestamp(session.lastActiveAt);
-  if (lastActiveAt === null) {
-    return true;
-  }
-
-  return now.getTime() - lastActiveAt > guardSessionTtlMs;
 }
 
 export function clearStoredGuardSession() {
@@ -133,10 +114,6 @@ export function readStoredGuardSession<T extends StoredGuardSession = StoredGuar
 
   const needsTimestampPersist = isMissingSessionTimestamp(session);
   const sessionWithTimestamps = withSessionTimestamps(session, now);
-  if (isExpired(sessionWithTimestamps, now)) {
-    clearStoredGuardSession();
-    return null;
-  }
 
   const shouldPersist = Boolean(legacySession) || options.touch || needsTimestampPersist;
   if (shouldPersist) {

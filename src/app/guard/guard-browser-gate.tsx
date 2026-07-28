@@ -36,7 +36,7 @@ export default function GuardBrowserGate({ installPrompt, onInstalled }: GuardBr
           <div className="min-w-0 flex-1">
             <h2 className="text-[18px] font-bold text-foreground leading-6">홈화면 아이콘 설치</h2>
             <p className="mt-2 text-[14px] font-semibold leading-relaxed text-muted-foreground">
-              현장 근로자 로그인은 홈화면에 설치된 올바름 근로자 아이콘에서만 사용할 수 있습니다.
+              현장 근무자 로그인은 홈화면에 설치된 올바름 근무자 아이콘에서만 사용할 수 있습니다.
             </p>
           </div>
         </div>
@@ -59,7 +59,7 @@ export default function GuardBrowserGate({ installPrompt, onInstalled }: GuardBr
         <div className="min-w-0 flex-1">
           <h2 className="text-[18px] font-bold text-foreground leading-6">홈화면 아이콘에서 실행해 주세요</h2>
           <p className="mt-2 text-[14px] font-semibold leading-relaxed text-muted-foreground">
-            이미 설치되어 있다면 휴대폰 홈화면의 올바름 근로자 아이콘을 눌러 로그인해 주세요.
+            이미 설치되어 있다면 휴대폰 홈화면의 올바름 근무자 아이콘을 눌러 로그인해 주세요.
           </p>
         </div>
       </div>

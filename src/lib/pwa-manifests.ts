@@ -56,8 +56,8 @@ const managerIcons: MetadataRoute.Manifest["icons"] = [
 
 export function guardPwaManifest(): MetadataRoute.Manifest {
   return {
-    name: "올바름 현장 근로자",
-    short_name: "올바름 근로자",
+    name: "올바름 근무자",
+    short_name: "올바름 근무자",
     description: "올바름 현장 근로자 모바일 업무 앱",
     id: "/guard",
     start_url: "/guard",

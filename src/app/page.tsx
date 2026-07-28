@@ -232,7 +232,7 @@ export default function Home() {
                 관리자
               </Link>
               <Link className="hover:text-primary transition-colors" href="/guard">
-                경비원
+                근무자
               </Link>
             </div>
           </div>

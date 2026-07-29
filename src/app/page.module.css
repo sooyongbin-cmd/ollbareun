@@ -21,6 +21,10 @@
   text-decoration: none;
 }
 
+.site section[id] {
+  scroll-margin-top: 72px;
+}
+
 .header {
   position: fixed;
   z-index: 50;
@@ -519,6 +523,25 @@
   font-size: 15px;
 }
 
+.certificateImages {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+.certificateImages > div {
+  position: relative;
+  min-height: 280px;
+  border: 1px solid #eceff1;
+  background: #fff;
+  box-shadow: 0 14px 35px rgb(11 49 74 / 6%);
+}
+
+.certificateImages img {
+  padding: 12px;
+  object-fit: contain;
+}
+
 .servicePreview {
   width: 100%;
   padding-right: max(24px, calc((100% - 1280px) / 2));
@@ -611,6 +634,48 @@
   transform: translateX(4px);
 }
 
+.homeClientSection {
+  padding-top: 125px;
+  padding-bottom: 125px;
+}
+
+.homeClientLogos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--home-line);
+  border-left: 1px solid var(--home-line);
+}
+
+.homeClientLogos > div {
+  position: relative;
+  display: grid;
+  min-height: 120px;
+  padding: 24px;
+  place-items: center;
+  border-right: 1px solid var(--home-line);
+  border-bottom: 1px solid var(--home-line);
+}
+
+.homeClientLogos img {
+  padding: 22px 36px;
+  object-fit: contain;
+}
+
+.healthLogo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #454b50;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.healthLogo b {
+  color: #1688c8;
+  font-size: 24px;
+  font-style: italic;
+}
+
 .aboutHero,
 .serviceHero,
 .clientHero {
@@ -635,9 +700,9 @@
   background: linear-gradient(90deg, rgb(0 35 56 / 74%), rgb(0 72 113 / 40%));
 }
 
-.aboutHero h2,
-.serviceHero h2,
-.clientHero h2 {
+.aboutHero h1,
+.serviceHero h1,
+.clientHero h1 {
   margin: 0;
   font-size: clamp(34px, 3.5vw, 54px);
   font-weight: 420;
@@ -1437,8 +1502,13 @@
     gap: 45px;
   }
 
-  .certificateCards {
+  .certificateCards,
+  .certificateImages {
     gap: 8px;
+  }
+
+  .certificateImages > div {
+    min-height: 210px;
   }
 
   .certificateCards article {
@@ -1488,10 +1558,29 @@
     width: calc(100% - 40px);
   }
 
-  .aboutHero h2,
-  .serviceHero h2,
-  .clientHero h2 {
+  .aboutHero h1,
+  .serviceHero h1,
+  .clientHero h1 {
     font-size: 33px;
+  }
+
+  .homeClientSection {
+    width: calc(100% - 40px);
+    padding-top: 85px;
+    padding-bottom: 85px;
+  }
+
+  .homeClientLogos {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .homeClientLogos > div {
+    min-height: 100px;
+    padding: 14px;
+  }
+
+  .homeClientLogos img {
+    padding: 18px;
   }
 
   .stats {

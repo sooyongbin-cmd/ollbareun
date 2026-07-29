@@ -2,6 +2,7 @@
 
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import styles from "./page.module.css";
 
@@ -11,29 +12,29 @@ const menuColumns = [
   {
     key: "about" as const,
     label: "올바름 소개",
-    href: "#about",
+    href: "/about",
     items: [
-      ["연혁", "#history"],
-      ["핵심가치", "#values"],
-      ["contact us", "#contact"],
+      ["연혁", "/about#history"],
+      ["핵심가치", "/about#values"],
+      ["contact us", "/about#contact"],
     ],
   },
   {
     key: "services" as const,
     label: "서비스",
-    href: "#services",
+    href: "/services",
     items: [
-      ["운영 체계", "#operation"],
-      ["근로자 파견", "#dispatch"],
-      ["건물·시설물 종합 관리", "#facility"],
-      ["방역·소독", "#disinfection"],
+      ["운영 체계", "/services#operation"],
+      ["근로자 파견", "/services#dispatch"],
+      ["건물·시설물 종합 관리", "/services#facility"],
+      ["방역·소독", "/services#disinfection"],
     ],
   },
   {
     key: "clients" as const,
     label: "고객사",
-    href: "#clients",
-    items: [["고객사", "#clients"]],
+    href: "/clients",
+    items: [["고객사", "/clients#client-list"]],
   },
 ];
 
@@ -48,32 +49,22 @@ function HeaderBrand() {
   );
 }
 
-function getActiveMenu(): MenuKey | null {
-  const scrollPosition = window.scrollY + window.innerHeight * 0.28;
-  const sections: Array<[MenuKey, HTMLElement | null]> = [
-    ["about", document.getElementById("about")],
-    ["services", document.getElementById("services")],
-    ["clients", document.getElementById("clients")],
-  ];
-
-  let active: MenuKey | null = null;
-  for (const [key, section] of sections) {
-    if (section && section.offsetTop <= scrollPosition) {
-      active = key;
-    }
-  }
-  return active;
-}
-
 export default function HomepageHeader() {
+  const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [openMenu, setOpenMenu] = useState<MenuKey | null>(null);
-  const [activeMenu, setActiveMenu] = useState<MenuKey | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const activeMenu: MenuKey | null = pathname.startsWith("/about")
+    ? "about"
+    : pathname.startsWith("/services")
+      ? "services"
+      : pathname.startsWith("/clients")
+        ? "clients"
+        : null;
+
   useEffect(() => {
     const updateHeader = () => {
       setIsScrolled(window.scrollY > 40);
-      setActiveMenu(getActiveMenu());
     };
 
     updateHeader();
@@ -116,14 +107,14 @@ export default function HomepageHeader() {
       }}
     >
       <div className={styles.headerInner}>
-        <a href="#top" aria-label="올바름 홈페이지 처음으로" onClick={closeMenus}>
+        <Link href="/" aria-label="올바름 홈페이지 처음으로" onClick={closeMenus}>
           <HeaderBrand />
-        </a>
+        </Link>
         <p className={styles.certification}>고용노동부 지정 사회적기업 / 여성기업</p>
 
         <nav className={styles.desktopNav} aria-label="주요 메뉴">
           {menuColumns.map((menu) => (
-            <a
+            <Link
               key={menu.key}
               href={menu.href}
               className={`${styles.desktopNavItem} ${
@@ -135,7 +126,7 @@ export default function HomepageHeader() {
               onClick={() => setOpenMenu(null)}
             >
               {menu.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -168,14 +159,14 @@ export default function HomepageHeader() {
               }`}
             >
               {column.items.map(([label, href]) => (
-                <a
+                <Link
                   key={href}
                   href={href}
                   onClick={closeMenus}
                   tabIndex={openMenu ? 0 : -1}
                 >
                   {label}
-                </a>
+                </Link>
               ))}
             </div>
           ))}
@@ -191,14 +182,19 @@ export default function HomepageHeader() {
         <div className={styles.mobileMenuInner}>
           {menuColumns.map((column) => (
             <section key={column.key}>
-              <a className={styles.mobileMenuTitle} href={column.href} onClick={closeMenus}>
+              <Link className={styles.mobileMenuTitle} href={column.href} onClick={closeMenus}>
                 {column.label}
-              </a>
+              </Link>
               <div>
                 {column.items.map(([label, href]) => (
-                  <a key={href} href={href} onClick={closeMenus} tabIndex={mobileOpen ? 0 : -1}>
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={closeMenus}
+                    tabIndex={mobileOpen ? 0 : -1}
+                  >
                     {label}
-                  </a>
+                  </Link>
                 ))}
               </div>
             </section>

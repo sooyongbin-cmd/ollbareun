@@ -22,18 +22,33 @@
 }
 
 .header {
-  position: absolute;
+  position: fixed;
   z-index: 50;
   top: 0;
   left: 0;
   width: 100%;
   color: #fff;
+  transition:
+    background-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.headerScrolled {
+  background: rgb(15 105 170 / 96%);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 10%);
+  backdrop-filter: blur(12px);
+}
+
+.headerMenuOpen {
+  background: rgb(12 74 119 / 96%);
 }
 
 .headerInner {
+  position: relative;
+  z-index: 2;
   display: flex;
   width: min(1280px, calc(100% - 48px));
-  height: 84px;
+  height: 72px;
   margin: 0 auto;
   align-items: center;
 }
@@ -104,99 +119,194 @@
 }
 
 .desktopNav {
-  display: flex;
+  display: grid;
   height: 100%;
   margin-left: auto;
   align-items: center;
-  gap: 46px;
+  grid-template-columns: repeat(3, 186px);
   font-size: 14px;
   font-weight: 550;
 }
 
-.desktopNav a {
+.desktopNavItem {
   position: relative;
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 160ms ease;
 }
 
-.desktopNav a::after {
+.desktopNavItem:hover,
+.desktopNavItem:focus-visible,
+.desktopNavItemActive {
+  background: #37a8ef;
+}
+
+.megaMenu {
   position: absolute;
-  bottom: -10px;
+  z-index: 1;
+  top: 72px;
   left: 0;
-  width: 0;
-  height: 2px;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  background: rgb(0 31 52 / 83%);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    height 220ms ease,
+    opacity 160ms ease;
+}
+
+.megaMenuOpen {
+  height: 216px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.megaMenuInner {
+  display: grid;
+  width: min(1280px, calc(100% - 48px));
+  height: 216px;
+  margin: 0 auto;
+  grid-template-columns: minmax(0, 1fr) repeat(3, 186px);
+}
+
+.megaMenuColumn {
+  display: flex;
+  padding: 27px 12px;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  transition: background-color 160ms ease;
+}
+
+.megaMenuColumnActive {
+  background: #050505;
+}
+
+.megaMenuColumn a {
+  position: relative;
+  color: rgb(255 255 255 / 86%);
+  font-size: 14px;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.megaMenuColumn a::after {
+  position: absolute;
+  right: 0;
+  bottom: -5px;
+  left: 0;
+  height: 1px;
   background: #fff;
   content: "";
-  transition: width 180ms ease;
+  opacity: 0;
+  transform: scaleX(0.5);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
 }
 
-.desktopNav a:hover::after,
-.desktopNav a:focus-visible::after {
-  width: 100%;
+.megaMenuColumn a:hover,
+.megaMenuColumn a:focus-visible {
+  color: #fff;
+  font-weight: 700;
 }
 
-.desktopNav .inquiryLink {
-  display: inline-flex;
-  min-height: 40px;
-  padding: 0 18px;
-  align-items: center;
-  border: 1px solid rgb(255 255 255 / 55%);
-  border-radius: 999px;
+.megaMenuColumn a:hover::after,
+.megaMenuColumn a:focus-visible::after {
+  opacity: 1;
+  transform: scaleX(1);
 }
 
-.desktopNav .inquiryLink::after {
-  display: none;
-}
-
-.desktopNav .inquiryLink:hover {
-  border-color: #fff;
-  background: #fff;
-  color: var(--home-deep-blue);
-}
-
-.mobileNav {
-  position: relative;
+.mobileMenuButton {
   display: none;
   margin-left: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
 }
 
-.mobileNav summary {
-  display: grid;
+.mobileMenuButton {
   width: 44px;
   height: 44px;
-  cursor: pointer;
-  list-style: none;
   place-items: center;
 }
 
-.mobileNav summary::-webkit-details-marker {
-  display: none;
-}
-
-.mobileNav summary svg {
+.mobileMenuButton svg {
   width: 27px;
   height: 27px;
 }
 
-.mobileNav > div {
+.mobileMenu {
   position: absolute;
-  top: 52px;
-  right: 0;
-  display: grid;
-  width: 230px;
-  padding: 12px;
-  border: 1px solid rgb(255 255 255 / 25%);
-  border-radius: 16px;
-  background: rgb(3 34 54 / 96%);
-  box-shadow: 0 20px 60px rgb(0 0 0 / 24%);
+  top: 70px;
+  left: 0;
+  width: 100%;
+  max-height: 0;
+  overflow: hidden;
+  background: rgb(3 37 61 / 98%);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    max-height 260ms ease,
+    opacity 180ms ease;
 }
 
-.mobileNav > div a {
-  padding: 12px 14px;
-  border-radius: 9px;
+.mobileMenuOpen {
+  max-height: calc(100vh - 70px);
+  overflow-y: auto;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobileMenuInner {
+  display: grid;
+  width: min(100% - 40px, 600px);
+  margin: 0 auto;
+  padding: 24px 0 34px;
+}
+
+.mobileMenuInner section {
+  display: grid;
+  padding: 20px 0;
+  grid-template-columns: 120px 1fr;
+  border-bottom: 1px solid rgb(255 255 255 / 14%);
+}
+
+.mobileMenuTitle {
+  color: #6cc7ff;
+  font-size: 15px;
+  font-weight: 750;
+}
+
+.mobileMenuInner section > div {
+  display: grid;
+  gap: 15px;
+}
+
+.mobileMenuInner section > div a {
+  color: rgb(255 255 255 / 82%);
   font-size: 14px;
 }
 
-.mobileNav > div a:hover {
-  background: rgb(255 255 255 / 10%);
+.mobileSystemLinks {
+  display: flex;
+  padding-top: 24px;
+  gap: 10px;
+}
+
+.mobileSystemLinks a {
+  display: inline-flex;
+  min-height: 42px;
+  padding: 0 17px;
+  align-items: center;
+  border: 1px solid rgb(255 255 255 / 25%);
+  border-radius: 999px;
+  font-size: 12px;
 }
 
 .hero,
@@ -205,6 +315,7 @@
 .clientHero {
   position: relative;
   isolation: isolate;
+  scroll-margin-top: 72px;
   color: #fff;
 }
 
@@ -317,7 +428,7 @@
   width: min(1280px, calc(100% - 48px));
   margin: 0 auto;
   padding: 112px 0;
-  scroll-margin-top: 30px;
+  scroll-margin-top: 92px;
 }
 
 .sectionHeading {
@@ -687,7 +798,7 @@
 
 .values {
   padding: 110px max(24px, calc((100% - 1280px) / 2)) 120px;
-  scroll-margin-top: 30px;
+  scroll-margin-top: 92px;
   background: var(--home-deep-blue);
   color: #fff;
 }
@@ -1196,7 +1307,11 @@
 
 @media (max-width: 1000px) {
   .desktopNav {
-    gap: 24px;
+    grid-template-columns: repeat(3, 160px);
+  }
+
+  .megaMenuInner {
+    grid-template-columns: minmax(0, 1fr) repeat(3, 160px);
   }
 
   .certification {
@@ -1249,8 +1364,12 @@
     display: none;
   }
 
-  .mobileNav {
-    display: block;
+  .mobileMenuButton {
+    display: grid;
+  }
+
+  .megaMenu {
+    display: none;
   }
 
   .hero {

@@ -11,7 +11,6 @@ import {
   Lightbulb,
   Mail,
   MapPin,
-  Menu,
   ParkingCircle,
   Phone,
   ShieldCheck,
@@ -21,6 +20,7 @@ import {
   Wrench,
 } from "lucide-react";
 import styles from "./page.module.css";
+import HomepageHeader from "./homepage-header";
 
 const services = [
   {
@@ -181,40 +181,6 @@ function SectionHeading({
   );
 }
 
-function Header() {
-  return (
-    <header className={styles.header}>
-      <div className={styles.headerInner}>
-        <a href="#top" aria-label="올바름 홈페이지 처음으로">
-          <Brand inverse />
-        </a>
-        <p className={styles.certification}>고용노동부 지정 사회적기업 / 여성기업</p>
-        <nav className={styles.desktopNav} aria-label="주요 메뉴">
-          <a href="#about">올바름 소개</a>
-          <a href="#services">서비스</a>
-          <a href="#clients">고객사</a>
-          <a className={styles.inquiryLink} href="#contact">
-            문의하기
-          </a>
-        </nav>
-        <details className={styles.mobileNav}>
-          <summary aria-label="메뉴 열기">
-            <Menu aria-hidden="true" />
-          </summary>
-          <div>
-            <a href="#about">올바름 소개</a>
-            <a href="#services">서비스</a>
-            <a href="#clients">고객사</a>
-            <a href="#contact">문의하기</a>
-            <Link href="/manager">관리자 시스템</Link>
-            <Link href="/guard">근무자 시스템</Link>
-          </div>
-        </details>
-      </div>
-    </header>
-  );
-}
-
 function Footer() {
   return (
     <footer className={styles.footer}>
@@ -262,7 +228,7 @@ function Footer() {
 export default function Home() {
   return (
     <main id="top" className={styles.site}>
-      <Header />
+      <HomepageHeader />
 
       <section className={styles.hero} aria-labelledby="hero-title">
         <Image
@@ -362,7 +328,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className={`${styles.section} ${styles.companySection}`}>
+      <section id="history" className={`${styles.section} ${styles.companySection}`}>
         <SectionHeading
           eyebrow="SINCE 2018"
           title="사람을 향한 동행, 함께 크는 지역사회"
@@ -470,7 +436,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className={`${styles.section} ${styles.operationSection}`}>
+      <section id="operation" className={`${styles.section} ${styles.operationSection}`}>
         <SectionHeading
           eyebrow="Operation System"
           title="처음 진단부터 운영 보고까지 같은 기준으로 움직입니다."

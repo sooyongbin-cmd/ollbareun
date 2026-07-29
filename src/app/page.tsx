@@ -1,379 +1,684 @@
-"use client";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-import AlertModal from "@/components/modals/alert-modal";
+import {
+  ArrowRight,
+  ArrowUp,
+  Award,
+  BriefcaseBusiness,
+  Building2,
+  CheckCircle2,
+  Droplets,
+  Lightbulb,
+  Mail,
+  MapPin,
+  Menu,
+  ParkingCircle,
+  Phone,
+  ShieldCheck,
+  Sparkles,
+  TrendingUp,
+  UsersRound,
+  Wrench,
+} from "lucide-react";
+import styles from "./page.module.css";
+
+const services = [
+  {
+    title: "근로자 파견",
+    description:
+      "사무관리, 생산·물류, IT·전산, 의료·간병 등 필요한 직무에 적합한 인력을 연결하고 체계적으로 관리합니다.",
+    image: "/homepage/service-worker.webp",
+    icon: UsersRound,
+  },
+  {
+    title: "건물·시설물 종합 관리",
+    description:
+      "전기·소방·기계·가스·건축 설비의 점검부터 위생, 보안, 주차까지 현장 운영을 통합 제공합니다.",
+    image: "/homepage/service-facility.webp",
+    icon: Building2,
+  },
+  {
+    title: "방역·소독",
+    description:
+      "법정 의무소독, 살충·살균소독과 항공기 검역 현장에 맞춘 전문 방역 프로세스를 운영합니다.",
+    image: "/homepage/service-disinfection.webp",
+    icon: Droplets,
+  },
+];
+
+const history = [
+  ["2018.04", "(주)올바름 설립", "여성기업 인증"],
+  ["2021.05", "고용노동부", "사회적기업 지정"],
+  ["2022.07", "한국공항공사 등록", "김해공항 세관 등록"],
+  ["2023.02", "본점 확장 이전", "자본금 증자"],
+  ["2023.06", "근로자파견업", "허가 취득"],
+];
+
+const values = [
+  ["B", "Benefit", "차별화된 서비스로 고객 감동 극대화"],
+  ["E", "Earning", "경쟁력 강화로 건강한 수익 창출"],
+  ["S", "Social", "사회 환원을 통한 가치 실현"],
+  ["T", "Talented", "취약계층 육성을 통한 역량 강화"],
+];
+
+const operationSteps = [
+  ["01", "현장 진단", "경영상황과 현장 여건을 진단해 업무 범위와 핵심 과제를 확인합니다."],
+  ["02", "목표·기준 설정", "비용, 품질, 안전 기준을 구체화하고 역할과 보고 체계를 설계합니다."],
+  ["03", "인력 배치·운영", "직무에 적합한 인력을 배치하고 표준 절차에 따라 현장을 운영합니다."],
+  ["04", "점검·개선 보고", "운영 성과와 위험 요소를 정기적으로 점검하고 개선 결과를 공유합니다."],
+];
+
+const facilityItems = [
+  {
+    title: "건물·시설 유지관리",
+    text: "전기, 소방, 기계, 가스, 건축 설비의 점검과 운영관리를 한 번에 제공합니다.",
+    icon: Wrench,
+  },
+  {
+    title: "위생관리",
+    text: "상주 청소, 바닥 왁스, 준공 청소 등 철저한 위생관리로 쾌적함을 유지합니다.",
+    icon: Sparkles,
+  },
+  {
+    title: "시설보안",
+    text: "위험 요소를 사전에 제거하고 안전사고 예방과 친절한 응대를 제공합니다.",
+    icon: ShieldCheck,
+  },
+  {
+    title: "주차관리",
+    text: "차량 입·출입과 주차장 안전을 관리해 내부 주차 질서를 확립합니다.",
+    icon: ParkingCircle,
+  },
+];
+
+const socialValues = [
+  {
+    title: "좋은 일자리 제공",
+    text: "취약계층에게 안정된 일자리와 직무 몰입 환경을 제공합니다.",
+    icon: BriefcaseBusiness,
+  },
+  {
+    title: "지역사회 활성화",
+    text: "영업활동에서 나온 이익을 지역사회에 다시 연결합니다.",
+    icon: MapPin,
+  },
+  {
+    title: "윤리적 시장 확산",
+    text: "정직과 투명성을 바탕으로 공정한 거래 문화를 지향합니다.",
+    icon: Lightbulb,
+  },
+  {
+    title: "환경경영시스템 인증",
+    text: "ISO 14001을 기반으로 신뢰와 비용 절감, ESG 경영을 실현합니다.",
+    icon: Award,
+  },
+];
+
+const clientGroups = [
+  {
+    title: "공공기관",
+    logos: [
+      ["한국해양수산연수원", "/homepage/logo-maritime.webp"],
+      ["부산박물관", "/homepage/logo-busan-museum.webp"],
+      ["부산정보산업진흥원", "/homepage/logo-bipa.webp"],
+      ["외교부", "/homepage/logo-ministry.webp"],
+      ["부산지방경찰청", "/homepage/logo-police.webp"],
+    ],
+  },
+  {
+    title: "교육기관",
+    logos: [
+      ["동아대학교", "/homepage/logo-donga.webp"],
+      ["경남공업고등학교", "/homepage/logo-technical.webp"],
+      ["금정중학교", "/homepage/logo-school-2.webp"],
+      ["명지초등학교", "/homepage/logo-school-4.webp"],
+      ["대덕여자고등학교", "/homepage/logo-school-5.webp"],
+    ],
+  },
+  {
+    title: "항공사",
+    logos: [
+      ["대한항공", "/homepage/logo-koreanair.webp"],
+      ["에어부산", "/homepage/logo-airbusan.webp"],
+      ["진에어", "/homepage/logo-jinair.webp"],
+      ["이스타항공", "/homepage/logo-eastar.webp"],
+      ["에어코리아", "/homepage/logo-airkorea.webp"],
+      ["싱가포르항공", "/homepage/logo-singapore.webp"],
+      ["중국동방항공", "/homepage/logo-china-eastern.webp"],
+      ["에어차이나", "/homepage/logo-air-china.webp"],
+    ],
+  },
+];
+
+function Brand({ inverse = false }: { inverse?: boolean }) {
+  return (
+    <span className={`${styles.brand} ${inverse ? styles.brandInverse : ""}`}>
+      <span className={styles.brandMark} aria-hidden="true">
+        <span />
+      </span>
+      <span className={styles.brandName}>주식회사 올바름</span>
+    </span>
+  );
+}
+
+function SectionHeading({
+  eyebrow,
+  title,
+  description,
+  align = "center",
+}: {
+  eyebrow: string;
+  title: string;
+  description?: string;
+  align?: "center" | "left";
+}) {
+  return (
+    <div className={`${styles.sectionHeading} ${align === "left" ? styles.alignLeft : ""}`}>
+      <p>{eyebrow}</p>
+      <h2>{title}</h2>
+      {description ? <span>{description}</span> : null}
+    </div>
+  );
+}
+
+function Header() {
+  return (
+    <header className={styles.header}>
+      <div className={styles.headerInner}>
+        <a href="#top" aria-label="올바름 홈페이지 처음으로">
+          <Brand inverse />
+        </a>
+        <p className={styles.certification}>고용노동부 지정 사회적기업 / 여성기업</p>
+        <nav className={styles.desktopNav} aria-label="주요 메뉴">
+          <a href="#about">올바름 소개</a>
+          <a href="#services">서비스</a>
+          <a href="#clients">고객사</a>
+          <a className={styles.inquiryLink} href="#contact">
+            문의하기
+          </a>
+        </nav>
+        <details className={styles.mobileNav}>
+          <summary aria-label="메뉴 열기">
+            <Menu aria-hidden="true" />
+          </summary>
+          <div>
+            <a href="#about">올바름 소개</a>
+            <a href="#services">서비스</a>
+            <a href="#clients">고객사</a>
+            <a href="#contact">문의하기</a>
+            <Link href="/manager">관리자 시스템</Link>
+            <Link href="/guard">근무자 시스템</Link>
+          </div>
+        </details>
+      </div>
+    </header>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className={styles.footer}>
+      <div className={styles.footerGrid}>
+        <div className={styles.footerBrand}>
+          <Brand />
+          <p>현장의 기준을 바로 세우는 사람 중심의 운영 파트너</p>
+        </div>
+        <div>
+          <strong>올바름 소개</strong>
+          <a href="#about">연혁</a>
+          <a href="#values">성장 현황</a>
+          <a href="#contact">Contact Us</a>
+        </div>
+        <div>
+          <strong>서비스</strong>
+          <a href="#dispatch">근로자 파견</a>
+          <a href="#facility">시설물 관리</a>
+          <a href="#disinfection">방역·소독</a>
+        </div>
+        <div>
+          <strong>업무 시스템</strong>
+          <Link href="/manager">관리자</Link>
+          <Link href="/guard">근무자</Link>
+          <a href="/docs/documents/">운영 문서</a>
+        </div>
+        <div>
+          <strong>문의</strong>
+          <a href="tel:0514657767">T. 051-465-7767</a>
+          <a href="tel:0519617767">F. 051-961-7767</a>
+          <a href="mailto:olbareum@naver.com">olbareum@naver.com</a>
+        </div>
+      </div>
+      <div className={styles.footerBottom}>
+        <p>
+          부산광역시 강서구 유통단지1로 41, 105동 217·218호 · 대표이사 윤지욱 ·
+          사업자등록번호 213-87-01208
+        </p>
+        <p>© 2026 주식회사 올바름. All rights reserved.</p>
+      </div>
+    </footer>
+  );
+}
 
 export default function Home() {
-  const [counselingOpen, setCounselingOpen] = useState(false);
-  const [benefitsOpen, setBenefitsOpen] = useState(false);
-  const [counselingName, setCounselingName] = useState("");
-  const [counselingPhone, setCounselingPhone] = useState("");
-  const [counselingNotes, setCounselingNotes] = useState("");
-  const [alertMessage, setAlertMessage] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-
-  const handleCounselingSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!counselingName.trim()) {
-      setAlertMessage("성함을 입력해 주세요.");
-      return;
-    }
-    if (!counselingPhone.trim()) {
-      setAlertMessage("연락처를 입력해 주세요.");
-      return;
-    }
-
-    setSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
-      setSubmitting(false);
-      setCounselingOpen(false);
-      setAlertMessage("상담 신청이 완료되었습니다. 담당자가 빠른 시일 내에 연락드리겠습니다.");
-      // Reset form
-      setCounselingName("");
-      setCounselingPhone("");
-      setCounselingNotes("");
-    }, 1200);
-  };
-
   return (
-    <main className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/20">
-      {/* GNB (Header) */}
-      <header className="sticky top-0 z-40 bg-card/90 backdrop-blur-md border-b border-border shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
-            <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="32" height="32" rx="8" fill="#006a62" />
-              <path d="M9 16L14 21L23 11" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <h1 className="text-[20px] font-bold text-foreground tracking-tight">올바름</h1>
-          </div>
+    <main id="top" className={styles.site}>
+      <Header />
 
-          {/* Consultation Button */}
-          <Button
-            type="button"
-            onClick={() => setCounselingOpen(true)}
-            className="bg-foreground hover:bg-black text-white px-5 py-2 rounded-full text-[14px] font-medium transition-colors duration-200"
-          >
-            상담 신청하기
-          </Button>
-        </div>
-      </header>
-
-      {/* Hero Banner Section */}
-      <section className="relative h-[560px] md:h-[640px] w-full overflow-hidden bg-foreground flex items-center">
-        {/* Background Image */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url('/lobby_hero.png')` }}
+      <section className={styles.hero} aria-labelledby="hero-title">
+        <Image
+          src="/homepage/hero-lighthouse.webp"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className={styles.coverImage}
         />
-        {/* Dark Scrim */}
-        <div className="absolute inset-0 bg-black/45" />
-
-        {/* Content Overlay */}
-        <div className="relative max-w-7xl mx-auto px-6 w-full text-white">
-          <h2 className="text-[32px] md:text-[48px] font-bold leading-[1.25] tracking-tight max-w-2xl font-sans">
-            사람을 향한 신뢰,
-            <br />
-            공간을 채우는 투명함.
-            <br />
-            사회적기업 올바름이 함께합니다.
-          </h2>
+        <div className={styles.heroOverlay} />
+        <div className={styles.heroContent}>
+          <p>사람과 공간을 위한 운영 파트너</p>
+          <h1 id="hero-title">
+            변함없는 진심으로
+            <br />더 <strong>올바른 길</strong>을 밝힙니다
+          </h1>
+          <a href="#services" className={styles.heroButton}>
+            서비스 알아보기 <ArrowRight aria-hidden="true" />
+          </a>
         </div>
+        <a className={styles.scrollCue} href="#trust" aria-label="다음 내용 보기">
+          <span>SCROLL</span>
+          <i />
+        </a>
       </section>
 
-      {/* Core Features (3 Card Section) */}
-      <section className="relative z-10 px-6 -mt-16 md:-mt-24">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Card 1 */}
-          <div className="bg-card rounded-xl p-8 border border-border shadow-[0px_4px_20px_rgba(15,32,39,0.06)] flex flex-col gap-4 hover:-translate-y-1.5 transition-all duration-300 group">
-            <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479L12 21l-6.825-4a12.084 12.084 0 01.665-6.479L12 14z" />
-              </svg>
-            </div>
-            <h3 className="text-[20px] font-bold text-foreground">체계적인 전문 교육</h3>
-            <p className="text-[15px] text-muted-foreground leading-relaxed">
-              직무 전문성 향상을 위한 정기적이고 체계적인 커리큘럼을 통해 최상의 서비스를 보장합니다.
-            </p>
-          </div>
-
-          {/* Card 2 */}
-          <div className="bg-card rounded-xl p-8 border border-border shadow-[0px_4px_20px_rgba(15,32,39,0.06)] flex flex-col gap-4 hover:-translate-y-1.5 transition-all duration-300 group">
-            <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </div>
-            <h3 className="text-[20px] font-bold text-foreground">철저한 현장 관리</h3>
-            <p className="text-[15px] text-muted-foreground leading-relaxed">
-              실시간 모니터링 및 현장 매니저 전담 배치를 통해 공백 없는 시설 관리를 실현합니다.
-            </p>
-          </div>
-
-          {/* Card 3 */}
-          <div className="bg-card rounded-xl p-8 border border-border shadow-[0px_4px_20px_rgba(15,32,39,0.06)] flex flex-col gap-4 hover:-translate-y-1.5 transition-all duration-300 group">
-            <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-            </div>
-            <h3 className="text-[20px] font-bold text-foreground">낮은 이직률, 안정적 품질</h3>
-            <p className="text-[15px] text-muted-foreground leading-relaxed">
-              정규직 고용과 우수한 복지를 통해 숙련된 인력을 유지하여 일관된 품질을 제공합니다.
-            </p>
+      <section id="trust" className={`${styles.section} ${styles.trustSection}`}>
+        <div className={styles.splitIntro}>
+          <SectionHeading
+            eyebrow="OLBAREUM is"
+            title={"신뢰와 성실로\n더 좋은 일터를 만듭니다"}
+            description="우수한 서비스와 일자리 창출로 지역사회와 함께 지속 성장하는 사회적기업입니다."
+            align="left"
+          />
+          <div className={styles.certificateCards} aria-label="보유 인증">
+            <article>
+              <CheckCircle2 aria-hidden="true" />
+              <span>사회적기업 인증</span>
+              <strong>고용노동부</strong>
+            </article>
+            <article>
+              <Award aria-hidden="true" />
+              <span>근로자파견사업 허가</span>
+              <strong>부산지방고용노동청</strong>
+            </article>
+            <article>
+              <ShieldCheck aria-hidden="true" />
+              <span>여성기업 확인</span>
+              <strong>중소벤처기업부</strong>
+            </article>
           </div>
         </div>
       </section>
 
-      {/* Promotion / Call to Action Section */}
-      <section className="max-w-7xl mx-auto px-6 py-12">
-        <div className="relative rounded-[24px] bg-primary p-10 md:p-16 text-white shadow-xl overflow-hidden flex flex-col items-center text-center gap-6">
-          {/* Subtle Decorative SVGs in Background */}
-          <div className="absolute -left-12 -bottom-12 w-48 h-48 rounded-full bg-card/5 pointer-events-none animate-pulse" />
-          <div className="absolute -right-8 -top-8 w-36 h-36 rounded-full bg-card/5 pointer-events-none animate-pulse" />
+      <section className={`${styles.section} ${styles.servicePreview}`}>
+        <SectionHeading
+          eyebrow="Main Service"
+          title="인력, 시설, 위생을 따로 보지 않습니다."
+          description="채용, 배치, 안전, 청결, 보고 체계가 함께 움직이는 하나의 운영 시스템을 제공합니다."
+          align="left"
+        />
+        <div className={styles.serviceGrid}>
+          {services.map(({ title, description, image, icon: Icon }) => (
+            <article key={title} className={styles.serviceCard}>
+              <div className={styles.serviceImage}>
+                <Image src={image} alt="" fill sizes="(max-width: 760px) 100vw, 33vw" />
+              </div>
+              <div>
+                <Icon aria-hidden="true" />
+                <h3>{title}</h3>
+                <p>{description}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+        <a className={styles.moreLink} href="#services">
+          MORE VIEW <ArrowRight aria-hidden="true" />
+        </a>
+      </section>
 
-          <h2 className="text-[28px] md:text-[36px] font-bold tracking-tight">
-            사회적기업 올바름과 함께하면
+      <section id="about" className={styles.aboutHero}>
+        <Image
+          src="/homepage/about-hero.webp"
+          alt=""
+          fill
+          sizes="100vw"
+          className={styles.coverImage}
+        />
+        <div className={styles.aboutOverlay} />
+        <div>
+          <p>ABOUT OLBAREUM</p>
+          <h2>
+            사람 중심의 가치를 심고,
+            <br />지속 가능한 내일을 가꿔갑니다.
           </h2>
-          <p className="max-w-3xl text-[15px] md:text-[17px] opacity-90 leading-relaxed font-normal">
-            사회적기업 제품 우선구매 제도는 공공기관이 사회적기업의 제품을 우선 구매하도록 촉진하는 제도입니다. 올바름과 함께하시면 법정 우선구매 목표 달성에 기여하고 우수한 품질의 서비스와 사회적 가치를 동시에 실현할 수 있습니다.
+        </div>
+      </section>
+
+      <section className={`${styles.section} ${styles.companySection}`}>
+        <SectionHeading
+          eyebrow="SINCE 2018"
+          title="사람을 향한 동행, 함께 크는 지역사회"
+          description="지역사회와 함께 성장하는 사회적기업으로서 근로자 파견, 시설물 관리, 방역·소독까지 현장의 기준을 바로 세웁니다."
+        />
+        <div className={styles.stats}>
+          <div>
+            <Building2 aria-hidden="true" />
+            <strong>2018</strong>
+            <span>법인 설립</span>
+          </div>
+          <div>
+            <UsersRound aria-hidden="true" />
+            <strong>26명</strong>
+            <span>2026 임직원</span>
+          </div>
+          <div>
+            <Award aria-hidden="true" />
+            <strong>10.3억 원</strong>
+            <span>2025 매출</span>
+          </div>
+          <div>
+            <TrendingUp aria-hidden="true" />
+            <strong>220%</strong>
+            <span>2022–2025 매출 성장률</span>
+          </div>
+        </div>
+        <div className={styles.historyWrap}>
+          <div className={styles.historyImage}>
+            <Image
+              src="/homepage/history-building.webp"
+              alt="불이 켜진 사무실 건물"
+              fill
+              sizes="(max-width: 760px) 100vw, 42vw"
+            />
+            <div>
+              <span>HISTORY</span>
+              <p>사람 중심의 가치를 심고 지속 가능한 내일을 가꿔갑니다.</p>
+            </div>
+          </div>
+          <ol className={styles.timeline}>
+            {history.map(([date, title, detail]) => (
+              <li key={date}>
+                <time>{date}</time>
+                <i />
+                <p>
+                  <strong>{title}</strong>
+                  <span>{detail}</span>
+                </p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section id="values" className={styles.values}>
+        <SectionHeading
+          eyebrow="Core Values"
+          title="B.E.S.T"
+          description="고객 감동, 수익 창출, 사회 환원, 인재 양성으로 지속 가능한 성장을 이루는 네 가지 핵심 가치"
+        />
+        <div className={styles.valueGrid}>
+          {values.map(([letter, title, description]) => (
+            <article key={letter}>
+              <strong>{letter}</strong>
+              <span>{title}</span>
+              <p>{description}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className={`${styles.section} ${styles.socialSection}`}>
+        <SectionHeading
+          eyebrow="Social Impact"
+          title="이윤과 공익이 같은 방향으로 흐르게 합니다."
+          description="안정된 일자리와 균등한 교육기회를 제공하고 지역사회 재투자와 사회서비스 확충을 기업 운영의 중요한 기준으로 둡니다."
+        />
+        <div className={styles.socialGrid}>
+          {socialValues.map(({ title, text, icon: Icon }) => (
+            <article key={title}>
+              <Icon aria-hidden="true" />
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section id="services" className={styles.serviceHero}>
+        <Image
+          src="/homepage/airport-hero.webp"
+          alt=""
+          fill
+          sizes="100vw"
+          className={styles.coverImage}
+        />
+        <div className={styles.serviceHeroOverlay} />
+        <div>
+          <p>SERVICE</p>
+          <h2>
+            현장을 아는 전문성과 체계적 관리로
+            <br />최적의 환경을 완성합니다
+          </h2>
+        </div>
+      </section>
+
+      <section className={`${styles.section} ${styles.operationSection}`}>
+        <SectionHeading
+          eyebrow="Operation System"
+          title="처음 진단부터 운영 보고까지 같은 기준으로 움직입니다."
+          description="목표·비용·품질·리스크 관리가 함께 설계되어야 현장이 흔들리지 않습니다."
+        />
+        <div className={styles.teamImage}>
+          <Image
+            src="/homepage/service-team.webp"
+            alt="공항 현장에서 일하는 올바름 서비스 전문가"
+            fill
+            sizes="(max-width: 760px) 100vw, 1200px"
+          />
+        </div>
+        <div className={styles.operationLayout}>
+          <h3>
+            진단부터 개선까지,
+            <br />현장의 기준을 세웁니다.
+          </h3>
+          <ol>
+            {operationSteps.map(([number, title, description]) => (
+              <li key={number}>
+                <strong>{number}</strong>
+                <div>
+                  <h4>{title}</h4>
+                  <p>{description}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section id="dispatch" className={`${styles.section} ${styles.detailSection}`}>
+        <SectionHeading
+          eyebrow="Worker Dispatch"
+          title="근로자 파견"
+          description="고용과 사용이 분리된 체계적인 인력 운영을 통해 기업의 경영 효율성을 극대화합니다."
+        />
+        <div className={styles.detailBanner}>
+          <Image
+            src="/homepage/service-worker.webp"
+            alt="의료 현장에서 근무하는 전문 인력"
+            fill
+            sizes="(max-width: 760px) 100vw, 1200px"
+          />
+        </div>
+        <h3 className={styles.detailMessage}>
+          사무관리, 생산·물류, IT·전산, 의료·간병, 콜센터 등
+          <br />필요한 직무에 적합한 인력을 연결합니다.
+        </h3>
+        <div className={styles.dispatchFlow}>
+          <div>
+            <BriefcaseBusiness aria-hidden="true" />
+            <strong>파견사업주</strong>
+          </div>
+          <ArrowRight aria-hidden="true" />
+          <div>
+            <UsersRound aria-hidden="true" />
+            <strong>파견근로자</strong>
+          </div>
+          <ArrowRight aria-hidden="true" />
+          <div>
+            <Building2 aria-hidden="true" />
+            <strong>사용사업주</strong>
+          </div>
+        </div>
+      </section>
+
+      <section id="facility" className={`${styles.section} ${styles.facilitySection}`}>
+        <SectionHeading
+          eyebrow="Facility Management"
+          title="건물·시설물 종합 관리"
+          description="보이지 않는 곳까지 세심하게, 빈틈없는 시설 관리로 공간의 품격을 높입니다."
+        />
+        <div className={styles.detailBanner}>
+          <Image
+            src="/homepage/service-facility.webp"
+            alt="시설 설비를 점검하는 전문 인력"
+            fill
+            sizes="(max-width: 760px) 100vw, 1200px"
+          />
+        </div>
+        <h3 className={styles.detailMessage}>
+          전기·소방·기계·가스·건축 설비의 점검과 운영관리,
+          <br />위생관리, 시설보안, 주차관리까지 통합 제공합니다.
+        </h3>
+        <div className={styles.facilityGrid}>
+          {facilityItems.map(({ title, text, icon: Icon }) => (
+            <article key={title}>
+              <Icon aria-hidden="true" />
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section id="disinfection" className={`${styles.section} ${styles.detailSection}`}>
+        <SectionHeading
+          eyebrow="Certified Disinfection"
+          title="방역·소독"
+          description="전문적인 진단과 맞춤형 방역 시스템으로 누구나 안심하고 머물 수 있는 공간을 약속합니다."
+        />
+        <div className={styles.detailBanner}>
+          <Image
+            src="/homepage/service-disinfection.webp"
+            alt="항공기 객실에서 방역 작업을 진행하는 전문 인력"
+            fill
+            sizes="(max-width: 760px) 100vw, 1200px"
+          />
+        </div>
+        <h3 className={styles.detailMessage}>
+          현장 조건에 맞춘 법정·살충·살균 소독으로
+          <br />대형 건축물과 항공기 검역 현장의 예방 체계를 지원합니다.
+        </h3>
+        <div className={styles.airportCard}>
+          <Image src="/homepage/plane.webp" alt="" fill sizes="600px" />
+          <p>
+            당사는 현재 김해공항 내
+            <br />전 항공기 검역 및 방역 프로세스를
+            <br />독자 수행 중입니다.
           </p>
-          <Button
-            type="button"
-            onClick={() => setBenefitsOpen(true)}
-            className="bg-foreground hover:bg-black text-white px-8 py-3 rounded-full text-base font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
-          >
-            혜택 자세히 보기
-          </Button>
         </div>
       </section>
 
-      {/* Social Metrics Section */}
-      <section className="max-w-7xl mx-auto px-6 py-16 flex flex-col items-center gap-10">
-        <div className="text-center space-y-2">
-          <h2 className="text-[28px] md:text-[36px] font-bold text-foreground">사회적 가치 측정 지표</h2>
-          <p className="text-[16px] text-muted-foreground">우리는 비즈니스를 통해 더 나은 세상을 만듭니다.</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-          {/* Metric 1 */}
-          <div className="bg-card border border-border rounded-xl p-8 shadow-[0px_4px_12px_rgba(15,32,39,0.04)] flex flex-col items-center justify-between text-center gap-6">
-            <div className="space-y-2">
-              <span className="text-[48px] font-bold text-primary leading-none block">30%+</span>
-              <span className="text-foreground text-[16px] font-semibold block">취약계층 고용률</span>
-            </div>
-            {/* Custom progress bar */}
-            <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden">
-              <div className="bg-primary h-full rounded-full" style={{ width: "35%" }} />
-            </div>
-          </div>
-
-          {/* Metric 2 */}
-          <div className="bg-card border border-border rounded-xl p-8 shadow-[0px_4px_12px_rgba(15,32,39,0.04)] flex flex-col items-center justify-between text-center gap-6">
-            <div className="space-y-2">
-              <span className="text-[48px] font-bold text-primary leading-none block">98%</span>
-              <span className="text-foreground text-[16px] font-semibold block">고객 만족도</span>
-            </div>
-            {/* Custom progress bar */}
-            <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden">
-              <div className="bg-primary h-full rounded-full" style={{ width: "98%" }} />
-            </div>
-          </div>
-
-          {/* Metric 3 */}
-          <div className="bg-card border border-border rounded-xl p-8 shadow-[0px_4px_12px_rgba(15,32,39,0.04)] flex flex-col items-center justify-between text-center gap-6">
-            <div className="space-y-2">
-              <span className="text-[48px] font-bold text-primary leading-none block">S+</span>
-              <span className="text-foreground text-[16px] font-semibold block">지역사회 공헌 지표</span>
-            </div>
-            {/* Stars */}
-            <div className="flex gap-1.5 text-primary">
-              {[...Array(5)].map((_, i) => (
-                <svg key={i} className="w-6 h-6 fill-current animate-pulse" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27Z" />
-                </svg>
-              ))}
-            </div>
-          </div>
+      <section id="clients" className={styles.clientHero}>
+        <Image
+          src="/homepage/client-hero.webp"
+          alt=""
+          fill
+          sizes="100vw"
+          className={styles.coverImage}
+        />
+        <div className={styles.clientOverlay} />
+        <div>
+          <p>CLIENT</p>
+          <h2>
+            성공적인 경험이 증명하는 실력,
+            <br />더 깊어진 책임감으로 보답합니다.
+          </h2>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-foreground text-white py-16">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12">
-          {/* Column 1 */}
-          <div className="space-y-4">
-            <h3 className="text-[24px] font-bold text-white">올바름 (All-Barun)</h3>
-            <p className="text-muted-foreground text-[14px] leading-relaxed max-w-sm">
-              사회적가치를 창출하며 깨끗하고 안전한 공간을 만드는 프리미엄 시설관리 전문 기업입니다.
-            </p>
-            <div className="text-[14px] text-muted-foreground space-y-1.5 pt-2">
-              <p className="font-bold">주식회사 올바름</p>
-              <p><span className="font-bold">주소 :</span> 부산광역시 강서구 유통단지1로 41, 118동 222호(대저2동)</p>
-              <p><span className="font-bold">대표자 :</span> 윤지욱</p>
-              <p><span className="font-bold">연락처 :</span> 051-465-7767</p>
-              <p><span className="font-bold">인·지정연도 :</span> 2021</p>
+      <section className={`${styles.section} ${styles.clientsSection}`}>
+        <SectionHeading
+          eyebrow="Client"
+          title="성실함과 신뢰로 단단하게 이어온 파트너"
+          description="수많은 현장에서 쌓아온 경험과 전문성을 바탕으로 고객의 기대를 뛰어넘는 최적의 솔루션을 완성합니다."
+        />
+        <div className={styles.clientGroups}>
+          {clientGroups.map(({ title, logos }) => (
+            <div key={title}>
+              <h3>{title}</h3>
+              <div className={styles.logoGrid}>
+                {logos.map(([name, src]) => (
+                  <div key={name}>
+                    <Image src={src} alt={name} fill sizes="180px" />
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-
-          {/* Column 2 */}
-          <div>
-            <h4 className="text-[16px] font-bold text-muted-foreground mb-4">바로가기</h4>
-            <div className="flex flex-col gap-2.5 text-[14px]">
-              <Link className="hover:text-primary transition-colors" href="/manager">
-                관리자
-              </Link>
-              <Link className="hover:text-primary transition-colors" href="/guard">
-                근무자
-              </Link>
-            </div>
-          </div>
-
-          {/* Column 3 */}
-          <div>
-            <h4 className="text-[16px] font-bold text-muted-foreground mb-4">고객지원</h4>
-            <div className="flex flex-col gap-2.5 text-[14px] text-muted-foreground">
-              <span className="hover:text-white cursor-pointer transition-colors">이용약관</span>
-              <span className="hover:text-white cursor-pointer transition-colors">개인정보처리방침</span>
-              <span className="hover:text-white cursor-pointer transition-colors">오시는 길</span>
-              <span className="hover:text-white cursor-pointer transition-colors">윤리경영</span>
-            </div>
-          </div>
+          ))}
         </div>
+      </section>
 
-        {/* Bottom copyright row */}
-        <div className="max-w-7xl mx-auto px-6 pt-8 mt-12 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-muted-foreground text-[14px]">
-          <p>© 2024 All-Barun Social Enterprise. All rights reserved.</p>
-          <div className="flex gap-6">
-            <span className="hover:text-white cursor-pointer transition-colors">LinkedIn</span>
-            <span className="hover:text-white cursor-pointer transition-colors">Instagram</span>
-            <span className="hover:text-white cursor-pointer transition-colors">Blog</span>
-          </div>
+      <section id="contact" className={`${styles.section} ${styles.contactSection}`}>
+        <div className={styles.map}>
+          <Image
+            src="/homepage/location-map.webp"
+            alt="부산광역시 강서구 올바름 본사 위치 지도"
+            fill
+            sizes="(max-width: 760px) 100vw, 60vw"
+          />
+          <span aria-hidden="true">
+            <MapPin />
+          </span>
         </div>
-      </footer>
+        <div className={styles.contactCopy}>
+          <p>CONTACT US</p>
+          <h2>
+            현장 운영의 기준을 세울 때,
+            <br />올바름과 먼저 의논하세요.
+          </h2>
+          <address>
+            <span>
+              <MapPin aria-hidden="true" />
+              부산광역시 강서구 유통단지1로 41, 105동 217·218호
+            </span>
+            <a href="tel:0514657767">
+              <Phone aria-hidden="true" />
+              051-465-7767
+            </a>
+            <a href="mailto:olbareum@naver.com">
+              <Mail aria-hidden="true" />
+              olbareum@naver.com
+            </a>
+          </address>
+          <a className={styles.contactButton} href="mailto:olbareum@naver.com">
+            상담 문의하기 <ArrowRight aria-hidden="true" />
+          </a>
+        </div>
+      </section>
 
-      {/* Counseling Application Modal */}
-      <Dialog open={counselingOpen} onOpenChange={setCounselingOpen}>
-        <DialogContent className="max-w-[460px]">
-          <DialogHeader>
-            <DialogTitle>무료상담 신청하기</DialogTitle>
-            <DialogDescription>담당자 정보를 남겨주시면 확인 후 연락드리겠습니다.</DialogDescription>
-          </DialogHeader>
+      <a className={styles.toTop} href="#top" aria-label="맨 위로 이동">
+        <ArrowUp aria-hidden="true" />
+      </a>
 
-            <form onSubmit={handleCounselingSubmit} className="space-y-5">
-              <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-foreground block">성함 / 담당자명</label>
-                <Input
-                  type="text"
-                  required
-                  className="w-full px-4 py-2.5 rounded-lg border border-input focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring text-[15px]"
-                  placeholder="담당자분의 이름을 입력해 주세요."
-                  value={counselingName}
-                  onChange={(e) => setCounselingName(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-foreground block">연락처</label>
-                <Input
-                  type="tel"
-                  required
-                  className="w-full px-4 py-2.5 rounded-lg border border-input focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring text-[15px]"
-                  placeholder="예: 010-1234-5678"
-                  value={counselingPhone}
-                  onChange={(e) => setCounselingPhone(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-foreground block">문의 및 요청사항 (선택)</label>
-                <Textarea
-                  className="w-full px-4 py-2.5 rounded-lg border border-input focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring text-[15px] h-24 resize-none"
-                  placeholder="문의하실 시설종류나 요청 내용을 적어주세요."
-                  value={counselingNotes}
-                  onChange={(e) => setCounselingNotes(e.target.value)}
-                />
-              </div>
-
-              <div className="pt-4 flex gap-3">
-                <Button
-                  type="button"
-                  onClick={() => setCounselingOpen(false)}
-                  variant="outline"
-                  className="w-1/2 py-3 rounded-lg border border-input hover:bg-muted text-muted-foreground font-semibold text-[15px] transition-colors"
-                >
-                  취소
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-1/2 py-3 rounded-lg bg-primary hover:bg-primary/90 disabled:bg-primary/50 text-white font-semibold text-[15px] transition-colors"
-                >
-                  {submitting ? "신청 중..." : "신청 완료"}
-                </Button>
-              </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Benefits Info Modal */}
-      <Dialog open={benefitsOpen} onOpenChange={setBenefitsOpen}>
-        <DialogContent className="flex max-h-[85vh] max-w-[500px] flex-col">
-          <DialogHeader>
-            <DialogTitle>사회적기업 우선구매 혜택 안내</DialogTitle>
-            <DialogDescription>사회적기업 제품과 용역을 구매할 때 얻을 수 있는 주요 혜택입니다.</DialogDescription>
-          </DialogHeader>
-
-            <div className="flex-1 overflow-y-auto space-y-6 pr-1">
-              <div className="space-y-2">
-                <h3 className="text-[16px] font-bold text-primary">1. 공공기관 법정 의무구매 목표 달성</h3>
-                <p className="text-[14px] text-muted-foreground leading-relaxed">
-                  사회적기업 육성법 제12조 및 동법 시행령 제12조에 의거하여, 모든 공공기관은 총 구매액의 일정 비율 이상을 사회적기업의 제품 및 용역 서비스로 구매해야 합니다. 올바름과 연계하시면 당해 목표 실적을 손쉽게 채우실 수 있습니다.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <h3 className="text-[16px] font-bold text-primary">2. 공공 입찰 및 수의계약 혜택</h3>
-                <p className="text-[14px] text-muted-foreground leading-relaxed">
-                  공공 입찰 적격심사 시 신인도 가점이 부여되며, 지자체 및 공공기관에 따라 소액 수의계약 한도가 상향 적용되는 등의 실무적인 행정 편의와 혜택을 받으실 수 있습니다.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <h3 className="text-[16px] font-bold text-primary">3. 기업 ESG 경영 가점 확보</h3>
-                <p className="text-[14px] text-muted-foreground leading-relaxed">
-                  사회적 책임을 중시하는 최근 경영 트렌드에 따라, 취약계층 일자리를 제공하고 지역 사회공헌 지표가 우수한 올바름과의 거래를 통해 기업의 친환경(E)·사회적 책임(S)·투명경영(G) 실적 지표를 크게 개선할 수 있습니다.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-8 border-t border-border pt-4 flex justify-end">
-              <Button
-                className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-lg text-[15px]"
-                type="button"
-                onClick={() => setBenefitsOpen(false)}
-              >
-                닫기
-              </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Global Alert Modal */}
-      <AlertModal
-        isOpen={Boolean(alertMessage)}
-        onClose={() => setAlertMessage("")}
-        title="알림"
-        description={alertMessage}
-      />
+      <Footer />
     </main>
   );
 }

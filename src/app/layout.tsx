@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 const siteUrl = new URL("https://ollbareun.vercel.app");
-const siteTitle = "올바름 | 프리미엄 시설관리 전문기업";
+const siteTitle = "주식회사 올바름 | 현장의 기준을 바로 세우는 운영 파트너";
 const siteDescription =
-  "사람을 향한 신뢰, 공간을 채우는 투명함. 체계적인 교육과 철저한 현장관리로 깨끗하고 안전한 공간을 만듭니다.";
+  "근로자 파견, 건물·시설물 종합 관리, 방역·소독까지 사람과 공간을 위한 현장 운영 서비스를 제공합니다.";
 
 export const metadata: Metadata = {
   metadataBase: siteUrl,

@@ -18,6 +18,7 @@ import {
   Wrench,
 } from "lucide-react";
 import styles from "./page.module.css";
+import HomepageContactMap from "./homepage-contact-map";
 import HomepageHeader from "./homepage-header";
 
 const services = [
@@ -234,17 +235,7 @@ function BackToTop() {
 function ContactSection() {
   return (
     <section id="contact" className={`${styles.section} ${styles.contactSection}`}>
-      <div className={styles.map}>
-        <Image
-          src="/homepage/location-map.webp"
-          alt="부산광역시 강서구 올바름 본사 위치 지도"
-          fill
-          sizes="(max-width: 760px) 100vw, 60vw"
-        />
-        <span aria-hidden="true">
-          <MapPin />
-        </span>
-      </div>
+      <HomepageContactMap />
       <div className={styles.contactCopy}>
         <h2>
           <strong>현장 운영</strong>의 <strong>기준</strong>을 세울 때,

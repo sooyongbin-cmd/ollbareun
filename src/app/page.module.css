@@ -1261,27 +1261,20 @@
   overflow: hidden;
 }
 
-.map img {
-  object-fit: cover;
-}
-
-.map > span {
+.mapCanvas {
   position: absolute;
-  top: 48%;
-  left: 51%;
-  display: grid;
-  width: 58px;
-  height: 58px;
-  place-items: center;
-  border: 6px solid #fff;
-  border-radius: 50%;
-  background: var(--home-deep-blue);
-  color: #fff;
-  box-shadow: 0 9px 25px rgb(0 0 0 / 20%);
+  inset: 0;
 }
 
-.map > span svg {
-  width: 25px;
+.mapStatus {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  margin: 0;
+  place-items: center;
+  background: #eef1f3;
+  color: var(--home-muted);
+  font-size: 14px;
 }
 
 .contactCopy {

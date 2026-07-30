@@ -9,6 +9,7 @@
   overflow: clip;
   background: #fff;
   color: var(--home-ink);
+  font-family: "Noonnu", "Pretendard Variable", "Pretendard", system-ui, sans-serif;
 }
 
 .site,
@@ -297,22 +298,6 @@
   font-size: 14px;
 }
 
-.mobileSystemLinks {
-  display: flex;
-  padding-top: 24px;
-  gap: 10px;
-}
-
-.mobileSystemLinks a {
-  display: inline-flex;
-  min-height: 42px;
-  padding: 0 17px;
-  align-items: center;
-  border: 1px solid rgb(255 255 255 / 25%);
-  border-radius: 999px;
-  font-size: 12px;
-}
-
 .hero,
 .aboutHero,
 .serviceHero,
@@ -374,7 +359,7 @@
 }
 
 .heroContent h1 strong {
-  font-weight: 750;
+  font-weight: 800;
 }
 
 .heroButton,
@@ -450,17 +435,25 @@
   margin: 0 0 14px;
   color: var(--home-blue);
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .sectionHeading h2 {
   margin: 0;
   color: var(--home-ink);
   font-size: clamp(31px, 3vw, 44px);
-  font-weight: 750;
+  font-weight: 500;
   letter-spacing: -0.045em;
   line-height: 1.25;
   white-space: pre-line;
+}
+
+.sectionHeading h2 b {
+  font-weight: 700;
+}
+
+.sectionHeading h2 strong {
+  font-weight: 800;
 }
 
 .sectionHeading > span {
@@ -468,7 +461,12 @@
   margin-top: 18px;
   color: var(--home-muted);
   font-size: 16px;
+  font-weight: 500;
   line-height: 1.75;
+}
+
+.sectionHeading > span strong {
+  font-weight: 800;
 }
 
 .trustSection {
@@ -705,9 +703,15 @@
 .clientHero h1 {
   margin: 0;
   font-size: clamp(34px, 3.5vw, 54px);
-  font-weight: 420;
+  font-weight: 400;
   letter-spacing: -0.05em;
   line-height: 1.25;
+}
+
+.aboutHero h1 strong,
+.serviceHero h1 strong,
+.clientHero h1 strong {
+  font-weight: 800;
 }
 
 .companySection {
@@ -924,6 +928,10 @@
   padding-bottom: 130px;
 }
 
+.socialSection .sectionHeading {
+  max-width: 1040px;
+}
+
 .socialGrid,
 .facilityGrid {
   display: grid;
@@ -1000,9 +1008,13 @@
 .operationLayout > h3 {
   margin: 16px 0 0;
   font-size: clamp(28px, 3vw, 42px);
-  font-weight: 750;
+  font-weight: 500;
   letter-spacing: -0.045em;
   line-height: 1.4;
+}
+
+.operationLayout > h3 strong {
+  font-weight: 800;
 }
 
 .operationLayout ol {
@@ -1074,6 +1086,19 @@
   text-align: center;
 }
 
+.dispatchDiagram {
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.dispatchDiagram > p {
+  margin: 0 0 18px;
+  color: var(--home-muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
 .dispatchFlow {
   display: flex;
   max-width: 760px;
@@ -1120,6 +1145,14 @@
 
 .dispatchFlow strong {
   margin-top: 12px;
+  font-size: 14px;
+}
+
+.dispatchRelations {
+  display: flex;
+  margin-top: 16px;
+  justify-content: space-around;
+  color: var(--home-muted);
   font-size: 14px;
 }
 
@@ -1209,7 +1242,7 @@
 
 .contactSection {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: 75px;
   align-items: center;
   padding-top: 130px;
@@ -1219,6 +1252,7 @@
 
 .map {
   position: relative;
+  grid-column: 1 / -1;
   min-height: 430px;
   overflow: hidden;
 }
@@ -1246,25 +1280,25 @@
   width: 25px;
 }
 
-.contactCopy > p {
-  margin: 0 0 15px;
-  color: var(--home-blue);
-  font-size: 13px;
-  font-weight: 750;
-  letter-spacing: 0.12em;
+.contactCopy {
+  display: contents;
 }
 
 .contactCopy h2 {
   margin: 0;
   font-size: clamp(31px, 3vw, 43px);
-  font-weight: 750;
+  font-weight: 500;
   letter-spacing: -0.045em;
   line-height: 1.35;
 }
 
+.contactCopy h2 strong {
+  font-weight: 800;
+}
+
 .contactCopy address {
   display: grid;
-  margin-top: 34px;
+  margin: 0;
   gap: 13px;
   color: var(--home-muted);
   font-size: 14px;
@@ -1278,22 +1312,11 @@
   gap: 12px;
 }
 
-.contactCopy address svg {
-  width: 18px;
-  height: 18px;
-  flex: 0 0 18px;
-  color: var(--home-blue);
-}
-
-.contactButton {
-  border-color: var(--home-deep-blue);
-  background: var(--home-deep-blue);
-  color: #fff;
-}
-
-.contactButton:hover {
-  background: var(--home-blue);
-  border-color: var(--home-blue);
+.contactCopy address strong {
+  min-width: 68px;
+  color: var(--home-ink);
+  font-size: 15px;
+  font-weight: 800;
 }
 
 .toTop {
@@ -1323,19 +1346,11 @@
 
 .footerGrid {
   display: grid;
-  grid-template-columns: 1.35fr repeat(4, 0.65fr);
-  gap: 50px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 80px;
 }
 
-.footerBrand > p {
-  max-width: 280px;
-  margin: 18px 0 0;
-  color: #6a6a6a;
-  font-size: 13px;
-  line-height: 1.7;
-}
-
-.footerGrid > div:not(.footerBrand) {
+.footerGrid > div {
   display: flex;
   flex-direction: column;
   gap: 9px;
@@ -1405,7 +1420,7 @@
   }
 
   .footerGrid {
-    grid-template-columns: 1.3fr repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -1761,10 +1776,6 @@
   .footerGrid {
     grid-template-columns: repeat(2, 1fr);
     gap: 38px 25px;
-  }
-
-  .footerBrand {
-    grid-column: 1 / -1;
   }
 
   .footerBottom {

@@ -94,6 +94,10 @@ export default function HomepageHeader() {
     setMobileOpen(false);
   };
 
+  const closeMenusAfterNavigation = () => {
+    window.setTimeout(closeMenus, 0);
+  };
+
   return (
     <header
       className={`${styles.header} ${isScrolled ? styles.headerScrolled : ""} ${
@@ -144,7 +148,7 @@ export default function HomepageHeader() {
 
       <div
         className={`${styles.megaMenu} ${openMenu ? styles.megaMenuOpen : ""}`}
-        aria-hidden={!openMenu}
+        inert={!openMenu}
         onMouseEnter={() => {
           if (!openMenu) setOpenMenu(activeMenu ?? "about");
         }}
@@ -162,7 +166,7 @@ export default function HomepageHeader() {
                 <Link
                   key={href}
                   href={href}
-                  onClick={closeMenus}
+                  onClick={closeMenusAfterNavigation}
                   tabIndex={openMenu ? 0 : -1}
                 >
                   {label}
@@ -177,12 +181,16 @@ export default function HomepageHeader() {
         id="homepage-mobile-menu"
         className={`${styles.mobileMenu} ${mobileOpen ? styles.mobileMenuOpen : ""}`}
         aria-label="모바일 주요 메뉴"
-        aria-hidden={!mobileOpen}
+        inert={!mobileOpen}
       >
         <div className={styles.mobileMenuInner}>
           {menuColumns.map((column) => (
             <section key={column.key}>
-              <Link className={styles.mobileMenuTitle} href={column.href} onClick={closeMenus}>
+              <Link
+                className={styles.mobileMenuTitle}
+                href={column.href}
+                onClick={closeMenusAfterNavigation}
+              >
                 {column.label}
               </Link>
               <div>
@@ -190,7 +198,7 @@ export default function HomepageHeader() {
                   <Link
                     key={href}
                     href={href}
-                    onClick={closeMenus}
+                    onClick={closeMenusAfterNavigation}
                     tabIndex={mobileOpen ? 0 : -1}
                   >
                     {label}
@@ -199,14 +207,6 @@ export default function HomepageHeader() {
               </div>
             </section>
           ))}
-          <div className={styles.mobileSystemLinks}>
-            <Link href="/manager" onClick={closeMenus}>
-              관리자 시스템
-            </Link>
-            <Link href="/guard" onClick={closeMenus}>
-              근무자 시스템
-            </Link>
-          </div>
         </div>
       </nav>
     </header>

@@ -14,8 +14,11 @@ describe("homepage header", () => {
     fireEvent.mouseEnter(aboutMenu);
 
     expect(aboutMenu).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByRole("link", { name: "연혁" })).toHaveAttribute("href", "/about#history");
-    expect(screen.getByRole("link", { name: "핵심가치" })).toHaveAttribute(
+    expect(screen.getAllByRole("link", { name: "연혁" })[0]).toHaveAttribute(
+      "href",
+      "/about#history",
+    );
+    expect(screen.getAllByRole("link", { name: "핵심가치" })[0]).toHaveAttribute(
       "href",
       "/about#values",
     );
@@ -31,9 +34,8 @@ describe("homepage header", () => {
       "aria-expanded",
       "true",
     );
-    expect(screen.getByRole("navigation", { name: "모바일 주요 메뉴" })).toHaveAttribute(
-      "aria-hidden",
-      "false",
+    expect(screen.getByRole("navigation", { name: "모바일 주요 메뉴" })).not.toHaveAttribute(
+      "inert",
     );
   });
 });

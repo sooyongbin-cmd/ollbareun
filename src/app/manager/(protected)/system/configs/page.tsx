@@ -96,13 +96,13 @@ export default function SystemConfigsPage() {
                 ) : (
                   configs.map((config) => (
                     <TableRow key={config.system_code} className="hover:bg-muted/40 transition-colors">
-                      <TableCell data-label="설명" className="max-w-[360px] whitespace-pre-wrap">{config.description ?? "-"}</TableCell>
-                      <TableCell data-label="내용" className="max-w-[520px] whitespace-pre-wrap">{config.content}</TableCell>
-                      <TableCell data-label="시스템코드" className="font-semibold">
+                      <TableCell data-label="설명" className="max-w-[360px] whitespace-pre-wrap font-semibold">
                         <Link className="text-primary hover:opacity-80" href={`/manager/system/configs/${encodeURIComponent(config.system_code)}`}>
-                          {config.system_code}
+                          {config.description ?? "-"}
                         </Link>
                       </TableCell>
+                      <TableCell data-label="내용" className="max-w-[520px] whitespace-pre-wrap">{config.content}</TableCell>
+                      <TableCell data-label="시스템코드" className="font-semibold">{config.system_code}</TableCell>
                       <TableCell data-label="상위시스템코드">{config.parent_system_code ?? "-"}</TableCell>
                     </TableRow>
                   ))

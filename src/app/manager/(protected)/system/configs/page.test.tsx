@@ -33,11 +33,11 @@ describe("system configs page", () => {
       "시스템코드",
       "상위시스템코드",
     ]);
-    expect(await screen.findByRole("link", { name: "manager_email" })).toHaveAttribute(
+    expect(await screen.findByRole("link", { name: "Manager notification email address" })).toHaveAttribute(
       "href",
       "/manager/system/configs/manager_email",
     );
-    expect(screen.getByText("Manager notification email address")).toBeInTheDocument();
+    expect(screen.getByText("manager_email")).toBeInTheDocument();
     expect(screen.getByText("admin@example.com")).toBeInTheDocument();
   });
 });

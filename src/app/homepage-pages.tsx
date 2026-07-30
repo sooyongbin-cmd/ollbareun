@@ -224,21 +224,8 @@ function Footer() {
 }
 
 function BackToTop() {
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
   return (
-    <a
-      className={styles.toTop}
-      href="#top"
-      aria-label="맨 위로 이동"
-      onClick={handleClick}
-    >
+    <a className={styles.toTop} href="#top" aria-label="맨 위로 이동">
       <ArrowUp aria-hidden="true" />
     </a>
   );

@@ -853,16 +853,15 @@
   display: flex;
   margin: 0 0 0 22px;
   flex-direction: column;
+  color: var(--home-muted);
   font-size: 13px;
+  font-weight: 500;
   line-height: 1.55;
 }
 
-.timeline p strong {
-  font-weight: 650;
-}
-
 .timeline p span {
-  color: var(--home-muted);
+  color: inherit;
+  font-weight: inherit;
 }
 
 .values {

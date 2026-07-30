@@ -465,7 +465,7 @@ export function AboutPage() {
           </div>
           <ol className={styles.timeline}>
             {history.map(([date, title, detail]) => (
-              <li key={date}><time>{date}</time><i /><p><strong>{title}</strong><span>{detail}</span></p></li>
+              <li key={date}><time>{date}</time><i /><p><span>{title}</span><span>{detail}</span></p></li>
             ))}
           </ol>
         </div>

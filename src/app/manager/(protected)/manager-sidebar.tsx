@@ -54,8 +54,7 @@ export default function ManagerSidebar() {
                   <ShieldCheck aria-hidden="true" className="size-4" />
                 </span>
                 <span className="grid flex-1 text-left leading-tight">
-                  <span className="truncate font-semibold">올바름</span>
-                  <span className="truncate text-xs text-muted-foreground">관리자 시스템</span>
+                  <span className="truncate font-semibold">올바름 관리자</span>
                 </span>
               </Link>
             </SidebarMenuButton>

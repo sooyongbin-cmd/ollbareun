@@ -37,7 +37,7 @@ describe("manager safety notifications page", () => {
 
     render(<ManagerSafetyNotificationsPage />);
 
-    expect(await screen.findByRole("heading", { name: "자동알림" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "자동알림이력" })).toBeInTheDocument();
     expect(screen.getAllByText(/최근 100건/).length).toBeGreaterThan(0);
     expect(screen.getByRole("columnheader", { name: "예약일" })).toBeInTheDocument();
     expect(screen.getByText("education_reminder")).toBeInTheDocument();

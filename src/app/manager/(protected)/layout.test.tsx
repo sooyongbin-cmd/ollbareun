@@ -204,7 +204,7 @@ describe("manager layout", () => {
       "href",
       "/manager/safety/completions",
     );
-    expect(screen.getByRole("link", { name: "자동알림" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "자동알림이력" })).toHaveAttribute(
       "href",
       "/manager/safety/notifications",
     );

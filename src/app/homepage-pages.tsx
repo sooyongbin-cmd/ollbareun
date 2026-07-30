@@ -321,14 +321,18 @@ export function MainPage() {
     <main id="top" className={styles.site}>
       <HomepageHeader />
       <section className={styles.hero} aria-labelledby="hero-title">
-        <Image
-          src="/homepage/hero-lighthouse.webp"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className={styles.coverImage}
-        />
+        <video
+          className={styles.heroVideo}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          poster="/homepage/hero-lighthouse.webp"
+          aria-hidden="true"
+        >
+          <source src="/homepage/hero-lighthouse_moving.mp4" type="video/mp4" />
+        </video>
         <div className={styles.heroOverlay} />
         <div className={styles.heroContent}>
           <h1 id="hero-title">

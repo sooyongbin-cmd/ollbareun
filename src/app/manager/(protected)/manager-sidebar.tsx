@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShieldCheck } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -28,7 +27,11 @@ export default function ManagerSidebar() {
   const pathname = usePathname();
   const { openMobile, setOpenMobile } = useSidebar();
 
-  const closeMobileMenu = () => setOpenMobile(false);
+  const closeMobileMenu = () => {
+    if (openMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   useEffect(() => {
     if (!openMobile) {
@@ -50,9 +53,14 @@ export default function ManagerSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg" tooltip="올바름 관리자">
               <Link href="/manager" onClick={closeMobileMenu}>
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <ShieldCheck aria-hidden="true" className="size-4" />
-                </span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/manager-icon.svg"
+                  alt=""
+                  width={32}
+                  height={32}
+                  className="size-8 shrink-0 rounded-lg"
+                />
                 <span className="grid flex-1 text-left leading-tight">
                   <span className="truncate font-semibold">올바름 관리자</span>
                 </span>

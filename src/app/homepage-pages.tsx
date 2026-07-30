@@ -270,12 +270,36 @@ function ContactSection() {
 
 function HomeClientPreview() {
   const previewLogos = [
-    ["대한항공", "/homepage/logo-koreanair.webp"],
-    ["부산지방경찰청", "/homepage/logo-police.webp"],
-    ["동아대학교", "/homepage/logo-donga.webp"],
-    ["에어부산", "/homepage/logo-airbusan.webp"],
-    ["국민건강보험", null],
-    ["경남공업고등학교", "/homepage/logo-technical.webp"],
+    [
+      "대한항공",
+      "/homepage/client-logo-korean-air.png",
+      "https://www.koreanair.com/",
+    ],
+    [
+      "부산경찰청",
+      "/homepage/client-logo-police.png",
+      "https://www.bspolice.go.kr/",
+    ],
+    [
+      "동아대학교",
+      "/homepage/client-logo-donga.png",
+      "https://www.donga.ac.kr/",
+    ],
+    [
+      "에어부산",
+      "/homepage/client-logo-airbusan.png",
+      "https://www.airbusan.com/",
+    ],
+    [
+      "국민건강보험",
+      "/homepage/client-logo-nhis.png",
+      "https://www.nhis.or.kr/",
+    ],
+    [
+      "경남공업고등학교",
+      "/homepage/client-logo-technical-high.png",
+      "https://school.busanedu.net/knt-h/main.do",
+    ],
   ] as const;
 
   return (
@@ -297,15 +321,16 @@ function HomeClientPreview() {
         align="left"
       />
       <div className={styles.homeClientLogos}>
-        {previewLogos.map(([name, src]) => (
+        {previewLogos.map(([name, src, href]) => (
           <div key={name}>
-            {src ? (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${name} 공식 홈페이지 새 창에서 열기`}
+            >
               <Image src={src} alt={name} fill sizes="220px" />
-            ) : (
-              <span className={styles.healthLogo}>
-                <b>h·well</b> 국민건강보험
-              </span>
-            )}
+            </a>
           </div>
         ))}
       </div>

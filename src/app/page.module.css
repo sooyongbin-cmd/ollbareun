@@ -658,30 +658,25 @@
   position: relative;
   display: grid;
   min-height: 120px;
-  padding: 24px;
   place-items: center;
   border-right: 1px solid var(--home-line);
   border-bottom: 1px solid var(--home-line);
 }
 
+.homeClientLogos a {
+  position: absolute;
+  inset: 0;
+}
+
+.homeClientLogos a:focus-visible {
+  z-index: 1;
+  outline: 3px solid var(--home-blue);
+  outline-offset: -3px;
+}
+
 .homeClientLogos img {
   padding: 22px 36px;
   object-fit: contain;
-}
-
-.healthLogo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #454b50;
-  font-size: 15px;
-  font-weight: 700;
-}
-
-.healthLogo b {
-  color: #1688c8;
-  font-size: 24px;
-  font-style: italic;
 }
 
 .aboutHero,
@@ -1601,7 +1596,6 @@
 
   .homeClientLogos > div {
     min-height: 100px;
-    padding: 14px;
   }
 
   .homeClientLogos img {

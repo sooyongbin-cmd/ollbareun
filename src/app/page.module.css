@@ -355,7 +355,7 @@
   font-weight: 350;
   letter-spacing: -0.055em;
   line-height: 1.2;
-  text-wrap: balance;
+  white-space: nowrap;
 }
 
 .heroContent h1 strong {
@@ -1476,7 +1476,7 @@
   }
 
   .heroContent h1 {
-    font-size: clamp(36px, 10.2vw, 48px);
+    font-size: clamp(26px, 8vw, 42px);
   }
 
   .heroButton {

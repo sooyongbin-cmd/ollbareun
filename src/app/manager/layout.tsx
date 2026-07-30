@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+  title: "(주)올바름 관리자",
   manifest: "/manager/manifest.webmanifest",
 };
 

@@ -201,6 +201,11 @@ function Footer() {
           <Link href="/clients#client-list">교육기관</Link>
         </div>
         <div>
+          <strong>연결</strong>
+          <Link href="/manager">관리자</Link>
+          <Link href="/guard">근무자</Link>
+        </div>
+        <div>
           <strong>문의</strong>
           <a href="tel:0514657767">T.051-465-7767</a>
           <a href="tel:0519617767">F.051-961-7767</a>

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { notifyManagerThemeChange } from "../../../manager-theme-provider";
 
 type SystemConfigFormProps = {
   mode: "create" | "edit";
@@ -50,6 +51,10 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
         throw new Error(payload.error ?? "시스템설정을 저장하지 못했습니다.");
       }
 
+      if (systemCode.trim().toUpperCase() === "THEME_CODE") {
+        notifyManagerThemeChange(content);
+      }
+
       router.push("/manager/system/configs");
       router.refresh();
     } catch (saveError) {
@@ -74,6 +79,10 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
 
       if (!response.ok) {
         throw new Error(payload.error ?? "시스템설정을 삭제하지 못했습니다.");
+      }
+
+      if (initialConfig.system_code.trim().toUpperCase() === "THEME_CODE") {
+        notifyManagerThemeChange("system");
       }
 
       router.push("/manager/system/configs");

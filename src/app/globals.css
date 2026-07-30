@@ -215,6 +215,79 @@ h1, h2, h3, h4, h5, h6 {
   --sidebar-ring: #0071e3;
 }
 
+.manager-theme[data-theme="dark"],
+html[data-manager-theme="dark"] {
+  color-scheme: dark;
+  --background: #0a0a0b;
+  --foreground: #f5f5f7;
+  --card: #18181b;
+  --card-foreground: #f5f5f7;
+  --popover: #18181b;
+  --popover-foreground: #f5f5f7;
+  --primary: #2997ff;
+  --primary-foreground: #07111c;
+  --secondary: #27272a;
+  --secondary-foreground: #f5f5f7;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  --accent: #172554;
+  --accent-foreground: #bfdbfe;
+  --destructive: #ff6b6b;
+  --border: #3f3f46;
+  --input: #52525b;
+  --ring: #2997ff;
+  --chart-1: #60a5fa;
+  --chart-2: #34d399;
+  --chart-3: #a78bfa;
+  --chart-4: #fbbf24;
+  --chart-5: #fb7185;
+  --sidebar: #111113;
+  --sidebar-foreground: #f5f5f7;
+  --sidebar-primary: #2997ff;
+  --sidebar-primary-foreground: #07111c;
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: #dbeafe;
+  --sidebar-border: #3f3f46;
+  --sidebar-ring: #2997ff;
+}
+
+@media (prefers-color-scheme: dark) {
+  .manager-theme[data-theme="system"] {
+    color-scheme: dark;
+    --background: #0a0a0b;
+    --foreground: #f5f5f7;
+    --card: #18181b;
+    --card-foreground: #f5f5f7;
+    --popover: #18181b;
+    --popover-foreground: #f5f5f7;
+    --primary: #2997ff;
+    --primary-foreground: #07111c;
+    --secondary: #27272a;
+    --secondary-foreground: #f5f5f7;
+    --muted: #27272a;
+    --muted-foreground: #a1a1aa;
+    --accent: #172554;
+    --accent-foreground: #bfdbfe;
+    --destructive: #ff6b6b;
+    --border: #3f3f46;
+    --input: #52525b;
+    --ring: #2997ff;
+    --chart-1: #60a5fa;
+    --chart-2: #34d399;
+    --chart-3: #a78bfa;
+    --chart-4: #fbbf24;
+    --chart-5: #fb7185;
+    --sidebar: #111113;
+    --sidebar-foreground: #f5f5f7;
+    --sidebar-primary: #2997ff;
+    --sidebar-primary-foreground: #07111c;
+    --sidebar-accent: #1e293b;
+    --sidebar-accent-foreground: #dbeafe;
+    --sidebar-border: #3f3f46;
+    --sidebar-ring: #2997ff;
+  }
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;

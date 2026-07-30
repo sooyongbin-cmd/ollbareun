@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from "./supabase-admin";
 import {
   defaultKakaoOpenGraphMetadata,
   getKakaoOpenGraphMetadata,
+  getManagerTheme,
 } from "./system-configs";
 
 vi.mock("./supabase-admin", () => ({
@@ -77,5 +78,37 @@ describe("listSystemConfigs", () => {
     expect(result).toHaveLength(1);
     expect(from).toHaveBeenCalledWith("system_configs");
     expect(order).toHaveBeenCalledWith("description", { ascending: true });
+  });
+});
+
+describe("getManagerTheme", () => {
+  it("loads and normalizes THEME_CODE", async () => {
+    const single = vi.fn().mockResolvedValue({
+      data: { content: "  DARK  " },
+      error: null,
+    });
+    const eq = vi.fn(() => ({ single }));
+    const select = vi.fn(() => ({ eq }));
+    const from = vi.fn(() => ({ select }));
+
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from } as never);
+
+    await expect(getManagerTheme()).resolves.toBe("dark");
+    expect(from).toHaveBeenCalledWith("system_configs");
+    expect(eq).toHaveBeenCalledWith("system_code", "THEME_CODE");
+  });
+
+  it("falls back to system when THEME_CODE cannot be loaded", async () => {
+    const single = vi.fn().mockResolvedValue({
+      data: null,
+      error: { message: "not found" },
+    });
+    const eq = vi.fn(() => ({ single }));
+    const select = vi.fn(() => ({ eq }));
+    const from = vi.fn(() => ({ select }));
+
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from } as never);
+
+    await expect(getManagerTheme()).resolves.toBe("system");
   });
 });

@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from "./supabase-admin";
+import { normalizeManagerTheme } from "./manager-theme";
 
 export type SystemConfigRow = {
   system_code: string;
@@ -61,6 +62,14 @@ export async function getSystemConfig(systemCodeInput: unknown) {
 
 export async function getSystemConfigContent(systemCodeInput: unknown) {
   return (await getSystemConfig(systemCodeInput)).content;
+}
+
+export async function getManagerTheme() {
+  try {
+    return normalizeManagerTheme(await getSystemConfigContent("THEME_CODE"));
+  } catch {
+    return "system";
+  }
 }
 
 export async function getKakaoOpenGraphMetadata() {

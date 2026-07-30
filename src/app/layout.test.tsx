@@ -12,7 +12,7 @@ describe("root layout", () => {
 
   it("provides complete social sharing metadata", () => {
     expect(metadata.metadataBase?.toString()).toBe("https://ollbareun.vercel.app/");
-    expect(metadata.title).toBe("주식회사 올바름 | 현장의 기준을 바로 세우는 운영 파트너");
+    expect(metadata.title).toBe("(주)올바름");
     expect(metadata.description).toContain("근로자 파견");
     expect(metadata.alternates).toEqual({ canonical: "/" });
     expect(metadata.openGraph).toMatchObject({
@@ -20,11 +20,11 @@ describe("root layout", () => {
       locale: "ko_KR",
       url: "/",
       siteName: "올바름",
-      title: "주식회사 올바름 | 현장의 기준을 바로 세우는 운영 파트너",
+      title: "(주)올바름",
     });
     expect(metadata.twitter).toMatchObject({
       card: "summary_large_image",
-      title: "주식회사 올바름 | 현장의 기준을 바로 세우는 운영 파트너",
+      title: "(주)올바름",
     });
   });
 });

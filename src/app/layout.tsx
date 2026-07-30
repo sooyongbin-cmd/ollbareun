@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 const siteUrl = new URL("https://ollbareun.vercel.app");
-const siteTitle = "주식회사 올바름 | 현장의 기준을 바로 세우는 운영 파트너";
+const siteTitle = "(주)올바름";
 const siteDescription =
   "근로자 파견, 건물·시설물 종합 관리, 방역·소독까지 사람과 공간을 위한 현장 운영 서비스를 제공합니다.";
 

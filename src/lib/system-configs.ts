@@ -40,7 +40,7 @@ export async function listSystemConfigs() {
   const { data, error } = await supabase
     .from("system_configs")
     .select(systemConfigSelect)
-    .order("system_code", { ascending: true });
+    .order("description", { ascending: true });
 
   throwIfError(error);
   return (data ?? []) as SystemConfigRow[];

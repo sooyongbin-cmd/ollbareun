@@ -52,3 +52,30 @@ describe("Kakao Open Graph system configs", () => {
     });
   });
 });
+
+describe("listSystemConfigs", () => {
+  it("orders system configs by description ascending", async () => {
+    const order = vi.fn().mockResolvedValue({
+      data: [
+        {
+          system_code: "manager_email",
+          parent_system_code: null,
+          description: "관리자 알림 이메일 주소",
+          content: "admin@example.com",
+        },
+      ],
+      error: null,
+    });
+    const select = vi.fn(() => ({ order }));
+    const from = vi.fn(() => ({ select }));
+
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from } as never);
+
+    const { listSystemConfigs } = await import("./system-configs");
+    const result = await listSystemConfigs();
+
+    expect(result).toHaveLength(1);
+    expect(from).toHaveBeenCalledWith("system_configs");
+    expect(order).toHaveBeenCalledWith("description", { ascending: true });
+  });
+});

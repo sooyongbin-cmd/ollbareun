@@ -49,7 +49,7 @@ describe("guard layout zoom scope", () => {
     const metadata = await generateMetadata({}, resolveMetadata(parentMetadata));
 
     expect(dynamic).toBe("force-dynamic");
-    expect(metadata.title).toBe("사회적기업 올바름");
+    expect(metadata.title).toBe("(주)올바름 근무자");
     expect(metadata.manifest).toBe("/guard/manifest.webmanifest");
     expect(metadata.openGraph).toMatchObject({
       siteName: "올바름",

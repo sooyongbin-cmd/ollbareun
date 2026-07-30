@@ -326,7 +326,7 @@ export default function GuardPage() {
               className="w-full rounded-xl border border-border/50 bg-muted/40 p-5"
             >
               <div className="text-center space-y-1 mb-6">
-                <p className="text-[15px] font-semibold text-primary">사회적기업 올바름</p>
+                <p className="text-[15px] font-semibold text-primary">(주)올바름 근무자</p>
                 <h1 className="text-[28px] font-bold text-foreground">근무자 로그인</h1>
               </div>
               <form className="w-full space-y-6" onSubmit={handleGuardAuth}>

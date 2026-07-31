@@ -12,4 +12,15 @@ describe("homepage client logo sizing", () => {
       /\.homeClientLogos img\s*\{[^}]*padding: 0 24px;/s,
     );
   });
+
+  it("draws only the top and bottom rules shown in the PDF", () => {
+    const gridRule = stylesheet.match(/\.homeClientLogos\s*\{([^}]*)\}/s)?.[1];
+    const cellRule = stylesheet.match(/\.homeClientLogos > div\s*\{([^}]*)\}/s)?.[1];
+
+    expect(gridRule).toContain("border-top: 1px solid var(--home-line);");
+    expect(gridRule).toContain("border-bottom: 1px solid var(--home-line);");
+    expect(gridRule).not.toContain("border-left");
+    expect(gridRule).not.toContain("border-right");
+    expect(cellRule).not.toContain("border");
+  });
 });

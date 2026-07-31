@@ -603,7 +603,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   border-top: 1px solid var(--home-line);
-  border-left: 1px solid var(--home-line);
+  border-bottom: 1px solid var(--home-line);
 }
 
 .homeClientLogos > div {
@@ -611,8 +611,6 @@
   display: grid;
   min-height: 170px;
   place-items: center;
-  border-right: 1px solid var(--home-line);
-  border-bottom: 1px solid var(--home-line);
 }
 
 .homeClientLogos img {

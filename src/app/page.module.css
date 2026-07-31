@@ -55,6 +55,12 @@
   align-items: center;
 }
 
+.headerInner > a {
+  display: flex;
+  height: 100%;
+  align-items: center;
+}
+
 .brand {
   display: inline-flex;
   align-items: center;
@@ -108,8 +114,12 @@
 }
 
 .certification {
+  display: inline-flex;
+  height: 30px;
   margin: 0 0 0 16px;
+  align-items: center;
   font-size: 11px;
+  line-height: 1;
   opacity: 0.82;
 }
 

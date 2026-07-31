@@ -609,7 +609,7 @@
 .homeClientLogos > div {
   position: relative;
   display: grid;
-  min-height: 120px;
+  min-height: 170px;
   place-items: center;
   border-right: 1px solid var(--home-line);
   border-bottom: 1px solid var(--home-line);
@@ -627,7 +627,7 @@
 }
 
 .homeClientLogos img {
-  padding: 22px 36px;
+  padding: 0 24px;
   object-fit: contain;
 }
 
@@ -1514,11 +1514,11 @@
   }
 
   .homeClientLogos > div {
-    min-height: 100px;
+    min-height: 110px;
   }
 
   .homeClientLogos img {
-    padding: 18px;
+    padding: 0 12px;
   }
 
   .stats {

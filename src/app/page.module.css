@@ -5,10 +5,11 @@
   --home-ink: #151515;
   --home-muted: #666b70;
   --home-line: #d9dde1;
-  --home-trust-background: #e5e5e5;
-  --home-service-background: #fafafa;
-  --home-client-background: #e5e5e5;
-  --home-footer-background: #e2e2e2;
+  --home-trust-background: #ffffff;
+  --home-service-background: #f9f9f8;
+  --home-client-background: #ffffff;
+  --home-values-background: #315da6;
+  --home-footer-background: #dcdbda;
   position: relative;
   overflow: clip;
   background: #fff;
@@ -830,7 +831,7 @@
 .values {
   padding: 110px max(24px, calc((100% - 1280px) / 2)) 120px;
   scroll-margin-top: 92px;
-  background: var(--home-deep-blue);
+  background: var(--home-values-background);
   color: #fff;
 }
 
@@ -888,6 +889,7 @@
 .socialSection {
   padding-top: 130px;
   padding-bottom: 130px;
+  background: var(--home-service-background);
 }
 
 .socialSection .sectionHeading {
@@ -1039,7 +1041,7 @@
 }
 
 .detailSection {
-  background: #f8f9fa;
+  background: var(--home-service-background);
 }
 
 .detailBanner {

@@ -333,6 +333,7 @@
   width: min(1120px, calc(100% - 48px));
   margin: 32px auto 0;
   padding-left: 41%;
+  text-align: center;
 }
 
 .heroContent > p,
@@ -531,13 +532,9 @@
 .certificateImages > div {
   position: relative;
   min-height: 280px;
-  border: 1px solid #eceff1;
-  background: #fff;
-  box-shadow: 0 14px 35px rgb(11 49 74 / 6%);
 }
 
 .certificateImages img {
-  padding: 12px;
   object-fit: contain;
 }
 
@@ -698,6 +695,12 @@
   margin: 0 auto;
 }
 
+.aboutHero > div:last-child,
+.serviceHero > div:last-child,
+.clientHero > div:last-child {
+  text-align: center;
+}
+
 .aboutOverlay,
 .serviceHeroOverlay,
 .clientOverlay {
@@ -800,10 +803,14 @@
 
 .historyImage > div {
   position: absolute;
-  right: 42px;
-  bottom: 42px;
-  left: 42px;
+  inset: 0;
+  display: flex;
+  padding: 42px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   color: #fff;
+  text-align: center;
 }
 
 .historyImage span {
@@ -819,6 +826,9 @@
 }
 
 .timeline {
+  --timeline-date-column: 145px;
+  --timeline-marker-column: 32px;
+
   position: relative;
   margin: 0;
   padding: 0;
@@ -829,7 +839,7 @@
   position: absolute;
   top: 28px;
   bottom: 28px;
-  left: 176px;
+  left: calc(var(--timeline-date-column) + (var(--timeline-marker-column) / 2) - 0.5px);
   width: 1px;
   background: var(--home-line);
   content: "";
@@ -838,7 +848,7 @@
 .timeline li {
   display: grid;
   min-height: 86px;
-  grid-template-columns: 145px 32px 1fr;
+  grid-template-columns: var(--timeline-date-column) var(--timeline-marker-column) 1fr;
   align-items: center;
 }
 
@@ -955,6 +965,11 @@
   border-radius: 0 26px 0 26px;
 }
 
+.socialGrid article,
+.facilityGrid article {
+  border-radius: 26px;
+}
+
 .socialGrid svg,
 .facilityGrid svg {
   width: 32px;
@@ -1042,7 +1057,7 @@
   align-items: center;
   border: 1px solid #e2e5e7;
   border-radius: 46px;
-  box-shadow: 0 5px 14px rgb(0 0 0 / 8%);
+  box-shadow: 0 8px 22px rgb(0 0 0 / 14%);
 }
 
 .operationLayout li > strong {
@@ -1050,7 +1065,7 @@
   width: 64px;
   height: 64px;
   place-items: center;
-  border-radius: 50%;
+  border-radius: 18px;
   background: var(--home-blue);
   color: #fff;
   font-size: 22px;
@@ -1095,73 +1110,14 @@
 }
 
 .dispatchDiagram {
-  max-width: 760px;
+  width: min(620px, 100%);
   margin: 0 auto;
-  text-align: center;
 }
 
-.dispatchDiagram > p {
-  margin: 0 0 18px;
-  color: var(--home-muted);
-  font-size: 14px;
-  line-height: 1.45;
-}
-
-.dispatchFlow {
-  display: flex;
-  max-width: 760px;
-  margin: 0 auto;
-  align-items: center;
-  justify-content: center;
-}
-
-.dispatchFlow > div {
-  display: flex;
-  width: 150px;
-  height: 150px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: 9px solid #dce6eb;
-  border-radius: 50%;
-  background: #fff;
-}
-
-.dispatchFlow > div:nth-of-type(1) {
-  border-color: #159ed5;
-}
-
-.dispatchFlow > div:nth-of-type(2) {
-  border-color: #26b8c2;
-}
-
-.dispatchFlow > div:nth-of-type(3) {
-  border-color: #f5aa2c;
-}
-
-.dispatchFlow svg {
-  width: 37px;
-  height: 37px;
-  color: #58707f;
-  stroke-width: 1.5;
-}
-
-.dispatchFlow > svg {
-  width: 68px;
-  color: #b8c1c7;
-}
-
-.dispatchFlow strong {
-  margin-top: 12px;
-  font-size: 14px;
-}
-
-.dispatchRelations {
-  display: flex;
-  margin-top: 16px;
-  justify-content: space-around;
-  color: var(--home-muted);
-  font-size: 14px;
+.dispatchDiagram img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .facilityGrid {
@@ -1170,37 +1126,14 @@
 }
 
 .airportCard {
-  position: relative;
-  display: grid;
-  width: min(620px, 100%);
-  min-height: 300px;
+  width: min(525px, 100%);
   margin: 50px auto 0;
-  place-items: center;
-  overflow: hidden;
-  border-radius: 54px 0 54px 0;
-  isolation: isolate;
-}
-
-.airportCard::after {
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  background: rgb(0 71 148 / 86%);
-  content: "";
 }
 
 .airportCard img {
-  z-index: -2;
-  object-fit: cover;
-}
-
-.airportCard p {
-  margin: 0;
-  color: #fff;
-  font-size: 24px;
-  font-weight: 750;
-  line-height: 1.55;
-  text-align: center;
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .clientHero {
@@ -1226,8 +1159,8 @@
 .clientGroups > div > h3 {
   margin: 0 0 26px;
   padding: 10px 15px;
-  background: #e2e2e2;
-  color: #6a6a6a;
+  background: #c1c1c1;
+  color: #fff;
   font-size: 13px;
   font-weight: 550;
   text-align: center;
@@ -1664,13 +1597,12 @@
     min-height: 390px;
   }
 
-  .timeline::before {
-    left: 121px;
+  .timeline {
+    --timeline-date-column: 98px;
   }
 
   .timeline li {
     min-height: 80px;
-    grid-template-columns: 98px 32px 1fr;
   }
 
   .timeline time {
@@ -1742,42 +1674,13 @@
   .operationLayout li > strong {
     width: 56px;
     height: 56px;
+    border-radius: 16px;
     font-size: 19px;
   }
 
   .detailMessage {
     margin-top: 45px;
     font-size: 22px;
-  }
-
-  .dispatchFlow {
-    flex-wrap: wrap;
-  }
-
-  .dispatchFlow > div {
-    width: 118px;
-    height: 118px;
-    border-width: 7px;
-  }
-
-  .dispatchFlow > svg {
-    width: 31px;
-  }
-
-  .dispatchFlow > div svg {
-    width: 28px;
-  }
-
-  .dispatchFlow strong {
-    font-size: 12px;
-  }
-
-  .airportCard {
-    min-height: 250px;
-  }
-
-  .airportCard p {
-    font-size: 19px;
   }
 
   .logoGrid {
@@ -1843,13 +1746,6 @@
     min-height: 145px;
   }
 
-  .dispatchFlow > svg {
-    display: none;
-  }
-
-  .dispatchFlow {
-    gap: 10px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -417,11 +417,15 @@ export function MainPage() {
             align="left"
           />
           <div className={styles.certificateImages} aria-label="보유 인증서">
-            {[1, 2, 3].map((number) => (
-              <div key={number}>
+            {[
+              ["/homepage/certificate-figma-1.png", "여성기업 확인서"],
+              ["/homepage/certificate-figma-2.png", "김해공항세관 등록증"],
+              ["/homepage/certificate-figma-3.png", "사회적기업 인증서"],
+            ].map(([src, alt]) => (
+              <div key={src}>
                 <Image
-                  src={`/homepage/certificate-${number}.webp`}
-                  alt={number === 1 ? "여성기업 확인서" : number === 2 ? "근로자파견사업 허가증" : "사회적기업 인증서"}
+                  src={src}
+                  alt={alt}
                   fill
                   sizes="200px"
                 />
@@ -645,16 +649,13 @@ export function ServicesPage() {
         <div className={styles.detailBanner}><Image src="/homepage/service-worker.webp" alt="의료 현장에서 근무하는 전문 인력" fill sizes="(max-width: 760px) 100vw, 1200px" /></div>
         <h3 className={styles.detailMessage}>사무관리, 생산·물류, IT·전산, 의료·간병, 콜센터 등<br />필요한 직무에 적합한 인력을 연결합니다.</h3>
         <div className={styles.dispatchDiagram}>
-          <p>근로자 파견계약<br /><span>(지휘권 임대)</span></p>
-          <div className={styles.dispatchFlow}>
-            <div><BriefcaseBusiness aria-hidden="true" /><strong>파견사업주</strong></div><span aria-hidden="true">→</span>
-            <div><UsersRound aria-hidden="true" /><strong>파견근로자</strong></div><span aria-hidden="true">→</span>
-            <div><Building2 aria-hidden="true" /><strong>사용사업주</strong></div>
-          </div>
-          <div className={styles.dispatchRelations}>
-            <span>고용계약관계</span>
-            <span>지휘 / 명령관계</span>
-          </div>
+          <Image
+            src="/homepage/dispatch-diagram-figma.png"
+            alt="파견사업주와 사용사업주는 근로자 파견계약을 맺고, 파견사업주는 파견근로자와 고용계약관계를, 사용사업주는 파견근로자와 지휘 및 명령관계를 맺는 구조"
+            width={1200}
+            height={940}
+            sizes="(max-width: 760px) calc(100vw - 40px), 620px"
+          />
         </div>
       </section>
 
@@ -694,8 +695,13 @@ export function ServicesPage() {
         <div className={styles.detailBanner}><Image src="/homepage/service-disinfection.webp" alt="항공기 객실에서 방역 작업을 진행하는 전문 인력" fill sizes="(max-width: 760px) 100vw, 1200px" /></div>
         <h3 className={styles.detailMessage}>현장 조건에 맞춘 법정·살충·살균 소독으로<br />대형 건축물과 항공기 검역 현장의 예방 체계를 지원합니다.</h3>
         <div className={styles.airportCard}>
-          <Image src="/homepage/plane.webp" alt="" fill sizes="600px" />
-          <p>당사는 현재 김해공항 내<br />전 항공기 검역 및<br />방역프로세스를 독자 수행중입니다</p>
+          <Image
+            src="/homepage/airport-card-figma.png"
+            alt="당사는 현재 김해공항 내 전 항공기 검역 및 방역프로세스를 독자 수행중입니다"
+            width={1050}
+            height={616}
+            sizes="(max-width: 760px) calc(100vw - 48px), 525px"
+          />
         </div>
       </section>
       <BackToTop />

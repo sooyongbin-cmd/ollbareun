@@ -24,3 +24,14 @@ describe("homepage client logo sizing", () => {
     expect(cellRule).not.toContain("border");
   });
 });
+
+describe("client page logo sizing", () => {
+  it("matches the logo-to-heading scale in the PDF", () => {
+    expect(stylesheet).toMatch(
+      /\.clientGroups > div > h3\s*\{[^}]*font-size: 13px;/s,
+    );
+    expect(stylesheet).toMatch(
+      /\.logoGrid > div\s*\{[^}]*height: 130px;/s,
+    );
+  });
+});

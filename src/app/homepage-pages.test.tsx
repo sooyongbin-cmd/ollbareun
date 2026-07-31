@@ -60,12 +60,16 @@ describe("public homepage pages", () => {
   });
 
   it("renders four distinct operation steps", () => {
-    render(<ServicesPage />);
+    const { container } = render(<ServicesPage />);
 
     expect(screen.getByText("준비단계와 목표 설정")).toBeInTheDocument();
     expect(screen.getByText("비용 분석과 계약 협상")).toBeInTheDocument();
     expect(screen.getByText("운영 모니터링과 평가")).toBeInTheDocument();
     expect(screen.getByText("이슈 대응과 현장 존중")).toBeInTheDocument();
+    expect(
+      container.querySelector('img[src*="operation-system.svg"]'),
+    ).toBeInTheDocument();
+    expect(container.querySelector('ol[class*="visuallyHidden"]')).toBeInTheDocument();
   });
 
   it("renders all client categories", () => {

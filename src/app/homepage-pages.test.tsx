@@ -66,9 +66,12 @@ describe("public homepage pages", () => {
     expect(screen.getByText("비용 분석과 계약 협상")).toBeInTheDocument();
     expect(screen.getByText("운영 모니터링과 평가")).toBeInTheDocument();
     expect(screen.getByText("이슈 대응과 현장 존중")).toBeInTheDocument();
-    expect(
-      container.querySelector('img[src*="operation-system.svg"]'),
-    ).toBeInTheDocument();
+    const operationDiagram = container.querySelector(
+      'img[src*="operation-system.svg"]',
+    );
+    expect(operationDiagram).toBeInTheDocument();
+    expect(operationDiagram).toHaveAttribute("width", "665");
+    expect(operationDiagram).toHaveAttribute("height", "492");
     expect(container.querySelector('ol[class*="visuallyHidden"]')).toBeInTheDocument();
   });
 

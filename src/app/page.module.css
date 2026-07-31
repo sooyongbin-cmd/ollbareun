@@ -5,6 +5,10 @@
   --home-ink: #151515;
   --home-muted: #666b70;
   --home-line: #d9dde1;
+  --home-trust-background: #e5e5e5;
+  --home-service-background: #fafafa;
+  --home-client-background: #e5e5e5;
+  --home-footer-background: #e2e2e2;
   position: relative;
   overflow: clip;
   background: #fff;
@@ -463,8 +467,12 @@
 }
 
 .trustSection {
+  width: 100%;
   padding-top: 130px;
+  padding-right: max(24px, calc((100% - 1280px) / 2));
   padding-bottom: 130px;
+  padding-left: max(24px, calc((100% - 1280px) / 2));
+  background: var(--home-trust-background);
 }
 
 .splitIntro {
@@ -537,7 +545,7 @@
   width: 100%;
   padding-right: max(24px, calc((100% - 1280px) / 2));
   padding-left: max(24px, calc((100% - 1280px) / 2));
-  background: #f7f8f9;
+  background: var(--home-service-background);
 }
 
 .serviceGrid {
@@ -548,7 +556,7 @@
 
 .serviceCard {
   overflow: hidden;
-  background: #fff;
+  background: var(--home-service-background);
   box-shadow: 0 16px 46px rgb(11 49 74 / 7%);
   transition:
     transform 180ms ease,
@@ -635,8 +643,12 @@
 }
 
 .homeClientSection {
+  width: 100%;
   padding-top: 125px;
+  padding-right: max(24px, calc((100% - 1280px) / 2));
   padding-bottom: 125px;
+  padding-left: max(24px, calc((100% - 1280px) / 2));
+  background: var(--home-client-background);
 }
 
 .homeClientLogos {
@@ -1358,7 +1370,7 @@
 
 .footer {
   padding: 70px max(24px, calc((100% - 1280px) / 2)) 24px;
-  background: #e7e7e7;
+  background: var(--home-footer-background);
   color: #343434;
 }
 
@@ -1531,8 +1543,11 @@
   }
 
   .trustSection {
+    width: 100%;
     padding-top: 85px;
+    padding-right: 20px;
     padding-bottom: 85px;
+    padding-left: 20px;
   }
 
   .splitIntro {
@@ -1603,9 +1618,11 @@
   }
 
   .homeClientSection {
-    width: calc(100% - 40px);
+    width: 100%;
     padding-top: 85px;
+    padding-right: 20px;
     padding-bottom: 85px;
+    padding-left: 20px;
   }
 
   .homeClientLogos {

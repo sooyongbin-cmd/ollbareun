@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 import HomepageHeader from "./homepage-header";
 
@@ -13,6 +14,14 @@ describe("homepage header", () => {
     expect(
       container.querySelector('img[src*="archive/logo-white.svg"]'),
     ).toBeInTheDocument();
+  });
+
+  it("uses the PDF logo width on desktop", () => {
+    const stylesheet = readFileSync("src/app/page.module.css", "utf8");
+
+    expect(stylesheet).toMatch(
+      /\.brandLogo\s*\{[^}]*width: 223px;/s,
+    );
   });
 
   it("opens the desktop mega menu and exposes section links", () => {

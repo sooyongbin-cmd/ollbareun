@@ -72,6 +72,21 @@ describe("public homepage pages", () => {
     expect(container.querySelector('ol[class*="visuallyHidden"]')).toBeInTheDocument();
   });
 
+  it("uses the supplied archive icons for facility management cards", () => {
+    const { container } = render(<ServicesPage />);
+
+    for (const filename of [
+      "facility-maintenance.svg",
+      "facility-hygiene.svg",
+      "facility-security.svg",
+      "facility-parking.svg",
+    ]) {
+      expect(container.querySelector(`img[src*="${filename}"]`)).toBeInTheDocument();
+    }
+
+    expect(container.querySelectorAll('[class*="facilityGrid"] svg')).toHaveLength(0);
+  });
+
   it("renders all client categories", () => {
     render(<ClientsPage />);
 

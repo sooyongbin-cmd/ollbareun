@@ -2,12 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import {
-  ArrowRight,
-  ArrowUp,
   Award,
   BriefcaseBusiness,
   Building2,
-  Droplets,
   Lightbulb,
   MapPin,
   ParkingCircle,
@@ -27,21 +24,18 @@ const services = [
     description:
       "파견 사업주가 근로자를 고용한 후 사용 사업주의 지휘명령을 받아 근로에 종사하게 하는 전문 서비스. 파견기간 1년 기준, 합의 시 연장.",
     image: "/homepage/service-worker.webp",
-    icon: UsersRound,
   },
   {
     title: "건물 시설물 종합 관리",
     description:
       "각종 설비(전기, 소방, 기계, 가스, 건축)의 철저한 점검을 통한 체계적인 운영관리. 위생관리, 시설보안, 주차관리 통합 제공.",
     image: "/homepage/service-facility.webp",
-    icon: Building2,
   },
   {
     title: "방역 · 알콜 소독",
     description:
       "법정 의무소독, 살충소독(ULV·연막), 살균소독. 현재 김해공항 내 전 항공기 검역 및 방역프로세스를 독자 수행 중.",
     image: "/homepage/service-disinfection.webp",
-    icon: Droplets,
   },
 ];
 
@@ -227,8 +221,46 @@ function Footer() {
 function BackToTop() {
   return (
     <a className={styles.toTop} href="#top" aria-label="맨 위로 이동">
-      <ArrowUp aria-hidden="true" />
+      <Image
+        className={styles.toTopBackground}
+        src="/homepage/figma-icons/top-circle.svg"
+        alt=""
+        width={71}
+        height={71}
+        aria-hidden="true"
+      />
+      <Image
+        className={styles.toTopArrow}
+        src="/homepage/figma-icons/top-arrow.svg"
+        alt=""
+        width={22}
+        height={25}
+        aria-hidden="true"
+      />
     </a>
+  );
+}
+
+function MoreViewIcon({
+  circle = "dark",
+}: {
+  circle?: "dark" | "light" | "client";
+}) {
+  return (
+    <span className={styles.moreViewIcon} aria-hidden="true">
+      <Image
+        src={`/homepage/figma-icons/more-circle-${circle}.svg`}
+        alt=""
+        width={29}
+        height={29}
+      />
+      <Image
+        src="/homepage/figma-icons/more-arrow-dark.svg"
+        alt=""
+        width={12}
+        height={10}
+      />
+    </span>
   );
 }
 
@@ -331,7 +363,7 @@ function HomeClientPreview() {
         ))}
       </div>
       <Link className={styles.moreLink} href="/clients">
-        MORE VIEW <ArrowRight aria-hidden="true" />
+        MORE VIEW <MoreViewIcon circle="client" />
       </Link>
     </section>
   );
@@ -398,7 +430,7 @@ export function MainPage() {
           </div>
         </div>
         <Link className={styles.moreLink} href="/about">
-          MORE VIEW <ArrowRight aria-hidden="true" />
+          MORE VIEW <MoreViewIcon />
         </Link>
       </section>
 
@@ -420,13 +452,12 @@ export function MainPage() {
           align="left"
         />
         <div className={styles.serviceGrid}>
-          {services.map(({ title, description, image, icon: Icon }) => (
+          {services.map(({ title, description, image }) => (
             <article key={title} className={styles.serviceCard}>
               <div className={styles.serviceImage}>
                 <Image src={image} alt="" fill sizes="(max-width: 760px) 100vw, 33vw" />
               </div>
               <div>
-                <Icon aria-hidden="true" />
                 <h3>{title}</h3>
                 <p>{description}</p>
               </div>
@@ -434,7 +465,7 @@ export function MainPage() {
           ))}
         </div>
         <Link className={styles.moreLink} href="/services">
-          MORE VIEW <ArrowRight aria-hidden="true" />
+          MORE VIEW <MoreViewIcon circle="light" />
         </Link>
       </section>
       <HomeClientPreview />
@@ -616,8 +647,8 @@ export function ServicesPage() {
         <div className={styles.dispatchDiagram}>
           <p>근로자 파견계약<br /><span>(지휘권 임대)</span></p>
           <div className={styles.dispatchFlow}>
-            <div><BriefcaseBusiness aria-hidden="true" /><strong>파견사업주</strong></div><ArrowRight aria-hidden="true" />
-            <div><UsersRound aria-hidden="true" /><strong>파견근로자</strong></div><ArrowRight aria-hidden="true" />
+            <div><BriefcaseBusiness aria-hidden="true" /><strong>파견사업주</strong></div><span aria-hidden="true">→</span>
+            <div><UsersRound aria-hidden="true" /><strong>파견근로자</strong></div><span aria-hidden="true">→</span>
             <div><Building2 aria-hidden="true" /><strong>사용사업주</strong></div>
           </div>
           <div className={styles.dispatchRelations}>

@@ -24,6 +24,18 @@ describe("homepage back to top button", () => {
     expect(container.querySelector('img[src*="hero-lighthouse-figma.png"]')).toBeInTheDocument();
     expect(container.querySelector("video")).not.toBeInTheDocument();
   });
+
+  it("uses the exported Figma arrows and omits invented service icons", () => {
+    const { container } = render(<MainPage />);
+
+    expect(
+      container.querySelector('img[src*="figma-icons/more-arrow-dark.svg"]'),
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector('img[src*="figma-icons/top-arrow.svg"]'),
+    ).toBeInTheDocument();
+    expect(container.querySelectorAll('[class*="serviceCard"] svg')).toHaveLength(0);
+  });
 });
 
 describe("public homepage pages", () => {

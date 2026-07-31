@@ -1,6 +1,7 @@
 "use client";
 
 import { Menu, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -42,7 +43,27 @@ function HeaderBrand() {
   return (
     <span className={`${styles.brand} ${styles.brandInverse}`}>
       <span className={styles.brandMark} aria-hidden="true">
-        <span />
+        <Image
+          className={styles.brandSymbolOne}
+          src="/homepage/figma-icons/brand-symbol-1.svg"
+          alt=""
+          width={10}
+          height={17}
+        />
+        <Image
+          className={styles.brandSymbolTwo}
+          src="/homepage/figma-icons/brand-symbol-2.svg"
+          alt=""
+          width={17}
+          height={25}
+        />
+        <Image
+          className={styles.brandSymbolThree}
+          src="/homepage/figma-icons/brand-symbol-3.svg"
+          alt=""
+          width={22}
+          height={30}
+        />
       </span>
       <span className={styles.brandName}>주식회사 올바름</span>
     </span>

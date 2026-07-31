@@ -1,9 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { MainPage } from "./homepage-pages";
+import { AboutPage, ClientsPage, MainPage, ServicesPage } from "./homepage-pages";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/",
+}));
+
+vi.mock("./homepage-contact-map", () => ({
+  default: () => <div data-testid="homepage-contact-map" />,
 }));
 
 describe("homepage back to top button", () => {
@@ -12,5 +16,39 @@ describe("homepage back to top button", () => {
 
     const toTopButton = screen.getByRole("link", { name: "맨 위로 이동" });
     expect(toTopButton).toHaveAttribute("href", "#top");
+  });
+
+  it("uses the Figma hero image without rendering a video", () => {
+    const { container } = render(<MainPage />);
+
+    expect(container.querySelector('img[src*="hero-lighthouse-figma.png"]')).toBeInTheDocument();
+    expect(container.querySelector("video")).not.toBeInTheDocument();
+  });
+});
+
+describe("public homepage pages", () => {
+  it("renders the Figma company content", () => {
+    render(<AboutPage />);
+
+    expect(screen.getByText("2018", { selector: "strong" })).toBeInTheDocument();
+    expect(screen.getByText("10.3억")).toBeInTheDocument();
+    expect(screen.getByText("B.E.S.T")).toBeInTheDocument();
+  });
+
+  it("renders four distinct operation steps", () => {
+    render(<ServicesPage />);
+
+    expect(screen.getByText("준비단계와 목표 설정")).toBeInTheDocument();
+    expect(screen.getByText("비용 분석과 계약 협상")).toBeInTheDocument();
+    expect(screen.getByText("운영 모니터링과 평가")).toBeInTheDocument();
+    expect(screen.getByText("이슈 대응과 현장 존중")).toBeInTheDocument();
+  });
+
+  it("renders all client categories", () => {
+    render(<ClientsPage />);
+
+    expect(screen.getByRole("heading", { name: "공공기관" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "교육기관" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "항공사" })).toBeInTheDocument();
   });
 });

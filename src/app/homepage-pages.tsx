@@ -62,9 +62,9 @@ const values = [
 
 const operationSteps = [
   ["01", "준비단계와 목표 설정", "현재 경영상황을 진단하고 추진 배경, 업무 범위, 품질수준, 수행기준을 구체화합니다."],
-  ["02", "준비단계와 목표 설정", "현재 경영상황을 진단하고 추진 배경, 업무 범위, 품질수준, 수행기준을 구체화합니다."],
-  ["03", "준비단계와 목표 설정", "현재 경영상황을 진단하고 추진 배경, 업무 범위, 품질수준, 수행기준을 구체화합니다."],
-  ["04", "준비단계와 목표 설정", "현재 경영상황을 진단하고 추진 배경, 업무 범위, 품질수준, 수행기준을 구체화합니다."],
+  ["02", "비용 분석과 계약 협상", "현재 수행수준과 원가를 분석해 개선목표를 세우고, 장애 요소와 대처 시나리오를 준비합니다."],
+  ["03", "운영 모니터링과 평가", "관리팀을 중심으로 의사소통 채널, 수행결과 모니터링, 평가 시스템을 구축합니다."],
+  ["04", "이슈 대응과 현장 존중", "쟁점사항을 등록·공유·처리하고, 현장직원을 존중하는 관리감독으로 업무 시너지를 만듭니다."],
 ];
 
 const facilityItems = [
@@ -342,18 +342,15 @@ export function MainPage() {
     <main id="top" className={styles.site}>
       <HomepageHeader />
       <section className={styles.hero} aria-labelledby="hero-title">
-        <video
-          className={styles.heroVideo}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          poster="/homepage/hero-lighthouse.webp"
+        <Image
+          src="/homepage/hero-lighthouse-figma.png"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className={styles.coverImage}
           aria-hidden="true"
-        >
-          <source src="/homepage/hero-lighthouse_moving.mp4" type="video/mp4" />
-        </video>
+        />
         <div className={styles.heroOverlay} />
         <div className={styles.heroContent}>
           <h1 id="hero-title">

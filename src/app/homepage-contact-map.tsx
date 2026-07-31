@@ -100,6 +100,7 @@ export default function HomepageContactMap() {
   const mapRef = useRef<HomepageKakaoMap | null>(null);
   const markerRef = useRef<HomepageKakaoMarker | null>(null);
   const [status, setStatus] = useState("지도를 불러오는 중입니다.");
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     let ignore = false;
@@ -127,9 +128,11 @@ export default function HomepageContactMap() {
         });
         mapRef.current.relayout?.();
         mapRef.current.setCenter(position);
+        setHasError(false);
         setStatus("");
       } catch (error) {
         if (!ignore) {
+          setHasError(true);
           setStatus(error instanceof Error ? error.message : "카카오 지도를 불러오지 못했습니다.");
         }
       }
@@ -155,9 +158,16 @@ export default function HomepageContactMap() {
         role="region"
       />
       {status ? (
-        <p className={styles.mapStatus} aria-live="polite">
-          {status}
-        </p>
+        <div className={styles.mapStatus} aria-live="polite">
+          <p>{status}</p>
+          {hasError ? (
+            <address>
+              <span>부산광역시 강서구 유통단지1로 41, 105동 217·218호</span>
+              <a href="tel:0514657767">전화 051-465-7767</a>
+              <a href="mailto:olbareum@naver.com">olbareum@naver.com</a>
+            </address>
+          ) : null}
+        </div>
       ) : null}
     </div>
   );

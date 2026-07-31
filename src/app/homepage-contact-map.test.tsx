@@ -59,4 +59,24 @@ describe("homepage contact map", () => {
     });
     expect(screen.queryByText("지도를 불러오는 중입니다.")).not.toBeInTheDocument();
   });
+
+  it("keeps contact details available when the map SDK fails", async () => {
+    render(<HomepageContactMap />);
+
+    const script = document.head.querySelector<HTMLScriptElement>(
+      'script[src="/api/kakao/maps-sdk"]',
+    );
+    expect(script).not.toBeNull();
+    script?.onerror?.(new Event("error"));
+
+    expect(await screen.findByText("카카오 지도를 불러오지 못했습니다.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "전화 051-465-7767" })).toHaveAttribute(
+      "href",
+      "tel:0514657767",
+    );
+    expect(screen.getByRole("link", { name: "olbareum@naver.com" })).toHaveAttribute(
+      "href",
+      "mailto:olbareum@naver.com",
+    );
+  });
 });

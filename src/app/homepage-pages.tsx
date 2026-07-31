@@ -1,12 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import {
-  ParkingCircle,
-  ShieldCheck,
-  Sparkles,
-  Wrench,
-} from "lucide-react";
 import styles from "./page.module.css";
 import HomepageContactMap from "./homepage-contact-map";
 import HomepageHeader from "./homepage-header";
@@ -58,22 +52,22 @@ const facilityItems = [
   {
     title: "건물·시설 유지관리",
     text: "전기, 소방, 기계, 가스, 건축 설비의 점검과 운영관리 등 현장 유지에 필요한 업무를 묶어 관리합니다.",
-    icon: Wrench,
+    image: "/homepage/archive/facility-maintenance.svg",
   },
   {
     title: "위생관리",
     text: "상주 청소, 바닥 왁스, 준공 청소 등 철저한 위생 관리로 쾌적한 환경을 유지합니다.",
-    icon: Sparkles,
+    image: "/homepage/archive/facility-hygiene.svg",
   },
   {
     title: "시설보안",
     text: "위협 요소를 사전 제거하고, 안전사고 예방과 친절한 응대를 제공합니다.",
-    icon: ShieldCheck,
+    image: "/homepage/archive/facility-security.svg",
   },
   {
     title: "주차관리",
     text: "차량 입·출입 상황 및 주차장 안전과 내부 주차 질서를 확립합니다.",
-    icon: ParkingCircle,
+    image: "/homepage/archive/facility-parking.svg",
   },
 ];
 
@@ -81,22 +75,22 @@ const socialValues = [
   {
     title: "좋은 일자리 제공",
     text: "취약계층에게 안정된 일자리와 직무 몰입 환경을 제공합니다.",
-    image: "/homepage/figma-icons/social-jobs.png",
+    image: "/homepage/archive/social-jobs.svg",
   },
   {
     title: "지역사회 활성화",
     text: "영업활동에서 나온 이익을 지역사회에 다시 연결합니다.",
-    image: "/homepage/figma-icons/social-community.png",
+    image: "/homepage/archive/social-community.svg",
   },
   {
     title: "윤리적 시장 확산",
     text: "정직과 투명성을 바탕으로 공정한 거래 문화를 지향합니다.",
-    image: "/homepage/figma-icons/social-ethics.png",
+    image: "/homepage/archive/social-ethics.svg",
   },
   {
     title: "환경경영시스템 인증",
     text: "ISO 14001 인증으로 신뢰와 비용 절감, ESG 경영을 실현합니다.",
-    image: "/homepage/figma-icons/social-environment.png",
+    image: "/homepage/archive/social-environment.svg",
   },
 ];
 
@@ -215,19 +209,10 @@ function BackToTop() {
   return (
     <a className={styles.toTop} href="#top" aria-label="맨 위로 이동">
       <Image
-        className={styles.toTopBackground}
-        src="/homepage/figma-icons/top-circle.svg"
+        src="/homepage/archive/to-top.svg"
         alt=""
         width={71}
         height={71}
-        aria-hidden="true"
-      />
-      <Image
-        className={styles.toTopArrow}
-        src="/homepage/figma-icons/top-arrow.svg"
-        alt=""
-        width={22}
-        height={25}
         aria-hidden="true"
       />
     </a>
@@ -240,18 +225,12 @@ function MoreViewIcon({
   circle?: "dark" | "light" | "client";
 }) {
   return (
-    <span className={styles.moreViewIcon} aria-hidden="true">
+    <span className={styles.moreViewIcon} data-variant={circle} aria-hidden="true">
       <Image
-        src={`/homepage/figma-icons/more-circle-${circle}.svg`}
+        src="/homepage/archive/more.svg"
         alt=""
         width={29}
         height={29}
-      />
-      <Image
-        src="/homepage/figma-icons/more-arrow-dark.svg"
-        alt=""
-        width={12}
-        height={10}
       />
     </span>
   );
@@ -269,18 +248,22 @@ function ContactSection() {
         </h2>
         <address>
           <span>
+            <Image src="/homepage/archive/contact-address.svg" alt="" width={10} height={15} aria-hidden="true" />
             <strong>ADDRESS</strong>
             부산광역시 강서구 유통단지1로 41, 105동 217·218호
           </span>
           <a href="tel:0514657767">
+            <Image src="/homepage/archive/contact-phone.svg" alt="" width={12} height={16} aria-hidden="true" />
             <strong>TEL</strong>
             051-465-7767
           </a>
           <a href="fax:0519617767">
+            <Image src="/homepage/archive/contact-fax.svg" alt="" width={12} height={15} aria-hidden="true" />
             <strong>FAX</strong>
             051-961-7767
           </a>
           <a href="mailto:olbareum@naver.com">
+            <Image src="/homepage/archive/contact-email.svg" alt="" width={13} height={9} aria-hidden="true" />
             olbareum@naver.com
           </a>
         </address>
@@ -368,7 +351,7 @@ export function MainPage() {
       <HomepageHeader />
       <section className={styles.hero} aria-labelledby="hero-title">
         <Image
-          src="/homepage/hero-lighthouse-figma.png"
+          src="/homepage/archive/hero-main.jpg"
           alt=""
           fill
           priority
@@ -478,7 +461,7 @@ export function AboutPage() {
       <HomepageHeader />
       <section className={styles.aboutHero}>
         <Image
-          src="/homepage/about-hero.webp"
+          src="/homepage/archive/hero-about.jpg"
           alt=""
           fill
           priority
@@ -513,14 +496,14 @@ export function AboutPage() {
           }
         />
         <div className={styles.stats}>
-          <div><Image src="/homepage/figma-icons/stat-company.png" alt="" width={42} height={42} aria-hidden="true" /><strong>2018</strong><span>법인 설립</span></div>
-          <div><Image src="/homepage/figma-icons/stat-employees.png" alt="" width={42} height={42} aria-hidden="true" /><strong>26</strong><span>2026 임직원</span></div>
-          <div><Image src="/homepage/figma-icons/stat-sales.png" alt="" width={42} height={42} aria-hidden="true" /><strong>10.3억</strong><span>2025 매출</span></div>
-          <div><Image src="/homepage/figma-icons/stat-growth.png" alt="" width={42} height={42} aria-hidden="true" /><strong>220%</strong><span>2022~25 매출 성장률</span></div>
+          <div><Image src="/homepage/archive/stat-company.svg" alt="" width={31} height={36} aria-hidden="true" /><strong>2018</strong><span>법인 설립</span></div>
+          <div><Image src="/homepage/archive/stat-employees.svg" alt="" width={54} height={28} aria-hidden="true" /><strong>26</strong><span>2026 임직원</span></div>
+          <div><Image src="/homepage/archive/stat-sales.svg" alt="" width={37} height={34} aria-hidden="true" /><strong>10.3억</strong><span>2025 매출</span></div>
+          <div><Image src="/homepage/archive/stat-growth.svg" alt="" width={34} height={34} aria-hidden="true" /><strong>220%</strong><span>2022~25 매출 성장률</span></div>
         </div>
         <div className={styles.historyWrap}>
           <div className={styles.historyImage}>
-            <Image src="/homepage/history-building.webp" alt="불이 켜진 사무실 건물" fill sizes="(max-width: 760px) 100vw, 42vw" />
+            <Image src="/homepage/archive/history.jpg" alt="불이 켜진 사무실 건물" fill sizes="(max-width: 760px) 100vw, 42vw" />
             <div><span>HISTORY</span><p>사람 중심의 가치를 심고,<br />지속 가능한 내일을 가꿔갑니다.</p></div>
           </div>
           <ol className={styles.timeline}>
@@ -590,7 +573,7 @@ export function ServicesPage() {
     <main id="top" className={styles.site}>
       <HomepageHeader />
       <section className={styles.serviceHero}>
-        <Image src="/homepage/airport-hero.webp" alt="" fill priority sizes="100vw" className={styles.coverImage} />
+        <Image src="/homepage/archive/hero-services.jpg" alt="" fill priority sizes="100vw" className={styles.coverImage} />
         <div className={styles.serviceHeroOverlay} />
         <div>
           <h1>
@@ -615,7 +598,7 @@ export function ServicesPage() {
           }
         />
         <div className={styles.teamImage}>
-          <Image src="/homepage/service-team.webp" alt="공항 현장에서 일하는 올바름 서비스 전문가" fill sizes="(max-width: 760px) 100vw, 1200px" />
+          <Image src="/homepage/archive/operation.jpg" alt="공항 현장에서 일하는 올바름 서비스 전문가" fill sizes="(max-width: 760px) 100vw, 1200px" />
         </div>
         <div className={styles.operationLayout}>
           <h3>
@@ -623,7 +606,8 @@ export function ServicesPage() {
             <br />
             같은 기준으로 움직입니다.
           </h3>
-          <ol>
+          <Image className={styles.operationDiagram} src="/homepage/archive/operation-system.svg" alt="준비단계와 목표 설정부터 이슈 대응과 현장 존중까지 이어지는 4단계 운영 체계" width={671} height={505} />
+          <ol className={styles.visuallyHidden}>
             {operationSteps.map(([number, title, description]) => (
               <li key={number}><strong>{number}</strong><div><h4>{title}</h4><p>{description}</p></div></li>
             ))}
@@ -647,10 +631,10 @@ export function ServicesPage() {
         <h3 className={styles.detailMessage}>사무관리, 생산·물류, IT·전산, 의료·간병, 콜센터 등<br />필요한 직무에 적합한 인력을 연결합니다.</h3>
         <div className={styles.dispatchDiagram}>
           <Image
-            src="/homepage/dispatch-diagram-figma.png"
+            src="/homepage/archive/worker-dispatch.svg"
             alt="파견사업주와 사용사업주는 근로자 파견계약을 맺고, 파견사업주는 파견근로자와 고용계약관계를, 사용사업주는 파견근로자와 지휘 및 명령관계를 맺는 구조"
-            width={1200}
-            height={940}
+            width={504}
+            height={397}
             sizes="(max-width: 760px) calc(100vw - 40px), 620px"
           />
         </div>
@@ -668,11 +652,11 @@ export function ServicesPage() {
             </>
           }
         />
-        <div className={styles.detailBanner}><Image src="/homepage/service-facility.webp" alt="시설 설비를 점검하는 전문 인력" fill sizes="(max-width: 760px) 100vw, 1200px" /></div>
+        <div className={styles.detailBanner}><Image src="/homepage/archive/facility.jpg" alt="시설 설비를 점검하는 전문 인력" fill sizes="(max-width: 760px) 100vw, 1200px" /></div>
         <h3 className={styles.detailMessage}>전기·소방·기계·가스·건축 설비의 점검과 운영관리,<br />위생관리, 시설보안, 주차관리까지 통합 제공합니다.</h3>
         <div className={styles.facilityGrid}>
-          {facilityItems.map(({ title, text, icon: Icon }) => (
-            <article key={title}><Icon aria-hidden="true" /><h3>{title}</h3><p>{text}</p></article>
+          {facilityItems.map(({ title, text, image }) => (
+            <article key={title}><Image src={image} alt="" width={46} height={42} aria-hidden="true" /><h3>{title}</h3><p>{text}</p></article>
           ))}
         </div>
       </section>
@@ -689,7 +673,7 @@ export function ServicesPage() {
             </>
           }
         />
-        <div className={styles.detailBanner}><Image src="/homepage/service-disinfection.webp" alt="항공기 객실에서 방역 작업을 진행하는 전문 인력" fill sizes="(max-width: 760px) 100vw, 1200px" /></div>
+        <div className={styles.detailBanner}><Image src="/homepage/archive/disinfection.jpg" alt="항공기 객실에서 방역 작업을 진행하는 전문 인력" fill sizes="(max-width: 760px) 100vw, 1200px" /></div>
         <h3 className={styles.detailMessage}>현장 조건에 맞춘 법정·살충·살균 소독으로<br />대형 건축물과 항공기 검역 현장의 예방 체계를 지원합니다.</h3>
         <div className={styles.airportCard}>
           <Image
@@ -712,7 +696,7 @@ export function ClientsPage() {
     <main id="top" className={styles.site}>
       <HomepageHeader />
       <section className={styles.clientHero}>
-        <Image src="/homepage/client-hero.webp" alt="" fill priority sizes="100vw" className={styles.coverImage} />
+        <Image src="/homepage/archive/hero-clients.jpg" alt="" fill priority sizes="100vw" className={styles.coverImage} />
         <div className={styles.clientOverlay} />
         <div>
           <h1>

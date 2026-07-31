@@ -64,53 +64,12 @@
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  color: #182732;
 }
 
-.brandInverse {
-  color: #fff;
-}
-
-.brandMark {
-  position: relative;
-  display: inline-block;
-  width: 30px;
-  height: 30px;
-  flex: 0 0 30px;
-}
-
-.brandMark img {
-  position: absolute;
+.brandLogo {
   display: block;
-}
-
-.brandSymbolOne {
-  top: 11.3px;
-  left: 0;
-  width: 9.45px;
-  height: 16.64px;
-}
-
-.brandSymbolTwo {
-  top: 3.92px;
-  left: 0.48px;
-  width: 16.35px;
-  height: 24.27px;
-}
-
-.brandSymbolThree {
-  top: 0;
-  left: 7.67px;
-  width: 21.43px;
-  height: 29.47px;
-}
-
-.brandName {
-  font-size: 18px;
-  font-weight: 750;
-  letter-spacing: -0.04em;
-  white-space: nowrap;
+  width: 132px;
+  height: auto;
 }
 
 .certification {
@@ -621,21 +580,9 @@
 }
 
 .moreViewIcon img {
-  position: absolute;
   display: block;
-}
-
-.moreViewIcon img:first-child {
-  inset: 0;
   width: 29px;
   height: 29px;
-}
-
-.moreViewIcon img:last-child {
-  top: 9.5px;
-  left: 9.2px;
-  width: 11.1px;
-  height: 9.72px;
 }
 
 .moreLink:hover .moreViewIcon {
@@ -755,8 +702,9 @@
 }
 
 .stats > div > img {
-  width: 42px;
-  height: 42px;
+  width: auto;
+  max-width: 54px;
+  height: 38px;
   margin-bottom: 4px;
 }
 
@@ -839,11 +787,11 @@
 
 .timeline::before {
   position: absolute;
-  top: 28px;
-  bottom: 28px;
-  left: calc(var(--timeline-date-column) + (var(--timeline-marker-column) / 2) - 0.5px);
-  width: 1px;
-  background: var(--home-line);
+  top: 0;
+  bottom: 0;
+  left: calc(var(--timeline-date-column) + (var(--timeline-marker-column) / 2) - 13.5px);
+  width: 27px;
+  background: url("/homepage/archive/history-timeline.svg") center / 27px 100% no-repeat;
   content: "";
 }
 
@@ -861,13 +809,7 @@
 }
 
 .timeline i {
-  z-index: 1;
-  width: 15px;
-  height: 15px;
-  justify-self: center;
-  border: 3px solid var(--home-blue);
-  border-radius: 50%;
-  background: #fff;
+  visibility: hidden;
 }
 
 .timeline p {
@@ -972,15 +914,9 @@
   border-radius: 26px;
 }
 
-.socialGrid svg,
-.facilityGrid svg {
-  width: 32px;
-  height: 32px;
-  color: var(--home-blue);
-  stroke-width: 1.6;
-}
-
-.socialGrid article > img {
+.socialGrid article > img,
+.facilityGrid article > img {
+  object-fit: contain;
   width: 42px;
   height: 42px;
 }
@@ -1123,6 +1059,24 @@
 .dispatchDiagram {
   width: min(620px, 100%);
   margin: 0 auto;
+}
+
+.operationDiagram {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.visuallyHidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 
 .dispatchDiagram img {
@@ -1294,22 +1248,17 @@
   box-shadow: 0 10px 25px rgb(0 92 144 / 22%);
 }
 
-.toTop img {
-  position: absolute;
-  display: block;
+.contactCopy address img {
+  width: 13px;
+  height: 16px;
+  margin-top: 1px;
+  object-fit: contain;
 }
 
-.toTopBackground {
-  inset: 0;
+.toTop img {
+  display: block;
   width: 70px;
   height: 70px;
-}
-
-.toTopArrow {
-  top: 23px;
-  left: 25px;
-  width: 21.11px;
-  height: 24.21px;
 }
 
 .footer {
@@ -1404,19 +1353,8 @@
     height: 70px;
   }
 
-  .brandName {
-    font-size: 16px;
-  }
-
-  .brandMark {
-    width: 27px;
-    height: 27px;
-    flex-basis: 27px;
-  }
-
-  .brandMark img {
-    transform: scale(0.9);
-    transform-origin: top left;
+  .brandLogo {
+    width: 120px;
   }
 
   .desktopNav {
@@ -1722,16 +1660,9 @@
     height: 52px;
   }
 
-  .toTopBackground {
+  .toTop img {
     width: 52px;
     height: 52px;
-  }
-
-  .toTopArrow {
-    top: 17px;
-    left: 18px;
-    width: 16px;
-    height: 18px;
   }
 
   .footer {

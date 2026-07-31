@@ -17,6 +17,8 @@ type HomepageKakaoMarker = {
   setMap?: (map: HomepageKakaoMap | null) => void;
 };
 
+type HomepageKakaoMarkerImage = object;
+
 type HomepageKakaoGlobal = {
   maps: {
     load: (callback: () => void) => void;
@@ -28,7 +30,15 @@ type HomepageKakaoGlobal = {
     Marker: new (options: {
       position: HomepageKakaoLatLng;
       map: HomepageKakaoMap;
+      image?: HomepageKakaoMarkerImage;
     }) => HomepageKakaoMarker;
+    MarkerImage?: new (
+      source: string,
+      size: object,
+      options?: { offset?: object },
+    ) => HomepageKakaoMarkerImage;
+    Size?: new (width: number, height: number) => object;
+    Point?: new (x: number, y: number) => object;
   };
 };
 
@@ -122,9 +132,20 @@ export default function HomepageContactMap() {
           center: position,
           level: 3,
         });
+        const markerImage =
+          kakao.maps.MarkerImage && kakao.maps.Size
+            ? new kakao.maps.MarkerImage(
+                "/homepage/archive/map-pin.svg",
+                new kakao.maps.Size(55, 68),
+                kakao.maps.Point
+                  ? { offset: new kakao.maps.Point(27, 68) }
+                  : undefined,
+              )
+            : undefined;
         markerRef.current = new kakao.maps.Marker({
           position,
           map: mapRef.current,
+          ...(markerImage ? { image: markerImage } : {}),
         });
         mapRef.current.relayout?.();
         mapRef.current.setCenter(position);

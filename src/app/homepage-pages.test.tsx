@@ -18,23 +18,22 @@ describe("homepage back to top button", () => {
     expect(toTopButton).toHaveAttribute("href", "#top");
   });
 
-  it("uses the Figma hero image without rendering a video", () => {
+  it("uses the supplied homepage hero image without rendering a video", () => {
     const { container } = render(<MainPage />);
 
-    expect(container.querySelector('img[src*="hero-lighthouse-figma.png"]')).toBeInTheDocument();
+    expect(container.querySelector('img[src*="hero-main.jpg"]')).toBeInTheDocument();
     expect(container.querySelector("video")).not.toBeInTheDocument();
   });
 
-  it("uses the exported Figma arrows and omits invented service icons", () => {
+  it("uses the supplied archive navigation icon", () => {
     const { container } = render(<MainPage />);
 
     expect(
-      container.querySelector('img[src*="figma-icons/more-arrow-dark.svg"]'),
+      container.querySelector('img[src*="archive/more.svg"]'),
     ).toBeInTheDocument();
     expect(
-      container.querySelector('img[src*="figma-icons/top-arrow.svg"]'),
+      container.querySelector('img[src*="archive/to-top.svg"]'),
     ).toBeInTheDocument();
-    expect(container.querySelectorAll('[class*="serviceCard"] svg')).toHaveLength(0);
   });
 });
 

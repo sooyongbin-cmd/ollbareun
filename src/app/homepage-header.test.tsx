@@ -7,17 +7,11 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("homepage header", () => {
-  it("renders the three exact Figma brand symbol assets", () => {
+  it("renders the supplied white brand logo", () => {
     const { container } = render(<HomepageHeader />);
 
     expect(
-      container.querySelector('img[src*="figma-icons/brand-symbol-1.svg"]'),
-    ).toBeInTheDocument();
-    expect(
-      container.querySelector('img[src*="figma-icons/brand-symbol-2.svg"]'),
-    ).toBeInTheDocument();
-    expect(
-      container.querySelector('img[src*="figma-icons/brand-symbol-3.svg"]'),
+      container.querySelector('img[src*="archive/logo-white.svg"]'),
     ).toBeInTheDocument();
   });
 

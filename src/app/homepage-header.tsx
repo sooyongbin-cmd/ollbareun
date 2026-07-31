@@ -41,31 +41,15 @@ const menuColumns = [
 
 function HeaderBrand() {
   return (
-    <span className={`${styles.brand} ${styles.brandInverse}`}>
-      <span className={styles.brandMark} aria-hidden="true">
-        <Image
-          className={styles.brandSymbolOne}
-          src="/homepage/figma-icons/brand-symbol-1.svg"
-          alt=""
-          width={10}
-          height={17}
-        />
-        <Image
-          className={styles.brandSymbolTwo}
-          src="/homepage/figma-icons/brand-symbol-2.svg"
-          alt=""
-          width={17}
-          height={25}
-        />
-        <Image
-          className={styles.brandSymbolThree}
-          src="/homepage/figma-icons/brand-symbol-3.svg"
-          alt=""
-          width={22}
-          height={30}
-        />
-      </span>
-      <span className={styles.brandName}>주식회사 올바름</span>
+    <span className={styles.brand}>
+      <Image
+        className={styles.brandLogo}
+        src="/homepage/archive/logo-white.svg"
+        alt="주식회사 올바름"
+        width={223}
+        height={92}
+        priority
+      />
     </span>
   );
 }

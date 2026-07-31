@@ -744,11 +744,10 @@
   border-right: 0;
 }
 
-.stats svg {
-  width: 28px;
-  margin-bottom: 13px;
-  color: #747b80;
-  stroke-width: 1.6;
+.stats > div > img {
+  width: 42px;
+  height: 42px;
+  margin-bottom: 4px;
 }
 
 .stats strong {
@@ -971,12 +970,21 @@
   stroke-width: 1.6;
 }
 
+.socialGrid article > img {
+  width: 42px;
+  height: 42px;
+}
+
 .socialGrid h3,
 .facilityGrid h3 {
   margin: 30px 0 12px;
   color: var(--home-deep-blue);
   font-size: 18px;
   font-weight: 750;
+}
+
+.socialGrid h3 {
+  margin-top: 20px;
 }
 
 .socialGrid p,

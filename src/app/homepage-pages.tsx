@@ -2,16 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import {
-  Award,
-  BriefcaseBusiness,
-  Building2,
-  Lightbulb,
-  MapPin,
   ParkingCircle,
   ShieldCheck,
   Sparkles,
-  TrendingUp,
-  UsersRound,
   Wrench,
 } from "lucide-react";
 import styles from "./page.module.css";
@@ -88,22 +81,22 @@ const socialValues = [
   {
     title: "좋은 일자리 제공",
     text: "취약계층에게 안정된 일자리와 직무 몰입 환경을 제공합니다.",
-    icon: BriefcaseBusiness,
+    image: "/homepage/figma-icons/social-jobs.png",
   },
   {
     title: "지역사회 활성화",
     text: "영업활동에서 나온 이익을 지역사회에 다시 연결합니다.",
-    icon: MapPin,
+    image: "/homepage/figma-icons/social-community.png",
   },
   {
     title: "윤리적 시장 확산",
     text: "정직과 투명성을 바탕으로 공정한 거래 문화를 지향합니다.",
-    icon: Lightbulb,
+    image: "/homepage/figma-icons/social-ethics.png",
   },
   {
     title: "환경경영시스템 인증",
     text: "ISO 14001 인증으로 신뢰와 비용 절감, ESG 경영을 실현합니다.",
-    icon: Award,
+    image: "/homepage/figma-icons/social-environment.png",
   },
 ];
 
@@ -520,10 +513,10 @@ export function AboutPage() {
           }
         />
         <div className={styles.stats}>
-          <div><Building2 aria-hidden="true" /><strong>2018</strong><span>법인 설립</span></div>
-          <div><UsersRound aria-hidden="true" /><strong>26</strong><span>2026 임직원</span></div>
-          <div><Award aria-hidden="true" /><strong>10.3억</strong><span>2025 매출</span></div>
-          <div><TrendingUp aria-hidden="true" /><strong>220%</strong><span>2022~25 매출 성장률</span></div>
+          <div><Image src="/homepage/figma-icons/stat-company.png" alt="" width={42} height={42} aria-hidden="true" /><strong>2018</strong><span>법인 설립</span></div>
+          <div><Image src="/homepage/figma-icons/stat-employees.png" alt="" width={42} height={42} aria-hidden="true" /><strong>26</strong><span>2026 임직원</span></div>
+          <div><Image src="/homepage/figma-icons/stat-sales.png" alt="" width={42} height={42} aria-hidden="true" /><strong>10.3억</strong><span>2025 매출</span></div>
+          <div><Image src="/homepage/figma-icons/stat-growth.png" alt="" width={42} height={42} aria-hidden="true" /><strong>220%</strong><span>2022~25 매출 성장률</span></div>
         </div>
         <div className={styles.historyWrap}>
           <div className={styles.historyImage}>
@@ -576,8 +569,12 @@ export function AboutPage() {
           }
         />
         <div className={styles.socialGrid}>
-          {socialValues.map(({ title, text, icon: Icon }) => (
-            <article key={title}><Icon aria-hidden="true" /><h3>{title}</h3><p>{text}</p></article>
+          {socialValues.map(({ title, text, image }) => (
+            <article key={title}>
+              <Image src={image} alt="" width={42} height={42} aria-hidden="true" />
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </article>
           ))}
         </div>
       </section>

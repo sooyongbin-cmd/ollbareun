@@ -35,6 +35,14 @@ describe("homepage back to top button", () => {
       container.querySelector('img[src*="archive/to-top.svg"]'),
     ).toBeInTheDocument();
   });
+
+  it("renders client preview logos without external links", () => {
+    const { container } = render(<MainPage />);
+    const clientLogos = container.querySelector('[class*="homeClientLogos"]');
+
+    expect(clientLogos?.querySelectorAll("img")).toHaveLength(6);
+    expect(clientLogos?.querySelectorAll("a")).toHaveLength(0);
+  });
 });
 
 describe("public homepage pages", () => {

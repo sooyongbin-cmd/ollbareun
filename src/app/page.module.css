@@ -615,17 +615,6 @@
   border-bottom: 1px solid var(--home-line);
 }
 
-.homeClientLogos a {
-  position: absolute;
-  inset: 0;
-}
-
-.homeClientLogos a:focus-visible {
-  z-index: 1;
-  outline: 3px solid var(--home-blue);
-  outline-offset: -3px;
-}
-
 .homeClientLogos img {
   padding: 0 24px;
   object-fit: contain;

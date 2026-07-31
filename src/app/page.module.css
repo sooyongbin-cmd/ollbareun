@@ -36,16 +36,9 @@
   top: 0;
   left: 0;
   width: 100%;
+  background: rgb(0 0 0 / 22%);
   color: #fff;
-  transition:
-    background-color 220ms ease,
-    box-shadow 220ms ease;
-}
-
-.headerScrolled {
-  background: rgb(15 105 170 / 96%);
-  box-shadow: 0 1px 0 rgb(255 255 255 / 10%);
-  backdrop-filter: blur(12px);
+  transition: background-color 220ms ease;
 }
 
 .headerMenuOpen {

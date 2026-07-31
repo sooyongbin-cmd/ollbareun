@@ -72,7 +72,6 @@ function HeaderBrand() {
 
 export default function HomepageHeader() {
   const pathname = usePathname();
-  const [isScrolled, setIsScrolled] = useState(false);
   const [openMenu, setOpenMenu] = useState<MenuKey | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const activeMenu: MenuKey | null = pathname.startsWith("/about")
@@ -82,20 +81,6 @@ export default function HomepageHeader() {
       : pathname.startsWith("/clients")
         ? "clients"
         : null;
-
-  useEffect(() => {
-    const updateHeader = () => {
-      setIsScrolled(window.scrollY > 40);
-    };
-
-    updateHeader();
-    window.addEventListener("scroll", updateHeader, { passive: true });
-    window.addEventListener("resize", updateHeader);
-    return () => {
-      window.removeEventListener("scroll", updateHeader);
-      window.removeEventListener("resize", updateHeader);
-    };
-  }, []);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -121,9 +106,7 @@ export default function HomepageHeader() {
 
   return (
     <header
-      className={`${styles.header} ${isScrolled ? styles.headerScrolled : ""} ${
-        openMenu || mobileOpen ? styles.headerMenuOpen : ""
-      }`}
+      className={`${styles.header} ${openMenu || mobileOpen ? styles.headerMenuOpen : ""}`}
       onMouseLeave={() => setOpenMenu(null)}
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) {

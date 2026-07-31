@@ -205,6 +205,7 @@ function Footer() {
           <strong>연결</strong>
           <Link href="/manager">관리자</Link>
           <Link href="/guard">근무자</Link>
+          <Link href="/dev">개발자</Link>
         </div>
         <div>
           <strong>문의</strong>

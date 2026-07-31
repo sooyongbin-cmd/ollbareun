@@ -735,7 +735,7 @@
   position: relative;
   min-height: 480px;
   overflow: hidden;
-  border-radius: 0 55px 0 55px;
+  border-radius: 55px 0 55px 0;
   isolation: isolate;
 }
 

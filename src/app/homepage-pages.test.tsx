@@ -46,6 +46,19 @@ describe("public homepage pages", () => {
     expect(screen.getByText("B.E.S.T")).toBeInTheDocument();
   });
 
+  it("uses the supplied archive icons for every contact detail", () => {
+    const { container } = render(<AboutPage />);
+
+    for (const filename of [
+      "contact-address.svg",
+      "contact-phone.svg",
+      "contact-fax.svg",
+      "contact-email.svg",
+    ]) {
+      expect(container.querySelector(`img[src*="${filename}"]`)).toBeInTheDocument();
+    }
+  });
+
   it("renders four distinct operation steps", () => {
     render(<ServicesPage />);
 

@@ -20,4 +20,10 @@ describe("homepage PDF background colors", () => {
       /\.detailSection\s*\{[^}]*background: var\(--home-service-background\);/s,
     );
   });
+
+  it("rounds the history image at the PDF's top-left and bottom-right corners", () => {
+    expect(stylesheet).toMatch(
+      /\.historyImage\s*\{[^}]*border-radius: 55px 0 55px 0;/s,
+    );
+  });
 });

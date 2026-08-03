@@ -335,10 +335,6 @@ export function MainPage() {
             <br />더 <strong>올바른 길</strong>을 밝힙니다
           </h1>
         </div>
-        <a className={styles.scrollCue} href="#trust" aria-label="다음 내용 보기">
-          <span>SCROLL</span>
-          <i />
-        </a>
       </section>
 
       <section id="trust" className={`${styles.section} ${styles.trustSection}`}>

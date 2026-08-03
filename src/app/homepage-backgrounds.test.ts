@@ -50,4 +50,10 @@ describe("homepage PDF background colors", () => {
       /\.heroContent\s*\{[^}]*width: min\(1280px, calc\(100% - 48px\)\);[^}]*padding-left: calc\(56px \+ 37\.7778%\);[^}]*text-align: left;/s,
     );
   });
+
+  it("applies a 1px solid black border to certificate images", () => {
+    expect(stylesheet).toMatch(
+      /\.certificateImages img\s*\{[^}]*border: 1px solid black;/s,
+    );
+  });
 });

@@ -297,11 +297,10 @@
 }
 
 .heroContent {
-  width: min(1280px, calc(100% - 48px));
-  margin: 32px auto 0;
-  /* Match the certificate column start in .splitIntro (90px gap, 0.85fr/1.4fr). */
-  padding-left: calc(56px + 37.7778%);
-  text-align: left;
+  width: 100%;
+  margin: 32px 0 0;
+  padding-left: 0;
+  text-align: center;
 }
 
 .heroContent > p,
@@ -1373,8 +1372,7 @@
   }
 
   .heroContent {
-    /* .splitIntro uses a 45px gap at this breakpoint. */
-    padding-left: calc(28px + 37.7778%);
+    padding-left: 0;
   }
 
   .splitIntro,

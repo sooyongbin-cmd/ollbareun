@@ -45,9 +45,9 @@ describe("homepage PDF background colors", () => {
     );
   });
 
-  it("aligns the main hero title with the certificate column", () => {
+  it("centers the main hero title in the viewport", () => {
     expect(stylesheet).toMatch(
-      /\.heroContent\s*\{[^}]*width: min\(1280px, calc\(100% - 48px\)\);[^}]*padding-left: calc\(56px \+ 37\.7778%\);[^}]*text-align: left;/s,
+      /\.heroContent\s*\{[^}]*width: 100%;[^}]*padding-left: 0;[^}]*text-align: center;/s,
     );
   });
 

@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { findManagerNavigation } from "./manager-navigation";
-import ManagerPushConnect from "./manager-push-connect";
 
 export default function ManagerHeader() {
   const pathname = usePathname();
@@ -72,8 +71,6 @@ export default function ManagerHeader() {
         <ChevronRight aria-hidden="true" className="hidden size-3.5 text-muted-foreground sm:block" />
         <span className="truncate font-medium text-foreground">{current.item.label}</span>
       </nav>
-
-      <ManagerPushConnect />
 
       {email ? (
         <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">

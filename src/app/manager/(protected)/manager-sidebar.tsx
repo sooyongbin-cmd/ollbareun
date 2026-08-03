@@ -22,6 +22,7 @@ import {
   isManagerPathActive,
   managerNavigationGroups,
 } from "./manager-navigation";
+import ManagerPushConnect from "./manager-push-connect";
 
 export default function ManagerSidebar() {
   const pathname = usePathname();
@@ -120,9 +121,7 @@ export default function ManagerSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
-        <p className="px-2 py-1 text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">
-          시설관리 운영 콘솔
-        </p>
+        <ManagerPushConnect />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

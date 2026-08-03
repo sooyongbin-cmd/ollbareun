@@ -1,8 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { Bell, BellOff, LoaderCircle } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type ConnectionStatus = "idle" | "connecting" | "connected" | "error";
 
@@ -16,8 +14,9 @@ function urlBase64ToUint8Array(base64String: string) {
 export default function ManagerPushConnect() {
   const [status, setStatus] = useState<ConnectionStatus>("idle");
   const [statusMessage, setStatusMessage] = useState("관리자 푸시 알림을 연결합니다.");
+  const hasStartedRef = useRef(false);
 
-  async function handleConnect() {
+  const handleConnect = useCallback(async () => {
     if (status === "connecting") {
       return;
     }
@@ -28,6 +27,7 @@ export default function ManagerPushConnect() {
     try {
       if (
         !("serviceWorker" in navigator) ||
+        !navigator.serviceWorker ||
         !("PushManager" in window) ||
         !("Notification" in window)
       ) {
@@ -75,38 +75,23 @@ export default function ManagerPushConnect() {
       setStatus("error");
       setStatusMessage(error instanceof Error ? error.message : "푸시 알림 연결에 실패했습니다.");
     }
-  }
+  }, [status]);
 
-  const label =
-    status === "connecting"
-      ? "연결 중"
-      : status === "connected"
-        ? "푸시 연결됨"
-        : status === "error"
-          ? "연결 재시도"
-          : "푸시 알림 연결";
+  useEffect(() => {
+    if (hasStartedRef.current) {
+      return;
+    }
+
+    hasStartedRef.current = true;
+    void handleConnect();
+  }, [handleConnect]);
 
   return (
-    <Button
-      aria-label={label}
-      className="ml-auto inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border border-border bg-background px-2.5 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-wait disabled:opacity-70"
-      disabled={status === "connecting"}
-      onClick={handleConnect}
-      title={statusMessage}
-      type="button"
-      variant="outline"
+    <p
+      aria-live="polite"
+      className="px-2 py-1 text-xs text-muted-foreground group-data-[collapsible=icon]:hidden"
     >
-      {status === "connecting" ? (
-        <LoaderCircle aria-hidden="true" className="size-3.5 animate-spin" />
-      ) : status === "error" ? (
-        <BellOff aria-hidden="true" className="size-3.5 text-destructive" />
-      ) : (
-        <Bell aria-hidden="true" className="size-3.5" />
-      )}
-      <span className="hidden sm:inline">{label}</span>
-      <span className="sr-only" aria-live="polite">
-        {statusMessage}
-      </span>
-    </Button>
+      {statusMessage}
+    </p>
   );
 }

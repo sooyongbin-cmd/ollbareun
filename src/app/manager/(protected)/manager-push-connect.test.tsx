@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { StrictMode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ManagerPushConnect from "./manager-push-connect";
 
@@ -26,7 +26,6 @@ describe("ManagerPushConnect", () => {
   });
 
   it("reuses an existing browser subscription and stores it for the manager", async () => {
-    const user = userEvent.setup();
     const subscription = {
       toJSON: () => ({
         endpoint: "https://push.test/manager",
@@ -38,7 +37,6 @@ describe("ManagerPushConnect", () => {
     vi.stubGlobal("fetch", fetch);
 
     render(<ManagerPushConnect />);
-    await user.click(screen.getByRole("button", { name: "푸시 알림 연결" }));
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
@@ -50,11 +48,10 @@ describe("ManagerPushConnect", () => {
       );
     });
     expect(subscribe).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "푸시 연결됨" })).toBeInTheDocument();
+    expect(await screen.findByText("이 기기에서 관리자 푸시 알림을 받을 수 있습니다.")).toBeInTheDocument();
   });
 
   it("creates a subscription when the browser has none", async () => {
-    const user = userEvent.setup();
     const subscription = {
       toJSON: () => ({
         endpoint: "https://push.test/new",
@@ -66,7 +63,6 @@ describe("ManagerPushConnect", () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ success: true })));
 
     render(<ManagerPushConnect />);
-    await user.click(screen.getByRole("button", { name: "푸시 알림 연결" }));
 
     await waitFor(() => expect(subscribe).toHaveBeenCalled());
     expect(subscribe).toHaveBeenCalledWith(
@@ -77,18 +73,47 @@ describe("ManagerPushConnect", () => {
     );
   });
 
-  it("shows a retry state when notification permission is denied", async () => {
-    const user = userEvent.setup();
+  it("shows a permission error when notification permission is denied", async () => {
     vi.stubGlobal("Notification", {
       permission: "default",
       requestPermission: vi.fn().mockResolvedValue("denied"),
     });
 
     render(<ManagerPushConnect />);
-    await user.click(screen.getByRole("button", { name: "푸시 알림 연결" }));
 
-    expect(await screen.findByRole("button", { name: "연결 재시도" })).toBeInTheDocument();
-    expect(screen.getByText(/알림 권한을 허용해야/)).toBeInTheDocument();
+    expect(await screen.findByText(/알림 권한을 허용해야/)).toBeInTheDocument();
     expect(register).not.toHaveBeenCalled();
+  });
+
+  it("shows an unsupported browser status", async () => {
+    Object.defineProperty(navigator, "serviceWorker", {
+      configurable: true,
+      value: undefined,
+    });
+
+    render(<ManagerPushConnect />);
+
+    expect(await screen.findByText("이 브라우저는 푸시 알림을 지원하지 않습니다.")).toBeInTheDocument();
+  });
+
+  it("starts only once in React Strict Mode", async () => {
+    const subscription = {
+      toJSON: () => ({
+        endpoint: "https://push.test/strict-mode",
+        keys: { p256dh: "key", auth: "secret" },
+      }),
+    };
+    getSubscription.mockResolvedValue(subscription);
+    const fetch = vi.fn().mockResolvedValue(Response.json({ success: true }));
+    vi.stubGlobal("fetch", fetch);
+
+    render(
+      <StrictMode>
+        <ManagerPushConnect />
+      </StrictMode>,
+    );
+
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
+    expect(register).toHaveBeenCalledTimes(1);
   });
 });

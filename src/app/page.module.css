@@ -1471,6 +1471,24 @@
     font-size: 14px;
   }
 
+  .trustSection .sectionHeading > p,
+  .servicePreview .sectionHeading > p,
+  .homeClientSection .sectionHeading > p {
+    font-size: 15px;
+  }
+
+  .trustSection .sectionHeading h2,
+  .servicePreview .sectionHeading h2,
+  .homeClientSection .sectionHeading h2 {
+    font-size: 31px;
+  }
+
+  .trustSection .sectionHeading > span,
+  .servicePreview .sectionHeading > span,
+  .homeClientSection .sectionHeading > span {
+    font-size: 14px;
+  }
+
   .trustSection {
     width: 100%;
     padding-top: 85px;

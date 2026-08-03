@@ -422,7 +422,7 @@ export function MainPage() {
 
 export function AboutPage() {
   return (
-    <main id="top" className={styles.site}>
+    <main id="top" className={`${styles.site} ${styles.aboutPage}`}>
       <HomepageHeader />
       <section className={styles.aboutHero}>
         <Image
@@ -535,7 +535,7 @@ export function AboutPage() {
 
 export function ServicesPage() {
   return (
-    <main id="top" className={styles.site}>
+    <main id="top" className={`${styles.site} ${styles.servicesPage}`}>
       <HomepageHeader />
       <section className={styles.serviceHero}>
         <Image src="/homepage/archive/hero-services.jpg" alt="" fill priority sizes="100vw" className={styles.coverImage} />
@@ -658,7 +658,7 @@ export function ServicesPage() {
 
 export function ClientsPage() {
   return (
-    <main id="top" className={styles.site}>
+    <main id="top" className={`${styles.site} ${styles.clientsPage}`}>
       <HomepageHeader />
       <section className={styles.clientHero}>
         <Image src="/homepage/archive/hero-clients.jpg" alt="" fill priority sizes="100vw" className={styles.coverImage} />

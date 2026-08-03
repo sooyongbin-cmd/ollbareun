@@ -44,4 +44,10 @@ describe("homepage PDF background colors", () => {
       /\.aboutHero h1,[\s\S]*\.serviceHero h1,[\s\S]*\.clientHero h1\s*\{[^}]*width: fit-content;[^}]*margin: 0 auto;/s,
     );
   });
+
+  it("aligns the main hero title with the certificate column", () => {
+    expect(stylesheet).toMatch(
+      /\.heroContent\s*\{[^}]*width: min\(1280px, calc\(100% - 48px\)\);[^}]*padding-left: calc\(56px \+ 37\.7778%\);[^}]*text-align: left;/s,
+    );
+  });
 });

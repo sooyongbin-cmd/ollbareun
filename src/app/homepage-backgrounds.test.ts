@@ -71,4 +71,10 @@ describe("homepage PDF background colors", () => {
       /\.certificateImages img\s*\{[^}]*border: 1px solid black;/s,
     );
   });
+
+  it("aligns the trust copy and certificate images to the same top edge", () => {
+    expect(stylesheet).toMatch(
+      /\.splitIntro\s*\{[^}]*align-items: start;/s,
+    );
+  });
 });

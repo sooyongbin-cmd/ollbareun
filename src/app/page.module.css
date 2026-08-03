@@ -494,7 +494,7 @@
 
 .certificateImages > div {
   position: relative;
-  min-height: 280px;
+  height: 326px;
 }
 
 .certificateImages img {
@@ -1432,7 +1432,7 @@
   }
 
   .certificateImages > div {
-    min-height: 210px;
+    height: 210px;
   }
 
   .certificateCards article {

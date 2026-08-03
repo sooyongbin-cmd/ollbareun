@@ -1275,6 +1275,18 @@
   width: 70px;
   height: 70px;
   box-shadow: 0 10px 25px rgb(0 92 144 / 22%);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 300ms ease,
+    visibility 300ms ease;
+}
+
+.toTopVisible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .contactCopy address img {

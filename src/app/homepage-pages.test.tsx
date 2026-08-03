@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { AboutPage, ClientsPage, MainPage, ServicesPage } from "./homepage-pages";
 
@@ -11,11 +11,17 @@ vi.mock("./homepage-contact-map", () => ({
 }));
 
 describe("homepage back to top button", () => {
-  it("links to the top anchor", () => {
+  it("links to the top anchor and shows up on scroll", () => {
     render(<MainPage />);
 
     const toTopButton = screen.getByRole("link", { name: "맨 위로 이동" });
     expect(toTopButton).toHaveAttribute("href", "#top");
+    expect(toTopButton.className).not.toContain("toTopVisible");
+
+    window.scrollY = 300;
+    fireEvent.scroll(window);
+
+    expect(toTopButton.className).toContain("toTopVisible");
   });
 
   it("uses the supplied homepage hero image without rendering a video", () => {

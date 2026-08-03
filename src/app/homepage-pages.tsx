@@ -1,6 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import styles from "./page.module.css";
 import HomepageContactMap from "./homepage-contact-map";
 import HomepageHeader from "./homepage-header";
@@ -206,8 +208,24 @@ function Footer() {
 }
 
 function BackToTop() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setVisible(window.scrollY > 200);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <a className={styles.toTop} href="#top" aria-label="맨 위로 이동">
+    <a
+      className={`${styles.toTop} ${visible ? styles.toTopVisible : ""}`}
+      href="#top"
+      aria-label="맨 위로 이동"
+    >
       <Image
         src="/homepage/archive/to-top.svg"
         alt=""

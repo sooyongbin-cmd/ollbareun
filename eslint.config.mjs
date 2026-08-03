@@ -16,6 +16,7 @@ const eslintConfig = defineConfig([
     "supabase/functions/**",
     "docs/.vitepress/**",
     "public/docs/**",
+    "tmp/**",
   ]),
 ]);
 

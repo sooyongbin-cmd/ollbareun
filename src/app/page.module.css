@@ -312,9 +312,9 @@
 
 .heroContent h1 {
   margin: 0;
-  font-size: clamp(42px, 4.15vw, 67px);
+  font-size: 67.31px;
   font-weight: 350;
-  letter-spacing: -0.055em;
+  letter-spacing: -0.48px;
   line-height: 1.2;
   white-space: nowrap;
 }

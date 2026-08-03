@@ -674,7 +674,7 @@
 .serviceHero,
 .clientHero {
   display: flex;
-  min-height: 450px;
+  min-height: 500px;
   align-items: center;
 }
 

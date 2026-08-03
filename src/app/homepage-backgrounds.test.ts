@@ -26,4 +26,10 @@ describe("homepage PDF background colors", () => {
       /\.historyImage\s*\{[^}]*border-radius: 55px 0 55px 0;/s,
     );
   });
+
+  it("keeps the about, service, and client hero images the same height", () => {
+    expect(stylesheet).toMatch(
+      /\.aboutHero,[\s\S]*\.serviceHero,[\s\S]*\.clientHero\s*\{[^}]*min-height: 500px;/s,
+    );
+  });
 });

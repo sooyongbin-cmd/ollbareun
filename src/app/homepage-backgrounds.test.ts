@@ -38,4 +38,10 @@ describe("homepage PDF background colors", () => {
       /\.aboutHero > div:last-child,[\s\S]*\.serviceHero > div:last-child,[\s\S]*\.clientHero > div:last-child\s*\{[^}]*text-align: left;/s,
     );
   });
+
+  it("centers the left-aligned hero copy as a text block", () => {
+    expect(stylesheet).toMatch(
+      /\.aboutHero h1,[\s\S]*\.serviceHero h1,[\s\S]*\.clientHero h1\s*\{[^}]*width: fit-content;[^}]*margin: 0 auto;/s,
+    );
+  });
 });

@@ -78,8 +78,8 @@ describe("public homepage pages", () => {
       'img[src*="operation-system.svg"]',
     );
     expect(operationDiagram).toBeInTheDocument();
-    expect(operationDiagram).toHaveAttribute("width", "665");
-    expect(operationDiagram).toHaveAttribute("height", "492");
+    expect(operationDiagram).toHaveAttribute("width", "1920");
+    expect(operationDiagram).toHaveAttribute("height", "5789");
     expect(container.querySelector('ol[class*="visuallyHidden"]')).toBeInTheDocument();
   });
 

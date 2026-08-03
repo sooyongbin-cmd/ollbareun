@@ -668,7 +668,7 @@
 .aboutHero > div:last-child,
 .serviceHero > div:last-child,
 .clientHero > div:last-child {
-  text-align: left;
+  text-align: center;
 }
 
 .aboutOverlay,
@@ -690,6 +690,7 @@
   font-weight: 400;
   letter-spacing: -0.05em;
   line-height: 1.25;
+  text-align: center;
 }
 
 .aboutHero h1 strong,

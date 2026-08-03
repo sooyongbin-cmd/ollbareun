@@ -33,9 +33,9 @@ describe("homepage PDF background colors", () => {
     );
   });
 
-  it("left-aligns the about, service, and client hero copy", () => {
+  it("centers the about, service, and client hero copy", () => {
     expect(stylesheet).toMatch(
-      /\.aboutHero > div:last-child,[\s\S]*\.serviceHero > div:last-child,[\s\S]*\.clientHero > div:last-child\s*\{[^}]*text-align: left;/s,
+      /\.aboutHero > div:last-child,[\s\S]*\.serviceHero > div:last-child,[\s\S]*\.clientHero > div:last-child\s*\{[^}]*text-align: center;/s,
     );
   });
 

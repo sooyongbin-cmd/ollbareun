@@ -850,6 +850,19 @@
   font-weight: inherit;
 }
 
+@media (min-width: 1201px) {
+  .aboutPage .historyWrap {
+    max-width: 1280px;
+    grid-template-columns: 640px minmax(0, 1fr);
+    gap: 90px;
+  }
+
+  .aboutPage .timeline {
+    --timeline-date-column: 188px;
+    --timeline-marker-column: 84px;
+  }
+}
+
 .values {
   padding: 110px max(24px, calc((100% - 1280px) / 2)) 120px;
   scroll-margin-top: 92px;
@@ -909,8 +922,11 @@
 }
 
 .socialSection {
+  width: 100%;
+  padding-right: max(24px, calc((100% - 1280px) / 2));
   padding-top: 130px;
   padding-bottom: 130px;
+  padding-left: max(24px, calc((100% - 1280px) / 2));
   background: var(--home-service-background);
 }
 
@@ -931,6 +947,10 @@
   padding: 31px 27px;
   border: 1px solid var(--home-line);
   border-radius: 0 26px 0 26px;
+}
+
+.socialGrid article {
+  background: #fff;
 }
 
 .socialGrid article,
@@ -1848,6 +1868,11 @@
   .socialGrid,
   .facilityGrid {
     grid-template-columns: 1fr;
+  }
+
+  .socialSection {
+    padding-right: 20px;
+    padding-left: 20px;
   }
 
   .socialGrid article,

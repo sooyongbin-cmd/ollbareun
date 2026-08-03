@@ -359,9 +359,9 @@ export function MainPage() {
           />
           <div className={styles.certificateImages} aria-label="보유 인증서">
             {[
-              ["/homepage/certificate-figma-1.png", "여성기업 확인서"],
-              ["/homepage/certificate-figma-2.png", "김해공항세관 등록증"],
-              ["/homepage/certificate-figma-3.png", "사회적기업 인증서"],
+              ["/homepage/lc_1.svg", "여성기업 확인서"],
+              ["/homepage/lc_2.svg", "김해공항세관 등록증"],
+              ["/homepage/lc_3.svg", "사회적기업 인증서"],
             ].map(([src, alt]) => (
               <div key={src}>
                 <Image

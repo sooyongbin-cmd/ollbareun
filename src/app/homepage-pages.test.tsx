@@ -25,6 +25,14 @@ describe("homepage back to top button", () => {
     expect(container.querySelector("video")).not.toBeInTheDocument();
   });
 
+  it("uses the supplied certificate SVGs", () => {
+    const { container } = render(<MainPage />);
+
+    for (const filename of ["lc_1.svg", "lc_2.svg", "lc_3.svg"]) {
+      expect(container.querySelector(`img[src*="${filename}"]`)).toBeInTheDocument();
+    }
+  });
+
   it("uses the supplied archive navigation icon", () => {
     const { container } = render(<MainPage />);
 

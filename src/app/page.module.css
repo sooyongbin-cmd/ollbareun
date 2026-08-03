@@ -14,7 +14,7 @@
   overflow: clip;
   background: #fff;
   color: var(--home-ink);
-  font-family: "Noonnu", "Pretendard Variable", "Pretendard", system-ui, sans-serif;
+  font-family: "Pretendard Variable", "Pretendard", system-ui, sans-serif;
 }
 
 .site,
@@ -78,8 +78,10 @@
   height: 30px;
   margin: 0 0 0 16px;
   align-items: center;
-  font-size: 11px;
-  line-height: 1;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: normal;
   opacity: 0.82;
 }
 
@@ -89,8 +91,9 @@
   margin-left: auto;
   align-items: center;
   grid-template-columns: repeat(3, 186px);
-  font-size: 14px;
-  font-weight: 550;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: normal;
 }
 
 .desktopNavItem {
@@ -154,8 +157,9 @@
 .megaMenuColumn a {
   position: relative;
   color: rgb(255 255 255 / 86%);
-  font-size: 14px;
-  line-height: 1.35;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: normal;
   text-align: center;
 }
 
@@ -313,9 +317,9 @@
 .heroContent h1 {
   margin: 0;
   font-size: 67.31px;
-  font-weight: 350;
-  letter-spacing: -0.48px;
-  line-height: 1.2;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: normal;
   white-space: nowrap;
 }
 
@@ -428,6 +432,45 @@
 
 .sectionHeading > span strong {
   font-weight: 800;
+}
+
+.trustSection .sectionHeading > p,
+.servicePreview .sectionHeading > p,
+.homeClientSection .sectionHeading > p {
+  margin-bottom: 18px;
+  font-size: 26px;
+  font-weight: 500;
+  line-height: normal;
+}
+
+.trustSection .sectionHeading h2,
+.servicePreview .sectionHeading h2,
+.homeClientSection .sectionHeading h2 {
+  font-size: 43px;
+  letter-spacing: -0.03em;
+  line-height: normal;
+}
+
+.trustSection .sectionHeading h2 {
+  font-weight: 500;
+}
+
+.servicePreview .sectionHeading h2,
+.homeClientSection .sectionHeading h2 {
+  font-weight: 400;
+}
+
+.trustSection .sectionHeading > span,
+.servicePreview .sectionHeading > span,
+.homeClientSection .sectionHeading > span {
+  font-size: 21px;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: normal;
+}
+
+.servicePreview .sectionHeading > p {
+  letter-spacing: -0.03em;
 }
 
 .trustSection {
@@ -550,15 +593,19 @@
 
 .serviceCard h3 {
   margin: 0 0 12px;
-  font-size: 21px;
-  font-weight: 750;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: normal;
 }
 
 .serviceCard p {
   margin: 0;
   color: var(--home-muted);
-  font-size: 14px;
-  line-height: 1.75;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: normal;
 }
 
 .moreLink {
@@ -567,9 +614,14 @@
   margin: 54px auto 0;
   align-items: center;
   gap: 10px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  font-size: 15.66px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: normal;
+}
+
+.homeClientSection > .moreLink {
+  font-weight: 400;
 }
 
 .moreViewIcon {
@@ -1266,12 +1318,15 @@
   display: flex;
   flex-direction: column;
   gap: 9px;
-  font-size: 12px;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: normal;
 }
 
 .footerGrid strong {
   margin-bottom: 6px;
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .footerGrid a {
@@ -1290,7 +1345,10 @@
   gap: 24px;
   border-top: 1px solid #9e9e9e;
   color: #747474;
-  font-size: 10px;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: -0.05em;
+  line-height: normal;
 }
 
 .footerBottom p {

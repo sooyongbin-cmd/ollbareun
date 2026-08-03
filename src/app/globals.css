@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @font-face {
-  font-family: "Noonnu";
+  font-family: "Pretendard Variable";
   font-style: normal;
   font-weight: 45 920;
   font-display: swap;
@@ -41,8 +41,8 @@
   --color-status-warn-bg: #fff4e5;
   --color-status-warn-text: #b64e00;
 
-  --font-noonnu: "Noonnu", "Pretendard Variable", "Pretendard", system-ui, -apple-system, sans-serif;
-  --font-apple: var(--font-noonnu);
+  --font-pretendard: "Pretendard Variable", "Pretendard", system-ui, -apple-system, sans-serif;
+  --font-apple: var(--font-pretendard);
 
   --radius-apple-sm: 8px;
   --radius-apple-md: 11px;
@@ -59,9 +59,9 @@
 
   --shadow-product: 3px 5px 30px 0 rgba(0, 0, 0, 0.22);
 
-  --font-heading: "Noonnu", "Pretendard Variable", "Pretendard", system-ui, -apple-system, sans-serif;
+  --font-heading: var(--font-pretendard);
 
-  --font-sans: "Noonnu", "Pretendard Variable", "Pretendard", system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-pretendard);
 
   --color-sidebar-ring: var(--sidebar-ring);
 
@@ -150,7 +150,7 @@ body {
 
 /* Typography Defaults */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-noonnu);
+  font-family: var(--font-pretendard);
   font-weight: 600;
   letter-spacing: 0;
 }

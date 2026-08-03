@@ -32,4 +32,10 @@ describe("homepage PDF background colors", () => {
       /\.aboutHero,[\s\S]*\.serviceHero,[\s\S]*\.clientHero\s*\{[^}]*min-height: 500px;/s,
     );
   });
+
+  it("left-aligns the about, service, and client hero copy", () => {
+    expect(stylesheet).toMatch(
+      /\.aboutHero > div:last-child,[\s\S]*\.serviceHero > div:last-child,[\s\S]*\.clientHero > div:last-child\s*\{[^}]*text-align: left;/s,
+    );
+  });
 });

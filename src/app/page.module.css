@@ -688,7 +688,7 @@
 .aboutHero > div:last-child,
 .serviceHero > div:last-child,
 .clientHero > div:last-child {
-  text-align: center;
+  text-align: left;
 }
 
 .aboutOverlay,

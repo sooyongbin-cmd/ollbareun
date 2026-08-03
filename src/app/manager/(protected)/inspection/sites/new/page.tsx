@@ -148,8 +148,8 @@ export default function InspectionSiteNewPage() {
   return (
     <section className="space-y-[24px]">
       <header>
-        <h1 className="text-[40px] font-semibold leading-[1.1]">현장등록</h1>
-        <p className="text-[21px] font-normal text-muted-foreground mt-2 max-w-[640px]">
+        <h1 className="text-[28px] leading-[1.2]">현장등록</h1>
+        <p className="text-[14px] font-normal leading-relaxed text-muted-foreground mt-2 max-w-[640px]">
           근무지에 속한 현장을 등록하고 점검 QR을 생성합니다.
         </p>
       </header>

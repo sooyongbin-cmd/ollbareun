@@ -156,8 +156,8 @@ export default function EducationResourceSavePage() {
       <header>
         <p className="text-[14px] font-semibold text-muted-foreground uppercase">관리자 화면</p>
         <div className="space-y-3">
-          <h1 className="text-[40px] font-semibold leading-[1.1]">교육자료수정</h1>
-          <p className="text-[21px] font-normal text-muted-foreground max-w-[640px]">
+          <h1 className="text-[28px] leading-[1.2]">교육자료수정</h1>
+          <p className="text-[14px] font-normal leading-relaxed text-muted-foreground max-w-[640px]">
             선택한 교육자료의 제목과 유튜브 링크를 수정할 수 있습니다.
           </p>
         </div>

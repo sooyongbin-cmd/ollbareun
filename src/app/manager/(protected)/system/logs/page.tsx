@@ -177,8 +177,8 @@ export default function ManagerSystemLogsPage() {
     <section className="space-y-[24px]">
       <header>
         <div className="space-y-3">
-          <h1 className="text-[40px] font-semibold leading-[1.1]">로그현황</h1>
-          <p className="text-[21px] font-normal text-muted-foreground max-w-[640px]">
+          <h1 className="text-[28px] leading-[1.2]">로그현황</h1>
+          <p className="text-[14px] font-normal leading-relaxed text-muted-foreground max-w-[640px]">
             경비원 로그인, Push 알림 연결, 로그아웃 처리 내역을 확인합니다. 최신 100건만 유지합니다.
           </p>
         </div>

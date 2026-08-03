@@ -106,8 +106,8 @@ export default function AssignmentNewPage() {
   return (
     <section className="space-y-[24px]">
       <header>
-        <h1 className="text-[40px] font-semibold leading-[1.1]">배정등록</h1>
-        <p className="text-[21px] font-normal text-muted-foreground mt-2 max-w-[600px]">
+        <h1 className="text-[28px] leading-[1.2]">배정등록</h1>
+        <p className="text-[14px] font-normal leading-relaxed text-muted-foreground mt-2 max-w-[600px]">
           직원에게 근무지를 배정합니다.
         </p>
       </header>

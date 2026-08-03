@@ -224,8 +224,8 @@ export default function EducationCompletionsPage() {
     <section className="space-y-[24px]">
       <header>
         <div className="space-y-3">
-          <h1 className="text-[40px] font-semibold leading-[1.1]">교육이수관리</h1>
-          <p className="text-[21px] font-normal text-muted-foreground max-w-[640px]">
+          <h1 className="text-[28px] leading-[1.2]">교육이수관리</h1>
+          <p className="text-[14px] font-normal leading-relaxed text-muted-foreground max-w-[640px]">
             직원별 교육이수 현황을 확인합니다.
           </p>
         </div>

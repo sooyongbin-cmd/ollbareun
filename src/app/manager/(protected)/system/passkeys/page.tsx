@@ -116,8 +116,8 @@ export default function ManagerPasskeyRequestsPage() {
     <section className="space-y-[24px]">
       <header>
         <div className="space-y-3">
-          <h1 className="text-[40px] font-semibold leading-[1.1]">패스키 요청 관리</h1>
-          <p className="max-w-[640px] text-[21px] font-normal text-muted-foreground">
+          <h1 className="text-[28px] leading-[1.2]">패스키 요청 관리</h1>
+          <p className="max-w-[640px] text-[14px] font-normal leading-relaxed text-muted-foreground">
             경비원이 요청한 패스키 등록을 승인하거나 거절합니다.
           </p>
         </div>

@@ -91,8 +91,8 @@ export default function EducationResourceNewPage() {
   return (
     <section className="space-y-[24px]">
       <header>
-        <h1 className="text-[40px] font-semibold leading-[1.1]">교재등록</h1>
-        <p className="text-[21px] font-normal text-muted-foreground mt-2 max-w-[600px]">
+        <h1 className="text-[28px] leading-[1.2]">교재등록</h1>
+        <p className="text-[14px] font-normal leading-relaxed text-muted-foreground mt-2 max-w-[600px]">
           안전교육 교재 제목과 유튜브 링크를 등록합니다.
         </p>
       </header>

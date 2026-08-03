@@ -132,8 +132,8 @@ export default function EmployeeSavePage() {
       <header>
         <p className="text-[14px] font-semibold text-muted-foreground uppercase">관리자 화면</p>
         <div className="space-y-3">
-          <h1 className="text-[40px] font-semibold leading-[1.1]">직원수정</h1>
-          <p className="text-[21px] font-normal text-muted-foreground max-w-[640px]">
+          <h1 className="text-[28px] leading-[1.2]">직원수정</h1>
+          <p className="text-[14px] font-normal leading-relaxed text-muted-foreground max-w-[640px]">
             선택한 직원의 이름과 연락처를 수정할 수 있습니다.
           </p>
         </div>

@@ -104,8 +104,8 @@ export default function CloudflareVideoNewPage() {
   return (
     <section className="space-y-[24px]">
       <header>
-        <h1 className="text-[40px] font-semibold leading-[1.1]">(cloudflare)등록화면</h1>
-        <p className="text-[21px] font-normal text-muted-foreground mt-2 max-w-[600px]">
+        <h1 className="text-[28px] leading-[1.2]">(cloudflare)등록화면</h1>
+        <p className="text-[14px] font-normal leading-relaxed text-muted-foreground mt-2 max-w-[600px]">
           로컬 PC의 동영상 파일을 Cloudflare Stream으로 업로드합니다.
         </p>
       </header>

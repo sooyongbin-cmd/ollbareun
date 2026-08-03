@@ -149,8 +149,8 @@ export default function SpecialRemarkDetailPage({ params }: PageProps) {
   return (
     <section className="space-y-[24px]">
       <header>
-        <h1 className="text-[40px] font-semibold leading-[1.1]">특이사항 상세</h1>
-        <p className="mt-2 max-w-[640px] text-[21px] font-normal text-muted-foreground">
+        <h1 className="text-[28px] leading-[1.2]">특이사항 상세</h1>
+        <p className="mt-2 max-w-[640px] text-[14px] font-normal leading-relaxed text-muted-foreground">
           보고된 특이사항의 전체 내용과 첨부사진을 확인합니다.
         </p>
       </header>

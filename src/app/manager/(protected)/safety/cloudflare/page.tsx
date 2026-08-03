@@ -112,8 +112,8 @@ export default function CloudflareVideosPage() {
     <section className="space-y-[24px]">
       <header>
         <div className="space-y-3">
-          <h1 className="text-[40px] font-semibold leading-[1.1]">교육자료(cloudflare)목록</h1>
-          <p className="text-[21px] font-normal text-muted-foreground max-w-[640px]">
+          <h1 className="text-[28px] leading-[1.2]">교육자료(cloudflare)목록</h1>
+          <p className="text-[14px] font-normal leading-relaxed text-muted-foreground max-w-[640px]">
             Cloudflare Stream에 등록된 안전교육 동영상을 조회하고 시청합니다.
           </p>
         </div>

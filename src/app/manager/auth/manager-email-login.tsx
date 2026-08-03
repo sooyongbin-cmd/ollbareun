@@ -94,10 +94,10 @@ export default function ManagerEmailLogin({
         <div className="space-y-8">
           <div className="space-y-3">
             <p className="text-[14px] font-semibold text-primary">관리자 인증</p>
-            <h1 className="text-[30px] font-semibold leading-tight">
+            <h1 className="text-[28px] leading-[1.2]">
               {initialAdminSetupRequired ? "최초 관리자 등록" : "관리자 Google 인증"}
             </h1>
-            <p className="text-[15px] leading-7 text-foreground/70">
+            <p className="text-[14px] font-normal leading-relaxed text-foreground/70">
               {initialAdminSetupRequired
                 ? "등록된 관리자가 없어 최초 관리자 등록코드 확인 후 Google 인증을 시작합니다."
                 : "등록된 관리자 Google 계정으로 인증 후 관리자 화면에 접근할 수 있습니다."}

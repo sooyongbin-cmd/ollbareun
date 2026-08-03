@@ -172,8 +172,8 @@ export default function AdminUsersPage() {
     <section className="space-y-[24px]">
       <header>
         <div className="space-y-3">
-          <h1 className="text-[40px] font-semibold leading-[1.1]">관리자 관리</h1>
-          <p className="max-w-[640px] text-[21px] font-normal text-muted-foreground">
+          <h1 className="text-[28px] leading-[1.2]">관리자 관리</h1>
+          <p className="max-w-[640px] text-[14px] font-normal leading-relaxed text-muted-foreground">
             사전 등록된 관리자 목록을 조회하고 새 관리자를 사전에 등록하거나 권한을 설정합니다.
           </p>
         </div>

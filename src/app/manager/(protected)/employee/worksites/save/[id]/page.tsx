@@ -136,8 +136,8 @@ export default function WorksiteSavePage() {
       <header>
         <p className="text-[14px] font-semibold text-muted-foreground uppercase">관리자 화면</p>
         <div className="space-y-3">
-          <h1 className="text-[40px] font-semibold leading-[1.1]">근무지수정</h1>
-          <p className="text-[21px] font-normal text-muted-foreground max-w-[640px]">
+          <h1 className="text-[28px] leading-[1.2]">근무지수정</h1>
+          <p className="text-[14px] font-normal leading-relaxed text-muted-foreground max-w-[640px]">
             선택한 근무지의 이름, 주소, 실제 GPS정보, 허용 반경을 수정할 수 있습니다.
           </p>
         </div>

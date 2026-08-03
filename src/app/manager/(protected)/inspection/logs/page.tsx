@@ -115,8 +115,8 @@ export default function InspectionLogsPage() {
   return (
     <section className="space-y-[24px]">
       <header>
-        <h1 className="text-[40px] font-semibold leading-[1.1]">현장점검현황</h1>
-        <p className="mt-2 max-w-[640px] text-[21px] font-normal text-muted-foreground">
+        <h1 className="text-[28px] leading-[1.2]">현장점검현황</h1>
+        <p className="mt-2 max-w-[640px] text-[14px] font-normal leading-relaxed text-muted-foreground">
           근무지별 현장점검 기록을 확인합니다.
         </p>
       </header>

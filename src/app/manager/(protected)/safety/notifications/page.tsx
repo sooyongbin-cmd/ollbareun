@@ -119,8 +119,8 @@ export default function ManagerSafetyNotificationsPage() {
     <section className="space-y-[24px]">
       <header>
         <div className="space-y-3">
-          <h1 className="text-[40px] font-semibold leading-[1.1]">자동알림이력</h1>
-          <p className="text-[21px] font-normal text-muted-foreground max-w-[640px]">
+          <h1 className="text-[28px] leading-[1.2]">자동알림이력</h1>
+          <p className="text-[14px] font-normal leading-relaxed text-muted-foreground max-w-[640px]">
             안전교육 자동 푸쉬 발송 이력을 최근 100건까지 확인합니다.
           </p>
         </div>

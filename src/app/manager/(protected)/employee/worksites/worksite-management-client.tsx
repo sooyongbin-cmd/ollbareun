@@ -131,8 +131,8 @@ export default function WorksiteManagementClient() {
     <section className="space-y-[24px]">
       <header>
         <div className="space-y-3">
-          <h1 className="text-[40px] font-semibold leading-[1.1]">근무지관리</h1>
-          <p className="text-[21px] font-normal text-muted-foreground max-w-[640px]">
+          <h1 className="text-[28px] leading-[1.2]">근무지관리</h1>
+          <p className="text-[14px] font-normal leading-relaxed text-muted-foreground max-w-[640px]">
             등록된 근무지를 검색하고 배정 현황을 확인합니다.
           </p>
         </div>

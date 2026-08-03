@@ -143,8 +143,8 @@ export default function EducationResourcesPage() {
     <section className="space-y-[24px]">
       <header>
         <div className="space-y-3">
-          <h1 className="text-[40px] font-semibold leading-[1.1]">교육자료관리</h1>
-          <p className="text-[21px] font-normal text-muted-foreground max-w-[640px]">
+          <h1 className="text-[28px] leading-[1.2]">교육자료관리</h1>
+          <p className="text-[14px] font-normal leading-relaxed text-muted-foreground max-w-[640px]">
             안전교육 교재 유튜브 링크를 등록하고 조회합니다.
           </p>
         </div>

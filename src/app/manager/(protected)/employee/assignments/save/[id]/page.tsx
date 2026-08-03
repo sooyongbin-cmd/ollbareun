@@ -204,8 +204,8 @@ export default function AssignmentSavePage() {
       <header>
         <p className="text-[14px] font-semibold text-muted-foreground uppercase">관리자 화면</p>
         <div className="space-y-3">
-          <h1 className="text-[40px] font-semibold leading-[1.1]">배정수정</h1>
-          <p className="text-[21px] font-normal text-muted-foreground max-w-[640px]">
+          <h1 className="text-[28px] leading-[1.2]">배정수정</h1>
+          <p className="text-[14px] font-normal leading-relaxed text-muted-foreground max-w-[640px]">
             선택한 배정의 직원, 근무지, 근무기간을 수정합니다.
           </p>
         </div>

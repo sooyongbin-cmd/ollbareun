@@ -41,8 +41,8 @@ export default async function CloudflareVideoWatchPage({ params }: { params: Pro
   return (
     <section className="space-y-[24px]">
       <header>
-        <h1 className="text-[40px] font-semibold leading-[1.1]">{video.title}</h1>
-        <p className="text-[16px] font-normal text-muted-foreground mt-2 max-w-[720px]">
+        <h1 className="text-[28px] leading-[1.2]">{video.title}</h1>
+        <p className="text-[14px] font-normal leading-relaxed text-muted-foreground mt-2 max-w-[720px]">
           UID {video.uid} · {getStatusText(video)}
         </p>
       </header>

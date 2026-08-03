@@ -83,7 +83,7 @@ export default function EducationReportPage() {
   return (
     <section className="space-y-[24px]">
       <header>
-        <h1 className="text-[40px] font-semibold leading-[1.1]">교육이수자료</h1>
+        <h1 className="text-[28px] leading-[1.2]">교육이수자료</h1>
       </header>
 
       <section aria-label="교육이수자료 조회" className="rounded-xl border border-border/50 bg-muted/40 p-[32px]">

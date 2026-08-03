@@ -571,7 +571,7 @@ export function ServicesPage() {
             <br />
             같은 기준으로 움직입니다.
           </h3>
-          <Image className={styles.operationDiagram} src="/homepage/archive/operation-system.svg" alt="준비단계와 목표 설정부터 이슈 대응과 현장 존중까지 이어지는 4단계 운영 체계" width={1920} height={5789} />
+          <Image className={styles.operationDiagram} src="/homepage/archive/operation-system.svg" alt="준비단계와 목표 설정부터 이슈 대응과 현장 존중까지 이어지는 4단계 운영 체계" width={665} height={492} />
           <ol className={styles.visuallyHidden}>
             {operationSteps.map(([number, title, description]) => (
               <li key={number}><strong>{number}</strong><div><h4>{title}</h4><p>{description}</p></div></li>

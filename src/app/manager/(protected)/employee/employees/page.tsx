@@ -185,7 +185,6 @@ export default function EmployeeRosterPage() {
         aria-label="직원 검색"
         className="rounded-xl border border-border/50 bg-muted/40 p-[24px] md:p-[32px]"
       >
-        <h2 className="mb-4 text-[18px] font-semibold leading-snug">직원 검색</h2>
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="flex flex-1 flex-col gap-4 md:flex-row">
             <div className="flex-1 space-y-2">
@@ -250,7 +249,6 @@ export default function EmployeeRosterPage() {
         aria-label="직원 목록"
         className="rounded-xl border border-border/50 bg-muted/40 p-[24px] md:p-[32px]"
       >
-        <h2 className="text-[18px] font-semibold leading-snug">직원 목록</h2>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-[12px] font-normal text-muted-foreground">
           <span>전체 직원 {data.employees.length}</span>
           <span>검색 결과 {filteredEmployees.length}</span>

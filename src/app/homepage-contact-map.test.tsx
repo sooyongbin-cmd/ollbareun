@@ -70,6 +70,11 @@ describe("homepage contact map", () => {
     script?.onerror?.(new Event("error"));
 
     expect(await screen.findByText("카카오 지도를 불러오지 못했습니다.")).toBeInTheDocument();
+    expect(
+      screen.getByText("부산광역시 강서구 유통단지1로 41, 105동 217·218호", {
+        selector: "span",
+      }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "전화 051-465-7767" })).toHaveAttribute(
       "href",
       "tel:0514657767",

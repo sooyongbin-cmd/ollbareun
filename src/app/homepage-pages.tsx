@@ -40,7 +40,7 @@ const values = [
   ["B", "Benefit", "차별화된 서비스로 고객감동 극대화"],
   ["E", "Earning", "경쟁력 강화로 수익 창출"],
   ["S", "Social", "사회 환원을 통한 가치 실현"],
-  ["T", "Talented", "취약계층 육성을 통한 역량강화"],
+  ["T", "Talented", "취약계측 육성을 통한 역걍강화"],
 ];
 
 const operationSteps = [
@@ -52,7 +52,7 @@ const operationSteps = [
 
 const facilityItems = [
   {
-    title: "건물·시설 유지관리",
+    title: "건물/시설 유지관리",
     text: "전기, 소방, 기계, 가스, 건축 설비의 점검과 운영관리 등 현장 유지에 필요한 업무를 묶어 관리합니다.",
     image: "/homepage/archive/facility-maintenance.svg",
   },
@@ -185,11 +185,6 @@ function Footer() {
           <Link href="/clients#client-list">교육기관</Link>
         </div>
         <div>
-          <strong>연결</strong>
-          <Link href="/manager">관리자</Link>
-          <Link href="/guard">근무자</Link>
-        </div>
-        <div>
           <strong>문의</strong>
           <a href="tel:0514657767">T.051-465-7767</a>
           <a href="tel:0519617767">F.051-961-7767</a>
@@ -198,10 +193,10 @@ function Footer() {
       </div>
       <div className={styles.footerBottom}>
         <p>
-          부산광역시 강서구 유통단지1로 41, 105동 217·218호 · 대표이사 윤지욱 ·
+          부산광역시 강서구 유통단지1로 41, 105동 217・218호・대표이사 윤지욱・
           사업자등록번호213-87-01208
         </p>
-        <p>©2026 주식회사 올바름. All rights reserved.</p>
+        <p>Ⓒ2026 주식회사 올바름. All rights reserved.</p>
       </div>
     </footer>
   );
@@ -268,7 +263,7 @@ function ContactSection() {
           <span>
             <Image src="/homepage/archive/contact-address.svg" alt="" width={10} height={15} aria-hidden="true" />
             <strong>ADDRESS</strong>
-            부산광역시 강서구 유통단지1로 41, 105동 217·218호
+            부산광역시 강서구 유통단지1로 41, 105동 217・218호
           </span>
           <a href="tel:0514657767">
             <Image src="/homepage/archive/contact-phone.svg" alt="" width={12} height={16} aria-hidden="true" />
@@ -282,6 +277,7 @@ function ContactSection() {
           </a>
           <a href="mailto:olbareum@naver.com">
             <Image src="/homepage/archive/contact-email.svg" alt="" width={13} height={9} aria-hidden="true" />
+            <strong>e-mail</strong>
             olbareum@naver.com
           </a>
         </address>
@@ -456,7 +452,7 @@ export function AboutPage() {
           <h1>
             <strong>사람 중심</strong>의 <strong>가치</strong>를 심고,
             <br />
-            <strong>지속 가능한 내일</strong>을 가꿔갑니다.
+            <strong>지속 가능한 내일</strong>을 가꿉니다.
           </h1>
         </div>
       </section>
@@ -560,7 +556,7 @@ export function ServicesPage() {
         <div className={styles.serviceHeroOverlay} />
         <div>
           <h1>
-            <strong>현장</strong>을 아는 <strong>전문성</strong>과{" "}
+            <strong>전문성</strong>과{" "}
             <strong>체계적 관리</strong>로
             <br />
             최적의 환경을 완성합니다
@@ -683,9 +679,9 @@ export function ClientsPage() {
         <div className={styles.clientOverlay} />
         <div>
           <h1>
-            성공적인 <strong>경험</strong>이 증명하는 <strong>실력,</strong>
+            <strong>경험</strong>이 증명하는 <strong>실력,</strong>
             <br />
-            더 깊어진 <strong>책임감</strong>으로 보답합니다
+            <strong>책임감</strong>으로 보답합니다
           </h1>
         </div>
       </section>

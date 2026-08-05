@@ -24,6 +24,17 @@ describe("homepage header", () => {
     );
   });
 
+  it("keeps the non-active mega menu area transparent", () => {
+    const stylesheet = readFileSync("src/app/page.module.css", "utf8");
+
+    expect(stylesheet).toMatch(
+      /\.megaMenu\s*\{[^}]*background:\s*transparent;/s,
+    );
+    expect(stylesheet).toMatch(
+      /\.megaMenuColumnActive\s*\{[^}]*background:\s*#050505;/s,
+    );
+  });
+
   it("opens the desktop mega menu and exposes section links", () => {
     render(<HomepageHeader />);
 

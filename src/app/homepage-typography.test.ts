@@ -62,7 +62,17 @@ describe("homepage Figma typography", () => {
     expect(stylesheet).toMatch(/\.aboutPage \.timeline time\s*\{[^}]*font-size: 40\.12px;[^}]*line-height: normal;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.valueGrid strong\s*\{[^}]*font-size: 74px;[^}]*line-height: normal;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.socialGrid h3\s*\{[^}]*font-size: 25\.78px;[^}]*line-height: normal;/s);
-    expect(stylesheet).toMatch(/\.aboutPage \.contactCopy h2\s*\{[^}]*font-size: 43px;[^}]*line-height: 54px;/s);
+    expect(stylesheet).toMatch(/\.contactSection \.contactCopy h2\s*\{[^}]*font-size: 43px;[^}]*line-height: 54px;/s);
+  });
+
+  it("aligns the landing contact heading and details to the same top edge", () => {
+    expect(stylesheet).toMatch(/\.contactSection\s*\{\s*align-items: start;/s);
+    expect(stylesheet).toMatch(
+      /\.contactSection \.contactCopy h2\s*\{[^}]*font-size: 43px;[^}]*line-height: 54px;/s,
+    );
+    expect(stylesheet).toMatch(
+      /\.contactSection \.contactCopy address > span,[\s\S]*\.contactSection \.contactCopy address > a\s*\{[^}]*grid-template-columns: 13px 94px minmax\(0, 1fr\);[^}]*column-gap: 40px;/s,
+    );
   });
 
   it("matches the Figma services-page body typography", () => {

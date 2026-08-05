@@ -1544,35 +1544,36 @@
     line-height: 29px;
   }
 
-  .aboutPage .contactCopy h2 {
+  .contactSection {
+    align-items: start;
+  }
+
+  .contactSection .contactCopy h2 {
     font-size: 43px;
     line-height: 54px;
   }
 
-  .aboutPage .contactCopy address {
+  .contactSection .contactCopy address {
     font-size: 16px;
     line-height: normal;
   }
 
-  .aboutPage .contactCopy address > span,
-  .aboutPage .contactCopy address > a {
+  .contactSection .contactCopy address > span,
+  .contactSection .contactCopy address > a {
     display: grid;
     grid-template-columns: 13px 94px minmax(0, 1fr);
     column-gap: 40px;
     align-items: start;
   }
 
-  .aboutPage .contactCopy address strong {
+  .contactSection .contactCopy address strong {
     min-width: 0;
-  }
-
-  .aboutPage .contactCopy address .contactValue {
-    margin-left: 12px;
-  }
-
-  .aboutPage .contactCopy address strong {
     font-size: 20px;
     line-height: normal;
+  }
+
+  .contactSection .contactCopy address .contactValue {
+    margin-left: 12px;
   }
 }
 

@@ -71,6 +71,8 @@ describe("Figma homepage desktop line heights", () => {
     expect(stylesheet).toMatch(/\.servicesPage \.operationLayout > h3\s*\{[^}]*line-height: 63px;/s);
     expect(stylesheet).toMatch(/\.servicesPage \.detailMessage\s*\{[^}]*line-height: 47px;/s);
     expect(stylesheet).toMatch(/\.servicesPage \.facilityGrid p\s*\{[^}]*line-height: 29px;/s);
+    expect(stylesheet).toMatch(/\.teamImage,\s*\.detailBanner\s*\{[^}]*width: min\(100%, 1280px\);/s);
+    expect(stylesheet).toMatch(/\.operationLayout\s*\{[^}]*max-width: 1280px;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.aboutHero h1\s*\{[^}]*line-height: 70px;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.companySection \.sectionHeading h2\s*\{[^}]*line-height: 54px;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.timeline p\s*\{[^}]*line-height: 28\.35px;/s);

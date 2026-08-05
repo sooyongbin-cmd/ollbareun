@@ -8,6 +8,11 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
+    "test:homepage": "vitest run src/app/figma-homepage.test.tsx",
+    "test:manager": "vitest run src/app/manager",
+    "test:api": "vitest run src/app/api",
+    "test:lib": "vitest run src/lib",
+    "test:guard": "vitest run src/app/guard",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs --outDir public/docs/documents",
     "docs:preview": "vitepress preview docs --outDir public/docs/documents"
@@ -53,6 +58,6 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitepress": "^1.6.4",
-    "vitest": "^4.1.6"
+    "vitest": "^4.1.10"
   }
 }

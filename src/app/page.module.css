@@ -705,7 +705,7 @@
 
 .stats {
   display: grid;
-  max-width: 980px;
+  max-width: 1280px;
   margin: 0 auto 110px;
   grid-template-columns: repeat(4, 1fr);
 }

@@ -76,6 +76,7 @@ describe("Figma homepage desktop line heights", () => {
     expect(stylesheet).toMatch(/\.aboutPage \.timeline p\s*\{[^}]*line-height: 28\.35px;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.socialGrid p\s*\{[^}]*line-height: 29px;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.contactCopy h2\s*\{[^}]*line-height: 54px;/s);
+    expect(stylesheet).toMatch(/\.stats\s*\{[^}]*max-width: 1280px;/s);
     expect(stylesheet).toMatch(/\.footerGrid\s*\{[^}]*grid-template-columns: repeat\(4, 1fr\);/s);
   });
 });

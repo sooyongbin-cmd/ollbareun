@@ -1329,6 +1329,10 @@
     padding-top: 160px;
   }
 
+  .clientsPage .clientsSection .sectionHeading {
+    margin-bottom: 130px;
+  }
+
   .trustSection .sectionHeading h2 {
     line-height: 54px;
   }

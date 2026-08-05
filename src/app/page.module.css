@@ -119,7 +119,7 @@
   width: 100%;
   height: 0;
   overflow: hidden;
-  background: transparent;
+  background: rgb(0 31 52 / 83%);
   opacity: 0;
   pointer-events: none;
   transition:

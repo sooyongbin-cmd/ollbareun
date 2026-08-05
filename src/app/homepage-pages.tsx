@@ -185,11 +185,6 @@ function Footer() {
           <Link href="/clients#client-list">교육기관</Link>
         </div>
         <div>
-          <strong>연결</strong>
-          <Link href="/manager">관리자</Link>
-          <Link href="/guard">근무자</Link>
-        </div>
-        <div>
           <strong>문의</strong>
           <a href="tel:0514657767">T.051-465-7767</a>
           <a href="tel:0519617767">F.051-961-7767</a>
@@ -457,7 +452,7 @@ export function AboutPage() {
           <h1>
             <strong>사람 중심</strong>의 <strong>가치</strong>를 심고,
             <br />
-            <strong>지속 가능한 내일</strong>을 가꿔갑니다.
+            <strong>지속 가능한 내일</strong>을 가꿉니다.
           </h1>
         </div>
       </section>
@@ -561,7 +556,7 @@ export function ServicesPage() {
         <div className={styles.serviceHeroOverlay} />
         <div>
           <h1>
-            <strong>현장</strong>을 아는 <strong>전문성</strong>과{" "}
+            <strong>전문성</strong>과{" "}
             <strong>체계적 관리</strong>로
             <br />
             최적의 환경을 완성합니다
@@ -684,9 +679,9 @@ export function ClientsPage() {
         <div className={styles.clientOverlay} />
         <div>
           <h1>
-            성공적인 <strong>경험</strong>이 증명하는 <strong>실력,</strong>
+            <strong>경험</strong>이 증명하는 <strong>실력,</strong>
             <br />
-            더 깊어진 <strong>책임감</strong>으로 보답합니다
+            <strong>책임감</strong>으로 보답합니다
           </h1>
         </div>
       </section>

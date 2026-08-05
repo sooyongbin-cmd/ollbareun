@@ -1266,14 +1266,14 @@
 .contactCopy address {
   display: grid;
   margin: 0;
-  gap: 13px;
+  gap: 16px;
   color: var(--home-muted);
   font-size: 14px;
   font-style: normal;
 }
 
-.contactCopy address span,
-.contactCopy address a {
+.contactCopy address > span,
+.contactCopy address > a {
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -1310,8 +1310,8 @@
 }
 
 .contactCopy address img {
-  width: 13px;
-  height: 16px;
+  width: auto;
+  height: auto;
   margin-top: 1px;
   object-fit: contain;
 }
@@ -1552,6 +1552,22 @@
   .aboutPage .contactCopy address {
     font-size: 16px;
     line-height: normal;
+  }
+
+  .aboutPage .contactCopy address > span,
+  .aboutPage .contactCopy address > a {
+    display: grid;
+    grid-template-columns: 13px 94px minmax(0, 1fr);
+    column-gap: 40px;
+    align-items: start;
+  }
+
+  .aboutPage .contactCopy address strong {
+    min-width: 0;
+  }
+
+  .aboutPage .contactCopy address .contactValue {
+    margin-left: 12px;
   }
 
   .aboutPage .contactCopy address strong {

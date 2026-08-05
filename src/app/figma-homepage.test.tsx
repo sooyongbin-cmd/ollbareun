@@ -63,6 +63,9 @@ describe("Figma homepage text updates", () => {
 
 describe("Figma homepage desktop line heights", () => {
   it("uses the updated multi-line text leading", () => {
+    expect(stylesheet).toMatch(/\.aboutPage \.companySection\s*\{[^}]*padding-top: 112px;/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.operationSection\s*\{[^}]*padding-top: 160px;/s);
+    expect(stylesheet).toMatch(/\.clientsPage \.clientsSection\s*\{[^}]*padding-top: 160px;/s);
     expect(stylesheet).toMatch(/\.trustSection \.sectionHeading h2\s*\{[^}]*line-height: 54px;/s);
     expect(stylesheet).toMatch(/\.trustSection \.sectionHeading > span,[\s\S]*\.homeClientSection \.sectionHeading > span\s*\{[^}]*line-height: 28\.35px;/s);
     expect(stylesheet).toMatch(/\.serviceCard p\s*\{[^}]*line-height: 21px;/s);

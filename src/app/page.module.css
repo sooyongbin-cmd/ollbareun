@@ -1317,6 +1317,18 @@
 }
 
 @media (min-width: 761px) {
+  .aboutPage .companySection {
+    padding-top: 112px;
+  }
+
+  .servicesPage .operationSection {
+    padding-top: 160px;
+  }
+
+  .clientsPage .clientsSection {
+    padding-top: 160px;
+  }
+
   .trustSection .sectionHeading h2 {
     line-height: 54px;
   }

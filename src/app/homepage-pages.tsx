@@ -40,7 +40,7 @@ const values = [
   ["B", "Benefit", "차별화된 서비스로 고객감동 극대화"],
   ["E", "Earning", "경쟁력 강화로 수익 창출"],
   ["S", "Social", "사회 환원을 통한 가치 실현"],
-  ["T", "Talented", "취약계층 육성을 통한 역량강화"],
+  ["T", "Talented", "취약계측 육성을 통한 역걍강화"],
 ];
 
 const operationSteps = [
@@ -52,7 +52,7 @@ const operationSteps = [
 
 const facilityItems = [
   {
-    title: "건물·시설 유지관리",
+    title: "건물/시설 유지관리",
     text: "전기, 소방, 기계, 가스, 건축 설비의 점검과 운영관리 등 현장 유지에 필요한 업무를 묶어 관리합니다.",
     image: "/homepage/archive/facility-maintenance.svg",
   },
@@ -198,10 +198,10 @@ function Footer() {
       </div>
       <div className={styles.footerBottom}>
         <p>
-          부산광역시 강서구 유통단지1로 41, 105동 217·218호 · 대표이사 윤지욱 ·
+          부산광역시 강서구 유통단지1로 41, 105동 217・218호・대표이사 윤지욱・
           사업자등록번호213-87-01208
         </p>
-        <p>©2026 주식회사 올바름. All rights reserved.</p>
+        <p>Ⓒ2026 주식회사 올바름. All rights reserved.</p>
       </div>
     </footer>
   );
@@ -268,7 +268,7 @@ function ContactSection() {
           <span>
             <Image src="/homepage/archive/contact-address.svg" alt="" width={10} height={15} aria-hidden="true" />
             <strong>ADDRESS</strong>
-            부산광역시 강서구 유통단지1로 41, 105동 217·218호
+            부산광역시 강서구 유통단지1로 41, 105동 217・218호
           </span>
           <a href="tel:0514657767">
             <Image src="/homepage/archive/contact-phone.svg" alt="" width={12} height={16} aria-hidden="true" />
@@ -282,6 +282,7 @@ function ContactSection() {
           </a>
           <a href="mailto:olbareum@naver.com">
             <Image src="/homepage/archive/contact-email.svg" alt="" width={13} height={9} aria-hidden="true" />
+            <strong>e-mail</strong>
             olbareum@naver.com
           </a>
         </address>

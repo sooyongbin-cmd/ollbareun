@@ -585,7 +585,7 @@
   font-size: 15px;
   font-weight: 400;
   letter-spacing: -0.03em;
-  line-height: normal;
+  line-height: 21px;
 }
 
 .moreLink {
@@ -1317,9 +1317,19 @@
 }
 
 @media (min-width: 761px) {
+  .trustSection .sectionHeading h2 {
+    line-height: 54px;
+  }
+
+  .trustSection .sectionHeading > span,
+  .servicePreview .sectionHeading > span,
+  .homeClientSection .sectionHeading > span {
+    line-height: 28.35px;
+  }
+
   .clientsPage .clientHero h1 {
     font-size: 53px;
-    line-height: normal;
+    line-height: 70px;
   }
 
   .clientsPage .sectionHeading > p {
@@ -1334,7 +1344,7 @@
 
   .clientsPage .sectionHeading > span {
     font-size: 21px;
-    line-height: normal;
+    line-height: 28.35px;
   }
 
   .clientsPage .clientGroups > div > h3 {
@@ -1344,7 +1354,7 @@
 
   .servicesPage .serviceHero h1 {
     font-size: 53px;
-    line-height: normal;
+    line-height: 70px;
   }
 
   .servicesPage .sectionHeading > p {
@@ -1359,17 +1369,22 @@
 
   .servicesPage .sectionHeading > span {
     font-size: 21px;
-    line-height: normal;
+    line-height: 28.35px;
+  }
+
+  .servicesPage .detailSection .sectionHeading > span,
+  .servicesPage .facilitySection .sectionHeading > span {
+    line-height: 28.4px;
   }
 
   .servicesPage .operationLayout > h3 {
     font-size: 47.17px;
-    line-height: normal;
+    line-height: 63px;
   }
 
   .servicesPage .detailMessage {
     font-size: 35px;
-    line-height: normal;
+    line-height: 47px;
   }
 
   .servicesPage .facilityGrid h3 {
@@ -1379,7 +1394,7 @@
 
   .servicesPage .facilityGrid p {
     font-size: 19.64px;
-    line-height: normal;
+    line-height: 29px;
   }
 
   .servicesPage .operationLayout li > strong {
@@ -1399,7 +1414,7 @@
 
   .aboutPage .aboutHero h1 {
     font-size: 53px;
-    line-height: normal;
+    line-height: 70px;
   }
 
   .aboutPage .companySection .sectionHeading > p,
@@ -1409,7 +1424,11 @@
     line-height: normal;
   }
 
-  .aboutPage .companySection .sectionHeading h2,
+  .aboutPage .companySection .sectionHeading h2 {
+    font-size: 43px;
+    line-height: 54px;
+  }
+
   .aboutPage .socialSection .sectionHeading h2 {
     font-size: 43px;
     line-height: normal;
@@ -1421,8 +1440,12 @@
   }
 
   .aboutPage .companySection .sectionHeading > span,
-  .aboutPage .values .sectionHeading > span,
   .aboutPage .socialSection .sectionHeading > span {
+    font-size: 21px;
+    line-height: 28.35px;
+  }
+
+  .aboutPage .values .sectionHeading > span {
     font-size: 21px;
     line-height: normal;
   }
@@ -1459,7 +1482,7 @@
 
   .aboutPage .timeline p {
     font-size: 16px;
-    line-height: normal;
+    line-height: 28.35px;
   }
 
   .aboutPage .valueGrid strong {
@@ -1484,12 +1507,12 @@
 
   .aboutPage .socialGrid p {
     font-size: 19.64px;
-    line-height: normal;
+    line-height: 29px;
   }
 
   .aboutPage .contactCopy h2 {
     font-size: 43px;
-    line-height: normal;
+    line-height: 54px;
   }
 
   .aboutPage .contactCopy address {

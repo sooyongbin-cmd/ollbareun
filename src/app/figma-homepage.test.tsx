@@ -67,7 +67,11 @@ describe("Figma homepage desktop line heights", () => {
     expect(stylesheet).toMatch(/\.trustSection \.sectionHeading > span,[\s\S]*\.homeClientSection \.sectionHeading > span\s*\{[^}]*line-height: 28\.35px;/s);
     expect(stylesheet).toMatch(/\.serviceCard p\s*\{[^}]*line-height: 21px;/s);
     expect(stylesheet).toMatch(/\.clientsPage \.clientHero h1\s*\{[^}]*line-height: 70px;/s);
+    expect(stylesheet).toMatch(/\.clientsPage \.sectionHeading > p\s*\{[^}]*margin-bottom: 21px;/s);
+    expect(stylesheet).toMatch(/\.clientsPage \.sectionHeading > span\s*\{[^}]*margin-top: 21px;/s);
     expect(stylesheet).toMatch(/\.servicesPage \.serviceHero h1\s*\{[^}]*line-height: 70px;/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.operationSection \.sectionHeading > p\s*\{[^}]*margin-bottom: 21px;/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.operationSection \.sectionHeading > span\s*\{[^}]*margin-top: 21px;/s);
     expect(stylesheet).toMatch(/\.servicesPage \.operationLayout > h3\s*\{[^}]*line-height: 63px;/s);
     expect(stylesheet).toMatch(/\.servicesPage \.detailMessage\s*\{[^}]*line-height: 47px;/s);
     expect(stylesheet).toMatch(/\.servicesPage \.facilityGrid p\s*\{[^}]*line-height: 29px;/s);
@@ -77,6 +81,8 @@ describe("Figma homepage desktop line heights", () => {
     expect(stylesheet).toMatch(/\.clientGroups\s*\{[^}]*max-width: 1280px;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.aboutHero h1\s*\{[^}]*line-height: 70px;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.companySection \.sectionHeading h2\s*\{[^}]*line-height: 54px;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.companySection \.sectionHeading > p\s*\{[^}]*margin-bottom: 14px;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.companySection \.sectionHeading > span\s*\{[^}]*margin-top: 21px;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.timeline p\s*\{[^}]*line-height: 28\.35px;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.socialGrid p\s*\{[^}]*line-height: 29px;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.contactCopy h2\s*\{[^}]*line-height: 54px;/s);

@@ -1335,6 +1335,7 @@
   .clientsPage .sectionHeading > p {
     font-size: 26px;
     line-height: normal;
+    margin-bottom: 21px;
   }
 
   .clientsPage .sectionHeading h2 {
@@ -1345,6 +1346,7 @@
   .clientsPage .sectionHeading > span {
     font-size: 21px;
     line-height: 28.35px;
+    margin-top: 21px;
   }
 
   .clientsPage .clientGroups > div > h3 {
@@ -1362,6 +1364,10 @@
     line-height: normal;
   }
 
+  .servicesPage .operationSection .sectionHeading > p {
+    margin-bottom: 21px;
+  }
+
   .servicesPage .sectionHeading h2 {
     font-size: 43px;
     line-height: normal;
@@ -1370,6 +1376,10 @@
   .servicesPage .sectionHeading > span {
     font-size: 21px;
     line-height: 28.35px;
+  }
+
+  .servicesPage .operationSection .sectionHeading > span {
+    margin-top: 21px;
   }
 
   .servicesPage .detailSection .sectionHeading > span,
@@ -1429,6 +1439,10 @@
     line-height: 54px;
   }
 
+  .aboutPage .companySection .sectionHeading > p {
+    margin-bottom: 14px;
+  }
+
   .aboutPage .socialSection .sectionHeading h2 {
     font-size: 43px;
     line-height: normal;
@@ -1443,6 +1457,10 @@
   .aboutPage .socialSection .sectionHeading > span {
     font-size: 21px;
     line-height: 28.35px;
+  }
+
+  .aboutPage .companySection .sectionHeading > span {
+    margin-top: 21px;
   }
 
   .aboutPage .values .sectionHeading > span {

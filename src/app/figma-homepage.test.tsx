@@ -116,5 +116,17 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(stylesheet).toMatch(
       /@media \(max-width: 767px\)[\s\S]*\n  \.certification\s*\{[^}]*display: inline-flex;/s,
     );
+    expect(stylesheet).toMatch(
+      /@media \(max-width: 767px\)[\s\S]*\.trustSection\s*\{[^}]*padding-bottom: 54px;/s,
+    );
+    expect(stylesheet).toMatch(
+      /\.trustSection \.splitIntro\s*\{[^}]*gap: 42px;/s,
+    );
+    expect(stylesheet).toMatch(
+      /\.trustSection \.sectionHeading > span\s*\{[^}]*margin-top: 14px;[^}]*line-height: 20px;/s,
+    );
+    expect(stylesheet).toMatch(/\.certificateImages\s*\{[^}]*gap: 14px;/s);
+    expect(stylesheet).toMatch(/\.certificateImages > div\s*\{[^}]*height: 136px;/s);
+    expect(stylesheet).toMatch(/\.trustSection > \.moreLink\s*\{[^}]*margin-top: 44px;/s);
   });
 });

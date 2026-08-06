@@ -2311,13 +2311,21 @@
 
   .trustSection {
     padding-top: 65px;
-    padding-bottom: 72px;
+    padding-bottom: 54px;
   }
 
   .trustSection .sectionHeading,
   .servicePreview .sectionHeading,
   .homeClientSection .sectionHeading {
     margin-bottom: 38px;
+  }
+
+  .trustSection .splitIntro {
+    gap: 42px;
+  }
+
+  .trustSection .splitIntro .sectionHeading {
+    margin-bottom: 0;
   }
 
   .trustSection .sectionHeading > p,
@@ -2341,12 +2349,21 @@
     line-height: 1.45;
   }
 
+  .trustSection .sectionHeading > span {
+    margin-top: 14px;
+    line-height: 20px;
+  }
+
   .certificateImages {
-    gap: 8px;
+    gap: 14px;
   }
 
   .certificateImages > div {
-    height: 118px;
+    height: 136px;
+  }
+
+  .trustSection > .moreLink {
+    margin-top: 44px;
   }
 
   .servicePreview {

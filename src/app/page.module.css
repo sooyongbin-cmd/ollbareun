@@ -2320,7 +2320,7 @@
   .aboutHero,
   .serviceHero,
   .clientHero {
-    min-height: 381px;
+    min-height: 348px;
   }
 
   .aboutHero > div:last-child,
@@ -2524,12 +2524,17 @@
   }
 
   .aboutPage .companySection {
-    padding-top: 30px;
-    padding-bottom: 78px;
+    padding-top: 64.18px;
+    padding-bottom: 61.18px;
   }
 
   .aboutPage .companySection .sectionHeading {
     margin-bottom: 42px;
+  }
+
+  .aboutPage .companySection .sectionHeading > p {
+    margin-bottom: 13.55px;
+    line-height: 19px;
   }
 
   .aboutPage .companySection .sectionHeading > p,
@@ -2541,38 +2546,83 @@
   .aboutPage .companySection .sectionHeading h2,
   .aboutPage .socialSection .sectionHeading h2 {
     font-size: 27px;
-    line-height: 1.25;
+    line-height: 32px;
   }
 
-  .aboutPage .companySection .sectionHeading > span,
-  .aboutPage .socialSection .sectionHeading > span {
+  .aboutPage .companySection .sectionHeading h2 {
+    width: 206px;
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .aboutPage .companySection .sectionHeading > span {
+    width: 241px;
+    margin: 23.51px auto 0;
     font-size: 14px;
-    line-height: 1.45;
+    line-height: 23px;
   }
 
   .stats {
-    margin-bottom: 48px;
+    margin-bottom: 77.76px;
   }
 
   .stats > div {
-    min-height: 108px;
+    min-height: 117px;
+    justify-content: flex-start;
+  }
+
+  .stats > div > img {
+    flex: 0 0 auto;
+    max-width: none;
+    margin-bottom: 0;
+  }
+
+  .stats > div:nth-child(1) > img {
+    width: 19.81px;
+    height: 22.38px;
+    margin-top: 5.76px;
+    margin-bottom: 7.62px;
+  }
+
+  .stats > div:nth-child(2) > img {
+    width: 33.97px;
+    height: 17.26px;
+    margin-top: 9.68px;
+    margin-bottom: 8.82px;
+  }
+
+  .stats > div:nth-child(3) > img {
+    width: 23.09px;
+    height: 20.69px;
+    margin-top: 32.76px;
+    margin-bottom: 8.31px;
+  }
+
+  .stats > div:nth-child(4) > img {
+    width: 21.25px;
+    height: 21.26px;
+    margin-top: 32.76px;
+    margin-bottom: 7.74px;
   }
 
   .stats strong {
-    font-size: 29px;
+    font-size: 28.53px;
+    font-weight: 900;
+    line-height: 34px;
   }
 
   .stats span {
-    margin-top: 4px;
+    margin-top: 8px;
     font-size: 11px;
+    line-height: 13px;
   }
 
   .historyWrap {
-    gap: 48px;
+    gap: 34.2px;
   }
 
   .historyImage {
-    min-height: 289px;
+    min-height: 283px;
     border-radius: 40px 0 40px 0;
   }
 
@@ -2591,61 +2641,113 @@
   }
 
   .timeline {
-    --timeline-date-column: 98px;
+    --timeline-date-column: 127px;
     --timeline-marker-column: 26px;
+    height: 278.5px;
   }
 
   .timeline li {
-    min-height: 56px;
+    position: relative;
+    display: block;
+    height: 55.7px;
+    min-height: 55.7px;
   }
 
   .timeline time {
+    position: absolute;
+    top: 12.63px;
+    left: 43.32px;
+    width: 83px;
     font-size: 21px;
+    line-height: 25px;
+    text-align: right;
   }
 
   .timeline p {
-    margin-left: 10px;
+    position: absolute;
+    top: 8.64px;
+    left: 197.75px;
+    width: 102.25px;
+    margin: 0;
     font-size: 12px;
-    line-height: 1.45;
+    line-height: 19px;
   }
 
   .values {
-    padding-top: 65px;
-    padding-bottom: 60px;
+    padding-top: 64.63px;
+    padding-bottom: 69.42px;
+  }
+
+  .aboutPage .values .sectionHeading {
+    margin-bottom: 32.93px;
+  }
+
+  .aboutPage .values .sectionHeading > p {
+    margin-bottom: 9.55px;
+    font-size: 16.61px;
+    line-height: 20px;
   }
 
   .aboutPage .values .sectionHeading h2 {
-    font-size: 28px;
+    font-size: 28.06px;
+    line-height: 33px;
   }
 
   .aboutPage .values .sectionHeading > span {
+    width: 265px;
+    margin: 16.17px auto 0;
     font-size: 14px;
-    line-height: 1.45;
+    line-height: 23px;
   }
 
   .valueGrid article {
-    min-height: 150px;
+    min-height: 147.78px;
     padding: 12px;
   }
 
   .valueGrid strong {
     font-size: 47px;
+    line-height: 56px;
   }
 
   .valueGrid span {
     margin-top: 4px;
-    font-size: 14px;
+    font-size: 12px;
+    line-height: 17px;
   }
 
   .valueGrid p {
     margin-top: 8px;
     font-size: 9.5px;
-    line-height: 1.35;
+    line-height: 11px;
   }
 
   .socialSection {
-    padding-top: 72px;
-    padding-bottom: 72px;
+    width: 100%;
+    margin: 0;
+    padding: 64.81px 0 59.65px;
+  }
+
+  .aboutPage .socialSection .sectionHeading {
+    margin-bottom: 39.08px;
+  }
+
+  .aboutPage .socialSection .sectionHeading > p {
+    display: none;
+  }
+
+  .aboutPage .socialSection .sectionHeading h2 {
+    width: 288px;
+    margin-right: auto;
+    margin-left: auto;
+    line-height: 32px;
+  }
+
+  .aboutPage .socialSection .sectionHeading > span {
+    width: 315px;
+    margin: 21.5px auto 0;
+    font-size: 14px;
+    line-height: 23px;
   }
 
   .socialGrid article,
@@ -2654,28 +2756,108 @@
   }
 
   .socialGrid article {
-    display: grid;
-    min-height: 144px;
-    padding: 20px;
-    grid-template-columns: 42px 1fr;
-    column-gap: 18px;
-    align-content: center;
+    display: block;
+    min-height: 190px;
+    padding: 24.9px 30.62px;
   }
 
   .socialGrid article > img {
-    grid-row: 1 / span 2;
+    display: block;
+    width: 42px;
+    height: 42px;
+    margin: 0;
   }
 
   .socialGrid h3 {
-    margin: 0;
-    align-self: end;
+    margin: 21.5px 0 0;
     font-size: 16px;
+    line-height: 19px;
   }
 
   .socialGrid p {
-    margin-top: 8px;
+    margin-top: 15px;
     font-size: 12px;
-    line-height: 1.55;
+    line-height: 19px;
+  }
+
+  .socialGrid {
+    width: 302.53px;
+    margin-right: auto;
+    margin-left: auto;
+    gap: 20.45px;
+  }
+
+  .aboutPage .contactSection {
+    row-gap: 38.28px;
+  }
+
+  .aboutPage .contactSection .map {
+    min-height: 289.32px;
+  }
+
+  .aboutPage .contactSection .contactCopy h2 {
+    width: 278px;
+    font-size: 27px;
+    letter-spacing: -0.81px;
+    line-height: 32px;
+  }
+
+  .aboutPage .contactSection .contactCopy address {
+    width: 320px;
+    margin-top: 4.07px;
+    gap: 7.75px;
+    font-size: 13px;
+    line-height: 20px;
+  }
+
+  .aboutPage .contactSection .contactCopy address > span,
+  .aboutPage .contactSection .contactCopy address > a {
+    display: grid;
+    grid-template-columns: 15px 78px minmax(0, 1fr);
+    column-gap: 12px;
+    align-items: start;
+  }
+
+  .aboutPage .contactSection .contactCopy address > span {
+    margin-bottom: -1.08px;
+  }
+
+  .aboutPage .contactSection .contactCopy address strong {
+    min-width: 0;
+    font-size: 13.97px;
+    line-height: 17px;
+  }
+
+  .aboutPage .contactSection .contactCopy address .contactValue {
+    margin-left: 0;
+    font-size: 13px;
+    line-height: 20px;
+  }
+
+  .aboutPage .contactSection .contactCopy address img {
+    display: block;
+    margin-top: 3px;
+    object-fit: contain;
+  }
+
+  .aboutPage .contactSection .contactCopy address > span img {
+    width: 10px;
+    height: 15px;
+  }
+
+  .aboutPage .contactSection .contactCopy address > a:nth-of-type(1) img,
+  .aboutPage .contactSection .contactCopy address > a:nth-of-type(2) img {
+    width: 12px;
+    height: 15px;
+  }
+
+  .aboutPage .contactSection .contactCopy address > a:nth-of-type(1) img {
+    height: 16px;
+  }
+
+  .aboutPage .contactSection .contactCopy address > a:nth-of-type(3) img {
+    width: 13px;
+    height: 9px;
   }
 
   .servicesPage .operationSection {

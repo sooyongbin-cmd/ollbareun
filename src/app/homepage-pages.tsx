@@ -488,7 +488,9 @@ export function AboutPage() {
           eyebrow="SINCE 2018"
           title={
             <>
-              <strong>사람</strong>을 향한 <strong>동행</strong>, 함께 크는{" "}
+              <strong>사람</strong>을 향한 <strong>동행</strong>,{" "}
+              <br className={styles.mobileOnlyBreak} />
+              함께 크는{" "}
               <strong>지역 사회</strong>
             </>
           }
@@ -496,7 +498,9 @@ export function AboutPage() {
             <>
               지역사회와 함께 성장하는 사회적기업으로서
               <br />
-              근로자 파견, 시설물 관리, 방역·소독까지 현장의 기준을 바로 세웁니다.
+              근로자 파견, 시설물 관리, 방역·소독까지{" "}
+              <br className={styles.mobileOnlyBreak} />
+              현장의 기준을 바로 세웁니다.
             </>
           }
         />
@@ -525,7 +529,9 @@ export function AboutPage() {
           title={<strong>B.E.S.T</strong>}
           description={
             <>
-              고객감동, 수익 창출, 사회환원, 인재 양성으로 지속 가능한 성장을 이루어내는{" "}
+              고객감동, 수익 창출, 사회환원, 인재 양성으로{" "}
+              <br className={styles.mobileOnlyBreak} />
+              지속 가능한 성장을 이루어내는{" "}
               <strong>4가지 핵심 가치</strong>
             </>
           }
@@ -543,16 +549,28 @@ export function AboutPage() {
           title={
             <>
               <strong>이윤</strong>과 <strong>공익</strong>이 <strong>같은 방향</strong>으로
+              <br className={styles.mobileOnlyBreak} />
               흐르게 합니다.
             </>
           }
           description={
             <>
-              올바름은 취약계층에게 안정된 일자리를 제공하고,
-              <br />
-              균등한 교육기회와 복리후생을 통해 직무에 전념할 수 있는 환경을 만듭니다.
-              <br />
-              지역사회 재투자와 사회서비스 확충을 기업 운영의 중요한 기준으로 둡니다.
+              <span className={styles.desktopOnlyCopy}>
+                올바름은 취약계층에게 안정된 일자리를 제공하고,
+                <br />
+                균등한 교육기회와 복리후생을 통해 직무에 전념할 수 있는 환경을 만듭니다.
+                <br />
+                지역사회 재투자와 사회서비스 확충을 기업 운영의 중요한 기준으로 둡니다.
+              </span>
+              <span className={styles.mobileOnlyCopy}>
+                올바름은 취약계층에게 안정된 일자리를 제공하고,
+                <br />
+                균등한 교육기회와 복리후생을 통해 직무에 전념할 수 있는
+                <br />
+                환경을 만듭니다. 지역사회 재투자와 사회서비스 확충을
+                <br />
+                기업 운영의 중요한 기준으로 둡니다.
+              </span>
             </>
           }
         />

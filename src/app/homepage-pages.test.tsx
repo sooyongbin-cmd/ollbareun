@@ -83,11 +83,15 @@ describe("homepage back to top button", () => {
 
 describe("public homepage pages", () => {
   it("renders the Figma company content", () => {
-    render(<AboutPage />);
+    const { container } = render(<AboutPage />);
 
     expect(screen.getByText("2018", { selector: "strong" })).toBeInTheDocument();
     expect(screen.getByText("10.3억")).toBeInTheDocument();
     expect(screen.getByText("B.E.S.T")).toBeInTheDocument();
+    expect(container.querySelectorAll('[class*="timeline"] > li')).toHaveLength(5);
+    expect(container.querySelectorAll('[class*="socialGrid"] > article')).toHaveLength(4);
+    expect(container.querySelectorAll('[class*="contactCopy"] address > span, [class*="contactCopy"] address > a')).toHaveLength(4);
+    expect(container.querySelector('[class*="socialSection"] [class*="mobileOnlyCopy"]')).toBeInTheDocument();
   });
 
   it("uses the supplied archive icons for every contact detail", () => {

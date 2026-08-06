@@ -134,5 +134,14 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(stylesheet).toMatch(/\.moreViewIcon,[\s\S]*\.moreViewIcon img\s*\{[^}]*width: 18\.9px;[^}]*height: 18\.9px;/s);
     expect(stylesheet).toMatch(/\.footerGrid\s*\{[^}]*width: 224\.4px;[^}]*grid-template-columns: 121px 58px;[^}]*gap: 27px 45\.4px;/s);
     expect(stylesheet).toMatch(/\.footerBottom\s*\{[^}]*width: 320px;[^}]*padding-top: 9px;/s);
+    expect(stylesheet).toMatch(/@media \(max-width: 767px\)[\s\S]*\.aboutHero,\s*\.serviceHero,\s*\.clientHero\s*\{[^}]*min-height: 348px;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.companySection\s*\{[^}]*padding-top: 64\.18px;[^}]*padding-bottom: 61\.18px;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.companySection \.sectionHeading > span\s*\{[^}]*width: 241px;[^}]*line-height: 23px;/s);
+    expect(stylesheet).toMatch(/\.stats > div:nth-child\(1\) > img\s*\{[^}]*width: 19\.81px;[^}]*height: 22\.38px;/s);
+    expect(stylesheet).toMatch(/\.timeline li\s*\{[^}]*height: 55\.7px;[^}]*min-height: 55\.7px;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.values \.sectionHeading > span\s*\{[^}]*width: 265px;[^}]*line-height: 23px;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.socialSection\s*\.sectionHeading > span\s*\{[^}]*width: 315px;[^}]*line-height: 23px;/s);
+    expect(stylesheet).toMatch(/\.socialGrid article\s*\{[^}]*display: block;[^}]*min-height: 190px;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.contactSection \.contactCopy address > span,[\s\S]*grid-template-columns: 15px 78px minmax\(0, 1fr\);/s);
   });
 });

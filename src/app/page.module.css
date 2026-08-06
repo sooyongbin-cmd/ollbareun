@@ -1620,20 +1620,6 @@
   line-height: normal;
 }
 
-.footerGrid > .footerContactGroup {
-  flex-direction: row;
-  gap: 30px;
-}
-
-.footerContactGroup > div {
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: normal;
-}
-
 .footerGrid strong {
   margin-bottom: 6px;
   font-size: 14px;
@@ -3251,20 +3237,10 @@
     gap: 27px 45.4px;
   }
 
-  .footerGrid > .footerContactGroup {
-    display: contents;
-  }
-
   .footerGrid > div,
   .footerConnection,
   .footerInquiry {
     min-width: 0;
-    gap: 0;
-    font-size: 12.5px;
-    line-height: 26px;
-  }
-
-  .footerContactGroup > div {
     gap: 0;
     font-size: 12.5px;
     line-height: 26px;

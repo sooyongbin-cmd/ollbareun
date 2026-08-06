@@ -198,18 +198,16 @@ function Footer() {
           <Link href="/clients#client-list">항공사</Link>
           <Link href="/clients#client-list">교육기관</Link>
         </div>
-        <div className={styles.footerContactGroup}>
-          <div className={styles.footerConnection}>
-            <strong>연결</strong>
-            <Link href="/manager">관리자</Link>
-            <Link href="/guard">근무자</Link>
-          </div>
-          <div className={styles.footerInquiry}>
-            <strong>문의</strong>
-            <a href="tel:0514657767">T.051-465-7767</a>
-            <a href="tel:0519617767">F.051-961-7767</a>
-            <a href="mailto:olbareum@naver.com">olbareum@naver.com</a>
-          </div>
+        <div className={styles.footerConnection}>
+          <strong>연결</strong>
+          <Link href="/manager">관리자</Link>
+          <Link href="/guard">근무자</Link>
+        </div>
+        <div className={styles.footerInquiry}>
+          <strong>문의</strong>
+          <a href="tel:0514657767">T.051-465-7767</a>
+          <a href="tel:0519617767">F.051-961-7767</a>
+          <a href="mailto:olbareum@naver.com">olbareum@naver.com</a>
         </div>
       </div>
       <div className={styles.footerBottom}>

@@ -7,31 +7,24 @@ import styles from "./page.module.css";
 import HomepageContactMap from "./homepage-contact-map";
 import HomepageHeader from "./homepage-header";
 
-const services = [
+type ServiceItem = {
+  title: string;
+  description: string;
+  mobileDescription?: ReactNode;
+  image: string;
+};
+
+const services: ServiceItem[] = [
   {
     title: "근로자 파견",
     description:
       "파견 사업주가 근로자를 고용한 후 사용 사업주의 지휘명령을 받아 근로에 종사하게 하는 전문 서비스. 파견기간 1년 기준, 합의 시 연장.",
-    mobileDescription: (
-      <>
-        파견 사업주가 근로자를 고용한 후 사용 사업주의 지휘명령을 받아 근로에{" "}
-        <br className={styles.mobileServiceBreak} />
-        종사하게 하는 전문 서비스. 파견기간 1년 기준, 합의 시 연장.
-      </>
-    ),
     image: "/homepage/service-worker.webp",
   },
   {
     title: "건물 시설물 종합 관리",
     description:
       "각종 설비(전기, 소방, 기계, 가스, 건축)의 철저한 점검을 통한 체계적인 운영관리. 위생관리, 시설보안, 주차관리 통합 제공.",
-    mobileDescription: (
-      <>
-        각종 설비(전기, 소방, 기계, 가스, 건축)의 철저한 점검을 통한 체계적인{" "}
-        <br className={styles.mobileServiceBreak} />
-        운영관리. 위생관리, 시설보안, 주차관리 통합 제공.
-      </>
-    ),
     image: "/homepage/service-facility.webp",
   },
   {
@@ -470,8 +463,14 @@ export function MainPage() {
               <div>
                 <h3>{title}</h3>
                 <p>
-                  <span className={styles.desktopOnlyCopy}>{description}</span>
-                  <span className={styles.mobileOnlyCopy}>{mobileDescription}</span>
+                  {mobileDescription ? (
+                    <>
+                      <span className={styles.desktopOnlyCopy}>{description}</span>
+                      <span className={styles.mobileOnlyCopy}>{mobileDescription}</span>
+                    </>
+                  ) : (
+                    description
+                  )}
                 </p>
               </div>
             </article>

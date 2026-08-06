@@ -47,7 +47,13 @@ describe("Figma homepage text updates", () => {
     const serviceSection = container.querySelector('[class*="servicePreview"]');
     const clientLogos = container.querySelector('[class*="homeClientLogos"]');
 
-    expect(serviceSection?.querySelectorAll('[class*="mobileServiceBreak"]')).toHaveLength(5);
+    expect(serviceSection?.querySelectorAll('[class*="mobileServiceBreak"]')).toHaveLength(3);
+    const serviceCards = serviceSection?.querySelectorAll('[class*="serviceCard"]') ?? [];
+    expect(serviceCards[0]?.querySelector('[class*="desktopOnlyCopy"]')).toBeNull();
+    expect(serviceCards[0]?.querySelector('[class*="mobileOnlyCopy"]')).toBeNull();
+    expect(serviceCards[1]?.querySelector('[class*="desktopOnlyCopy"]')).toBeNull();
+    expect(serviceCards[1]?.querySelector('[class*="mobileOnlyCopy"]')).toBeNull();
+    expect(serviceCards[2]?.querySelector('[class*="mobileOnlyCopy"]')).not.toBeNull();
     expect(Array.from(clientLogos?.querySelectorAll("img") ?? []).map((image) => image.alt)).toEqual([
       "대한항공",
       "에어부산",

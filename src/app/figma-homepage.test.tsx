@@ -174,5 +174,6 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(stylesheet).toMatch(/\.servicesPage \.teamImage img\s*\{[^}]*object-position: 61\.43% center;/s);
     expect(stylesheet).toMatch(/\.servicesPage \.operationLayout\s*\{[^}]*gap: 27\.6px;/s);
     expect(stylesheet).toMatch(/\.servicesPage \.dispatchSection \.detailBanner img\s*\{[^}]*object-fit: fill;/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.serviceHero h1,\s*\.clientsPage \.clientHero h1\s*\{[^}]*line-height: 34px;/s);
   });
 });

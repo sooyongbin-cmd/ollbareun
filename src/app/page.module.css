@@ -2352,6 +2352,11 @@
     line-height: 34px;
   }
 
+  .servicesPage .serviceHero h1,
+  .clientsPage .clientHero h1 {
+    line-height: 34px;
+  }
+
   .sectionHeading {
     margin-bottom: 38px;
   }

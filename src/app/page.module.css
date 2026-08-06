@@ -3107,7 +3107,7 @@
 
   .servicesPage .dispatchSection .detailBanner img {
     object-fit: fill;
-    transform: scale(1.08);
+    transform: translateX(65.47px) scale(2.6);
     transform-origin: center;
   }
 

@@ -113,4 +113,19 @@ describe("homepage Figma typography", () => {
     expect(stylesheet).toMatch(/\.clientsPage \.sectionHeading > span\s*\{[^}]*font-size: 21px;[^}]*line-height: 28\.35px;/s);
     expect(stylesheet).toMatch(/\.clientsPage \.clientGroups > div > h3\s*\{[^}]*font-size: 17px;[^}]*line-height: normal;/s);
   });
+
+  it("matches the Figma clients mobile heading geometry and tracking", () => {
+    expect(stylesheet).toMatch(
+      /\.clientsPage \.clientsSection\s*\{\s*padding-top: 64\.18px;/s,
+    );
+    expect(stylesheet).toMatch(
+      /\.clientsPage \.clientsSection \.sectionHeading > p\s*\{[^}]*margin-bottom: 13\.55px;[^}]*line-height: 19px;/s,
+    );
+    expect(stylesheet).toMatch(
+      /\.clientsPage \.clientsSection \.sectionHeading > span\s*\{[^}]*width: 303px;[^}]*letter-spacing: -0\.42px;[^}]*line-height: 23px;/s,
+    );
+    expect(stylesheet).toMatch(
+      /\.clientGroups > div > h3\s*\{[^}]*padding: 4px 12px;[^}]*line-height: 17px;/s,
+    );
+  });
 });

@@ -3128,14 +3128,43 @@
     padding-bottom: 78px;
   }
 
+  /* Clients mobile design: values taken from Figma mobile_design4 (360px). */
+  .clientsPage .clientsSection {
+    padding-top: 64.18px;
+  }
+
+  .clientsPage .clientsSection .sectionHeading {
+    margin-bottom: 24px;
+  }
+
+  .clientsPage .clientsSection .sectionHeading > p {
+    margin-bottom: 13.55px;
+    line-height: 19px;
+  }
+
+  .clientsPage .clientsSection .sectionHeading h2 {
+    line-height: 32px;
+    letter-spacing: -0.81px;
+  }
+
+  .clientsPage .clientsSection .sectionHeading > span {
+    width: 303px;
+    max-width: 100%;
+    margin: 22.8px auto 0;
+    letter-spacing: -0.42px;
+    line-height: 23px;
+    white-space: normal;
+  }
+
   .clientGroups {
     gap: 46px;
   }
 
   .clientGroups > div > h3 {
     margin-bottom: 20px;
-    padding: 7px 12px;
+    padding: 4px 12px;
     font-size: 12px;
+    line-height: 17px;
   }
 
   .logoGrid {

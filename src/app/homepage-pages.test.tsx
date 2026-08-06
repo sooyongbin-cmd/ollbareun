@@ -148,10 +148,11 @@ describe("public homepage pages", () => {
   });
 
   it("renders all client categories", () => {
-    render(<ClientsPage />);
+    const { container } = render(<ClientsPage />);
 
     expect(screen.getByRole("heading", { name: "공공기관" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "교육기관" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "항공사" })).toBeInTheDocument();
+    expect(container.querySelector('#client-list h2 + span br')).toBeInTheDocument();
   });
 });

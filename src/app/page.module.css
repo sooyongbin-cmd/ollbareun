@@ -1710,6 +1710,11 @@
 }
 
 @media (max-width: 767px) {
+  .mapCanvas img[src*="map-pin.svg"] {
+    transform: scale(0.5);
+    transform-origin: 50% 100%;
+  }
+
   .headerInner {
     width: min(100% - 32px, 1280px);
     height: 70px;
@@ -3180,14 +3185,6 @@
 
   .servicesPage .facilityManagementSection {
     padding-bottom: 68.2px;
-  }
-
-  .servicesPage .airportCard {
-    width: 311.08px;
-    max-width: 100%;
-    margin-right: 0;
-    margin-left: auto;
-    margin-top: 0;
   }
 
   .clientsPage .clientsSection {

@@ -2059,6 +2059,19 @@
     width: 120px;
   }
 
+  .certification {
+    display: inline-flex;
+    min-width: 0;
+    height: 18px;
+    margin-left: 8px;
+    overflow: hidden;
+    align-items: center;
+    font-size: 8px;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
   .mobileHeaderOpen {
     background: #fff;
     color: #231815;

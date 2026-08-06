@@ -108,5 +108,8 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(stylesheet).toMatch(
       /@media \(max-width: 767px\)[\s\S]*\.logoGrid\s*\{[^}]*grid-template-columns: repeat\(2, 1fr\);/s,
     );
+    expect(stylesheet).toMatch(
+      /@media \(max-width: 767px\)[\s\S]*\n  \.certification\s*\{[^}]*display: inline-flex;/s,
+    );
   });
 });

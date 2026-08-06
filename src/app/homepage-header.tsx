@@ -163,7 +163,11 @@ export default function HomepageHeader() {
           aria-controls="homepage-mobile-menu"
           onClick={() => setMobileOpen((open) => !open)}
         >
-          {mobileOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
+          {mobileOpen ? (
+            <X aria-hidden="true" />
+          ) : (
+            <Menu aria-hidden="true" preserveAspectRatio="none" />
+          )}
         </button>
       </div>
 

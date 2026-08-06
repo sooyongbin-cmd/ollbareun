@@ -24,6 +24,28 @@ describe("homepage header", () => {
     );
   });
 
+  it("matches the Figma 360px closed mobile header geometry", () => {
+    const stylesheet = readFileSync("src/app/page.module.css", "utf8");
+
+    expect(stylesheet).toContain("width: 132.87px;");
+    expect(stylesheet).toContain("margin-left: -17.49px;");
+    expect(stylesheet).toContain("left: 109.63px;");
+    expect(stylesheet).toContain("font-size: 9.18px;");
+    expect(stylesheet).toContain("letter-spacing: -0.2754px;");
+    expect(stylesheet).toContain("width: 39.225px;");
+    expect(stylesheet).toContain("height: 23.42px;");
+    expect(stylesheet).toContain("margin-right: -13.36px;");
+  });
+
+  it("keeps the closed mobile menu icon horizontally stretchable", () => {
+    render(<HomepageHeader />);
+
+    expect(screen.getByRole("button", { name: "메뉴 열기" }).querySelector("svg")).toHaveAttribute(
+      "preserveAspectRatio",
+      "none",
+    );
+  });
+
   it("opens the desktop mega menu and exposes section links", () => {
     render(<HomepageHeader />);
 

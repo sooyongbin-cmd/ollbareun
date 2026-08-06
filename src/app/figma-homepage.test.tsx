@@ -114,7 +114,7 @@ describe("Figma homepage mobile responsive layout", () => {
       /@media \(max-width: 767px\)[\s\S]*\.logoGrid\s*\{[^}]*grid-template-columns: repeat\(2, 1fr\);/s,
     );
     expect(stylesheet).toMatch(
-      /@media \(max-width: 767px\)[\s\S]*\n  \.certification\s*\{[^}]*display: inline-flex;/s,
+      /@media \(max-width: 767px\)[\s\S]*\n  \.certification\s*\{[^}]*display: flex;/s,
     );
     expect(stylesheet).toMatch(
       /@media \(max-width: 767px\)[\s\S]*\.trustSection\s*\{[^}]*padding-bottom: 54px;/s,

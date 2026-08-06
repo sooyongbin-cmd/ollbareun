@@ -24,7 +24,7 @@ function expectHeadingText(expected: string) {
 
 describe("Figma homepage text updates", () => {
   it("matches the updated main-page copy and footer punctuation", () => {
-    render(<MainPage />);
+    const { container } = render(<MainPage />);
 
     expect(
       screen.getByRole("heading", { name: "인력, 시설, 위생을 따로 보지 않습니다." }),
@@ -35,6 +35,7 @@ describe("Figma homepage text updates", () => {
     expect(screen.queryByText("연결")).not.toBeInTheDocument();
     expect(screen.queryByText("관리자")).not.toBeInTheDocument();
     expect(screen.queryByText("근무자")).not.toBeInTheDocument();
+    expect(container.querySelectorAll('[class*="mobileOnlyBreak"]')).toHaveLength(2);
   });
 
   it("matches the updated about-page copy and contact labels", () => {
@@ -92,6 +93,10 @@ describe("Figma homepage desktop line heights", () => {
     expect(stylesheet).toMatch(/\.contactSection \.contactCopy h2\s*\{[^}]*line-height: 54px;/s);
     expect(stylesheet).toMatch(/\.stats\s*\{[^}]*max-width: 1280px;/s);
     expect(stylesheet).toMatch(/\.footerGrid\s*\{[^}]*grid-template-columns: repeat\(4, 1fr\);/s);
+    expect(stylesheet).toMatch(/\.mobileOnlyBreak\s*\{[^}]*display: none;/s);
+    expect(stylesheet).toMatch(
+      /@media \(max-width: 767px\)[\s\S]*\.mobileOnlyBreak\s*\{[^}]*display: block;/s,
+    );
   });
 });
 

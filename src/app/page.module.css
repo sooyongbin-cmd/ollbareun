@@ -306,6 +306,10 @@
   font-weight: 800;
 }
 
+.mobileOnlyBreak {
+  display: none;
+}
+
 .heroButton,
 .contactButton {
   display: inline-flex;
@@ -2256,6 +2260,10 @@
     font-size: 33.18px;
     line-height: 1.2;
     white-space: normal;
+  }
+
+  .mobileOnlyBreak {
+    display: block;
   }
 
   .aboutHero,

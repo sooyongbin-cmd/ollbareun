@@ -44,7 +44,7 @@ describe("homepage header", () => {
       /\.mobileMenuTitle\s*\{[^}]*position: relative;[^}]*display: block;[^}]*line-height: normal;/s,
     );
     expect(stylesheet).toMatch(
-      /\.mobileMenuTitle > span:first-child\s*\{[^}]*top: 2px;[^}]*left: 7\.24%;[^}]*line-height: normal;/s,
+      /\.mobileMenuTitle > span:first-child\s*\{[^}]*top: 0px;[^}]*left: 7\.24%;[^}]*line-height: normal;/s,
     );
     expect(stylesheet).toMatch(
       /\.mobileMenuTitle > span:last-child\s*\{[^}]*top: 10\.5px;[^}]*left: 13\.36%;/s,

@@ -57,6 +57,13 @@ describe("homepage back to top button", () => {
     expect(clientLogos?.querySelectorAll("img")).toHaveLength(6);
     expect(clientLogos?.querySelectorAll("a")).toHaveLength(0);
   });
+
+  it("renders the three main services as separate content items", () => {
+    const { container } = render(<MainPage />);
+    const serviceGrid = container.querySelector('[class*="serviceGrid"]');
+
+    expect(serviceGrid?.querySelectorAll("article")).toHaveLength(3);
+  });
 });
 
 describe("public homepage pages", () => {

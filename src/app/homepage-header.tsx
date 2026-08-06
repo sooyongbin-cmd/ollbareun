@@ -39,12 +39,31 @@ const menuColumns = [
   },
 ];
 
-function HeaderBrand() {
+const mobileMenuItems = {
+  about: [
+    ["연혁", "/about#history"],
+    ["핵심가치", "/about#values"],
+    ["contact us", "/about#contact"],
+  ],
+  services: [
+    ["운영 체계", "/services#operation"],
+    ["근로자 파견", "/services#dispatch"],
+    ["건물·시설물 종합 관리", "/services#facility"],
+    ["방역·소독", "/services#disinfection"],
+  ],
+  clients: [
+    ["공공기관", "/clients#client-list"],
+    ["항공사", "/clients#client-list"],
+    ["교육기관", "/clients#client-list"],
+  ],
+} satisfies Record<MenuKey, readonly (readonly [string, string])[]>;
+
+function HeaderBrand({ mobileOpen = false }: { mobileOpen?: boolean }) {
   return (
     <span className={styles.brand}>
       <Image
         className={styles.brandLogo}
-        src="/homepage/archive/logo-white.svg"
+        src={mobileOpen ? "/homepage/archive/logo-color.svg" : "/homepage/archive/logo-white.svg"}
         alt="주식회사 올바름"
         width={223}
         height={92}
@@ -58,6 +77,7 @@ export default function HomepageHeader() {
   const pathname = usePathname();
   const [openMenu, setOpenMenu] = useState<MenuKey | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileOpenMenu, setMobileOpenMenu] = useState<MenuKey | null>(null);
   const activeMenu: MenuKey | null = pathname.startsWith("/about")
     ? "about"
     : pathname.startsWith("/services")
@@ -72,6 +92,7 @@ export default function HomepageHeader() {
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setMobileOpen(false);
+        setMobileOpenMenu(null);
       }
     };
 
@@ -79,9 +100,21 @@ export default function HomepageHeader() {
     return () => document.removeEventListener("keydown", closeOnEscape);
   }, [mobileOpen]);
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileOpen]);
+
   const closeMenus = () => {
     setOpenMenu(null);
     setMobileOpen(false);
+    setMobileOpenMenu(null);
   };
 
   const closeMenusAfterNavigation = () => {
@@ -90,7 +123,7 @@ export default function HomepageHeader() {
 
   return (
     <header
-      className={`${styles.header} ${openMenu || mobileOpen ? styles.headerMenuOpen : ""}`}
+      className={`${styles.header} ${openMenu ? styles.headerMenuOpen : ""} ${mobileOpen ? styles.mobileHeaderOpen : ""}`}
       onMouseLeave={() => setOpenMenu(null)}
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) {
@@ -100,7 +133,7 @@ export default function HomepageHeader() {
     >
       <div className={styles.headerInner}>
         <Link href="/" aria-label="올바름 홈페이지 처음으로" onClick={closeMenus}>
-          <HeaderBrand />
+          <HeaderBrand mobileOpen={mobileOpen} />
         </Link>
         <p className={styles.certification}>고용노동부 지정 사회적기업 / 여성기업</p>
 
@@ -172,29 +205,44 @@ export default function HomepageHeader() {
         inert={!mobileOpen}
       >
         <div className={styles.mobileMenuInner}>
-          {menuColumns.map((column) => (
-            <section key={column.key}>
-              <Link
-                className={styles.mobileMenuTitle}
-                href={column.href}
-                onClick={closeMenusAfterNavigation}
-              >
-                {column.label}
-              </Link>
-              <div>
-                {column.items.map(([label, href]) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    onClick={closeMenusAfterNavigation}
-                    tabIndex={mobileOpen ? 0 : -1}
-                  >
-                    {label}
-                  </Link>
-                ))}
-              </div>
-            </section>
-          ))}
+          {menuColumns.map((column) => {
+            const isExpanded = mobileOpenMenu === column.key;
+
+            return (
+              <section key={column.key}>
+                <button
+                  type="button"
+                  className={`${styles.mobileMenuTitle} ${isExpanded ? styles.mobileMenuTitleActive : ""}`}
+                  aria-expanded={isExpanded}
+                  aria-controls={`homepage-mobile-submenu-${column.key}`}
+                  onClick={() =>
+                    setMobileOpenMenu((current) =>
+                      current === column.key ? null : column.key,
+                    )
+                  }
+                >
+                  <span aria-hidden="true">{isExpanded ? "−" : "+"}</span>
+                  <span>{column.label}</span>
+                </button>
+                <div
+                  id={`homepage-mobile-submenu-${column.key}`}
+                  className={`${styles.mobileMenuSubmenu} ${isExpanded ? styles.mobileMenuSubmenuOpen : ""}`}
+                  inert={!isExpanded}
+                >
+                  {mobileMenuItems[column.key].map(([label, href]) => (
+                    <Link
+                      key={`${column.key}-${label}`}
+                      href={href}
+                      onClick={closeMenus}
+                      tabIndex={mobileOpen && isExpanded ? 0 : -1}
+                    >
+                      {label}
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            );
+          })}
         </div>
       </nav>
     </header>

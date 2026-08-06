@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 import HomepageHeader from "./homepage-header";
@@ -53,6 +53,64 @@ describe("homepage header", () => {
     );
     expect(screen.getByRole("navigation", { name: "모바일 주요 메뉴" })).not.toHaveAttribute(
       "inert",
+    );
+  });
+
+  it("uses accordion mobile menus and closes after a submenu navigation", () => {
+    const { container } = render(<HomepageHeader />);
+    const mobileNavigation = screen.getByRole("navigation", {
+      name: "모바일 주요 메뉴",
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "메뉴 열기" }));
+    expect(container.querySelector('img[src*="archive/logo-color.svg"]')).toBeInTheDocument();
+    expect(document.body.style.overflow).toBe("hidden");
+
+    const aboutButton = within(mobileNavigation).getByRole("button", {
+      name: "올바름 소개",
+    });
+    const servicesButton = within(mobileNavigation).getByRole("button", {
+      name: "서비스",
+    });
+    const clientsButton = within(mobileNavigation).getByRole("button", {
+      name: "고객사",
+    });
+
+    expect(aboutButton).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(aboutButton);
+    expect(aboutButton).toHaveAttribute("aria-expanded", "true");
+    expect(
+      within(mobileNavigation).getByRole("link", { name: "연혁" }),
+    ).toHaveAttribute("href", "/about#history");
+
+    fireEvent.click(servicesButton);
+    expect(aboutButton).toHaveAttribute("aria-expanded", "false");
+    expect(servicesButton).toHaveAttribute("aria-expanded", "true");
+
+    fireEvent.click(clientsButton);
+    expect(servicesButton).toHaveAttribute("aria-expanded", "false");
+    expect(clientsButton).toHaveAttribute("aria-expanded", "true");
+    expect(within(mobileNavigation).getByRole("link", { name: "공공기관" })).toHaveAttribute(
+      "href",
+      "/clients#client-list",
+    );
+    expect(within(mobileNavigation).getByRole("link", { name: "항공사" })).toBeInTheDocument();
+    expect(within(mobileNavigation).getByRole("link", { name: "교육기관" })).toBeInTheDocument();
+
+    fireEvent.click(within(mobileNavigation).getByRole("link", { name: "공공기관" }));
+    expect(screen.getByRole("button", { name: "메뉴 열기" })).toBeInTheDocument();
+    expect(document.body.style.overflow).toBe("");
+  });
+
+  it("closes the mobile navigation with Escape", () => {
+    render(<HomepageHeader />);
+
+    fireEvent.click(screen.getByRole("button", { name: "메뉴 열기" }));
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    expect(screen.getByRole("button", { name: "메뉴 열기" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
     );
   });
 });

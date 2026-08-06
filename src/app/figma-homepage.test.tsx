@@ -94,3 +94,19 @@ describe("Figma homepage desktop line heights", () => {
     expect(stylesheet).toMatch(/\.footerGrid\s*\{[^}]*grid-template-columns: repeat\(4, 1fr\);/s);
   });
 });
+
+describe("Figma homepage mobile responsive layout", () => {
+  it("uses the shared 768px breakpoint and mobile service/client layouts", () => {
+    expect(stylesheet).toContain("@media (min-width: 768px)");
+    expect(stylesheet).toContain("@media (max-width: 767px)");
+    expect(stylesheet).toMatch(
+      /@media \(max-width: 767px\)[\s\S]*\.serviceCard\s*\{[^}]*box-shadow: none;/s,
+    );
+    expect(stylesheet).toMatch(
+      /@media \(max-width: 767px\)[\s\S]*\.homeClientLogos\s*\{[^}]*grid-template-columns: repeat\(3, 1fr\);/s,
+    );
+    expect(stylesheet).toMatch(
+      /@media \(max-width: 767px\)[\s\S]*\.logoGrid\s*\{[^}]*grid-template-columns: repeat\(2, 1fr\);/s,
+    );
+  });
+});

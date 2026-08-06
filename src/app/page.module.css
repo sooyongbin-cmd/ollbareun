@@ -2554,8 +2554,8 @@
   }
 
   .homeClientLogos {
-    margin-top: -50px;
-    padding: 85.5px 0 5.9px;
+    margin-top: 40px;
+    padding: 7.5px 0 5.9px;
     grid-template-columns: repeat(2, 1fr);
   }
 

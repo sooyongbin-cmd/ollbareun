@@ -2961,6 +2961,168 @@
     margin-top: 34px;
   }
 
+  /* Services mobile design: values taken from Figma mobile_design3 (360px). */
+  .servicesPage .operationSection {
+    padding-top: 64.18px;
+    padding-bottom: 70px;
+  }
+
+  .servicesPage .operationSection .sectionHeading {
+    margin-bottom: 23.7px;
+  }
+
+  .servicesPage .operationSection .sectionHeading > p {
+    margin-bottom: 13.55px;
+    line-height: 19px;
+  }
+
+  .servicesPage .operationSection .sectionHeading h2 {
+    line-height: 32px;
+  }
+
+  .servicesPage .operationSection .sectionHeading > span {
+    width: 306px;
+    max-width: 100%;
+    margin: 22.8px auto 0;
+    font-weight: 500;
+    letter-spacing: -0.42px;
+    line-height: 23px;
+    white-space: normal;
+  }
+
+  .servicesPage .teamImage,
+  .servicesPage .detailBanner {
+    height: 150px;
+    aspect-ratio: auto;
+  }
+
+  .servicesPage .operationLayout {
+    margin-top: 54px;
+    gap: 33px;
+  }
+
+  .servicesPage .operationDiagram {
+    height: 314px;
+    object-fit: fill;
+  }
+
+  .servicesPage .operationLayout > h3 {
+    margin-top: 0;
+    font-size: 24px;
+    font-weight: 500;
+    letter-spacing: -0.72px;
+    line-height: 29px;
+    text-align: center;
+  }
+
+  .servicesPage .detailSection,
+  .servicesPage .facilitySection {
+    padding-top: 64.18px;
+  }
+
+  .servicesPage .detailSection .sectionHeading,
+  .servicesPage .facilitySection .sectionHeading {
+    margin-bottom: 28.5px;
+  }
+
+  .servicesPage .detailSection .sectionHeading > span,
+  .servicesPage .facilitySection .sectionHeading > span {
+    font-weight: 500;
+    letter-spacing: -0.42px;
+    line-height: 23px;
+  }
+
+  .servicesPage .detailMessage {
+    margin: 34px 0 32px;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: -0.48px;
+  }
+
+  .servicesPage .dispatchSection .detailMessage {
+    font-weight: 500;
+    line-height: 23px;
+  }
+
+  .servicesPage .dispatchSection {
+    padding-bottom: 75.39px;
+  }
+
+  .servicesPage .facilityManagementSection .detailMessage,
+  .servicesPage .disinfectionSection .detailMessage {
+    font-weight: 700;
+  }
+
+  .servicesPage .facilityManagementSection .detailMessage {
+    margin-bottom: 42px;
+  }
+
+  .servicesPage .facilityGrid {
+    width: 302.53px;
+    max-width: 100%;
+    gap: 20.85px;
+  }
+
+  .servicesPage .facilityGrid article {
+    display: block;
+    min-height: 190px;
+    height: 190px;
+    padding: 26.8px 28.5px 28px 30.6px;
+    border: 1px solid #d1d1d1;
+    border-radius: 12px;
+    background: #fff;
+  }
+
+  .servicesPage .facilityGrid article > img {
+    display: block;
+    width: 42px;
+    height: 42px;
+    margin: 0;
+    object-fit: contain;
+  }
+
+  .servicesPage .facilityGrid h3 {
+    margin: 19.6px 0 15px;
+    color: #005da7;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.48px;
+    line-height: 19px;
+  }
+
+  .servicesPage .facilityGrid p {
+    margin: 0;
+    color: #040000;
+    font-size: 12px;
+    font-weight: 300;
+    letter-spacing: -0.36px;
+    line-height: 20px;
+  }
+
+  .servicesPage .disinfectionSection .detailMessage {
+    margin-bottom: 43px;
+  }
+
+  .servicesPage .disinfectionSection .sectionHeading {
+    margin-bottom: 29.64px;
+  }
+
+  .servicesPage .disinfectionSection {
+    padding-bottom: 71.94px;
+  }
+
+  .servicesPage .facilityManagementSection {
+    padding-bottom: 68.2px;
+  }
+
+  .servicesPage .airportCard {
+    width: 311.08px;
+    max-width: 100%;
+    margin-right: 0;
+    margin-left: auto;
+    margin-top: 0;
+  }
+
   .clientsPage .clientsSection {
     padding-top: 30px;
     padding-bottom: 78px;

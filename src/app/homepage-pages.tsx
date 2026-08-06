@@ -638,7 +638,7 @@ export function ServicesPage() {
         </div>
       </section>
 
-      <section id="dispatch" className={`${styles.section} ${styles.detailSection}`}>
+      <section id="dispatch" className={`${styles.section} ${styles.detailSection} ${styles.dispatchSection}`}>
         <SectionHeading
           eyebrow="Worker Dispatch"
           title={<b>근로자 파견</b>}
@@ -663,7 +663,7 @@ export function ServicesPage() {
         </div>
       </section>
 
-      <section id="facility" className={`${styles.section} ${styles.facilitySection}`}>
+      <section id="facility" className={`${styles.section} ${styles.facilitySection} ${styles.facilityManagementSection}`}>
         <SectionHeading
           eyebrow="Facility Management"
           title={<b>건물·시설물 종합 관리</b>}
@@ -684,7 +684,7 @@ export function ServicesPage() {
         </div>
       </section>
 
-      <section id="disinfection" className={`${styles.section} ${styles.detailSection}`}>
+      <section id="disinfection" className={`${styles.section} ${styles.detailSection} ${styles.disinfectionSection}`}>
         <SectionHeading
           eyebrow="Certified Disinfection"
           title={<b>방역·소독</b>}
@@ -697,7 +697,7 @@ export function ServicesPage() {
           }
         />
         <div className={styles.detailBanner}><Image src="/homepage/archive/disinfection.jpg" alt="항공기 객실에서 방역 작업을 진행하는 전문 인력" fill sizes="(max-width: 760px) 100vw, 1200px" /></div>
-        <h3 className={styles.detailMessage}>현장 조건에 맞춘 법정·살충·살균 소독으로<br />대형 건축물과 항공기 검역 현장의 예방 체계를 지원합니다.</h3>
+        <h3 className={styles.detailMessage}>현장 조건에 맞춘 법정·살충·살균 소독으로<br />대형 건축물과 항공기 검역 현장의 예방 체계를{" "}<br className={styles.mobileOnlyBreak} />지원합니다.</h3>
         <div className={styles.airportCard}>
           <Image
             src="/homepage/airport-card-figma.png"

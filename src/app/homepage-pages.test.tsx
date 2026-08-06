@@ -138,6 +138,15 @@ describe("public homepage pages", () => {
     expect(container.querySelectorAll('[class*="facilityGrid"] svg')).toHaveLength(0);
   });
 
+  it("keeps the services mobile sections and line-break-only content in place", () => {
+    const { container } = render(<ServicesPage />);
+
+    expect(container.querySelector('#dispatch[class*="dispatchSection"]')).toBeInTheDocument();
+    expect(container.querySelector('#facility[class*="facilityManagementSection"]')).toBeInTheDocument();
+    expect(container.querySelector('#disinfection[class*="disinfectionSection"]')).toBeInTheDocument();
+    expect(container.querySelector('#disinfection [class*="mobileOnlyBreak"]')).toBeInTheDocument();
+  });
+
   it("renders all client categories", () => {
     render(<ClientsPage />);
 

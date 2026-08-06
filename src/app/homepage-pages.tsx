@@ -566,7 +566,11 @@ export function AboutPage() {
         />
         <div className={styles.valueGrid}>
           {values.map(([letter, title, description]) => (
-            <article key={letter}><strong>{letter}</strong><span>{title}</span><p>{description}</p></article>
+            <article key={letter}>
+              <strong>{letter}</strong>
+              <span>{title}</span>
+              <p className={letter === "B" ? styles.benefitDescription : undefined}>{description}</p>
+            </article>
           ))}
         </div>
       </section>

@@ -2736,6 +2736,10 @@
     padding: 12px;
   }
 
+  .aboutPage .benefitDescription {
+    letter-spacing: -1px;
+  }
+
   .valueGrid strong {
     font-size: 47px;
     line-height: 56px;

@@ -165,6 +165,7 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(stylesheet).toMatch(/\.stats > div:nth-child\(1\) > img\s*\{[^}]*width: 19\.81px;[^}]*height: 22\.38px;/s);
     expect(stylesheet).toMatch(/\.timeline li\s*\{[^}]*height: 55\.7px;[^}]*min-height: 55\.7px;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.timeline::before\s*\{[^}]*left: calc\(50% - 13\.5px\);/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.benefitDescription\s*\{[^}]*letter-spacing: -1px;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.values \.sectionHeading > span\s*\{[^}]*width: 265px;[^}]*line-height: 23px;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.socialSection\s*\.sectionHeading > span\s*\{[^}]*width: 315px;[^}]*line-height: 23px;/s);
     expect(stylesheet).toMatch(/\.socialGrid article\s*\{[^}]*display: block;[^}]*min-height: 190px;/s);

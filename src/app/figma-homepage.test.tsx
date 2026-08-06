@@ -170,5 +170,9 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(stylesheet).toMatch(/\.aboutPage \.socialSection\s*\.sectionHeading > span\s*\{[^}]*width: 315px;[^}]*line-height: 23px;/s);
     expect(stylesheet).toMatch(/\.socialGrid article\s*\{[^}]*display: block;[^}]*min-height: 190px;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.contactSection \.contactCopy address > span,[\s\S]*grid-template-columns: 15px 78px minmax\(0, 1fr\);/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.operationSection \.sectionHeading > span\s*\{[^}]*letter-spacing: -1px;/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.teamImage img\s*\{[^}]*object-position: 61\.43% center;/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.operationLayout\s*\{[^}]*gap: 27\.6px;/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.dispatchSection \.detailBanner img\s*\{[^}]*object-fit: fill;/s);
   });
 });

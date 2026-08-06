@@ -3020,7 +3020,7 @@
     max-width: 100%;
     margin: 22.8px auto 0;
     font-weight: 500;
-    letter-spacing: -0.42px;
+    letter-spacing: -1px;
     line-height: 23px;
     white-space: normal;
   }
@@ -3031,9 +3031,13 @@
     aspect-ratio: auto;
   }
 
+  .servicesPage .teamImage img {
+    object-position: 61.43% center;
+  }
+
   .servicesPage .operationLayout {
     margin-top: 54px;
-    gap: 33px;
+    gap: 27.6px;
   }
 
   .servicesPage .operationDiagram {
@@ -3077,6 +3081,10 @@
   .servicesPage .dispatchSection .detailMessage {
     font-weight: 500;
     line-height: 23px;
+  }
+
+  .servicesPage .dispatchSection .detailBanner img {
+    object-fit: fill;
   }
 
   .servicesPage .dispatchSection {

@@ -3090,6 +3090,8 @@
 
   .servicesPage .dispatchSection .detailBanner img {
     object-fit: fill;
+    transform: scale(1.08);
+    transform-origin: center;
   }
 
   .servicesPage .dispatchSection {

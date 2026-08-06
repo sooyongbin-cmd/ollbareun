@@ -308,6 +308,31 @@ html[data-manager-theme="dark"] {
 }
 
 @layer components {
+  /* Keep Korean text together by word while allowing emergency breaks for long URLs or tokens. */
+  :where(
+    .text-box,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    [data-slot="card-title"],
+    [data-slot="card-description"],
+    [data-slot="alert-title"],
+    [data-slot="alert-description"],
+    [data-slot="dialog-title"],
+    [data-slot="dialog-description"]
+  ) {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  .text-box {
+    min-width: 0;
+  }
+
   @media (width < 48rem) {
     [data-slot="table-container"][data-mobile-layout="cards"] {
       overflow: visible;

@@ -7,7 +7,14 @@ import styles from "./page.module.css";
 import HomepageContactMap from "./homepage-contact-map";
 import HomepageHeader from "./homepage-header";
 
-const services = [
+type ServiceItem = {
+  title: string;
+  description: string;
+  mobileDescription?: ReactNode;
+  image: string;
+};
+
+const services: ServiceItem[] = [
   {
     title: "근로자 파견",
     description:
@@ -24,6 +31,13 @@ const services = [
     title: "방역 · 알콜 소독",
     description:
       "법정 의무소독, 살충소독(ULV·연막), 살균소독. 현재 김해공항 내 전 항공기 검역 및 방역프로세스를 독자 수행 중.",
+    mobileDescription: (
+      <>
+        법정 의무소독, 살충소독(ULV·연막), 살균소독. 현재 김해공항 내{" "}
+        <br className={styles.mobileServiceBreak} />
+        전 항공기 검역 및 방역프로세스를 독자 수행 중.
+      </>
+    ),
     image: "/homepage/service-disinfection.webp",
   },
 ];
@@ -184,17 +198,28 @@ function Footer() {
           <Link href="/clients#client-list">항공사</Link>
           <Link href="/clients#client-list">교육기관</Link>
         </div>
-        <div>
-          <strong>문의</strong>
-          <a href="tel:0514657767">T.051-465-7767</a>
-          <a href="tel:0519617767">F.051-961-7767</a>
-          <a href="mailto:olbareum@naver.com">olbareum@naver.com</a>
+        <div className={styles.footerContactGroup}>
+          <div className={styles.footerConnection}>
+            <strong>연결</strong>
+            <Link href="/manager">관리자</Link>
+            <Link href="/guard">근무자</Link>
+          </div>
+          <div className={styles.footerInquiry}>
+            <strong>문의</strong>
+            <a href="tel:0514657767">T.051-465-7767</a>
+            <a href="tel:0519617767">F.051-961-7767</a>
+            <a href="mailto:olbareum@naver.com">olbareum@naver.com</a>
+          </div>
         </div>
       </div>
       <div className={styles.footerBottom}>
-        <p>
-          부산광역시 강서구 유통단지1로 41, 105동 217・218호・대표이사 윤지욱・
-          사업자등록번호213-87-01208
+        <p className={styles.footerAddress}>
+          <span className={styles.footerAddressLine}>
+            부산광역시 강서구 유통단지1로 41, 105동 217・218호
+          </span>
+          <span className={styles.footerAddressLine}>
+            대표이사 윤지욱・사업자등록번호213-87-01208
+          </span>
         </p>
         <p>Ⓒ2026 주식회사 올바름. All rights reserved.</p>
       </div>
@@ -291,10 +316,10 @@ function ContactSection() {
 function HomeClientPreview() {
   const previewLogos = [
     ["대한항공", "/homepage/client-logo-korean-air.png"],
-    ["부산경찰청", "/homepage/client-logo-police.png"],
-    ["동아대학교", "/homepage/client-logo-donga.png"],
     ["에어부산", "/homepage/client-logo-airbusan.png"],
+    ["부산경찰청", "/homepage/client-logo-police.png"],
     ["국민건강보험", "/homepage/client-logo-nhis.png"],
+    ["동아대학교", "/homepage/client-logo-donga.png"],
     ["경남공업고등학교", "/homepage/client-logo-technical-high.png"],
   ] as const;
 
@@ -304,14 +329,25 @@ function HomeClientPreview() {
         eyebrow="Client"
         title={
           <>
-            <b>성실함</b>과 <b>신뢰</b>로 단단하게 이어온 파트너
+            <b>성실함</b>과 <b>신뢰</b>로
+            <br className={styles.mobileOnlyBreak} />
+            단단하게 이어온 파트너
           </>
         }
         description={
           <>
-            철저한 관리와 맞춤형 서비스로 고객이 본업에만 집중할 수 있는
-            <br />
-            최적의 환경을 만들며 함께 성장하는 든든한 파트너가 되겠습니다.
+            <span className={styles.desktopOnlyCopy}>
+              철저한 관리와 맞춤형 서비스로 고객이 본업에만 집중할 수 있는
+              <br />
+              최적의 환경을 만들며 함께 성장하는 든든한 파트너가 되겠습니다.
+            </span>
+            <span className={styles.mobileOnlyCopy}>
+              철저한 관리와 맞춤형 서비스로 고객이 본업에만
+              <br />
+              집중할 수 있는 최적의 환경을 만들며 함께 성장하는
+              <br />
+              든든한 파트너가 되겠습니다.
+            </span>
           </>
         }
         align="left"
@@ -347,8 +383,10 @@ export function MainPage() {
         <div className={styles.heroOverlay} />
         <div className={styles.heroContent}>
           <h1 id="hero-title">
-            변함없는 <strong>진심</strong>으로
-            <br />더 <strong>올바른 길</strong>을 밝힙니다
+            변함없는
+            <br className={styles.mobileOnlyBreak} /> <strong>진심</strong>으로
+            <br />더 <strong>올바른 길</strong>을
+            <br className={styles.mobileOnlyBreak} /> 밝힙니다
           </h1>
         </div>
       </section>
@@ -400,12 +438,16 @@ export function MainPage() {
           eyebrow="Main Service"
           title={
             <>
-              <b>인력, 시설, 위생</b>을 따로 보지 않습니다.
+              <b>인력, 시설, 위생</b>을
+              <br className={styles.mobileServiceBreak} />
+              따로 보지 않습니다.
             </>
           }
           description={
             <>
-              현장의 성과는 채용, 배치, 안전, 청결, 보고 체계가 함께 움직일 때 만들어집니다.
+              현장의 성과는 채용, 배치, 안전, 청결, 보고 체계가
+              <br className={styles.mobileServiceBreak} />
+              함께 움직일 때 만들어집니다.
               <br />
               올바름은 세 영역을 하나의 운영 시스템으로 연결합니다.
             </>
@@ -413,14 +455,23 @@ export function MainPage() {
           align="left"
         />
         <div className={styles.serviceGrid}>
-          {services.map(({ title, description, image }) => (
+          {services.map(({ title, description, mobileDescription, image }) => (
             <article key={title} className={styles.serviceCard}>
               <div className={styles.serviceImage}>
                 <Image src={image} alt="" fill sizes="(max-width: 760px) 100vw, 33vw" />
               </div>
               <div>
                 <h3>{title}</h3>
-                <p>{description}</p>
+                <p>
+                  {mobileDescription ? (
+                    <>
+                      <span className={styles.desktopOnlyCopy}>{description}</span>
+                      <span className={styles.mobileOnlyCopy}>{mobileDescription}</span>
+                    </>
+                  ) : (
+                    description
+                  )}
+                </p>
               </div>
             </article>
           ))}
@@ -464,7 +515,9 @@ export function AboutPage() {
           eyebrow="SINCE 2018"
           title={
             <>
-              <strong>사람</strong>을 향한 <strong>동행</strong>, 함께 크는{" "}
+              <strong>사람</strong>을 향한 <strong>동행</strong>,{" "}
+              <br className={styles.mobileOnlyBreak} />
+              함께 크는{" "}
               <strong>지역 사회</strong>
             </>
           }
@@ -472,7 +525,9 @@ export function AboutPage() {
             <>
               지역사회와 함께 성장하는 사회적기업으로서
               <br />
-              근로자 파견, 시설물 관리, 방역·소독까지 현장의 기준을 바로 세웁니다.
+              근로자 파견, 시설물 관리, 방역·소독까지{" "}
+              <br className={styles.mobileOnlyBreak} />
+              현장의 기준을 바로 세웁니다.
             </>
           }
         />
@@ -501,14 +556,20 @@ export function AboutPage() {
           title={<strong>B.E.S.T</strong>}
           description={
             <>
-              고객감동, 수익 창출, 사회환원, 인재 양성으로 지속 가능한 성장을 이루어내는{" "}
+              고객감동, 수익 창출, 사회환원, 인재 양성으로{" "}
+              <br className={styles.mobileOnlyBreak} />
+              지속 가능한 성장을 이루어내는{" "}
               <strong>4가지 핵심 가치</strong>
             </>
           }
         />
         <div className={styles.valueGrid}>
           {values.map(([letter, title, description]) => (
-            <article key={letter}><strong>{letter}</strong><span>{title}</span><p>{description}</p></article>
+            <article key={letter}>
+              <strong>{letter}</strong>
+              <span>{title}</span>
+              <p className={letter === "B" ? styles.benefitDescription : undefined}>{description}</p>
+            </article>
           ))}
         </div>
       </section>
@@ -519,16 +580,28 @@ export function AboutPage() {
           title={
             <>
               <strong>이윤</strong>과 <strong>공익</strong>이 <strong>같은 방향</strong>으로
+              <br className={styles.mobileOnlyBreak} />
               흐르게 합니다.
             </>
           }
           description={
             <>
-              올바름은 취약계층에게 안정된 일자리를 제공하고,
-              <br />
-              균등한 교육기회와 복리후생을 통해 직무에 전념할 수 있는 환경을 만듭니다.
-              <br />
-              지역사회 재투자와 사회서비스 확충을 기업 운영의 중요한 기준으로 둡니다.
+              <span className={styles.desktopOnlyCopy}>
+                올바름은 취약계층에게 안정된 일자리를 제공하고,
+                <br />
+                균등한 교육기회와 복리후생을 통해 직무에 전념할 수 있는 환경을 만듭니다.
+                <br />
+                지역사회 재투자와 사회서비스 확충을 기업 운영의 중요한 기준으로 둡니다.
+              </span>
+              <span className={styles.mobileOnlyCopy}>
+                올바름은 취약계층에게 안정된 일자리를 제공하고,
+                <br />
+                균등한 교육기회와 복리후생을 통해 직무에 전념할 수 있는
+                <br />
+                환경을 만듭니다. 지역사회 재투자와 사회서비스 확충을
+                <br />
+                기업 운영의 중요한 기준으로 둡니다.
+              </span>
             </>
           }
         />
@@ -596,7 +669,7 @@ export function ServicesPage() {
         </div>
       </section>
 
-      <section id="dispatch" className={`${styles.section} ${styles.detailSection}`}>
+      <section id="dispatch" className={`${styles.section} ${styles.detailSection} ${styles.dispatchSection}`}>
         <SectionHeading
           eyebrow="Worker Dispatch"
           title={<b>근로자 파견</b>}
@@ -621,7 +694,7 @@ export function ServicesPage() {
         </div>
       </section>
 
-      <section id="facility" className={`${styles.section} ${styles.facilitySection}`}>
+      <section id="facility" className={`${styles.section} ${styles.facilitySection} ${styles.facilityManagementSection}`}>
         <SectionHeading
           eyebrow="Facility Management"
           title={<b>건물·시설물 종합 관리</b>}
@@ -642,7 +715,7 @@ export function ServicesPage() {
         </div>
       </section>
 
-      <section id="disinfection" className={`${styles.section} ${styles.detailSection}`}>
+      <section id="disinfection" className={`${styles.section} ${styles.detailSection} ${styles.disinfectionSection}`}>
         <SectionHeading
           eyebrow="Certified Disinfection"
           title={<b>방역·소독</b>}
@@ -655,7 +728,7 @@ export function ServicesPage() {
           }
         />
         <div className={styles.detailBanner}><Image src="/homepage/archive/disinfection.jpg" alt="항공기 객실에서 방역 작업을 진행하는 전문 인력" fill sizes="(max-width: 760px) 100vw, 1200px" /></div>
-        <h3 className={styles.detailMessage}>현장 조건에 맞춘 법정·살충·살균 소독으로<br />대형 건축물과 항공기 검역 현장의 예방 체계를 지원합니다.</h3>
+        <h3 className={styles.detailMessage}>현장 조건에 맞춘 법정·살충·살균 소독으로<br />대형 건축물과 항공기 검역 현장의 예방 체계를{" "}<br className={styles.mobileOnlyBreak} />지원합니다.</h3>
         <div className={styles.airportCard}>
           <Image
             src="/homepage/airport-card-figma.png"

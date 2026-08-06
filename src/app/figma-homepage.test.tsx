@@ -24,17 +24,44 @@ function expectHeadingText(expected: string) {
 
 describe("Figma homepage text updates", () => {
   it("matches the updated main-page copy and footer punctuation", () => {
-    render(<MainPage />);
+    const { container } = render(<MainPage />);
 
     expect(
-      screen.getByRole("heading", { name: "인력, 시설, 위생을 따로 보지 않습니다." }),
+      screen.getByRole("heading", { name: /인력, 시설, 위생을.*따로 보지 않습니다\./ }),
     ).toBeInTheDocument();
-    expect(screen.getByText("법정 의무소독, 살충소독(ULV·연막), 살균소독. 현재 김해공항 내 전 항공기 검역 및 방역프로세스를 독자 수행 중.")).toBeInTheDocument();
-    expect(screen.getByText(/217・218호・대표이사 윤지욱・/)).toBeInTheDocument();
+    expect(
+      screen.getAllByText(
+        "법정 의무소독, 살충소독(ULV·연막), 살균소독. 현재 김해공항 내 전 항공기 검역 및 방역프로세스를 독자 수행 중.",
+      ),
+    ).toHaveLength(2);
+    expect(screen.getByText(/217・218호/)).toBeInTheDocument();
     expect(screen.getByText("Ⓒ2026 주식회사 올바름. All rights reserved.")).toBeInTheDocument();
-    expect(screen.queryByText("연결")).not.toBeInTheDocument();
-    expect(screen.queryByText("관리자")).not.toBeInTheDocument();
-    expect(screen.queryByText("근무자")).not.toBeInTheDocument();
+    expect(screen.getByText("연결", { selector: "strong" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "관리자" })).toHaveAttribute("href", "/manager");
+    expect(screen.getByRole("link", { name: "근무자" })).toHaveAttribute("href", "/guard");
+    expect(container.querySelectorAll('[class*="mobileOnlyBreak"]')).toHaveLength(3);
+  });
+
+  it("keeps the Figma mobile service breaks and client logo order", () => {
+    const { container } = render(<MainPage />);
+    const serviceSection = container.querySelector('[class*="servicePreview"]');
+    const clientLogos = container.querySelector('[class*="homeClientLogos"]');
+
+    expect(serviceSection?.querySelectorAll('[class*="mobileServiceBreak"]')).toHaveLength(3);
+    const serviceCards = serviceSection?.querySelectorAll('[class*="serviceCard"]') ?? [];
+    expect(serviceCards[0]?.querySelector('[class*="desktopOnlyCopy"]')).toBeNull();
+    expect(serviceCards[0]?.querySelector('[class*="mobileOnlyCopy"]')).toBeNull();
+    expect(serviceCards[1]?.querySelector('[class*="desktopOnlyCopy"]')).toBeNull();
+    expect(serviceCards[1]?.querySelector('[class*="mobileOnlyCopy"]')).toBeNull();
+    expect(serviceCards[2]?.querySelector('[class*="mobileOnlyCopy"]')).not.toBeNull();
+    expect(Array.from(clientLogos?.querySelectorAll("img") ?? []).map((image) => image.alt)).toEqual([
+      "대한항공",
+      "에어부산",
+      "부산경찰청",
+      "국민건강보험",
+      "동아대학교",
+      "경남공업고등학교",
+    ]);
   });
 
   it("matches the updated about-page copy and contact labels", () => {
@@ -43,7 +70,7 @@ describe("Figma homepage text updates", () => {
     expectHeadingText("사람 중심의 가치를 심고, 지속 가능한 내일을 가꿉니다.");
     expect(screen.getByText("취약계측 육성을 통한 역걍강화")).toBeInTheDocument();
     expect(screen.getByText("e-mail", { selector: "strong" })).toBeInTheDocument();
-    expect(screen.getByText(/217・218호/, { selector: "span" })).toBeInTheDocument();
+    expect(screen.getAllByText(/217・218호/, { selector: "span" }).length).toBeGreaterThanOrEqual(1);
   });
 
   it("matches the exact services-page hero and facility-card copy", () => {
@@ -70,6 +97,10 @@ describe("Figma homepage desktop line heights", () => {
     expect(stylesheet).toMatch(/\.trustSection \.sectionHeading h2\s*\{[^}]*line-height: 54px;/s);
     expect(stylesheet).toMatch(/\.trustSection \.sectionHeading > span,[\s\S]*\.homeClientSection \.sectionHeading > span\s*\{[^}]*line-height: 28\.35px;/s);
     expect(stylesheet).toMatch(/\.serviceCard p\s*\{[^}]*line-height: 21px;/s);
+    expect(stylesheet).toMatch(/\.servicePreview \.sectionHeading h2\s*\{[^}]*width: 199px;[^}]*line-height: 33px;/s);
+    expect(stylesheet).toMatch(/\.servicePreview \.sectionHeading > span\s*\{[^}]*width: 291px;[^}]*line-height: 20px;[^}]*white-space: nowrap;/s);
+    expect(stylesheet).toMatch(/\.homeClientLogos\s*\{[^}]*margin-top: 40px;[^}]*padding: 7\.5px 0 5\.9px;[^}]*grid-template-columns: repeat\(2, 1fr\);/s);
+    expect(stylesheet).toMatch(/\.homeClientLogos > div\s*\{[^}]*min-height: 97px;/s);
     expect(stylesheet).toMatch(/\.clientsPage \.clientHero h1\s*\{[^}]*line-height: 70px;/s);
     expect(stylesheet).toMatch(/\.clientsPage \.sectionHeading > p\s*\{[^}]*margin-bottom: 21px;/s);
     expect(stylesheet).toMatch(/\.clientsPage \.sectionHeading > span\s*\{[^}]*margin-top: 21px;/s);
@@ -84,6 +115,7 @@ describe("Figma homepage desktop line heights", () => {
     expect(stylesheet).toMatch(/\.facilityGrid\s*\{[^}]*max-width: 1280px;/s);
     expect(stylesheet).toMatch(/\.clientGroups\s*\{[^}]*max-width: 1280px;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.aboutHero h1\s*\{[^}]*line-height: 70px;/s);
+    expect(stylesheet).toMatch(/\.aboutHero h1\s*\{[^}]*line-height: 34px;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.companySection \.sectionHeading h2\s*\{[^}]*line-height: 54px;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.companySection \.sectionHeading > p\s*\{[^}]*margin-bottom: 14px;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.companySection \.sectionHeading > span\s*\{[^}]*margin-top: 21px;/s);
@@ -92,5 +124,62 @@ describe("Figma homepage desktop line heights", () => {
     expect(stylesheet).toMatch(/\.contactSection \.contactCopy h2\s*\{[^}]*line-height: 54px;/s);
     expect(stylesheet).toMatch(/\.stats\s*\{[^}]*max-width: 1280px;/s);
     expect(stylesheet).toMatch(/\.footerGrid\s*\{[^}]*grid-template-columns: repeat\(4, 1fr\);/s);
+    expect(stylesheet).toMatch(/\.mobileOnlyBreak\s*\{[^}]*display: none;/s);
+    expect(stylesheet).toMatch(
+      /@media \(max-width: 767px\)[\s\S]*\.mobileOnlyBreak\s*\{[^}]*display: block;/s,
+    );
+  });
+});
+
+describe("Figma homepage mobile responsive layout", () => {
+  it("uses the shared 768px breakpoint and mobile service/client layouts", () => {
+    expect(stylesheet).toContain("@media (min-width: 768px)");
+    expect(stylesheet).toContain("@media (max-width: 767px)");
+    expect(stylesheet).toMatch(
+      /@media \(max-width: 767px\)[\s\S]*\.serviceCard\s*\{[^}]*box-shadow: none;/s,
+    );
+    expect(stylesheet).toMatch(
+      /@media \(max-width: 767px\)[\s\S]*\.homeClientLogos\s*\{[^}]*grid-template-columns: repeat\(2, 1fr\);/s,
+    );
+    expect(stylesheet).toMatch(
+      /@media \(max-width: 767px\)[\s\S]*\.logoGrid\s*\{[^}]*grid-template-columns: repeat\(2, 1fr\);/s,
+    );
+    expect(stylesheet).toMatch(
+      /@media \(max-width: 767px\)[\s\S]*\n  \.certification\s*\{[^}]*display: flex;/s,
+    );
+    expect(stylesheet).toMatch(
+      /@media \(max-width: 767px\)[\s\S]*\.trustSection\s*\{[^}]*padding-bottom: 64\.1px;/s,
+    );
+    expect(stylesheet).toMatch(
+      /\.trustSection \.splitIntro\s*\{[^}]*gap: 42px;/s,
+    );
+    expect(stylesheet).toMatch(
+      /\.trustSection \.sectionHeading > span\s*\{[^}]*margin-top: 14px;[^}]*line-height: 20px;/s,
+    );
+    expect(stylesheet).toMatch(/\.certificateImages\s*\{[^}]*gap: 14px;/s);
+    expect(stylesheet).toMatch(/\.certificateImages > div\s*\{[^}]*height: 136px;/s);
+    expect(stylesheet).toMatch(/\.trustSection > \.moreLink\s*\{[^}]*margin-top: 44px;/s);
+    expect(stylesheet).toMatch(/\.homeClientSection \.sectionHeading h2\s*\{[^}]*max-width: 238px;[^}]*line-height: 33px;/s);
+    expect(stylesheet).toMatch(/\.homeClientSection \.sectionHeading > span\s*\{[^}]*width: 270px;[^}]*line-height: 20px;/s);
+    expect(stylesheet).toMatch(/\.moreLink\s*\{[^}]*font-size: 10\.27px;[^}]*font-weight: 700;/s);
+    expect(stylesheet).toMatch(/\.moreViewIcon,[\s\S]*\.moreViewIcon img\s*\{[^}]*width: 18\.9px;[^}]*height: 18\.9px;/s);
+    expect(stylesheet).toMatch(/\.footerGrid\s*\{[^}]*width: 224\.4px;[^}]*grid-template-columns: 121px 58px;[^}]*gap: 27px 45\.4px;/s);
+    expect(stylesheet).toMatch(/\.footerBottom\s*\{[^}]*width: 320px;[^}]*padding-top: 9px;/s);
+    expect(stylesheet).toMatch(/@media \(max-width: 767px\)[\s\S]*\.aboutHero,\s*\.serviceHero,\s*\.clientHero\s*\{[^}]*min-height: 348px;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.companySection\s*\{[^}]*padding-top: 64\.18px;[^}]*padding-bottom: 61\.18px;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.companySection \.sectionHeading > span\s*\{[^}]*width: 241px;[^}]*line-height: 23px;/s);
+    expect(stylesheet).toMatch(/\.stats > div:nth-child\(1\) > img\s*\{[^}]*width: 19\.81px;[^}]*height: 22\.38px;/s);
+    expect(stylesheet).toMatch(/\.timeline li\s*\{[^}]*height: 55\.7px;[^}]*min-height: 55\.7px;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.timeline::before\s*\{[^}]*left: calc\(50% - 13\.5px\);/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.benefitDescription\s*\{[^}]*letter-spacing: -1px;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.values \.sectionHeading > span\s*\{[^}]*width: 265px;[^}]*line-height: 23px;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.socialSection\s*\.sectionHeading > span\s*\{[^}]*width: 315px;[^}]*line-height: 23px;/s);
+    expect(stylesheet).toMatch(/\.socialGrid article\s*\{[^}]*display: block;[^}]*min-height: 190px;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.contactSection \.contactCopy address > span,[\s\S]*grid-template-columns: 15px 78px minmax\(0, 1fr\);/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.operationSection \.sectionHeading > span\s*\{[^}]*letter-spacing: -1px;/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.teamImage img\s*\{[^}]*object-position: 61\.43% center;/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.operationLayout\s*\{[^}]*gap: 27\.6px;/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.dispatchSection \.detailBanner img\s*\{[^}]*object-fit: fill;[^}]*transform: translateX\(65\.47px\) scale\(2\.6\);[^}]*transform-origin: center;/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.serviceHero h1,\s*\.clientsPage \.clientHero h1\s*\{[^}]*line-height: 34px;/s);
   });
 });

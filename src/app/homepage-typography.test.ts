@@ -88,11 +88,44 @@ describe("homepage Figma typography", () => {
     expect(stylesheet).toMatch(/\.servicesPage \.operationLayout li p\s*\{[^}]*font-size: 16px;[^}]*line-height: normal;/s);
   });
 
+  it("matches the Figma services mobile geometry and typography", () => {
+    expect(stylesheet).toMatch(
+      /\.servicesPage \.teamImage,[\s\S]*\.servicesPage \.detailBanner\s*\{\s*height: 150px;\s*aspect-ratio: auto;/s,
+    );
+    expect(stylesheet).toMatch(
+      /\.servicesPage \.operationLayout > h3\s*\{[^}]*font-size: 24px;[^}]*letter-spacing: -0\.72px;[^}]*line-height: 29px;[^}]*text-align: center;/s,
+    );
+    expect(stylesheet).toMatch(
+      /\.servicesPage \.operationDiagram\s*\{[^}]*height: 314px;[^}]*object-fit: fill;/s,
+    );
+    expect(stylesheet).toMatch(
+      /\.servicesPage \.dispatchSection \.detailMessage\s*\{[^}]*font-weight: 500;[^}]*line-height: 23px;/s,
+    );
+    expect(stylesheet).toMatch(
+      /\.servicesPage \.facilityGrid article\s*\{[^}]*display: block;[^}]*height: 190px;[^}]*padding: 26\.8px 28\.5px 28px 30\.6px;/s,
+    );
+  });
+
   it("matches the Figma clients-page body typography", () => {
     expect(stylesheet).toMatch(/\.clientsPage \.clientHero h1\s*\{[^}]*font-size: 53px;[^}]*line-height: 70px;/s);
     expect(stylesheet).toMatch(/\.clientsPage \.sectionHeading > p\s*\{[^}]*font-size: 26px;[^}]*line-height: normal;/s);
     expect(stylesheet).toMatch(/\.clientsPage \.sectionHeading h2\s*\{[^}]*font-size: 43px;[^}]*line-height: normal;/s);
     expect(stylesheet).toMatch(/\.clientsPage \.sectionHeading > span\s*\{[^}]*font-size: 21px;[^}]*line-height: 28\.35px;/s);
     expect(stylesheet).toMatch(/\.clientsPage \.clientGroups > div > h3\s*\{[^}]*font-size: 17px;[^}]*line-height: normal;/s);
+  });
+
+  it("matches the Figma clients mobile heading geometry and tracking", () => {
+    expect(stylesheet).toMatch(
+      /\.clientsPage \.clientsSection\s*\{\s*padding-top: 64\.18px;/s,
+    );
+    expect(stylesheet).toMatch(
+      /\.clientsPage \.clientsSection \.sectionHeading > p\s*\{[^}]*margin-bottom: 13\.55px;[^}]*line-height: 19px;/s,
+    );
+    expect(stylesheet).toMatch(
+      /\.clientsPage \.clientsSection \.sectionHeading > span\s*\{[^}]*width: 303px;[^}]*letter-spacing: -0\.42px;[^}]*line-height: 23px;/s,
+    );
+    expect(stylesheet).toMatch(
+      /\.clientGroups > div > h3\s*\{[^}]*padding: 4px 12px;[^}]*line-height: 17px;/s,
+    );
   });
 });

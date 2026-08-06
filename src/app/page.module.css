@@ -1326,9 +1326,10 @@
 }
 
 .contactCopy address img {
+  align-self: center;
   width: auto;
   height: auto;
-  margin-top: 1px;
+  margin-top: 0;
   object-fit: contain;
 }
 
@@ -2882,9 +2883,9 @@
     line-height: 20px;
   }
 
-  .aboutPage .contactSection .contactCopy address img {
+.aboutPage .contactSection .contactCopy address img {
     display: block;
-    margin-top: 3px;
+    margin-top: 0;
     object-fit: contain;
   }
 

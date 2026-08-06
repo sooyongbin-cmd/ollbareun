@@ -109,6 +109,7 @@ describe("Figma homepage desktop line heights", () => {
     expect(stylesheet).toMatch(/\.facilityGrid\s*\{[^}]*max-width: 1280px;/s);
     expect(stylesheet).toMatch(/\.clientGroups\s*\{[^}]*max-width: 1280px;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.aboutHero h1\s*\{[^}]*line-height: 70px;/s);
+    expect(stylesheet).toMatch(/\.aboutHero h1\s*\{[^}]*line-height: 34px;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.companySection \.sectionHeading h2\s*\{[^}]*line-height: 54px;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.companySection \.sectionHeading > p\s*\{[^}]*margin-bottom: 14px;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.companySection \.sectionHeading > span\s*\{[^}]*margin-top: 21px;/s);

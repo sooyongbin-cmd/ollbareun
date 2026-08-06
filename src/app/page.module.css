@@ -2348,6 +2348,10 @@
     line-height: 1.3;
   }
 
+  .aboutHero h1 {
+    line-height: 34px;
+  }
+
   .sectionHeading {
     margin-bottom: 38px;
   }

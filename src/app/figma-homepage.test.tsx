@@ -27,15 +27,35 @@ describe("Figma homepage text updates", () => {
     const { container } = render(<MainPage />);
 
     expect(
-      screen.getByRole("heading", { name: "인력, 시설, 위생을 따로 보지 않습니다." }),
+      screen.getByRole("heading", { name: /인력, 시설, 위생을.*따로 보지 않습니다\./ }),
     ).toBeInTheDocument();
-    expect(screen.getByText("법정 의무소독, 살충소독(ULV·연막), 살균소독. 현재 김해공항 내 전 항공기 검역 및 방역프로세스를 독자 수행 중.")).toBeInTheDocument();
+    expect(
+      screen.getAllByText(
+        "법정 의무소독, 살충소독(ULV·연막), 살균소독. 현재 김해공항 내 전 항공기 검역 및 방역프로세스를 독자 수행 중.",
+      ),
+    ).toHaveLength(2);
     expect(screen.getByText(/217・218호/)).toBeInTheDocument();
     expect(screen.getByText("Ⓒ2026 주식회사 올바름. All rights reserved.")).toBeInTheDocument();
     expect(screen.getByText("연결", { selector: "strong" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "관리자" })).toHaveAttribute("href", "/manager");
     expect(screen.getByRole("link", { name: "근무자" })).toHaveAttribute("href", "/guard");
     expect(container.querySelectorAll('[class*="mobileOnlyBreak"]')).toHaveLength(3);
+  });
+
+  it("keeps the Figma mobile service breaks and client logo order", () => {
+    const { container } = render(<MainPage />);
+    const serviceSection = container.querySelector('[class*="servicePreview"]');
+    const clientLogos = container.querySelector('[class*="homeClientLogos"]');
+
+    expect(serviceSection?.querySelectorAll('[class*="mobileServiceBreak"]')).toHaveLength(5);
+    expect(Array.from(clientLogos?.querySelectorAll("img") ?? []).map((image) => image.alt)).toEqual([
+      "대한항공",
+      "에어부산",
+      "부산경찰청",
+      "국민건강보험",
+      "동아대학교",
+      "경남공업고등학교",
+    ]);
   });
 
   it("matches the updated about-page copy and contact labels", () => {
@@ -71,6 +91,11 @@ describe("Figma homepage desktop line heights", () => {
     expect(stylesheet).toMatch(/\.trustSection \.sectionHeading h2\s*\{[^}]*line-height: 54px;/s);
     expect(stylesheet).toMatch(/\.trustSection \.sectionHeading > span,[\s\S]*\.homeClientSection \.sectionHeading > span\s*\{[^}]*line-height: 28\.35px;/s);
     expect(stylesheet).toMatch(/\.serviceCard p\s*\{[^}]*line-height: 21px;/s);
+    expect(stylesheet).toMatch(/\.servicePreview \.sectionHeading h2\s*\{[^}]*width: 199px;[^}]*line-height: 33px;/s);
+    expect(stylesheet).toMatch(/\.servicePreview \.sectionHeading > span\s*\{[^}]*width: 291px;[^}]*line-height: 20px;[^}]*white-space: nowrap;/s);
+    expect(stylesheet).toMatch(/\.serviceCard p\s*\{[^}]*width: 327px;[^}]*white-space: nowrap;/s);
+    expect(stylesheet).toMatch(/\.homeClientLogos\s*\{[^}]*padding: 85\.5px 0 5\.9px;[^}]*grid-template-columns: repeat\(2, 1fr\);/s);
+    expect(stylesheet).toMatch(/\.homeClientLogos > div\s*\{[^}]*min-height: 97px;/s);
     expect(stylesheet).toMatch(/\.clientsPage \.clientHero h1\s*\{[^}]*line-height: 70px;/s);
     expect(stylesheet).toMatch(/\.clientsPage \.sectionHeading > p\s*\{[^}]*margin-bottom: 21px;/s);
     expect(stylesheet).toMatch(/\.clientsPage \.sectionHeading > span\s*\{[^}]*margin-top: 21px;/s);

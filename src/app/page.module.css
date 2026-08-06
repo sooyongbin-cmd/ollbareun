@@ -310,6 +310,10 @@
   display: none;
 }
 
+.mobileServiceBreak {
+  display: none;
+}
+
 .desktopOnlyCopy {
   display: inline;
 }
@@ -2309,6 +2313,10 @@
     display: block;
   }
 
+  .mobileServiceBreak {
+    display: block;
+  }
+
   .desktopOnlyCopy {
     display: none;
   }
@@ -2423,12 +2431,25 @@
   }
 
   .servicePreview .sectionHeading {
-    margin-bottom: 50px;
+    margin-bottom: 50.55px;
+  }
+
+  .servicePreview .sectionHeading > p {
+    margin-bottom: 12.73px;
+    line-height: 20px;
+  }
+
+  .servicePreview .sectionHeading h2 {
+    width: 199px;
+    line-height: 33px;
   }
 
   .servicePreview .sectionHeading > span {
-    margin-top: 14px;
+    width: 291px;
+    max-width: 100%;
+    margin-top: 13.72px;
     line-height: 20px;
+    white-space: nowrap;
   }
 
   .serviceGrid {
@@ -2436,6 +2457,7 @@
   }
 
   .serviceCard {
+    min-width: 0;
     overflow: visible;
     background: transparent;
     box-shadow: none;
@@ -2464,8 +2486,11 @@
   }
 
   .serviceCard p {
+    width: 327px;
+    max-width: calc(100vw - 20px);
     font-size: 12px;
     line-height: 1.375;
+    white-space: nowrap;
   }
 
   .moreLink {
@@ -2507,11 +2532,12 @@
 
   .homeClientLogos {
     margin-top: -50px;
+    padding: 85.5px 0 5.9px;
     grid-template-columns: repeat(2, 1fr);
   }
 
   .homeClientLogos > div {
-    min-height: 127.47px;
+    min-height: 97px;
   }
 
   .homeClientLogos img {

@@ -12,18 +12,39 @@ const services = [
     title: "근로자 파견",
     description:
       "파견 사업주가 근로자를 고용한 후 사용 사업주의 지휘명령을 받아 근로에 종사하게 하는 전문 서비스. 파견기간 1년 기준, 합의 시 연장.",
+    mobileDescription: (
+      <>
+        파견 사업주가 근로자를 고용한 후 사용 사업주의 지휘명령을 받아 근로에{" "}
+        <br className={styles.mobileServiceBreak} />
+        종사하게 하는 전문 서비스. 파견기간 1년 기준, 합의 시 연장.
+      </>
+    ),
     image: "/homepage/service-worker.webp",
   },
   {
     title: "건물 시설물 종합 관리",
     description:
       "각종 설비(전기, 소방, 기계, 가스, 건축)의 철저한 점검을 통한 체계적인 운영관리. 위생관리, 시설보안, 주차관리 통합 제공.",
+    mobileDescription: (
+      <>
+        각종 설비(전기, 소방, 기계, 가스, 건축)의 철저한 점검을 통한 체계적인{" "}
+        <br className={styles.mobileServiceBreak} />
+        운영관리. 위생관리, 시설보안, 주차관리 통합 제공.
+      </>
+    ),
     image: "/homepage/service-facility.webp",
   },
   {
     title: "방역 · 알콜 소독",
     description:
       "법정 의무소독, 살충소독(ULV·연막), 살균소독. 현재 김해공항 내 전 항공기 검역 및 방역프로세스를 독자 수행 중.",
+    mobileDescription: (
+      <>
+        법정 의무소독, 살충소독(ULV·연막), 살균소독. 현재 김해공항 내{" "}
+        <br className={styles.mobileServiceBreak} />
+        전 항공기 검역 및 방역프로세스를 독자 수행 중.
+      </>
+    ),
     image: "/homepage/service-disinfection.webp",
   },
 ];
@@ -302,10 +323,10 @@ function ContactSection() {
 function HomeClientPreview() {
   const previewLogos = [
     ["대한항공", "/homepage/client-logo-korean-air.png"],
-    ["부산경찰청", "/homepage/client-logo-police.png"],
-    ["동아대학교", "/homepage/client-logo-donga.png"],
     ["에어부산", "/homepage/client-logo-airbusan.png"],
+    ["부산경찰청", "/homepage/client-logo-police.png"],
     ["국민건강보험", "/homepage/client-logo-nhis.png"],
+    ["동아대학교", "/homepage/client-logo-donga.png"],
     ["경남공업고등학교", "/homepage/client-logo-technical-high.png"],
   ] as const;
 
@@ -424,12 +445,16 @@ export function MainPage() {
           eyebrow="Main Service"
           title={
             <>
-              <b>인력, 시설, 위생</b>을 따로 보지 않습니다.
+              <b>인력, 시설, 위생</b>을
+              <br className={styles.mobileServiceBreak} />
+              따로 보지 않습니다.
             </>
           }
           description={
             <>
-              현장의 성과는 채용, 배치, 안전, 청결, 보고 체계가 함께 움직일 때 만들어집니다.
+              현장의 성과는 채용, 배치, 안전, 청결, 보고 체계가
+              <br className={styles.mobileServiceBreak} />
+              함께 움직일 때 만들어집니다.
               <br />
               올바름은 세 영역을 하나의 운영 시스템으로 연결합니다.
             </>
@@ -437,14 +462,17 @@ export function MainPage() {
           align="left"
         />
         <div className={styles.serviceGrid}>
-          {services.map(({ title, description, image }) => (
+          {services.map(({ title, description, mobileDescription, image }) => (
             <article key={title} className={styles.serviceCard}>
               <div className={styles.serviceImage}>
                 <Image src={image} alt="" fill sizes="(max-width: 760px) 100vw, 33vw" />
               </div>
               <div>
                 <h3>{title}</h3>
-                <p>{description}</p>
+                <p>
+                  <span className={styles.desktopOnlyCopy}>{description}</span>
+                  <span className={styles.mobileOnlyCopy}>{mobileDescription}</span>
+                </p>
               </div>
             </article>
           ))}

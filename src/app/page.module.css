@@ -2220,13 +2220,11 @@
   }
 
   .mobileMenuTitle {
-    display: flex;
+    position: relative;
+    display: block;
     width: 100%;
     height: 43px;
-    padding: 0 28px;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 8px;
+    padding: 0;
     border: 0;
     border-bottom: 1px solid rgb(255 255 255 / 46%);
     background: #0667ad;
@@ -2235,25 +2233,44 @@
     font-size: 16px;
     font-weight: 400;
     letter-spacing: -0.04em;
-    line-height: 1;
+    line-height: normal;
     text-align: left;
     cursor: pointer;
   }
 
   .mobileMenuTitle > span:first-child {
-    display: inline-grid;
-    width: 13px;
-    place-items: center;
+    position: absolute;
+    top: 2px;
+    left: 7.24%;
+    display: block;
+    width: auto;
     color: inherit;
     font-family: Inter, system-ui, sans-serif;
     font-size: 26px;
     font-weight: 400;
-    line-height: 1;
+    line-height: normal;
+  }
+
+  .mobileMenuTitle > span:last-child {
+    position: absolute;
+    top: 10.5px;
+    left: 13.36%;
+    line-height: normal;
   }
 
   .mobileMenuTitleActive {
     color: #71c7d5;
     font-weight: 700;
+  }
+
+  .mobileMenuTitleActive > span:first-child {
+    top: 1.5px;
+    left: 7.94%;
+  }
+
+  .mobileMenuTitleActive > span:last-child {
+    top: 10px;
+    left: 13.4%;
   }
 
   .mobileMenuInner section > .mobileMenuSubmenu {

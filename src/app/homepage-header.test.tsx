@@ -37,6 +37,23 @@ describe("homepage header", () => {
     expect(stylesheet).toContain("margin-right: -13.36px;");
   });
 
+  it("matches the Figma mobile menu symbol alignment and label spacing", () => {
+    const stylesheet = readFileSync("src/app/page.module.css", "utf8");
+
+    expect(stylesheet).toMatch(
+      /\.mobileMenuTitle\s*\{[^}]*position: relative;[^}]*display: block;[^}]*line-height: normal;/s,
+    );
+    expect(stylesheet).toMatch(
+      /\.mobileMenuTitle > span:first-child\s*\{[^}]*top: 2px;[^}]*left: 7\.24%;[^}]*line-height: normal;/s,
+    );
+    expect(stylesheet).toMatch(
+      /\.mobileMenuTitle > span:last-child\s*\{[^}]*top: 10\.5px;[^}]*left: 13\.36%;/s,
+    );
+    expect(stylesheet).toMatch(
+      /\.mobileMenuTitleActive > span:first-child\s*\{[^}]*top: 1\.5px;[^}]*left: 7\.94%;/s,
+    );
+  });
+
   it("keeps the closed mobile menu icon horizontally stretchable", () => {
     render(<HomepageHeader />);
 

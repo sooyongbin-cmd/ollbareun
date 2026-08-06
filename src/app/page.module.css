@@ -2673,6 +2673,10 @@
     height: 278.5px;
   }
 
+  .aboutPage .timeline::before {
+    left: calc(50% - 13.5px);
+  }
+
   .timeline li {
     position: relative;
     display: block;

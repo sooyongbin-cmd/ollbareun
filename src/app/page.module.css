@@ -2486,11 +2486,8 @@
   }
 
   .serviceCard p {
-    width: 327px;
-    max-width: calc(100vw - 20px);
     font-size: 12px;
     line-height: 1.375;
-    white-space: nowrap;
   }
 
   .moreLink {

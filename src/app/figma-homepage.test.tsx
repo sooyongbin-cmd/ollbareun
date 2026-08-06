@@ -93,7 +93,6 @@ describe("Figma homepage desktop line heights", () => {
     expect(stylesheet).toMatch(/\.serviceCard p\s*\{[^}]*line-height: 21px;/s);
     expect(stylesheet).toMatch(/\.servicePreview \.sectionHeading h2\s*\{[^}]*width: 199px;[^}]*line-height: 33px;/s);
     expect(stylesheet).toMatch(/\.servicePreview \.sectionHeading > span\s*\{[^}]*width: 291px;[^}]*line-height: 20px;[^}]*white-space: nowrap;/s);
-    expect(stylesheet).toMatch(/\.serviceCard p\s*\{[^}]*width: 327px;[^}]*white-space: nowrap;/s);
     expect(stylesheet).toMatch(/\.homeClientLogos\s*\{[^}]*padding: 85\.5px 0 5\.9px;[^}]*grid-template-columns: repeat\(2, 1fr\);/s);
     expect(stylesheet).toMatch(/\.homeClientLogos > div\s*\{[^}]*min-height: 97px;/s);
     expect(stylesheet).toMatch(/\.clientsPage \.clientHero h1\s*\{[^}]*line-height: 70px;/s);

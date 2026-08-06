@@ -58,6 +58,21 @@ describe("homepage back to top button", () => {
     expect(clientLogos?.querySelectorAll("a")).toHaveLength(0);
   });
 
+  it("matches the mobile client wrapping and footer connection structure", () => {
+    const { container } = render(<MainPage />);
+    const clientSection = container.querySelector('[class*="homeClientSection"]');
+    const clientHeading = clientSection?.querySelector("h2");
+    const clientDescription = clientSection?.querySelector('[class*="sectionHeading"] > span');
+    const footerAddress = container.querySelector('[class*="footerAddress"]');
+
+    expect(clientHeading?.querySelectorAll('[class*="mobileOnlyBreak"]')).toHaveLength(1);
+    expect(clientDescription?.querySelector('[class*="mobileOnlyCopy"]')).toBeInTheDocument();
+    expect(clientSection?.querySelectorAll('[class*="homeClientLogos"] > div')).toHaveLength(6);
+    expect(screen.getByRole("link", { name: "관리자" })).toHaveAttribute("href", "/manager");
+    expect(screen.getByRole("link", { name: "근무자" })).toHaveAttribute("href", "/guard");
+    expect(footerAddress?.querySelectorAll('[class*="footerAddressLine"]')).toHaveLength(2);
+  });
+
   it("renders the three main services as separate content items", () => {
     const { container } = render(<MainPage />);
     const serviceGrid = container.querySelector('[class*="serviceGrid"]');

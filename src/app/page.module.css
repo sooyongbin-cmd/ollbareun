@@ -310,6 +310,14 @@
   display: none;
 }
 
+.desktopOnlyCopy {
+  display: inline;
+}
+
+.mobileOnlyCopy {
+  display: none;
+}
+
 .heroButton,
 .contactButton {
   display: inline-flex;
@@ -1608,6 +1616,20 @@
   line-height: normal;
 }
 
+.footerGrid > .footerContactGroup {
+  flex-direction: row;
+  gap: 30px;
+}
+
+.footerContactGroup > div {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: normal;
+}
+
 .footerGrid strong {
   margin-bottom: 6px;
   font-size: 14px;
@@ -1638,6 +1660,10 @@
 
 .footerBottom p {
   margin: 0;
+}
+
+.footerAddressLine + .footerAddressLine::before {
+  content: "・";
 }
 
 @media (max-width: 1000px) {
@@ -2283,6 +2309,14 @@
     display: block;
   }
 
+  .desktopOnlyCopy {
+    display: none;
+  }
+
+  .mobileOnlyCopy {
+    display: inline;
+  }
+
   .aboutHero,
   .serviceHero,
   .clientHero {
@@ -2328,7 +2362,7 @@
 
   .trustSection {
     padding-top: 65px;
-    padding-bottom: 54px;
+    padding-bottom: 64.1px;
   }
 
   .trustSection .sectionHeading,
@@ -2385,11 +2419,20 @@
 
   .servicePreview {
     padding-top: 65px;
-    padding-bottom: 72px;
+    padding-bottom: 79px;
+  }
+
+  .servicePreview .sectionHeading {
+    margin-bottom: 50px;
+  }
+
+  .servicePreview .sectionHeading > span {
+    margin-top: 14px;
+    line-height: 20px;
   }
 
   .serviceGrid {
-    gap: 56px;
+    gap: 52px;
   }
 
   .serviceCard {
@@ -2405,19 +2448,19 @@
 
   .serviceImage {
     height: auto;
-    aspect-ratio: 320 / 183;
+    aspect-ratio: 320 / 179;
   }
 
   .serviceCard > div:last-child {
     min-height: 0;
-    margin-top: 8px;
+    margin-top: 11px;
     padding: 0;
   }
 
   .serviceCard h3 {
-    margin-bottom: 5px;
+    margin-bottom: 3px;
     font-size: 14px;
-    line-height: 1.35;
+    line-height: 17px;
   }
 
   .serviceCard p {
@@ -2425,21 +2468,59 @@
     line-height: 1.375;
   }
 
+  .moreLink {
+    gap: 7.11px;
+    font-size: 10.27px;
+    font-weight: 700;
+  }
+
+  .moreViewIcon,
+  .moreViewIcon img {
+    width: 18.9px;
+    height: 18.9px;
+  }
+
+  .servicePreview > .moreLink {
+    margin-top: 40.2px;
+  }
+
   .homeClientSection {
-    padding-top: 72px;
-    padding-bottom: 72px;
+    padding-top: 65px;
+    padding-bottom: 70.8px;
+  }
+
+  .homeClientSection .sectionHeading {
+    margin-bottom: 0;
+  }
+
+  .homeClientSection .sectionHeading h2 {
+    max-width: 238px;
+    font-weight: 500;
+    line-height: 33px;
+  }
+
+  .homeClientSection .sectionHeading > span {
+    width: 270px;
+    margin-top: 14px;
+    line-height: 20px;
   }
 
   .homeClientLogos {
-    grid-template-columns: repeat(3, 1fr);
+    margin-top: -50px;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .homeClientLogos > div {
-    min-height: 88px;
+    min-height: 127.47px;
   }
 
   .homeClientLogos img {
     padding: 0 8px;
+  }
+
+  .homeClientSection > .moreLink {
+    margin-top: 36.6px;
+    font-weight: 700;
   }
 
   .aboutPage .companySection {
@@ -2723,16 +2804,68 @@
   }
 
   .footer {
-    padding: 55px 20px 24px;
+    padding: 70px 0 14px;
   }
 
   .footerGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 38px 25px;
+    width: 224.4px;
+    margin: 0 0 0 max(20px, calc((100% - 209.76px) / 2));
+    grid-template-columns: 121px 58px;
+    gap: 27px 45.4px;
+  }
+
+  .footerGrid > .footerContactGroup {
+    display: contents;
+  }
+
+  .footerGrid > div,
+  .footerConnection,
+  .footerInquiry {
+    min-width: 0;
+    gap: 0;
+    font-size: 12.5px;
+    line-height: 26px;
+  }
+
+  .footerContactGroup > div {
+    gap: 0;
+    font-size: 12.5px;
+    line-height: 26px;
+  }
+
+  .footerGrid strong {
+    margin-bottom: 6px;
+    font-size: 12px;
+    line-height: 14px;
+  }
+
+  .footerInquiry {
+    transform: translateY(-5px);
   }
 
   .footerBottom {
+    width: 320px;
+    margin: 34.5px auto 0;
+    padding-top: 9px;
     flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    font-size: 11px;
+    letter-spacing: -0.33px;
+    line-height: normal;
+    text-align: center;
+  }
+
+  .footerAddressLine {
+    display: block;
+  }
+
+  .footerAddressLine + .footerAddressLine::before {
+    content: none;
+  }
+
+  .footerAddressLine:last-child {
+    line-height: 17px;
   }
 }
 

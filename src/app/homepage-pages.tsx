@@ -184,17 +184,28 @@ function Footer() {
           <Link href="/clients#client-list">항공사</Link>
           <Link href="/clients#client-list">교육기관</Link>
         </div>
-        <div>
-          <strong>문의</strong>
-          <a href="tel:0514657767">T.051-465-7767</a>
-          <a href="tel:0519617767">F.051-961-7767</a>
-          <a href="mailto:olbareum@naver.com">olbareum@naver.com</a>
+        <div className={styles.footerContactGroup}>
+          <div className={styles.footerConnection}>
+            <strong>연결</strong>
+            <Link href="/manager">관리자</Link>
+            <Link href="/guard">근무자</Link>
+          </div>
+          <div className={styles.footerInquiry}>
+            <strong>문의</strong>
+            <a href="tel:0514657767">T.051-465-7767</a>
+            <a href="tel:0519617767">F.051-961-7767</a>
+            <a href="mailto:olbareum@naver.com">olbareum@naver.com</a>
+          </div>
         </div>
       </div>
       <div className={styles.footerBottom}>
-        <p>
-          부산광역시 강서구 유통단지1로 41, 105동 217・218호・대표이사 윤지욱・
-          사업자등록번호213-87-01208
+        <p className={styles.footerAddress}>
+          <span className={styles.footerAddressLine}>
+            부산광역시 강서구 유통단지1로 41, 105동 217・218호
+          </span>
+          <span className={styles.footerAddressLine}>
+            대표이사 윤지욱・사업자등록번호213-87-01208
+          </span>
         </p>
         <p>Ⓒ2026 주식회사 올바름. All rights reserved.</p>
       </div>
@@ -304,14 +315,25 @@ function HomeClientPreview() {
         eyebrow="Client"
         title={
           <>
-            <b>성실함</b>과 <b>신뢰</b>로 단단하게 이어온 파트너
+            <b>성실함</b>과 <b>신뢰</b>로
+            <br className={styles.mobileOnlyBreak} />
+            단단하게 이어온 파트너
           </>
         }
         description={
           <>
-            철저한 관리와 맞춤형 서비스로 고객이 본업에만 집중할 수 있는
-            <br />
-            최적의 환경을 만들며 함께 성장하는 든든한 파트너가 되겠습니다.
+            <span className={styles.desktopOnlyCopy}>
+              철저한 관리와 맞춤형 서비스로 고객이 본업에만 집중할 수 있는
+              <br />
+              최적의 환경을 만들며 함께 성장하는 든든한 파트너가 되겠습니다.
+            </span>
+            <span className={styles.mobileOnlyCopy}>
+              철저한 관리와 맞춤형 서비스로 고객이 본업에만
+              <br />
+              집중할 수 있는 최적의 환경을 만들며 함께 성장하는
+              <br />
+              든든한 파트너가 되겠습니다.
+            </span>
           </>
         }
         align="left"

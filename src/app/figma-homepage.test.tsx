@@ -30,12 +30,12 @@ describe("Figma homepage text updates", () => {
       screen.getByRole("heading", { name: "인력, 시설, 위생을 따로 보지 않습니다." }),
     ).toBeInTheDocument();
     expect(screen.getByText("법정 의무소독, 살충소독(ULV·연막), 살균소독. 현재 김해공항 내 전 항공기 검역 및 방역프로세스를 독자 수행 중.")).toBeInTheDocument();
-    expect(screen.getByText(/217・218호・대표이사 윤지욱・/)).toBeInTheDocument();
+    expect(screen.getByText(/217・218호/)).toBeInTheDocument();
     expect(screen.getByText("Ⓒ2026 주식회사 올바름. All rights reserved.")).toBeInTheDocument();
-    expect(screen.queryByText("연결")).not.toBeInTheDocument();
-    expect(screen.queryByText("관리자")).not.toBeInTheDocument();
-    expect(screen.queryByText("근무자")).not.toBeInTheDocument();
-    expect(container.querySelectorAll('[class*="mobileOnlyBreak"]')).toHaveLength(2);
+    expect(screen.getByText("연결", { selector: "strong" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "관리자" })).toHaveAttribute("href", "/manager");
+    expect(screen.getByRole("link", { name: "근무자" })).toHaveAttribute("href", "/guard");
+    expect(container.querySelectorAll('[class*="mobileOnlyBreak"]')).toHaveLength(3);
   });
 
   it("matches the updated about-page copy and contact labels", () => {
@@ -44,7 +44,7 @@ describe("Figma homepage text updates", () => {
     expectHeadingText("사람 중심의 가치를 심고, 지속 가능한 내일을 가꿉니다.");
     expect(screen.getByText("취약계측 육성을 통한 역걍강화")).toBeInTheDocument();
     expect(screen.getByText("e-mail", { selector: "strong" })).toBeInTheDocument();
-    expect(screen.getByText(/217・218호/, { selector: "span" })).toBeInTheDocument();
+    expect(screen.getAllByText(/217・218호/, { selector: "span" }).length).toBeGreaterThanOrEqual(1);
   });
 
   it("matches the exact services-page hero and facility-card copy", () => {
@@ -108,7 +108,7 @@ describe("Figma homepage mobile responsive layout", () => {
       /@media \(max-width: 767px\)[\s\S]*\.serviceCard\s*\{[^}]*box-shadow: none;/s,
     );
     expect(stylesheet).toMatch(
-      /@media \(max-width: 767px\)[\s\S]*\.homeClientLogos\s*\{[^}]*grid-template-columns: repeat\(3, 1fr\);/s,
+      /@media \(max-width: 767px\)[\s\S]*\.homeClientLogos\s*\{[^}]*grid-template-columns: repeat\(2, 1fr\);/s,
     );
     expect(stylesheet).toMatch(
       /@media \(max-width: 767px\)[\s\S]*\.logoGrid\s*\{[^}]*grid-template-columns: repeat\(2, 1fr\);/s,
@@ -117,7 +117,7 @@ describe("Figma homepage mobile responsive layout", () => {
       /@media \(max-width: 767px\)[\s\S]*\n  \.certification\s*\{[^}]*display: flex;/s,
     );
     expect(stylesheet).toMatch(
-      /@media \(max-width: 767px\)[\s\S]*\.trustSection\s*\{[^}]*padding-bottom: 54px;/s,
+      /@media \(max-width: 767px\)[\s\S]*\.trustSection\s*\{[^}]*padding-bottom: 64\.1px;/s,
     );
     expect(stylesheet).toMatch(
       /\.trustSection \.splitIntro\s*\{[^}]*gap: 42px;/s,
@@ -128,5 +128,11 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(stylesheet).toMatch(/\.certificateImages\s*\{[^}]*gap: 14px;/s);
     expect(stylesheet).toMatch(/\.certificateImages > div\s*\{[^}]*height: 136px;/s);
     expect(stylesheet).toMatch(/\.trustSection > \.moreLink\s*\{[^}]*margin-top: 44px;/s);
+    expect(stylesheet).toMatch(/\.homeClientSection \.sectionHeading h2\s*\{[^}]*max-width: 238px;[^}]*line-height: 33px;/s);
+    expect(stylesheet).toMatch(/\.homeClientSection \.sectionHeading > span\s*\{[^}]*width: 270px;[^}]*line-height: 20px;/s);
+    expect(stylesheet).toMatch(/\.moreLink\s*\{[^}]*font-size: 10\.27px;[^}]*font-weight: 700;/s);
+    expect(stylesheet).toMatch(/\.moreViewIcon,[\s\S]*\.moreViewIcon img\s*\{[^}]*width: 18\.9px;[^}]*height: 18\.9px;/s);
+    expect(stylesheet).toMatch(/\.footerGrid\s*\{[^}]*width: 224\.4px;[^}]*grid-template-columns: 121px 58px;[^}]*gap: 27px 45\.4px;/s);
+    expect(stylesheet).toMatch(/\.footerBottom\s*\{[^}]*width: 320px;[^}]*padding-top: 9px;/s);
   });
 });

@@ -171,7 +171,7 @@ function SectionHeading({
     <div className={`${styles.sectionHeading} ${align === "left" ? styles.alignLeft : ""}`}>
       <p>{eyebrow}</p>
       <h2>{title}</h2>
-      {description ? <span>{description}</span> : null}
+      {description ? <span className="text-box">{description}</span> : null}
     </div>
   );
 }
@@ -353,7 +353,7 @@ function HomeClientPreview() {
       <div className={styles.homeClientLogos}>
         {previewLogos.map(([name, src]) => (
           <div key={name}>
-            <Image src={src} alt={name} fill sizes="220px" />
+            <Image src={src} alt={name} fill sizes="13.75rem" />
           </div>
         ))}
       </div>
@@ -420,7 +420,7 @@ export function MainPage() {
                   src={src}
                   alt={alt}
                   fill
-                  sizes="200px"
+                  sizes="12.5rem"
                 />
               </div>
             ))}
@@ -456,7 +456,7 @@ export function MainPage() {
           {services.map(({ title, description, mobileDescription, image }) => (
             <article key={title} className={styles.serviceCard}>
               <div className={styles.serviceImage}>
-                <Image src={image} alt="" fill sizes="(max-width: 760px) 100vw, 33vw" />
+                <Image src={image} alt="" fill sizes="(max-width: 47.5rem) 100vw, 33vw" />
               </div>
               <div>
                 <h3>{title}</h3>
@@ -537,7 +537,7 @@ export function AboutPage() {
         </div>
         <div className={styles.historyWrap}>
           <div className={styles.historyImage}>
-            <Image src="/homepage/archive/history.jpg" alt="불이 켜진 사무실 건물" fill sizes="(max-width: 760px) 100vw, 42vw" />
+            <Image src="/homepage/archive/history.jpg" alt="불이 켜진 사무실 건물" fill sizes="(max-width: 47.5rem) 100vw, 42vw" />
             <div><span>HISTORY</span><p>사람 중심의 가치를 심고,<br />지속 가능한 내일을 가꿔갑니다.</p></div>
           </div>
           <ol className={styles.timeline}>
@@ -650,7 +650,7 @@ export function ServicesPage() {
           }
         />
         <div className={styles.teamImage}>
-          <Image src="/homepage/archive/operation.jpg" alt="공항 현장에서 일하는 올바름 서비스 전문가" fill sizes="(max-width: 760px) 100vw, 1200px" />
+          <Image src="/homepage/archive/operation.jpg" alt="공항 현장에서 일하는 올바름 서비스 전문가" fill sizes="(max-width: 47.5rem) 100vw, 75rem" />
         </div>
         <div className={styles.operationLayout}>
           <h3>
@@ -679,7 +679,7 @@ export function ServicesPage() {
             </>
           }
         />
-        <div className={styles.detailBanner}><Image src="/homepage/service-worker.webp" alt="의료 현장에서 근무하는 전문 인력" fill sizes="(max-width: 760px) 100vw, 1200px" /></div>
+        <div className={styles.detailBanner}><Image src="/homepage/service-worker.webp" alt="의료 현장에서 근무하는 전문 인력" fill sizes="(max-width: 47.5rem) 100vw, 75rem" /></div>
         <h3 className={styles.detailMessage}>사무관리, 생산·물류, IT·전산, 의료·간병, 콜센터 등<br />필요한 직무에 적합한 인력을 연결합니다.</h3>
         <div className={styles.dispatchDiagram}>
           <Image
@@ -687,7 +687,7 @@ export function ServicesPage() {
             alt="파견사업주와 사용사업주는 근로자 파견계약을 맺고, 파견사업주는 파견근로자와 고용계약관계를, 사용사업주는 파견근로자와 지휘 및 명령관계를 맺는 구조"
             width={504}
             height={397}
-            sizes="(max-width: 760px) calc(100vw - 40px), 620px"
+            sizes="(max-width: 47.5rem) calc(100vw - 2.5rem), 38.75rem"
           />
         </div>
       </section>
@@ -704,7 +704,7 @@ export function ServicesPage() {
             </>
           }
         />
-        <div className={styles.detailBanner}><Image src="/homepage/archive/facility.jpg" alt="시설 설비를 점검하는 전문 인력" fill sizes="(max-width: 760px) 100vw, 1200px" /></div>
+        <div className={styles.detailBanner}><Image src="/homepage/archive/facility.jpg" alt="시설 설비를 점검하는 전문 인력" fill sizes="(max-width: 47.5rem) 100vw, 75rem" /></div>
         <h3 className={styles.detailMessage}>전기·소방·기계·가스·건축 설비의 점검과 운영관리,<br />위생관리, 시설보안, 주차관리까지 통합 제공합니다.</h3>
         <div className={styles.facilityGrid}>
           {facilityItems.map(({ title, text, image }) => (
@@ -725,7 +725,7 @@ export function ServicesPage() {
             </>
           }
         />
-        <div className={styles.detailBanner}><Image src="/homepage/archive/disinfection.jpg" alt="항공기 객실에서 방역 작업을 진행하는 전문 인력" fill sizes="(max-width: 760px) 100vw, 1200px" /></div>
+        <div className={styles.detailBanner}><Image src="/homepage/archive/disinfection.jpg" alt="항공기 객실에서 방역 작업을 진행하는 전문 인력" fill sizes="(max-width: 47.5rem) 100vw, 75rem" /></div>
         <h3 className={styles.detailMessage}>현장 조건에 맞춘 법정·살충·살균 소독으로<br />대형 건축물과 항공기 검역 현장의 예방 체계를{" "}<br className={styles.mobileOnlyBreak} />지원합니다.</h3>
         <div className={styles.airportCard}>
           <Image
@@ -733,7 +733,7 @@ export function ServicesPage() {
             alt="당사는 현재 김해공항 내 전 항공기 검역 및 방역프로세스를 독자 수행중입니다"
             width={1050}
             height={616}
-            sizes="(max-width: 760px) calc(100vw - 48px), 525px"
+            sizes="(max-width: 47.5rem) calc(100vw - 3rem), 32.8125rem"
           />
         </div>
       </section>
@@ -776,7 +776,7 @@ export function ClientsPage() {
               <h3>{title}</h3>
               <div className={styles.logoGrid}>
                 {logos.map(([name, src]) => (
-                  <div key={name}><Image src={src} alt={name} fill sizes="180px" /></div>
+                  <div key={name}><Image src={src} alt={name} fill sizes="11.25rem" /></div>
                 ))}
               </div>
             </div>

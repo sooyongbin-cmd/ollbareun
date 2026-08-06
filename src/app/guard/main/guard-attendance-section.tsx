@@ -189,21 +189,21 @@ export default function GuardAttendanceSection() {
 
   return (
     <section className="mb-6 bg-background rounded-xl p-6 border border-border shadow-sm space-y-5">
-      <h3 className="text-[14px] font-semibold text-muted-foreground">출근 상황</h3>
+      <h3 className="text-[0.875rem] font-semibold text-muted-foreground">출근 상황</h3>
       
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
-          <p className="text-[12px] text-muted-foreground">출근 시각</p>
-          <p className="text-[20px] font-bold text-foreground">{formatTime(attendance?.clock_in_at)}</p>
+          <p className="text-[0.75rem] text-muted-foreground">출근 시각</p>
+          <p className="text-[1.25rem] font-bold text-foreground">{formatTime(attendance?.clock_in_at)}</p>
         </div>
         <div className="space-y-1">
-          <p className="text-[12px] text-muted-foreground">퇴근 시각</p>
-          <p className="text-[20px] font-bold text-foreground">{formatTime(attendance?.clock_out_at)}</p>
+          <p className="text-[0.75rem] text-muted-foreground">퇴근 시각</p>
+          <p className="text-[1.25rem] font-bold text-foreground">{formatTime(attendance?.clock_out_at)}</p>
         </div>
       </div>
 
       <div className="space-y-2 border-t border-border/30 pt-4">
-        <div className="flex items-center justify-between text-[13px]">
+        <div className="flex items-center justify-between text-[0.8125rem]">
           <span className="text-muted-foreground font-semibold">근무지와의 거리</span>
           <span className={`font-bold ${distance !== null && distance > (session?.worksite?.radius_meters ?? 100) ? "text-destructive" : "text-primary"}`}>
             {distance !== null ? `${Math.round(distance)}m` : locError || "출근 화면에서 확인"}
@@ -232,13 +232,13 @@ export default function GuardAttendanceSection() {
       </div>
 
       {session?.isDayOff && !isClockedIn ? (
-        <p className="text-center text-[13px] font-semibold text-primary">
+        <p className="text-center text-[0.8125rem] font-semibold text-primary">
           오늘은 휴무일로 지정되어 출근할 수 없습니다.
         </p>
       ) : null}
 
       {isClockedOut && (
-        <p className="text-[13px] text-muted-foreground font-medium text-center">
+        <p className="text-[0.8125rem] text-muted-foreground font-medium text-center">
           오늘의 근무가 모두 완료되었습니다.
         </p>
       )}

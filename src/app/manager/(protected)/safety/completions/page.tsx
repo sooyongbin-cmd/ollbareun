@@ -221,11 +221,11 @@ export default function EducationCompletionsPage() {
   };
 
   return (
-    <section className="space-y-[24px]">
+    <section className="space-y-[1.5rem]">
       <header>
         <div className="space-y-3">
-          <h1 className="text-[28px] leading-[1.2]">교육이수관리</h1>
-          <p className="text-[14px] font-normal leading-relaxed text-muted-foreground max-w-[640px]">
+          <h1 className="text-[1.75rem] leading-[1.2]">교육이수관리</h1>
+          <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground max-w-[40rem]">
             직원별 교육이수 현황을 확인합니다.
           </p>
         </div>
@@ -233,12 +233,12 @@ export default function EducationCompletionsPage() {
 
       <section
         aria-label="교육이수 검색"
-        className="bg-muted/40 rounded-xl p-[32px] border border-border/50"
+        className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
       >
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="flex flex-1 flex-col gap-4 md:flex-row">
             <div className="space-y-2 flex-1">
-              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="completion-name-search">
+              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="completion-name-search">
                 직원 이름
               </label>
               <div className="flex gap-2">
@@ -251,7 +251,7 @@ export default function EducationCompletionsPage() {
                 />
                 <Button
                   type="button"
-                  className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 flex items-center justify-center gap-1.5 px-5 min-w-[120px]"
+                  className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 flex items-center justify-center gap-1.5 px-5 min-w-[7.5rem]"
                   onClick={handleSendPushNotifications}
                   disabled={sendingPush || filteredEmployees.length === 0}
                 >
@@ -266,9 +266,9 @@ export default function EducationCompletionsPage() {
 
       <section
         aria-label="교육이수 목록"
-        className="bg-muted/40 rounded-xl p-[32px] border border-border/50"
+        className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
       >
-        <div className="flex flex-wrap items-center justify-between gap-3 text-[14px] text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-[0.875rem] text-muted-foreground">
           <span>전체 직원 {employees.filter((e) => !e.is_retired).length}</span>
           <span>검색 결과 {filteredEmployees.length}</span>
         </div>
@@ -276,7 +276,7 @@ export default function EducationCompletionsPage() {
         {loading ? (
           <ManagerLoadingMessage className="mt-6" />
         ) : error ? (
-          <p className="mt-6 text-[16px] text-destructive">{error}</p>
+          <p className="mt-6 text-[1rem] text-destructive">{error}</p>
         ) : (
           <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
             <Table className="w-full">
@@ -331,8 +331,8 @@ export default function EducationCompletionsPage() {
                           <span
                             className={
                               isSubscribed
-                                ? "inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-[13px] font-semibold text-primary"
-                                : "inline-flex items-center rounded-full bg-muted/40 px-3 py-1 text-[13px] font-semibold text-muted-foreground"
+                                ? "inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-[0.8125rem] font-semibold text-primary"
+                                : "inline-flex items-center rounded-full bg-muted/40 px-3 py-1 text-[0.8125rem] font-semibold text-muted-foreground"
                             }
                           >
                             {isSubscribed ? "구독중" : "미구독"}
@@ -343,10 +343,10 @@ export default function EducationCompletionsPage() {
                             <span
                               className={
                                 deliveryStatus.status === "success"
-                                  ? "inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-[13px] font-semibold text-primary"
+                                  ? "inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-[0.8125rem] font-semibold text-primary"
                                   : deliveryStatus.status === "failed"
-                                    ? "inline-flex items-center rounded-full bg-destructive/15 px-3 py-1 text-[13px] font-semibold text-destructive"
-                                    : "inline-flex items-center rounded-full bg-muted/40 px-3 py-1 text-[13px] font-semibold text-muted-foreground"
+                                    ? "inline-flex items-center rounded-full bg-destructive/15 px-3 py-1 text-[0.8125rem] font-semibold text-destructive"
+                                    : "inline-flex items-center rounded-full bg-muted/40 px-3 py-1 text-[0.8125rem] font-semibold text-muted-foreground"
                               }
                               title={deliveryStatus.status === "failed" ? deliveryStatus.reason : undefined}
                             >
@@ -357,7 +357,7 @@ export default function EducationCompletionsPage() {
                                   : "미구독"}
                             </span>
                           ) : (
-                            <span className="text-[13px] font-semibold text-muted-foreground">대기</span>
+                            <span className="text-[0.8125rem] font-semibold text-muted-foreground">대기</span>
                           )}
                         </TableCell>
                       </TableRow>
@@ -372,7 +372,7 @@ export default function EducationCompletionsPage() {
 
       {/* Push Notification Result Modal */}
       <Dialog open={showResultModal && Boolean(pushResult)} onOpenChange={setShowResultModal}>
-        <DialogContent className="flex max-h-[85vh] max-w-[500px] flex-col">
+        <DialogContent className="flex max-h-[85vh] max-w-[31.25rem] flex-col">
           <DialogHeader>
             <DialogTitle>교육 알림 전송 결과</DialogTitle>
             <DialogDescription>알림 전송 대상별 처리 결과입니다.</DialogDescription>
@@ -382,30 +382,30 @@ export default function EducationCompletionsPage() {
             <>
             <div className="flex-1 overflow-y-auto space-y-5 pr-1">
               {/* Summary Stats */}
-              <div className="grid grid-cols-3 gap-2 bg-muted/40 p-4 rounded-[12px] text-center border border-border/30">
+              <div className="grid grid-cols-3 gap-2 bg-muted/40 p-4 rounded-[0.75rem] text-center border border-border/30">
                 <div>
-                  <p className="text-[12px] text-muted-foreground">성공 건수</p>
-                  <p className="text-[20px] font-bold text-primary">{pushResult.successCount}건</p>
+                  <p className="text-[0.75rem] text-muted-foreground">성공 건수</p>
+                  <p className="text-[1.25rem] font-bold text-primary">{pushResult.successCount}건</p>
                 </div>
                 <div>
-                  <p className="text-[12px] text-muted-foreground">미등록 인원</p>
-                  <p className="text-[20px] font-bold text-foreground">{pushResult.unregisteredCount}명</p>
+                  <p className="text-[0.75rem] text-muted-foreground">미등록 인원</p>
+                  <p className="text-[1.25rem] font-bold text-foreground">{pushResult.unregisteredCount}명</p>
                 </div>
                 <div>
-                  <p className="text-[12px] text-muted-foreground">전송 실패</p>
-                  <p className="text-[20px] font-bold text-destructive">{pushResult.failedCount}건</p>
+                  <p className="text-[0.75rem] text-muted-foreground">전송 실패</p>
+                  <p className="text-[1.25rem] font-bold text-destructive">{pushResult.failedCount}건</p>
                 </div>
               </div>
 
               {/* Notified list */}
               {pushResult.notifiedEmployees.length > 0 && (
                 <div className="space-y-2">
-                  <h3 className="text-[14px] font-semibold text-primary flex items-center gap-1.5">
+                  <h3 className="text-[0.875rem] font-semibold text-primary flex items-center gap-1.5">
                     <CheckCircle2 size={16} />
                     알림 전송 완료 ({pushResult.notifiedEmployees.length}명)
                   </h3>
-                  <div className="max-h-[120px] overflow-y-auto rounded-[12px] border border-border/30 bg-muted/50 p-3">
-                    <p className="text-[14px] text-muted-foreground leading-relaxed">
+                  <div className="max-h-[7.5rem] overflow-y-auto rounded-[0.75rem] border border-border/30 bg-muted/50 p-3">
+                    <p className="text-[0.875rem] text-muted-foreground leading-relaxed">
                       {pushResult.notifiedEmployees.join(", ")}
                     </p>
                   </div>
@@ -415,15 +415,15 @@ export default function EducationCompletionsPage() {
               {/* Unregistered list */}
               {pushResult.unregisteredEmployees.length > 0 && (
                 <div className="space-y-2">
-                  <h3 className="text-[14px] font-semibold text-foreground flex items-center gap-1.5">
+                  <h3 className="text-[0.875rem] font-semibold text-foreground flex items-center gap-1.5">
                     <AlertCircle size={16} className="text-muted-foreground" />
                     알림 미수신 대상 - 기기 미등록 ({pushResult.unregisteredEmployees.length}명)
                   </h3>
-                  <p className="text-[12px] text-muted-foreground">
+                  <p className="text-[0.75rem] text-muted-foreground">
                     ※ 모바일 웹 환경에서 알림 권한을 허용하지 않았거나 접속 이력이 없는 직원입니다.
                   </p>
-                  <div className="max-h-[120px] overflow-y-auto rounded-[12px] border border-border/30 bg-muted/50 p-3">
-                    <p className="text-[14px] text-muted-foreground leading-relaxed">
+                  <div className="max-h-[7.5rem] overflow-y-auto rounded-[0.75rem] border border-border/30 bg-muted/50 p-3">
+                    <p className="text-[0.875rem] text-muted-foreground leading-relaxed">
                       {pushResult.unregisteredEmployees.join(", ")}
                     </p>
                   </div>
@@ -433,15 +433,15 @@ export default function EducationCompletionsPage() {
               {/* Failed list */}
               {pushResult.failedEmployees.length > 0 && (
                 <div className="space-y-2">
-                  <h3 className="text-[14px] font-semibold text-destructive flex items-center gap-1.5">
+                  <h3 className="text-[0.875rem] font-semibold text-destructive flex items-center gap-1.5">
                     <AlertCircle size={16} />
                     알림 전송 실패 ({pushResult.failedEmployees.length}명)
                   </h3>
-                  <div className="max-h-[150px] space-y-1.5 overflow-y-auto rounded-[12px] border border-border/30 bg-muted/50 p-3">
+                  <div className="max-h-[9.375rem] space-y-1.5 overflow-y-auto rounded-[0.75rem] border border-border/30 bg-muted/50 p-3">
                     {pushResult.failedEmployees.map((failed, idx) => (
-                      <div key={idx} className="flex justify-between items-start text-[14px]">
+                      <div key={idx} className="flex justify-between items-start text-[0.875rem]">
                         <span className="font-semibold text-foreground">{failed.employeeName}</span>
-                        <span className="text-muted-foreground text-[12px] text-right">{failed.reason}</span>
+                        <span className="text-muted-foreground text-[0.75rem] text-right">{failed.reason}</span>
                       </div>
                     ))}
                   </div>
@@ -451,7 +451,7 @@ export default function EducationCompletionsPage() {
 
             <div className="mt-6 border-t border-border pt-4 flex justify-end">
               <Button
-                className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 px-6"
+                className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 px-6"
                 type="button"
                 onClick={() => setShowResultModal(false)}
               >

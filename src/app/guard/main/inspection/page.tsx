@@ -125,25 +125,25 @@ export default function GuardInspectionPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[980px] w-full px-5 py-[80px]">
-      <div className="max-w-[600px] mx-auto space-y-6">
+    <div className="mx-auto max-w-[61.25rem] w-full px-5 py-[5rem]">
+      <div className="max-w-[37.5rem] mx-auto space-y-6">
         <header>
-          <h1 className="text-[36px] font-semibold leading-[1.1]">현장점검</h1>
-          <p className="mt-2 text-[18px] text-muted-foreground">현장 QR을 스캔한 뒤 촬영 버튼으로 점검을 저장합니다.</p>
+          <h1 className="text-[2.25rem] font-semibold leading-[1.1]">현장점검</h1>
+          <p className="mt-2 text-[1.125rem] text-muted-foreground">현장 QR을 스캔한 뒤 촬영 버튼으로 점검을 저장합니다.</p>
         </header>
 
-        <section className="bg-muted/40 rounded-xl p-[24px] border border-border/50 space-y-5">
+        <section className="bg-muted/40 rounded-xl p-[1.5rem] border border-border/50 space-y-5">
           <video
             ref={videoRef}
-            className="aspect-[4/3] w-full rounded-[12px] border border-border bg-foreground object-cover"
+            className="aspect-[4/3] w-full rounded-[0.75rem] border border-border bg-foreground object-cover"
             muted
             playsInline
           />
 
-          <div className="rounded-[12px] border border-border/50 bg-background p-4 space-y-2">
-            <p className="text-[14px] font-semibold text-muted-foreground">{status}</p>
+          <div className="rounded-[0.75rem] border border-border/50 bg-background p-4 space-y-2">
+            <p className="text-[0.875rem] font-semibold text-muted-foreground">{status}</p>
             {qrPayload ? (
-              <div className="grid gap-1 text-[15px]">
+              <div className="grid gap-1 text-[0.9375rem]">
                 <span className="font-semibold">{qrPayload.siteName}</span>
                 <span className="text-muted-foreground">{qrPayload.worksiteName}</span>
                 <span className="text-muted-foreground">
@@ -155,7 +155,7 @@ export default function GuardInspectionPage() {
           </div>
 
           <Button
-            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full justify-center disabled:opacity-50"
+            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center disabled:opacity-50"
             disabled={!qrPayload || saving}
             onClick={handleCapture}
             type="button"

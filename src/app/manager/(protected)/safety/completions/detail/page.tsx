@@ -164,11 +164,11 @@ export default function EducationCompletionsDetailPage() {
   };
 
   return (
-    <section className="space-y-[24px]">
+    <section className="space-y-[1.5rem]">
       <header>
         <div className="space-y-3">
-          <h1 className="text-[28px] leading-[1.2]">교육이수상세</h1>
-          <p className="text-[14px] font-normal leading-relaxed text-muted-foreground max-w-[640px]">
+          <h1 className="text-[1.75rem] leading-[1.2]">교육이수상세</h1>
+          <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground max-w-[40rem]">
             직원별 교육이수 현황을 확인합니다.
           </p>
         </div>
@@ -176,12 +176,12 @@ export default function EducationCompletionsDetailPage() {
 
       <section
         aria-label="교육이수 검색"
-        className="bg-muted/40 rounded-xl p-[32px] border border-border/50"
+        className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
       >
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="flex flex-1 flex-col gap-4 md:flex-row">
             <div className="space-y-2 flex-1">
-              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="completion-resource-search">
+              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="completion-resource-search">
                 교재
               </label>
               <NativeSelect
@@ -199,7 +199,7 @@ export default function EducationCompletionsDetailPage() {
               </NativeSelect>
             </div>
             <div className="space-y-2 flex-1">
-              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="completion-name-search">
+              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="completion-name-search">
                 직원 이름
               </label>
               <Input
@@ -216,9 +216,9 @@ export default function EducationCompletionsDetailPage() {
 
       <section
         aria-label="교육이수 목록"
-        className="bg-muted/40 rounded-xl p-[32px] border border-border/50"
+        className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
       >
-        <div className="flex flex-wrap items-center justify-between gap-3 text-[14px] text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-[0.875rem] text-muted-foreground">
           <span>전체 이수 기록 {completions.length}</span>
           <span>검색 결과 {filteredCompletions.length}</span>
         </div>
@@ -226,7 +226,7 @@ export default function EducationCompletionsDetailPage() {
         {loading ? (
           <ManagerLoadingMessage className="mt-6" />
         ) : error ? (
-          <p className="mt-6 text-[16px] text-destructive">{error}</p>
+          <p className="mt-6 text-[1rem] text-destructive">{error}</p>
         ) : (
           <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
             <Table className="w-full">
@@ -286,7 +286,7 @@ export default function EducationCompletionsDetailPage() {
                           <div>{completion.resource_title}</div>
                           {completion.resource_youtube_link ? (
                             <a
-                              className="text-[12px] underline-offset-4 hover:underline"
+                              className="text-[0.75rem] underline-offset-4 hover:underline"
                               href={completion.resource_youtube_link}
                               target="_blank"
                               rel="noreferrer"
@@ -298,7 +298,7 @@ export default function EducationCompletionsDetailPage() {
                       </TableCell>
                       <TableCell data-label="완료여부">
                         <span
-                          className={`inline-flex rounded-full px-3 py-1 text-[12px] font-semibold ${
+                          className={`inline-flex rounded-full px-3 py-1 text-[0.75rem] font-semibold ${
                             completion.is_completed ? "bg-primary/10 text-primary" : "bg-foreground/10 text-muted-foreground"
                           }`}
                         >

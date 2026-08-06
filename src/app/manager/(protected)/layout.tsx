@@ -27,7 +27,7 @@ export default function ManagerLayout({
           <ManagerHeader />
           <div className="flex flex-1 flex-col">
             <div className="@container/main flex flex-1 flex-col">
-              <section className="mx-auto w-full max-w-[1600px] min-w-0 p-4 md:p-6 lg:p-8">
+              <section className="mx-auto w-full max-w-[100rem] min-w-0 p-4 md:p-6 lg:p-8">
                 <Suspense fallback={<ManagerLoadingMessage />}>{children}</Suspense>
               </section>
             </div>

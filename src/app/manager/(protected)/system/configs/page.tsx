@@ -54,23 +54,23 @@ export default function SystemConfigsPage() {
   }, []);
 
   return (
-    <section className="space-y-[24px]">
+    <section className="space-y-[1.5rem]">
       <header>
-        <h1 className="text-[28px] leading-[1.2]">시스템설정</h1>
-        <p className="mt-2 max-w-[640px] text-[14px] font-normal leading-relaxed text-muted-foreground">
+        <h1 className="text-[1.75rem] leading-[1.2]">시스템설정</h1>
+        <p className="mt-2 max-w-[40rem] text-[0.875rem] font-normal leading-relaxed text-muted-foreground">
           시스템에서 사용하는 코드와 내용을 관리합니다.
         </p>
       </header>
 
-      <section aria-label="시스템설정 조회" className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
+      <section aria-label="시스템설정 조회" className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
         <div className="flex justify-end">
-          <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50" href="/manager/system/configs/new">
+          <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" href="/manager/system/configs/new">
             등록
           </Link>
         </div>
       </section>
 
-      <section aria-label="시스템설정 목록" className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
+      <section aria-label="시스템설정 목록" className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
         {loading ? (
           <ManagerLoadingMessage />
         ) : error ? (
@@ -96,12 +96,12 @@ export default function SystemConfigsPage() {
                 ) : (
                   configs.map((config) => (
                     <TableRow key={config.system_code} className="hover:bg-muted/40 transition-colors">
-                      <TableCell data-label="설명" className="max-w-[360px] whitespace-pre-wrap font-semibold">
+                      <TableCell data-label="설명" className="max-w-[22.5rem] whitespace-pre-wrap font-semibold">
                         <Link className="text-primary hover:opacity-80" href={`/manager/system/configs/${encodeURIComponent(config.system_code)}`}>
                           {config.description ?? "-"}
                         </Link>
                       </TableCell>
-                      <TableCell data-label="내용" className="max-w-[520px] whitespace-pre-wrap">{config.content}</TableCell>
+                      <TableCell data-label="내용" className="max-w-[32.5rem] whitespace-pre-wrap">{config.content}</TableCell>
                       <TableCell data-label="시스템코드" className="font-semibold">{config.system_code}</TableCell>
                       <TableCell data-label="상위시스템코드">{config.parent_system_code ?? "-"}</TableCell>
                     </TableRow>

@@ -104,22 +104,22 @@ export default function AssignmentNewPage() {
   }
 
   return (
-    <section className="space-y-[24px]">
+    <section className="space-y-[1.5rem]">
       <header>
-        <h1 className="text-[28px] leading-[1.2]">배정등록</h1>
-        <p className="text-[14px] font-normal leading-relaxed text-muted-foreground mt-2 max-w-[600px]">
+        <h1 className="text-[1.75rem] leading-[1.2]">배정등록</h1>
+        <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground mt-2 max-w-[37.5rem]">
           직원에게 근무지를 배정합니다.
         </p>
       </header>
 
-      <section className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
+      <section className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
         {loading ? (
           <ManagerLoadingMessage />
         ) : (
           <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="grid gap-4 lg:grid-cols-[minmax(360px,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
-              <div className="space-y-2 lg:min-w-[360px]">
-                <p className="text-[14px] font-semibold text-muted-foreground ml-1">근무기간</p>
+            <div className="grid gap-4 lg:grid-cols-[minmax(22.5rem,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
+              <div className="space-y-2 lg:min-w-[22.5rem]">
+                <p className="text-[0.875rem] font-semibold text-muted-foreground ml-1">근무기간</p>
                 <div className="grid gap-2 sm:grid-cols-2">
                   <label className="sr-only" htmlFor="assignment-start-date">
                     시작일
@@ -148,7 +148,7 @@ export default function AssignmentNewPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="assignment-worksite">
+                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-worksite">
                   근무지
                 </label>
                 <NativeSelect className="w-full appearance-none" id="assignment-worksite" name="worksiteId" required>
@@ -161,7 +161,7 @@ export default function AssignmentNewPage() {
                 </NativeSelect>
               </div>
               <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="assignment-employee">
+                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-employee">
                   직원
                 </label>
                 <NativeSelect className="w-full appearance-none" id="assignment-employee" name="employeeId" required>
@@ -177,7 +177,7 @@ export default function AssignmentNewPage() {
 
             <Button
               aria-label="저장"
-              className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full md:w-auto"
+              className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto"
               data-testid="assignment-submit"
               type="submit"
             >

@@ -90,96 +90,96 @@ describe("Figma homepage text updates", () => {
 
 describe("Figma homepage desktop line heights", () => {
   it("uses the updated multi-line text leading", () => {
-    expect(stylesheet).toMatch(/\.aboutPage \.companySection\s*\{[^}]*padding-top: 112px;/s);
-    expect(stylesheet).toMatch(/\.servicesPage \.operationSection\s*\{[^}]*padding-top: 160px;/s);
-    expect(stylesheet).toMatch(/\.clientsPage \.clientsSection\s*\{[^}]*padding-top: 160px;/s);
-    expect(stylesheet).toMatch(/\.clientsPage \.clientsSection \.sectionHeading\s*\{[^}]*margin-bottom: 130px;/s);
-    expect(stylesheet).toMatch(/\.trustSection \.sectionHeading h2\s*\{[^}]*line-height: 54px;/s);
-    expect(stylesheet).toMatch(/\.trustSection \.sectionHeading > span,[\s\S]*\.homeClientSection \.sectionHeading > span\s*\{[^}]*line-height: 28\.35px;/s);
-    expect(stylesheet).toMatch(/\.serviceCard p\s*\{[^}]*line-height: 21px;/s);
-    expect(stylesheet).toMatch(/\.servicePreview \.sectionHeading h2\s*\{[^}]*width: 199px;[^}]*line-height: 33px;/s);
-    expect(stylesheet).toMatch(/\.servicePreview \.sectionHeading > span\s*\{[^}]*width: 291px;[^}]*line-height: 20px;[^}]*white-space: nowrap;/s);
-    expect(stylesheet).toMatch(/\.homeClientLogos\s*\{[^}]*margin-top: 40px;[^}]*padding: 7\.5px 0 5\.9px;[^}]*grid-template-columns: repeat\(2, 1fr\);/s);
-    expect(stylesheet).toMatch(/\.homeClientLogos > div\s*\{[^}]*min-height: 97px;/s);
-    expect(stylesheet).toMatch(/\.clientsPage \.clientHero h1\s*\{[^}]*line-height: 70px;/s);
-    expect(stylesheet).toMatch(/\.clientsPage \.sectionHeading > p\s*\{[^}]*margin-bottom: 21px;/s);
-    expect(stylesheet).toMatch(/\.clientsPage \.sectionHeading > span\s*\{[^}]*margin-top: 21px;/s);
-    expect(stylesheet).toMatch(/\.servicesPage \.serviceHero h1\s*\{[^}]*line-height: 70px;/s);
-    expect(stylesheet).toMatch(/\.servicesPage \.operationSection \.sectionHeading > p\s*\{[^}]*margin-bottom: 21px;/s);
-    expect(stylesheet).toMatch(/\.servicesPage \.operationSection \.sectionHeading > span\s*\{[^}]*margin-top: 21px;/s);
-    expect(stylesheet).toMatch(/\.servicesPage \.operationLayout > h3\s*\{[^}]*line-height: 63px;/s);
-    expect(stylesheet).toMatch(/\.servicesPage \.detailMessage\s*\{[^}]*line-height: 47px;/s);
-    expect(stylesheet).toMatch(/\.servicesPage \.facilityGrid p\s*\{[^}]*line-height: 29px;/s);
-    expect(stylesheet).toMatch(/\.teamImage,\s*\.detailBanner\s*\{[^}]*width: min\(100%, 1280px\);/s);
-    expect(stylesheet).toMatch(/\.operationLayout\s*\{[^}]*max-width: 1280px;/s);
-    expect(stylesheet).toMatch(/\.facilityGrid\s*\{[^}]*max-width: 1280px;/s);
-    expect(stylesheet).toMatch(/\.clientGroups\s*\{[^}]*max-width: 1280px;/s);
-    expect(stylesheet).toMatch(/\.aboutPage \.aboutHero h1\s*\{[^}]*line-height: 70px;/s);
-    expect(stylesheet).toMatch(/\.aboutHero h1\s*\{[^}]*line-height: 34px;/s);
-    expect(stylesheet).toMatch(/\.aboutPage \.companySection \.sectionHeading h2\s*\{[^}]*line-height: 54px;/s);
-    expect(stylesheet).toMatch(/\.aboutPage \.companySection \.sectionHeading > p\s*\{[^}]*margin-bottom: 14px;/s);
-    expect(stylesheet).toMatch(/\.aboutPage \.companySection \.sectionHeading > span\s*\{[^}]*margin-top: 21px;/s);
-    expect(stylesheet).toMatch(/\.aboutPage \.timeline p\s*\{[^}]*line-height: 28\.35px;/s);
-    expect(stylesheet).toMatch(/\.aboutPage \.socialGrid p\s*\{[^}]*line-height: 29px;/s);
-    expect(stylesheet).toMatch(/\.contactSection \.contactCopy h2\s*\{[^}]*line-height: 54px;/s);
-    expect(stylesheet).toMatch(/\.stats\s*\{[^}]*max-width: 1280px;/s);
-    expect(stylesheet).toMatch(/\.footerGrid\s*\{[^}]*grid-template-columns: repeat\(4, 1fr\);/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.companySection\s*\{[^}]*padding-top: 7rem;/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.operationSection\s*\{[^}]*padding-top: 10rem;/s);
+    expect(stylesheet).toMatch(/\.clientsPage \.clientsSection\s*\{[^}]*padding-top: 10rem;/s);
+    expect(stylesheet).toMatch(/\.clientsPage \.clientsSection \.sectionHeading\s*\{[^}]*margin-bottom: 8.125rem;/s);
+    expect(stylesheet).toMatch(/\.trustSection \.sectionHeading h2\s*\{[^}]*line-height: 3.375rem;/s);
+    expect(stylesheet).toMatch(/\.trustSection \.sectionHeading > span,[\s\S]*\.homeClientSection \.sectionHeading > span\s*\{[^}]*line-height: 1.771875rem;/s);
+    expect(stylesheet).toMatch(/\.serviceCard p\s*\{[^}]*line-height: 1.3125rem;/s);
+    expect(stylesheet).toMatch(/\.servicePreview \.sectionHeading h2\s*\{[^}]*width: 12.4375rem;[^}]*line-height: 2.0625rem;/s);
+    expect(stylesheet).toMatch(/\.servicePreview \.sectionHeading > span\s*\{[^}]*width: 18.1875rem;[^}]*line-height: 1.25rem;[^}]*white-space: nowrap;/s);
+    expect(stylesheet).toMatch(/\.homeClientLogos\s*\{[^}]*margin-top: 2.5rem;[^}]*padding: 0.46875rem 0 0.36875rem;[^}]*grid-template-columns: repeat\(2, 1fr\);/s);
+    expect(stylesheet).toMatch(/\.homeClientLogos > div\s*\{[^}]*min-height: 6.0625rem;/s);
+    expect(stylesheet).toMatch(/\.clientsPage \.clientHero h1\s*\{[^}]*line-height: 4.375rem;/s);
+    expect(stylesheet).toMatch(/\.clientsPage \.sectionHeading > p\s*\{[^}]*margin-bottom: 1.3125rem;/s);
+    expect(stylesheet).toMatch(/\.clientsPage \.sectionHeading > span\s*\{[^}]*margin-top: 1.3125rem;/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.serviceHero h1\s*\{[^}]*line-height: 4.375rem;/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.operationSection \.sectionHeading > p\s*\{[^}]*margin-bottom: 1.3125rem;/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.operationSection \.sectionHeading > span\s*\{[^}]*margin-top: 1.3125rem;/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.operationLayout > h3\s*\{[^}]*line-height: 3.9375rem;/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.detailMessage\s*\{[^}]*line-height: 2.9375rem;/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.facilityGrid p\s*\{[^}]*line-height: 1.8125rem;/s);
+    expect(stylesheet).toMatch(/\.teamImage,\s*\.detailBanner\s*\{[^}]*width: min\(100%, 80rem\);/s);
+    expect(stylesheet).toMatch(/\.operationLayout\s*\{[^}]*max-width: 80rem;/s);
+    expect(stylesheet).toMatch(/\.facilityGrid\s*\{[^}]*max-width: 80rem;/s);
+    expect(stylesheet).toMatch(/\.clientGroups\s*\{[^}]*max-width: 80rem;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.aboutHero h1\s*\{[^}]*line-height: 4.375rem;/s);
+    expect(stylesheet).toMatch(/\.aboutHero h1\s*\{[^}]*line-height: 2.125rem;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.companySection \.sectionHeading h2\s*\{[^}]*line-height: 3.375rem;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.companySection \.sectionHeading > p\s*\{[^}]*margin-bottom: 0.875rem;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.companySection \.sectionHeading > span\s*\{[^}]*margin-top: 1.3125rem;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.timeline p\s*\{[^}]*line-height: 1.771875rem;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.socialGrid p\s*\{[^}]*line-height: 1.8125rem;/s);
+    expect(stylesheet).toMatch(/\.contactSection \.contactCopy h2\s*\{[^}]*line-height: 3.375rem;/s);
+    expect(stylesheet).toMatch(/\.stats\s*\{[^}]*max-width: 80rem;/s);
+    expect(stylesheet).toMatch(/\.footerGrid\s*\{[^}]*grid-template-columns: repeat\(5, 1fr\);/s);
     expect(stylesheet).toMatch(/\.mobileOnlyBreak\s*\{[^}]*display: none;/s);
     expect(stylesheet).toMatch(
-      /@media \(max-width: 767px\)[\s\S]*\.mobileOnlyBreak\s*\{[^}]*display: block;/s,
+      /@media \(max-width: 47.9375rem\)[\s\S]*\.mobileOnlyBreak\s*\{[^}]*display: block;/s,
     );
   });
 });
 
 describe("Figma homepage mobile responsive layout", () => {
-  it("uses the shared 768px breakpoint and mobile service/client layouts", () => {
-    expect(stylesheet).toContain("@media (min-width: 768px)");
-    expect(stylesheet).toContain("@media (max-width: 767px)");
+  it("uses the shared 48rem breakpoint and mobile service/client layouts", () => {
+    expect(stylesheet).toContain("@media (min-width: 48rem)");
+    expect(stylesheet).toContain("@media (max-width: 47.9375rem)");
     expect(stylesheet).toMatch(
-      /@media \(max-width: 767px\)[\s\S]*\.serviceCard\s*\{[^}]*box-shadow: none;/s,
+      /@media \(max-width: 47.9375rem\)[\s\S]*\.serviceCard\s*\{[^}]*box-shadow: none;/s,
     );
     expect(stylesheet).toMatch(
-      /@media \(max-width: 767px\)[\s\S]*\.homeClientLogos\s*\{[^}]*grid-template-columns: repeat\(2, 1fr\);/s,
+      /@media \(max-width: 47.9375rem\)[\s\S]*\.homeClientLogos\s*\{[^}]*grid-template-columns: repeat\(2, 1fr\);/s,
     );
     expect(stylesheet).toMatch(
-      /@media \(max-width: 767px\)[\s\S]*\.logoGrid\s*\{[^}]*grid-template-columns: repeat\(2, 1fr\);/s,
+      /@media \(max-width: 47.9375rem\)[\s\S]*\.logoGrid\s*\{[^}]*grid-template-columns: repeat\(2, 1fr\);/s,
     );
     expect(stylesheet).toMatch(
-      /@media \(max-width: 767px\)[\s\S]*\n  \.certification\s*\{[^}]*display: flex;/s,
+      /@media \(max-width: 47.9375rem\)[\s\S]*\n  \.certification\s*\{[^}]*display: flex;/s,
     );
     expect(stylesheet).toMatch(
-      /@media \(max-width: 767px\)[\s\S]*\.trustSection\s*\{[^}]*padding-bottom: 64\.1px;/s,
+      /@media \(max-width: 47.9375rem\)[\s\S]*\.trustSection\s*\{[^}]*padding-bottom: 4.00625rem;/s,
     );
     expect(stylesheet).toMatch(
-      /\.trustSection \.splitIntro\s*\{[^}]*gap: 42px;/s,
+      /\.trustSection \.splitIntro\s*\{[^}]*gap: 2.625rem;/s,
     );
     expect(stylesheet).toMatch(
-      /\.trustSection \.sectionHeading > span\s*\{[^}]*margin-top: 14px;[^}]*line-height: 20px;/s,
+      /\.trustSection \.sectionHeading > span\s*\{[^}]*margin-top: 0.875rem;[^}]*line-height: 1.25rem;/s,
     );
-    expect(stylesheet).toMatch(/\.certificateImages\s*\{[^}]*gap: 14px;/s);
-    expect(stylesheet).toMatch(/\.certificateImages > div\s*\{[^}]*height: 136px;/s);
-    expect(stylesheet).toMatch(/\.trustSection > \.moreLink\s*\{[^}]*margin-top: 44px;/s);
-    expect(stylesheet).toMatch(/\.homeClientSection \.sectionHeading h2\s*\{[^}]*max-width: 238px;[^}]*line-height: 33px;/s);
-    expect(stylesheet).toMatch(/\.homeClientSection \.sectionHeading > span\s*\{[^}]*width: 270px;[^}]*line-height: 20px;/s);
-    expect(stylesheet).toMatch(/\.moreLink\s*\{[^}]*font-size: 10\.27px;[^}]*font-weight: 700;/s);
-    expect(stylesheet).toMatch(/\.moreViewIcon,[\s\S]*\.moreViewIcon img\s*\{[^}]*width: 18\.9px;[^}]*height: 18\.9px;/s);
-    expect(stylesheet).toMatch(/\.footerGrid\s*\{[^}]*width: 224\.4px;[^}]*grid-template-columns: 121px 58px;[^}]*gap: 27px 45\.4px;/s);
-    expect(stylesheet).toMatch(/\.footerBottom\s*\{[^}]*width: 320px;[^}]*padding-top: 9px;/s);
-    expect(stylesheet).toMatch(/@media \(max-width: 767px\)[\s\S]*\.aboutHero,\s*\.serviceHero,\s*\.clientHero\s*\{[^}]*min-height: 348px;/s);
-    expect(stylesheet).toMatch(/\.aboutPage \.companySection\s*\{[^}]*padding-top: 64\.18px;[^}]*padding-bottom: 61\.18px;/s);
-    expect(stylesheet).toMatch(/\.aboutPage \.companySection \.sectionHeading > span\s*\{[^}]*width: 241px;[^}]*line-height: 23px;/s);
-    expect(stylesheet).toMatch(/\.stats > div:nth-child\(1\) > img\s*\{[^}]*width: 19\.81px;[^}]*height: 22\.38px;/s);
-    expect(stylesheet).toMatch(/\.timeline li\s*\{[^}]*height: 55\.7px;[^}]*min-height: 55\.7px;/s);
-    expect(stylesheet).toMatch(/\.aboutPage \.timeline::before\s*\{[^}]*left: calc\(50% - 13\.5px\);/s);
-    expect(stylesheet).toMatch(/\.aboutPage \.benefitDescription\s*\{[^}]*letter-spacing: -1px;/s);
-    expect(stylesheet).toMatch(/\.aboutPage \.values \.sectionHeading > span\s*\{[^}]*width: 265px;[^}]*line-height: 23px;/s);
-    expect(stylesheet).toMatch(/\.aboutPage \.socialSection\s*\.sectionHeading > span\s*\{[^}]*width: 315px;[^}]*line-height: 23px;/s);
-    expect(stylesheet).toMatch(/\.socialGrid article\s*\{[^}]*display: block;[^}]*min-height: 190px;/s);
-    expect(stylesheet).toMatch(/\.aboutPage \.contactSection \.contactCopy address > span,[\s\S]*grid-template-columns: 15px 78px minmax\(0, 1fr\);/s);
-    expect(stylesheet).toMatch(/\.servicesPage \.operationSection \.sectionHeading > span\s*\{[^}]*letter-spacing: -1px;/s);
+    expect(stylesheet).toMatch(/\.certificateImages\s*\{[^}]*gap: 0.875rem;/s);
+    expect(stylesheet).toMatch(/\.certificateImages > div\s*\{[^}]*height: 8.5rem;/s);
+    expect(stylesheet).toMatch(/\.trustSection > \.moreLink\s*\{[^}]*margin-top: 2.75rem;/s);
+    expect(stylesheet).toMatch(/\.homeClientSection \.sectionHeading h2\s*\{[^}]*max-width: 14.875rem;[^}]*line-height: 2.0625rem;/s);
+    expect(stylesheet).toMatch(/\.homeClientSection \.sectionHeading > span\s*\{[^}]*width: 16.875rem;[^}]*line-height: 1.25rem;/s);
+    expect(stylesheet).toMatch(/\.moreLink\s*\{[^}]*font-size: 0.641875rem;[^}]*font-weight: 700;/s);
+    expect(stylesheet).toMatch(/\.moreViewIcon,[\s\S]*\.moreViewIcon img\s*\{[^}]*width: 1.18125rem;[^}]*height: 1.18125rem;/s);
+    expect(stylesheet).toMatch(/\.footerGrid\s*\{[^}]*width: 14.025rem;[^}]*grid-template-columns: 7.5625rem 3.625rem;[^}]*gap: 1.6875rem 2.8375rem;/s);
+    expect(stylesheet).toMatch(/\.footerBottom\s*\{[^}]*width: 20rem;[^}]*padding-top: 0.5625rem;/s);
+    expect(stylesheet).toMatch(/@media \(max-width: 47.9375rem\)[\s\S]*\.aboutHero,\s*\.serviceHero,\s*\.clientHero\s*\{[^}]*min-height: 21.75rem;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.companySection\s*\{[^}]*padding-top: 4.01125rem;[^}]*padding-bottom: 3.82375rem;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.companySection \.sectionHeading > span\s*\{[^}]*width: 15.0625rem;[^}]*line-height: 1.4375rem;/s);
+    expect(stylesheet).toMatch(/\.stats > div:nth-child\(1\) > img\s*\{[^}]*width: 1.238125rem;[^}]*height: 1.39875rem;/s);
+    expect(stylesheet).toMatch(/\.timeline li\s*\{[^}]*height: 3.48125rem;[^}]*min-height: 3.48125rem;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.timeline::before\s*\{[^}]*left: calc\(50% - 0.84375rem\);/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.benefitDescription\s*\{[^}]*letter-spacing: -0\.0625rem;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.values \.sectionHeading > span\s*\{[^}]*width: 16.5625rem;[^}]*line-height: 1.4375rem;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.socialSection\s*\.sectionHeading > span\s*\{[^}]*width: 19.6875rem;[^}]*line-height: 1.4375rem;/s);
+    expect(stylesheet).toMatch(/\.socialGrid article\s*\{[^}]*display: block;[^}]*min-height: 11.875rem;/s);
+    expect(stylesheet).toMatch(/\.aboutPage \.contactSection \.contactCopy address > span,[\s\S]*grid-template-columns: 0.9375rem 4.875rem minmax\(0, 1fr\);/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.operationSection \.sectionHeading > span\s*\{[^}]*letter-spacing: -0\.0625rem;/s);
     expect(stylesheet).toMatch(/\.servicesPage \.teamImage img\s*\{[^}]*object-position: 61\.43% center;/s);
-    expect(stylesheet).toMatch(/\.servicesPage \.operationLayout\s*\{[^}]*gap: 27\.6px;/s);
-    expect(stylesheet).toMatch(/\.servicesPage \.dispatchSection \.detailBanner img\s*\{[^}]*object-fit: fill;[^}]*transform: translateX\(65\.47px\) scale\(2\.6\);[^}]*transform-origin: center;/s);
-    expect(stylesheet).toMatch(/\.servicesPage \.serviceHero h1,\s*\.clientsPage \.clientHero h1\s*\{[^}]*line-height: 34px;/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.operationLayout\s*\{[^}]*gap: 1.725rem;/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.dispatchSection \.detailBanner img\s*\{[^}]*object-fit: fill;[^}]*transform: translateX\(4.091875rem\) scale\(2\.6\);[^}]*transform-origin: center;/s);
+    expect(stylesheet).toMatch(/\.servicesPage \.serviceHero h1,\s*\.clientsPage \.clientHero h1\s*\{[^}]*line-height: 2.125rem;/s);
   });
 });

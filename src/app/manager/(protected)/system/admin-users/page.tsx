@@ -169,11 +169,11 @@ export default function AdminUsersPage() {
   const isSuperAdmin = currentAdmin?.role === "super_admin";
 
   return (
-    <section className="space-y-[24px]">
+    <section className="space-y-[1.5rem]">
       <header>
         <div className="space-y-3">
-          <h1 className="text-[28px] leading-[1.2]">관리자 관리</h1>
-          <p className="max-w-[640px] text-[14px] font-normal leading-relaxed text-muted-foreground">
+          <h1 className="text-[1.75rem] leading-[1.2]">관리자 관리</h1>
+          <p className="max-w-[40rem] text-[0.875rem] font-normal leading-relaxed text-muted-foreground">
             사전 등록된 관리자 목록을 조회하고 새 관리자를 사전에 등록하거나 권한을 설정합니다.
           </p>
         </div>
@@ -183,12 +183,12 @@ export default function AdminUsersPage() {
       {successMessage ? <p className="font-semibold text-primary">{successMessage}</p> : null}
 
       {/* Admin registration form (Visible & interactive only for super_admin) */}
-      <section className="rounded-xl border border-border/50 bg-muted/40 p-[32px]">
-        <h2 className="text-[20px] font-semibold mb-4">새 관리자 사전 등록</h2>
+      <section className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
+        <h2 className="text-[1.25rem] font-semibold mb-4">새 관리자 사전 등록</h2>
         {isSuperAdmin ? (
           <form onSubmit={handleRegister} className="flex flex-col gap-4 sm:flex-row sm:items-end">
             <div className="flex-1 space-y-2">
-              <label htmlFor="new-admin-email" className="text-[14px] font-semibold text-muted-foreground">
+              <label htmlFor="new-admin-email" className="text-[0.875rem] font-semibold text-muted-foreground">
                 관리자 Google 이메일
               </label>
               <Input
@@ -202,8 +202,8 @@ export default function AdminUsersPage() {
                 disabled={registering}
               />
             </div>
-            <div className="w-full sm:w-[180px] space-y-2">
-              <label htmlFor="new-admin-role" className="text-[14px] font-semibold text-muted-foreground">
+            <div className="w-full sm:w-[11.25rem] space-y-2">
+              <label htmlFor="new-admin-role" className="text-[0.875rem] font-semibold text-muted-foreground">
                 역할 설정
               </label>
               <NativeSelect
@@ -220,20 +220,20 @@ export default function AdminUsersPage() {
             <Button
               type="submit"
               disabled={registering}
-              className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-11 px-6 justify-center disabled:opacity-60"
+              className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 h-11 px-6 justify-center disabled:opacity-60"
             >
               {registering ? "등록 중..." : "사전 등록 추가"}
             </Button>
           </form>
         ) : (
-          <p className="text-[14px] text-muted-foreground italic">
+          <p className="text-[0.875rem] text-muted-foreground italic">
             * 새로운 관리자 사전 등록은 최고 관리자(super_admin) 권한을 가진 계정으로만 수행할 수 있습니다.
           </p>
         )}
       </section>
 
       {/* Admin list table */}
-      <section className="rounded-xl border border-border/50 bg-muted/40 p-[32px]">
+      <section className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
         {loading ? (
           <ManagerLoadingMessage />
         ) : (
@@ -268,7 +268,7 @@ export default function AdminUsersPage() {
                               void handleChangeRole(admin.id, e.target.value as "admin" | "super_admin")
                             }
                             disabled={actionLoadingId === admin.id}
-                            className="bg-transparent border-0 font-medium text-[14px] text-primary focus:ring-0 p-0 cursor-pointer"
+                            className="bg-transparent border-0 font-medium text-[0.875rem] text-primary focus:ring-0 p-0 cursor-pointer"
                           >
                             <NativeSelectOption value="admin">일반 관리자</NativeSelectOption>
                             <NativeSelectOption value="super_admin">최고 관리자</NativeSelectOption>
@@ -279,11 +279,11 @@ export default function AdminUsersPage() {
                       </TableCell>
                       <TableCell data-label="활성화 여부">
                         {admin.user_id ? (
-                          <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-[12px] font-medium text-primary ring-1 ring-inset ring-primary/20">
+                          <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-[0.75rem] font-medium text-primary ring-1 ring-inset ring-primary/20">
                             활성화됨
                           </span>
                         ) : (
-                          <span className="inline-flex items-center rounded-full bg-yellow-50 px-2 py-1 text-[12px] font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">
+                          <span className="inline-flex items-center rounded-full bg-yellow-50 px-2 py-1 text-[0.75rem] font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">
                             대기 중
                           </span>
                         )}
@@ -294,7 +294,7 @@ export default function AdminUsersPage() {
                         <TableCell data-label="작업" className="text-right">
                           <Button
                             aria-label="삭제"
-                            className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full md:w-auto text-destructive hover:text-destructive/80"
+                            className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto text-destructive hover:text-destructive/80"
                             disabled={actionLoadingId === admin.id}
                             onClick={() => void handleDelete(admin.id)}
                             type="button"

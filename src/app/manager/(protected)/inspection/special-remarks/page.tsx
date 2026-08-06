@@ -98,18 +98,18 @@ export default function SpecialRemarksPage() {
   }
 
   return (
-    <section className="space-y-[24px]">
+    <section className="space-y-[1.5rem]">
       <header>
-        <h1 className="text-[28px] leading-[1.2]">특이사항</h1>
-        <p className="mt-2 max-w-[640px] text-[14px] font-normal leading-relaxed text-muted-foreground">
+        <h1 className="text-[1.75rem] leading-[1.2]">특이사항</h1>
+        <p className="mt-2 max-w-[40rem] text-[0.875rem] font-normal leading-relaxed text-muted-foreground">
           경비원이 보고한 특이사항과 첨부사진을 확인합니다.
         </p>
       </header>
 
-      <section aria-label="특이사항 검색" className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
+      <section aria-label="특이사항 검색" className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
         <form className="flex flex-col gap-4 md:flex-row md:items-end" onSubmit={handleSearch}>
-          <div className="space-y-2 w-full md:max-w-[240px]">
-            <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="special-remark-year">
+          <div className="space-y-2 w-full md:max-w-[15rem]">
+            <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="special-remark-year">
               조회연도
             </label>
             <Input
@@ -122,13 +122,13 @@ export default function SpecialRemarksPage() {
               value={year}
             />
           </div>
-          <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 min-w-[96px]" type="submit" variant="outline">
+          <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 min-w-[6rem]" type="submit" variant="outline">
             조회
           </Button>
         </form>
       </section>
 
-      <section aria-label="특이사항 목록" className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
+      <section aria-label="특이사항 목록" className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
         {loading ? (
           <ManagerLoadingMessage />
         ) : error ? (
@@ -163,13 +163,13 @@ export default function SpecialRemarksPage() {
                         </Link>
                       </TableCell>
                       <TableCell data-label="점검자">{report.employee_name}</TableCell>
-                      <TableCell data-label="특이사항내용" className="max-w-[420px]">{summarizeContent(report.content)}</TableCell>
+                      <TableCell data-label="특이사항내용" className="max-w-[26.25rem]">{summarizeContent(report.content)}</TableCell>
                       <TableCell data-label="첨부사진">
                         {report.photo_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
                             alt="첨부사진 썸네일"
-                            className="h-14 w-20 rounded-[8px] border border-border object-cover"
+                            className="h-14 w-20 rounded-[0.5rem] border border-border object-cover"
                             src={report.photo_url}
                           />
                         ) : (

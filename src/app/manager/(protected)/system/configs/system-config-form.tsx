@@ -95,13 +95,13 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
   }
 
   return (
-    <form className="bg-muted/40 rounded-xl p-[32px] border border-border/50 space-y-5" onSubmit={handleSubmit}>
+    <form className="bg-muted/40 rounded-xl p-[2rem] border border-border/50 space-y-5" onSubmit={handleSubmit}>
       <div className="space-y-2">
-        <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="system-config-description">
+        <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="system-config-description">
           설명
         </label>
         <Textarea
-          className="w-full min-h-[96px] resize-y"
+          className="w-full min-h-[6rem] resize-y"
           id="system-config-description"
           onChange={(event) => setDescription(event.target.value)}
           value={description}
@@ -109,11 +109,11 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
       </div>
 
       <div className="space-y-2">
-        <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="system-config-content">
+        <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="system-config-content">
           내용
         </label>
         <Textarea
-          className="w-full min-h-[180px] resize-y"
+          className="w-full min-h-[11.25rem] resize-y"
           id="system-config-content"
           onChange={(event) => setContent(event.target.value)}
           value={content}
@@ -121,7 +121,7 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
       </div>
 
       <div className="space-y-2">
-        <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="system-code">
+        <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="system-code">
           시스템코드
         </label>
         <Input
@@ -134,7 +134,7 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
       </div>
 
       <div className="space-y-2">
-        <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="parent-system-code">
+        <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="parent-system-code">
           상위시스템코드
         </label>
         <Input
@@ -149,11 +149,11 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
 
       <div className="flex flex-col gap-3 md:flex-row md:justify-end">
         {mode === "edit" ? (
-          <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50" disabled={saving} onClick={handleDelete} type="button" variant="outline">
+          <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" disabled={saving} onClick={handleDelete} type="button" variant="outline">
             삭제
           </Button>
         ) : null}
-        <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50" disabled={saving} type="submit">
+        <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" disabled={saving} type="submit">
           저장
         </Button>
       </div>

@@ -46,7 +46,7 @@ export default function GuardWorksiteSection() {
   if (!sessionData?.worksiteName) {
     return (
       <section className="mb-6 bg-background rounded-xl p-6 border border-border shadow-sm">
-        <p className="text-[17px] font-semibold text-muted-foreground text-center py-2">
+        <p className="text-[1.0625rem] font-semibold text-muted-foreground text-center py-2">
           배정된 근무지 정보가 없습니다
         </p>
       </section>
@@ -56,8 +56,8 @@ export default function GuardWorksiteSection() {
   return (
     <section className="mb-6 bg-background rounded-xl p-6 border border-border shadow-sm space-y-2">
       <div className="flex items-baseline gap-2">
-        <h3 className="text-[14px] font-semibold text-muted-foreground">오늘의 근무지 :</h3>
-        <p className="text-[21px] font-bold text-primary">
+        <h3 className="text-[0.875rem] font-semibold text-muted-foreground">오늘의 근무지 :</h3>
+        <p className="text-[1.3125rem] font-bold text-primary">
           {sessionData.worksiteName}
         </p>
       </div>
@@ -67,8 +67,8 @@ export default function GuardWorksiteSection() {
         </p>
       ) : null}
       {sessionData.startDate && (
-        <div className="flex items-center gap-2 text-[13px] text-muted-foreground border-t border-border/30 pt-2">
-          <span className="font-semibold w-[80px]">배정기간 :</span>
+        <div className="flex items-center gap-2 text-[0.8125rem] text-muted-foreground border-t border-border/30 pt-2">
+          <span className="font-semibold w-[5rem]">배정기간 :</span>
           <span className="font-medium">
             {sessionData.startDate === sessionData.endDate 
               ? sessionData.startDate 

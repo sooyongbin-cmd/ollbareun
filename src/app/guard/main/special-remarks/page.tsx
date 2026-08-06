@@ -292,20 +292,20 @@ export default function GuardSpecialRemarksPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[980px] w-full px-5 py-[80px]">
-      <div className="max-w-[600px] mx-auto space-y-6">
+    <div className="mx-auto max-w-[61.25rem] w-full px-5 py-[5rem]">
+      <div className="max-w-[37.5rem] mx-auto space-y-6">
         <header>
-          <h1 className="text-[36px] font-semibold leading-[1.1]">특이사항</h1>
-          <p className="mt-2 text-[18px] text-muted-foreground">근무 중 확인한 특이사항을 작성하고 관리자에게 보고합니다.</p>
+          <h1 className="text-[2.25rem] font-semibold leading-[1.1]">특이사항</h1>
+          <p className="mt-2 text-[1.125rem] text-muted-foreground">근무 중 확인한 특이사항을 작성하고 관리자에게 보고합니다.</p>
         </header>
 
-        <section className="bg-muted/40 rounded-xl p-[24px] border border-border/50 space-y-5">
+        <section className="bg-muted/40 rounded-xl p-[1.5rem] border border-border/50 space-y-5">
           <div className="space-y-2">
-            <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="special-remark-content">
+            <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="special-remark-content">
               특이사항 내용
             </label>
             <Textarea
-              className="w-full min-h-[160px] resize-y"
+              className="w-full min-h-[10rem] resize-y"
               id="special-remark-content"
               value={content}
               onChange={(event) => setContent(event.target.value)}
@@ -319,24 +319,24 @@ export default function GuardSpecialRemarksPage() {
           </Button>
         </section>
 
-        <section className="bg-muted/40 rounded-xl p-[24px] border border-border/50 space-y-5">
+        <section className="bg-muted/40 rounded-xl p-[1.5rem] border border-border/50 space-y-5">
           <video
             ref={videoRef}
-            className="aspect-[4/3] w-full rounded-[12px] border border-border bg-foreground object-cover"
+            className="aspect-[4/3] w-full rounded-[0.75rem] border border-border bg-foreground object-cover"
             muted
             playsInline
           />
-          <p className="text-[14px] font-semibold text-muted-foreground">{cameraStatus}</p>
+          <p className="text-[0.875rem] font-semibold text-muted-foreground">{cameraStatus}</p>
           {photoDataUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img alt="촬영된 첨부사진" className="w-full rounded-[12px] border border-border" src={photoDataUrl} />
+            <img alt="촬영된 첨부사진" className="w-full rounded-[0.75rem] border border-border" src={photoDataUrl} />
           ) : null}
           {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p> : null}
           <Button className="w-full" onClick={handleCapture} type="button" variant="outline">
             촬영
           </Button>
           <Button
-            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full justify-center disabled:opacity-50"
+            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center disabled:opacity-50"
             disabled
             onClick={() => handleReport("resend")}
             type="button"
@@ -344,7 +344,7 @@ export default function GuardSpecialRemarksPage() {
             이메일보고(resend)
           </Button>
           <Button
-            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full justify-center disabled:opacity-50"
+            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center disabled:opacity-50"
             disabled={saving || !content.trim()}
             onClick={() => handleReport("formspree")}
             type="button"
@@ -352,7 +352,7 @@ export default function GuardSpecialRemarksPage() {
             {savingProvider === "formspree" ? "보고 중..." : "이메일(Formspree)"}
           </Button>
           <Button
-            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full justify-center disabled:opacity-50"
+            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center disabled:opacity-50"
             disabled={saving || !content.trim()}
             onClick={() => handleReport("naver")}
             type="button"
@@ -360,7 +360,7 @@ export default function GuardSpecialRemarksPage() {
             {savingProvider === "naver" ? "보고 중..." : "이메일(NAVER)"}
           </Button>
           <Button
-            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full justify-center gap-2 disabled:opacity-50"
+            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center gap-2 disabled:opacity-50"
             disabled={saving || !content.trim()}
             onClick={() => handleReport("push")}
             type="button"

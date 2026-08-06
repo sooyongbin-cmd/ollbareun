@@ -132,27 +132,27 @@ export default function WorksiteSavePage() {
   }
 
   return (
-    <section className="space-y-[24px]">
+    <section className="space-y-[1.5rem]">
       <header>
-        <p className="text-[14px] font-semibold text-muted-foreground uppercase">관리자 화면</p>
+        <p className="text-[0.875rem] font-semibold text-muted-foreground uppercase">관리자 화면</p>
         <div className="space-y-3">
-          <h1 className="text-[28px] leading-[1.2]">근무지수정</h1>
-          <p className="text-[14px] font-normal leading-relaxed text-muted-foreground max-w-[640px]">
+          <h1 className="text-[1.75rem] leading-[1.2]">근무지수정</h1>
+          <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground max-w-[40rem]">
             선택한 근무지의 이름, 주소, 실제 GPS정보, 허용 반경을 수정할 수 있습니다.
           </p>
         </div>
       </header>
 
-      <section className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
+      <section className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
         {loading ? (
           <ManagerLoadingMessage />
         ) : routeError ? (
-          <p className="text-[16px] text-destructive">{routeError}</p>
+          <p className="text-[1rem] text-destructive">{routeError}</p>
         ) : (
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="worksite-name">
+                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="worksite-name">
                   근무지명
                 </label>
                 <Input
@@ -164,7 +164,7 @@ export default function WorksiteSavePage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="worksite-address">
+                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="worksite-address">
                   근무지주소
                 </label>
                 <Input
@@ -177,7 +177,7 @@ export default function WorksiteSavePage() {
               </div>
               <WorksiteGpsPicker address={address} value={gpsInfo} onChange={setGpsInfo} />
               <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="worksite-radius">
+                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="worksite-radius">
                   허용반경(m)
                 </label>
                 <Input
@@ -191,12 +191,12 @@ export default function WorksiteSavePage() {
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <Button aria-label="저장" className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full md:w-auto" type="submit">
+              <Button aria-label="저장" className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto" type="submit">
                 <SaveIcon size={20} />
               </Button>
               <Button
                 aria-label="삭제"
-                className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full md:w-auto"
+                className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto"
                 type="button"
                 onClick={() => setDeleteConfirmOpen(true)}
                 variant="outline"
@@ -207,7 +207,7 @@ export default function WorksiteSavePage() {
           </form>
         )}
 
-        {error ? <p className="mt-6 text-[16px] text-destructive">{error}</p> : null}
+        {error ? <p className="mt-6 text-[1rem] text-destructive">{error}</p> : null}
       </section>
 
       <ConfirmModal

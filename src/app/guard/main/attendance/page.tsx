@@ -280,11 +280,11 @@ export default function GuardAttendancePage() {
   }
 
   return (
-    <div className="mx-auto max-w-[980px] w-full px-5 py-[80px]">
-      <div className="max-w-[600px] mx-auto">
+    <div className="mx-auto max-w-[61.25rem] w-full px-5 py-[5rem]">
+      <div className="max-w-[37.5rem] mx-auto">
         {guard ? (
-          <section className="bg-muted/40 rounded-xl p-[16px] border border-border/50">
-            <div className="space-y-[32px]">
+          <section className="bg-muted/40 rounded-xl p-[1rem] border border-border/50">
+            <div className="space-y-[2rem]">
               <AttendanceMapSection
                 currentLatitude={latitude}
                 currentLongitude={longitude}
@@ -292,7 +292,7 @@ export default function GuardAttendancePage() {
               />
 
               <div
-                className={`p-4 rounded-xl text-center text-[15px] font-medium transition-colors ${
+                className={`p-4 rounded-xl text-center text-[0.9375rem] font-medium transition-colors ${
                   activeDecision.allowed ? "bg-primary/5 text-primary" : "bg-destructive text-foreground"
                 }`}
                 id="attendance-decision-section"
@@ -302,7 +302,7 @@ export default function GuardAttendancePage() {
 
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3" id="attendance-actions-section">
                 <Button
-                  className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                  className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"
                   data-testid="clock-in"
                   type="button"
                   disabled={!clockInDecision.allowed || !!guard.attendance?.clock_in_at}
@@ -328,11 +328,11 @@ export default function GuardAttendancePage() {
           </section>
         ) : (
           <section
-            className="bg-muted/40 rounded-xl p-[16px] border border-border/50 text-center"
+            className="bg-muted/40 rounded-xl p-[1rem] border border-border/50 text-center"
             id="attendance-auth-required-section"
           >
-            <p className="text-[17px] text-muted-foreground">현장 근로자 인증 후 이용할 수 있습니다.</p>
-            <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 mt-6 inline-flex" href="/guard">
+            <p className="text-[1.0625rem] text-muted-foreground">현장 근로자 인증 후 이용할 수 있습니다.</p>
+            <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 mt-6 inline-flex" href="/guard">
               인증하러 가기
             </Link>
           </section>

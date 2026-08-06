@@ -98,28 +98,28 @@ export default function WorksiteNewPage() {
   }
 
   return (
-    <section className="space-y-[24px]">
+    <section className="space-y-[1.5rem]">
       <header>
-        <h1 className="text-[28px] leading-[1.2]">근무지등록</h1>
-        <p className="text-[14px] font-normal leading-relaxed text-muted-foreground mt-2 max-w-[600px]">
+        <h1 className="text-[1.75rem] leading-[1.2]">근무지등록</h1>
+        <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground mt-2 max-w-[37.5rem]">
           근무지명, 주소, 실제 GPS정보, 허용 반경을 입력해 근무지를 등록합니다.
         </p>
       </header>
 
-      <section className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
+      <section className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="worksite-name">
+              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="worksite-name">
                 근무지명
               </label>
               <Input className="w-full" id="worksite-name" name="name" placeholder="작업장 이름을 입력하세요." required />
             </div>
             <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="worksite-address">
+              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="worksite-address">
                 근무지주소
               </label>
-              <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_132px]">
+              <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_8.25rem]">
                 <Input
                   className="w-full"
                   id="worksite-address"
@@ -129,14 +129,14 @@ export default function WorksiteNewPage() {
                   readOnly
                   required
                 />
-                <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full whitespace-nowrap md:w-full" type="button" onClick={openAddressPopup} variant="outline">
+                <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full whitespace-nowrap md:w-full" type="button" onClick={openAddressPopup} variant="outline">
                   주소 검색
                 </Button>
               </div>
             </div>
             <WorksiteGpsPicker address={address} value={gpsInfo} onChange={setGpsInfo} />
             <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="worksite-radius">
+              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="worksite-radius">
                 허용반경(m)
               </label>
               <Input className="w-full" id="worksite-radius" name="radiusMeters" placeholder="100" required />
@@ -145,7 +145,7 @@ export default function WorksiteNewPage() {
 
           <Button
             aria-label="저장"
-            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full md:w-auto"
+            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto"
             data-testid="worksite-submit"
             type="submit"
           >

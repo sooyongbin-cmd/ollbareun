@@ -150,15 +150,15 @@ export default function AttendanceReportPage() {
   }
 
   return (
-    <section className="space-y-[24px]">
+    <section className="space-y-[1.5rem]">
       <header>
-        <h1 className="text-[28px] leading-[1.2]">근태내역</h1>
+        <h1 className="text-[1.75rem] leading-[1.2]">근태내역</h1>
       </header>
 
-      <section aria-label="근태내역 조회" className="rounded-xl border border-border/50 bg-muted/40 p-[32px]">
-        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_160px_auto_auto] md:items-end">
+      <section aria-label="근태내역 조회" className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_10rem_auto_auto] md:items-end">
           <div className="space-y-2">
-            <label className="ml-1 text-[14px] font-semibold text-muted-foreground" htmlFor="attendance-employee-name">
+            <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="attendance-employee-name">
               직원이름
             </label>
             <NativeSelect
@@ -177,7 +177,7 @@ export default function AttendanceReportPage() {
             </NativeSelect>
           </div>
           <div className="space-y-2">
-            <label className="ml-1 text-[14px] font-semibold text-muted-foreground" htmlFor="attendance-year">
+            <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="attendance-year">
               연도
             </label>
             <Input
@@ -190,16 +190,16 @@ export default function AttendanceReportPage() {
               onChange={(event) => setYear(Number(event.target.value))}
             />
           </div>
-          <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-[48px]" type="button" onClick={handleSearch} disabled={loading} variant="outline">
+          <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 h-[3rem]" type="button" onClick={handleSearch} disabled={loading} variant="outline">
             조회
           </Button>
-          <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-[48px]" type="button" onClick={handleExport} disabled={rows.length === 0}>
+          <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 h-[3rem]" type="button" onClick={handleExport} disabled={rows.length === 0}>
             엑셀
           </Button>
         </div>
       </section>
 
-      <section aria-label="근태내역 목록" className="rounded-xl border border-border/50 bg-muted/40 p-[32px]">
+      <section aria-label="근태내역 목록" className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
         {loading ? (
           <ManagerLoadingMessage />
         ) : error ? (
@@ -229,7 +229,7 @@ export default function AttendanceReportPage() {
                       <TableCell data-label="퇴근일시">{row.clockOutDateTime ?? "-"}</TableCell>
                       <TableCell data-label="근무시간">{row.workDuration}</TableCell>
                       <TableCell data-label="수정">
-                        <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-[40px]" type="button" onClick={() => openEditModal(row)} variant="outline">
+                        <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 h-[2.5rem]" type="button" onClick={() => openEditModal(row)} variant="outline">
                           수정
                         </Button>
                       </TableCell>
@@ -243,13 +243,13 @@ export default function AttendanceReportPage() {
       </section>
 
       <Dialog open={selectedRow !== null} onOpenChange={(open) => !open && closeEditModal()}>
-        <DialogContent className="max-w-[440px]">
+        <DialogContent className="max-w-[27.5rem]">
           <DialogHeader>
             <DialogTitle>근태 기록 수정</DialogTitle>
             <DialogDescription>출근일시와 퇴근일시를 확인한 뒤 저장하세요.</DialogDescription>
           </DialogHeader>
             <div className="mt-6 space-y-2">
-              <label className="ml-1 text-[14px] font-semibold text-muted-foreground" htmlFor="clock-in-date-time">
+              <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="clock-in-date-time">
                 출근일시
               </label>
               <Input
@@ -262,7 +262,7 @@ export default function AttendanceReportPage() {
               />
             </div>
             <div className="mt-4 space-y-2">
-              <label className="ml-1 text-[14px] font-semibold text-muted-foreground" htmlFor="clock-out-date-time">
+              <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="clock-out-date-time">
                 퇴근일시
               </label>
               <Input
@@ -276,14 +276,14 @@ export default function AttendanceReportPage() {
             {modalError && <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mt-4">{modalError}</p>}
             <div className="mt-8 flex gap-3">
               <Button
-                className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 flex-1"
+                className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 flex-1"
                 type="button"
                 disabled={saving || !clockInDateTime}
                 onClick={handleAttendanceSave}
               >
                 {saving ? "저장 중..." : "저장"}
               </Button>
-              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 flex-1" type="button" disabled={saving} onClick={closeEditModal} variant="outline">
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 flex-1" type="button" disabled={saving} onClick={closeEditModal} variant="outline">
                 취소
               </Button>
             </div>

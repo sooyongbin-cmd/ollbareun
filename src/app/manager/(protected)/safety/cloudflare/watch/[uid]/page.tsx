@@ -39,16 +39,16 @@ export default async function CloudflareVideoWatchPage({ params }: { params: Pro
   const video = await loadCloudflareVideo(uid);
 
   return (
-    <section className="space-y-[24px]">
+    <section className="space-y-[1.5rem]">
       <header>
-        <h1 className="text-[28px] leading-[1.2]">{video.title}</h1>
-        <p className="text-[14px] font-normal leading-relaxed text-muted-foreground mt-2 max-w-[720px]">
+        <h1 className="text-[1.75rem] leading-[1.2]">{video.title}</h1>
+        <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground mt-2 max-w-[45rem]">
           UID {video.uid} · {getStatusText(video)}
         </p>
       </header>
 
-      <section className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
-        <div className="aspect-video min-h-[220px] overflow-hidden rounded-lg border border-border bg-black">
+      <section className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
+        <div className="aspect-video min-h-[13.75rem] overflow-hidden rounded-lg border border-border bg-black">
           <iframe
             allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
             allowFullScreen

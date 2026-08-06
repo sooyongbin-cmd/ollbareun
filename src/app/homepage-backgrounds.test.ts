@@ -23,13 +23,13 @@ describe("homepage PDF background colors", () => {
 
   it("rounds the history image at the PDF's top-left and bottom-right corners", () => {
     expect(stylesheet).toMatch(
-      /\.historyImage\s*\{[^}]*border-radius: 55px 0 55px 0;/s,
+      /\.historyImage\s*\{[^}]*border-radius: 3.4375rem 0 3.4375rem 0;/s,
     );
   });
 
   it("makes the Social Impact background full-bleed with white cards", () => {
     expect(stylesheet).toMatch(
-      /\.socialSection\s*\{[^}]*width: 100%;[^}]*padding-right: max\(24px, calc\(\(100% - 1280px\) \/ 2\)\);[^}]*padding-left: max\(24px, calc\(\(100% - 1280px\) \/ 2\)\);/s,
+      /\.socialSection\s*\{[^}]*width: 100%;[^}]*padding-right: max\(1.5rem, calc\(\(100% - 80rem\) \/ 2\)\);[^}]*padding-left: max\(1.5rem, calc\(\(100% - 80rem\) \/ 2\)\);/s,
     );
     expect(stylesheet).toMatch(
       /\.socialGrid article\s*\{[^}]*background: #fff;/s,
@@ -38,13 +38,13 @@ describe("homepage PDF background colors", () => {
 
   it("matches the Figma desktop history timeline horizontal layout", () => {
     expect(stylesheet).toMatch(
-      /@media \(min-width: 1201px\) \{[\s\S]*\.aboutPage \.historyWrap\s*\{[^}]*max-width: 1280px;[^}]*grid-template-columns: 640px minmax\(0, 1fr\);[^}]*gap: 90px;[\s\S]*\.aboutPage \.timeline\s*\{[^}]*--timeline-date-column: 188px;[^}]*--timeline-marker-column: 84px;/s,
+      /@media \(min-width: 75.0625rem\) \{[\s\S]*\.aboutPage \.historyWrap\s*\{[^}]*max-width: 80rem;[^}]*grid-template-columns: 40rem minmax\(0, 1fr\);[^}]*gap: 5.625rem;[\s\S]*\.aboutPage \.timeline\s*\{[^}]*--timeline-date-column: 11.75rem;[^}]*--timeline-marker-column: 5.25rem;/s,
     );
   });
 
   it("keeps the about, service, and client hero images the same height", () => {
     expect(stylesheet).toMatch(
-      /\.aboutHero,[\s\S]*\.serviceHero,[\s\S]*\.clientHero\s*\{[^}]*min-height: 500px;/s,
+      /\.aboutHero,[\s\S]*\.serviceHero,[\s\S]*\.clientHero\s*\{[^}]*min-height: 31.25rem;/s,
     );
   });
 

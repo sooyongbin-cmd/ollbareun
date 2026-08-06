@@ -6,10 +6,10 @@ const stylesheet = readFileSync("src/app/page.module.css", "utf8");
 describe("homepage client logo sizing", () => {
   it("gives the padded source images enough height to match the PDF artwork", () => {
     expect(stylesheet).toMatch(
-      /\.homeClientLogos > div\s*\{[^}]*min-height: 170px;/s,
+      /\.homeClientLogos > div\s*\{[^}]*min-height: 10.625rem;/s,
     );
     expect(stylesheet).toMatch(
-      /\.homeClientLogos img\s*\{[^}]*padding: 0 24px;/s,
+      /\.homeClientLogos img\s*\{[^}]*padding: 0 1.5rem;/s,
     );
   });
 
@@ -28,10 +28,10 @@ describe("homepage client logo sizing", () => {
 describe("client page logo sizing", () => {
   it("matches the logo-to-heading scale in the PDF", () => {
     expect(stylesheet).toMatch(
-      /\.clientGroups > div > h3\s*\{[^}]*font-size: 13px;/s,
+      /\.clientGroups > div > h3\s*\{[^}]*font-size: 0.8125rem;/s,
     );
     expect(stylesheet).toMatch(
-      /\.logoGrid > div\s*\{[^}]*height: 130px;/s,
+      /\.logoGrid > div\s*\{[^}]*height: 8.125rem;/s,
     );
   });
 });

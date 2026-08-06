@@ -324,8 +324,8 @@ export default function AttendanceMapSection({
         className="bg-background rounded-xl p-6 border border-border shadow-sm"
         id="attendance-map-section"
       >
-        <h3 className="text-[17px] font-semibold">지도</h3>
-        <p className="mt-3 text-[14px] text-muted-foreground">오늘 배정된 근무지가 없어 지도를 표시할 수 없습니다.</p>
+        <h3 className="text-[1.0625rem] font-semibold">지도</h3>
+        <p className="mt-3 text-[0.875rem] text-muted-foreground">오늘 배정된 근무지가 없어 지도를 표시할 수 없습니다.</p>
       </section>
     );
   }
@@ -333,17 +333,17 @@ export default function AttendanceMapSection({
   return (
     <section className="bg-background rounded-xl p-6 border border-border shadow-sm" id="attendance-map-section">
       <div className="mb-4 flex flex-col gap-1">
-        <h3 className="text-[17px] font-semibold">지도</h3>
-        <p className="text-[13px] text-muted-foreground">근무지 : {worksite.name}</p>
-        <p className="text-[13px] text-muted-foreground">{formatCurrentDistance(worksite, currentGps)}</p>
+        <h3 className="text-[1.0625rem] font-semibold">지도</h3>
+        <p className="text-[0.8125rem] text-muted-foreground">근무지 : {worksite.name}</p>
+        <p className="text-[0.8125rem] text-muted-foreground">{formatCurrentDistance(worksite, currentGps)}</p>
       </div>
       <div
         ref={mapElementRef}
-        className="h-[320px] w-full overflow-hidden rounded-lg border border-border bg-muted/40"
+        className="h-[20rem] w-full overflow-hidden rounded-lg border border-border bg-muted/40"
         data-testid="attendance-map"
         id="attendance-map-canvas"
       />
-      <div className="mt-3 flex flex-wrap gap-3 text-[13px] text-muted-foreground">
+      <div className="mt-3 flex flex-wrap gap-3 text-[0.8125rem] text-muted-foreground">
         <span className="inline-flex items-center gap-2">
           <span className="h-3 w-3 rounded-full bg-primary" />
           현재 위치

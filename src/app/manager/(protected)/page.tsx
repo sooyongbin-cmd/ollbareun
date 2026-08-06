@@ -144,7 +144,7 @@ function DashboardSkeleton() {
           <Skeleton className="h-4 w-64 max-w-full" />
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-[300px] w-full" />
+          <Skeleton className="h-[18.75rem] w-full" />
         </CardContent>
       </Card>
       <div className="grid gap-6 xl:grid-cols-2">
@@ -180,13 +180,13 @@ function DashboardTrendChart({ data }: { data: DashboardPayload["dailyRates"] })
       </CardHeader>
       <CardContent className="pt-6">
         {data.length === 0 ? (
-          <div className="flex h-[300px] items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
+          <div className="flex h-[18.75rem] items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
             표시할 추이 데이터가 없습니다.
           </div>
         ) : (
           <ChartContainer
             config={chartConfig}
-            className="h-[300px] w-full aspect-auto"
+            className="h-[18.75rem] w-full aspect-auto"
             role="img"
             aria-label="최근 30일 출근율과 안전교육 이수율 비교 차트"
             data-testid="dashboard-trend-chart"
@@ -386,7 +386,7 @@ export default function ManagerPage() {
           </CardHeader>
           <CardContent className="min-w-0 px-0">
             <div className="min-w-0 overflow-x-auto">
-              <Table className="min-w-[420px]">
+              <Table className="min-w-[26.25rem]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>근무지명</TableHead>
@@ -437,7 +437,7 @@ export default function ManagerPage() {
           </CardHeader>
           <CardContent className="min-w-0 px-0">
             <div className="min-w-0 overflow-x-auto">
-              <Table className="min-w-[680px]">
+              <Table className="min-w-[42.5rem]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>성명</TableHead>

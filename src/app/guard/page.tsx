@@ -306,7 +306,7 @@ export default function GuardPage() {
 
   return (
     <main className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/20">
-      <div className="mx-auto flex min-h-screen w-full max-w-[600px] flex-col justify-center gap-6 px-5 py-10">
+      <div className="mx-auto flex min-h-screen w-full max-w-[37.5rem] flex-col justify-center gap-6 px-5 py-10">
         {launchState === "in-app" && <InAppBrowserGuide />}
 
         {(launchState === "installable-browser" || launchState === "browser-installed-or-unavailable") && (
@@ -326,13 +326,13 @@ export default function GuardPage() {
               className="w-full rounded-xl border border-border/50 bg-muted/40 p-5"
             >
               <div className="text-center space-y-1 mb-6">
-                <p className="text-[15px] font-semibold text-primary">(주)올바름 근무자</p>
-                <h1 className="text-[28px] font-bold text-foreground">근무자 로그인</h1>
+                <p className="text-[0.9375rem] font-semibold text-primary">(주)올바름 근무자</p>
+                <h1 className="text-[1.75rem] font-bold text-foreground">근무자 로그인</h1>
               </div>
               <form className="w-full space-y-6" onSubmit={handleGuardAuth}>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="guard-name">
+                    <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="guard-name">
                       이름
                     </label>
                     <Input
@@ -346,14 +346,14 @@ export default function GuardPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="guard-phone">
+                    <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="guard-phone">
                       연락처
                     </label>
                     <Input className="w-full" id="guard-phone" name="phone" placeholder="010-0000-0000" required />
                   </div>
                 </div>
                 <Button
-                  className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full disabled:opacity-70"
+                  className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full disabled:opacity-70"
                   data-testid="guard-auth-submit"
                   disabled={isGuardLoginPending}
                   type="submit"
@@ -361,7 +361,7 @@ export default function GuardPage() {
                   로그인
                 </Button>
                 {guardLoginProgress && (
-                  <p aria-live="polite" className="-mt-3 text-center text-[13px] leading-relaxed text-muted-foreground">
+                  <p aria-live="polite" className="-mt-3 text-center text-[0.8125rem] leading-relaxed text-muted-foreground">
                     {guardLoginProgress}
                   </p>
                 )}
@@ -369,21 +369,21 @@ export default function GuardPage() {
             </section>
 
             <section className="w-full rounded-xl border border-border/50 bg-muted/40 p-5">
-              <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full" onClick={handlePasskeyLogin} type="button">
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full" onClick={handlePasskeyLogin} type="button">
                 패스키로 로그인
               </Button>
-              <p className="mt-3 text-[13px] leading-relaxed text-muted-foreground">
+              <p className="mt-3 text-[0.8125rem] leading-relaxed text-muted-foreground">
                 관리자 승인을 받은 뒤 이 기기에 패스키를 등록한 근무자만 사용할 수 있습니다.
               </p>
             </section>
 
             <section className="w-full rounded-xl border border-border/50 bg-muted/40 p-6">
               <div className="space-y-2">
-                <p className="text-[13px] font-semibold text-primary">로그아웃 Push 처리 결과</p>
-                <h2 className="text-[21px] font-semibold">
+                <p className="text-[0.8125rem] font-semibold text-primary">로그아웃 Push 처리 결과</p>
+                <h2 className="text-[1.3125rem] font-semibold">
                   {logoutPushResult ? "마지막 로그아웃 처리 내역" : "처리 내역 없음"}
                 </h2>
-                <p className="text-[14px] leading-relaxed text-muted-foreground">
+                <p className="text-[0.875rem] leading-relaxed text-muted-foreground">
                   {logoutPushResult
                     ? `${formatLogoutResultTime(logoutPushResult.completedAt)}에 수행된 Push 알림 정리 결과입니다.`
                     : "로그아웃을 수행하면 브라우저 Push 구독 해제와 Supabase 구독정보 삭제 결과가 여기에 표시됩니다."}
@@ -391,20 +391,20 @@ export default function GuardPage() {
               </div>
 
               {logoutPushResult && (
-                <dl className="mt-5 grid gap-3 text-[14px]">
-                  <div className="rounded-[12px] border border-border/40 bg-background px-4 py-3">
+                <dl className="mt-5 grid gap-3 text-[0.875rem]">
+                  <div className="rounded-[0.75rem] border border-border/40 bg-background px-4 py-3">
                     <dt className="font-semibold text-foreground">브라우저 구독</dt>
                     <dd className="mt-1 text-muted-foreground">{getBrowserSubscriptionText(logoutPushResult.browserSubscription)}</dd>
                   </div>
-                  <div className="rounded-[12px] border border-border/40 bg-background px-4 py-3">
+                  <div className="rounded-[0.75rem] border border-border/40 bg-background px-4 py-3">
                     <dt className="font-semibold text-foreground">서버 구독정보</dt>
                     <dd className="mt-1 text-muted-foreground">{getServerSubscriptionText(logoutPushResult.serverSubscription)}</dd>
                   </div>
-                  <div className="rounded-[12px] border border-border/40 bg-background px-4 py-3">
+                  <div className="rounded-[0.75rem] border border-border/40 bg-background px-4 py-3">
                     <dt className="font-semibold text-foreground">로그인 세션</dt>
                     <dd className="mt-1 text-muted-foreground">{getSessionText(logoutPushResult.session)}</dd>
                   </div>
-                  <div className="rounded-[12px] border border-border/40 bg-background px-4 py-3">
+                  <div className="rounded-[0.75rem] border border-border/40 bg-background px-4 py-3">
                     <dt className="font-semibold text-foreground">endpoint</dt>
                     <dd className="mt-1 break-all text-muted-foreground">{maskEndpoint(logoutPushResult.endpoint)}</dd>
                   </div>

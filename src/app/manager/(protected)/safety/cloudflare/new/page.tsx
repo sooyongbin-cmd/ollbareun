@@ -102,18 +102,18 @@ export default function CloudflareVideoNewPage() {
   }
 
   return (
-    <section className="space-y-[24px]">
+    <section className="space-y-[1.5rem]">
       <header>
-        <h1 className="text-[28px] leading-[1.2]">(cloudflare)등록화면</h1>
-        <p className="text-[14px] font-normal leading-relaxed text-muted-foreground mt-2 max-w-[600px]">
+        <h1 className="text-[1.75rem] leading-[1.2]">(cloudflare)등록화면</h1>
+        <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground mt-2 max-w-[37.5rem]">
           로컬 PC의 동영상 파일을 Cloudflare Stream으로 업로드합니다.
         </p>
       </header>
 
-      <section className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
+      <section className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
         <form className="space-y-6" noValidate onSubmit={handleSubmit}>
           <div className="space-y-2">
-            <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="cloudflare-video-file">
+            <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="cloudflare-video-file">
               동영상 파일
             </label>
             <Input
@@ -125,11 +125,11 @@ export default function CloudflareVideoNewPage() {
               required
               type="file"
             />
-            <p className="text-[13px] text-muted-foreground">200MB 이하 동영상 파일을 업로드할 수 있습니다.</p>
+            <p className="text-[0.8125rem] text-muted-foreground">200MB 이하 동영상 파일을 업로드할 수 있습니다.</p>
           </div>
 
           <Button
-            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full md:w-auto disabled:opacity-50 gap-2"
+            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto disabled:opacity-50 gap-2"
             type="submit"
             disabled={isUploading}
           >
@@ -143,7 +143,7 @@ export default function CloudflareVideoNewPage() {
         {uploadedUid ? (
           <div className="mt-6 rounded-lg border border-border bg-background p-5">
             <p className="rounded-md border border-border bg-muted px-4 py-3 text-sm text-foreground">업로드가 완료되었습니다. Cloudflare에서 처리 중일 수 있습니다.</p>
-            <dl className="mt-4 grid gap-2 text-[14px]">
+            <dl className="mt-4 grid gap-2 text-[0.875rem]">
               <div className="flex flex-wrap gap-2">
                 <dt className="font-semibold text-muted-foreground">UID</dt>
                 <dd className="font-semibold text-foreground">{uploadedUid}</dd>

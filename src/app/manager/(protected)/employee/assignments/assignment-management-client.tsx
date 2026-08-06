@@ -152,11 +152,11 @@ export default function AssignmentManagementClient() {
   }
 
   return (
-    <section className="space-y-[24px]">
+    <section className="space-y-[1.5rem]">
       <header>
         <div className="space-y-3">
-          <h1 className="text-[28px] leading-[1.2]">근무지배정</h1>
-          <p className="text-[14px] font-normal leading-relaxed text-muted-foreground max-w-[640px]">
+          <h1 className="text-[1.75rem] leading-[1.2]">근무지배정</h1>
+          <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground max-w-[40rem]">
             날짜, 근무지, 이름으로 배정 현황을 확인하고 필요하면 수정합니다.
           </p>
         </div>
@@ -164,12 +164,12 @@ export default function AssignmentManagementClient() {
 
       <section
         aria-label="배정 검색"
-        className="bg-muted/40 rounded-xl p-[32px] border border-border/50"
+        className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
       >
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="grid gap-4 flex-1 md:grid-cols-3">
             <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="assignment-date-search">
+              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-date-search">
                 날짜
               </label>
               <Input
@@ -181,7 +181,7 @@ export default function AssignmentManagementClient() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="assignment-worksite-search">
+              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-worksite-search">
                 근무지
               </label>
               <NativeSelect
@@ -199,7 +199,7 @@ export default function AssignmentManagementClient() {
               </NativeSelect>
             </div>
             <div className="space-y-2">
-              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="assignment-name-search">
+              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-name-search">
                 이름
               </label>
               <Input
@@ -213,7 +213,7 @@ export default function AssignmentManagementClient() {
           </div>
 
           <Link
-            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2"
+            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2"
             href="/manager/employee/assignments/new"
           >
             <span>배정등록</span>
@@ -224,9 +224,9 @@ export default function AssignmentManagementClient() {
 
       <section
         aria-label="배정 목록"
-        className="bg-muted/40 rounded-xl p-[32px] border border-border/50"
+        className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
       >
-        <div className="flex flex-wrap items-center justify-between gap-3 text-[14px] text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-[0.875rem] text-muted-foreground">
           <span>전체 배정 {assignments.length}</span>
           <span>조회 결과 {filteredAssignments.length}</span>
         </div>
@@ -234,7 +234,7 @@ export default function AssignmentManagementClient() {
         {loading ? (
           <ManagerLoadingMessage className="mt-6" />
         ) : error ? (
-          <p className="mt-6 text-[16px] text-destructive">{error}</p>
+          <p className="mt-6 text-[1rem] text-destructive">{error}</p>
         ) : (
           <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
             <Table className="w-full">

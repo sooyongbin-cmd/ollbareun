@@ -269,18 +269,18 @@ export default function GuardInspectionNfcPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[980px] w-full px-5 py-[80px]">
-      <div className="max-w-[600px] mx-auto space-y-6">
+    <div className="mx-auto max-w-[61.25rem] w-full px-5 py-[5rem]">
+      <div className="max-w-[37.5rem] mx-auto space-y-6">
         <header>
-          <h1 className="text-[36px] font-semibold leading-[1.1]">순찰(NFC태그)</h1>
-          <p className="mt-2 text-[18px] text-muted-foreground">NFC 스티커를 태그하면 점검 기록을 저장합니다.</p>
+          <h1 className="text-[2.25rem] font-semibold leading-[1.1]">순찰(NFC태그)</h1>
+          <p className="mt-2 text-[1.125rem] text-muted-foreground">NFC 스티커를 태그하면 점검 기록을 저장합니다.</p>
         </header>
 
-        <section className="bg-muted/40 rounded-xl p-[24px] border border-border/50 space-y-5">
-          <div className="rounded-[12px] border border-border/50 bg-background p-4 space-y-2">
-            <p className="text-[14px] font-semibold text-muted-foreground">{saving ? "저장 중..." : status}</p>
+        <section className="bg-muted/40 rounded-xl p-[1.5rem] border border-border/50 space-y-5">
+          <div className="rounded-[0.75rem] border border-border/50 bg-background p-4 space-y-2">
+            <p className="text-[0.875rem] font-semibold text-muted-foreground">{saving ? "저장 중..." : status}</p>
             {nfcPayload ? (
-              <div className="grid gap-1 text-[15px]">
+              <div className="grid gap-1 text-[0.9375rem]">
                 <span className="font-semibold">{nfcPayload.siteName}</span>
                 <span className="text-muted-foreground">{nfcPayload.worksiteName}</span>
                 <span className="text-muted-foreground">

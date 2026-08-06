@@ -113,11 +113,11 @@ export default function ManagerPasskeyRequestsPage() {
   }
 
   return (
-    <section className="space-y-[24px]">
+    <section className="space-y-[1.5rem]">
       <header>
         <div className="space-y-3">
-          <h1 className="text-[28px] leading-[1.2]">패스키 요청 관리</h1>
-          <p className="max-w-[640px] text-[14px] font-normal leading-relaxed text-muted-foreground">
+          <h1 className="text-[1.75rem] leading-[1.2]">패스키 요청 관리</h1>
+          <p className="max-w-[40rem] text-[0.875rem] font-normal leading-relaxed text-muted-foreground">
             경비원이 요청한 패스키 등록을 승인하거나 거절합니다.
           </p>
         </div>
@@ -125,7 +125,7 @@ export default function ManagerPasskeyRequestsPage() {
 
       {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p> : null}
 
-      <section className="rounded-xl border border-border/50 bg-muted/40 p-[32px]">
+      <section className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
         {loading ? (
           <ManagerLoadingMessage />
         ) : (
@@ -153,7 +153,7 @@ export default function ManagerPasskeyRequestsPage() {
                       <TableCell data-label="경비원" className="font-semibold">
                         <div>
                           {request.employeeName}
-                          {request.employeeRetired ? <span className="ml-2 text-[12px] text-destructive">퇴직</span> : null}
+                          {request.employeeRetired ? <span className="ml-2 text-[0.75rem] text-destructive">퇴직</span> : null}
                         </div>
                       </TableCell>
                       <TableCell data-label="연락처">{request.employeePhone}</TableCell>
@@ -164,7 +164,7 @@ export default function ManagerPasskeyRequestsPage() {
                           {request.status === "pending" ? (
                             <>
                               <Button
-                                className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 px-3 py-2 text-[13px]"
+                                className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 px-3 py-2 text-[0.8125rem]"
                                 disabled={actionLoadingId === request.id}
                                 onClick={() => void runAction(request.id, "approve")}
                                 type="button"
@@ -172,7 +172,7 @@ export default function ManagerPasskeyRequestsPage() {
                                 승인
                               </Button>
                               <Button
-                                className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 px-3 py-2 text-[13px]"
+                                className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 px-3 py-2 text-[0.8125rem]"
                                 disabled={actionLoadingId === request.id}
                                 onClick={() => void runAction(request.id, "reject")}
                                 type="button"
@@ -184,7 +184,7 @@ export default function ManagerPasskeyRequestsPage() {
                           ) : null}
                           {request.status === "registered" || request.status === "approved" ? (
                             <Button
-                              className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 px-3 py-2 text-[13px]"
+                              className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 px-3 py-2 text-[0.8125rem]"
                               disabled={actionLoadingId === request.id}
                               onClick={() => void runAction(request.id, "revoke")}
                               type="button"

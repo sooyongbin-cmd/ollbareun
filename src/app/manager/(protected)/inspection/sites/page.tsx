@@ -77,21 +77,21 @@ export default function InspectionSitesPage() {
   }
 
   return (
-    <section className="space-y-[24px]">
+    <section className="space-y-[1.5rem]">
       <header>
-        <h1 className="text-[28px] leading-[1.2]">현장관리</h1>
-        <p className="mt-2 max-w-[640px] text-[14px] font-normal leading-relaxed text-muted-foreground">
+        <h1 className="text-[1.75rem] leading-[1.2]">현장관리</h1>
+        <p className="mt-2 max-w-[40rem] text-[0.875rem] font-normal leading-relaxed text-muted-foreground">
           근무지별 현장을 등록하고 점검 위치를 관리합니다.
         </p>
       </header>
 
       <section
         aria-label="현장 검색"
-        className="bg-muted/40 rounded-xl p-[32px] border border-border/50"
+        className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
       >
         <form className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between" onSubmit={handleSearch}>
           <div className="space-y-2 flex-1">
-            <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="site-search">
+            <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="site-search">
               현장이름
             </label>
             <Input
@@ -103,10 +103,10 @@ export default function InspectionSitesPage() {
             />
           </div>
           <div className="flex gap-3">
-            <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 min-w-[96px]" type="submit" variant="outline">
+            <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 min-w-[6rem]" type="submit" variant="outline">
               조회
             </Button>
-            <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 gap-2 whitespace-nowrap" href="/manager/inspection/sites/new">
+            <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 gap-2 whitespace-nowrap" href="/manager/inspection/sites/new">
               <span>현장등록</span>
               <ArrowRightIcon size={18} />
             </Link>
@@ -116,7 +116,7 @@ export default function InspectionSitesPage() {
 
       <section
         aria-label="현장 목록"
-        className="bg-muted/40 rounded-xl p-[32px] border border-border/50"
+        className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
       >
         {loading ? (
           <ManagerLoadingMessage />

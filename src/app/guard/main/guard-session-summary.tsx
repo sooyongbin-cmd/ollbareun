@@ -47,7 +47,7 @@ export default function GuardSessionSummary() {
   }
 
   return (
-    <div className="flex min-w-0 items-center gap-2 text-[12px] text-muted-foreground sm:text-[13px]">
+    <div className="flex min-w-0 items-center gap-2 text-[0.75rem] text-muted-foreground sm:text-[0.8125rem]">
       <span className="truncate font-medium text-foreground" title={summary.name}>
         {summary.name}
       </span>

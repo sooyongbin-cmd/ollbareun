@@ -89,7 +89,7 @@ describe("manager dashboard page", () => {
       name: "최근 30일 출근율과 안전교육 이수율 비교 차트",
     });
 
-    expect(chart).toHaveClass("h-[300px]", "w-full", "aspect-auto");
+    expect(chart).toHaveClass("h-[18.75rem]", "w-full", "aspect-auto");
     expect(screen.getAllByTestId("dashboard-trend-chart")).toHaveLength(1);
   });
 

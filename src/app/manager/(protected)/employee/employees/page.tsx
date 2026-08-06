@@ -171,11 +171,11 @@ export default function EmployeeRosterPage() {
   };
 
   return (
-    <section className="space-y-[24px]">
+    <section className="space-y-[1.5rem]">
       <header>
         <div className="space-y-3">
-          <h1 className="text-[28px] leading-[1.2]">직원명부관리</h1>
-          <p className="max-w-[640px] text-[14px] font-normal leading-relaxed text-muted-foreground">
+          <h1 className="text-[1.75rem] leading-[1.2]">직원명부관리</h1>
+          <p className="max-w-[40rem] text-[0.875rem] font-normal leading-relaxed text-muted-foreground">
             등록된 직원의 이름과 연락처를 검색해 확인합니다.
           </p>
         </div>
@@ -183,12 +183,12 @@ export default function EmployeeRosterPage() {
 
       <section
         aria-label="직원 검색"
-        className="rounded-xl border border-border/50 bg-muted/40 p-[24px] md:p-[32px]"
+        className="rounded-xl border border-border/50 bg-muted/40 p-[1.5rem] md:p-[2rem]"
       >
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="flex flex-1 flex-col gap-4 md:flex-row">
             <div className="flex-1 space-y-2">
-              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="employee-roster-name-search">
+              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="employee-roster-name-search">
                 이름
               </label>
               <NativeSelect
@@ -206,7 +206,7 @@ export default function EmployeeRosterPage() {
               </NativeSelect>
             </div>
             <div className="flex-1 space-y-2">
-              <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="employee-roster-role-search">
+              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="employee-roster-role-search">
                 역할
               </label>
               <NativeSelect
@@ -223,7 +223,7 @@ export default function EmployeeRosterPage() {
             </div>
           </div>
 
-          <label className="flex h-[48px] items-center gap-2 text-[14px] font-semibold text-foreground/80 md:mb-0">
+          <label className="flex h-[3rem] items-center gap-2 text-[0.875rem] font-semibold text-foreground/80 md:mb-0">
             <Checkbox
               checked={showRetired}
               onCheckedChange={(checked) => {
@@ -236,7 +236,7 @@ export default function EmployeeRosterPage() {
           </label>
 
           <Link
-            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full gap-2 text-center md:w-auto"
+            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full gap-2 text-center md:w-auto"
             href="/manager/employee/employees/new"
           >
             <span>직원 등록</span>
@@ -247,9 +247,9 @@ export default function EmployeeRosterPage() {
 
       <section
         aria-label="직원 목록"
-        className="rounded-xl border border-border/50 bg-muted/40 p-[24px] md:p-[32px]"
+        className="rounded-xl border border-border/50 bg-muted/40 p-[1.5rem] md:p-[2rem]"
       >
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-[12px] font-normal text-muted-foreground">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-[0.75rem] font-normal text-muted-foreground">
           <span>전체 직원 {data.employees.length}</span>
           <span>검색 결과 {filteredEmployees.length}</span>
         </div>
@@ -257,7 +257,7 @@ export default function EmployeeRosterPage() {
         {loading ? (
           <ManagerLoadingMessage className="mt-6" />
         ) : error ? (
-          <p className="mt-6 text-[16px] text-destructive">{error}</p>
+          <p className="mt-6 text-[1rem] text-destructive">{error}</p>
         ) : (
           <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
             <Table className="w-full">
@@ -335,7 +335,7 @@ export default function EmployeeRosterPage() {
                       </TableCell>
                       <TableCell data-label="상태" className="text-right">
                         <span
-                          className={`inline-flex rounded-full px-3 py-1 text-[12px] font-semibold ${
+                          className={`inline-flex rounded-full px-3 py-1 text-[0.75rem] font-semibold ${
                             employee.is_retired
                               ? "bg-foreground/10 text-muted-foreground"
                               : "bg-primary/10 text-primary"

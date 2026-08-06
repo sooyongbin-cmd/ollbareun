@@ -90,14 +90,14 @@ export default function ManagerEmailLogin({
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <main className="mx-auto flex min-h-screen w-full max-w-[420px] flex-col justify-center px-6 py-16">
+      <main className="mx-auto flex min-h-screen w-full max-w-[26.25rem] flex-col justify-center px-6 py-16">
         <div className="space-y-8">
           <div className="space-y-3">
-            <p className="text-[14px] font-semibold text-primary">관리자 인증</p>
-            <h1 className="text-[28px] leading-[1.2]">
+            <p className="text-[0.875rem] font-semibold text-primary">관리자 인증</p>
+            <h1 className="text-[1.75rem] leading-[1.2]">
               {initialAdminSetupRequired ? "최초 관리자 등록" : "관리자 Google 인증"}
             </h1>
-            <p className="text-[14px] font-normal leading-relaxed text-foreground/70">
+            <p className="text-[0.875rem] font-normal leading-relaxed text-foreground/70">
               {initialAdminSetupRequired
                 ? "등록된 관리자가 없어 최초 관리자 등록코드 확인 후 Google 인증을 시작합니다."
                 : "등록된 관리자 Google 계정으로 인증 후 관리자 화면에 접근할 수 있습니다."}
@@ -107,7 +107,7 @@ export default function ManagerEmailLogin({
           <form className="space-y-4" onSubmit={signInWithGoogle}>
             {initialAdminSetupRequired ? (
               <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-muted-foreground" htmlFor="initial-admin-setup-code">
+                <label className="text-[0.875rem] font-semibold text-muted-foreground" htmlFor="initial-admin-setup-code">
                   최초 관리자 등록코드
                 </label>
                 <Input
@@ -125,7 +125,7 @@ export default function ManagerEmailLogin({
             <Button
               type="submit"
               disabled={isSending}
-              className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-12 w-full justify-center disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 h-12 w-full justify-center disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSending
                 ? "이동 중..."
@@ -135,7 +135,7 @@ export default function ManagerEmailLogin({
             </Button>
           </form>
 
-          {errorMessage ? <p className="text-[14px] text-destructive">{errorMessage}</p> : null}
+          {errorMessage ? <p className="text-[0.875rem] text-destructive">{errorMessage}</p> : null}
         </div>
       </main>
       <ManagerInAppBrowserChecker />

@@ -288,7 +288,7 @@ describe("worksite new page", () => {
     render(<WorksiteNewPage />);
 
     expect(screen.getByLabelText("근무지주소").parentElement).toHaveClass(
-      "md:grid-cols-[minmax(0,1fr)_132px]",
+      "md:grid-cols-[minmax(0,1fr)_8.25rem]",
     );
     expect(screen.getByRole("button", { name: "주소 검색" })).toHaveClass("md:w-full", "whitespace-nowrap");
 

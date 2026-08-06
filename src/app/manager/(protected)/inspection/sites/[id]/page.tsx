@@ -316,15 +316,15 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
   }
 
   return (
-    <section className="space-y-[24px]">
+    <section className="space-y-[1.5rem]">
       <header>
-        <h1 className="text-[28px] leading-[1.2]">현장상세</h1>
-        <p className="text-[14px] font-normal leading-relaxed text-muted-foreground mt-2 max-w-[640px]">
+        <h1 className="text-[1.75rem] leading-[1.2]">현장상세</h1>
+        <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground mt-2 max-w-[40rem]">
           현장 정보를 수정하고 QR코드와 NFC URL을 생성합니다.
         </p>
       </header>
 
-      <section className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
+      <section className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
         {loading ? (
           <ManagerLoadingMessage />
         ) : error && !savedSite ? (
@@ -333,7 +333,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="inspection-worksite">
+                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="inspection-worksite">
                   근무지
                 </label>
                 <NativeSelect
@@ -353,7 +353,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="inspection-site-name">
+                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="inspection-site-name">
                   현장명
                 </label>
                 <Input
@@ -367,12 +367,12 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="inspection-address">
+                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="inspection-address">
                   현장주소
                 </label>
-                <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_132px]">
+                <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_8.25rem]">
                   <Input className="w-full" id="inspection-address" value={address} readOnly required />
-                  <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full whitespace-nowrap md:w-full" type="button" onClick={openAddressPopup} variant="outline">
+                  <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full whitespace-nowrap md:w-full" type="button" onClick={openAddressPopup} variant="outline">
                     주소 검색
                   </Button>
                 </div>
@@ -382,12 +382,12 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
             </div>
 
             <div className="flex flex-col gap-3 md:flex-row">
-              <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full justify-center md:w-auto" disabled={saving} type="submit">
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center md:w-auto" disabled={saving} type="submit">
                 <SaveIcon size={20} />
                 <span>저장</span>
               </Button>
               <Button
-                className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full justify-center md:w-auto"
+                className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center md:w-auto"
                 disabled={printing || !savedSite}
                 onClick={handleQrPrint}
                 type="button"
@@ -395,11 +395,11 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
               >
                 QR코드
               </Button>
-              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full justify-center md:w-auto" onClick={handleNfcUrl} type="button" variant="outline">
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center md:w-auto" onClick={handleNfcUrl} type="button" variant="outline">
                 NFC(URL)
               </Button>
               <Button
-                className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full justify-center md:w-auto"
+                className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center md:w-auto"
                 disabled={deleting}
                 onClick={handleDelete}
                 type="button"
@@ -422,21 +422,21 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
       />
 
       <Dialog open={Boolean(nfcUrl)} onOpenChange={(open) => !open && setNfcUrl("")}>
-        <DialogContent className="max-w-[560px]">
+        <DialogContent className="max-w-[35rem]">
           <DialogHeader>
             <DialogTitle>NFC(URL)</DialogTitle>
             <DialogDescription>NFC Tools의 URL 레코드에 아래 주소를 붙여넣으세요.</DialogDescription>
           </DialogHeader>
-            <Textarea className="w-full mt-4 min-h-[112px]" readOnly value={nfcUrl} />
-            {copyMessage ? <p className="mt-3 text-[14px] font-semibold text-primary">{copyMessage}</p> : null}
+            <Textarea className="w-full mt-4 min-h-[7rem]" readOnly value={nfcUrl} />
+            {copyMessage ? <p className="mt-3 text-[0.875rem] font-semibold text-primary">{copyMessage}</p> : null}
             <div className="mt-6 flex flex-col gap-3 md:flex-row">
-              <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 flex-1" onClick={handleCopyNfcUrl} type="button">
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 flex-1" onClick={handleCopyNfcUrl} type="button">
                 복사
               </Button>
-              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 flex-1" onClick={handleWriteNfc} type="button" variant="outline">
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 flex-1" onClick={handleWriteNfc} type="button" variant="outline">
                 NFC 쓰기
               </Button>
-              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 flex-1" onClick={() => setNfcUrl("")} type="button" variant="outline">
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 flex-1" onClick={() => setNfcUrl("")} type="button" variant="outline">
                 닫기
               </Button>
             </div>
@@ -444,7 +444,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
       </Dialog>
 
       <Dialog open={isWritingNfc} onOpenChange={(open) => !open && handleCancelNfcWrite()}>
-        <DialogContent className="max-w-[480px] text-center" showCloseButton={false}>
+        <DialogContent className="max-w-[30rem] text-center" showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>NFC 카드 쓰기</DialogTitle>
             <DialogDescription>상태 안내에 따라 NFC 카드를 기기에 가까이 대어주세요.</DialogDescription>
@@ -452,13 +452,13 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
             
             {nfcWriteStatus === "scanning" && (
               <div className="mt-6 space-y-4">
-                <div className="mx-auto h-12 w-12 animate-pulse rounded-full bg-primary/20 flex items-center justify-center text-primary text-[24px]">
+                <div className="mx-auto h-12 w-12 animate-pulse rounded-full bg-primary/20 flex items-center justify-center text-primary text-[1.5rem]">
                   📡
                 </div>
-                <p className="text-[16px] text-muted-foreground leading-relaxed">
+                <p className="text-[1rem] text-muted-foreground leading-relaxed">
                   NFC 카드(스티커)를 디바이스 뒷면이나<br />NFC 리더기 근처에 대어 주세요.
                 </p>
-                <p className="text-[13px] text-muted-foreground animate-pulse">
+                <p className="text-[0.8125rem] text-muted-foreground animate-pulse">
                   인식 대기 중...
                 </p>
               </div>
@@ -466,13 +466,13 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
 
             {nfcWriteStatus === "success" && (
               <div className="mt-6 space-y-4">
-                <div className="mx-auto h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[24px]">
+                <div className="mx-auto h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[1.5rem]">
                   ✓
                 </div>
-                <p className="text-[16px] font-semibold text-primary">
+                <p className="text-[1rem] font-semibold text-primary">
                   NFC 쓰기 완료!
                 </p>
-                <p className="text-[14px] text-muted-foreground">
+                <p className="text-[0.875rem] text-muted-foreground">
                   성공적으로 작성되었습니다. 창을 닫습니다.
                 </p>
               </div>
@@ -480,13 +480,13 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
 
             {nfcWriteStatus === "error" && (
               <div className="mt-6 space-y-4">
-                <div className="mx-auto h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center text-destructive text-[24px]">
+                <div className="mx-auto h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center text-destructive text-[1.5rem]">
                   ⚠
                 </div>
-                <p className="text-[16px] font-semibold text-destructive">
+                <p className="text-[1rem] font-semibold text-destructive">
                   NFC 쓰기 실패
                 </p>
-                <p className="text-[14px] text-muted-foreground leading-relaxed px-2">
+                <p className="text-[0.875rem] text-muted-foreground leading-relaxed px-2">
                   {nfcWriteError}
                 </p>
               </div>
@@ -494,7 +494,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
 
             <div className="mt-8">
               <Button
-                className="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"
                 onClick={handleCancelNfcWrite}
                 type="button"
                 variant="outline"

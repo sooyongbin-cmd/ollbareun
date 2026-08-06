@@ -15,9 +15,9 @@ export default function GuardMainLayout({
       <GuardSessionGate />
 
       <nav className="sticky top-0 z-40 h-14 border-b bg-background/95 backdrop-blur">
-        <div className="mx-auto max-w-[980px] w-full h-full flex items-center justify-between px-5">
+        <div className="mx-auto max-w-[61.25rem] w-full h-full flex items-center justify-between px-5">
           <div className="flex min-w-0 items-center gap-3">
-            <h2 className="shrink-0 text-[21px] font-semibold">
+            <h2 className="shrink-0 text-[1.3125rem] font-semibold">
               <Link href="/guard/main" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                 <GuardIcon size={24} className="text-primary" />
                 <GuardHeaderTitle />

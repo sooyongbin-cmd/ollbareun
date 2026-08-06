@@ -142,7 +142,7 @@ describe("manager layout", () => {
       </ManagerLayout>,
     );
 
-    const content = container.querySelector("section.max-w-\\[1600px\\]");
+    const content = container.querySelector("section.max-w-\\[100rem\\]");
     expect(content).toHaveClass("w-full", "min-w-0", "p-4", "md:p-6", "lg:p-8");
   });
 

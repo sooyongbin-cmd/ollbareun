@@ -418,27 +418,27 @@ export default function GuardSafetyEducationPage() {
   }, [loadedIframeResourceId, markEducationCompletion, playerReady, selectedResource]);
 
   return (
-    <div className="mx-auto max-w-[980px] w-full px-5 py-[56px]">
-      <section className="space-y-[24px]">
+    <div className="mx-auto max-w-[61.25rem] w-full px-5 py-[3.5rem]">
+      <section className="space-y-[1.5rem]">
         <header>
-          <h1 className="text-[40px] font-semibold leading-[1.1]">안전교육</h1>
-          <p className="text-[21px] font-normal text-muted-foreground mt-2 max-w-[640px]">
+          <h1 className="text-[2.5rem] font-semibold leading-[1.1]">안전교육</h1>
+          <p className="text-[1.3125rem] font-normal text-muted-foreground mt-2 max-w-[40rem]">
             등록된 안전교육 자료의 제목과 유튜브 링크를 확인합니다.
           </p>
         </header>
 
         <section
           aria-label="안전교육 목록"
-          className="bg-muted/40 rounded-xl p-[16px] border border-border/50"
+          className="bg-muted/40 rounded-xl p-[1rem] border border-border/50"
         >
-          <div className="flex flex-wrap items-center justify-between gap-3 text-[14px] text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-between gap-3 text-[0.875rem] text-muted-foreground">
             <span>전체 안전교육 {sortedResources.length}</span>
           </div>
 
           {loading ? (
             <LoadingBoard className="mt-6" />
           ) : listError ? (
-            <p className="mt-6 text-[16px] text-destructive">{listError}</p>
+            <p className="mt-6 text-[1rem] text-destructive">{listError}</p>
           ) : (
             <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
               <Table className="w-full" data-responsive-single-column>
@@ -489,7 +489,7 @@ export default function GuardSafetyEducationPage() {
               <iframe
                 key={selectedResource.id}
                 ref={iframeRef}
-                className="aspect-video w-full rounded-[12px] border border-border bg-black"
+                className="aspect-video w-full rounded-[0.75rem] border border-border bg-black"
                 src={selectedEmbedUrl}
                 title={selectedResource.title}
                 onLoad={() => setLoadedIframeResourceId(selectedResource.id)}
@@ -503,8 +503,8 @@ export default function GuardSafetyEducationPage() {
             )}
           </div>
 
-          {message ? <p className="mt-4 text-[16px] text-primary">{message}</p> : null}
-          {completionError ? <p className="mt-4 text-[16px] text-destructive">{completionError}</p> : null}
+          {message ? <p className="mt-4 text-[1rem] text-primary">{message}</p> : null}
+          {completionError ? <p className="mt-4 text-[1rem] text-destructive">{completionError}</p> : null}
         </section>
       </section>
     </div>

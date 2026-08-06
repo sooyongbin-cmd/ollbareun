@@ -147,15 +147,15 @@ export default function SpecialRemarkDetailPage({ params }: PageProps) {
   }
 
   return (
-    <section className="space-y-[24px]">
+    <section className="space-y-[1.5rem]">
       <header>
-        <h1 className="text-[28px] leading-[1.2]">특이사항 상세</h1>
-        <p className="mt-2 max-w-[640px] text-[14px] font-normal leading-relaxed text-muted-foreground">
+        <h1 className="text-[1.75rem] leading-[1.2]">특이사항 상세</h1>
+        <p className="mt-2 max-w-[40rem] text-[0.875rem] font-normal leading-relaxed text-muted-foreground">
           보고된 특이사항의 전체 내용과 첨부사진을 확인합니다.
         </p>
       </header>
 
-      <section className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
+      <section className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
         {loading ? (
           <ManagerLoadingMessage />
         ) : error && !report ? (
@@ -163,17 +163,17 @@ export default function SpecialRemarkDetailPage({ params }: PageProps) {
         ) : report ? (
           <div className="space-y-5">
             <div className="grid gap-4 md:grid-cols-3">
-              <div className="rounded-[12px] border border-border bg-background p-4">
-                <p className="text-[13px] font-semibold text-muted-foreground">점검일시</p>
-                <p className="mt-1 text-[17px] font-semibold">{formatDateTime(report.reported_at)}</p>
+              <div className="rounded-[0.75rem] border border-border bg-background p-4">
+                <p className="text-[0.8125rem] font-semibold text-muted-foreground">점검일시</p>
+                <p className="mt-1 text-[1.0625rem] font-semibold">{formatDateTime(report.reported_at)}</p>
               </div>
-              <div className="rounded-[12px] border border-border bg-background p-4">
-                <p className="text-[13px] font-semibold text-muted-foreground">점검자</p>
-                <p className="mt-1 text-[17px] font-semibold">{report.employee_name}</p>
+              <div className="rounded-[0.75rem] border border-border bg-background p-4">
+                <p className="text-[0.8125rem] font-semibold text-muted-foreground">점검자</p>
+                <p className="mt-1 text-[1.0625rem] font-semibold">{report.employee_name}</p>
               </div>
-              <div className="rounded-[12px] border border-border bg-background p-4">
-                <p className="text-[13px] font-semibold text-muted-foreground">보고 위치 (GPS)</p>
-                <p className="mt-1 text-[17px] font-semibold">
+              <div className="rounded-[0.75rem] border border-border bg-background p-4">
+                <p className="text-[0.8125rem] font-semibold text-muted-foreground">보고 위치 (GPS)</p>
+                <p className="mt-1 text-[1.0625rem] font-semibold">
                   {report.gps_info
                     ? address || (loadingAddress ? "주소 조회 중..." : `${report.gps_info.latitude.toFixed(6)}, ${report.gps_info.longitude.toFixed(6)}`)
                     : "기록 없음"}
@@ -181,16 +181,16 @@ export default function SpecialRemarkDetailPage({ params }: PageProps) {
               </div>
             </div>
 
-            <div className="rounded-[12px] border border-border bg-background p-4">
-              <p className="text-[13px] font-semibold text-muted-foreground">특이사항내용</p>
-              <p className="mt-3 whitespace-pre-wrap text-[16px] leading-relaxed">{report.content}</p>
+            <div className="rounded-[0.75rem] border border-border bg-background p-4">
+              <p className="text-[0.8125rem] font-semibold text-muted-foreground">특이사항내용</p>
+              <p className="mt-3 whitespace-pre-wrap text-[1rem] leading-relaxed">{report.content}</p>
             </div>
 
-            <div className="rounded-[12px] border border-border bg-background p-4">
-              <p className="text-[13px] font-semibold text-muted-foreground">첨부사진</p>
+            <div className="rounded-[0.75rem] border border-border bg-background p-4">
+              <p className="text-[0.8125rem] font-semibold text-muted-foreground">첨부사진</p>
               {report.photo_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img alt="첨부사진" className="mt-3 max-h-[70vh] w-full rounded-[12px] object-contain" src={report.photo_url} />
+                <img alt="첨부사진" className="mt-3 max-h-[70vh] w-full rounded-[0.75rem] object-contain" src={report.photo_url} />
               ) : (
                 <p className="mt-3 text-muted-foreground">첨부사진이 없습니다.</p>
               )}
@@ -199,7 +199,7 @@ export default function SpecialRemarkDetailPage({ params }: PageProps) {
             {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p> : null}
 
             <div className="flex justify-end">
-              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50" disabled={deleting} onClick={handleDelete} type="button" variant="outline">
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" disabled={deleting} onClick={handleDelete} type="button" variant="outline">
                 삭제
               </Button>
             </div>

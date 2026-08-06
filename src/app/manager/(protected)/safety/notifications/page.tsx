@@ -116,20 +116,20 @@ export default function ManagerSafetyNotificationsPage() {
   }, [queryString]);
 
   return (
-    <section className="space-y-[24px]">
+    <section className="space-y-[1.5rem]">
       <header>
         <div className="space-y-3">
-          <h1 className="text-[28px] leading-[1.2]">자동알림이력</h1>
-          <p className="text-[14px] font-normal leading-relaxed text-muted-foreground max-w-[640px]">
+          <h1 className="text-[1.75rem] leading-[1.2]">자동알림이력</h1>
+          <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground max-w-[40rem]">
             안전교육 자동 푸쉬 발송 이력을 최근 100건까지 확인합니다.
           </p>
         </div>
       </header>
 
-      <section aria-label="자동알림 검색" className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
+      <section aria-label="자동알림 검색" className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
         <div className="flex flex-wrap gap-4">
-          <div className="w-[220px] space-y-2">
-            <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="notification-code">
+          <div className="w-[13.75rem] space-y-2">
+            <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="notification-code">
               알림코드
             </label>
             <NativeSelect
@@ -142,8 +142,8 @@ export default function ManagerSafetyNotificationsPage() {
               <NativeSelectOption value="education_reminder">education_reminder</NativeSelectOption>
             </NativeSelect>
           </div>
-          <div className="w-[220px] space-y-2">
-            <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="notification-status">
+          <div className="w-[13.75rem] space-y-2">
+            <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="notification-status">
               상태
             </label>
             <NativeSelect
@@ -162,8 +162,8 @@ export default function ManagerSafetyNotificationsPage() {
         </div>
       </section>
 
-      <section aria-label="자동알림 목록" className="bg-muted/40 rounded-xl p-[32px] border border-border/50">
-        <div className="flex flex-wrap items-center justify-between gap-3 text-[14px] text-muted-foreground">
+      <section aria-label="자동알림 목록" className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-[0.875rem] text-muted-foreground">
           <span>조회 결과 {runs.length}건</span>
           <span>최근 100건</span>
         </div>
@@ -171,7 +171,7 @@ export default function ManagerSafetyNotificationsPage() {
         {loading ? (
           <ManagerLoadingMessage className="mt-6" />
         ) : error ? (
-          <p className="mt-6 text-[16px] text-destructive">{error}</p>
+          <p className="mt-6 text-[1rem] text-destructive">{error}</p>
         ) : (
           <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
             <Table className="w-full">
@@ -207,8 +207,8 @@ export default function ManagerSafetyNotificationsPage() {
                         )}
                       </TableCell>
                       <TableCell data-label="발송시각" className="whitespace-nowrap">{formatDateTime(run.sent_at)}</TableCell>
-                      <TableCell data-label="발송결과" className="min-w-[220px] text-foreground/80">{summarizeResult(run.result)}</TableCell>
-                      <TableCell data-label="오류내용" className="min-w-[180px] text-muted-foreground">{run.error_message ?? "-"}</TableCell>
+                      <TableCell data-label="발송결과" className="min-w-[13.75rem] text-foreground/80">{summarizeResult(run.result)}</TableCell>
+                      <TableCell data-label="오류내용" className="min-w-[11.25rem] text-muted-foreground">{run.error_message ?? "-"}</TableCell>
                     </TableRow>
                   ))
                 )}

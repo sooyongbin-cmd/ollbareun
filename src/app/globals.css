@@ -44,20 +44,20 @@
   --font-pretendard: "Pretendard Variable", "Pretendard", system-ui, -apple-system, sans-serif;
   --font-apple: var(--font-pretendard);
 
-  --radius-apple-sm: 8px;
-  --radius-apple-md: 11px;
-  --radius-apple-lg: 18px;
-  --radius-pill: 9999px;
+  --radius-apple-sm: 0.5rem;
+  --radius-apple-md: 0.6875rem;
+  --radius-apple-lg: 1.125rem;
+  --radius-pill: 624.9375rem;
 
-  --spacing-apple-xs: 8px;
-  --spacing-apple-sm: 12px;
-  --spacing-apple-md: 17px;
-  --spacing-apple-lg: 24px;
-  --spacing-apple-xl: 32px;
-  --spacing-apple-xxl: 48px;
-  --spacing-apple-section: 80px;
+  --spacing-apple-xs: 0.5rem;
+  --spacing-apple-sm: 0.75rem;
+  --spacing-apple-md: 1.0625rem;
+  --spacing-apple-lg: 1.5rem;
+  --spacing-apple-xl: 2rem;
+  --spacing-apple-xxl: 3rem;
+  --spacing-apple-section: 5rem;
 
-  --shadow-product: 3px 5px 30px 0 rgba(0, 0, 0, 0.22);
+  --shadow-product: 0.1875rem 0.3125rem 1.875rem 0 rgba(0, 0, 0, 0.22);
 
   --font-heading: var(--font-pretendard);
 
@@ -142,7 +142,7 @@ body {
   background-color: var(--color-canvas);
   color: var(--color-ink);
   font-family: var(--font-apple);
-  font-size: 17px;
+  font-size: 1.0625rem;
   line-height: 1.47;
   -webkit-font-smoothing: antialiased;
   letter-spacing: 0;
@@ -291,6 +291,7 @@ html[data-manager-theme="dark"] {
 @layer base {
   html {
     scroll-behavior: smooth;
+    font-size: 100%;
   }
 
   * {
@@ -368,7 +369,7 @@ html[data-manager-theme="dark"] {
       border: 1px solid var(--border);
       border-radius: var(--radius);
       background: var(--card);
-      box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+      box-shadow: 0 1px 0.125rem rgb(0 0 0 / 0.05);
     }
 
     [data-mobile-layout="cards"] [data-slot="table-body"] [data-slot="table-cell"] {

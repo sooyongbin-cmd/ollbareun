@@ -20,21 +20,21 @@ describe("homepage header", () => {
     const stylesheet = readFileSync("src/app/page.module.css", "utf8");
 
     expect(stylesheet).toMatch(
-      /\.brandLogo\s*\{[^}]*width: 223px;/s,
+      /\.brandLogo\s*\{[^}]*width: 13.9375rem;/s,
     );
   });
 
-  it("matches the Figma 360px closed mobile header geometry", () => {
+  it("matches the Figma 22.5rem closed mobile header geometry", () => {
     const stylesheet = readFileSync("src/app/page.module.css", "utf8");
 
-    expect(stylesheet).toContain("width: 132.87px;");
-    expect(stylesheet).toContain("margin-left: -17.49px;");
-    expect(stylesheet).toContain("left: 109.63px;");
-    expect(stylesheet).toContain("font-size: 9.18px;");
-    expect(stylesheet).toContain("letter-spacing: -0.2754px;");
-    expect(stylesheet).toContain("width: 39.225px;");
-    expect(stylesheet).toContain("height: 23.42px;");
-    expect(stylesheet).toContain("margin-right: -13.36px;");
+    expect(stylesheet).toContain("width: 8.304375rem;");
+    expect(stylesheet).toContain("margin-left: -1.093125rem;");
+    expect(stylesheet).toContain("left: 6.851875rem;");
+    expect(stylesheet).toContain("font-size: 0.57375rem;");
+    expect(stylesheet).toContain("letter-spacing: -0.017212rem;");
+    expect(stylesheet).toContain("width: 2.451562rem;");
+    expect(stylesheet).toContain("height: 1.46375rem;");
+    expect(stylesheet).toContain("margin-right: -0.835rem;");
   });
 
   it("matches the Figma mobile menu symbol alignment and label spacing", () => {
@@ -44,13 +44,13 @@ describe("homepage header", () => {
       /\.mobileMenuTitle\s*\{[^}]*position: relative;[^}]*display: block;[^}]*line-height: normal;/s,
     );
     expect(stylesheet).toMatch(
-      /\.mobileMenuTitle > span:first-child\s*\{[^}]*top: 0px;[^}]*left: 7\.24%;[^}]*line-height: normal;/s,
+      /\.mobileMenuTitle > span:first-child\s*\{[^}]*top: 0;[^}]*left: 7\.24%;[^}]*line-height: normal;/s,
     );
     expect(stylesheet).toMatch(
-      /\.mobileMenuTitle > span:last-child\s*\{[^}]*top: 10\.5px;[^}]*left: 13\.36%;/s,
+      /\.mobileMenuTitle > span:last-child\s*\{[^}]*top: 0.65625rem;[^}]*left: 13\.36%;/s,
     );
     expect(stylesheet).toMatch(
-      /\.mobileMenuTitleActive > span:first-child\s*\{[^}]*top: 1\.5px;[^}]*left: 7\.94%;/s,
+      /\.mobileMenuTitleActive > span:first-child\s*\{[^}]*top: 0.09375rem;[^}]*left: 7\.94%;/s,
     );
   });
 

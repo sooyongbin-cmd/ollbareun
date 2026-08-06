@@ -29,7 +29,7 @@ export default function ManagerInAppBrowserGuide({ variant = "inline", onDismiss
     <div
       className={
         isPopup
-          ? "mx-auto flex w-full max-w-[600px] flex-col gap-3 rounded-xl border border-border bg-muted p-5 shadow-lg relative animate-in fade-in slide-in-from-bottom-5 duration-300"
+          ? "mx-auto flex w-full max-w-[37.5rem] flex-col gap-3 rounded-xl border border-border bg-muted p-5 shadow-lg relative animate-in fade-in slide-in-from-bottom-5 duration-300"
           : "w-full rounded-xl border border-border bg-muted p-6 shadow-lg"
       }
     >
@@ -45,14 +45,14 @@ export default function ManagerInAppBrowserGuide({ variant = "inline", onDismiss
       )}
 
       <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] bg-primary text-white">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[0.75rem] bg-primary text-white">
           <AlertTriangle className="h-5 w-5" />
         </div>
         <div className={isPopup ? "min-w-0 flex-1 pr-6" : "min-w-0 flex-1"}>
-          <h2 id="manager-in-app-browser-title" className="text-[16px] font-bold text-foreground leading-6">
+          <h2 id="manager-in-app-browser-title" className="text-[1rem] font-bold text-foreground leading-6">
             기본 브라우저로 열기 안내
           </h2>
-          <p className="mt-1 text-[13px] font-semibold text-muted-foreground leading-snug">
+          <p className="mt-1 text-[0.8125rem] font-semibold text-muted-foreground leading-snug">
             관리자 화면은 기본 브라우저 또는 홈 화면 아이콘에서 사용해 주세요.
           </p>
         </div>
@@ -62,7 +62,7 @@ export default function ManagerInAppBrowserGuide({ variant = "inline", onDismiss
         <Button
           type="button"
           onClick={handleOpen}
-          className="w-full rounded-[12px] bg-primary hover:bg-primary/90 text-white font-bold text-[14px] py-2.5 transition-colors shadow-sm"
+          className="w-full rounded-[0.75rem] bg-primary hover:bg-primary/90 text-white font-bold text-[0.875rem] py-2.5 transition-colors shadow-sm"
         >
           기본 브라우저로 열기
         </Button>

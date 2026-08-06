@@ -89,11 +89,11 @@ export default function GuardMainPage() {
   }, [storedSession]);
 
   return (
-    <div className="mx-auto max-w-[980px] w-full px-5 py-[80px]">
-      <div className="max-w-[600px] mx-auto">
+    <div className="mx-auto max-w-[61.25rem] w-full px-5 py-[5rem]">
+      <div className="max-w-[37.5rem] mx-auto">
         <GuardWorksiteSection />
         
-        <section className="bg-muted/40 rounded-xl p-[16px] border border-border/50">
+        <section className="bg-muted/40 rounded-xl p-[1rem] border border-border/50">
           <div className="flex flex-col gap-3">
             <GuardLocationGateLink href="/guard/main/attendance" hasAssignedWorksite={hasAssignedWorksite}>
               출근하기

@@ -113,20 +113,20 @@ export default function InspectionLogsPage() {
   }, [worksiteId]);
 
   return (
-    <section className="space-y-[24px]">
+    <section className="space-y-[1.5rem]">
       <header>
-        <h1 className="text-[28px] leading-[1.2]">현장점검현황</h1>
-        <p className="mt-2 max-w-[640px] text-[14px] font-normal leading-relaxed text-muted-foreground">
+        <h1 className="text-[1.75rem] leading-[1.2]">현장점검현황</h1>
+        <p className="mt-2 max-w-[40rem] text-[0.875rem] font-normal leading-relaxed text-muted-foreground">
           근무지별 현장점검 기록을 확인합니다.
         </p>
       </header>
 
       <section
         aria-label="현장점검현황 검색"
-        className="bg-muted/40 rounded-xl p-[32px] border border-border/50"
+        className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
       >
-        <div className="space-y-2 max-w-[420px]">
-          <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="inspection-log-worksite">
+        <div className="space-y-2 max-w-[26.25rem]">
+          <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="inspection-log-worksite">
             근무지
           </label>
           <NativeSelect
@@ -147,7 +147,7 @@ export default function InspectionLogsPage() {
 
       <section
         aria-label="현장점검현황 목록"
-        className="bg-muted/40 rounded-xl p-[32px] border border-border/50"
+        className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
       >
         {loading ? (
           <ManagerLoadingMessage />

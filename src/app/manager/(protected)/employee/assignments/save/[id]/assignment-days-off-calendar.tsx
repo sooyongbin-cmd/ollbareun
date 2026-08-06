@@ -65,7 +65,7 @@ export default function AssignmentDaysOffCalendar({
   return (
     <section className="mt-8 border-t border-border/60 pt-8" aria-labelledby="days-off-calendar-title">
       <div className="mb-5 space-y-1">
-        <h2 className="text-[24px] font-semibold" id="days-off-calendar-title">
+        <h2 className="text-[1.5rem] font-semibold" id="days-off-calendar-title">
           휴무일 지정
         </h2>
         <p className="text-sm text-muted-foreground">
@@ -78,7 +78,7 @@ export default function AssignmentDaysOffCalendar({
         ) : null}
       </div>
 
-      <div className="mx-auto max-w-[760px] rounded-xl border border-border bg-background p-3 shadow-sm sm:p-5">
+      <div className="mx-auto max-w-[47.5rem] rounded-xl border border-border bg-background p-3 shadow-sm sm:p-5">
         <div className="mb-4 flex items-center justify-between">
           <Button
             aria-label="이전 달"
@@ -123,7 +123,7 @@ export default function AssignmentDaysOffCalendar({
                 aria-label={`${date} ${daysOff.has(date) ? "휴무일 해제" : "휴무일 지정"}`}
                 aria-pressed={daysOff.has(date)}
                 className={[
-                  "aspect-square min-h-10 rounded-lg border text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+                  "aspect-square min-h-10 rounded-lg border text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50",
                   daysOff.has(date)
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-transparent bg-muted/40 hover:border-primary/40 hover:bg-primary/10",

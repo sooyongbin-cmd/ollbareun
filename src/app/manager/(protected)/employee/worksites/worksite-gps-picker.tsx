@@ -323,14 +323,14 @@ export default function WorksiteGpsPicker({ address, value, onChange, hideInput 
     <div className="space-y-4">
       <div
         ref={mapElementRef}
-        className="h-[360px] w-full overflow-hidden rounded-lg border border-border bg-background"
+        className="h-[22.5rem] w-full overflow-hidden rounded-lg border border-border bg-background"
         data-test-id="worksite-map"
         data-testid="worksite-map"
       />
 
       {!hideInput ? (
         <div className="space-y-2">
-          <label className="text-[14px] font-semibold text-muted-foreground ml-1" htmlFor="worksite-gps-info">
+          <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="worksite-gps-info">
             GPS정보
           </label>
           <Input
@@ -342,7 +342,7 @@ export default function WorksiteGpsPicker({ address, value, onChange, hideInput 
             value={inputValue}
             onChange={(event) => handleGpsInputChange(event.target.value)}
           />
-          <p className="text-[13px] text-muted-foreground">
+          <p className="text-[0.8125rem] text-muted-foreground">
             {value ? `선택한 GPS정보: ${formatGpsInfo(value)}` : status || "지도에서 실제 근무지를 클릭하거나 GPS정보를 입력하세요."}
           </p>
         </div>

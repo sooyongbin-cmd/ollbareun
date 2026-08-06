@@ -47,7 +47,7 @@ describe("assignment new page", () => {
 
     expect(await screen.findByRole("heading", { name: "배정등록" })).toBeInTheDocument();
     expect(screen.getByText("근무기간")).toBeInTheDocument();
-    expect(screen.getByText("근무기간").closest("div")).toHaveClass("lg:min-w-[360px]");
+    expect(screen.getByText("근무기간").closest("div")).toHaveClass("lg:min-w-[22.5rem]");
     await user.clear(screen.getByLabelText("시작일"));
     await user.type(screen.getByLabelText("시작일"), "2026-05-21");
     await user.clear(screen.getByLabelText("종료일"));

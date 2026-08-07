@@ -78,7 +78,7 @@
   height: 1.875rem;
   margin: 0 0 0 1rem;
   align-items: center;
-  font-size: 0.9375rem;
+  font-size: clamp(0.57375rem, calc(1.8774vw - 0.3274rem), 0.9375rem);
   font-weight: 500;
   letter-spacing: -0.03em;
   line-height: normal;
@@ -2152,7 +2152,6 @@
     margin: 0;
     overflow: hidden;
     align-items: center;
-    font-size: 0.57375rem;
     letter-spacing: -0.017212rem;
     line-height: 0.6875rem;
     opacity: 1;

@@ -819,9 +819,16 @@
   --timeline-marker-column: 2rem;
 
   position: relative;
-  margin: 0;
+  width: 28.5rem;
+  margin: 0 auto;
   padding: 0;
   list-style: none;
+}
+
+@media (max-width: 47.5rem) {
+  .timeline {
+    width: 20.25rem;
+  }
 }
 
 .timeline::before {

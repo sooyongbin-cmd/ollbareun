@@ -170,7 +170,7 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(stylesheet).toMatch(/\.aboutPage \.companySection \.sectionHeading > span\s*\{[^}]*width: 15.0625rem;[^}]*line-height: 1.4375rem;/s);
     expect(stylesheet).toMatch(/\.stats > div:nth-child\(1\) > img\s*\{[^}]*width: 1.238125rem;[^}]*height: 1.39875rem;/s);
     expect(stylesheet).toMatch(/\.timeline li\s*\{[^}]*height: 3.48125rem;[^}]*min-height: 3.48125rem;/s);
-    expect(stylesheet).toMatch(/\.aboutPage \.timeline::before\s*\{[^}]*left: calc\(50% - 0.84375rem\);/s);
+    expect(stylesheet).toMatch(/\.timeline::before\s*\{[^}]*left: 50%;[^}]*transform: translateX\(-50%\);/s);
     expect(stylesheet).toMatch(/\.aboutPage \.benefitDescription\s*\{[^}]*letter-spacing: -0\.0625rem;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.values \.sectionHeading > span\s*\{[^}]*width: 16.5625rem;[^}]*line-height: 1.4375rem;/s);
     expect(stylesheet).toMatch(/\.aboutPage \.socialSection\s*\.sectionHeading > span\s*\{[^}]*width: 19.6875rem;[^}]*line-height: 1.4375rem;/s);

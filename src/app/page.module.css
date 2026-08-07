@@ -1188,7 +1188,7 @@
   width: calc(100% - 3rem);
   margin: 0;
   color: #fff;
-  font-size: clamp(0.75rem, 3.05vw, 1rem);
+  font-size: clamp(19.55px, 3.05vw, 32px);
   font-weight: 800;
   letter-spacing: -0.03rem;
   line-height: 1.53125;

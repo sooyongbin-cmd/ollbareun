@@ -1714,10 +1714,6 @@
     grid-template-columns: minmax(0, 1fr) repeat(3, 10rem);
   }
 
-  .certification {
-    display: none;
-  }
-
   .heroContent {
     padding-left: 0;
   }
@@ -2150,7 +2146,6 @@
     position: absolute;
     top: 1.459375rem;
     left: 6.851875rem;
-    display: flex;
     min-width: 0;
     width: max-content;
     height: 0.6875rem;

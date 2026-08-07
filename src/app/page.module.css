@@ -1066,35 +1066,75 @@
   font-weight: 800;
 }
 
-.operationLayout ol {
+.operationSteps {
   display: grid;
   margin: 0;
-  padding: 0;
-  gap: 1rem;
+  min-width: 0;
+  padding: 0 0 0 2.3125rem;
+  gap: 1.6875rem;
   list-style: none;
 }
 
-.operationLayout li {
-  display: grid;
-  min-height: 5.75rem;
-  padding: 0.875rem 1.625rem 0.875rem 0.875rem;
-  grid-template-columns: 4rem 1fr;
-  gap: 1.25rem;
+.operationStep {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 5.819375rem;
+  padding: 0.8125rem 1.5rem 0.6875rem 8rem;
   align-items: center;
-  border: 1px solid #e2e5e7;
-  border-radius: 2.875rem;
-  box-shadow: 0 0.5rem 1.375rem rgb(0 0 0 / 14%);
+  border-radius: 1.5625rem;
+  background: #fff;
+  box-shadow: 0.1875rem 0.1875rem 0.125rem rgb(0 0 0 / 20%);
 }
 
-.operationLayout li > strong {
+.operationBadge {
+  position: absolute;
+  top: 50%;
+  left: -2.3125rem;
   display: grid;
-  width: 4rem;
-  height: 4rem;
+  width: 7.04125rem;
+  height: 7.04125rem;
+  transform: translateY(-50%);
   place-items: center;
-  border-radius: 1.125rem;
-  background: var(--home-blue);
+  border-radius: 50%;
+  background: linear-gradient(90deg, #fff 47.115%, #e3e2e2 100%);
+  box-shadow: 0 0.25rem 0.125rem rgb(0 0 0 / 15%);
+}
+
+.operationBadgeRing,
+.operationBadgeFill {
+  position: absolute;
+  display: block;
+  max-width: none;
+  object-fit: fill;
+}
+
+.operationBadgeRing {
+  top: 7.101%;
+  left: 7.101%;
+  width: 85.64%;
+  height: 85.64%;
+}
+
+.operationBadgeFill {
+  top: 10.65%;
+  left: 5.326%;
+  width: 84.133%;
+  height: 84.133%;
+}
+
+.operationNumber {
+  position: relative;
+  z-index: 1;
   color: #fff;
-  font-size: 1.375rem;
+  font-family: "Arial Narrow", Pretendard, sans-serif;
+  font-size: 2.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.operationCopy {
+  min-width: 0;
 }
 
 .operationLayout h4 {
@@ -1138,24 +1178,6 @@
 .dispatchDiagram {
   width: min(38.75rem, 100%);
   margin: 0 auto;
-}
-
-.operationDiagram {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.visuallyHidden {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  padding: 0 !important;
-  margin: -1px !important;
-  overflow: hidden !important;
-  clip: rect(0, 0, 0, 0) !important;
-  white-space: nowrap !important;
-  border: 0 !important;
 }
 
 .dispatchDiagram img {
@@ -1469,11 +1491,6 @@
   .servicesPage .facilityGrid p {
     font-size: 1.2275rem;
     line-height: 1.8125rem;
-  }
-
-  .servicesPage .operationLayout li > strong {
-    font-size: 2.75rem;
-    line-height: normal;
   }
 
   .servicesPage .operationLayout h4 {
@@ -2025,18 +2042,25 @@
     font-size: 1.9375rem;
   }
 
-  .operationLayout li {
-    min-height: 5.5rem;
-    padding-right: 1.125rem;
-    grid-template-columns: 3.5rem 1fr;
-    gap: 0.8125rem;
+  .operationSteps {
+    padding-left: 1.5rem;
+    gap: 1.25rem;
   }
 
-  .operationLayout li > strong {
-    width: 3.5rem;
-    height: 3.5rem;
-    border-radius: 1rem;
-    font-size: 1.1875rem;
+  .operationStep {
+    min-height: 6.25rem;
+    padding: 0.875rem 1rem 0.875rem 4.25rem;
+    border-radius: 1.25rem;
+  }
+
+  .operationBadge {
+    left: -1.5rem;
+    width: 4.75rem;
+    height: 4.75rem;
+  }
+
+  .operationNumber {
+    font-size: 1.75rem;
   }
 
   .detailMessage {
@@ -2978,10 +3002,6 @@
     line-height: 1.4;
   }
 
-  .operationDiagram {
-    width: 100%;
-  }
-
   .detailSection,
   .facilitySection {
     padding-top: 4.5rem;
@@ -3075,11 +3095,6 @@
   .servicesPage .operationLayout {
     margin-top: 3.375rem;
     gap: 1.725rem;
-  }
-
-  .servicesPage .operationDiagram {
-    height: 19.625rem;
-    object-fit: fill;
   }
 
   .servicesPage .operationLayout > h3 {

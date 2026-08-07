@@ -658,10 +658,31 @@ export function ServicesPage() {
             <br />
             같은 기준으로 움직입니다.
           </h3>
-          <Image className={styles.operationDiagram} src="/homepage/archive/operation-system.svg" alt="준비단계와 목표 설정부터 이슈 대응과 현장 존중까지 이어지는 4단계 운영 체계" width={665} height={492} />
-          <ol className={styles.visuallyHidden}>
+          <ol className={styles.operationSteps}>
             {operationSteps.map(([number, title, description]) => (
-              <li key={number}><strong>{number}</strong><div><h4>{title}</h4><p>{description}</p></div></li>
+              <li className={styles.operationStep} key={number}>
+                <span className={styles.operationBadge} aria-hidden="true">
+                  <Image
+                    className={styles.operationBadgeRing}
+                    src="/homepage/archive/operation-step-ring.svg"
+                    alt=""
+                    width={97}
+                    height={97}
+                  />
+                  <Image
+                    className={styles.operationBadgeFill}
+                    src={`/homepage/archive/operation-step-${number}.svg`}
+                    alt=""
+                    width={95}
+                    height={95}
+                  />
+                  <span className={styles.operationNumber}>{number}</span>
+                </span>
+                <div className={styles.operationCopy}>
+                  <h4>{title}</h4>
+                  <p>{description}</p>
+                </div>
+              </li>
             ))}
           </ol>
         </div>

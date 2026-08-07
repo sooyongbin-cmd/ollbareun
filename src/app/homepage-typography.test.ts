@@ -96,7 +96,10 @@ describe("homepage Figma typography", () => {
       /\.servicesPage \.operationLayout > h3\s*\{[^}]*font-size: 1.5rem;[^}]*letter-spacing: -0.045rem;[^}]*line-height: 1.8125rem;[^}]*text-align: center;/s,
     );
     expect(stylesheet).toMatch(
-      /\.servicesPage \.operationDiagram\s*\{[^}]*height: 19.625rem;[^}]*object-fit: fill;/s,
+      /\.operationStep\s*\{[^}]*min-height: 6.25rem;[^}]*padding: 0.875rem 1rem 0.875rem 4.25rem;[^}]*border-radius: 1.25rem;/s,
+    );
+    expect(stylesheet).toMatch(
+      /\.operationBadge\s*\{[^}]*left: -1.5rem;[^}]*width: 4.75rem;[^}]*height: 4.75rem;/s,
     );
     expect(stylesheet).toMatch(
       /\.servicesPage \.dispatchSection \.detailMessage\s*\{[^}]*font-weight: 500;[^}]*line-height: 1.4375rem;/s,

@@ -825,6 +825,12 @@
   list-style: none;
 }
 
+@media (max-width: 75rem) {
+  .timeline {
+    width: 22.5rem;
+  }
+}
+
 @media (max-width: 47.5rem) {
   .timeline {
     width: 20.25rem;

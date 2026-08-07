@@ -225,7 +225,7 @@ export default function HomepageHeader() {
                     )
                   }
                 >
-                  <span aria-hidden="true">{isExpanded ? "−" : "+"}</span>
+                  <span aria-hidden="true">{isExpanded ? "-" : "+"}</span>
                   <span>{column.label}</span>
                 </button>
                 <div

@@ -49,9 +49,6 @@ describe("homepage header", () => {
     expect(stylesheet).toMatch(
       /\.mobileMenuTitle > span:last-child\s*\{[^}]*top: 0.65625rem;[^}]*left: 13\.36%;/s,
     );
-    expect(stylesheet).toMatch(
-      /\.mobileMenuTitleActive > span:first-child\s*\{[^}]*top: 0.09375rem;[^}]*left: 7\.94%;/s,
-    );
   });
 
   it("keeps the closed mobile menu icon horizontally stretchable", () => {

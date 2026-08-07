@@ -2286,11 +2286,6 @@
     font-weight: 700;
   }
 
-  .mobileMenuTitleActive > span:first-child {
-    top: 0.09375rem;
-    left: 7.94%;
-  }
-
   .mobileMenuTitleActive > span:last-child {
     top: 0.625rem;
     left: 13.4%;

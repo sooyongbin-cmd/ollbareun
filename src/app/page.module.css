@@ -2310,7 +2310,7 @@
 
   .mobileMenuInner section > .mobileMenuSubmenu a {
     display: block;
-    padding: 0.625rem 3rem;
+    padding: 0.625rem 3rem 0.625rem 13.4%;
     color: rgb(255 255 255 / 92%);
     font-family: "Pretendard Variable", "Pretendard", system-ui, sans-serif;
     font-size: 0.875rem;

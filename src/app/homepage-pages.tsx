@@ -729,12 +729,20 @@ export function ServicesPage() {
         <h3 className={styles.detailMessage}>현장 조건에 맞춘 법정·살충·살균 소독으로<br />대형 건축물과 항공기 검역 현장의 예방 체계를{" "}<br className={styles.mobileOnlyBreak} />지원합니다.</h3>
         <div className={styles.airportCard}>
           <Image
-            src="/homepage/airport-card-figma.png"
-            alt="당사는 현재 김해공항 내 전 항공기 검역 및 방역프로세스를 독자 수행중입니다"
+            src="/homepage/airport-card-background.png"
+            alt=""
+            aria-hidden="true"
             width={1050}
             height={616}
             sizes="(max-width: 47.5rem) calc(100vw - 3rem), 32.8125rem"
           />
+          <p className={styles.airportCardText}>
+            당사는 현재 김해공항 내
+            <br />
+            전 항공기 검역 및
+            <br />
+            방역프로세스를 독자 수행중입니다
+          </p>
         </div>
       </section>
       <BackToTop />

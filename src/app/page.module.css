@@ -1170,6 +1170,7 @@
 }
 
 .airportCard {
+  position: relative;
   width: min(32.8125rem, 100%);
   margin: 3.125rem auto 0;
 }
@@ -1178,6 +1179,22 @@
   display: block;
   width: 100%;
   height: auto;
+}
+
+.airportCardText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(100% - 3rem);
+  margin: 0;
+  color: #fff;
+  font-size: clamp(0.75rem, 3.05vw, 1rem);
+  font-weight: 800;
+  letter-spacing: -0.03rem;
+  line-height: 1.53125;
+  text-align: center;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
 }
 
 .clientHero {

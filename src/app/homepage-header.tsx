@@ -62,10 +62,11 @@ function HeaderBrand({ mobileOpen = false }: { mobileOpen?: boolean }) {
     <span className={styles.brand}>
       <Image
         className={styles.brandLogo}
-        src={mobileOpen ? "/homepage/archive/logo-color.svg" : "/homepage/archive/logo-white.svg"}
+        src={mobileOpen ? "/icons/header-logo-color.svg" : "/icons/header-logo-white.svg"}
         alt="주식회사 올바름"
-        width={223}
-        height={92}
+        width={mobileOpen ? 162 : 173}
+        height={mobileOpen ? 28 : 30}
+        style={{ width: "100%", height: "100%" }}
         priority
       />
     </span>
@@ -170,13 +171,15 @@ export default function HomepageHeader() {
             })
           }
         >
-          <Image
-            src={mobileOpen ? "/icons/close-menu.svg" : "/icons/menu.svg"}
-            alt=""
-            width={mobileOpen ? 22 : 28}
-            height={mobileOpen ? 22 : 16}
-            aria-hidden="true"
-          />
+          <span className={styles.mobileMenuGlyph} aria-hidden="true">
+            <Image
+              src={mobileOpen ? "/icons/close-menu.svg" : "/icons/menu.svg"}
+              alt=""
+              width={mobileOpen ? 22 : 28}
+              height={mobileOpen ? 22 : 16}
+              style={{ width: "100%", height: "100%" }}
+            />
+          </span>
         </button>
       </div>
 
@@ -199,7 +202,7 @@ export default function HomepageHeader() {
                   key={href}
                   href={href}
                   onClick={closeMenusAfterNavigation}
-                  tabIndex={openMenu ? 0 : -1}
+                  tabIndex={openMenu === column.key ? 0 : -1}
                 >
                   {label}
                 </Link>

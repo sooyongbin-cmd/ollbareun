@@ -3556,6 +3556,7 @@
     font-size: 16px;
     font-weight: 400;
     letter-spacing: -0.48px;
+    line-height: normal;
     text-align: left;
     cursor: pointer;
   }
@@ -3570,6 +3571,8 @@
 
   .mobileMenuTitle > span:last-child {
     position: static;
+    top: auto;
+    line-height: normal;
   }
 
   .mobileMenuTitleActive {

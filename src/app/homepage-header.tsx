@@ -139,19 +139,20 @@ export default function HomepageHeader() {
 
         <nav className={styles.desktopNav} aria-label="주요 메뉴">
           {menuColumns.map((menu) => (
-            <Link
+            <button
+              type="button"
               key={menu.key}
-              href={menu.href}
               className={`${styles.desktopNavItem} ${
                 (openMenu ?? activeMenu) === menu.key ? styles.desktopNavItemActive : ""
               }`}
               aria-expanded={openMenu === menu.key}
+              aria-controls="homepage-desktop-submenu"
               onMouseEnter={() => setOpenMenu(menu.key)}
               onFocus={() => setOpenMenu(menu.key)}
-              onClick={() => setOpenMenu(null)}
+              onClick={() => setOpenMenu(menu.key)}
             >
               {menu.label}
-            </Link>
+            </button>
           ))}
         </nav>
 
@@ -172,6 +173,7 @@ export default function HomepageHeader() {
       </div>
 
       <div
+        id="homepage-desktop-submenu"
         className={`${styles.megaMenu} ${openMenu ? styles.megaMenuOpen : ""}`}
         inert={!openMenu}
         onMouseEnter={() => {

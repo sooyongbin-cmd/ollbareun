@@ -3322,6 +3322,931 @@
   }
 }
 
+/*
+ * Figma page-body rhythm.
+ *
+ * Header and footer contracts are intentionally excluded from this block.
+ * The values below interpolate the measured section boundaries between the
+ * responsive frames in the landing, about, services, and clients designs.
+ */
+.hero,
+.aboutHero,
+.serviceHero,
+.clientHero,
+.trustSection,
+.servicePreview,
+.homeClientSection,
+.companySection,
+.values,
+.socialSection,
+.contactSection,
+.operationSection,
+.dispatchSection,
+.facilityManagementSection,
+.disinfectionSection,
+.clientsSection {
+  box-sizing: border-box;
+}
+
+@media (min-width: 1281px) {
+  .hero {
+    min-height: 833px;
+    height: 833px;
+  }
+
+  .heroContent {
+    position: absolute;
+    top: 353px;
+    left: 0;
+    margin: 0;
+  }
+
+  .trustSection {
+    min-height: calc(512px + 7.8125vw);
+    height: calc(512px + 7.8125vw);
+  }
+
+  .servicePreview {
+    min-height: calc(491px + 22.3438vw);
+    height: calc(491px + 22.3438vw);
+  }
+
+  .homeClientSection {
+    min-height: calc(932px - 0.625vw);
+    height: calc(932px - 0.625vw);
+  }
+
+  .trustSection .splitIntro,
+  .servicePreview > .sectionHeading,
+  .servicePreview > .serviceGrid,
+  .homeClientSection > .sectionHeading,
+  .homeClientSection > .homeClientLogos {
+    width: min(1290px, 100%);
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .aboutHero,
+  .serviceHero,
+  .clientHero {
+    min-height: 502px;
+    height: 502px;
+  }
+
+  .aboutPage .companySection {
+    min-height: calc(1101.24px + 14.903vw);
+    height: calc(1101.24px + 14.903vw);
+  }
+
+  .aboutPage .values {
+    min-height: calc(801.282px - 1.038vw);
+    height: calc(801.282px - 1.038vw);
+  }
+
+  .aboutPage .socialSection {
+    min-height: calc(347px + 30vw);
+    height: calc(347px + 30vw);
+  }
+
+  .aboutPage .contactSection {
+    min-height: calc(926.18px + 9.205vw);
+    height: calc(926.18px + 9.205vw);
+  }
+
+  .servicesPage .operationSection {
+    min-height: calc(1182px + 7.5vw);
+    height: calc(1182px + 7.5vw);
+  }
+
+  .servicesPage .dispatchSection {
+    min-height: calc(1183.22px + 10.92vw);
+    height: calc(1183.22px + 10.92vw);
+  }
+
+  .servicesPage .facilityManagementSection {
+    min-height: calc(1045px + 14.375vw);
+    height: calc(1045px + 14.375vw);
+  }
+
+  .servicesPage .disinfectionSection {
+    min-height: calc(999px + 20.156vw);
+    height: calc(999px + 20.156vw);
+  }
+
+  .servicesPage .dispatchDiagram {
+    width: min(508.639px, 100%);
+  }
+
+  .clientsPage .clientsSection {
+    min-height: calc(1252px + 58.438vw);
+    height: calc(1252px + 58.438vw);
+  }
+}
+
+@media (min-width: 1063px) and (max-width: 1280px) {
+  .hero {
+    min-height: calc(222.3578px + 47.7064vw);
+    height: calc(222.3578px + 47.7064vw);
+  }
+
+  .heroContent {
+    position: absolute;
+    top: calc(182.75px + 13.303vw);
+    left: 0;
+    margin: 0;
+  }
+
+  .heroContent h1 {
+    font-size: calc(24.39px + 3.353vw);
+  }
+
+  .trustSection {
+    min-height: 612px;
+    height: 612px;
+  }
+
+  .servicePreview {
+    min-height: 777px;
+    height: 777px;
+  }
+
+  .homeClientSection {
+    min-height: 924px;
+    height: 924px;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .trustSection .splitIntro,
+  .servicePreview > .sectionHeading,
+  .servicePreview > .serviceGrid,
+  .homeClientSection > .sectionHeading,
+  .homeClientSection > .homeClientLogos {
+    width: min(934px, 100%);
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .aboutHero,
+  .serviceHero,
+  .clientHero {
+    min-height: 502px;
+    height: 502px;
+  }
+
+  .aboutPage .companySection {
+    min-height: calc(5012px - 290.625vw);
+    height: calc(5012px - 290.625vw);
+  }
+
+  .aboutPage .values {
+    min-height: calc(1789.795px - 78.265vw);
+    height: calc(1789.795px - 78.265vw);
+  }
+
+  .aboutPage .socialSection {
+    min-height: calc(1881px - 89.844vw);
+    height: calc(1881px - 89.844vw);
+  }
+
+  .aboutPage .contactSection {
+    min-height: calc(889px + 12.109vw);
+    height: calc(889px + 12.109vw);
+  }
+
+  .servicesPage .operationSection {
+    min-height: calc(1182.61px + 7.452vw);
+    height: calc(1182.61px + 7.452vw);
+  }
+
+  .servicesPage .dispatchSection {
+    min-height: calc(1091.565px + 18.081vw);
+    height: calc(1091.565px + 18.081vw);
+  }
+
+  .servicesPage .facilityManagementSection {
+    min-height: calc(4052.175px - 220.561vw);
+    height: calc(4052.175px - 220.561vw);
+  }
+
+  .servicesPage .disinfectionSection {
+    min-height: calc(607px + 50.781vw);
+    height: calc(607px + 50.781vw);
+  }
+
+  .servicesPage .dispatchDiagram {
+    width: min(483.208px, 100%);
+  }
+
+  .clientsPage .clientsSection {
+    min-height: calc(2255px - 19.922vw);
+    height: calc(2255px - 19.922vw);
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1062px) {
+  .hero {
+    min-height: calc(71.5714px + 61.9048vw);
+    height: calc(71.5714px + 61.9048vw);
+  }
+
+  .heroContent {
+    position: absolute;
+    top: calc(60.36px + 24.83vw);
+    left: 0;
+    margin: 0;
+  }
+
+  .heroContent h1 {
+    font-size: calc(5.816px + 5.102vw);
+  }
+
+  .trustSection {
+    min-height: calc(1179.1224px - 53.4014vw);
+    height: calc(1179.1224px - 53.4014vw);
+  }
+
+  .servicePreview {
+    min-height: calc(2593.9592px - 171.0884vw);
+    height: calc(2593.9592px - 171.0884vw);
+  }
+
+  .homeClientSection {
+    min-height: calc(378.551px + 51.3605vw);
+    height: calc(378.551px + 51.3605vw);
+  }
+
+  .trustSection .splitIntro,
+  .servicePreview > .sectionHeading,
+  .servicePreview > .serviceGrid,
+  .homeClientSection > .sectionHeading,
+  .homeClientSection > .homeClientLogos {
+    width: min(934px, 100%);
+    margin-right: auto;
+    margin-left: auto;
+  }
+}
+
+@media (min-width: 769px) {
+  .servicePreview .serviceCard {
+    overflow: visible;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .servicePreview .serviceCard:hover {
+    box-shadow: none;
+    transform: none;
+  }
+
+  .servicePreview .serviceCard > div:last-child {
+    min-height: 0;
+    padding: 8px 3px 0;
+  }
+
+  .servicePreview > .moreLink {
+    margin-top: 32px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .aboutHero,
+  .serviceHero,
+  .clientHero {
+    min-height: calc(122px + 37.109vw);
+    height: calc(122px + 37.109vw);
+  }
+
+  .aboutPage .companySection {
+    min-height: calc(1872px + 16.016vw);
+    height: calc(1872px + 16.016vw);
+  }
+
+  .aboutPage .values {
+    min-height: calc(986.923px + 0.14vw);
+    height: calc(986.923px + 0.14vw);
+  }
+
+  .aboutPage .socialSection {
+    min-height: calc(2945px - 193.75vw);
+    height: calc(2945px - 193.75vw);
+  }
+
+  .aboutPage .contactSection {
+    min-height: calc(929px + 8.203vw);
+    height: calc(929px + 8.203vw);
+  }
+
+  .servicesPage .operationSection {
+    min-height: 1258.922px;
+    height: 1258.922px;
+  }
+
+  .servicesPage .dispatchSection {
+    min-height: calc(996.713px + 27.344vw);
+    height: calc(996.713px + 27.344vw);
+  }
+
+  .servicesPage .facilityManagementSection {
+    min-height: calc(1513.635px + 27.344vw);
+    height: calc(1513.635px + 27.344vw);
+  }
+
+  .servicesPage .disinfectionSection {
+    min-height: 1127px;
+    height: 1127px;
+  }
+
+  .servicesPage .dispatchDiagram {
+    width: min(436.359px, 100%);
+  }
+
+  .servicesPage .disinfectionSection {
+    padding-top: 94px;
+  }
+
+  .servicesPage .disinfectionSection .airportCard {
+    margin-top: 30px;
+  }
+
+  .servicesPage .disinfectionSection .detailMessage {
+    margin-bottom: 40px;
+  }
+
+  .clientsPage .clientsSection {
+    min-height: calc(835px + 118.75vw);
+    height: calc(835px + 118.75vw);
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .hero {
+    min-height: calc(1px + 71.0938vw);
+    height: calc(1px + 71.0938vw);
+  }
+
+  .heroContent {
+    position: absolute;
+    top: calc(-19px + 35.156vw);
+    left: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0 20px;
+  }
+
+  .heroContent h1 {
+    font-size: 5.8594vw;
+  }
+
+  .trustSection {
+    min-height: calc(361px + 53.125vw);
+    height: calc(361px + 53.125vw);
+  }
+
+  .servicePreview {
+    min-height: calc(1568px - 37.5vw);
+    height: calc(1568px - 37.5vw);
+  }
+
+  .homeClientSection {
+    min-height: calc(413px + 46.875vw);
+    height: calc(413px + 46.875vw);
+  }
+
+  .certificateImages {
+    width: min(374px, 100%);
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .servicePreview .serviceGrid {
+    width: min(363px, 100%);
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .homeClientSection > .sectionHeading,
+  .homeClientSection > .homeClientLogos {
+    width: min(571px, 100%);
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .trustSection .sectionHeading > p,
+  .servicePreview .sectionHeading > p,
+  .homeClientSection .sectionHeading > p {
+    margin-bottom: 12px;
+    font-size: 17px;
+    line-height: 20px;
+  }
+
+  .trustSection .sectionHeading h2,
+  .servicePreview .sectionHeading h2,
+  .homeClientSection .sectionHeading h2 {
+    font-size: 27px;
+    line-height: 33px;
+  }
+
+  .trustSection .sectionHeading > span,
+  .servicePreview .sectionHeading > span,
+  .homeClientSection .sectionHeading > span {
+    margin-top: 14px;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .homeClientSection {
+    padding-top: 74px;
+  }
+
+  .homeClientLogos > div {
+    min-height: 143px;
+  }
+
+  .aboutHero,
+  .clientHero {
+    min-height: calc(131px + 35.938vw);
+    height: calc(131px + 35.938vw);
+  }
+
+  .serviceHero {
+    min-height: calc(-340px + 109.375vw);
+    height: calc(-340px + 109.375vw);
+  }
+
+  .aboutPage .companySection {
+    min-height: calc(1965px + 3.906vw);
+    height: calc(1965px + 3.906vw);
+  }
+
+  .aboutPage .values {
+    min-height: 988px;
+    height: 988px;
+  }
+
+  .aboutPage .socialSection {
+    min-height: calc(761px + 90.625vw);
+    height: calc(761px + 90.625vw);
+  }
+
+  .aboutPage .contactSection {
+    min-height: calc(818px + 22.656vw);
+    height: calc(818px + 22.656vw);
+  }
+
+  .servicesPage .operationSection {
+    min-height: calc(1199.264px + 7.768vw);
+    height: calc(1199.264px + 7.768vw);
+  }
+
+  .servicesPage .dispatchSection {
+    min-height: 1206.713px;
+    height: 1206.713px;
+  }
+
+  .servicesPage .facilityManagementSection {
+    min-height: 1723.635px;
+    height: 1723.635px;
+  }
+
+  .servicesPage .disinfectionSection {
+    min-height: 1127px;
+    height: 1127px;
+  }
+
+  .clientsPage .clientsSection {
+    min-height: calc(2587px - 109.375vw);
+    height: calc(2587px - 109.375vw);
+  }
+
+  .aboutPage .socialGrid,
+  .servicesPage .facilityGrid {
+    width: min(calc(320px + 37.5vw - 240px), calc(100% - 40px));
+    margin-right: auto;
+    margin-left: auto;
+  }
+}
+
+@media (min-width: 767.984px) and (max-width: 768px) {
+  .servicesPage .operationSection {
+    width: 640px;
+    max-width: calc(100% - 40px);
+    padding-top: 64px;
+    padding-bottom: 70px;
+  }
+
+  .servicesPage .operationSection .sectionHeading,
+  .servicesPage .detailSection .sectionHeading,
+  .servicesPage .facilitySection .sectionHeading,
+  .clientsPage .clientsSection .sectionHeading {
+    margin-bottom: 28.5px;
+  }
+
+  .servicesPage .sectionHeading > p,
+  .clientsPage .sectionHeading > p {
+    margin-bottom: 13.5px;
+    font-size: 14px;
+    line-height: 19px;
+  }
+
+  .servicesPage .sectionHeading h2,
+  .clientsPage .sectionHeading h2 {
+    font-size: 27px;
+    line-height: 32px;
+  }
+
+  .servicesPage .sectionHeading > span,
+  .clientsPage .sectionHeading > span {
+    margin-top: 22.8px;
+    font-size: 14px;
+    line-height: 23px;
+  }
+
+  .servicesPage .teamImage,
+  .servicesPage .detailBanner {
+    height: 180px;
+  }
+
+  .servicesPage .operationLayout {
+    margin-top: 54px;
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .servicesPage .operationLayout > h3 {
+    margin: 0;
+    font-size: 24px;
+    line-height: 29px;
+    text-align: center;
+  }
+
+  .servicesPage .detailSection,
+  .servicesPage .facilitySection {
+    padding-top: 64px;
+  }
+
+  .servicesPage .detailSection > .sectionHeading,
+  .servicesPage .detailSection > .detailBanner,
+  .servicesPage .detailSection > .detailMessage,
+  .servicesPage .facilitySection > .sectionHeading,
+  .servicesPage .facilitySection > .detailBanner,
+  .servicesPage .facilitySection > .detailMessage,
+  .servicesPage .facilitySection > .facilityGrid {
+    width: min(570px, 100%);
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .servicesPage .detailMessage {
+    margin-top: 34px;
+    margin-bottom: 42px;
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .servicesPage .facilityGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .clientsPage .clientGroups {
+    gap: 30px;
+  }
+
+  .clientsPage .clientGroups > div:nth-child(1) .logoGrid > div,
+  .clientsPage .clientGroups > div:nth-child(3) .logoGrid > div {
+    height: 114px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .hero {
+    min-height: 71.25vw;
+    height: 71.25vw;
+  }
+
+  .heroContent {
+    top: calc(-26px + 36.25vw);
+  }
+
+  .heroContent h1 {
+    font-size: calc(7.5px + 4.6875vw);
+  }
+
+  .trustSection {
+    min-height: calc(661px + 6.25vw);
+    height: calc(661px + 6.25vw);
+  }
+
+  .servicePreview {
+    min-height: calc(1240px + 13.75vw);
+    height: calc(1240px + 13.75vw);
+  }
+
+  .homeClientSection {
+    min-height: calc(645px + 10.625vw);
+    height: calc(645px + 10.625vw);
+  }
+
+  .certificateImages,
+  .servicePreview .serviceGrid {
+    width: min(374px, 100%);
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .servicePreview .serviceGrid {
+    width: min(363px, 100%);
+  }
+
+  .aboutHero,
+  .clientHero {
+    min-height: calc(149px + 33.125vw);
+    height: calc(149px + 33.125vw);
+  }
+
+  .serviceHero {
+    min-height: 360px;
+    height: 360px;
+  }
+
+  .servicesPage .operationSection {
+    min-height: 1248.979px;
+    height: 1248.979px;
+  }
+
+  .servicesPage .dispatchSection {
+    min-height: 1206.713px;
+    height: 1206.713px;
+  }
+
+  .servicesPage .facilityManagementSection {
+    min-height: 1723.635px;
+    height: 1723.635px;
+  }
+
+  .servicesPage .disinfectionSection {
+    min-height: 1127px;
+    height: 1127px;
+  }
+
+  .aboutPage .companySection {
+    min-height: calc(1370px + 96.875vw);
+    height: calc(1370px + 96.875vw);
+  }
+
+  .aboutPage .values {
+    min-height: calc(-4.4px + 155.063vw);
+    height: calc(-4.4px + 155.063vw);
+  }
+
+  .aboutPage .socialSection {
+    min-height: calc(1121px + 34.375vw);
+    height: calc(1121px + 34.375vw);
+  }
+
+  .aboutPage .contactSection {
+    min-height: calc(503px + 71.875vw);
+    height: calc(503px + 71.875vw);
+  }
+
+  .clientsPage .clientsSection {
+    min-height: calc(2784.112px - 140.174vw);
+    height: calc(2784.112px - 140.174vw);
+  }
+
+  .aboutPage .socialGrid,
+  .servicesPage .facilityGrid {
+    width: min(320px, calc(100% - 40px));
+    margin-right: auto;
+    margin-left: auto;
+  }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+  .hero {
+    min-height: calc(206px + 28.3333vw);
+    height: calc(206px + 28.3333vw);
+  }
+
+  .heroContent {
+    top: calc(144px + 0.8333vw);
+  }
+
+  .heroContent h1 {
+    font-size: calc(14px + 3.3333vw);
+  }
+
+  .trustSection {
+    min-height: calc(11px + 141.6667vw);
+    height: calc(11px + 141.6667vw);
+  }
+
+  .servicePreview {
+    min-height: calc(682px + 130vw);
+    height: calc(682px + 130vw);
+  }
+
+  .homeClientSection {
+    min-height: calc(708px - 2.5vw);
+    height: calc(708px - 2.5vw);
+  }
+
+  .certificateImages {
+    width: min(420px, 100%);
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .servicePreview .serviceGrid {
+    width: min(363px, 100%);
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .aboutHero,
+  .clientHero {
+    min-height: calc(44px + 55vw);
+    height: calc(44px + 55vw);
+  }
+
+  .serviceHero {
+    min-height: 360px;
+    height: 360px;
+  }
+
+  .servicesPage .operationSection {
+    min-height: 1248.979px;
+    height: 1248.979px;
+  }
+
+  .servicesPage .dispatchSection {
+    min-height: 1206.713px;
+    height: 1206.713px;
+  }
+
+  .servicesPage .facilityManagementSection {
+    min-height: 1723.635px;
+    height: 1723.635px;
+  }
+
+  .servicesPage .disinfectionSection {
+    min-height: 1127px;
+    height: 1127px;
+  }
+
+  .aboutPage .companySection {
+    min-height: calc(-461px + 478.333vw);
+    height: calc(-461px + 478.333vw);
+  }
+
+  .aboutPage .values {
+    min-height: calc(129.3px + 127.208vw);
+    height: calc(129.3px + 127.208vw);
+  }
+
+  .aboutPage .socialSection {
+    min-height: calc(829.72px + 95.058vw);
+    height: calc(829.72px + 95.058vw);
+  }
+
+  .aboutPage .contactSection {
+    min-height: calc(-156px + 209.167vw);
+    height: calc(-156px + 209.167vw);
+  }
+
+  .clientsPage .clientsSection {
+    min-height: calc(1226.166px + 184.398vw);
+    height: calc(1226.166px + 184.398vw);
+  }
+
+  .aboutPage .socialGrid,
+  .servicesPage .facilityGrid {
+    width: min(320px, calc(100% - 40px));
+    margin-right: auto;
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 360px) {
+  .hero {
+    min-height: 308px;
+    height: 308px;
+  }
+
+  .heroContent {
+    top: 147px;
+  }
+
+  .heroContent h1 {
+    font-size: 26px;
+  }
+
+  .trustSection {
+    min-height: 521px;
+    height: 521px;
+  }
+
+  .servicePreview {
+    min-height: 1150px;
+    height: 1150px;
+  }
+
+  .homeClientSection {
+    min-height: 699px;
+    height: 699px;
+  }
+
+  .aboutHero {
+    min-height: 242px;
+    height: 242px;
+  }
+
+  .serviceHero {
+    min-height: 360px;
+    height: 360px;
+  }
+
+  .servicesPage .operationSection {
+    min-height: 1248.979px;
+    height: 1248.979px;
+  }
+
+  .servicesPage .dispatchSection {
+    min-height: 1206.713px;
+    height: 1206.713px;
+  }
+
+  .servicesPage .facilityManagementSection {
+    min-height: 1723.635px;
+    height: 1723.635px;
+  }
+
+  .servicesPage .disinfectionSection {
+    min-height: 1127px;
+    height: 1127px;
+  }
+
+  .clientHero {
+    min-height: 228px;
+    height: 228px;
+  }
+
+  .aboutPage .companySection {
+    min-height: 1261px;
+    height: 1261px;
+  }
+
+  .aboutPage .values {
+    min-height: 587.25px;
+    height: 587.25px;
+  }
+
+  .aboutPage .socialSection {
+    min-height: 1171.93px;
+    height: 1171.93px;
+  }
+
+  .aboutPage .contactSection {
+    min-height: 597px;
+    height: 597px;
+  }
+
+  .clientsPage .clientsSection {
+    min-height: 1890px;
+    height: 1890px;
+  }
+
+  .servicePreview .serviceGrid {
+    gap: 32px;
+  }
+
+  .servicePreview .serviceCard:nth-child(1) {
+    height: 236px;
+  }
+
+  .servicePreview .serviceCard:nth-child(2),
+  .servicePreview .serviceCard:nth-child(3) {
+    height: 216px;
+  }
+
+  .servicePreview > .moreLink {
+    margin-top: 47px;
+  }
+
+  .aboutPage .socialGrid,
+  .servicesPage .facilityGrid {
+    width: min(320px, calc(100% - 40px));
+    margin-right: auto;
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .heroContent .mobileOnlyBreak {
+    display: none;
+  }
+}
+
 /* Figma header component: desktop from 1063px, mobile through 1062px. */
 @media (min-width: 1063px) {
   .header,

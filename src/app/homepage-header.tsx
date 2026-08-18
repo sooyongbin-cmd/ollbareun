@@ -227,7 +227,14 @@ export default function HomepageHeader() {
                     )
                   }
                 >
-                  <span aria-hidden="true">{isExpanded ? "-" : "+"}</span>
+                  <span aria-hidden="true">
+                    <Image
+                      src={isExpanded ? "/icons/remove.svg" : "/icons/add.svg"}
+                      alt=""
+                      width={24}
+                      height={24}
+                    />
+                  </span>
                   <span>{column.label}</span>
                 </button>
                 <div

@@ -3523,10 +3523,13 @@
   .mobileMenuTitle > span:first-child {
     position: static;
     width: 20px;
-    font-family: Inter, system-ui, sans-serif;
-    font-size: 20px;
-    line-height: 1;
-    text-align: center;
+    height: 20px;
+  }
+
+  .mobileMenuTitle > span:first-child img {
+    display: block;
+    width: 20px;
+    height: 20px;
   }
 
   .mobileMenuTitle > span:last-child {

@@ -5,7 +5,7 @@
 .policy {
   width: min(1520px, calc(100% - 400px));
   margin: 0 auto;
-  padding: 380px 0 344px;
+  padding: 380px 0;
   color: #616161;
 }
 
@@ -100,12 +100,12 @@
   .content {
     font-size: 16px;
     letter-spacing: -0.48px;
-    line-height: 28px;
+    line-height: 36px;
   }
 
   .content section,
   .officer {
-    margin-top: 28px;
+    margin-top: 36px;
   }
 }
 
@@ -117,24 +117,49 @@
 
   .policy h1 {
     height: 85px;
-    margin-bottom: 65px;
+    margin-bottom: 80px;
     font-size: 43px;
     letter-spacing: -1.29px;
   }
 
   .content {
-    font-size: 15px;
-    letter-spacing: -0.45px;
-    line-height: 25px;
+    font-size: 16px;
+    letter-spacing: -0.48px;
+    line-height: 32px;
   }
 
   .content section,
   .officer {
-    margin-top: 25px;
+    margin-top: 32px;
   }
 }
 
 @media (min-width: 481px) and (max-width: 640px) {
+  .policy {
+    width: calc(100% - 160px);
+    padding: 168px 0;
+  }
+
+  .policy h1 {
+    height: 85px;
+    margin-bottom: 80px;
+    font-size: 43px;
+    letter-spacing: -1.29px;
+  }
+
+  .content {
+    font-size: 16px;
+    letter-spacing: -0.48px;
+    line-height: 32px;
+  }
+
+  .content section,
+  .officer {
+    margin-top: 32px;
+  }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
   .policy {
     width: calc(100% - 120px);
     padding: 150px 0;
@@ -151,6 +176,7 @@
     font-size: 15px;
     letter-spacing: -0.45px;
     line-height: 25px;
+    word-break: normal;
   }
 
   .content section,
@@ -159,7 +185,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 360px) {
   .policy {
     width: calc(100% - 40px);
     padding: 110px 0;

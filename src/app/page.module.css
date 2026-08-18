@@ -56,7 +56,13 @@
   align-items: center;
 }
 
-.headerInner > a {
+.brandCluster > a {
+  display: flex;
+  height: 100%;
+  align-items: center;
+}
+
+.brandCluster {
   display: flex;
   height: 100%;
   align-items: center;
@@ -3332,6 +3338,24 @@
     height: 64px;
   }
 
+  .brandCluster {
+    gap: 25px;
+  }
+
+  .brandLogo {
+    width: 173.341px;
+  }
+
+  .certification {
+    height: auto;
+    margin: 0;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: -0.45px;
+    opacity: 1;
+  }
+
   .desktopNav {
     display: grid;
     width: 561px;
@@ -3396,13 +3420,52 @@
 
 @media (max-width: 1062px) {
   .header {
+    height: 64px;
     background: rgb(0 0 0 / 35%);
   }
 
   .headerInner {
     width: 100%;
     height: 64px;
-    padding: 17px 30px 18px;
+    padding: 0 50px;
+  }
+
+  .brandCluster {
+    min-width: 0;
+    gap: 14.658px;
+  }
+
+  .brandCluster > a {
+    flex: none;
+  }
+
+  .brand {
+    width: auto;
+    flex: none;
+  }
+
+  .brandLogo {
+    width: 173.342px;
+    max-width: none;
+    margin: 0;
+  }
+
+  .certification {
+    position: static;
+    top: auto;
+    left: auto;
+    min-width: 0;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: -0.45px;
+    line-height: normal;
+    white-space: nowrap;
+    opacity: 1;
   }
 
   .desktopNav,
@@ -3412,78 +3475,28 @@
 
   .mobileMenuButton {
     display: grid;
-    width: 27px;
-    height: 29px;
+    width: 26.15px;
+    height: 15.16px;
+    margin: 0 0 0 auto;
+    flex: none;
     place-items: center;
     cursor: pointer;
   }
 
-  .mobileHeaderOpen {
-    height: 100dvh;
-    background: #005da7;
-    color: #231815;
-  }
-
-  .mobileHeaderOpen .headerInner {
-    height: 130px;
-    padding: 27px 30px;
-    align-items: flex-end;
-    background: #fff;
-  }
-
-  .mobileHeaderOpen .headerInner > a {
-    position: absolute;
-    bottom: 27px;
-    left: 30px;
-    width: auto;
-    height: 28px;
-    margin: 0;
-  }
-
-  .mobileHeaderOpen .brandLogo {
-    width: 162px;
-    margin: 0;
-  }
-
-  .mobileHeaderOpen .certification {
-    position: absolute;
-    top: 27px;
-    left: 30px;
-    margin: 0;
-    color: #231815;
-    font-size: 11px;
-    font-weight: 400;
-    letter-spacing: -0.331px;
-  }
-
-  .mobileHeaderOpen .mobileMenuButton {
-    position: absolute;
-    top: 25px;
-    right: 30px;
-    width: 28px;
-    height: 28px;
-    margin: 0;
-    color: #158cc8;
-  }
-
-  .mobileHeaderOpen .mobileMenuButton svg {
-    width: 22px;
-    height: 22px;
+  .mobileMenuButton img {
+    display: block;
+    width: 26.15px;
+    height: 13.66px;
   }
 
   .mobileMenu {
     position: fixed;
-    top: 130px;
+    z-index: 1;
+    top: 130.54px;
     display: block;
     height: 0;
     max-height: 0;
     background: #005da7;
-  }
-
-  .mobileMenuOpen {
-    height: calc(100dvh - 130px);
-    max-height: calc(100dvh - 130px);
-    overflow-y: auto;
   }
 
   .mobileMenuInner {
@@ -3520,13 +3533,9 @@
     cursor: pointer;
   }
 
-  .mobileMenuTitle > span:first-child {
-    position: static;
-    width: 20px;
-    height: 20px;
-  }
-
+  .mobileMenuTitle > span:first-child,
   .mobileMenuTitle > span:first-child img {
+    position: static;
     display: block;
     width: 20px;
     height: 20px;
@@ -3571,6 +3580,179 @@
   .mobileMenuInner section > .mobileMenuSubmenu a:focus-visible {
     color: #71c7d5;
     font-weight: 800;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .header,
+  .headerInner {
+    height: 58px;
+  }
+
+  .headerInner {
+    padding: 0 40px;
+  }
+
+  .brandCluster {
+    gap: 11.214px;
+  }
+
+  .brandLogo {
+    width: 132.606px;
+  }
+
+  .certification {
+    font-size: 11.475px;
+    letter-spacing: -0.344px;
+  }
+
+  .mobileMenuButton,
+  .mobileMenuButton img {
+    width: 23.535px;
+    height: 12.294px;
+  }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+  .header,
+  .headerInner {
+    height: 58px;
+  }
+
+  .headerInner {
+    padding: 0 25px;
+  }
+
+  .brandCluster {
+    gap: 9.62px;
+  }
+
+  .brandLogo {
+    width: 113.73px;
+  }
+
+  .certification {
+    font-size: 9.841px;
+    letter-spacing: -0.295px;
+  }
+
+  .mobileMenuButton,
+  .mobileMenuButton img {
+    width: 21.181px;
+    height: 11.065px;
+  }
+}
+
+@media (max-width: 360px) {
+  .header,
+  .headerInner {
+    height: 52px;
+  }
+
+  .headerInner {
+    min-width: 360px;
+    padding: 0 20px;
+  }
+
+  .brandCluster {
+    gap: 9px;
+  }
+
+  .brandLogo {
+    width: 102.357px;
+  }
+
+  .certification {
+    font-size: 8.857px;
+    letter-spacing: -0.266px;
+  }
+
+  .mobileMenuButton,
+  .mobileMenuButton img {
+    width: 21.181px;
+    height: 11.065px;
+  }
+}
+
+@media (max-width: 1062px) {
+  .mobileHeaderOpen {
+    height: 100dvh;
+    background: #005da7;
+    color: #231815;
+  }
+
+  .mobileHeaderOpen .headerInner {
+    height: 130.54px;
+    min-width: 0;
+    padding: 27px 30px;
+    align-items: flex-start;
+    background: #fff;
+  }
+
+  .mobileHeaderOpen .brandCluster {
+    height: auto;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .mobileHeaderOpen .brandCluster > a {
+    width: auto;
+    height: auto;
+    order: 2;
+  }
+
+  .mobileHeaderOpen .brandLogo {
+    width: 161.932px;
+    margin: 0;
+  }
+
+  .mobileHeaderOpen .brand {
+    width: auto;
+    flex-shrink: 0;
+  }
+
+  .mobileHeaderOpen .certification {
+    position: static;
+    top: auto;
+    left: auto;
+    display: block;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    order: 1;
+    margin: 0;
+    color: #231815;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: -0.331px;
+  }
+
+  .mobileHeaderOpen .mobileMenuButton {
+    position: absolute;
+    top: 27px;
+    right: 30px;
+    width: 22.29px;
+    height: 21.81px;
+    margin: 0;
+  }
+
+  .mobileHeaderOpen .mobileMenuButton img {
+    width: 22.29px;
+    height: 21.81px;
+  }
+
+  .mobileHeaderOpen .mobileMenu {
+    top: 130.54px;
+    background: #005da7;
+  }
+
+  .mobileHeaderOpen .mobileMenuOpen {
+    height: calc(100dvh - 130.54px);
+    max-height: calc(100dvh - 130.54px);
+    overflow-y: auto;
+    opacity: 1;
+    pointer-events: auto;
   }
 }
 

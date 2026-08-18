@@ -1,6 +1,5 @@
 "use client";
 
-import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -132,10 +131,12 @@ export default function HomepageHeader() {
       }}
     >
       <div className={styles.headerInner}>
-        <Link href="/" aria-label="올바름 홈페이지 처음으로" onClick={closeMenus}>
-          <HeaderBrand mobileOpen={mobileOpen} />
-        </Link>
-        <p className={styles.certification}>고용노동부 지정 사회적기업 / 여성기업</p>
+        <div className={styles.brandCluster}>
+          <Link href="/" aria-label="올바름 홈페이지 처음으로" onClick={closeMenus}>
+            <HeaderBrand mobileOpen={mobileOpen} />
+          </Link>
+          <p className={styles.certification}>고용노동부 지정 사회적기업 / 여성기업</p>
+        </div>
 
         <nav className={styles.desktopNav} aria-label="주요 메뉴">
           {menuColumns.map((menu) => (
@@ -147,9 +148,9 @@ export default function HomepageHeader() {
               }`}
               aria-expanded={openMenu === menu.key}
               aria-controls="homepage-desktop-submenu"
-              onMouseEnter={() => setOpenMenu(menu.key)}
-              onFocus={() => setOpenMenu(menu.key)}
-              onClick={() => setOpenMenu(menu.key)}
+              onClick={() =>
+                setOpenMenu((current) => (current === menu.key ? null : menu.key))
+              }
             >
               {menu.label}
             </button>
@@ -162,13 +163,20 @@ export default function HomepageHeader() {
           aria-label={mobileOpen ? "메뉴 닫기" : "메뉴 열기"}
           aria-expanded={mobileOpen}
           aria-controls="homepage-mobile-menu"
-          onClick={() => setMobileOpen((open) => !open)}
+          onClick={() =>
+            setMobileOpen((open) => {
+              if (open) setMobileOpenMenu(null);
+              return !open;
+            })
+          }
         >
-          {mobileOpen ? (
-            <X aria-hidden="true" />
-          ) : (
-            <Menu aria-hidden="true" preserveAspectRatio="none" />
-          )}
+          <Image
+            src={mobileOpen ? "/icons/close-menu.svg" : "/icons/menu.svg"}
+            alt=""
+            width={mobileOpen ? 22 : 28}
+            height={mobileOpen ? 22 : 16}
+            aria-hidden="true"
+          />
         </button>
       </div>
 
@@ -176,9 +184,6 @@ export default function HomepageHeader() {
         id="homepage-desktop-submenu"
         className={`${styles.megaMenu} ${openMenu ? styles.megaMenuOpen : ""}`}
         inert={!openMenu}
-        onMouseEnter={() => {
-          if (!openMenu) setOpenMenu(activeMenu ?? "about");
-        }}
       >
         <div className={styles.megaMenuInner}>
           <div aria-hidden="true" />

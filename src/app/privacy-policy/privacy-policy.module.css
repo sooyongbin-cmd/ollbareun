@@ -3,16 +3,20 @@
 }
 
 .policy {
-  width: min(1520px, calc(100% - 400px));
+  --policy-inline-total: clamp(200px, calc(31.25vw - 200px), 400px);
+  --policy-block-space: clamp(323px, calc(8.90625vw + 209px), 380px);
+  --policy-title-gap: 177px;
+  --policy-section-gap: 40px;
+  width: min(1520px, calc(100% - var(--policy-inline-total)));
   margin: 0 auto;
-  padding: 380px 0;
+  padding: var(--policy-block-space) 0;
   color: #616161;
 }
 
 .policy h1 {
   display: grid;
   height: 132px;
-  margin: 0 0 177px;
+  margin: 0 0 var(--policy-title-gap);
   place-items: center;
   border-radius: 30px;
   background: #d9dde1;
@@ -41,7 +45,7 @@
 }
 
 .content section {
-  margin-top: 40px;
+  margin-top: var(--policy-section-gap);
 }
 
 .content h2,
@@ -74,25 +78,28 @@
 }
 
 .officer {
-  margin-top: 40px;
+  margin-top: var(--policy-section-gap);
 }
 
 @media (min-width: 1025px) and (max-width: 1280px) {
   .policy {
-    width: calc(100% - 200px);
-    padding: 323px 0;
+    --policy-inline-total: 200px;
+    --policy-block-space: clamp(208px, calc(44.921875vw - 252px), 323px);
+    --policy-title-gap: clamp(126px, calc(19.921875vw - 78px), 177px);
+    --policy-section-gap: clamp(36px, calc(1.5625vw + 20px), 40px);
   }
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
   .policy {
-    width: calc(100% - 200px);
-    padding: 208px 0;
+    --policy-inline-total: clamp(160px, calc(15.625vw + 40px), 200px);
+    --policy-block-space: clamp(195px, calc(5.078125vw + 156px), 208px);
+    --policy-title-gap: clamp(80px, calc(17.96875vw - 58px), 126px);
+    --policy-section-gap: clamp(32px, calc(1.5625vw + 20px), 36px);
   }
 
   .policy h1 {
     height: 101px;
-    margin-bottom: 126px;
     font-size: 48px;
     letter-spacing: -1.44px;
   }
@@ -103,21 +110,18 @@
     line-height: 36px;
   }
 
-  .content section,
-  .officer {
-    margin-top: 36px;
-  }
 }
 
 @media (min-width: 641px) and (max-width: 768px) {
   .policy {
-    width: calc(100% - 160px);
-    padding: 195px 0;
+    --policy-inline-total: 160px;
+    --policy-block-space: clamp(168px, calc(21.09375vw + 33px), 195px);
+    --policy-title-gap: 80px;
+    --policy-section-gap: 32px;
   }
 
   .policy h1 {
     height: 85px;
-    margin-bottom: 80px;
     font-size: 43px;
     letter-spacing: -1.29px;
   }
@@ -128,21 +132,18 @@
     line-height: 32px;
   }
 
-  .content section,
-  .officer {
-    margin-top: 32px;
-  }
 }
 
 @media (min-width: 481px) and (max-width: 640px) {
   .policy {
-    width: calc(100% - 160px);
-    padding: 168px 0;
+    --policy-inline-total: clamp(120px, 25vw, 160px);
+    --policy-block-space: clamp(150px, calc(11.25vw + 96px), 168px);
+    --policy-title-gap: clamp(65px, calc(9.375vw + 20px), 80px);
+    --policy-section-gap: clamp(25px, calc(4.375vw + 4px), 32px);
   }
 
   .policy h1 {
     height: 85px;
-    margin-bottom: 80px;
     font-size: 43px;
     letter-spacing: -1.29px;
   }
@@ -153,21 +154,18 @@
     line-height: 32px;
   }
 
-  .content section,
-  .officer {
-    margin-top: 32px;
-  }
 }
 
 @media (min-width: 361px) and (max-width: 480px) {
   .policy {
-    width: calc(100% - 120px);
-    padding: 150px 0;
+    --policy-inline-total: clamp(40px, calc(66.666667vw - 200px), 120px);
+    --policy-block-space: clamp(110px, calc(33.333333vw - 10px), 150px);
+    --policy-title-gap: clamp(52px, calc(10.833333vw + 13px), 65px);
+    --policy-section-gap: 25px;
   }
 
   .policy h1 {
     height: 85px;
-    margin-bottom: 65px;
     font-size: 35px;
     letter-spacing: -1.05px;
   }
@@ -179,21 +177,18 @@
     word-break: normal;
   }
 
-  .content section,
-  .officer {
-    margin-top: 25px;
-  }
 }
 
 @media (max-width: 360px) {
   .policy {
-    width: calc(100% - 40px);
-    padding: 110px 0;
+    --policy-inline-total: 40px;
+    --policy-block-space: 110px;
+    --policy-title-gap: 52px;
+    --policy-section-gap: 25px;
   }
 
   .policy h1 {
     height: 85px;
-    margin-bottom: 52px;
     font-size: 27px;
     letter-spacing: -0.81px;
   }
@@ -205,8 +200,4 @@
     word-break: normal;
   }
 
-  .content section,
-  .officer {
-    margin-top: 25px;
-  }
 }

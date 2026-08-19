@@ -5100,3 +5100,1579 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/*
+ * About page (Figma 545:1113)
+ *
+ * These rules mirror the section Auto Layout contracts instead of matching
+ * only the outer frame heights. Header and footer styles are intentionally
+ * outside this block.
+ */
+.aboutPage .aboutHero {
+  height: 502px;
+  min-height: 0;
+  padding-top: 64px;
+  box-sizing: border-box;
+  justify-content: center;
+}
+
+.aboutPage .aboutHero > div:last-child {
+  position: static;
+  width: min(1240px, calc(100% - 40px));
+  margin: 0 auto;
+}
+
+.aboutPage .aboutHero h1 {
+  margin: 0 auto;
+  font-size: 53px;
+  letter-spacing: -1.59px;
+  line-height: 70px;
+}
+
+.aboutPage .companySection,
+.aboutPage .socialSection,
+.aboutPage .contactSection {
+  width: 100%;
+  max-width: none;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+}
+
+.aboutPage .companySection {
+  padding: 160px 0 200px;
+}
+
+.companyInner,
+.valuesInner,
+.socialInner,
+.contactInner {
+  width: min(1240px, calc(100% - 40px));
+  margin: 0 auto;
+}
+
+.companyInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 117px;
+}
+
+.aboutPage .companySection .sectionHeading {
+  width: 604px;
+  max-width: 100%;
+  margin: 0;
+}
+
+.aboutPage .companySection .sectionHeading > p {
+  margin: 0 0 14px;
+  font-size: 29px;
+  font-weight: 800;
+  line-height: 35px;
+}
+
+.aboutPage .companySection .sectionHeading h2 {
+  font-size: 43px;
+  letter-spacing: -1.29px;
+  line-height: 54px;
+  white-space: nowrap;
+}
+
+.aboutPage .companySection .sectionHeading > span {
+  margin-top: 19px;
+  font-size: 21px;
+  line-height: 28.35px;
+}
+
+.aboutPage .stats {
+  width: 100%;
+  max-width: none;
+  height: 147.122px;
+  margin: 0;
+}
+
+.aboutPage .stats > div {
+  min-height: 0;
+  gap: 10px;
+}
+
+.aboutPage .stats > div > img {
+  max-width: 55px;
+  height: 36px;
+  margin: 0;
+}
+
+.aboutPage .stats strong {
+  font-size: 59.34px;
+  line-height: 71px;
+}
+
+.aboutPage .stats span {
+  margin: 0;
+  font-size: 17px;
+  line-height: 20px;
+}
+
+.aboutPage .historyWrap {
+  display: grid;
+  width: 100%;
+  max-width: none;
+  height: 467.818px;
+  margin: 0;
+  grid-template-columns: 522px 496px;
+  gap: 100px;
+  justify-content: center;
+}
+
+.aboutPage .historyImage {
+  width: 522px;
+  height: 462px;
+  min-height: 0;
+  border-radius: 0;
+}
+
+.aboutPage .historyImage > div {
+  padding: 0;
+}
+
+.aboutPage .historyImage span {
+  font-size: 43.871px;
+  font-weight: 900;
+  line-height: normal;
+}
+
+.aboutPage .historyImage p {
+  margin-top: 17.1px;
+  font-size: 18.05px;
+  line-height: 28.5px;
+}
+
+.aboutPage .timeline {
+  position: relative;
+  display: grid;
+  width: 496px;
+  height: 467.818px;
+  margin: 0;
+  padding: 0 29px;
+  grid-template-rows: repeat(5, 1fr);
+}
+
+.aboutPage .timeline::before {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  height: 100%;
+}
+
+.aboutPage .timeline li {
+  position: static;
+  display: grid;
+  height: auto;
+  min-height: 0;
+  grid-template-columns: 172px 42px 1fr;
+  align-items: center;
+}
+
+.aboutPage .timeline time {
+  position: static;
+  width: auto;
+  font-size: 40px;
+  line-height: normal;
+  text-align: right;
+}
+
+.aboutPage .timeline p {
+  position: static;
+  width: auto;
+  margin: 0 0 0 20px;
+  font-size: 16px;
+  line-height: 26.933px;
+}
+
+.aboutPage .values {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  padding: 150px 0 200px;
+}
+
+.aboutPage .values .sectionHeading {
+  width: 100%;
+  max-width: none;
+  margin: 0 0 63px;
+}
+
+.aboutPage .values .sectionHeading > p {
+  margin: 0 0 8px;
+  font-size: 26px;
+  line-height: 32px;
+}
+
+.aboutPage .values .sectionHeading h2 {
+  font-size: 49px;
+  line-height: 58px;
+}
+
+.aboutPage .values .sectionHeading > span {
+  margin-top: 63px;
+  font-size: 19px;
+  line-height: 24px;
+}
+
+.aboutPage .values .sectionHeading > span strong {
+  font-size: 20px;
+}
+
+.aboutPage .valueGrid {
+  width: 100%;
+  height: 183.359px;
+}
+
+.aboutPage .valueGrid article {
+  min-height: 0;
+  padding: 10px 0;
+}
+
+.aboutPage .valueGrid strong {
+  font-size: 74px;
+  line-height: 88px;
+}
+
+.aboutPage .valueGrid span {
+  margin-top: 12px;
+  font-size: 26px;
+  line-height: 31px;
+}
+
+.aboutPage .valueGrid p {
+  margin-top: 12px;
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.aboutPage .socialSection {
+  padding: 160px 0 200px;
+}
+
+.socialInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 80px;
+}
+
+.aboutPage .socialSection .sectionHeading {
+  width: 686px;
+  max-width: 100%;
+  margin: 0;
+}
+
+.aboutPage .socialSection .sectionHeading > p {
+  display: none;
+}
+
+.aboutPage .socialSection .sectionHeading h2 {
+  font-size: 42px;
+  letter-spacing: -1.26px;
+  line-height: 50px;
+}
+
+.aboutPage .socialSection .sectionHeading > span {
+  margin-top: 23px;
+  font-size: 20px;
+  line-height: 29px;
+}
+
+.aboutPage .socialGrid {
+  width: 100%;
+  margin: 0;
+  grid-template-columns: repeat(4, 302px);
+  gap: 23px 0;
+  justify-content: space-between;
+}
+
+.aboutPage .socialGrid article {
+  display: flex;
+  width: 302px;
+  height: 237.26px;
+  min-height: 0;
+  padding: 32px 49px 31px 31px;
+  flex-direction: column;
+  align-items: flex-start;
+  border: 0.5px solid #7f7f7f;
+  border-radius: 40px;
+}
+
+.aboutPage .socialGrid article > img {
+  width: auto;
+  height: 42px;
+  margin: 0;
+}
+
+.aboutPage .socialGrid h3 {
+  margin: 34px 0 0;
+  font-size: 25.78px;
+  line-height: 31px;
+}
+
+.aboutPage .socialGrid p {
+  margin-top: 10px;
+  font-size: 19.642px;
+  line-height: 29px;
+}
+
+.aboutPage .contactSection {
+  display: block;
+  padding: 160px 0 200px;
+  border-top: 0;
+}
+
+.contactInner {
+  display: flex;
+  flex-direction: column;
+  gap: 100px;
+}
+
+.aboutPage .contactSection .map {
+  width: 100%;
+  height: 497.52px;
+  min-height: 0;
+}
+
+.aboutPage .contactCopy {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 443px 1fr;
+  gap: 238px;
+  align-items: start;
+}
+
+.aboutPage .contactCopy h2 {
+  width: 443px;
+  margin: 0;
+  font-size: 43px;
+  letter-spacing: -1.29px;
+  line-height: 54px;
+}
+
+.aboutPage .contactCopy address {
+  display: grid;
+  width: 559px;
+  margin: 0;
+  gap: 12px 20px;
+  grid-template-columns: 13px 94px 1fr;
+  font-size: 15px;
+  line-height: 18px;
+}
+
+.aboutPage .contactCopy address > span,
+.aboutPage .contactCopy address > a {
+  display: contents;
+}
+
+.aboutPage .contactCopy address img {
+  display: block;
+  align-self: center;
+}
+
+.aboutPage .contactCopy address strong {
+  min-width: 0;
+  font-size: 19px;
+  line-height: 23px;
+}
+
+.aboutPage .contactCopy address .contactValue {
+  margin: 0;
+  font-size: 15px;
+  line-height: 23px;
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .aboutPage .aboutHero h1 {
+    font-size: 52px;
+    letter-spacing: -1.56px;
+    line-height: 68px;
+  }
+
+  .aboutPage .companySection {
+    padding: 134px 0 154px;
+  }
+
+  .companyInner,
+  .valuesInner,
+  .socialInner,
+  .contactInner {
+    width: 935px;
+    max-width: calc(100% - 60px);
+  }
+
+  .companyInner {
+    gap: 0;
+  }
+
+  .aboutPage .companySection .sectionHeading {
+    margin-bottom: 85px;
+  }
+
+  .aboutPage .companySection .sectionHeading > p {
+    font-size: 26px;
+    line-height: 31px;
+  }
+
+  .aboutPage .companySection .sectionHeading h2 {
+    font-size: 42px;
+    line-height: 50px;
+  }
+
+  .aboutPage .companySection .sectionHeading > span {
+    margin-top: 20px;
+    font-size: 20px;
+    line-height: 28.35px;
+  }
+
+  .aboutPage .stats {
+    height: 162.5px;
+    margin-bottom: 140px;
+  }
+
+  .aboutPage .historyWrap {
+    height: 438.9px;
+    grid-template-columns: 496px 352px;
+    gap: 84px;
+  }
+
+  .aboutPage .historyImage {
+    width: 496px;
+    height: 438.9px;
+  }
+
+  .aboutPage .timeline {
+    width: 352px;
+    height: 432px;
+    padding: 0;
+  }
+
+  .aboutPage .timeline li {
+    grid-template-columns: 155px 42px 1fr;
+  }
+
+  .aboutPage .timeline time {
+    font-size: 38.114px;
+  }
+
+  .aboutPage .timeline p {
+    margin-left: 10px;
+    font-size: 15.2px;
+    line-height: 26.9px;
+  }
+
+  .aboutPage .values {
+    padding: 180px 0 200px;
+  }
+
+  .aboutPage .socialSection {
+    padding: 137px 0;
+  }
+
+  .socialInner {
+    gap: 103px;
+  }
+
+  .aboutPage .socialGrid {
+    grid-template-columns: repeat(4, 226px);
+    gap: 10px;
+  }
+
+  .aboutPage .socialGrid article {
+    width: 226px;
+    height: 217px;
+    padding: 23px 27px;
+    border-width: 0.366px;
+    border-radius: 29.287px;
+  }
+
+  .aboutPage .socialGrid article > img {
+    height: 31px;
+  }
+
+  .aboutPage .socialGrid h3 {
+    margin-top: 31px;
+    font-size: 19.5px;
+    line-height: 24px;
+  }
+
+  .aboutPage .socialGrid p {
+    margin-top: 9px;
+    font-size: 14.8px;
+    line-height: 22px;
+  }
+
+  .aboutPage .contactSection {
+    padding: 138px 0 166px;
+  }
+
+  .contactInner {
+    gap: 112px;
+  }
+
+  .aboutPage .contactSection .map {
+    height: 473px;
+  }
+
+  .aboutPage .contactCopy {
+    grid-template-columns: 390px 1fr;
+    gap: 116px;
+  }
+
+  .aboutPage .contactCopy h2 {
+    width: 390px;
+    font-size: 38px;
+    line-height: 49px;
+  }
+
+  .aboutPage .contactCopy address {
+    width: 429px;
+    grid-template-columns: 13px 94px 1fr;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 1024px) {
+  .aboutPage .companySection .mobileOnlyBreak {
+    display: none;
+  }
+
+  .aboutPage .companySection .sectionHeading > span {
+    width: 604px;
+    max-width: 100%;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .aboutPage .companySection .companyTitleBreak {
+    display: block;
+  }
+
+  .aboutPage .companySection .companyDescriptionBreak {
+    display: none;
+  }
+
+  .aboutPage .companySection .sectionHeading {
+    height: 215px;
+    margin-bottom: 62px;
+  }
+
+  .aboutPage .companySection .sectionHeading h2 {
+    line-height: 54px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .aboutPage .aboutHero {
+    height: clamp(361px, calc(122px + 37.1094vw), 502px);
+    padding-top: 64px;
+  }
+
+  .aboutPage .aboutHero h1 {
+    font-size: clamp(37px, calc(1px + 5.2734vw), 55px);
+    letter-spacing: -0.03em;
+    line-height: 1.236;
+  }
+
+  .aboutPage .companySection {
+    padding: clamp(101px, calc(76px + 3.7109vw), 114px) 0
+      clamp(83px, calc(144px - 5.957vw), 107px);
+  }
+
+  .companyInner {
+    width: 100%;
+    gap: 0;
+  }
+
+  .aboutPage .companySection .sectionHeading {
+    height: clamp(169px, 23.307vw, 179px);
+    margin: 0 0 clamp(99px, calc(90px + 1.1719vw), 102px);
+  }
+
+  .aboutPage .companySection .sectionHeading > p {
+    margin-bottom: 20px;
+    font-size: clamp(25px, 3.3854vw, 26px);
+    line-height: 31px;
+  }
+
+  .aboutPage .companySection .sectionHeading h2 {
+    font-size: 42px;
+    line-height: 50px;
+  }
+
+  .aboutPage .companySection .sectionHeading > span {
+    margin-top: 20px;
+    font-size: 20px;
+    line-height: 28.35px;
+  }
+
+  .aboutPage .stats {
+    width: clamp(570px, calc(525px + 5.8594vw), 585px);
+    height: 486px;
+    margin: 0 0 clamp(80px, calc(63px + 2.1484vw), 86px);
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+  }
+
+  .aboutPage .stats > div {
+    border-right: 1px solid var(--home-line);
+    border-bottom: 1px solid var(--home-line);
+  }
+
+  .aboutPage .stats > div:nth-child(2n) {
+    border-right: 0;
+  }
+
+  .aboutPage .stats > div:nth-last-child(-n + 2) {
+    border-bottom: 0;
+  }
+
+  .aboutPage .historyWrap {
+    display: flex;
+    width: clamp(473px, calc(398px + 9.7656vw), 498px);
+    height: clamp(939.55px, calc(769px + 22.2656vw), 996.2px);
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .aboutPage .historyImage {
+    width: 100%;
+    height: clamp(418.47px, calc(352px + 8.6589vw), 440.49px);
+    flex: 0 0 auto;
+  }
+
+  .aboutPage .historyImage span {
+    font-size: clamp(61.75px, calc(115px - 5.1992vw), 66px);
+  }
+
+  .aboutPage .historyImage p {
+    margin-top: 26px;
+    font-size: clamp(24.7px, calc(38px - 1.298vw), 25.9px);
+    line-height: 35px;
+  }
+
+  .aboutPage .timeline {
+    width: 100%;
+    height: auto;
+    flex: 1 1 auto;
+    padding: 40px 48px 0;
+  }
+
+  .aboutPage .timeline li {
+    grid-template-columns: 160px 42px 1fr;
+  }
+
+  .aboutPage .timeline time {
+    font-size: clamp(36px, 4.6875vw, 38px);
+  }
+
+  .aboutPage .timeline p {
+    margin-left: 14px;
+    font-size: 15.2px;
+    line-height: 26.9px;
+  }
+
+  .valuesInner {
+    width: 100%;
+  }
+
+  .aboutPage .values {
+    padding: 113px 0 124px;
+  }
+
+  .aboutPage .values .sectionHeading {
+    margin-bottom: 26px;
+  }
+
+  .aboutPage .values .sectionHeading > span {
+    margin-top: 26px;
+    padding-bottom: 44px;
+  }
+
+  .aboutPage .valueGrid {
+    width: 590px;
+    max-width: calc(100% - 40px);
+    height: 532px;
+    margin: 0 auto;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+  }
+
+  .aboutPage .valueGrid article {
+    border-right: 1px solid rgb(255 255 255 / 30%);
+    border-bottom: 1px solid rgb(255 255 255 / 30%);
+  }
+
+  .aboutPage .valueGrid article:nth-child(2n) {
+    border-right: 0;
+  }
+
+  .aboutPage .valueGrid article:nth-last-child(-n + 2) {
+    border-bottom: 0;
+  }
+
+  .aboutPage .socialSection {
+    padding: 116px 0 125px;
+  }
+
+  .socialInner {
+    gap: 94px;
+  }
+
+  .aboutPage .socialGrid {
+    width: 565px;
+    grid-template-columns: repeat(2, 271.8px);
+    gap: 20.7px 20px;
+  }
+
+  .aboutPage .socialGrid article {
+    width: 271.8px;
+    height: 213.534px;
+    padding: 29px 44px 28px 28px;
+    border-width: 0.45px;
+    border-radius: 36px;
+  }
+
+  .aboutPage .socialGrid article > img {
+    height: 37px;
+  }
+
+  .aboutPage .socialGrid h3 {
+    margin-top: 30.6px;
+    font-size: 23.202px;
+    line-height: 28px;
+  }
+
+  .aboutPage .socialGrid p {
+    margin-top: 9px;
+    font-size: 17.676px;
+    line-height: 26.1px;
+  }
+
+  .aboutPage .contactSection {
+    padding: 122px 0 87px;
+  }
+
+  .contactInner {
+    width: 688px;
+    max-width: calc(100% - 40px);
+    gap: 47px;
+  }
+
+  .aboutPage .contactSection .map {
+    height: 472px;
+  }
+
+  .aboutPage .contactCopy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 44px;
+  }
+
+  .aboutPage .contactCopy h2 {
+    width: auto;
+    font-size: 39px;
+    line-height: 49px;
+    text-align: center;
+  }
+
+  .aboutPage .contactCopy address {
+    width: 395px;
+    gap: 15px 23px;
+    grid-template-columns: 13px 94px 1fr;
+  }
+
+  .aboutPage .contactCopy address img {
+    display: block;
+    align-self: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .aboutPage .aboutHero {
+    height: clamp(361px, calc(85px + 41.9271vw), 407px);
+  }
+
+  .aboutPage .aboutHero h1 {
+    font-size: clamp(37px, calc(-3px + 6.25vw), 45px);
+    line-height: 1.267;
+  }
+
+  .aboutPage .companySection {
+    padding-top: clamp(101px, calc(76px + 3.9063vw), 106px);
+    padding-bottom: clamp(105px, calc(115px - 1.3021vw), 107px);
+  }
+
+  .aboutPage .companySection .sectionHeading {
+    height: 178px;
+    margin-bottom: 99px;
+  }
+
+  .aboutPage .stats {
+    width: clamp(570px, calc(495px + 11.7188vw), 585px);
+    margin-bottom: clamp(80px, calc(75px + 0.7813vw), 81px);
+  }
+
+  .aboutPage .historyWrap {
+    width: 473px;
+    height: 939.55px;
+  }
+
+  .aboutPage .historyImage {
+    height: 418.467px;
+  }
+
+  .aboutPage .timeline {
+    padding-top: 40px;
+  }
+
+  .aboutPage .values {
+    padding: 113px 0 124px;
+  }
+
+  .aboutPage .socialSection {
+    padding: 103px 0 122px;
+  }
+
+  .socialInner {
+    width: 100%;
+    gap: 29px;
+  }
+
+  .aboutPage .socialSection .sectionHeading {
+    width: 560px;
+  }
+
+  .aboutPage .socialSection .sectionHeading h2 {
+    font-size: 39px;
+    line-height: 49px;
+  }
+
+  .aboutPage .socialSection .sectionHeading > span {
+    font-size: 19px;
+    line-height: 27px;
+  }
+
+  .aboutPage .socialGrid {
+    width: 368px;
+    grid-template-columns: 1fr;
+    gap: 26.45px;
+  }
+
+  .aboutPage .socialGrid article {
+    width: 100%;
+    height: 218.5px;
+  }
+
+  .aboutPage .contactSection {
+    padding: clamp(107px, calc(-1px + 14.0625vw), 125px) 0
+      clamp(97px, calc(37px + 9.375vw), 109px);
+  }
+
+  .contactInner {
+    width: 568px;
+    gap: clamp(65px, calc(60px + 0.7813vw), 66px);
+  }
+
+  .aboutPage .contactSection .map {
+    height: 425px;
+  }
+
+  .aboutPage .contactCopy {
+    gap: 41px;
+  }
+
+  .aboutPage .contactCopy h2 {
+    font-size: 37px;
+    line-height: 49px;
+  }
+
+  .aboutPage .contactCopy address {
+    width: 426.583px;
+    gap: 11px 23px;
+    grid-template-columns: 12px 84.6px 1fr;
+  }
+
+  .aboutPage .contactCopy address strong {
+    font-size: 17.1px;
+    line-height: 20px;
+  }
+
+  .aboutPage .contactCopy address .contactValue {
+    font-size: 13.5px;
+    line-height: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .aboutPage .aboutHero {
+    height: clamp(242px, calc(44px + 55vw), 308px);
+    padding-top: clamp(55px, calc(46px + 2.5vw), 58px);
+  }
+
+  .aboutPage .aboutHero > div:last-child {
+    width: calc(100% - 40px);
+  }
+
+  .aboutPage .aboutHero h1 {
+    font-size: clamp(26px, calc(5px + 5.8333vw), 33px);
+    line-height: clamp(34px, calc(16px + 5vw), 40px);
+  }
+
+  .aboutPage .companySection {
+    padding-top: clamp(53px, calc(36.6667vw - 79px), 97px);
+    padding-bottom: clamp(35px, calc(20vw - 37px), 59px);
+  }
+
+  .aboutPage .companySection .sectionHeading {
+    width: 100%;
+    height: clamp(183px, calc(35.8333vw + 54px), 226px);
+    margin-bottom: clamp(35px, calc(33.3333vw - 85px), 75px);
+  }
+
+  .aboutPage .companySection .sectionHeading > p {
+    margin-bottom: clamp(14px, calc(5vw - 4px), 20px);
+    font-size: clamp(18px, calc(12px + 1.6667vw), 20px);
+    line-height: clamp(22px, calc(7px + 4.1667vw), 27px);
+  }
+
+  .aboutPage .companySection .sectionHeading h2 {
+    width: 100%;
+    font-size: clamp(29px, calc(17px + 3.3333vw), 33px);
+    letter-spacing: -0.03em;
+    line-height: clamp(35px, calc(20px + 4.1667vw), 40px);
+    white-space: normal;
+  }
+
+  .aboutPage .companySection .sectionHeading > span {
+    width: 100%;
+    margin-top: clamp(14px, calc(-4px + 5vw), 20px);
+    font-size: clamp(15px, calc(6px + 2.5vw), 18px);
+    line-height: clamp(21px, calc(-1px + 6.25vw), 29px);
+  }
+
+  .aboutPage .stats {
+    width: clamp(320px, calc(84.1667vw + 17px), 421px);
+    height: clamp(253px, calc(153.3333vw - 299px), 437px);
+    margin-bottom: clamp(51px, calc(45vw - 111px), 105px);
+  }
+
+  .aboutPage .stats > div {
+    gap: clamp(3px, 1.25vw, 6px);
+  }
+
+  .aboutPage .stats > div > img {
+    max-width: clamp(34px, calc(-26px + 16.6667vw), 54px);
+    height: clamp(23px, calc(-16px + 10.8333vw), 36px);
+  }
+
+  .aboutPage .stats strong {
+    font-size: clamp(30px, calc(0px + 8.3333vw), 40px);
+    line-height: clamp(36px, calc(0px + 10vw), 48px);
+  }
+
+  .aboutPage .stats span {
+    font-size: clamp(13px, calc(11.5px + 0.4167vw), 13.5px);
+    line-height: 17px;
+  }
+
+  .aboutPage .historyWrap {
+    width: clamp(320px, calc(84.1667vw + 17px), 421px);
+    height: clamp(651px, calc(154.1667vw + 96px), 836px);
+  }
+
+  .aboutPage .historyImage {
+    height: clamp(282px, calc(75vw + 12px), 372px);
+  }
+
+  .aboutPage .historyImage span {
+    font-size: clamp(46px, calc(19px + 7.5vw), 55px);
+  }
+
+  .aboutPage .historyImage p {
+    margin-top: clamp(11px, calc(-27px + 10.4167vw), 23.5px);
+    font-size: clamp(18px, calc(6px + 3.3333vw), 22px);
+    line-height: clamp(30px, calc(26px + 0.8333vw), 31px);
+  }
+
+  .aboutPage .timeline {
+    padding: clamp(25px, calc(-20px + 12.5vw), 40px)
+      clamp(20px, calc(-52px + 20vw), 44px) 0;
+  }
+
+  .aboutPage .timeline li {
+    position: relative;
+    display: block;
+  }
+
+  .aboutPage .timeline time {
+    position: absolute;
+    top: 50%;
+    left: 8%;
+    width: 32%;
+    font-size: clamp(20px, calc(-16px + 10vw), 32px);
+    transform: translateY(-50%);
+  }
+
+  .aboutPage .timeline p {
+    position: absolute;
+    top: 50%;
+    left: 58%;
+    width: 42%;
+    margin: 0;
+    font-size: clamp(14px, calc(10.4px + 1vw), 15.2px);
+    line-height: clamp(21px, calc(3px + 5vw), 27px);
+    transform: translateY(-50%);
+  }
+
+  .aboutPage .values {
+    padding: clamp(64px, calc(51px + 3.6111vw), 81px) 0
+      clamp(70px, calc(34px + 10vw), 82px);
+  }
+
+  .aboutPage .values .sectionHeading {
+    margin-bottom: clamp(33px, calc(9px + 6.6667vw), 41px);
+  }
+
+  .aboutPage .values .sectionHeading > p {
+    margin-bottom: clamp(8px, 2.0833vw, 10px);
+    font-size: clamp(16.61px, calc(12.44px + 1.1575vw), 18px);
+    line-height: clamp(20px, calc(11px + 2.5vw), 23px);
+  }
+
+  .aboutPage .values .sectionHeading h2 {
+    font-size: clamp(28.06px, calc(13.24px + 4.1167vw), 33px);
+    line-height: clamp(33px, calc(15px + 5vw), 39px);
+  }
+
+  .aboutPage .values .sectionHeading > span {
+    width: calc(100% - 40px);
+    margin: clamp(16px, calc(4px + 3.3333vw), 20px) auto 0;
+    padding: 0;
+    font-size: clamp(15px, calc(6px + 2.5vw), 18px);
+    line-height: clamp(23px, calc(8px + 4.1667vw), 28px);
+  }
+
+  .aboutPage .values .sectionHeading > span strong {
+    font-size: inherit;
+  }
+
+  .aboutPage .valueGrid {
+    width: calc(100% - 40px);
+    height: clamp(296px, calc(70vw + 44px), 380px);
+  }
+
+  .aboutPage .valueGrid strong {
+    font-size: clamp(46.61px, calc(16.61px + 8.3333vw), 56.61px);
+    line-height: clamp(56px, calc(20px + 10vw), 68px);
+  }
+
+  .aboutPage .valueGrid span {
+    margin-top: clamp(4px, 1.6667vw, 8px);
+    font-size: clamp(14px, calc(8px + 1.6667vw), 16px);
+  }
+
+  .aboutPage .valueGrid p {
+    margin-top: clamp(7px, 2.0833vw, 10px);
+    font-size: clamp(9.45px, calc(4.8px + 1.2917vw), 11px);
+    line-height: clamp(12px, calc(3px + 2.5vw), 15px);
+  }
+
+  .aboutPage .socialSection {
+    padding: clamp(65px, calc(32px + 9.1667vw), 76px) 0
+      clamp(54px, calc(-63px + 32.5vw), 93px);
+  }
+
+  .socialInner {
+    gap: clamp(47px, calc(50px - 0.625vw), 48px);
+  }
+
+  .aboutPage .socialSection .sectionHeading {
+    width: calc(100% - 40px);
+  }
+
+  .aboutPage .socialSection .sectionHeading h2 {
+    width: 100%;
+    font-size: clamp(27px, calc(-9px + 10vw), 39px);
+    line-height: clamp(32px, calc(-19px + 14.1667vw), 49px);
+  }
+
+  .aboutPage .socialSection .sectionHeading > span {
+    width: 100%;
+    margin-top: clamp(21px, calc(15px + 1.6667vw), 23px);
+    font-size: clamp(14px, calc(-1px + 4.1667vw), 19px);
+    line-height: clamp(20px, calc(-1px + 5.8333vw), 27px);
+  }
+
+  .aboutPage .socialGrid {
+    width: 320px;
+    max-width: calc(100% - 40px);
+    gap: 23px;
+  }
+
+  .aboutPage .socialGrid article {
+    height: 190px;
+    padding: 32px 49px 31px 36px;
+    border-width: 0.5px;
+    border-radius: 25px;
+  }
+
+  .aboutPage .socialGrid article > img {
+    height: 37px;
+  }
+
+  .aboutPage .socialGrid h3 {
+    margin-top: 28px;
+    font-size: 16px;
+    line-height: 19px;
+  }
+
+  .aboutPage .socialGrid p {
+    margin-top: 9px;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .aboutPage .contactSection {
+    padding: clamp(51px, calc(-54px + 29.1667vw), 86px) 0
+      clamp(58px, calc(10px + 13.3333vw), 74px);
+  }
+
+  .contactInner {
+    width: clamp(320px, calc(83.3333vw + 20px), 420px);
+    gap: clamp(40px, calc(-11px + 14.1667vw), 57px);
+  }
+
+  .aboutPage .contactSection .map {
+    height: clamp(247px, calc(-101px + 96.6667vw), 363px);
+  }
+
+  .aboutPage .contactCopy {
+    gap: clamp(36px, calc(21px + 4.1667vw), 41px);
+  }
+
+  .aboutPage .contactCopy h2 {
+    align-self: center;
+    font-size: clamp(27px, calc(-3px + 8.3333vw), 37px);
+    line-height: clamp(32px, calc(-19px + 14.1667vw), 49px);
+  }
+
+  .aboutPage .contactCopy address {
+    width: 100%;
+    gap: 11px 12px;
+    grid-template-columns: 13px clamp(61px, calc(-10px + 19.7917vw), 84.75px) 1fr;
+  }
+
+  .aboutPage .contactCopy address strong {
+    font-size: clamp(12px, calc(-3px + 4.1667vw), 17px);
+    line-height: 17px;
+  }
+
+  .aboutPage .contactCopy address .contactValue {
+    font-size: clamp(11px, calc(3.5px + 2.0833vw), 13.5px);
+    line-height: 17px;
+  }
+}
+
+@media (max-width: 360px) {
+  .aboutPage .aboutHero,
+  .aboutPage .companySection,
+  .aboutPage .values,
+  .aboutPage .socialSection,
+  .aboutPage .contactSection {
+    width: 100%;
+  }
+
+  .aboutPage .companySection .sectionHeading > span {
+    white-space: nowrap;
+  }
+
+  .aboutPage .timeline {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+
+  .aboutPage .socialSection .sectionHeading > span {
+    font-size: 14px;
+  }
+
+  .aboutPage .contactCopy {
+    align-items: flex-start;
+  }
+
+  .aboutPage .contactCopy h2 {
+    align-self: flex-start;
+    text-align: left;
+  }
+}
+
+/* Exact parent-frame reconciliation after the child layout contracts above. */
+.aboutPage .companySection {
+  height: 1387.38px;
+}
+
+.aboutPage .values {
+  display: flex;
+  height: 781.359px;
+  align-items: center;
+  justify-content: center;
+}
+
+.aboutPage .socialSection {
+  display: flex;
+  height: 923px;
+  align-items: center;
+  justify-content: center;
+}
+
+.aboutPage .contactSection {
+  height: 1102.91px;
+}
+
+.aboutPage .contactSection .contactCopy {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 443px 1fr;
+  gap: 238px;
+  align-items: start;
+}
+
+.aboutPage .contactSection .contactCopy h2 {
+  width: 443px;
+  margin: 0;
+  font-size: 43px;
+  letter-spacing: -1.29px;
+  line-height: 54px;
+}
+
+.aboutPage .contactSection .contactCopy address {
+  display: grid;
+  width: 559px;
+  margin: 0;
+  gap: 12px 20px;
+  grid-template-columns: 13px 94px 1fr;
+  font-size: 15px;
+  line-height: 18px;
+}
+
+.aboutPage .contactSection .contactCopy address > span,
+.aboutPage .contactSection .contactCopy address > a {
+  display: contents;
+}
+
+.aboutPage .contactSection .contactCopy address img {
+  display: block;
+  align-self: center;
+  margin: 0;
+}
+
+.aboutPage .contactSection .contactCopy address strong {
+  min-width: 0;
+  font-size: 19px;
+  line-height: 23px;
+}
+
+.aboutPage .contactSection .contactCopy address .contactValue {
+  margin: 0;
+  font-size: 15px;
+  line-height: 23px;
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .aboutPage .companySection {
+    height: 1292px;
+  }
+
+  .aboutPage .values {
+    height: 788px;
+  }
+
+  .aboutPage .socialSection {
+    height: 731px;
+  }
+
+  .socialInner {
+    gap: 80px;
+  }
+
+  .aboutPage .contactSection {
+    height: 1044px;
+  }
+
+  .aboutPage .contactSection .contactCopy {
+    grid-template-columns: 390px 1fr;
+    gap: 116px;
+  }
+
+  .aboutPage .contactSection .contactCopy h2 {
+    width: 390px;
+    font-size: 38px;
+    line-height: 49px;
+  }
+
+  .aboutPage .contactSection .contactCopy address {
+    width: 429px;
+    grid-template-columns: 13px 94px 1fr;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .aboutPage .companySection {
+    height: calc(1872px + 16.0156vw);
+  }
+
+  .aboutPage .values {
+    display: flex;
+    height: 988px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .aboutPage .socialSection {
+    height: calc(2945px - 193.75vw);
+  }
+
+  .aboutPage .contactSection {
+    height: calc(929px + 8.2031vw);
+  }
+}
+
+@media (max-width: 1024px) {
+  .aboutPage .contactSection .contactCopy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 44px;
+  }
+
+  .aboutPage .contactSection .contactCopy h2 {
+    width: auto;
+    font-size: 39px;
+    line-height: 49px;
+    text-align: center;
+  }
+
+  .aboutPage .contactSection .contactCopy address {
+    width: 395px;
+    gap: 15px 23px;
+    grid-template-columns: 13px 94px 1fr;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .aboutPage .companySection {
+    height: calc(1965px + 3.90625vw);
+  }
+
+  .aboutPage .values {
+    display: flex;
+    height: 988px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .aboutPage .values .sectionHeading > span {
+    width: min(500px, calc(100% - 40px));
+  }
+
+  .aboutPage .valueGrid {
+    width: 570px;
+    height: 508px;
+  }
+
+  .aboutPage .socialSection {
+    height: calc(761px + 90.625vw);
+  }
+
+  .aboutPage .contactSection {
+    height: calc(818px + 22.65625vw);
+  }
+
+  .aboutPage .contactSection .contactCopy {
+    gap: 41px;
+  }
+
+  .aboutPage .contactSection .contactCopy h2 {
+    font-size: 37px;
+    line-height: 49px;
+  }
+
+  .aboutPage .contactSection .contactCopy address {
+    width: 426.583px;
+    gap: 11px 23px;
+    grid-template-columns: 12px 84.6px 1fr;
+  }
+
+  .aboutPage .contactSection .contactCopy address strong {
+    font-size: 17.1px;
+    line-height: 20px;
+  }
+
+  .aboutPage .contactSection .contactCopy address .contactValue {
+    font-size: 13.5px;
+    line-height: 20px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .aboutPage .companySection {
+    height: calc(1370px + 96.875vw);
+  }
+
+  .aboutPage .values {
+    display: flex;
+    height: 988px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .aboutPage .values .sectionHeading > span {
+    width: min(500px, calc(100% - 40px));
+  }
+
+  .aboutPage .valueGrid {
+    width: 570px;
+    height: 508px;
+  }
+
+  .aboutPage .socialSection {
+    height: calc(1105px + 36.875vw);
+  }
+
+  .aboutPage .socialGrid {
+    width: 320px;
+    gap: 23px;
+  }
+
+  .aboutPage .socialGrid article {
+    height: 190px;
+    padding: 32px 49px 31px 36px;
+    border-radius: 25px;
+  }
+
+  .aboutPage .socialGrid h3 {
+    margin-top: 28px;
+    font-size: 16px;
+    line-height: 19px;
+  }
+
+  .aboutPage .socialGrid p {
+    margin-top: 9px;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .aboutPage .contactSection {
+    height: calc(503px + 71.875vw);
+  }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+  .aboutPage .companySection {
+    height: calc(-461px + 478.3333vw);
+  }
+
+  .aboutPage .values {
+    display: flex;
+    height: calc(131.965px + 126.46875vw);
+    align-items: center;
+    justify-content: center;
+  }
+
+  .aboutPage .socialSection {
+    height: calc(826.394px + 95.9317vw);
+  }
+
+  .aboutPage .contactSection {
+    height: calc(-156px + 209.1667vw);
+  }
+}
+
+@media (max-width: 480px) {
+  .aboutPage .contactSection .contactCopy {
+    align-items: center;
+    gap: clamp(36px, calc(21px + 4.1667vw), 41px);
+  }
+
+  .aboutPage .contactSection .contactCopy h2 {
+    align-self: center;
+    font-size: clamp(27px, calc(-3px + 8.3333vw), 37px);
+    line-height: clamp(32px, calc(-19px + 14.1667vw), 49px);
+    text-align: center;
+  }
+
+  .aboutPage .contactSection .contactCopy address {
+    width: 100%;
+    gap: 11px 12px;
+    grid-template-columns: 13px clamp(61px, calc(-10px + 19.7917vw), 84.75px) 1fr;
+  }
+
+  .aboutPage .contactSection .contactCopy address strong {
+    font-size: clamp(12px, calc(-3px + 4.1667vw), 17px);
+    line-height: 17px;
+  }
+
+  .aboutPage .contactSection .contactCopy address .contactValue {
+    font-size: clamp(11px, calc(3.5px + 2.0833vw), 13.5px);
+    line-height: 17px;
+  }
+}
+
+@media (max-width: 360px) {
+  .aboutPage .companySection {
+    height: 1261px;
+  }
+
+  .aboutPage .values {
+    display: flex;
+    height: 587.25px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .aboutPage .socialSection {
+    height: 1171.75px;
+  }
+
+  .aboutPage .contactSection {
+    height: 597px;
+  }
+
+  .aboutPage .contactSection .contactCopy {
+    align-items: flex-start;
+  }
+
+  .aboutPage .contactSection .contactCopy h2 {
+    align-self: flex-start;
+    text-align: left;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .aboutPage .companySection .companyTitleBreak {
+    display: block;
+  }
+
+  .aboutPage .companySection .companyDescriptionBreak {
+    display: none;
+  }
+
+  .aboutPage .companySection .sectionHeading {
+    height: 215px;
+    margin-bottom: 62px;
+  }
+
+  .aboutPage .companySection .sectionHeading h2 {
+    width: 604px;
+    max-width: 100%;
+    margin-right: auto;
+    margin-left: auto;
+    line-height: 54px;
+    white-space: normal;
+  }
+}

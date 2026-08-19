@@ -227,37 +227,39 @@ function MoreViewIcon({
 function ContactSection() {
   return (
     <section id="contact" className={`${styles.section} ${styles.contactSection}`}>
-      <HomepageContactMap />
-      <div className={styles.contactCopy}>
-        <h2>
-          <strong>현장 운영</strong>의 <strong>기준</strong>을 세울 때,
-          <br />
-          <strong>올바름</strong>과 먼저 의논하세요.
-        </h2>
-        <address>
-          <span>
-            <Image src="/homepage/archive/contact-address.svg" alt="" width={10} height={15} aria-hidden="true" />
-            <strong>ADDRESS</strong>
-            <span className={styles.contactValue}>
-              부산광역시 강서구 유통단지1로 41, 105동 217・218호
+      <div className={styles.contactInner}>
+        <HomepageContactMap />
+        <div className={styles.contactCopy}>
+          <h2>
+            <strong>현장 운영</strong>의 <strong>기준</strong>을 세울 때,
+            <br />
+            <strong>올바름</strong>과 먼저 의논하세요.
+          </h2>
+          <address>
+            <span>
+              <Image src="/homepage/archive/contact-address.svg" alt="" width={10} height={15} aria-hidden="true" />
+              <strong>ADDRESS</strong>
+              <span className={styles.contactValue}>
+                부산광역시 강서구 유통단지1로 41, 105동 217・218호
+              </span>
             </span>
-          </span>
-          <a href="tel:0514657767">
-            <Image src="/homepage/archive/contact-phone.svg" alt="" width={12} height={16} aria-hidden="true" />
-            <strong>TEL</strong>
-            <span className={styles.contactValue}>051-465-7767</span>
-          </a>
-          <a href="fax:0519617767">
-            <Image src="/homepage/archive/contact-fax.svg" alt="" width={12} height={15} aria-hidden="true" />
-            <strong>FAX</strong>
-            <span className={styles.contactValue}>051-961-7767</span>
-          </a>
-          <a href="mailto:olbareum@naver.com">
-            <Image src="/homepage/archive/contact-email.svg" alt="" width={13} height={9} aria-hidden="true" />
-            <strong>e-mail</strong>
-            <span className={styles.contactValue}>olbareum@naver.com</span>
-          </a>
-        </address>
+            <a href="tel:0514657767">
+              <Image src="/homepage/archive/contact-phone.svg" alt="" width={12} height={16} aria-hidden="true" />
+              <strong>TEL</strong>
+              <span className={styles.contactValue}>051-465-7767</span>
+            </a>
+            <a href="fax:0519617767">
+              <Image src="/homepage/archive/contact-fax.svg" alt="" width={12} height={15} aria-hidden="true" />
+              <strong>FAX</strong>
+              <span className={styles.contactValue}>051-961-7767</span>
+            </a>
+            <a href="mailto:olbareum@naver.com">
+              <Image src="/homepage/archive/contact-email.svg" alt="" width={13} height={9} aria-hidden="true" />
+              <strong>e-mail</strong>
+              <span className={styles.contactValue}>olbareum@naver.com</span>
+            </a>
+          </address>
+        </div>
       </div>
     </section>
   );
@@ -461,108 +463,114 @@ export function AboutPage() {
       </section>
 
       <section id="history" className={`${styles.section} ${styles.companySection}`}>
-        <SectionHeading
-          eyebrow="SINCE 2018"
-          title={
-            <>
-              <strong>사람</strong>을 향한 <strong>동행</strong>,{" "}
-              <br className={styles.mobileOnlyBreak} />
-              함께 크는{" "}
-              <strong>지역 사회</strong>
-            </>
-          }
-          description={
-            <>
-              지역사회와 함께 성장하는 사회적기업으로서
-              <br />
-              근로자 파견, 시설물 관리, 방역·소독까지{" "}
-              <br className={styles.mobileOnlyBreak} />
-              현장의 기준을 바로 세웁니다.
-            </>
-          }
-        />
-        <div className={styles.stats}>
-          <div><Image src="/homepage/archive/stat-company.svg" alt="" width={31} height={36} aria-hidden="true" /><strong>2018</strong><span>법인 설립</span></div>
-          <div><Image src="/homepage/archive/stat-employees.svg" alt="" width={54} height={28} aria-hidden="true" /><strong>26</strong><span>2026 임직원</span></div>
-          <div><Image src="/homepage/archive/stat-sales.svg" alt="" width={37} height={34} aria-hidden="true" /><strong>10.3억</strong><span>2025 매출</span></div>
-          <div><Image src="/homepage/archive/stat-growth.svg" alt="" width={34} height={34} aria-hidden="true" /><strong>220%</strong><span>2022~25 매출 성장률</span></div>
-        </div>
-        <div className={styles.historyWrap}>
-          <div className={styles.historyImage}>
-            <Image src="/homepage/archive/history.jpg" alt="불이 켜진 사무실 건물" fill sizes="(max-width: 47.5rem) 100vw, 42vw" />
-            <div><span>HISTORY</span><p>사람 중심의 가치를 심고,<br />지속 가능한 내일을 가꿔갑니다.</p></div>
+        <div className={styles.companyInner}>
+          <SectionHeading
+            eyebrow="SINCE 2018"
+            title={
+              <>
+                <strong>사람</strong>을 향한 <strong>동행</strong>,{" "}
+                <br className={`${styles.mobileOnlyBreak} ${styles.companyTitleBreak}`} />
+                함께 크는{" "}
+                <strong>지역 사회</strong>
+              </>
+            }
+            description={
+              <>
+                지역사회와 함께 성장하는 사회적기업으로서
+                <br />
+                근로자 파견, 시설물 관리, 방역·소독까지{" "}
+                <br className={`${styles.mobileOnlyBreak} ${styles.companyDescriptionBreak}`} />
+                현장의 기준을 바로 세웁니다.
+              </>
+            }
+          />
+          <div className={styles.stats}>
+            <div><Image src="/homepage/archive/stat-company.svg" alt="" width={31} height={36} aria-hidden="true" /><strong>2018</strong><span>법인 설립</span></div>
+            <div><Image src="/homepage/archive/stat-employees.svg" alt="" width={54} height={28} aria-hidden="true" /><strong>26</strong><span>2026 임직원</span></div>
+            <div><Image src="/homepage/archive/stat-sales.svg" alt="" width={37} height={34} aria-hidden="true" /><strong>10.3억</strong><span>2025 매출</span></div>
+            <div><Image src="/homepage/archive/stat-growth.svg" alt="" width={34} height={34} aria-hidden="true" /><strong>220%</strong><span>2022~25 매출 성장률</span></div>
           </div>
-          <ol className={styles.timeline}>
-            {history.map(([date, title, detail]) => (
-              <li key={date}><time>{date}</time><i /><p><span>{title}</span><span>{detail}</span></p></li>
-            ))}
-          </ol>
+          <div className={styles.historyWrap}>
+            <div className={styles.historyImage}>
+              <Image src="/homepage/archive/history.jpg" alt="불이 켜진 사무실 건물" fill sizes="(max-width: 47.5rem) 100vw, 42vw" />
+              <div><span>HISTORY</span><p>사람 중심의 가치를 심고,<br />지속 가능한 내일을 가꿔갑니다.</p></div>
+            </div>
+            <ol className={styles.timeline}>
+              {history.map(([date, title, detail]) => (
+                <li key={date}><time>{date}</time><i /><p><span>{title}</span><span>{detail}</span></p></li>
+              ))}
+            </ol>
+          </div>
         </div>
       </section>
 
       <section id="values" className={styles.values}>
-        <SectionHeading
-          eyebrow="Core Values"
-          title={<strong>B.E.S.T</strong>}
-          description={
-            <>
-              고객감동, 수익 창출, 사회환원, 인재 양성으로{" "}
-              <br className={styles.mobileOnlyBreak} />
-              지속 가능한 성장을 이루어내는{" "}
-              <strong>4가지 핵심 가치</strong>
-            </>
-          }
-        />
-        <div className={styles.valueGrid}>
-          {values.map(([letter, title, description]) => (
-            <article key={letter}>
-              <strong>{letter}</strong>
-              <span>{title}</span>
-              <p className={letter === "B" ? styles.benefitDescription : undefined}>{description}</p>
-            </article>
-          ))}
+        <div className={styles.valuesInner}>
+          <SectionHeading
+            eyebrow="Core Values"
+            title={<strong>B.E.S.T</strong>}
+            description={
+              <>
+                고객감동, 수익 창출, 사회환원, 인재 양성으로{" "}
+                <br className={styles.mobileOnlyBreak} />
+                지속 가능한 성장을 이루어내는{" "}
+                <strong>4가지 핵심 가치</strong>
+              </>
+            }
+          />
+          <div className={styles.valueGrid}>
+            {values.map(([letter, title, description]) => (
+              <article key={letter}>
+                <strong>{letter}</strong>
+                <span>{title}</span>
+                <p className={letter === "B" ? styles.benefitDescription : undefined}>{description}</p>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
       <section className={`${styles.section} ${styles.socialSection}`}>
-        <SectionHeading
-          eyebrow="Social Impact"
-          title={
-            <>
-              <strong>이윤</strong>과 <strong>공익</strong>이 <strong>같은 방향</strong>으로
-              <br className={styles.mobileOnlyBreak} />
-              흐르게 합니다.
-            </>
-          }
-          description={
-            <>
-              <span className={styles.desktopOnlyCopy}>
-                올바름은 취약계층에게 안정된 일자리를 제공하고,
-                <br />
-                균등한 교육기회와 복리후생을 통해 직무에 전념할 수 있는 환경을 만듭니다.
-                <br />
-                지역사회 재투자와 사회서비스 확충을 기업 운영의 중요한 기준으로 둡니다.
-              </span>
-              <span className={styles.mobileOnlyCopy}>
-                올바름은 취약계층에게 안정된 일자리를 제공하고,
-                <br />
-                균등한 교육기회와 복리후생을 통해 직무에 전념할 수 있는
-                <br />
-                환경을 만듭니다. 지역사회 재투자와 사회서비스 확충을
-                <br />
-                기업 운영의 중요한 기준으로 둡니다.
-              </span>
-            </>
-          }
-        />
-        <div className={styles.socialGrid}>
-          {socialValues.map(({ title, text, image }) => (
-            <article key={title}>
-              <Image src={image} alt="" width={42} height={42} aria-hidden="true" />
-              <h3>{title}</h3>
-              <p>{text}</p>
-            </article>
-          ))}
+        <div className={styles.socialInner}>
+          <SectionHeading
+            eyebrow="Social Impact"
+            title={
+              <>
+                <strong>이윤</strong>과 <strong>공익</strong>이 <strong>같은 방향</strong>으로
+                <br className={styles.mobileOnlyBreak} />
+                흐르게 합니다.
+              </>
+            }
+            description={
+              <>
+                <span className={styles.desktopOnlyCopy}>
+                  올바름은 취약계층에게 안정된 일자리를 제공하고,
+                  <br />
+                  균등한 교육기회와 복리후생을 통해 직무에 전념할 수 있는 환경을 만듭니다.
+                  <br />
+                  지역사회 재투자와 사회서비스 확충을 기업 운영의 중요한 기준으로 둡니다.
+                </span>
+                <span className={styles.mobileOnlyCopy}>
+                  올바름은 취약계층에게 안정된 일자리를 제공하고,
+                  <br />
+                  균등한 교육기회와 복리후생을 통해 직무에 전념할 수 있는
+                  <br />
+                  환경을 만듭니다. 지역사회 재투자와 사회서비스 확충을
+                  <br />
+                  기업 운영의 중요한 기준으로 둡니다.
+                </span>
+              </>
+            }
+          />
+          <div className={styles.socialGrid}>
+            {socialValues.map(({ title, text, image }) => (
+              <article key={title}>
+                <Image src={image} alt="" width={42} height={42} aria-hidden="true" />
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
       <ContactSection />

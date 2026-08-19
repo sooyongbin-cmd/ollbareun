@@ -6529,6 +6529,98 @@
     height: calc(1872px + 16.0156vw);
   }
 
+  .aboutPage .historyWrap {
+    width: calc(398.313px + 9.7244vw);
+    gap: calc(-61.353px + 7.9887vw);
+    align-items: flex-start;
+  }
+
+  .aboutPage .historyImage {
+    width: calc(398.159px + 9.7207vw);
+  }
+
+  .aboutPage .timeline {
+    --timeline-date-left: calc(41.076px + 1.0029vw);
+    --timeline-date-top: calc(123.592px - 6.4695vw);
+    --timeline-copy-left: calc(281.083px + 6.9842vw);
+    --timeline-copy-top: calc(117.369px - 6.6215vw);
+
+    display: block;
+    width: calc(398.313px + 9.7244vw);
+    height: calc(428.186px + 10.4538vw);
+    padding: 0;
+    flex: 0 0 auto;
+  }
+
+  .aboutPage .timeline::before {
+    top: calc(99.364px - 7.0613vw);
+    bottom: auto;
+    left: calc(222.199px + 5.5473vw);
+    width: calc(22.406px + 0.5469vw);
+    height: calc(388.352px + 9.4816vw);
+    background-size: 100% 100%;
+  }
+
+  .aboutPage .timeline li {
+    position: static;
+    display: block;
+    height: 0;
+    min-height: 0;
+  }
+
+  .aboutPage .timeline li:nth-child(1) {
+    --timeline-date-offset: 0px;
+    --timeline-copy-offset: 0px;
+  }
+
+  .aboutPage .timeline li:nth-child(2) {
+    --timeline-date-offset: calc(77.8px + 1.7773vw);
+    --timeline-copy-offset: calc(74px + 2.3438vw);
+  }
+
+  .aboutPage .timeline li:nth-child(3) {
+    --timeline-date-offset: calc(155.6px + 3.5547vw);
+    --timeline-copy-offset: calc(148px + 4.6875vw);
+  }
+
+  .aboutPage .timeline li:nth-child(4) {
+    --timeline-date-offset: calc(233.4px + 5.332vw);
+    --timeline-copy-offset: calc(222px + 7.0313vw);
+  }
+
+  .aboutPage .timeline li:nth-child(5) {
+    --timeline-date-offset: calc(311.2px + 7.1094vw);
+    --timeline-copy-offset: calc(296px + 9.375vw);
+  }
+
+  .aboutPage .timeline time {
+    position: absolute;
+    top: calc(var(--timeline-date-top) + var(--timeline-date-offset));
+    left: var(--timeline-date-left);
+    width: calc(123px + 3.125vw);
+    font-size: calc(30.4px + 0.7422vw);
+    font-weight: 700;
+    line-height: normal;
+    text-align: left;
+  }
+
+  .aboutPage .timeline p {
+    position: absolute;
+    top: calc(var(--timeline-copy-top) + var(--timeline-copy-offset));
+    left: var(--timeline-copy-left);
+    width: calc(89px + 1.9531vw);
+    margin: 0;
+    font-size: calc(12.16px + 0.2969vw);
+    font-weight: 400;
+    letter-spacing: calc(-0.3466px - 0.0107vw);
+    line-height: calc(21.52px + 0.5254vw);
+    white-space: nowrap;
+  }
+
+  .aboutPage .timeline li:first-child p {
+    font-weight: 500;
+  }
+
   .aboutPage .values {
     display: flex;
     height: 988px;

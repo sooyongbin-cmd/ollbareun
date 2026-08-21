@@ -6930,3 +6930,115 @@
     white-space: normal;
   }
 }
+
+/* Figma page 4 desktop body: interpolate the 4_1280 and 4_1920 frames. */
+@media (min-width: 1025px) {
+  .clientsPage .clientHero {
+    min-height: 502px;
+    height: 502px;
+  }
+
+  .clientsPage .clientHero > div:last-child {
+    position: absolute;
+    top: clamp(170.6px, calc(219.8px - 2.5625vw), 187px);
+    left: 0;
+    width: 100%;
+    margin: 0;
+  }
+
+  .clientsPage .clientHero h1 {
+    width: clamp(491px, calc(1.40625vw + 473px), 500px);
+    font-size: clamp(52px, calc(0.15625vw + 50px), 53px);
+    letter-spacing: clamp(-1.59px, calc(-1.5px - 0.0046875vw), -1.56px);
+    line-height: 70px;
+  }
+
+  .clientsPage .clientsSection {
+    box-sizing: border-box;
+    width: clamp(933px, calc(38.90625vw + 435.6px), 1182px);
+    max-width: none;
+    min-height: 0;
+    height: clamp(1844px, calc(82.8125vw + 784px), 2374px);
+    padding-top: clamp(122px, calc(12.1875vw - 34px), 200px);
+    padding-bottom: clamp(67px, calc(5.15625vw + 1px), 100px);
+  }
+
+  .clientsPage .clientsSection .sectionHeading {
+    width: clamp(432px, calc(3.4375vw + 388px), 454px);
+    max-width: none;
+    margin-bottom: clamp(100px, calc(145px - 2.34375vw), 115px);
+  }
+
+  .clientsPage .clientsSection .sectionHeading > p {
+    margin-bottom: clamp(22px, calc(0.15625vw + 20px), 23px);
+    font-size: clamp(25px, calc(0.15625vw + 23px), 26px);
+    line-height: clamp(30px, calc(0.15625vw + 28px), 31px);
+  }
+
+  .clientsPage .clientsSection .sectionHeading h2 {
+    font-size: clamp(42px, calc(0.15625vw + 40px), 43px);
+    letter-spacing: 0;
+    line-height: clamp(50px, calc(0.15625vw + 48px), 51px);
+  }
+
+  .clientsPage .clientsSection .sectionHeading > span {
+    margin-top: 23px;
+    font-size: clamp(20px, calc(0.15625vw + 18px), 21px);
+    letter-spacing: clamp(-0.63px, calc(-0.54px - 0.0046875vw), -0.6px);
+    line-height: 28.35px;
+  }
+
+  .clientsPage .clientGroups {
+    width: 100%;
+    max-width: none;
+    gap: 0;
+  }
+
+  .clientsPage .clientGroups > div:nth-child(1) {
+    margin-bottom: clamp(100px, calc(187px - 4.53125vw), 129px);
+  }
+
+  .clientsPage .clientGroups > div:nth-child(2) {
+    margin-bottom: clamp(100px, calc(163px - 3.28125vw), 121px);
+  }
+
+  .clientsPage .clientGroups > div > h3 {
+    height: clamp(32px, calc(0.9375vw + 20px), 38px);
+    margin: 0 0 clamp(50px, calc(7.8125vw - 50px), 100px);
+    padding: 0;
+    font-size: clamp(14.45px, calc(0.3984375vw + 9.35px), 17px);
+    font-weight: 400;
+    line-height: clamp(32px, calc(0.9375vw + 20px), 38px);
+  }
+
+  .clientsPage .logoGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    row-gap: clamp(24px, calc(2.828125vw - 12.2px), 42.1px);
+    column-gap: 30px;
+    margin: 0 auto;
+  }
+
+  .clientsPage .logoGrid > div {
+    height: auto;
+    min-height: 0;
+  }
+
+  .clientsPage .clientGroups > div:nth-child(1) .logoGrid {
+    width: clamp(933px, calc(21.9625vw + 651.88px), 1073.561px);
+    height: clamp(327px, calc(23vw + 32.6px), 474.2px);
+  }
+
+  .clientsPage .clientGroups > div:nth-child(2) .logoGrid {
+    width: clamp(933px, calc(16.9614vw + 715.9px), 1041.553px);
+    height: clamp(210px, calc(6.8565625vw + 122.3px), 253.882px);
+  }
+
+  .clientsPage .clientGroups > div:nth-child(3) .logoGrid {
+    width: clamp(933px, calc(20.0466vw + 676.4px), 1061.298px);
+    height: clamp(327px, calc(19.04875vw + 83.3px), 448.912px);
+  }
+
+  .clientsPage .logoGrid img {
+    padding: clamp(8px, calc(0.3125vw + 4px), 10px) clamp(18px, calc(0.3125vw + 14px), 20px);
+  }
+}

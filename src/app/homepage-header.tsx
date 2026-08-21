@@ -141,20 +141,21 @@ export default function HomepageHeader() {
 
         <nav className={styles.desktopNav} aria-label="주요 메뉴">
           {menuColumns.map((menu) => (
-            <button
-              type="button"
+            <Link
+              href={menu.href}
               key={menu.key}
               className={`${styles.desktopNavItem} ${
                 (openMenu ?? activeMenu) === menu.key ? styles.desktopNavItemActive : ""
               }`}
+              aria-haspopup="true"
               aria-expanded={openMenu === menu.key}
               aria-controls="homepage-desktop-submenu"
-              onClick={() =>
-                setOpenMenu((current) => (current === menu.key ? null : menu.key))
-              }
+              onMouseEnter={() => setOpenMenu(menu.key)}
+              onFocus={() => setOpenMenu(menu.key)}
+              onClick={closeMenus}
             >
               {menu.label}
-            </button>
+            </Link>
           ))}
         </nav>
 

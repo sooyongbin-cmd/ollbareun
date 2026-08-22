@@ -320,7 +320,7 @@ function HomeClientPreview() {
 
 export function MainPage() {
   return (
-    <main id="top" className={styles.site}>
+    <main id="top" className={`${styles.site} ${styles.landingPage}`}>
       <HomepageHeader />
       <section className={styles.hero} aria-labelledby="hero-title">
         <Image

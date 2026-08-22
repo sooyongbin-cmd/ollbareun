@@ -3443,6 +3443,1121 @@
   }
 }
 
+/* Landing page reconstruction from Figma.
+ *
+ * The landing page is intentionally scoped with .landingPage. Shared header,
+ * footer, and the other public pages keep their existing layout contracts.
+ */
+.landingPage {
+  background: #fff;
+}
+
+.landingPage .hero,
+.landingPage .trustSection,
+.landingPage .servicePreview,
+.landingPage .homeClientSection {
+  width: 100%;
+  max-width: none;
+  min-height: 0;
+  margin: 0;
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.landingPage .hero {
+  height: 833px;
+  min-height: 833px;
+  align-items: flex-start;
+}
+
+.landingPage .coverImage {
+  object-fit: cover;
+  object-position: center center;
+}
+
+.landingPage .heroContent {
+  position: absolute;
+  top: 353px;
+  left: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.landingPage .heroContent h1 {
+  margin: 0;
+  color: #fff;
+  font-size: 67.31px;
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 1.22;
+  white-space: nowrap;
+}
+
+.landingPage .heroContent h1 strong {
+  font-weight: 800;
+}
+
+.landingPage .trustSection,
+.landingPage .servicePreview,
+.landingPage .homeClientSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+}
+
+.landingPage .sectionHeading {
+  display: flex;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  flex: none;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.landingPage .sectionHeading > p,
+.landingPage .sectionHeading h2,
+.landingPage .sectionHeading > span {
+  margin-right: 0;
+  margin-left: 0;
+}
+
+.landingPage .sectionHeading > p {
+  margin-bottom: 22px;
+  color: var(--home-blue);
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 31px;
+}
+
+.landingPage .sectionHeading h2 {
+  color: var(--home-ink);
+  font-size: 43px;
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 1.25;
+}
+
+.landingPage .sectionHeading h2 b,
+.landingPage .sectionHeading h2 strong {
+  font-weight: 700;
+}
+
+.landingPage .sectionHeading > span {
+  display: block;
+  margin-top: 23px;
+  color: var(--home-muted);
+  font-size: 21px;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 28.35px;
+  white-space: normal;
+}
+
+.landingPage .splitIntro {
+  display: flex;
+  width: 1182.29px;
+  max-width: calc(100% - 48px);
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 48px;
+}
+
+.landingPage .splitIntro .sectionHeading {
+  width: 387px;
+  height: 240px;
+}
+
+.landingPage .trustSection {
+  height: 772px;
+  justify-content: center;
+  gap: 100px;
+}
+
+.landingPage .certificateImages {
+  display: grid;
+  width: 737.29px;
+  max-width: 100%;
+  flex: none;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.landingPage .certificateImages > div {
+  position: relative;
+  width: auto;
+  height: 326.36px;
+  min-width: 0;
+}
+
+.landingPage .certificateImages img {
+  border: 1px solid #111;
+  object-fit: contain;
+}
+
+.landingPage .moreLink {
+  display: flex;
+  width: max-content;
+  height: 28.8px;
+  margin: 0;
+  flex: none;
+  align-items: center;
+  gap: 12px;
+  color: #151515;
+  font-size: 15.66px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.landingPage .moreViewIcon,
+.landingPage .moreViewIcon img {
+  width: 28.8px;
+  height: 28.8px;
+}
+
+.landingPage .servicePreview {
+  height: 1073px;
+  padding-top: 193.3px;
+  padding-bottom: 193.3px;
+  background: #fafafa;
+  row-gap: 80px;
+}
+
+.landingPage .servicePreview > .sectionHeading {
+  width: 1182.29px;
+  height: 184px;
+}
+
+.landingPage .serviceGrid {
+  display: grid;
+  width: 1182.29px;
+  height: 293.54px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  flex: none;
+}
+
+.landingPage .serviceCard {
+  height: 293.54px;
+  min-width: 0;
+  overflow: visible;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+.landingPage .serviceCard:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+.landingPage .serviceImage {
+  position: relative;
+  width: 100%;
+  height: 214.84px;
+  overflow: hidden;
+}
+
+.landingPage .serviceImage img {
+  object-fit: cover;
+}
+
+.landingPage .serviceCard > div:last-child {
+  min-height: 0;
+  padding: 9px 0 0;
+}
+
+.landingPage .serviceCard h3 {
+  margin: 0 0 4px;
+  color: #151515;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 21px;
+}
+
+.landingPage .serviceCard p {
+  margin: 0;
+  color: var(--home-muted);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 18px;
+}
+
+.landingPage .servicePreview > .moreLink {
+  margin-top: 0;
+}
+
+.landingPage .homeClientSection {
+  height: 1197px;
+  padding-top: 200px;
+  padding-bottom: 232.48px;
+  background: #fff;
+  row-gap: 80px;
+}
+
+.landingPage .homeClientSection > .sectionHeading {
+  width: 1182.29px;
+  height: 184px;
+}
+
+.landingPage .homeClientLogos {
+  position: relative;
+  display: grid;
+  width: 1182.29px;
+  height: 371.72px;
+  margin: 0;
+  padding: 0 24px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  border-top: 1px solid var(--home-line);
+  border-bottom: 1px solid var(--home-line);
+}
+
+.landingPage .homeClientLogos > div {
+  position: relative;
+  display: grid;
+  min-height: 0;
+  place-items: center;
+}
+
+.landingPage .homeClientLogos img {
+  padding: 18px 30px;
+  object-fit: contain;
+}
+
+.landingPage .homeClientSection > .moreLink {
+  margin-top: 20px;
+  font-weight: 400;
+}
+
+.landingPage .desktopOnlyCopy {
+  display: inline;
+}
+
+.landingPage .mobileOnlyCopy,
+.landingPage .mobileOnlyBreak,
+.landingPage .mobileServiceBreak {
+  display: none;
+}
+
+@media (min-width: 1063px) and (max-width: 1280px) {
+  .landingPage .hero {
+    height: 833px;
+    min-height: 833px;
+  }
+
+  .landingPage .heroContent {
+    top: 353px;
+  }
+
+  .landingPage .heroContent h1 {
+    font-size: 58px;
+  }
+
+  .landingPage .sectionHeading > p {
+    margin-bottom: 21px;
+    font-size: 25px;
+    line-height: 30px;
+  }
+
+  .landingPage .sectionHeading h2 {
+    font-size: 42px;
+  }
+
+  .landingPage .sectionHeading > span {
+    margin-top: 22px;
+    font-size: 20px;
+    line-height: 27px;
+  }
+
+  .landingPage .trustSection {
+    height: 715.801px;
+    gap: 90px;
+  }
+
+  .landingPage .splitIntro {
+    width: 934px;
+    max-width: calc(100% - 48px);
+    gap: 58px;
+  }
+
+  .landingPage .splitIntro .sectionHeading {
+    width: 294px;
+    height: 317px;
+  }
+
+  .landingPage .certificateImages {
+    width: 583.125px;
+    gap: 10px;
+  }
+
+  .landingPage .certificateImages > div {
+    height: 265px;
+  }
+
+  .landingPage .moreLink {
+    font-size: 15px;
+  }
+
+  .landingPage .servicePreview {
+    height: 948.344px;
+    padding-top: 140px;
+    padding-bottom: 140px;
+    row-gap: 80px;
+  }
+
+  .landingPage .servicePreview > .sectionHeading,
+  .landingPage .serviceGrid,
+  .landingPage .homeClientSection > .sectionHeading,
+  .landingPage .homeClientLogos {
+    width: 934px;
+  }
+
+  .landingPage .servicePreview > .sectionHeading {
+    height: 181px;
+  }
+
+  .landingPage .serviceGrid {
+    height: 273.859px;
+    gap: 11px;
+  }
+
+  .landingPage .serviceCard {
+    height: 273.859px;
+  }
+
+  .landingPage .serviceImage {
+    height: 170px;
+  }
+
+  .landingPage .serviceCard h3 {
+    font-size: 15px;
+  }
+
+  .landingPage .serviceCard p {
+    font-size: 12px;
+    line-height: 17px;
+  }
+
+  .landingPage .homeClientSection {
+    height: 1044.525px;
+    padding-top: 140px;
+    padding-bottom: 140px;
+    row-gap: 80px;
+  }
+
+  .landingPage .homeClientSection > .sectionHeading {
+    height: 184px;
+  }
+
+  .landingPage .homeClientLogos {
+    height: 371.72px;
+  }
+
+  .landingPage .homeClientSection > .moreLink {
+    margin-top: 20px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1062px) {
+  .landingPage .hero {
+    height: 729px;
+    min-height: 729px;
+  }
+
+  .landingPage .heroContent {
+    top: 310px;
+  }
+
+  .landingPage .heroContent h1 {
+    font-size: 52px;
+  }
+
+  .landingPage .sectionHeading > p {
+    margin-bottom: 18px;
+    font-size: 23px;
+    line-height: 27px;
+  }
+
+  .landingPage .sectionHeading h2 {
+    font-size: 39px;
+    line-height: 50px;
+  }
+
+  .landingPage .sectionHeading > span {
+    margin-top: 22px;
+    font-size: 18px;
+    line-height: 25px;
+  }
+
+  .landingPage .trustSection {
+    height: 894.887px;
+    gap: 70px;
+  }
+
+  .landingPage .splitIntro {
+    width: 769px;
+    max-width: calc(100% - 48px);
+    flex-direction: column;
+    align-items: center;
+    gap: 70px;
+  }
+
+  .landingPage .splitIntro .sectionHeading {
+    width: 708px;
+    height: 221px;
+  }
+
+  .landingPage .certificateImages {
+    width: 593.125px;
+    gap: 15px;
+  }
+
+  .landingPage .certificateImages > div {
+    height: 265.086px;
+  }
+
+  .landingPage .servicePreview {
+    height: 1419.4px;
+    padding-top: 120px;
+    padding-bottom: 120px;
+    row-gap: 80px;
+  }
+
+  .landingPage .servicePreview > .sectionHeading,
+  .landingPage .homeClientSection > .sectionHeading {
+    width: 708px;
+  }
+
+  .landingPage .servicePreview > .sectionHeading {
+    height: 223px;
+  }
+
+  .landingPage .serviceGrid {
+    width: 363px;
+    height: 773px;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .landingPage .serviceCard {
+    height: 246px;
+  }
+
+  .landingPage .serviceCard:first-child {
+    height: 265px;
+  }
+
+  .landingPage .serviceImage {
+    height: 170px;
+  }
+
+  .landingPage .serviceCard > div:last-child {
+    padding-top: 9px;
+  }
+
+  .landingPage .serviceCard h3 {
+    margin-bottom: 3px;
+    font-size: 18px;
+    line-height: 23px;
+  }
+
+  .landingPage .serviceCard p {
+    font-size: 14px;
+    line-height: 19px;
+  }
+
+  .landingPage .moreLink {
+    height: 23.4px;
+    gap: 10px;
+    font-size: 14.094px;
+  }
+
+  .landingPage .moreViewIcon,
+  .landingPage .moreViewIcon img {
+    width: 23.4px;
+    height: 23.4px;
+  }
+
+  .landingPage .homeClientSection {
+    height: 897.053px;
+    padding-top: 120px;
+    padding-bottom: 120px;
+    row-gap: 60px;
+  }
+
+  .landingPage .homeClientSection > .sectionHeading {
+    height: 211px;
+  }
+
+  .landingPage .homeClientLogos {
+    width: 708px;
+    height: 278.653px;
+  }
+
+  .landingPage .homeClientSection > .moreLink {
+    margin-top: 24px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .landingPage .hero {
+    height: 457.482px;
+    min-height: 457.482px;
+  }
+
+  .landingPage .heroContent {
+    top: 185px;
+    padding: 0 20px;
+  }
+
+  .landingPage .heroContent h1 {
+    font-size: 34px;
+    line-height: 1.25;
+    white-space: normal;
+  }
+
+  .landingPage .mobileOnlyBreak,
+  .landingPage .mobileServiceBreak {
+    display: block;
+  }
+
+  .landingPage .desktopOnlyCopy {
+    display: none;
+  }
+
+  .landingPage .mobileOnlyCopy {
+    display: inline;
+  }
+
+  .landingPage .sectionHeading > p {
+    margin-bottom: 12px;
+    font-size: 20px;
+    line-height: 26px;
+  }
+
+  .landingPage .sectionHeading h2 {
+    font-size: 32px;
+    line-height: 42px;
+  }
+
+  .landingPage .sectionHeading > span {
+    margin-top: 14px;
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .landingPage .trustSection {
+    height: 712.664px;
+    gap: 66.664px;
+    justify-content: center;
+  }
+
+  .landingPage .splitIntro {
+    width: 420px;
+    max-width: calc(100% - 40px);
+    flex-direction: column;
+    align-items: center;
+    gap: 66.664px;
+  }
+
+  .landingPage .splitIntro .sectionHeading {
+    width: 420px;
+    max-width: 100%;
+    height: 194.665px;
+  }
+
+  .landingPage .certificateImages {
+    width: 420px;
+    gap: 11.33px;
+  }
+
+  .landingPage .certificateImages > div {
+    height: 180.671px;
+  }
+
+  .landingPage .servicePreview {
+    height: 1373.131px;
+    padding-top: 90px;
+    padding-bottom: 90px;
+    row-gap: 60px;
+  }
+
+  .landingPage .servicePreview > .sectionHeading {
+    width: 420px;
+    max-width: calc(100% - 40px);
+    height: 216.665px;
+  }
+
+  .landingPage .serviceGrid {
+    width: 363px;
+    height: 836.967px;
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .landingPage .serviceCard {
+    height: 246px;
+  }
+
+  .landingPage .serviceCard:first-child {
+    height: 265px;
+  }
+
+  .landingPage .serviceImage {
+    height: 170px;
+  }
+
+  .landingPage .serviceCard > div:last-child {
+    padding-top: 9px;
+  }
+
+  .landingPage .serviceCard h3 {
+    margin-bottom: 3px;
+    font-size: 18px;
+    line-height: 23px;
+  }
+
+  .landingPage .serviceCard p {
+    font-size: 14px;
+    line-height: 19px;
+  }
+
+  .landingPage .moreLink {
+    height: 24px;
+    gap: 10px;
+    font-size: 13.049px;
+  }
+
+  .landingPage .moreViewIcon,
+  .landingPage .moreViewIcon img {
+    width: 24px;
+    height: 24px;
+  }
+
+  .landingPage .homeClientSection {
+    height: 720.7px;
+    padding-top: 90px;
+    padding-bottom: 90px;
+    row-gap: 50px;
+  }
+
+  .landingPage .homeClientSection > .sectionHeading {
+    width: 420px;
+    max-width: calc(100% - 40px);
+    height: 214px;
+  }
+
+  .landingPage .homeClientLogos {
+    width: 420px;
+    max-width: calc(100% - 40px);
+    height: 187.206px;
+    padding: 0;
+  }
+
+  .landingPage .homeClientLogos::before,
+  .landingPage .homeClientLogos::after {
+    position: absolute;
+    left: 50%;
+    width: min(320px, 100%);
+    height: 1px;
+    background: var(--home-line);
+    content: "";
+    transform: translateX(-50%);
+  }
+
+  .landingPage .homeClientLogos::before {
+    top: -1px;
+  }
+
+  .landingPage .homeClientLogos::after {
+    bottom: -1px;
+  }
+
+  .landingPage .homeClientLogos > div {
+    min-height: 0;
+  }
+
+  .landingPage .homeClientLogos img {
+    padding: 8px 12px;
+  }
+
+  .landingPage .homeClientSection > .moreLink {
+    margin-top: 20px;
+  }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+  .landingPage .hero {
+    height: 343.111px;
+    min-height: 343.111px;
+  }
+
+  .landingPage .heroContent {
+    top: 135px;
+    padding: 0 20px;
+  }
+
+  .landingPage .heroContent h1 {
+    font-size: 27px;
+    line-height: 1.28;
+    white-space: normal;
+  }
+
+  .landingPage .mobileOnlyBreak,
+  .landingPage .mobileServiceBreak {
+    display: block;
+  }
+
+  .landingPage .desktopOnlyCopy {
+    display: none;
+  }
+
+  .landingPage .mobileOnlyCopy {
+    display: inline;
+  }
+
+  .landingPage .sectionHeading > p {
+    margin-bottom: 10px;
+    font-size: 20px;
+    line-height: 24px;
+  }
+
+  .landingPage .sectionHeading h2 {
+    font-size: 29px;
+    line-height: 35px;
+  }
+
+  .landingPage .sectionHeading > span {
+    margin-top: 13px;
+    font-size: 14px;
+    line-height: 22px;
+  }
+
+  .landingPage .trustSection {
+    height: 621.319px;
+    gap: 55px;
+    justify-content: center;
+  }
+
+  .landingPage .splitIntro {
+    width: 320px;
+    max-width: calc(100% - 40px);
+    flex-direction: column;
+    align-items: center;
+    gap: 55px;
+  }
+
+  .landingPage .splitIntro .sectionHeading {
+    width: 320px;
+    height: 189.665px;
+  }
+
+  .landingPage .certificateImages {
+    width: 320px;
+    gap: 9px;
+  }
+
+  .landingPage .certificateImages > div {
+    height: 137.654px;
+  }
+
+  .landingPage .servicePreview {
+    height: 1347.157px;
+    padding-top: 80px;
+    padding-bottom: 90px;
+    row-gap: 55px;
+  }
+
+  .landingPage .servicePreview > .sectionHeading {
+    width: 320px;
+    height: 230.665px;
+  }
+
+  .landingPage .serviceGrid {
+    width: 320px;
+    height: 816.992px;
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .landingPage .serviceCard {
+    height: 246px;
+  }
+
+  .landingPage .serviceCard:first-child {
+    height: 265px;
+  }
+
+  .landingPage .serviceImage {
+    height: 170px;
+  }
+
+  .landingPage .serviceCard > div:last-child {
+    padding-top: 9px;
+  }
+
+  .landingPage .serviceCard h3 {
+    margin-bottom: 3px;
+    font-size: 18px;
+    line-height: 23px;
+  }
+
+  .landingPage .serviceCard p {
+    font-size: 14px;
+    line-height: 19px;
+  }
+
+  .landingPage .moreLink {
+    height: 24px;
+    gap: 10px;
+    font-size: 13.049px;
+  }
+
+  .landingPage .moreViewIcon,
+  .landingPage .moreViewIcon img {
+    width: 24px;
+    height: 24px;
+  }
+
+  .landingPage .homeClientSection {
+    height: 653.333px;
+    padding-top: 80px;
+    padding-bottom: 80px;
+    row-gap: 50px;
+  }
+
+  .landingPage .homeClientSection > .sectionHeading {
+    width: 320px;
+    height: 202px;
+  }
+
+  .landingPage .homeClientLogos {
+    width: 420px;
+    max-width: calc(100% - 60px);
+    height: 166.837px;
+    padding: 0;
+  }
+
+  .landingPage .homeClientLogos::before,
+  .landingPage .homeClientLogos::after {
+    position: absolute;
+    left: 50%;
+    width: min(320px, 100%);
+    height: 1px;
+    background: var(--home-line);
+    content: "";
+    transform: translateX(-50%);
+  }
+
+  .landingPage .homeClientLogos::before {
+    top: -1px;
+  }
+
+  .landingPage .homeClientLogos::after {
+    bottom: -1px;
+  }
+
+  .landingPage .homeClientLogos img {
+    padding: 7px 10px;
+  }
+
+  .landingPage .homeClientSection > .moreLink {
+    margin-top: 5px;
+  }
+}
+
+@media (max-width: 360px) {
+  .landingPage .hero {
+    height: 310px;
+    min-height: 310px;
+  }
+
+  .landingPage .heroContent {
+    top: 116px;
+    padding: 0 20px;
+  }
+
+  .landingPage .heroContent h1 {
+    font-size: 24px;
+    line-height: 1.28;
+    white-space: normal;
+  }
+
+  .landingPage .mobileOnlyBreak,
+  .landingPage .mobileServiceBreak {
+    display: block;
+  }
+
+  .landingPage .desktopOnlyCopy {
+    display: none;
+  }
+
+  .landingPage .mobileOnlyCopy {
+    display: inline;
+  }
+
+  .landingPage .sectionHeading > p {
+    margin-bottom: 9px;
+    font-size: 20px;
+    line-height: 20px;
+  }
+
+  .landingPage .sectionHeading h2 {
+    font-size: 28px;
+    line-height: 35px;
+  }
+
+  .landingPage .sectionHeading > span {
+    margin-top: 11px;
+    font-size: 14px;
+    line-height: 22px;
+  }
+
+  .landingPage .trustSection {
+    height: 542.319px;
+    gap: 45px;
+    justify-content: center;
+  }
+
+  .landingPage .splitIntro {
+    width: 320px;
+    max-width: calc(100% - 40px);
+    flex-direction: column;
+    align-items: center;
+    gap: 45px;
+  }
+
+  .landingPage .splitIntro .sectionHeading {
+    width: 320px;
+    height: 170.665px;
+  }
+
+  .landingPage .certificateImages {
+    width: 320px;
+    gap: 9px;
+  }
+
+  .landingPage .certificateImages > div {
+    height: 137.654px;
+  }
+
+  .landingPage .servicePreview {
+    height: 1261.157px;
+    padding-top: 60px;
+    padding-bottom: 60px;
+    row-gap: 45px;
+  }
+
+  .landingPage .servicePreview > .sectionHeading,
+  .landingPage .homeClientSection > .sectionHeading {
+    width: 320px;
+  }
+
+  .landingPage .servicePreview > .sectionHeading {
+    height: 214.665px;
+  }
+
+  .landingPage .serviceGrid {
+    width: 320px;
+    height: 816.992px;
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .landingPage .serviceCard {
+    height: 246px;
+  }
+
+  .landingPage .serviceCard:first-child {
+    height: 265px;
+  }
+
+  .landingPage .serviceImage {
+    height: 170px;
+  }
+
+  .landingPage .serviceCard > div:last-child {
+    padding-top: 9px;
+  }
+
+  .landingPage .serviceCard h3 {
+    margin-bottom: 3px;
+    font-size: 18px;
+    line-height: 23px;
+  }
+
+  .landingPage .serviceCard p {
+    font-size: 14px;
+    line-height: 19px;
+  }
+
+  .landingPage .moreLink {
+    height: 19.5px;
+    gap: 10px;
+    font-size: 11.745px;
+  }
+
+  .landingPage .moreViewIcon,
+  .landingPage .moreViewIcon img {
+    width: 19.5px;
+    height: 19.5px;
+  }
+
+  .landingPage .homeClientSection {
+    height: 582.335px;
+    padding-top: 60px;
+    padding-bottom: 60px;
+    row-gap: 45px;
+  }
+
+  .landingPage .homeClientSection > .sectionHeading {
+    height: 186px;
+  }
+
+  .landingPage .homeClientLogos {
+    width: 320px;
+    height: 166.837px;
+    padding: 0;
+  }
+
+  .landingPage .homeClientLogos::before,
+  .landingPage .homeClientLogos::after {
+    position: absolute;
+    left: 50%;
+    width: 320px;
+    height: 1px;
+    background: var(--home-line);
+    content: "";
+    transform: translateX(-50%);
+  }
+
+  .landingPage .homeClientLogos::before {
+    top: -1px;
+  }
+
+  .landingPage .homeClientLogos::after {
+    bottom: -1px;
+  }
+
+  .landingPage .homeClientLogos img {
+    padding: 7px 8px;
+  }
+
+  .landingPage .homeClientSection > .moreLink {
+    margin-top: 0;
+  }
+}
+
 @media (min-width: 1063px) and (max-width: 1280px) {
   .hero {
     min-height: calc(222.3578px + 47.7064vw);

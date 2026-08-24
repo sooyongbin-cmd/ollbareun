@@ -6145,9 +6145,9 @@
   .footerGrid {
     width: 219px;
     margin: 0;
-    grid-template-columns: 71px 64px;
+    grid-template-columns: 71px 71px;
     grid-template-rows: 98px 98px 100px;
-    column-gap: 84px;
+    column-gap: 77px;
     row-gap: 25px;
   }
 

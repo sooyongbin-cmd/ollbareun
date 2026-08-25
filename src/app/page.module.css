@@ -9393,3 +9393,54 @@
     font-size: 13px;
   }
 }
+
+/* 360px Section 3 follows Frame 136: 320px content, 30px card gaps. */
+@media (max-width: 360px) {
+  .landingPage .servicePreview .serviceContent {
+    width: 320px;
+    max-width: none;
+    align-self: flex-start;
+    margin-left: 20px;
+    margin-right: 0;
+  }
+
+  .landingPage .servicePreview .serviceBody {
+    width: 320px;
+    align-items: flex-start;
+  }
+
+  .landingPage .servicePreview .serviceBody .serviceGrid {
+    width: 320px;
+    max-width: 320px;
+    height: 816.992px;
+    grid-template-columns: 1fr;
+    grid-template-rows: 264.998px 245.997px 245.997px;
+    gap: 30px;
+  }
+
+  .landingPage .servicePreview .serviceBody .serviceCard,
+  .landingPage .servicePreview .serviceBody .serviceCard:first-child,
+  .landingPage .servicePreview .serviceBody .serviceCard:nth-child(2),
+  .landingPage .servicePreview .serviceBody .serviceCard:nth-child(3) {
+    height: 100%;
+  }
+
+  .landingPage .servicePreview .serviceBody .serviceCard > div:last-child {
+    min-height: 0;
+    height: calc(100% - 170px);
+    margin-top: 0;
+    padding: 10px 0 0;
+    box-sizing: border-box;
+  }
+
+  .landingPage .servicePreview .serviceBody .serviceCard h3 {
+    margin: 0 0 10px;
+    font-size: 18px;
+    line-height: 18px;
+  }
+
+  .landingPage .servicePreview .serviceBody .serviceCard p {
+    font-size: 13px;
+    line-height: 19px;
+  }
+}

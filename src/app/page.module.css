@@ -103,7 +103,31 @@
   --landing-client-logo-height: 416.785px;
   --landing-client-heading-logo-gap: 80px;
   --landing-client-logo-link-gap: 100px;
-  --landing-client-logo-padding-x: 30px;
+  --landing-client-logo-content-top: 101px;
+  --landing-client-logo-column-1-width: 247.37px;
+  --landing-client-logo-column-2-width: 160.69px;
+  --landing-client-logo-column-3-width: 217.709px;
+  --landing-client-logo-column-gap: 238px;
+  --landing-client-logo-row-1-height: 90px;
+  --landing-client-logo-row-2-height: 76.608px;
+  --landing-client-logo-row-gap: 48.177px;
+  --landing-client-logo-1-width: 247.37px;
+  --landing-client-logo-1-height: 38.572px;
+  --landing-client-logo-2-width: 155.94px;
+  --landing-client-logo-2-height: 69.003px;
+  --landing-client-logo-3-width: 90px;
+  --landing-client-logo-3-height: 90px;
+  --landing-client-logo-4-width: 160.69px;
+  --landing-client-logo-4-height: 62.785px;
+  --landing-client-logo-5-width: 191.52px;
+  --landing-client-logo-5-height: 50.162px;
+  --landing-client-logo-6-width: 217.709px;
+  --landing-client-logo-6-height: 53.672px;
+  --landing-client-logo-1-top: 7.605px;
+  --landing-client-logo-3-top: 0px;
+  --landing-client-logo-5-top: 10.475px;
+  --landing-client-logo-4-row-top: 13.823px;
+  --landing-client-logo-6-row-top: 12.461px;
 }
 
 .landingPage .hero {
@@ -8982,11 +9006,18 @@
   max-width: 100%;
   height: var(--landing-client-logo-height);
   margin: 0;
-  padding: 0 var(--landing-client-logo-padding-x);
-  grid-auto-flow: column;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-  gap: 0;
+  padding: var(--landing-client-logo-content-top) 0 0;
+  grid-template-columns:
+    var(--landing-client-logo-column-1-width)
+    var(--landing-client-logo-column-2-width)
+    var(--landing-client-logo-column-3-width);
+  grid-template-rows:
+    var(--landing-client-logo-row-1-height)
+    var(--landing-client-logo-row-2-height);
+  column-gap: var(--landing-client-logo-column-gap);
+  row-gap: var(--landing-client-logo-row-gap);
+  justify-content: center;
+  align-content: start;
   border-top: 1px solid var(--home-line);
   border-bottom: 1px solid var(--home-line);
 }
@@ -8997,12 +9028,111 @@
 }
 
 .landingPage .homeClientLogos > div {
+  position: relative;
+  display: flex;
   min-height: 0;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.landingPage .homeClientLogos > div:nth-child(1),
+.landingPage .homeClientLogos > div:nth-child(2) {
+  grid-column: 1;
+}
+
+.landingPage .homeClientLogos > div:nth-child(3),
+.landingPage .homeClientLogos > div:nth-child(4) {
+  grid-column: 2;
+}
+
+.landingPage .homeClientLogos > div:nth-child(5),
+.landingPage .homeClientLogos > div:nth-child(6) {
+  grid-column: 3;
+}
+
+.landingPage .homeClientLogos > div:nth-child(1),
+.landingPage .homeClientLogos > div:nth-child(3),
+.landingPage .homeClientLogos > div:nth-child(5) {
+  grid-row: 1;
+}
+
+.landingPage .homeClientLogos > div:nth-child(2),
+.landingPage .homeClientLogos > div:nth-child(4),
+.landingPage .homeClientLogos > div:nth-child(6) {
+  grid-row: 2;
+}
+
+.landingPage .homeClientLogos > div:nth-child(1) {
+  width: var(--landing-client-logo-column-1-width);
+  height: var(--landing-client-logo-row-1-height);
+  margin-top: var(--landing-client-logo-1-top);
+}
+
+.landingPage .homeClientLogos > div:nth-child(2) {
+  width: var(--landing-client-logo-column-1-width);
+  height: var(--landing-client-logo-row-2-height);
+}
+
+.landingPage .homeClientLogos > div:nth-child(3) {
+  width: var(--landing-client-logo-column-2-width);
+  height: var(--landing-client-logo-row-1-height);
+  margin-top: var(--landing-client-logo-3-top);
+}
+
+.landingPage .homeClientLogos > div:nth-child(4) {
+  width: var(--landing-client-logo-column-2-width);
+  height: var(--landing-client-logo-row-2-height);
+  margin-top: var(--landing-client-logo-4-row-top);
+}
+
+.landingPage .homeClientLogos > div:nth-child(5) {
+  width: var(--landing-client-logo-column-3-width);
+  height: var(--landing-client-logo-row-1-height);
+  margin-top: var(--landing-client-logo-5-top);
+}
+
+.landingPage .homeClientLogos > div:nth-child(6) {
+  width: var(--landing-client-logo-column-3-width);
+  height: var(--landing-client-logo-row-2-height);
+  margin-top: var(--landing-client-logo-6-row-top);
 }
 
 .landingPage .homeClientLogos img {
-  padding: 8px 12px;
+  display: block;
+  width: var(--landing-client-logo-1-width);
+  height: var(--landing-client-logo-1-height);
+  max-width: none;
+  padding: 0;
   object-fit: contain;
+}
+
+.landingPage .homeClientLogos > div:nth-child(2) img {
+  width: var(--landing-client-logo-2-width);
+  height: var(--landing-client-logo-2-height);
+}
+
+.landingPage .homeClientLogos > div:nth-child(3) img {
+  width: var(--landing-client-logo-3-width);
+  height: var(--landing-client-logo-3-height);
+}
+
+.landingPage .homeClientLogos > div:nth-child(4) img {
+  width: var(--landing-client-logo-4-width);
+  height: var(--landing-client-logo-4-height);
+}
+
+.landingPage .homeClientLogos > div:nth-child(5) img {
+  width: var(--landing-client-logo-5-width);
+  height: var(--landing-client-logo-5-height);
+}
+
+.landingPage .homeClientLogos > div:nth-child(6) img {
+  width: var(--landing-client-logo-6-width);
+  height: var(--landing-client-logo-6-height);
+}
+
+.landingPage .homeClientLogos > div {
+  min-height: 0;
 }
 
 .landingPage .clientContent > .moreLink {
@@ -9026,6 +9156,167 @@
 }
 
 @media (min-width: 641px) and (max-width: 768px) {
+  .landingPage {
+    --landing-client-logo-content-top: 75px;
+    --landing-client-logo-column-1-width: 148.171px;
+    --landing-client-logo-column-2-width: 96.251px;
+    --landing-client-logo-column-3-width: 130.404px;
+    --landing-client-logo-column-gap: 80px;
+    --landing-client-logo-row-1-height: 53.909px;
+    --landing-client-logo-row-2-height: 45.887px;
+    --landing-client-logo-row-gap: 28.857px;
+    --landing-client-logo-1-width: 148.171px;
+    --landing-client-logo-1-height: 23.104px;
+    --landing-client-logo-2-width: 93.406px;
+    --landing-client-logo-2-height: 41.332px;
+    --landing-client-logo-3-width: 53.909px;
+    --landing-client-logo-3-height: 53.909px;
+    --landing-client-logo-4-width: 96.251px;
+    --landing-client-logo-4-height: 37.607px;
+    --landing-client-logo-5-width: 114.718px;
+    --landing-client-logo-5-height: 30.046px;
+    --landing-client-logo-6-width: 130.404px;
+    --landing-client-logo-6-height: 32.149px;
+    --landing-client-logo-1-top: 4.555px;
+    --landing-client-logo-3-top: 0px;
+    --landing-client-logo-5-top: 6.274px;
+    --landing-client-logo-4-row-top: 8.28px;
+    --landing-client-logo-6-row-top: 7.464px;
+  }
+
+  .landingPage .homeClientLogos {
+    align-self: center;
+    max-width: none;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1062px),
+  (min-width: 1063px) and (max-width: 1280px) {
+  .landingPage {
+    --landing-client-logo-content-top: 101px;
+    --landing-client-logo-column-1-width: 195.468px;
+    --landing-client-logo-column-2-width: 126.975px;
+    --landing-client-logo-column-3-width: 172.03px;
+    --landing-client-logo-column-gap: 188.064px;
+    --landing-client-logo-row-1-height: 71.117px;
+    --landing-client-logo-row-2-height: 60.535px;
+    --landing-client-logo-row-gap: 38.069px;
+    --landing-client-logo-1-width: 195.468px;
+    --landing-client-logo-1-height: 30.479px;
+    --landing-client-logo-2-width: 123.222px;
+    --landing-client-logo-2-height: 54.525px;
+    --landing-client-logo-3-width: 71.117px;
+    --landing-client-logo-3-height: 71.117px;
+    --landing-client-logo-4-width: 126.975px;
+    --landing-client-logo-4-height: 49.612px;
+    --landing-client-logo-5-width: 151.336px;
+    --landing-client-logo-5-height: 39.637px;
+    --landing-client-logo-6-width: 172.03px;
+    --landing-client-logo-6-height: 42.411px;
+    --landing-client-logo-1-top: 6.009px;
+    --landing-client-logo-3-top: 0px;
+    --landing-client-logo-5-top: 8.277px;
+    --landing-client-logo-4-row-top: 10.923px;
+    --landing-client-logo-6-row-top: 9.846px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .landingPage {
+    --landing-client-logo-content-top: 75px;
+    --landing-client-logo-column-1-width: 148.171px;
+    --landing-client-logo-column-2-width: 96.251px;
+    --landing-client-logo-column-3-width: 130.404px;
+    --landing-client-logo-column-gap: 142.558px;
+    --landing-client-logo-row-1-height: 53.909px;
+    --landing-client-logo-row-2-height: 45.887px;
+    --landing-client-logo-row-gap: 28.857px;
+    --landing-client-logo-1-width: 148.171px;
+    --landing-client-logo-1-height: 23.104px;
+    --landing-client-logo-2-width: 93.406px;
+    --landing-client-logo-2-height: 41.332px;
+    --landing-client-logo-3-width: 53.909px;
+    --landing-client-logo-3-height: 53.909px;
+    --landing-client-logo-4-width: 96.251px;
+    --landing-client-logo-4-height: 37.607px;
+    --landing-client-logo-5-width: 114.718px;
+    --landing-client-logo-5-height: 30.046px;
+    --landing-client-logo-6-width: 130.404px;
+    --landing-client-logo-6-height: 32.149px;
+    --landing-client-logo-1-top: 4.555px;
+    --landing-client-logo-3-top: 0px;
+    --landing-client-logo-5-top: 6.274px;
+    --landing-client-logo-4-row-top: 8.28px;
+    --landing-client-logo-6-row-top: 7.464px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .landingPage {
+    --landing-client-logo-width: 420px;
+    --landing-client-logo-content-top: 40px;
+    --landing-client-logo-column-1-width: 123.471px;
+    --landing-client-logo-column-2-width: 80.206px;
+    --landing-client-logo-column-3-width: 108.666px;
+    --landing-client-logo-column-gap: 40px;
+    --landing-client-logo-row-1-height: 44.922px;
+    --landing-client-logo-row-2-height: 38.238px;
+    --landing-client-logo-row-gap: 24.047px;
+    --landing-client-logo-1-width: 123.471px;
+    --landing-client-logo-1-height: 19.252px;
+    --landing-client-logo-2-width: 77.835px;
+    --landing-client-logo-2-height: 34.442px;
+    --landing-client-logo-3-width: 44.922px;
+    --landing-client-logo-3-height: 44.922px;
+    --landing-client-logo-4-width: 80.206px;
+    --landing-client-logo-4-height: 31.338px;
+    --landing-client-logo-5-width: 95.594px;
+    --landing-client-logo-5-height: 25.038px;
+    --landing-client-logo-6-width: 108.666px;
+    --landing-client-logo-6-height: 26.79px;
+    --landing-client-logo-1-top: 3.796px;
+    --landing-client-logo-3-top: 0px;
+    --landing-client-logo-5-top: 5.229px;
+    --landing-client-logo-4-row-top: 6.9px;
+    --landing-client-logo-6-row-top: 6.22px;
+  }
+
+  .landingPage .homeClientLogos {
+    align-self: center;
+    max-width: none;
+  }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+  .landingPage {
+    --landing-client-logo-width: 420px;
+    --landing-client-logo-content-top: 40px;
+    --landing-client-logo-column-1-width: 100.011px;
+    --landing-client-logo-column-2-width: 64.967px;
+    --landing-client-logo-column-3-width: 88.019px;
+    --landing-client-logo-column-gap: 26px;
+    --landing-client-logo-row-1-height: 36.387px;
+    --landing-client-logo-row-2-height: 30.973px;
+    --landing-client-logo-row-gap: 19.478px;
+    --landing-client-logo-1-width: 100.011px;
+    --landing-client-logo-1-height: 15.594px;
+    --landing-client-logo-2-width: 63.046px;
+    --landing-client-logo-2-height: 27.898px;
+    --landing-client-logo-3-width: 36.387px;
+    --landing-client-logo-3-height: 36.387px;
+    --landing-client-logo-4-width: 64.968px;
+    --landing-client-logo-4-height: 25.385px;
+    --landing-client-logo-5-width: 77.431px;
+    --landing-client-logo-5-height: 20.28px;
+    --landing-client-logo-6-width: 88.019px;
+    --landing-client-logo-6-height: 21.7px;
+    --landing-client-logo-1-top: 3.075px;
+    --landing-client-logo-3-top: 0px;
+    --landing-client-logo-5-top: 4.235px;
+    --landing-client-logo-4-row-top: 5.588px;
+    --landing-client-logo-6-row-top: 5.038px;
+  }
+
   .landingPage .homeClientLogos {
     align-self: center;
     max-width: none;
@@ -9033,6 +9324,40 @@
 }
 
 @media (max-width: 360px) {
+  .landingPage {
+    --landing-client-logo-width: 362px;
+    --landing-client-logo-content-top: 40px;
+    --landing-client-logo-column-1-width: 100.011px;
+    --landing-client-logo-column-2-width: 64.967px;
+    --landing-client-logo-column-3-width: 88.019px;
+    --landing-client-logo-column-gap: 26px;
+    --landing-client-logo-row-1-height: 36.387px;
+    --landing-client-logo-row-2-height: 30.973px;
+    --landing-client-logo-row-gap: 19.478px;
+    --landing-client-logo-1-width: 100.011px;
+    --landing-client-logo-1-height: 15.594px;
+    --landing-client-logo-2-width: 63.046px;
+    --landing-client-logo-2-height: 27.898px;
+    --landing-client-logo-3-width: 36.387px;
+    --landing-client-logo-3-height: 36.387px;
+    --landing-client-logo-4-width: 64.968px;
+    --landing-client-logo-4-height: 25.385px;
+    --landing-client-logo-5-width: 77.431px;
+    --landing-client-logo-5-height: 20.28px;
+    --landing-client-logo-6-width: 88.019px;
+    --landing-client-logo-6-height: 21.7px;
+    --landing-client-logo-1-top: 3.075px;
+    --landing-client-logo-3-top: 0px;
+    --landing-client-logo-5-top: 4.235px;
+    --landing-client-logo-4-row-top: 5.588px;
+    --landing-client-logo-6-row-top: 5.038px;
+  }
+
+  .landingPage .homeClientLogos {
+    align-self: center;
+    max-width: none;
+  }
+
   .landingPage .coverImage {
     object-position: 45.2% center;
   }

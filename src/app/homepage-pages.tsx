@@ -267,12 +267,48 @@ function ContactSection() {
 
 function HomeClientPreview() {
   const previewLogos = [
-    ["대한항공", "/homepage/client-logo-korean-air.png"],
-    ["에어부산", "/homepage/client-logo-airbusan.png"],
-    ["부산경찰청", "/homepage/client-logo-police.png"],
-    ["국민건강보험", "/homepage/client-logo-nhis.png"],
-    ["동아대학교", "/homepage/client-logo-donga.png"],
-    ["경남공업고등학교", "/homepage/client-logo-technical-high.png"],
+    {
+      id: "korean-air",
+      name: "대한항공",
+      src: "/homepage/figma-client-logo-korean-air.png",
+      width: 248,
+      height: 39,
+    },
+    {
+      id: "air-busan",
+      name: "에어부산",
+      src: "/homepage/figma-client-logo-air-busan.png",
+      width: 156,
+      height: 69,
+    },
+    {
+      id: "busan-police",
+      name: "부산경찰청",
+      src: "/homepage/figma-client-logo-busan-police.png",
+      width: 90,
+      height: 90,
+    },
+    {
+      id: "national-health-insurance",
+      name: "국민건강보험",
+      src: "/homepage/figma-client-logo-national-health-insurance.png",
+      width: 161,
+      height: 63,
+    },
+    {
+      id: "donga-university",
+      name: "동아대학교",
+      src: "/homepage/figma-client-logo-donga-university.png",
+      width: 192,
+      height: 51,
+    },
+    {
+      id: "gyeongnam-technical-high-school",
+      name: "경남공업고등학교",
+      src: "/homepage/figma-client-logo-gyeongnam-technical-high-school.png",
+      width: 218,
+      height: 54,
+    },
   ] as const;
 
   return (
@@ -307,9 +343,9 @@ function HomeClientPreview() {
             align="left"
           />
           <div className={styles.homeClientLogos}>
-            {previewLogos.map(([name, src]) => (
-              <div key={name}>
-                <Image src={src} alt={name} fill sizes="13.75rem" />
+            {previewLogos.map(({ id, name, src, width, height }) => (
+              <div key={id} data-logo={id}>
+                <Image src={src} alt={name} width={width} height={height} />
               </div>
             ))}
           </div>

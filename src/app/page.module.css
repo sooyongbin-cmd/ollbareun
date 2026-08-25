@@ -632,6 +632,37 @@
   }
 }
 
+/* Section 3 card typography follows the Frame 377 / Frame 136 references. */
+.landingPage .serviceCard h3 {
+  font-size: 19px;
+}
+
+.landingPage .serviceCard p {
+  font-size: 15px;
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .landingPage .serviceCard h3 {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .landingPage .serviceCard h3 {
+    font-size: 18px;
+  }
+
+  .landingPage .serviceCard p {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .landingPage .serviceCard p {
+    font-size: 13px;
+  }
+}
+
 .brandCluster {
   display: flex;
   height: 100%;

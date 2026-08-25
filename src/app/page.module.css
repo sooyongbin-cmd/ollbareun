@@ -9025,6 +9025,13 @@
   }
 }
 
+@media (min-width: 641px) and (max-width: 768px) {
+  .landingPage .homeClientLogos {
+    align-self: center;
+    max-width: none;
+  }
+}
+
 @media (max-width: 360px) {
   .landingPage .coverImage {
     object-position: 45.2% center;

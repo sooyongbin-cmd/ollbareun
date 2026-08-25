@@ -205,8 +205,9 @@ describe("Figma homepage mobile responsive layout", () => {
       /\.landingPage \.serviceContent,\s*\.landingPage \.clientContent\s*\{[^}]*width: var\(--landing-content-width\);/s,
     );
     expect(stylesheet).toMatch(/\.landingPage \.splitIntro\s*\{[^}]*width: var\(--landing-content-width\);/s);
-    expect(stylesheet).toMatch(/\.landingPage \.serviceContent > \.sectionHeading\s*\{/s);
-    expect(stylesheet).toMatch(/\.landingPage \.clientContent > \.sectionHeading\s*\{/s);
+    expect(stylesheet).toMatch(/\.landingPage \.serviceBody,\s*\.landingPage \.clientBody\s*\{[^}]*width: 100%;/s);
+    expect(stylesheet).toMatch(/\.landingPage \.serviceBody > \.sectionHeading\s*\{[^}]*align-self: flex-start;/s);
+    expect(stylesheet).toMatch(/\.landingPage \.clientBody > \.sectionHeading\s*\{/s);
     expect(stylesheet).toMatch(/\.landingPage \.clientContent > \.moreLink\s*\{[^}]*font-weight: 400;/s);
   });
 });

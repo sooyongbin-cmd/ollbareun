@@ -85,11 +85,13 @@ describe("homepage back to top button", () => {
     const serviceSection = container.querySelector('[class*="servicePreview"]');
     const clientSection = container.querySelector('[class*="homeClientSection"]');
 
-    expect(serviceSection?.querySelector('[class*="serviceContent"] > [class*="sectionHeading"]')).toBeInTheDocument();
-    expect(serviceSection?.querySelector('[class*="serviceContent"] > [class*="serviceGrid"]')).toBeInTheDocument();
+    expect(serviceSection?.querySelector('[class*="serviceContent"] > [class*="serviceBody"]')).toBeInTheDocument();
+    expect(serviceSection?.querySelector('[class*="serviceBody"] > [class*="sectionHeading"]')).toBeInTheDocument();
+    expect(serviceSection?.querySelector('[class*="serviceBody"] > [class*="serviceGrid"]')).toBeInTheDocument();
     expect(serviceSection?.querySelector('[class*="serviceContent"] > a')).toHaveAttribute("href", "/services");
-    expect(clientSection?.querySelector('[class*="clientContent"] > [class*="sectionHeading"]')).toBeInTheDocument();
-    expect(clientSection?.querySelector('[class*="clientContent"] > [class*="homeClientLogos"]')).toBeInTheDocument();
+    expect(clientSection?.querySelector('[class*="clientContent"] > [class*="clientBody"]')).toBeInTheDocument();
+    expect(clientSection?.querySelector('[class*="clientBody"] > [class*="sectionHeading"]')).toBeInTheDocument();
+    expect(clientSection?.querySelector('[class*="clientBody"] > [class*="homeClientLogos"]')).toBeInTheDocument();
     expect(clientSection?.querySelector('[class*="clientContent"] > a')).toHaveAttribute("href", "/clients");
   });
 });

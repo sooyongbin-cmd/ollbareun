@@ -278,39 +278,41 @@ function HomeClientPreview() {
   return (
     <section className={`${styles.section} ${styles.homeClientSection}`}>
       <div className={styles.clientContent}>
-        <SectionHeading
-          eyebrow="Client"
-          title={
-            <>
-              <b>성실함</b>과 <b>신뢰</b>로
-              <br className={styles.mobileOnlyBreak} />
-              단단하게 이어온 파트너
-            </>
-          }
-          description={
-            <>
-              <span className={styles.desktopOnlyCopy}>
-                철저한 관리와 맞춤형 서비스로 고객이 본업에만 집중할 수 있는
-                <br />
-                최적의 환경을 만들며 함께 성장하는 든든한 파트너가 되겠습니다.
-              </span>
-              <span className={styles.mobileOnlyCopy}>
-                철저한 관리와 맞춤형 서비스로 고객이 본업에만
-                <br />
-                집중할 수 있는 최적의 환경을 만들며 함께 성장하는
-                <br />
-                든든한 파트너가 되겠습니다.
-              </span>
-            </>
-          }
-          align="left"
-        />
-        <div className={styles.homeClientLogos}>
-          {previewLogos.map(([name, src]) => (
-            <div key={name}>
-              <Image src={src} alt={name} fill sizes="13.75rem" />
-            </div>
-          ))}
+        <div className={styles.clientBody}>
+          <SectionHeading
+            eyebrow="Client"
+            title={
+              <>
+                <b>성실함</b>과 <b>신뢰</b>로
+                <br className={styles.mobileOnlyBreak} />
+                단단하게 이어온 파트너
+              </>
+            }
+            description={
+              <>
+                <span className={styles.desktopOnlyCopy}>
+                  철저한 관리와 맞춤형 서비스로 고객이 본업에만 집중할 수 있는
+                  <br />
+                  최적의 환경을 만들며 함께 성장하는 든든한 파트너가 되겠습니다.
+                </span>
+                <span className={styles.mobileOnlyCopy}>
+                  철저한 관리와 맞춤형 서비스로 고객이 본업에만
+                  <br />
+                  집중할 수 있는 최적의 환경을 만들며 함께 성장하는
+                  <br />
+                  든든한 파트너가 되겠습니다.
+                </span>
+              </>
+            }
+            align="left"
+          />
+          <div className={styles.homeClientLogos}>
+            {previewLogos.map(([name, src]) => (
+              <div key={name}>
+                <Image src={src} alt={name} fill sizes="13.75rem" />
+              </div>
+            ))}
+          </div>
         </div>
         <Link className={styles.moreLink} href="/clients">
           MORE VIEW <MoreViewIcon circle="client" />
@@ -387,47 +389,49 @@ export function MainPage() {
 
       <section className={`${styles.section} ${styles.servicePreview}`}>
         <div className={styles.serviceContent}>
-          <SectionHeading
-            eyebrow="Main Service"
-            title={
-              <>
-                <b>인력, 시설, 위생</b>을
-                <br className={styles.mobileServiceBreak} />
-                따로 보지 않습니다.
-              </>
-            }
-            description={
-              <>
-                현장의 성과는 채용, 배치, 안전, 청결, 보고 체계가
-                <br className={styles.mobileServiceBreak} />
-                함께 움직일 때 만들어집니다.
-                <br />
-                올바름은 세 영역을 하나의 운영 시스템으로 연결합니다.
-              </>
-            }
-            align="left"
-          />
-          <div className={styles.serviceGrid}>
-            {services.map(({ title, description, mobileDescription, image }) => (
-              <article key={title} className={styles.serviceCard}>
-                <div className={styles.serviceImage}>
-                  <Image src={image} alt="" fill sizes="(max-width: 47.5rem) 100vw, 33vw" />
-                </div>
-                <div>
-                  <h3>{title}</h3>
-                  <p>
-                    {mobileDescription ? (
-                      <>
-                        <span className={styles.desktopOnlyCopy}>{description}</span>
-                        <span className={styles.mobileOnlyCopy}>{mobileDescription}</span>
-                      </>
-                    ) : (
-                      description
-                    )}
-                  </p>
-                </div>
-              </article>
-            ))}
+          <div className={styles.serviceBody}>
+            <SectionHeading
+              eyebrow="Main Service"
+              title={
+                <>
+                  <b>인력, 시설, 위생</b>을
+                  <br className={styles.mobileServiceBreak} />
+                  따로 보지 않습니다.
+                </>
+              }
+              description={
+                <>
+                  현장의 성과는 채용, 배치, 안전, 청결, 보고 체계가
+                  <br className={styles.mobileServiceBreak} />
+                  함께 움직일 때 만들어집니다.
+                  <br />
+                  올바름은 세 영역을 하나의 운영 시스템으로 연결합니다.
+                </>
+              }
+              align="left"
+            />
+            <div className={styles.serviceGrid}>
+              {services.map(({ title, description, mobileDescription, image }) => (
+                <article key={title} className={styles.serviceCard}>
+                  <div className={styles.serviceImage}>
+                    <Image src={image} alt="" fill sizes="(max-width: 47.5rem) 100vw, 33vw" />
+                  </div>
+                  <div>
+                    <h3>{title}</h3>
+                    <p>
+                      {mobileDescription ? (
+                        <>
+                          <span className={styles.desktopOnlyCopy}>{description}</span>
+                          <span className={styles.mobileOnlyCopy}>{mobileDescription}</span>
+                        </>
+                      ) : (
+                        description
+                      )}
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
           <Link className={styles.moreLink} href="/services">
             MORE VIEW <MoreViewIcon circle="light" />

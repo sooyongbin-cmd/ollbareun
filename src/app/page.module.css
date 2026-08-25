@@ -8895,7 +8895,32 @@
   align-items: center;
 }
 
-.landingPage .serviceContent > .sectionHeading {
+.landingPage .serviceContent {
+  row-gap: var(--landing-service-grid-link-gap);
+}
+
+.landingPage .clientContent {
+  row-gap: var(--landing-client-logo-link-gap);
+}
+
+.landingPage .serviceBody,
+.landingPage .clientBody {
+  display: flex;
+  width: 100%;
+  flex: none;
+  flex-direction: column;
+}
+
+.landingPage .serviceBody {
+  align-items: center;
+}
+
+.landingPage .clientBody {
+  align-items: flex-start;
+}
+
+.landingPage .serviceBody > .sectionHeading {
+  align-self: flex-start;
   width: var(--landing-service-heading-width);
   max-width: 100%;
   height: var(--landing-service-heading-height);
@@ -8907,7 +8932,7 @@
   width: var(--landing-service-grid-width);
   max-width: 100%;
   height: var(--landing-service-grid-height);
-  margin: 0 0 var(--landing-service-grid-link-gap);
+  margin: 0;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--landing-service-grid-gap);
   flex: none;
@@ -8943,7 +8968,7 @@
   row-gap: 0;
 }
 
-.landingPage .clientContent > .sectionHeading {
+.landingPage .clientBody > .sectionHeading {
   width: var(--landing-client-heading-width);
   max-width: 100%;
   height: var(--landing-client-heading-height);
@@ -8956,7 +8981,7 @@
   width: var(--landing-client-logo-width);
   max-width: 100%;
   height: var(--landing-client-logo-height);
-  margin: 0 0 var(--landing-client-logo-link-gap);
+  margin: 0;
   padding: 0 var(--landing-client-logo-padding-x);
   grid-auto-flow: column;
   grid-template-columns: repeat(3, minmax(0, 1fr));

@@ -34,7 +34,17 @@ The landing implementation uses one normal-flow content wrapper for each of Sect
 | `361px–480px` | 320px | `.splitIntro` | `.serviceContent` | `.clientContent` |
 | `max-width: 360px` | `calc(100% - 40px)` | `.splitIntro` | `.serviceContent` | `.clientContent` |
 
-The wrappers keep heading, content grid/logo rail, and the MORE VIEW link in one parent frame, matching the Figma Auto Layout hierarchy while preserving normal document flow.
+The wrappers keep heading, content grid/logo rail, and the MORE VIEW link in one parent frame, matching the Figma Auto Layout hierarchy while preserving normal document flow. Section 3 uses `serviceContent > serviceBody > (sectionHeading, serviceGrid)` and Section 4 uses `clientContent > clientBody > (sectionHeading, homeClientLogos)`; the MORE VIEW link remains a sibling of each body inside the outer content frame.
+
+## Section 2–4 parent/child layout contracts
+
+| Section / Figma nodes | Parent layout direction and size | Padding / gap / alignment | Child positioning and size | Child alignment basis |
+| --- | --- | --- | --- | --- |
+| Section 2 `857:1891 → 857:1892 → 857:1893` | Outer section frame is full viewport; content frame is the shared width. Inner frame is a row. | Section padding is viewport-specific; inner row gap is 58px at desktop/tablet. The row is centered and its children use `align-items:center`. | Heading frame is 387px at 1920; certificate frame is 737.29px × 326.36px. Both are normal-flow flex items. | Heading and certificates align to the inner row’s cross-axis center; MORE VIEW is a sibling in the outer column frame. |
+| Section 3 `857:1924 → 857:1925 → 857:1926` | Outer content frame is a column, gap 100px, centered. The inner body uses the shared width. | Figma’s Frame378 places heading and grid at `left:0`; implementation keeps normal flow and uses `align-self:flex-start` for the heading, avoiding coordinate offsets. | Heading is 621.979px × 185.543px at 1920; grid is 1182px × 293.543px. Cards switch from three columns to one at 1024px and below. | `serviceBody` is the reference frame for both heading and grid. Heading x equals body x; the grid can center its narrower mobile card stack within that body. MORE VIEW is a sibling of `serviceBody`. |
+| Section 4 `857:1952 → 857:1953 → 857:1954` | Outer content frame is a column, gap 100px, centered. The inner body is a full-width column. | Inner body uses `align-items:flex-start` and an 80px heading-to-logo gap at desktop; responsive values follow the viewport matrix. | Heading is 650px wide at desktop; logo rail is the body width (1182px at 1920) and remains normal-flow. | Heading and logo rail share `clientBody`’s left edge. MORE VIEW is a sibling of `clientBody` in `clientContent`. |
+
+The Figma Section 3 reference uses absolute child coordinates inside Frame378, but those coordinates describe the frame’s left/top Auto Layout placement. The web implementation expresses the same relationship with a normal-flow `serviceBody`, so responsive content remains in flow and no arbitrary `top`, `left`, transform, or negative margin is needed.
 
 ## Section 1 — Hero
 

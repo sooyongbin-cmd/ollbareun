@@ -19,6 +19,23 @@ The eight `landing_*` frames are reference states of one page. The implementatio
 
 The small differences between summed section heights and page height are Figma canvas separators (0–4px), not web content gaps.
 
+## Implemented shared content frame matrix
+
+The landing implementation uses one normal-flow content wrapper for each of Sections 2–4. The wrapper is centered inside the viewport and uses the following discrete widths; Section 3's single-column cards remain narrower children inside the wrapper at tablet/mobile widths.
+
+| CSS range | Shared content width | Section 2 wrapper | Section 3 wrapper | Section 4 wrapper |
+| --- | ---: | --- | --- | --- |
+| `min-width: 1281px` | 1182px | `.splitIntro` | `.serviceContent` | `.clientContent` |
+| `1063px–1280px` | 934px | `.splitIntro` | `.serviceContent` | `.clientContent` |
+| `1025px–1062px` | 934px | `.splitIntro` | `.serviceContent` | `.clientContent` |
+| `769px–1024px` | 708px | `.splitIntro` | `.serviceContent` | `.clientContent` |
+| `641px–768px` | 560px | `.splitIntro` | `.serviceContent` | `.clientContent` |
+| `481px–640px` | 420px | `.splitIntro` | `.serviceContent` | `.clientContent` |
+| `361px–480px` | 320px | `.splitIntro` | `.serviceContent` | `.clientContent` |
+| `max-width: 360px` | `calc(100% - 40px)` | `.splitIntro` | `.serviceContent` | `.clientContent` |
+
+The wrappers keep heading, content grid/logo rail, and the MORE VIEW link in one parent frame, matching the Figma Auto Layout hierarchy while preserving normal document flow.
+
 ## Section 1 — Hero
 
 | Reference | Node | Height | Title | Alignment | Background |

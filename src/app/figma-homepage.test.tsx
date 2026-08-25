@@ -187,6 +187,7 @@ describe("Figma homepage mobile responsive layout", () => {
   });
 
   it("uses the eight discrete landing reference states", () => {
+    expect(stylesheet).toContain("--landing-content-width: 1182px");
     expect(stylesheet).toContain("--landing-hero-height: 833px");
     expect(stylesheet).toContain("--landing-trust-height: 855.161px");
     expect(stylesheet).toContain("--landing-service-height: 1073px");
@@ -197,5 +198,15 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(stylesheet).toContain("@media (min-width: 481px) and (max-width: 640px)");
     expect(stylesheet).toContain("@media (min-width: 361px) and (max-width: 480px)");
     expect(stylesheet).toMatch(/\.landingPage \.homeClientLogos\s*\{[^}]*grid-auto-flow: column;/s);
+  });
+
+  it("uses one shared content frame for each landing preview section", () => {
+    expect(stylesheet).toMatch(
+      /\.landingPage \.serviceContent,\s*\.landingPage \.clientContent\s*\{[^}]*width: var\(--landing-content-width\);/s,
+    );
+    expect(stylesheet).toMatch(/\.landingPage \.splitIntro\s*\{[^}]*width: var\(--landing-content-width\);/s);
+    expect(stylesheet).toMatch(/\.landingPage \.serviceContent > \.sectionHeading\s*\{/s);
+    expect(stylesheet).toMatch(/\.landingPage \.clientContent > \.sectionHeading\s*\{/s);
+    expect(stylesheet).toMatch(/\.landingPage \.clientContent > \.moreLink\s*\{[^}]*font-weight: 400;/s);
   });
 });

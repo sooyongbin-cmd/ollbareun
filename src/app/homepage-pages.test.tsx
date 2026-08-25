@@ -79,6 +79,19 @@ describe("homepage back to top button", () => {
 
     expect(serviceGrid?.querySelectorAll("article")).toHaveLength(3);
   });
+
+  it("groups service and client previews inside their shared content frames", () => {
+    const { container } = render(<MainPage />);
+    const serviceSection = container.querySelector('[class*="servicePreview"]');
+    const clientSection = container.querySelector('[class*="homeClientSection"]');
+
+    expect(serviceSection?.querySelector('[class*="serviceContent"] > [class*="sectionHeading"]')).toBeInTheDocument();
+    expect(serviceSection?.querySelector('[class*="serviceContent"] > [class*="serviceGrid"]')).toBeInTheDocument();
+    expect(serviceSection?.querySelector('[class*="serviceContent"] > a')).toHaveAttribute("href", "/services");
+    expect(clientSection?.querySelector('[class*="clientContent"] > [class*="sectionHeading"]')).toBeInTheDocument();
+    expect(clientSection?.querySelector('[class*="clientContent"] > [class*="homeClientLogos"]')).toBeInTheDocument();
+    expect(clientSection?.querySelector('[class*="clientContent"] > a')).toHaveAttribute("href", "/clients");
+  });
 });
 
 describe("public homepage pages", () => {

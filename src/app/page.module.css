@@ -68,6 +68,7 @@
  * values are not interpolated. The matching consumer rules are kept last.
  */
 .landingPage {
+  --landing-content-width: 1182px;
   --landing-hero-height: 833px;
   --landing-hero-font: 67.31px;
   --landing-eyebrow-font: 26px;
@@ -269,6 +270,7 @@
 
 @media (min-width: 1063px) and (max-width: 1280px) {
   .landingPage {
+    --landing-content-width: 934px;
     --landing-eyebrow-font: 25px;
     --landing-title-font: 42px;
     --landing-description-font: 20px;
@@ -300,6 +302,7 @@
 
 @media (min-width: 1025px) and (max-width: 1062px) {
   .landingPage {
+    --landing-content-width: 934px;
     --landing-hero-height: 729px;
     --landing-hero-font: 60px;
     --landing-eyebrow-font: 25px;
@@ -333,6 +336,7 @@
 
 @media (min-width: 769px) and (max-width: 1024px) {
   .landingPage {
+    --landing-content-width: 708px;
     --landing-hero-height: 729px;
     --landing-hero-font: 60px;
     --landing-eyebrow-font: 23px;
@@ -386,6 +390,7 @@
 
 @media (min-width: 641px) and (max-width: 768px) {
   .landingPage {
+    --landing-content-width: 560px;
     --landing-hero-height: 546.75px;
     --landing-hero-font: 45px;
     --landing-eyebrow-font: 23px;
@@ -439,6 +444,7 @@
 
 @media (min-width: 481px) and (max-width: 640px) {
   .landingPage {
+    --landing-content-width: 420px;
     --landing-hero-height: 457.482px;
     --landing-hero-font: 38px;
     --landing-eyebrow-font: 22px;
@@ -492,6 +498,7 @@
 
 @media (min-width: 361px) and (max-width: 480px) {
   .landingPage {
+    --landing-content-width: 320px;
     --landing-hero-height: 343.111px;
     --landing-hero-font: 30px;
     --landing-eyebrow-font: 20px;
@@ -545,6 +552,7 @@
 
 @media (max-width: 360px) {
   .landingPage {
+    --landing-content-width: calc(100% - 40px);
     --landing-hero-height: 310px;
     --landing-hero-font: 24px;
     --landing-eyebrow-font: 17px;
@@ -8832,7 +8840,7 @@
 
 .landingPage .splitIntro {
   display: flex;
-  width: var(--landing-trust-width);
+  width: var(--landing-content-width);
   max-width: calc(100% - 40px);
   height: auto;
   flex-direction: row;
@@ -8876,9 +8884,20 @@
   background: #fafafa;
 }
 
-.landingPage .servicePreview > .sectionHeading {
-  width: var(--landing-service-heading-width);
+.landingPage .serviceContent,
+.landingPage .clientContent {
+  display: flex;
+  width: var(--landing-content-width);
   max-width: calc(100% - 40px);
+  height: auto;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+}
+
+.landingPage .serviceContent > .sectionHeading {
+  width: var(--landing-service-heading-width);
+  max-width: 100%;
   height: var(--landing-service-heading-height);
   margin-bottom: var(--landing-service-heading-grid-gap);
 }
@@ -8886,7 +8905,7 @@
 .landingPage .serviceGrid {
   display: grid;
   width: var(--landing-service-grid-width);
-  max-width: calc(100% - 40px);
+  max-width: 100%;
   height: var(--landing-service-grid-height);
   margin: 0 0 var(--landing-service-grid-link-gap);
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -8924,9 +8943,9 @@
   row-gap: 0;
 }
 
-.landingPage .homeClientSection > .sectionHeading {
+.landingPage .clientContent > .sectionHeading {
   width: var(--landing-client-heading-width);
-  max-width: calc(100% - 40px);
+  max-width: 100%;
   height: var(--landing-client-heading-height);
   margin-bottom: var(--landing-client-heading-logo-gap);
 }
@@ -8935,7 +8954,7 @@
   position: relative;
   display: grid;
   width: var(--landing-client-logo-width);
-  max-width: calc(100% - 40px);
+  max-width: 100%;
   height: var(--landing-client-logo-height);
   margin: 0 0 var(--landing-client-logo-link-gap);
   padding: 0 var(--landing-client-logo-padding-x);
@@ -8959,6 +8978,11 @@
 .landingPage .homeClientLogos img {
   padding: 8px 12px;
   object-fit: contain;
+}
+
+.landingPage .clientContent > .moreLink {
+  margin: 0;
+  font-weight: 400;
 }
 
 @media (max-width: 1024px) {

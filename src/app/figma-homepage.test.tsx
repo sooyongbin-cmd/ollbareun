@@ -39,7 +39,8 @@ describe("Figma homepage text updates", () => {
     expect(screen.getByText("연결", { selector: "strong" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "관리자" })).toHaveAttribute("href", "/manager");
     expect(screen.getByRole("link", { name: "근무자" })).toHaveAttribute("href", "/guard");
-    expect(container.querySelectorAll('[class*="mobileOnlyBreak"]')).toHaveLength(3);
+    expect(container.querySelectorAll('[class*="mobileOnlyBreak"]')).toHaveLength(1);
+    expect(container.querySelector('[class*="hero"] h1')?.querySelectorAll("br")).toHaveLength(1);
   });
 
   it("keeps the Figma mobile service breaks and client logo order", () => {
@@ -145,7 +146,7 @@ describe("Figma homepage mobile responsive layout", () => {
       /@media \(max-width: 47.9375rem\)[\s\S]*\.logoGrid\s*\{[^}]*grid-template-columns: repeat\(2, 1fr\);/s,
     );
     expect(stylesheet).toMatch(
-      /@media \(max-width: 47.9375rem\)[\s\S]*\n  \.certification\s*\{[^}]*display: flex;/s,
+      /@media \(max-width: 47.9375rem\)[\s\S]*\n  \.certification\s*\{[^}]*position: absolute;/s,
     );
     expect(stylesheet).toMatch(
       /@media \(max-width: 47.9375rem\)[\s\S]*\.trustSection\s*\{[^}]*padding-bottom: 4.00625rem;/s,
@@ -183,5 +184,18 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(stylesheet).toMatch(/\.servicesPage \.operationLayout\s*\{[^}]*gap: 1.725rem;/s);
     expect(stylesheet).toMatch(/\.servicesPage \.dispatchSection \.detailBanner img\s*\{[^}]*object-fit: fill;[^}]*transform: translateX\(4.091875rem\) scale\(2\.6\);[^}]*transform-origin: center;/s);
     expect(stylesheet).toMatch(/\.servicesPage \.serviceHero h1,\s*\.clientsPage \.clientHero h1\s*\{[^}]*line-height: 2.125rem;/s);
+  });
+
+  it("uses the eight discrete landing reference states", () => {
+    expect(stylesheet).toContain("--landing-hero-height: 833px");
+    expect(stylesheet).toContain("--landing-trust-height: 855.161px");
+    expect(stylesheet).toContain("--landing-service-height: 1073px");
+    expect(stylesheet).toContain("--landing-client-height: 1197px");
+    expect(stylesheet).toContain("@media (min-width: 1025px) and (max-width: 1062px)");
+    expect(stylesheet).toContain("@media (min-width: 769px) and (max-width: 1024px)");
+    expect(stylesheet).toContain("@media (min-width: 641px) and (max-width: 768px)");
+    expect(stylesheet).toContain("@media (min-width: 481px) and (max-width: 640px)");
+    expect(stylesheet).toContain("@media (min-width: 361px) and (max-width: 480px)");
+    expect(stylesheet).toMatch(/\.landingPage \.homeClientLogos\s*\{[^}]*grid-auto-flow: column;/s);
   });
 });

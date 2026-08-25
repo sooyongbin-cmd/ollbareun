@@ -62,6 +62,544 @@
   align-items: center;
 }
 
+/*
+ * Authoritative landing breakpoint matrix from Figma node 858:2070.
+ * The eight named frames are discrete reference states, so landing-page
+ * values are not interpolated. The matching consumer rules are kept last.
+ */
+.landingPage {
+  --landing-hero-height: 833px;
+  --landing-hero-font: 67.31px;
+  --landing-eyebrow-font: 26px;
+  --landing-title-font: 43px;
+  --landing-description-font: 21px;
+  --landing-heading-gap: 23px;
+  --landing-description-leading: 28.35px;
+  --landing-more-size: 28.801px;
+  --landing-more-font: 15.66px;
+  --landing-trust-height: 855.161px;
+  --landing-trust-width: 1182.29px;
+  --landing-trust-copy-width: 387px;
+  --landing-trust-copy-height: 240px;
+  --landing-trust-gap: 100px;
+  --landing-trust-layout-gap: 58px;
+  --landing-certificate-width: 737.29px;
+  --landing-certificate-height: 326.36px;
+  --landing-certificate-gap: 22px;
+  --landing-service-height: 1073px;
+  --landing-service-heading-width: 621.979px;
+  --landing-service-heading-height: 184px;
+  --landing-service-grid-width: 1182.307px;
+  --landing-service-grid-height: 293.543px;
+  --landing-service-grid-gap: 13px;
+  --landing-service-image-height: 214.838px;
+  --landing-service-heading-grid-gap: 80px;
+  --landing-service-grid-link-gap: 92px;
+  --landing-client-height: 1197px;
+  --landing-client-heading-width: 650px;
+  --landing-client-heading-height: 184.004px;
+  --landing-client-logo-width: 1182px;
+  --landing-client-logo-height: 416.785px;
+  --landing-client-heading-logo-gap: 80px;
+  --landing-client-logo-link-gap: 100px;
+  --landing-client-logo-padding-x: 30px;
+}
+
+.landingPage .hero {
+  display: flex;
+  height: var(--landing-hero-height);
+  min-height: var(--landing-hero-height);
+  align-items: center;
+  justify-content: center;
+}
+
+.landingPage .heroOverlay {
+  display: none;
+}
+
+.landingPage .coverImage {
+  object-fit: cover;
+  object-position: center center;
+}
+
+.landingPage .heroContent {
+  position: relative;
+  top: auto;
+  left: auto;
+  width: auto;
+  margin: 0;
+  padding: 0;
+}
+
+.landingPage .heroContent h1 {
+  font-size: var(--landing-hero-font);
+  letter-spacing: -0.03em;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.landingPage .sectionHeading > p {
+  margin-bottom: var(--landing-heading-gap);
+  font-size: var(--landing-eyebrow-font);
+  line-height: normal;
+}
+
+.landingPage .sectionHeading h2 {
+  font-size: var(--landing-title-font);
+  line-height: 1.2558;
+}
+
+.landingPage .sectionHeading > span {
+  margin-top: var(--landing-heading-gap);
+  font-size: var(--landing-description-font);
+  line-height: var(--landing-description-leading);
+}
+
+.landingPage .moreLink {
+  width: max-content;
+  height: var(--landing-more-size);
+  margin: 0;
+  gap: 10px;
+  font-size: var(--landing-more-font);
+}
+
+.landingPage .moreViewIcon,
+.landingPage .moreViewIcon img {
+  width: var(--landing-more-size);
+  height: var(--landing-more-size);
+}
+
+.landingPage .trustSection {
+  height: var(--landing-trust-height);
+  padding: 0;
+  justify-content: center;
+  gap: var(--landing-trust-gap);
+}
+
+.landingPage .splitIntro {
+  width: var(--landing-trust-width);
+  max-width: calc(100% - 40px);
+  height: auto;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: var(--landing-trust-layout-gap);
+}
+
+.landingPage .splitIntro .sectionHeading {
+  width: var(--landing-trust-copy-width);
+  height: var(--landing-trust-copy-height);
+  flex: none;
+  justify-content: flex-start;
+}
+
+.landingPage .certificateImages {
+  width: var(--landing-certificate-width);
+  max-width: 100%;
+  height: var(--landing-certificate-height);
+  flex: none;
+  gap: var(--landing-certificate-gap);
+}
+
+.landingPage .certificateImages > div {
+  width: auto;
+  height: 100%;
+}
+
+.landingPage .servicePreview {
+  height: var(--landing-service-height);
+  padding: 0;
+  justify-content: center;
+  row-gap: 0;
+}
+
+.landingPage .servicePreview > .sectionHeading {
+  width: var(--landing-service-heading-width);
+  max-width: calc(100% - 40px);
+  height: var(--landing-service-heading-height);
+  margin-bottom: var(--landing-service-heading-grid-gap);
+}
+
+.landingPage .serviceGrid {
+  width: var(--landing-service-grid-width);
+  max-width: calc(100% - 40px);
+  height: var(--landing-service-grid-height);
+  margin-bottom: var(--landing-service-grid-link-gap);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--landing-service-grid-gap);
+}
+
+.landingPage .serviceCard,
+.landingPage .serviceCard:first-child {
+  height: 100%;
+}
+
+.landingPage .serviceImage {
+  height: var(--landing-service-image-height);
+}
+
+.landingPage .homeClientSection {
+  height: var(--landing-client-height);
+  padding: 0;
+  justify-content: center;
+  row-gap: 0;
+}
+
+.landingPage .homeClientSection > .sectionHeading {
+  width: var(--landing-client-heading-width);
+  max-width: calc(100% - 40px);
+  height: var(--landing-client-heading-height);
+  margin-bottom: var(--landing-client-heading-logo-gap);
+}
+
+.landingPage .homeClientLogos {
+  width: var(--landing-client-logo-width);
+  max-width: calc(100% - 40px);
+  height: var(--landing-client-logo-height);
+  margin: 0 0 var(--landing-client-logo-link-gap);
+  padding: 0 var(--landing-client-logo-padding-x);
+  grid-auto-flow: column;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.landingPage .homeClientSection > .moreLink {
+  margin: 0;
+}
+
+@media (min-width: 1063px) and (max-width: 1280px) {
+  .landingPage {
+    --landing-eyebrow-font: 25px;
+    --landing-title-font: 42px;
+    --landing-description-font: 20px;
+    --landing-heading-gap: 23px;
+    --landing-description-leading: 27px;
+    --landing-trust-height: 755.801px;
+    --landing-trust-width: 934px;
+    --landing-trust-copy-width: 294px;
+    --landing-trust-copy-height: 317px;
+    --landing-trust-gap: 90px;
+    --landing-trust-layout-gap: 58px;
+    --landing-certificate-width: 583.125px;
+    --landing-certificate-height: 265.086px;
+    --landing-certificate-gap: 10px;
+    --landing-service-height: 988.344px;
+    --landing-service-heading-width: 621.979px;
+    --landing-service-heading-height: 181px;
+    --landing-service-grid-width: 934px;
+    --landing-service-grid-height: 273.859px;
+    --landing-service-grid-gap: 10.27px;
+    --landing-service-image-height: 170px;
+    --landing-service-grid-link-gap: 104.684px;
+    --landing-client-height: 1084.525px;
+    --landing-client-logo-width: 934px;
+    --landing-client-logo-height: 371.72px;
+    --landing-client-logo-padding-x: 23.706px;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1062px) {
+  .landingPage {
+    --landing-hero-height: 729px;
+    --landing-hero-font: 60px;
+    --landing-eyebrow-font: 25px;
+    --landing-title-font: 42px;
+    --landing-description-font: 20px;
+    --landing-heading-gap: 23px;
+    --landing-description-leading: 27px;
+    --landing-trust-height: 715.801px;
+    --landing-trust-width: 934px;
+    --landing-trust-copy-width: 294px;
+    --landing-trust-copy-height: 317px;
+    --landing-trust-gap: 90px;
+    --landing-trust-layout-gap: 58px;
+    --landing-certificate-width: 583.125px;
+    --landing-certificate-height: 265.086px;
+    --landing-certificate-gap: 10px;
+    --landing-service-height: 948.344px;
+    --landing-service-heading-width: 621.979px;
+    --landing-service-heading-height: 181px;
+    --landing-service-grid-width: 934px;
+    --landing-service-grid-height: 273.859px;
+    --landing-service-grid-gap: 10.27px;
+    --landing-service-image-height: 170px;
+    --landing-service-grid-link-gap: 104.684px;
+    --landing-client-height: 1044.525px;
+    --landing-client-logo-width: 934px;
+    --landing-client-logo-height: 371.72px;
+    --landing-client-logo-padding-x: 23.706px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .landingPage {
+    --landing-hero-height: 729px;
+    --landing-hero-font: 60px;
+    --landing-eyebrow-font: 23px;
+    --landing-title-font: 42px;
+    --landing-description-font: 20px;
+    --landing-heading-gap: 22px;
+    --landing-description-leading: 27px;
+    --landing-trust-height: 940.887px;
+    --landing-trust-width: 769px;
+    --landing-trust-copy-width: 708px;
+    --landing-trust-copy-height: 221px;
+    --landing-trust-gap: 70px;
+    --landing-trust-layout-gap: 70px;
+    --landing-certificate-width: 583.125px;
+    --landing-certificate-height: 265.086px;
+    --landing-certificate-gap: 15px;
+    --landing-service-height: 1463.4px;
+    --landing-service-heading-width: 708px;
+    --landing-service-heading-height: 223px;
+    --landing-service-grid-width: 363px;
+    --landing-service-grid-height: 773px;
+    --landing-service-grid-gap: 8px;
+    --landing-service-image-height: 170px;
+    --landing-service-heading-grid-gap: 80px;
+    --landing-service-grid-link-gap: 80px;
+    --landing-more-size: 23.4px;
+    --landing-more-font: 14.094px;
+    --landing-client-height: 945.053px;
+    --landing-client-heading-width: 708px;
+    --landing-client-heading-height: 211px;
+    --landing-client-logo-width: 708px;
+    --landing-client-logo-height: 278.653px;
+    --landing-client-heading-logo-gap: 60px;
+    --landing-client-logo-link-gap: 84px;
+    --landing-client-logo-padding-x: 17.97px;
+  }
+
+  .landingPage .splitIntro {
+    flex-direction: column;
+  }
+
+  .landingPage .serviceGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .landingPage .serviceCard,
+  .landingPage .serviceCard:first-child {
+    height: auto;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .landingPage {
+    --landing-hero-height: 546.75px;
+    --landing-hero-font: 45px;
+    --landing-eyebrow-font: 23px;
+    --landing-title-font: 39px;
+    --landing-description-font: 18px;
+    --landing-heading-gap: 22px;
+    --landing-description-leading: 25px;
+    --landing-trust-height: 904.945px;
+    --landing-trust-width: 560px;
+    --landing-trust-copy-width: 560px;
+    --landing-trust-copy-height: 229.001px;
+    --landing-trust-gap: 80px;
+    --landing-trust-layout-gap: 80px;
+    --landing-certificate-width: 570.88px;
+    --landing-certificate-height: 255.144px;
+    --landing-certificate-gap: 15px;
+    --landing-service-height: 1483.4px;
+    --landing-service-heading-width: 560px;
+    --landing-service-heading-height: 223px;
+    --landing-service-grid-width: 363px;
+    --landing-service-grid-height: 837px;
+    --landing-service-grid-gap: 40px;
+    --landing-service-image-height: 170px;
+    --landing-service-heading-grid-gap: 80px;
+    --landing-service-grid-link-gap: 80px;
+    --landing-more-size: 23.4px;
+    --landing-more-font: 14.094px;
+    --landing-client-height: 857.053px;
+    --landing-client-heading-width: 559px;
+    --landing-client-heading-height: 211px;
+    --landing-client-logo-width: 600px;
+    --landing-client-logo-height: 278.653px;
+    --landing-client-heading-logo-gap: 60px;
+    --landing-client-logo-link-gap: 84px;
+    --landing-client-logo-padding-x: 17.97px;
+  }
+
+  .landingPage .splitIntro {
+    flex-direction: column;
+  }
+
+  .landingPage .serviceGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .landingPage .serviceCard,
+  .landingPage .serviceCard:first-child {
+    height: auto;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .landingPage {
+    --landing-hero-height: 457.482px;
+    --landing-hero-font: 38px;
+    --landing-eyebrow-font: 22px;
+    --landing-title-font: 36px;
+    --landing-description-font: 17px;
+    --landing-heading-gap: 18.333px;
+    --landing-description-leading: 24px;
+    --landing-trust-height: 752.664px;
+    --landing-trust-width: 420px;
+    --landing-trust-copy-width: 420px;
+    --landing-trust-copy-height: 194.665px;
+    --landing-trust-gap: 66.664px;
+    --landing-trust-layout-gap: 66.664px;
+    --landing-certificate-width: 420px;
+    --landing-certificate-height: 180.671px;
+    --landing-certificate-gap: 11.036px;
+    --landing-service-height: 1413.131px;
+    --landing-service-heading-width: 420px;
+    --landing-service-heading-height: 216.665px;
+    --landing-service-grid-width: 363px;
+    --landing-service-grid-height: 837px;
+    --landing-service-grid-gap: 40px;
+    --landing-service-image-height: 170px;
+    --landing-service-heading-grid-gap: 60px;
+    --landing-service-grid-link-gap: 60px;
+    --landing-more-size: 19.499px;
+    --landing-more-font: 11.745px;
+    --landing-client-height: 760.7px;
+    --landing-client-heading-width: 420px;
+    --landing-client-heading-height: 202.997px;
+    --landing-client-logo-width: 420px;
+    --landing-client-logo-height: 187.206px;
+    --landing-client-heading-logo-gap: 49.998px;
+    --landing-client-logo-link-gap: 69.997px;
+    --landing-client-logo-padding-x: 14.974px;
+  }
+
+  .landingPage .splitIntro {
+    flex-direction: column;
+  }
+
+  .landingPage .serviceGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .landingPage .serviceCard,
+  .landingPage .serviceCard:first-child {
+    height: auto;
+  }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+  .landingPage {
+    --landing-hero-height: 343.111px;
+    --landing-hero-font: 30px;
+    --landing-eyebrow-font: 20px;
+    --landing-title-font: 34px;
+    --landing-description-font: 16px;
+    --landing-heading-gap: 18.333px;
+    --landing-description-leading: 22px;
+    --landing-trust-height: 661.319px;
+    --landing-trust-width: 320px;
+    --landing-trust-copy-width: 320px;
+    --landing-trust-copy-height: 189.665px;
+    --landing-trust-gap: 55px;
+    --landing-trust-layout-gap: 55px;
+    --landing-certificate-width: 320px;
+    --landing-certificate-height: 137.654px;
+    --landing-certificate-gap: 8.408px;
+    --landing-service-height: 1377.157px;
+    --landing-service-heading-width: 320px;
+    --landing-service-heading-height: 230.665px;
+    --landing-service-grid-width: 320px;
+    --landing-service-grid-height: 816.992px;
+    --landing-service-grid-gap: 30px;
+    --landing-service-image-height: 170px;
+    --landing-service-heading-grid-gap: 55px;
+    --landing-service-grid-link-gap: 55px;
+    --landing-more-size: 19.499px;
+    --landing-more-font: 11.745px;
+    --landing-client-height: 693.333px;
+    --landing-client-heading-width: 320px;
+    --landing-client-heading-height: 202px;
+    --landing-client-logo-width: 320px;
+    --landing-client-logo-height: 166.837px;
+    --landing-client-heading-logo-gap: 49.998px;
+    --landing-client-logo-link-gap: 55px;
+    --landing-client-logo-padding-x: 12.129px;
+  }
+
+  .landingPage .splitIntro {
+    flex-direction: column;
+  }
+
+  .landingPage .serviceGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .landingPage .serviceCard,
+  .landingPage .serviceCard:first-child {
+    height: auto;
+  }
+}
+
+@media (max-width: 360px) {
+  .landingPage {
+    --landing-hero-height: 310px;
+    --landing-hero-font: 24px;
+    --landing-eyebrow-font: 17px;
+    --landing-title-font: 29px;
+    --landing-description-font: 16px;
+    --landing-heading-gap: 13px;
+    --landing-description-leading: 22px;
+    --landing-trust-height: 531.654px;
+    --landing-trust-width: 320px;
+    --landing-trust-copy-width: 320px;
+    --landing-trust-copy-height: 170.665px;
+    --landing-trust-gap: 45px;
+    --landing-trust-layout-gap: 45px;
+    --landing-certificate-width: 320px;
+    --landing-certificate-height: 137.654px;
+    --landing-certificate-gap: 8.408px;
+    --landing-service-height: 1250.492px;
+    --landing-service-heading-width: 320px;
+    --landing-service-heading-height: 214.665px;
+    --landing-service-grid-width: 320px;
+    --landing-service-grid-height: 816.992px;
+    --landing-service-grid-gap: 30px;
+    --landing-service-image-height: 170px;
+    --landing-service-heading-grid-gap: 45px;
+    --landing-service-grid-link-gap: 45px;
+    --landing-more-size: 19.499px;
+    --landing-more-font: 11.745px;
+    --landing-client-height: 578.336px;
+    --landing-client-heading-width: 320px;
+    --landing-client-heading-height: 182px;
+    --landing-client-logo-width: 320px;
+    --landing-client-logo-height: 166.837px;
+    --landing-client-heading-logo-gap: 45px;
+    --landing-client-logo-link-gap: 45px;
+    --landing-client-logo-padding-x: 12.129px;
+  }
+
+  .landingPage .coverImage {
+    object-position: 45.2% center;
+  }
+
+  .landingPage .splitIntro {
+    flex-direction: column;
+  }
+
+  .landingPage .serviceGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .landingPage .serviceCard,
+  .landingPage .serviceCard:first-child {
+    height: auto;
+  }
+}
+
 .brandCluster {
   display: flex;
   height: 100%;
@@ -8155,5 +8693,291 @@
 
   .clientsPage .logoGrid img {
     padding: clamp(8px, calc(0.3125vw + 4px), 10px) clamp(18px, calc(0.3125vw + 14px), 20px);
+  }
+}
+
+/* Final landing consumers. Keep this block last so the measured matrix above
+ * wins over historical responsive experiments without affecting other pages. */
+.landingPage .hero {
+  display: flex;
+  width: 100%;
+  max-width: none;
+  height: var(--landing-hero-height);
+  min-height: var(--landing-hero-height);
+  margin: 0;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.landingPage .heroOverlay {
+  display: none;
+}
+
+.landingPage .coverImage {
+  object-fit: cover;
+  object-position: center center;
+}
+
+.landingPage .heroContent {
+  position: relative;
+  top: auto;
+  left: auto;
+  width: auto;
+  margin: 0;
+  padding: 0;
+  align-self: auto;
+  text-align: center;
+}
+
+.landingPage .heroContent h1 {
+  margin: 0;
+  font-size: var(--landing-hero-font);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.landingPage .trustSection,
+.landingPage .servicePreview,
+.landingPage .homeClientSection {
+  display: flex;
+  width: 100%;
+  max-width: none;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.landingPage .sectionHeading {
+  display: flex;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  flex: none;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.landingPage .sectionHeading > p {
+  margin: 0 0 var(--landing-heading-gap);
+  color: var(--home-blue);
+  font-size: var(--landing-eyebrow-font);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: normal;
+}
+
+.landingPage .sectionHeading h2 {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  color: var(--home-ink);
+  font-size: var(--landing-title-font);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 1.2558;
+  white-space: normal;
+}
+
+.landingPage .sectionHeading h2 b,
+.landingPage .sectionHeading h2 strong {
+  font-weight: 700;
+}
+
+.landingPage .sectionHeading > span {
+  display: block;
+  width: 100%;
+  max-width: none;
+  margin: var(--landing-heading-gap) 0 0;
+  color: var(--home-muted);
+  font-size: var(--landing-description-font);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: var(--landing-description-leading);
+  white-space: normal;
+}
+
+.landingPage .moreLink,
+.landingPage .homeClientSection > .moreLink,
+.landingPage .servicePreview > .moreLink,
+.landingPage .trustSection > .moreLink {
+  display: flex;
+  width: max-content;
+  height: var(--landing-more-size);
+  margin: 0;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--landing-more-font);
+  line-height: 1;
+}
+
+.landingPage .moreViewIcon,
+.landingPage .moreViewIcon img {
+  width: var(--landing-more-size);
+  height: var(--landing-more-size);
+}
+
+.landingPage .trustSection {
+  height: var(--landing-trust-height);
+  gap: var(--landing-trust-gap);
+}
+
+.landingPage .splitIntro {
+  display: flex;
+  width: var(--landing-trust-width);
+  max-width: calc(100% - 40px);
+  height: auto;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: var(--landing-trust-layout-gap);
+}
+
+.landingPage .splitIntro .sectionHeading {
+  width: var(--landing-trust-copy-width);
+  max-width: 100%;
+  height: var(--landing-trust-copy-height);
+  flex: none;
+  justify-content: flex-start;
+}
+
+.landingPage .certificateImages {
+  display: grid;
+  width: var(--landing-certificate-width);
+  max-width: 100%;
+  height: var(--landing-certificate-height);
+  flex: none;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--landing-certificate-gap);
+}
+
+.landingPage .certificateImages > div {
+  position: relative;
+  width: auto;
+  height: 100%;
+  min-width: 0;
+}
+
+.landingPage .certificateImages img {
+  object-fit: contain;
+}
+
+.landingPage .servicePreview {
+  height: var(--landing-service-height);
+  row-gap: 0;
+  background: #fafafa;
+}
+
+.landingPage .servicePreview > .sectionHeading {
+  width: var(--landing-service-heading-width);
+  max-width: calc(100% - 40px);
+  height: var(--landing-service-heading-height);
+  margin-bottom: var(--landing-service-heading-grid-gap);
+}
+
+.landingPage .serviceGrid {
+  display: grid;
+  width: var(--landing-service-grid-width);
+  max-width: calc(100% - 40px);
+  height: var(--landing-service-grid-height);
+  margin: 0 0 var(--landing-service-grid-link-gap);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--landing-service-grid-gap);
+  flex: none;
+}
+
+.landingPage .serviceCard,
+.landingPage .serviceCard:first-child {
+  height: 100%;
+  min-width: 0;
+  overflow: visible;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+.landingPage .serviceCard:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+.landingPage .serviceImage {
+  width: 100%;
+  height: var(--landing-service-image-height);
+}
+
+.landingPage .serviceCard > div:last-child {
+  min-height: 0;
+  padding: 10px 0 0;
+}
+
+.landingPage .homeClientSection {
+  height: var(--landing-client-height);
+  row-gap: 0;
+}
+
+.landingPage .homeClientSection > .sectionHeading {
+  width: var(--landing-client-heading-width);
+  max-width: calc(100% - 40px);
+  height: var(--landing-client-heading-height);
+  margin-bottom: var(--landing-client-heading-logo-gap);
+}
+
+.landingPage .homeClientLogos {
+  position: relative;
+  display: grid;
+  width: var(--landing-client-logo-width);
+  max-width: calc(100% - 40px);
+  height: var(--landing-client-logo-height);
+  margin: 0 0 var(--landing-client-logo-link-gap);
+  padding: 0 var(--landing-client-logo-padding-x);
+  grid-auto-flow: column;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  border-top: 1px solid var(--home-line);
+  border-bottom: 1px solid var(--home-line);
+}
+
+.landingPage .homeClientLogos::before,
+.landingPage .homeClientLogos::after {
+  content: none;
+}
+
+.landingPage .homeClientLogos > div {
+  min-height: 0;
+}
+
+.landingPage .homeClientLogos img {
+  padding: 8px 12px;
+  object-fit: contain;
+}
+
+@media (max-width: 1024px) {
+  .landingPage .splitIntro {
+    flex-direction: column;
+  }
+
+  .landingPage .serviceGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .landingPage .serviceCard,
+  .landingPage .serviceCard:first-child {
+    height: auto;
+  }
+}
+
+@media (max-width: 360px) {
+  .landingPage .coverImage {
+    object-position: 45.2% center;
   }
 }

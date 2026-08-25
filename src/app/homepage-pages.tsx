@@ -324,7 +324,7 @@ export function MainPage() {
       <HomepageHeader />
       <section className={styles.hero} aria-labelledby="hero-title">
         <Image
-          src="/homepage/archive/hero-main.jpg"
+          src="/homepage/hero-lighthouse-figma.png"
           alt=""
           fill
           priority
@@ -335,10 +335,8 @@ export function MainPage() {
         <div className={styles.heroOverlay} />
         <div className={styles.heroContent}>
           <h1 id="hero-title">
-            변함없는
-            <br className={styles.mobileOnlyBreak} /> <strong>진심</strong>으로
-            <br />더 <strong>올바른 길</strong>을
-            <br className={styles.mobileOnlyBreak} /> 밝힙니다
+            변함없는 <strong>진심</strong>으로
+            <br />더 <strong>올바른 길</strong>을 밝힙니다
           </h1>
         </div>
       </section>

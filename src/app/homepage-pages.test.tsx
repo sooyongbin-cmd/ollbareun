@@ -27,7 +27,7 @@ describe("homepage back to top button", () => {
   it("uses the supplied homepage hero image without rendering a video", () => {
     const { container } = render(<MainPage />);
 
-    expect(container.querySelector('img[src*="hero-main.jpg"]')).toBeInTheDocument();
+    expect(container.querySelector('img[src*="hero-lighthouse-figma.png"]')).toBeInTheDocument();
     expect(container.querySelector("video")).not.toBeInTheDocument();
   });
 

@@ -7079,7 +7079,6 @@
 .aboutPage .socialGrid article {
   display: flex;
   width: 302px;
-  height: 237.26px;
   min-height: 0;
   padding: 32px 49px 31px 31px;
   flex-direction: column;
@@ -7132,7 +7131,6 @@
 
   .aboutPage .socialGrid article {
     width: max-content;
-    height: max-content;
     align-self: center;
     border: 0;
     box-shadow: inset 0 0 0 0.5px #7f7f7f;
@@ -7391,7 +7389,6 @@
 
   .aboutPage .socialGrid article {
     width: 226px;
-    height: 217px;
     padding: 23px 27px;
     border-width: 0.366px;
     border-radius: 29.287px;
@@ -7637,7 +7634,6 @@
 
   .aboutPage .socialGrid article {
     width: 271.8px;
-    height: 213.534px;
     padding: 29px 44px 28px 28px;
     border-width: 0.45px;
     border-radius: 36px;
@@ -7772,7 +7768,6 @@
 
   .aboutPage .socialGrid article {
     width: 100%;
-    height: 218.5px;
   }
 
   .aboutPage .contactSection {
@@ -8022,7 +8017,6 @@
   }
 
   .aboutPage .socialGrid article {
-    height: 190px;
     padding: 32px 49px 31px 36px;
     border-width: 0.5px;
     border-radius: 25px;
@@ -8196,10 +8190,6 @@
 
   .aboutPage .values {
     height: 788px;
-  }
-
-  .aboutPage .socialSection {
-    height: 731px;
   }
 
   .socialInner {
@@ -8507,7 +8497,6 @@
   }
 
   .aboutPage .socialGrid article {
-    height: 190px;
     padding: 32px 49px 31px 36px;
     border-radius: 25px;
   }
@@ -8654,7 +8643,6 @@
   --about-social-heading-width: 686px;
   --about-social-grid-width: 1182px;
   --about-social-card-width: 285px;
-  --about-social-card-height: 230px;
   --about-contact-map-width: 1182px;
   --about-contact-copy-width: 1096px;
   --about-contact-details-width: 539px;
@@ -8676,7 +8664,6 @@
     --about-social-heading-width: 686px;
     --about-social-grid-width: 584px;
     --about-social-card-width: 285px;
-    --about-social-card-height: 230px;
     --about-contact-map-width: 740px;
     --about-contact-copy-width: 741px;
     --about-contact-details-width: 535px;
@@ -8699,7 +8686,6 @@
     --about-social-heading-width: 686px;
     --about-social-grid-width: 584px;
     --about-social-card-width: 285px;
-    --about-social-card-height: 230px;
     --about-contact-map-width: 690px;
     --about-contact-copy-width: 741px;
     --about-contact-details-width: 535px;
@@ -8722,7 +8708,6 @@
     --about-social-heading-width: 686px;
     --about-social-grid-width: 768px;
     --about-social-card-width: 379px;
-    --about-social-card-height: 230px;
     --about-contact-map-width: 568px;
     --about-contact-copy-width: 741px;
     --about-contact-details-width: 507px;
@@ -8745,7 +8730,6 @@
     --about-social-heading-width: 506px;
     --about-social-grid-width: 341.1px;
     --about-social-card-width: 341.1px;
-    --about-social-card-height: 207px;
     --about-contact-map-width: 440px;
     --about-contact-copy-width: 540px;
     --about-contact-details-width: 440px;
@@ -8768,7 +8752,6 @@
     --about-social-heading-width: 346px;
     --about-social-grid-width: 320px;
     --about-social-card-width: 320px;
-    --about-social-card-height: 194.195px;
     --about-contact-map-width: 320px;
     --about-contact-copy-width: 480px;
     --about-contact-details-width: 320px;
@@ -8791,7 +8774,6 @@
     --about-social-heading-width: 346px;
     --about-social-grid-width: 320px;
     --about-social-card-width: 320px;
-    --about-social-card-height: 194.195px;
     --about-contact-map-width: 320px;
     --about-contact-copy-width: 480px;
     --about-contact-details-width: 320px;
@@ -8872,7 +8854,6 @@
 
 .aboutPage .socialGrid article {
   width: var(--about-social-card-width);
-  height: var(--about-social-card-height);
   max-width: none;
 }
 

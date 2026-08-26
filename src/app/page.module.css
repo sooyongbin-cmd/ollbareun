@@ -8622,6 +8622,8 @@
  * step at breakpoints instead of interpolating with clamp() or viewport math.
  */
 .aboutPage {
+  --about-hero-height: 502.03px;
+  --about-hero-font-size: 53px;
   --about-company-content-width: 1182px;
   --about-company-heading-width: 604px;
   --about-company-stats-width: 1182px;
@@ -8642,6 +8644,8 @@
 
 @media (min-width: 1025px) and (max-width: 1280px) {
   .aboutPage {
+    --about-hero-height: 502.03px;
+    --about-hero-font-size: 53px;
     --about-company-content-width: 1182px;
     --about-company-heading-width: 604px;
     --about-company-stats-width: 1075px;
@@ -8663,6 +8667,8 @@
 
 @media (min-width: 769px) and (max-width: 1024px) {
   .aboutPage {
+    --about-hero-height: 502.03px;
+    --about-hero-font-size: 53px;
     --about-company-content-width: 604px;
     --about-company-heading-width: 604px;
     --about-company-stats-width: 590px;
@@ -8684,6 +8690,8 @@
 
 @media (min-width: 641px) and (max-width: 768px) {
   .aboutPage {
+    --about-hero-height: 387.799px;
+    --about-hero-font-size: 45px;
     --about-company-content-width: 590px;
     --about-company-heading-width: 590px;
     --about-company-stats-width: 590px;
@@ -8705,6 +8713,8 @@
 
 @media (min-width: 481px) and (max-width: 640px) {
   .aboutPage {
+    --about-hero-height: 323.165px;
+    --about-hero-font-size: 38px;
     --about-company-content-width: 640px;
     --about-company-heading-width: 468px;
     --about-company-stats-width: 440px;
@@ -8726,6 +8736,8 @@
 
 @media (min-width: 361px) and (max-width: 480px) {
   .aboutPage {
+    --about-hero-height: 280px;
+    --about-hero-font-size: 30px;
     --about-company-content-width: 320px;
     --about-company-heading-width: 326px;
     --about-company-stats-width: 320px;
@@ -8747,6 +8759,8 @@
 
 @media (max-width: 360px) {
   .aboutPage {
+    --about-hero-height: 242px;
+    --about-hero-font-size: 22.465px;
     --about-company-content-width: 320px;
     --about-company-heading-width: 326px;
     --about-company-stats-width: 320px;
@@ -8764,6 +8778,15 @@
     --about-contact-copy-width: 480px;
     --about-contact-details-width: 320px;
   }
+}
+
+.aboutPage .aboutHero {
+  height: var(--about-hero-height);
+  min-height: var(--about-hero-height);
+}
+
+.aboutPage .aboutHero h1 {
+  font-size: var(--about-hero-font-size);
 }
 
 .aboutPage .companyInner {

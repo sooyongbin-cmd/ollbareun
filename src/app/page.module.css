@@ -8616,6 +8616,302 @@
   }
 }
 
+/*
+ * Figma page2 child-frame width matrix.
+ * Each named viewport is a discrete reference state; values intentionally
+ * step at breakpoints instead of interpolating with clamp() or viewport math.
+ */
+.aboutPage {
+  --about-company-content-width: 1182px;
+  --about-company-heading-width: 604px;
+  --about-company-stats-width: 1182px;
+  --about-company-history-width: 1182px;
+  --about-history-image-width: 522px;
+  --about-timeline-width: 539.954px;
+  --about-values-heading-width: 1240px;
+  --about-values-grid-width: 1240px;
+  --about-social-content-width: 1182px;
+  --about-social-heading-width: 686px;
+  --about-social-grid-width: 1182px;
+  --about-social-card-width: 285px;
+  --about-social-card-height: 230px;
+  --about-contact-map-width: 1182px;
+  --about-contact-copy-width: 1096px;
+  --about-contact-details-width: 539px;
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .aboutPage {
+    --about-company-content-width: 1182px;
+    --about-company-heading-width: 604px;
+    --about-company-stats-width: 1075px;
+    --about-company-history-width: 1055px;
+    --about-history-image-width: 522px;
+    --about-timeline-width: 443.954px;
+    --about-values-heading-width: 1240px;
+    --about-values-grid-width: 981px;
+    --about-social-content-width: 686px;
+    --about-social-heading-width: 686px;
+    --about-social-grid-width: 584px;
+    --about-social-card-width: 285px;
+    --about-social-card-height: 230px;
+    --about-contact-map-width: 740px;
+    --about-contact-copy-width: 741px;
+    --about-contact-details-width: 535px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .aboutPage {
+    --about-company-content-width: 604px;
+    --about-company-heading-width: 604px;
+    --about-company-stats-width: 590px;
+    --about-company-history-width: 494px;
+    --about-history-image-width: 496px;
+    --about-timeline-width: 494px;
+    --about-values-heading-width: 667px;
+    --about-values-grid-width: 660px;
+    --about-social-content-width: 1024px;
+    --about-social-heading-width: 686px;
+    --about-social-grid-width: 584px;
+    --about-social-card-width: 285px;
+    --about-social-card-height: 230px;
+    --about-contact-map-width: 690px;
+    --about-contact-copy-width: 741px;
+    --about-contact-details-width: 535px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .aboutPage {
+    --about-company-content-width: 590px;
+    --about-company-heading-width: 590px;
+    --about-company-stats-width: 590px;
+    --about-company-history-width: 522px;
+    --about-history-image-width: 522px;
+    --about-timeline-width: 494px;
+    --about-values-heading-width: 542px;
+    --about-values-grid-width: 568px;
+    --about-social-content-width: 768px;
+    --about-social-heading-width: 686px;
+    --about-social-grid-width: 768px;
+    --about-social-card-width: 379px;
+    --about-social-card-height: 230px;
+    --about-contact-map-width: 568px;
+    --about-contact-copy-width: 741px;
+    --about-contact-details-width: 507px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .aboutPage {
+    --about-company-content-width: 640px;
+    --about-company-heading-width: 468px;
+    --about-company-stats-width: 440px;
+    --about-company-history-width: 469.3px;
+    --about-history-image-width: 440px;
+    --about-timeline-width: 469.3px;
+    --about-values-heading-width: 542px;
+    --about-values-grid-width: 440px;
+    --about-social-content-width: 640px;
+    --about-social-heading-width: 506px;
+    --about-social-grid-width: 341.1px;
+    --about-social-card-width: 341.1px;
+    --about-social-card-height: 207px;
+    --about-contact-map-width: 440px;
+    --about-contact-copy-width: 540px;
+    --about-contact-details-width: 440px;
+  }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+  .aboutPage {
+    --about-company-content-width: 320px;
+    --about-company-heading-width: 326px;
+    --about-company-stats-width: 320px;
+    --about-company-history-width: 320px;
+    --about-history-image-width: 300.021px;
+    --about-timeline-width: 320px;
+    --about-values-heading-width: 269px;
+    --about-values-grid-width: 320px;
+    --about-social-content-width: 480px;
+    --about-social-heading-width: 346px;
+    --about-social-grid-width: 320px;
+    --about-social-card-width: 320px;
+    --about-social-card-height: 194.195px;
+    --about-contact-map-width: 320px;
+    --about-contact-copy-width: 480px;
+    --about-contact-details-width: 320px;
+  }
+}
+
+@media (max-width: 360px) {
+  .aboutPage {
+    --about-company-content-width: 320px;
+    --about-company-heading-width: 326px;
+    --about-company-stats-width: 320px;
+    --about-company-history-width: 320px;
+    --about-history-image-width: 300.021px;
+    --about-timeline-width: 320px;
+    --about-values-heading-width: 269px;
+    --about-values-grid-width: 320px;
+    --about-social-content-width: 360px;
+    --about-social-heading-width: 346px;
+    --about-social-grid-width: 320px;
+    --about-social-card-width: 320px;
+    --about-social-card-height: 194.195px;
+    --about-contact-map-width: 320px;
+    --about-contact-copy-width: 480px;
+    --about-contact-details-width: 320px;
+  }
+}
+
+.aboutPage .companyInner {
+  width: var(--about-company-content-width);
+  max-width: none;
+}
+
+.aboutPage .companySection .sectionHeading {
+  width: var(--about-company-heading-width);
+  max-width: none;
+}
+
+.aboutPage .stats {
+  width: var(--about-company-stats-width);
+  max-width: none;
+}
+
+.aboutPage .historyWrap {
+  width: var(--about-company-history-width);
+  max-width: none;
+}
+
+.aboutPage .historyImage {
+  width: var(--about-history-image-width);
+  max-width: none;
+}
+
+.aboutPage .timeline {
+  width: var(--about-timeline-width);
+  max-width: none;
+}
+
+.aboutPage .valuesInner {
+  display: flex;
+  width: 100%;
+  max-width: none;
+  flex-direction: column;
+  align-items: center;
+}
+
+.aboutPage .values .sectionHeading {
+  width: var(--about-values-heading-width);
+  max-width: none;
+}
+
+.aboutPage .valueGrid {
+  width: var(--about-values-grid-width);
+  max-width: none;
+}
+
+.aboutPage .socialInner {
+  width: var(--about-social-content-width);
+  max-width: none;
+}
+
+.aboutPage .socialSection .sectionHeading {
+  width: var(--about-social-heading-width);
+  max-width: none;
+}
+
+.aboutPage .socialGrid {
+  width: var(--about-social-grid-width);
+  max-width: none;
+}
+
+.aboutPage .socialGrid article {
+  width: var(--about-social-card-width);
+  height: var(--about-social-card-height);
+  max-width: none;
+}
+
+.aboutPage .contactInner {
+  width: 100%;
+  max-width: none;
+  align-items: center;
+}
+
+.aboutPage .contactSection .map {
+  width: var(--about-contact-map-width);
+  max-width: none;
+}
+
+.aboutPage .contactSection .contactCopy {
+  width: var(--about-contact-copy-width);
+  max-width: none;
+  flex: none;
+}
+
+.aboutPage .contactSection .contactCopy address {
+  width: var(--about-contact-details-width);
+  max-width: none;
+}
+
+@media (min-width: 1281px) {
+  .aboutPage .socialGrid {
+    grid-template-columns: repeat(4, var(--about-social-card-width));
+    gap: 0 13px;
+    justify-content: start;
+  }
+
+  .aboutPage .contactSection .contactCopy {
+    grid-template-columns: 401px var(--about-contact-details-width);
+    gap: 156px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1280px) {
+  .aboutPage .socialGrid {
+    grid-template-columns: repeat(2, var(--about-social-card-width));
+    gap: 13px;
+    justify-content: center;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .aboutPage .contactSection .contactCopy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 51px;
+  }
+}
+
+@media (max-width: 768px) {
+  .aboutPage .socialGrid {
+    grid-template-columns: var(--about-social-card-width);
+    justify-content: center;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .aboutPage .socialGrid {
+    gap: 13px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .aboutPage .socialGrid {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .aboutPage .socialGrid {
+    gap: 18.763px;
+  }
+}
+
 /* Figma page 4 desktop body: interpolate the 4_1280 and 4_1920 frames. */
 @media (min-width: 1025px) {
   .clientsPage .clientHero {

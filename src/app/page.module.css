@@ -8871,27 +8871,29 @@
 }
 
 /* Keep each timeline marker in the same normal-flow row as its date and copy. */
-.aboutPage .timeline::before {
-  width: 1px;
-  background: #d9d9d9;
-}
+@media (max-width: 1024px) {
+  .aboutPage .timeline::before {
+    width: 1px;
+    background: #d9d9d9;
+  }
 
-.aboutPage .timeline i {
-  position: relative;
-  z-index: 1;
-  display: block;
-  width: 25.954px;
-  height: 25.954px;
-  box-sizing: border-box;
-  justify-self: center;
-  visibility: visible;
-  border: 3.6px solid #158cc8;
-  border-radius: 50%;
-  background: #fff;
-}
+  .aboutPage .timeline i {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 25.954px;
+    height: 25.954px;
+    box-sizing: border-box;
+    justify-self: center;
+    visibility: visible;
+    border: 3.6px solid #158cc8;
+    border-radius: 50%;
+    background: #fff;
+  }
 
-.aboutPage .timeline p span {
-  white-space: nowrap;
+  .aboutPage .timeline p span {
+    white-space: nowrap;
+  }
 }
 
 @media (min-width: 641px) and (max-width: 1024px) {

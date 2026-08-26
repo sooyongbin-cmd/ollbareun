@@ -9523,8 +9523,8 @@
   }
 
   .landingPage .homeClientLogos {
-    width: 362px;
+    width: 100%;
     max-width: none;
-    align-self: center;
+    align-self: stretch;
   }
 }

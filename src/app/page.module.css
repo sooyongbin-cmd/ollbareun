@@ -8723,7 +8723,7 @@
 
 .aboutPage .companyInner {
   width: var(--about-company-content-width);
-  max-width: none;
+  max-width: 460px;
 }
 
 .aboutPage .companySection .sectionHeading {

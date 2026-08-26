@@ -5447,8 +5447,8 @@
   }
 
   .aboutPage .socialSection {
-    min-height: calc(761px + 90.625vw);
-    height: calc(761px + 90.625vw);
+    min-height: 120px;
+    height: 120px;
   }
 
   .servicesPage .operationSection {
@@ -8360,7 +8360,7 @@
   }
 
   .aboutPage .socialSection {
-    height: calc(761px + 90.625vw);
+    height: 120px;
   }
 
   .aboutPage .contactSection .contactCopy {

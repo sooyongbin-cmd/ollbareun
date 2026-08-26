@@ -8444,6 +8444,26 @@
     justify-content: center;
   }
 
+  .aboutPage .socialSection .sectionHeading h2 {
+    font-size: 30px;
+    line-height: normal;
+  }
+
+  .aboutPage .socialSection .sectionHeading > span {
+    font-size: 16px;
+    line-height: 23px;
+  }
+
+  .aboutPage .socialGrid h3 {
+    font-size: 21.767px;
+    line-height: normal;
+  }
+
+  .aboutPage .socialGrid p {
+    font-size: 15.198px;
+    line-height: 21.108px;
+  }
+
 }
 
 @media (max-width: 480px) {

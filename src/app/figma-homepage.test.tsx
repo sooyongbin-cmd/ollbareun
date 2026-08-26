@@ -295,6 +295,33 @@ describe("Figma homepage mobile responsive layout", () => {
     );
   });
 
+  it("uses the six discrete Figma typography states for services section four", () => {
+    const typographyRules = stylesheet.split(
+      "/* Services page section 4 typography: six discrete Figma viewport states. */",
+    )[1];
+
+    expect(typographyRules).toBeDefined();
+    expect(typographyRules).not.toMatch(/\b(?:clamp|calc)\(/);
+    expect(typographyRules).toMatch(
+      /\.facilityManagementSection \.sectionHeading > p\s*\{[^}]*font-size: 26px;[\s\S]*?\.facilityManagementSection \.sectionHeading h2\s*\{[^}]*font-size: 43px;[\s\S]*?\.facilityManagementSection \.sectionHeading > span\s*\{[^}]*font-size: 21px;[\s\S]*?\.facilityManagementSection \.detailMessage\s*\{[^}]*font-size: 35px;[\s\S]*?\.facilityManagementSection \.facilityGrid h3\s*\{[^}]*font-size: 26px;[\s\S]*?\.facilityManagementSection \.facilityGrid p\s*\{[^}]*font-size: 18px;/,
+    );
+    expect(typographyRules).toMatch(
+      /@media \(min-width: 1025px\) and \(max-width: 1280px\)[\s\S]*?font-size: 25px;[\s\S]*?font-size: 42px;[\s\S]*?font-size: 20px;[\s\S]*?font-size: 35px;[\s\S]*?font-size: 26px;[\s\S]*?font-size: 18px;/,
+    );
+    expect(typographyRules).toMatch(
+      /@media \(min-width: 769px\) and \(max-width: 1024px\)[\s\S]*?font-size: 23px;[\s\S]*?font-size: 39px;[\s\S]*?font-size: 18px;[\s\S]*?font-size: 30px;[\s\S]*?font-size: 26px;[\s\S]*?font-size: 18px;/,
+    );
+    expect(typographyRules).toMatch(
+      /@media \(min-width: 641px\) and \(max-width: 768px\)[\s\S]*?font-size: 22px;[\s\S]*?font-size: 39px;[\s\S]*?font-size: 18px;[\s\S]*?font-size: 29px;[\s\S]*?font-size: 26px;[\s\S]*?font-size: 18px;/,
+    );
+    expect(typographyRules).toMatch(
+      /@media \(min-width: 481px\) and \(max-width: 640px\)[\s\S]*?font-size: 23px;[\s\S]*?font-size: 39px;[\s\S]*?font-size: 18px;[\s\S]*?font-size: 23px;[\s\S]*?font-size: 20px;[\s\S]*?font-size: 16px;/,
+    );
+    expect(typographyRules).toMatch(
+      /@media \(max-width: 480px\)[\s\S]*?font-size: 18px;[\s\S]*?font-size: 30px;[\s\S]*?font-size: 16px;[\s\S]*?font-size: 20px;[\s\S]*?font-size: 20px;[\s\S]*?font-size: 16px;/,
+    );
+  });
+
   it("keeps the shared secondary heroes discrete without viewport calculations", () => {
     expect(stylesheet).not.toMatch(
       /\.aboutHero,\s*\.clientHero\s*\{/s,

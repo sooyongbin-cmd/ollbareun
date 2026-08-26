@@ -10340,3 +10340,158 @@
     font-size: 20px;
   }
 }
+
+/* Services page section 4 typography: six discrete Figma viewport states. */
+.servicesPage .facilityManagementSection .sectionHeading > p {
+  font-size: 26px;
+}
+
+.servicesPage .facilityManagementSection .sectionHeading h2 {
+  font-size: 43px;
+}
+
+.servicesPage .facilityManagementSection .sectionHeading > span {
+  font-size: 21px;
+}
+
+.servicesPage .facilityManagementSection .detailMessage {
+  font-size: 35px;
+}
+
+.servicesPage .facilityManagementSection .facilityGrid h3 {
+  font-size: 26px;
+}
+
+.servicesPage .facilityManagementSection .facilityGrid p {
+  font-size: 18px;
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .servicesPage .facilityManagementSection .sectionHeading > p {
+    font-size: 25px;
+  }
+
+  .servicesPage .facilityManagementSection .sectionHeading h2 {
+    font-size: 42px;
+  }
+
+  .servicesPage .facilityManagementSection .sectionHeading > span {
+    font-size: 20px;
+  }
+
+  .servicesPage .facilityManagementSection .detailMessage {
+    font-size: 35px;
+  }
+
+  .servicesPage .facilityManagementSection .facilityGrid h3 {
+    font-size: 26px;
+  }
+
+  .servicesPage .facilityManagementSection .facilityGrid p {
+    font-size: 18px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .servicesPage .facilityManagementSection .sectionHeading > p {
+    font-size: 23px;
+  }
+
+  .servicesPage .facilityManagementSection .sectionHeading h2 {
+    font-size: 39px;
+  }
+
+  .servicesPage .facilityManagementSection .sectionHeading > span {
+    font-size: 18px;
+  }
+
+  .servicesPage .facilityManagementSection .detailMessage {
+    font-size: 30px;
+  }
+
+  .servicesPage .facilityManagementSection .facilityGrid h3 {
+    font-size: 26px;
+  }
+
+  .servicesPage .facilityManagementSection .facilityGrid p {
+    font-size: 18px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .servicesPage .facilityManagementSection .sectionHeading > p {
+    font-size: 22px;
+  }
+
+  .servicesPage .facilityManagementSection .sectionHeading h2 {
+    font-size: 39px;
+  }
+
+  .servicesPage .facilityManagementSection .sectionHeading > span {
+    font-size: 18px;
+  }
+
+  .servicesPage .facilityManagementSection .detailMessage {
+    font-size: 29px;
+  }
+
+  .servicesPage .facilityManagementSection .facilityGrid h3 {
+    font-size: 26px;
+  }
+
+  .servicesPage .facilityManagementSection .facilityGrid p {
+    font-size: 18px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .servicesPage .facilityManagementSection .sectionHeading > p {
+    font-size: 23px;
+  }
+
+  .servicesPage .facilityManagementSection .sectionHeading h2 {
+    font-size: 39px;
+  }
+
+  .servicesPage .facilityManagementSection .sectionHeading > span {
+    font-size: 18px;
+  }
+
+  .servicesPage .facilityManagementSection .detailMessage {
+    font-size: 23px;
+  }
+
+  .servicesPage .facilityManagementSection .facilityGrid h3 {
+    font-size: 20px;
+  }
+
+  .servicesPage .facilityManagementSection .facilityGrid p {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .servicesPage .facilityManagementSection .sectionHeading > p {
+    font-size: 18px;
+  }
+
+  .servicesPage .facilityManagementSection .sectionHeading h2 {
+    font-size: 30px;
+  }
+
+  .servicesPage .facilityManagementSection .sectionHeading > span {
+    font-size: 16px;
+  }
+
+  .servicesPage .facilityManagementSection .detailMessage {
+    font-size: 20px;
+  }
+
+  .servicesPage .facilityManagementSection .facilityGrid h3 {
+    font-size: 20px;
+  }
+
+  .servicesPage .facilityManagementSection .facilityGrid p {
+    font-size: 16px;
+  }
+}

@@ -9472,6 +9472,12 @@
     align-self: stretch;
   }
 
+  /* The earlier 360px card contract used a 20px offset before the section
+   * itself owned the inset. Clear that legacy offset at the new boundary. */
+  .landingPage .servicePreview .serviceContent {
+    margin-left: 0;
+  }
+
   .landingPage .splitIntro .sectionHeading,
   .landingPage .certificateImages,
   .landingPage .serviceBody,
@@ -9489,6 +9495,7 @@
   }
 
   .landingPage .trustSection > .moreLink {
+    align-self: center;
     height: 24px;
     font-size: 13.049px;
   }

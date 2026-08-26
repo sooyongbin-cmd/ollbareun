@@ -9444,3 +9444,81 @@
     line-height: 19px;
   }
 }
+
+/*
+ * 360px landing frames follow the Figma section contracts: each section owns
+ * the 20px horizontal inset and its immediate content frame fills that box.
+ * Using 100vw here keeps the design width at 360px when desktop Chrome
+ * reserves a scrollbar gutter (documentElement.clientWidth becomes 345px).
+ */
+@media (max-width: 360px) {
+  .landingPage .trustSection,
+  .landingPage .servicePreview,
+  .landingPage .homeClientSection {
+    width: 100vw;
+    box-sizing: border-box;
+    padding-right: 20px;
+    padding-left: 20px;
+    align-items: stretch;
+  }
+
+  .landingPage .splitIntro,
+  .landingPage .serviceContent,
+  .landingPage .clientContent {
+    width: 100%;
+    max-width: none;
+    margin-right: 0;
+    margin-left: 0;
+    align-self: stretch;
+  }
+
+  .landingPage .splitIntro .sectionHeading,
+  .landingPage .certificateImages,
+  .landingPage .serviceBody,
+  .landingPage .clientBody {
+    width: 100%;
+    max-width: none;
+  }
+
+  .landingPage .splitIntro .sectionHeading {
+    height: 160px;
+  }
+
+  .landingPage .certificateImages {
+    height: 137.654px;
+  }
+
+  .landingPage .trustSection > .moreLink {
+    height: 24px;
+    font-size: 13.049px;
+  }
+
+  .landingPage .trustSection > .moreLink .moreViewIcon,
+  .landingPage .trustSection > .moreLink .moreViewIcon img {
+    width: 24px;
+    height: 24px;
+  }
+
+  .landingPage .serviceBody > .sectionHeading {
+    width: 100%;
+    max-width: none;
+    height: 204px;
+    margin-bottom: 45px;
+  }
+
+  .landingPage .servicePreview .serviceBody .serviceGrid {
+    width: 100%;
+    max-width: none;
+  }
+
+  .landingPage .clientBody > .sectionHeading {
+    width: 100%;
+    max-width: none;
+  }
+
+  .landingPage .homeClientLogos {
+    width: 362px;
+    max-width: none;
+    align-self: center;
+  }
+}

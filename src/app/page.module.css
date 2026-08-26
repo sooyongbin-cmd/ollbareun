@@ -7774,11 +7774,6 @@
 }
 
 @media (max-width: 480px) {
-  .aboutPage .aboutHero {
-    height: clamp(242px, calc(44px + 55vw), 308px);
-    padding-top: clamp(55px, calc(46px + 2.5vw), 58px);
-  }
-
   .aboutPage .aboutHero > div:last-child {
     width: calc(100% - 40px);
   }
@@ -7786,11 +7781,6 @@
   .aboutPage .aboutHero h1 {
     font-size: clamp(26px, calc(5px + 5.8333vw), 33px);
     line-height: clamp(34px, calc(16px + 5vw), 40px);
-  }
-
-  .aboutPage .companySection {
-    padding-top: clamp(53px, calc(36.6667vw - 79px), 97px);
-    padding-bottom: clamp(35px, calc(20vw - 37px), 59px);
   }
 
   .aboutPage .companySection .sectionHeading {
@@ -8466,6 +8456,8 @@
 @media (min-width: 361px) and (max-width: 480px) {
   .aboutPage .companySection {
     height: calc(-461px + 478.3333vw);
+    padding-top: 100px;
+    padding-bottom: 100px;
   }
 
   .aboutPage .values {
@@ -8514,6 +8506,8 @@
 @media (max-width: 360px) {
   .aboutPage .companySection {
     height: 1261px;
+    padding-top: 80px;
+    padding-bottom: 80px;
   }
 
   .aboutPage .values {

@@ -5429,26 +5429,6 @@
     height: 988px;
   }
 
-  .servicesPage .operationSection {
-    min-height: calc(1199.264px + 7.768vw);
-    height: calc(1199.264px + 7.768vw);
-  }
-
-  .servicesPage .dispatchSection {
-    min-height: 1206.713px;
-    height: 1206.713px;
-  }
-
-  .servicesPage .facilityManagementSection {
-    min-height: 1723.635px;
-    height: 1723.635px;
-  }
-
-  .servicesPage .disinfectionSection {
-    min-height: 1127px;
-    height: 1127px;
-  }
-
   .clientsPage .clientsSection {
     min-height: calc(2587px - 109.375vw);
     height: calc(2587px - 109.375vw);

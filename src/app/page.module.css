@@ -5702,26 +5702,6 @@
     height: 280px;
   }
 
-  .servicesPage .operationSection {
-    min-height: 1248.979px;
-    height: 1248.979px;
-  }
-
-  .servicesPage .dispatchSection {
-    min-height: 1206.713px;
-    height: 1206.713px;
-  }
-
-  .servicesPage .facilityManagementSection {
-    min-height: 1723.635px;
-    height: 1723.635px;
-  }
-
-  .servicesPage .disinfectionSection {
-    min-height: 1127px;
-    height: 1127px;
-  }
-
   .aboutPage .companySection {
     min-height: calc(-461px + 478.333vw);
     height: calc(-461px + 478.333vw);

@@ -175,21 +175,23 @@ describe("Figma homepage mobile responsive layout", () => {
 
     expect(servicesFrameRules).toBeDefined();
     expect(servicesFrameRules).not.toMatch(/\b(?:clamp|calc)\(/);
+    expect(servicesFrameRules).toMatch(/min-height: 0;\s*height: auto;/);
+    expect(servicesFrameRules).toMatch(/padding: 200px 0;/);
     expect(servicesFrameRules).toMatch(/max-width: 1182px;/);
     expect(servicesFrameRules).toMatch(
-      /@media \(min-width: 1025px\) and \(max-width: 1280px\)[\s\S]*?max-width: 960px;/,
+      /@media \(min-width: 1025px\) and \(max-width: 1280px\)[\s\S]*?padding-top: 160px;[\s\S]*?padding-bottom: 160px;[\s\S]*?max-width: 960px;/,
     );
     expect(servicesFrameRules).toMatch(
-      /@media \(min-width: 769px\) and \(max-width: 1024px\)[\s\S]*?max-width: 728px;/,
+      /@media \(min-width: 769px\) and \(max-width: 1024px\)[\s\S]*?padding-top: 140px;[\s\S]*?padding-bottom: 140px;[\s\S]*?max-width: 728px;/,
     );
     expect(servicesFrameRules).toMatch(
-      /@media \(min-width: 641px\) and \(max-width: 768px\)[\s\S]*?max-width: 570px;/,
+      /@media \(min-width: 641px\) and \(max-width: 768px\)[\s\S]*?padding-top: 120px;[\s\S]*?padding-bottom: 120px;[\s\S]*?max-width: 570px;/,
     );
     expect(servicesFrameRules).toMatch(
-      /@media \(min-width: 481px\) and \(max-width: 640px\)[\s\S]*?max-width: 440px;/,
+      /@media \(min-width: 481px\) and \(max-width: 640px\)[\s\S]*?padding-top: 110px;[\s\S]*?padding-bottom: 110px;[\s\S]*?max-width: 440px;/,
     );
     expect(servicesFrameRules).toMatch(
-      /@media \(max-width: 480px\)[\s\S]*?max-width: 320px;/,
+      /@media \(max-width: 480px\)[\s\S]*?padding-top: 100px;[\s\S]*?padding-bottom: 100px;[\s\S]*?max-width: 320px;/,
     );
   });
 

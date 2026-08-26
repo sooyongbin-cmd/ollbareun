@@ -5446,11 +5446,6 @@
     height: 988px;
   }
 
-  .aboutPage .socialSection {
-    min-height: 120px;
-    height: 120px;
-  }
-
   .servicesPage .operationSection {
     min-height: calc(1199.264px + 7.768vw);
     height: calc(1199.264px + 7.768vw);
@@ -8063,7 +8058,6 @@
 
 .aboutPage .socialSection {
   display: flex;
-  height: 923px;
   align-items: center;
   justify-content: center;
 }
@@ -8357,10 +8351,6 @@
   .aboutPage .valueGrid {
     width: 570px;
     height: 508px;
-  }
-
-  .aboutPage .socialSection {
-    height: 120px;
   }
 
   .aboutPage .contactSection .contactCopy {

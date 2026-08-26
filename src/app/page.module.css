@@ -8767,11 +8767,6 @@
   max-width: none;
 }
 
-.aboutPage .socialSection .sectionHeading {
-  width: var(--about-social-heading-width);
-  max-width: none;
-}
-
 .aboutPage .socialGrid {
   width: var(--about-social-grid-width);
   max-width: none;

@@ -5427,13 +5427,13 @@
 
   .aboutHero,
   .clientHero {
-    min-height: calc(131px + 35.938vw);
-    height: calc(131px + 35.938vw);
+    min-height: 407px;
+    height: 407px;
   }
 
   .serviceHero {
-    min-height: calc(-340px + 109.375vw);
-    height: calc(-340px + 109.375vw);
+    min-height: 376px;
+    height: 376px;
   }
 
   .aboutPage .companySection {
@@ -5612,13 +5612,13 @@
 
   .aboutHero,
   .clientHero {
-    min-height: calc(149px + 33.125vw);
-    height: calc(149px + 33.125vw);
+    min-height: 361px;
+    height: 361px;
   }
 
   .serviceHero {
-    min-height: 360px;
-    height: 360px;
+    min-height: 314px;
+    height: 314px;
   }
 
   .servicesPage .operationSection {
@@ -5712,13 +5712,13 @@
 
   .aboutHero,
   .clientHero {
-    min-height: calc(44px + 55vw);
-    height: calc(44px + 55vw);
+    min-height: 308px;
+    height: 308px;
   }
 
   .serviceHero {
-    min-height: 360px;
-    height: 360px;
+    min-height: 280px;
+    height: 280px;
   }
 
   .servicesPage .operationSection {
@@ -5804,8 +5804,8 @@
   }
 
   .serviceHero {
-    min-height: 360px;
-    height: 360px;
+    min-height: 280px;
+    height: 280px;
   }
 
   .servicesPage .operationSection {

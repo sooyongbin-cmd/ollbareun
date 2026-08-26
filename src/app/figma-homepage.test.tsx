@@ -157,6 +157,21 @@ describe("Figma homepage mobile responsive layout", () => {
     );
   });
 
+  it("keeps the shared secondary heroes discrete without viewport calculations", () => {
+    expect(stylesheet).not.toMatch(
+      /\.aboutHero,\s*\.clientHero\s*\{[^}]*\bcalc\(/s,
+    );
+    expect(stylesheet).toMatch(
+      /@media \(min-width: 641px\) and \(max-width: 768px\)[\s\S]*?\.aboutHero,\s*\.clientHero\s*\{[^}]*min-height: 407px;[^}]*height: 407px;/,
+    );
+    expect(stylesheet).toMatch(
+      /@media \(min-width: 481px\) and \(max-width: 640px\)[\s\S]*?\.aboutHero,\s*\.clientHero\s*\{[^}]*min-height: 361px;[^}]*height: 361px;/,
+    );
+    expect(stylesheet).toMatch(
+      /@media \(min-width: 361px\) and \(max-width: 480px\)[\s\S]*?\.aboutHero,\s*\.clientHero\s*\{[^}]*min-height: 308px;[^}]*height: 308px;/,
+    );
+  });
+
   it("uses the shared 48rem breakpoint and mobile service/client layouts", () => {
     expect(stylesheet).toContain("@media (min-width: 48rem)");
     expect(stylesheet).toContain("@media (max-width: 47.9375rem)");

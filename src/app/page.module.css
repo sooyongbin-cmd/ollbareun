@@ -7079,11 +7079,6 @@
     left: 255px;
   }
 
-  .aboutPage .timeline li {
-    grid-template-columns: 172px 25.954px 172px;
-    column-gap: 40px;
-  }
-
   .aboutPage .timeline p {
     margin-left: 0;
   }
@@ -7302,7 +7297,7 @@
   }
 
   .aboutPage .timeline::before {
-    left: 217px;
+    left: 265.977px;
     width: 1px;
     background: #d9d9d9;
   }
@@ -7400,6 +7395,13 @@
   .aboutPage .contactCopy address {
     width: 429px;
     grid-template-columns: 13px 94px 1fr;
+  }
+}
+
+@media (min-width: 1025px) {
+  .aboutPage .timeline li {
+    grid-template-columns: 172px 25.954px 172px;
+    column-gap: 40px;
   }
 }
 

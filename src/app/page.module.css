@@ -3402,14 +3402,12 @@
   }
 
   .aboutPage .socialSection .sectionHeading h2 {
-    width: 18rem;
     margin-right: auto;
     margin-left: auto;
     line-height: 2rem;
   }
 
   .aboutPage .socialSection .sectionHeading > span {
-    width: 19.6875rem;
     margin: 1.34375rem auto 0;
     font-size: 0.875rem;
     line-height: 1.4375rem;

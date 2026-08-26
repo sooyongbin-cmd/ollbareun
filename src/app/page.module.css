@@ -5287,8 +5287,8 @@
   .aboutHero,
   .serviceHero,
   .clientHero {
-    min-height: calc(122px + 37.109vw);
-    height: calc(122px + 37.109vw);
+    min-height: 502.03px;
+    height: 502.03px;
   }
 
   .aboutPage .companySection {
@@ -7444,11 +7444,6 @@
     line-height: 1.236;
   }
 
-  .aboutPage .companySection {
-    padding: clamp(101px, calc(76px + 3.7109vw), 114px) 0
-      clamp(83px, calc(144px - 5.957vw), 107px);
-  }
-
   .companyInner {
     width: 100%;
     gap: 0;
@@ -7666,11 +7661,6 @@
   .aboutPage .aboutHero h1 {
     font-size: clamp(37px, calc(-3px + 6.25vw), 45px);
     line-height: 1.267;
-  }
-
-  .aboutPage .companySection {
-    padding-top: clamp(101px, calc(76px + 3.9063vw), 106px);
-    padding-bottom: clamp(105px, calc(115px - 1.3021vw), 107px);
   }
 
   .aboutPage .companySection .sectionHeading {
@@ -8165,6 +8155,8 @@
 @media (min-width: 769px) and (max-width: 1024px) {
   .aboutPage .companySection {
     height: calc(1872px + 16.0156vw);
+    padding-top: 140px;
+    padding-bottom: 140px;
   }
 
   .aboutPage .historyWrap {
@@ -8356,6 +8348,8 @@
 @media (min-width: 641px) and (max-width: 768px) {
   .aboutPage .companySection {
     height: calc(1965px + 3.90625vw);
+    padding-top: 120px;
+    padding-bottom: 120px;
   }
 
   .aboutPage .values {
@@ -8407,6 +8401,8 @@
 @media (min-width: 481px) and (max-width: 640px) {
   .aboutPage .companySection {
     height: calc(1370px + 96.875vw);
+    padding-top: 110px;
+    padding-bottom: 110px;
   }
 
   .aboutPage .values {
@@ -8871,6 +8867,187 @@
 @media (max-width: 480px) {
   .aboutPage .socialGrid {
     gap: 18.763px;
+  }
+}
+
+/* Keep each timeline marker in the same normal-flow row as its date and copy. */
+.aboutPage .timeline::before {
+  width: 1px;
+  background: #d9d9d9;
+}
+
+.aboutPage .timeline i {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 25.954px;
+  height: 25.954px;
+  box-sizing: border-box;
+  justify-self: center;
+  visibility: visible;
+  border: 3.6px solid #158cc8;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.aboutPage .timeline p span {
+  white-space: nowrap;
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .aboutPage .timeline {
+    display: grid;
+    width: 494px;
+    height: 470px;
+    padding: 15px 10.046px 15px 40px;
+    flex: 0 0 auto;
+    grid-template-rows: repeat(5, 50px);
+    row-gap: 47.5px;
+  }
+
+  .aboutPage .timeline::before {
+    top: 1.091px;
+    bottom: 1.091px;
+    left: 284.977px;
+    height: auto;
+  }
+
+  .aboutPage .timeline li {
+    position: static;
+    display: grid;
+    height: 50px;
+    min-height: 0;
+    grid-template-columns: 172px 25.954px 126px;
+    column-gap: 60px;
+    align-items: center;
+  }
+
+  .aboutPage .timeline time,
+  .aboutPage .timeline p {
+    position: static;
+    top: auto;
+    left: auto;
+    width: auto;
+    transform: none;
+  }
+
+  .aboutPage .timeline time {
+    text-align: right;
+  }
+
+  .aboutPage .timeline p {
+    margin: 0;
+    white-space: normal;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .aboutPage .timeline {
+    display: grid;
+    width: 469.3px;
+    height: 453.75px;
+    padding: 19px 19.544px 14.25px 28px;
+    flex: 0 0 auto;
+    grid-template-rows: repeat(5, 48px);
+    row-gap: 45.125px;
+  }
+
+  .aboutPage .timeline::before {
+    top: 4.661px;
+    bottom: 4.662px;
+    left: 260.728px;
+    height: auto;
+  }
+
+  .aboutPage .timeline li {
+    position: static;
+    display: grid;
+    height: 48px;
+    min-height: 0;
+    grid-template-columns: 163.4px 24.656px 119.7px;
+    column-gap: 57px;
+    align-items: center;
+  }
+
+  .aboutPage .timeline i {
+    width: 24.656px;
+    height: 24.656px;
+    border-width: 3.42px;
+  }
+
+  .aboutPage .timeline time,
+  .aboutPage .timeline p {
+    position: static;
+    top: auto;
+    left: auto;
+    width: auto;
+    transform: none;
+  }
+
+  .aboutPage .timeline time {
+    text-align: right;
+  }
+
+  .aboutPage .timeline p {
+    margin: 0;
+    white-space: normal;
+  }
+}
+
+@media (max-width: 480px) {
+  .aboutPage .timeline {
+    display: grid;
+    width: 320px;
+    height: 310.672px;
+    padding: 12.955px 33.059px 9.717px 19.092px;
+    flex: 0 0 auto;
+    grid-template-rows: repeat(5, 40px);
+    row-gap: 22px;
+  }
+
+  .aboutPage .timeline::before {
+    top: 3.816px;
+    bottom: 3.816px;
+    left: 167.915px;
+    height: auto;
+  }
+
+  .aboutPage .timeline li {
+    position: static;
+    display: grid;
+    height: 40px;
+    min-height: 0;
+    grid-template-columns: 111.417px 16.812px 81.619px;
+    column-gap: 29px;
+    align-items: center;
+  }
+
+  .aboutPage .timeline i {
+    width: 16.812px;
+    height: 16.812px;
+    border-width: 2.33px;
+  }
+
+  .aboutPage .timeline time,
+  .aboutPage .timeline p {
+    position: static;
+    top: auto;
+    left: auto;
+    width: auto;
+    transform: none;
+  }
+
+  .aboutPage .timeline time {
+    font-size: 25.911px;
+    line-height: 31px;
+    text-align: right;
+  }
+
+  .aboutPage .timeline p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 20px;
+    white-space: normal;
   }
 }
 

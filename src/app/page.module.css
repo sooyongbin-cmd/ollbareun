@@ -9445,31 +9445,36 @@
   }
 }
 
-/* 360px and below: section 2-4 content frames are capped at 340px. */
+/*
+ * 360px landing frames follow the Figma section contracts: each section owns
+ * the 20px horizontal inset and its immediate content frame fills that box.
+ * Using 100vw here keeps the design width at 360px when desktop Chrome
+ * reserves a scrollbar gutter (documentElement.clientWidth becomes 345px).
+ */
 @media (max-width: 360px) {
   .landingPage .trustSection,
   .landingPage .servicePreview,
   .landingPage .homeClientSection {
-    width: 100%;
+    width: 100vw;
     box-sizing: border-box;
-    padding-right: 0;
-    padding-left: 0;
-    align-items: center;
+    padding-right: 20px;
+    padding-left: 20px;
+    align-items: stretch;
   }
 
   .landingPage .splitIntro,
   .landingPage .serviceContent,
   .landingPage .clientContent {
     width: 100%;
-    max-width: 340px;
-    margin-right: auto;
-    margin-left: auto;
-    align-self: center;
+    max-width: none;
+    margin-right: 0;
+    margin-left: 0;
+    align-self: stretch;
   }
 
-  /* Clear the earlier fixed offset; the frame cap now owns the alignment. */
+  /* Clear the earlier fixed offset now that the section owns the inset. */
   .landingPage .servicePreview .serviceContent {
-    margin-left: auto;
+    margin-left: 0;
   }
 
   .landingPage .splitIntro .sectionHeading,

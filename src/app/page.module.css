@@ -10090,3 +10090,146 @@
     height: 189px;
   }
 }
+
+/* Services page section 2 typography: six discrete Figma viewport states. */
+.servicesPage .operationSection .sectionHeading > p {
+  font-size: 26px;
+}
+
+.servicesPage .operationSection .sectionHeading h2 {
+  font-size: 43px;
+}
+
+.servicesPage .operationSection .sectionHeading > span {
+  font-size: 21px;
+}
+
+.servicesPage .operationLayout > h3 {
+  font-size: 40px;
+}
+
+.servicesPage .operationLayout h4 {
+  font-size: 21px;
+}
+
+.servicesPage .operationLayout li p {
+  font-size: 16px;
+}
+
+.servicesPage .operationNumber {
+  font-size: 44px;
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .servicesPage .operationSection .sectionHeading > p {
+    font-size: 25px;
+  }
+
+  .servicesPage .operationSection .sectionHeading h2 {
+    font-size: 42px;
+  }
+
+  .servicesPage .operationSection .sectionHeading > span {
+    font-size: 20px;
+  }
+
+  .servicesPage .operationLayout > h3 {
+    font-size: 38px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .servicesPage .operationSection .sectionHeading > p {
+    font-size: 23px;
+  }
+
+  .servicesPage .operationSection .sectionHeading h2 {
+    font-size: 39px;
+  }
+
+  .servicesPage .operationSection .sectionHeading > span {
+    font-size: 18px;
+  }
+
+  .servicesPage .operationLayout > h3 {
+    font-size: 38px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .servicesPage .operationSection .sectionHeading > p {
+    font-size: 22px;
+  }
+
+  .servicesPage .operationSection .sectionHeading h2 {
+    font-size: 39px;
+  }
+
+  .servicesPage .operationSection .sectionHeading > span {
+    font-size: 18px;
+  }
+
+  .servicesPage .operationLayout > h3 {
+    font-size: 38px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .servicesPage .operationSection .sectionHeading > p {
+    font-size: 23px;
+  }
+
+  .servicesPage .operationSection .sectionHeading h2 {
+    font-size: 39px;
+  }
+
+  .servicesPage .operationSection .sectionHeading > span {
+    font-size: 18px;
+  }
+
+  .servicesPage .operationLayout > h3 {
+    font-size: 38px;
+  }
+
+  .servicesPage .operationLayout h4 {
+    font-size: 19px;
+  }
+
+  .servicesPage .operationLayout li p {
+    font-size: 15px;
+  }
+
+  .servicesPage .operationNumber {
+    font-size: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .servicesPage .operationSection .sectionHeading > p {
+    font-size: 18px;
+  }
+
+  .servicesPage .operationSection .sectionHeading h2 {
+    font-size: 30px;
+  }
+
+  .servicesPage .operationSection .sectionHeading > span {
+    font-size: 16px;
+  }
+
+  .servicesPage .operationLayout > h3 {
+    font-size: 26px;
+  }
+
+  .servicesPage .operationLayout h4 {
+    font-size: 16px;
+  }
+
+  .servicesPage .operationLayout li p {
+    font-size: 13px;
+  }
+
+  .servicesPage .operationNumber {
+    font-size: 32px;
+  }
+}

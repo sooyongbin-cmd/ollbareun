@@ -7339,8 +7339,27 @@
     padding: 0 0 0 41px;
   }
 
+  .aboutPage .timeline::before {
+    left: 217px;
+    width: 1px;
+    background: #d9d9d9;
+  }
+
   .aboutPage .timeline li {
     grid-template-columns: 155px 42px 1fr;
+  }
+
+  .aboutPage .timeline i {
+    position: relative;
+    z-index: 1;
+    width: 25.954px;
+    height: 25.954px;
+    box-sizing: border-box;
+    justify-self: center;
+    visibility: visible;
+    border: 3.6px solid #158cc8;
+    border-radius: 50%;
+    background: #fff;
   }
 
   .aboutPage .timeline time {

@@ -762,9 +762,8 @@ export function ServicesPage() {
               src="/homepage/airport-card-background.png"
               alt=""
               aria-hidden="true"
-              width={1050}
-              height={616}
-              sizes="(max-width: 47.5rem) calc(100vw - 3rem), 32.8125rem"
+              fill
+              sizes="(max-width: 480px) 320px, (max-width: 640px) 440px, (max-width: 768px) 500px, 533px"
             />
             <p className={styles.airportCardText}>
               당사는 현재 김해공항 내

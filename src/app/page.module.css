@@ -10056,3 +10056,37 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Services page Frame 398: six discrete Figma viewport states. */
+.servicesPage .airportCard {
+  width: 533px;
+  max-width: none;
+  height: 314px;
+}
+
+.servicesPage .airportCard img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .servicesPage .airportCard {
+    width: 500px;
+    height: 295px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .servicesPage .airportCard {
+    width: 440px;
+    height: 259px;
+  }
+}
+
+@media (max-width: 480px) {
+  .servicesPage .airportCard {
+    width: 320px;
+    height: 189px;
+  }
+}

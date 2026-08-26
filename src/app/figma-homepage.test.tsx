@@ -173,6 +173,11 @@ describe("Figma homepage mobile responsive layout", () => {
       expect(section?.firstElementChild?.className).toContain("serviceSectionInner");
     }
 
+    expect(container.querySelector('[class*="airportCard"] img')).toHaveAttribute(
+      "sizes",
+      "(max-width: 480px) 320px, (max-width: 640px) 440px, (max-width: 768px) 500px, 533px",
+    );
+
     expect(servicesFrameRules).toBeDefined();
     expect(servicesFrameRules).not.toMatch(/\b(?:clamp|calc)\(/);
     expect(servicesFrameRules).toMatch(/min-height: 0;\s*height: auto;/);
@@ -198,6 +203,18 @@ describe("Figma homepage mobile responsive layout", () => {
     );
     expect(servicesFrameRules).toMatch(
       /@media \(max-width: 640px\)[\s\S]*?\.servicesPage \.facilityGrid\s*\{[^}]*max-width: 254px;[^}]*grid-template-columns: 1fr;/,
+    );
+    expect(servicesFrameRules).toMatch(
+      /\.servicesPage \.airportCard\s*\{[^}]*width: 533px;[^}]*height: 314px;/,
+    );
+    expect(servicesFrameRules).toMatch(
+      /@media \(min-width: 641px\) and \(max-width: 768px\)[\s\S]*?\.servicesPage \.airportCard\s*\{[^}]*width: 500px;[^}]*height: 295px;/,
+    );
+    expect(servicesFrameRules).toMatch(
+      /@media \(min-width: 481px\) and \(max-width: 640px\)[\s\S]*?\.servicesPage \.airportCard\s*\{[^}]*width: 440px;[^}]*height: 259px;/,
+    );
+    expect(servicesFrameRules).toMatch(
+      /@media \(max-width: 480px\)[\s\S]*?\.servicesPage \.airportCard\s*\{[^}]*width: 320px;[^}]*height: 189px;/,
     );
 
     for (const removedLegacyValue of [

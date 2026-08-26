@@ -3230,7 +3230,6 @@
 
   .stats > div {
     min-height: 7.3125rem;
-    justify-content: flex-start;
   }
 
   .stats > div > img {

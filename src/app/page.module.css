@@ -6760,7 +6760,6 @@
 .aboutPage .aboutHero {
   height: 502px;
   min-height: 0;
-  padding-top: 64px;
   box-sizing: border-box;
   justify-content: center;
 }
@@ -7437,7 +7436,6 @@
 @media (max-width: 1024px) {
   .aboutPage .aboutHero {
     height: clamp(361px, calc(122px + 37.1094vw), 502px);
-    padding-top: 64px;
   }
 
   .aboutPage .aboutHero h1 {

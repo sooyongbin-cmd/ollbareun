@@ -193,6 +193,12 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(servicesFrameRules).toMatch(
       /@media \(max-width: 480px\)[\s\S]*?padding-top: 100px;[\s\S]*?padding-bottom: 100px;[\s\S]*?max-width: 320px;/,
     );
+    expect(servicesFrameRules).toMatch(
+      /@media \(max-width: 1280px\)[\s\S]*?\.servicesPage \.facilityGrid\s*\{[^}]*width: 100%;[^}]*max-width: 590px;[^}]*margin-right: auto;[^}]*margin-left: auto;[^}]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/,
+    );
+    expect(servicesFrameRules).toMatch(
+      /@media \(max-width: 640px\)[\s\S]*?\.servicesPage \.facilityGrid\s*\{[^}]*max-width: 254px;[^}]*grid-template-columns: 1fr;/,
+    );
 
     for (const removedLegacyValue of [
       "calc(1182px + 7.5vw)",

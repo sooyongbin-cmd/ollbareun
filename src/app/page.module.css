@@ -10495,3 +10495,134 @@
     font-size: 16px;
   }
 }
+
+/* Services page section 5 typography: six discrete Figma viewport states. */
+.servicesPage .disinfectionSection .sectionHeading > p {
+  font-size: 26px;
+}
+
+.servicesPage .disinfectionSection .sectionHeading h2 {
+  font-size: 43px;
+}
+
+.servicesPage .disinfectionSection .sectionHeading > span {
+  font-size: 21px;
+}
+
+.servicesPage .disinfectionSection .detailMessage {
+  font-size: 35px;
+}
+
+.servicesPage .disinfectionSection .airportCardText {
+  font-size: 32px;
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .servicesPage .disinfectionSection .sectionHeading > p {
+    font-size: 25px;
+  }
+
+  .servicesPage .disinfectionSection .sectionHeading h2 {
+    font-size: 42px;
+  }
+
+  .servicesPage .disinfectionSection .sectionHeading > span {
+    font-size: 21px;
+  }
+
+  .servicesPage .disinfectionSection .detailMessage {
+    font-size: 35px;
+  }
+
+  .servicesPage .disinfectionSection .airportCardText {
+    font-size: 32px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .servicesPage .disinfectionSection .sectionHeading > p {
+    font-size: 23px;
+  }
+
+  .servicesPage .disinfectionSection .sectionHeading h2 {
+    font-size: 39px;
+  }
+
+  .servicesPage .disinfectionSection .sectionHeading > span {
+    font-size: 18px;
+  }
+
+  .servicesPage .disinfectionSection .detailMessage {
+    font-size: 30px;
+  }
+
+  .servicesPage .disinfectionSection .airportCardText {
+    font-size: 32px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .servicesPage .disinfectionSection .sectionHeading > p {
+    font-size: 22px;
+  }
+
+  .servicesPage .disinfectionSection .sectionHeading h2 {
+    font-size: 39px;
+  }
+
+  .servicesPage .disinfectionSection .sectionHeading > span {
+    font-size: 18px;
+  }
+
+  .servicesPage .disinfectionSection .detailMessage {
+    font-size: 29px;
+  }
+
+  .servicesPage .disinfectionSection .airportCardText {
+    font-size: 29px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .servicesPage .disinfectionSection .sectionHeading > p {
+    font-size: 23px;
+  }
+
+  .servicesPage .disinfectionSection .sectionHeading h2 {
+    font-size: 39px;
+  }
+
+  .servicesPage .disinfectionSection .sectionHeading > span {
+    font-size: 18px;
+  }
+
+  .servicesPage .disinfectionSection .detailMessage {
+    font-size: 23px;
+  }
+
+  .servicesPage .disinfectionSection .airportCardText {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 480px) {
+  .servicesPage .disinfectionSection .sectionHeading > p {
+    font-size: 18px;
+  }
+
+  .servicesPage .disinfectionSection .sectionHeading h2 {
+    font-size: 30px;
+  }
+
+  .servicesPage .disinfectionSection .sectionHeading > span {
+    font-size: 16px;
+  }
+
+  .servicesPage .disinfectionSection .detailMessage {
+    font-size: 20px;
+  }
+
+  .servicesPage .disinfectionSection .airportCardText {
+    font-size: 19px;
+  }
+}

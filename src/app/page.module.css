@@ -8758,7 +8758,7 @@
 }
 
 .aboutPage .values .sectionHeading {
-  width: var(--about-values-heading-width);
+  width: 700px;
   max-width: none;
 }
 

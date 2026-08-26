@@ -3977,11 +3977,6 @@
     height: calc(347px + 30vw);
   }
 
-  .aboutPage .contactSection {
-    min-height: calc(926.18px + 9.205vw);
-    height: calc(926.18px + 9.205vw);
-  }
-
   .servicesPage .operationSection {
     min-height: calc(1182px + 7.5vw);
     height: calc(1182px + 7.5vw);
@@ -5193,11 +5188,6 @@
     height: calc(1881px - 89.844vw);
   }
 
-  .aboutPage .contactSection {
-    min-height: calc(889px + 12.109vw);
-    height: calc(889px + 12.109vw);
-  }
-
   .servicesPage .operationSection {
     min-height: calc(1182.61px + 7.452vw);
     height: calc(1182.61px + 7.452vw);
@@ -5314,11 +5304,6 @@
   .aboutPage .socialSection {
     min-height: calc(2945px - 193.75vw);
     height: calc(2945px - 193.75vw);
-  }
-
-  .aboutPage .contactSection {
-    min-height: calc(929px + 8.203vw);
-    height: calc(929px + 8.203vw);
   }
 
   .servicesPage .operationSection {
@@ -5471,11 +5456,6 @@
   .aboutPage .socialSection {
     min-height: calc(761px + 90.625vw);
     height: calc(761px + 90.625vw);
-  }
-
-  .aboutPage .contactSection {
-    min-height: calc(818px + 22.656vw);
-    height: calc(818px + 22.656vw);
   }
 
   .servicesPage .operationSection {
@@ -5688,11 +5668,6 @@
     height: calc(1121px + 34.375vw);
   }
 
-  .aboutPage .contactSection {
-    min-height: calc(503px + 71.875vw);
-    height: calc(503px + 71.875vw);
-  }
-
   .clientsPage .clientsSection {
     min-height: calc(2784.112px - 140.174vw);
     height: calc(2784.112px - 140.174vw);
@@ -5793,11 +5768,6 @@
     height: calc(829.72px + 95.058vw);
   }
 
-  .aboutPage .contactSection {
-    min-height: calc(-156px + 209.167vw);
-    height: calc(-156px + 209.167vw);
-  }
-
   .clientsPage .clientsSection {
     min-height: calc(1226.166px + 184.398vw);
     height: calc(1226.166px + 184.398vw);
@@ -5888,11 +5858,6 @@
   .aboutPage .socialSection {
     min-height: 1171.93px;
     height: 1171.93px;
-  }
-
-  .aboutPage .contactSection {
-    min-height: 597px;
-    height: 597px;
   }
 
   .clientsPage .clientsSection {
@@ -8130,10 +8095,6 @@
   justify-content: center;
 }
 
-.aboutPage .contactSection {
-  height: 1102.91px;
-}
-
 .aboutPage .contactSection .contactCopy {
   display: grid;
   width: 100%;
@@ -8194,10 +8155,6 @@
 
   .socialInner {
     gap: 80px;
-  }
-
-  .aboutPage .contactSection {
-    height: 1044px;
   }
 
   .aboutPage .contactSection .contactCopy {
@@ -8384,9 +8341,6 @@
     height: calc(2945px - 193.75vw);
   }
 
-  .aboutPage .contactSection {
-    height: calc(929px + 8.2031vw);
-  }
 }
 
 @media (max-width: 1024px) {
@@ -8434,10 +8388,6 @@
 
   .aboutPage .socialSection {
     height: calc(761px + 90.625vw);
-  }
-
-  .aboutPage .contactSection {
-    height: calc(818px + 22.65625vw);
   }
 
   .aboutPage .contactSection .contactCopy {
@@ -8513,9 +8463,6 @@
     line-height: 20px;
   }
 
-  .aboutPage .contactSection {
-    height: calc(503px + 71.875vw);
-  }
 }
 
 @media (min-width: 361px) and (max-width: 480px) {
@@ -8534,9 +8481,6 @@
     height: calc(826.394px + 95.9317vw);
   }
 
-  .aboutPage .contactSection {
-    height: calc(-156px + 209.1667vw);
-  }
 }
 
 @media (max-width: 480px) {
@@ -8583,10 +8527,6 @@
 
   .aboutPage .socialSection {
     height: 1171.75px;
-  }
-
-  .aboutPage .contactSection {
-    height: 597px;
   }
 
   .aboutPage .contactSection .contactCopy {

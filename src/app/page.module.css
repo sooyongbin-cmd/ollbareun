@@ -2490,7 +2490,6 @@
   }
 
   .aboutHero h1,
-  .serviceHero h1,
   .clientHero h1 {
     font-size: 2.0625rem;
   }
@@ -2972,7 +2971,6 @@
   }
 
   .aboutHero h1,
-  .serviceHero h1,
   .clientHero h1 {
     font-size: 1.625rem;
     line-height: 1.3;
@@ -2982,7 +2980,6 @@
     line-height: 2.125rem;
   }
 
-  .servicesPage .serviceHero h1,
   .clientsPage .clientHero h1 {
     line-height: 2.125rem;
   }

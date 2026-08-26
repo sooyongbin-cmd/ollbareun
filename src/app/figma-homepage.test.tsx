@@ -155,6 +155,9 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(servicesHeroRules).toMatch(
       /@media \(max-width: 480px\)[\s\S]*?min-height: 280px;[\s\S]*?font-size: 30px;/,
     );
+    expect(stylesheet).not.toMatch(
+      /@media \(max-width: 47\.9375rem\)[\s\S]*?\.aboutHero h1,\s*\.serviceHero h1,\s*\.clientHero h1/,
+    );
   });
 
   it("keeps the shared secondary heroes discrete without viewport calculations", () => {
@@ -222,7 +225,7 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(stylesheet).toMatch(/\.servicesPage \.teamImage img\s*\{[^}]*object-position: 61\.43% center;/s);
     expect(stylesheet).toMatch(/\.servicesPage \.operationLayout\s*\{[^}]*gap: 1.725rem;/s);
     expect(stylesheet).toMatch(/\.servicesPage \.dispatchSection \.detailBanner img\s*\{[^}]*object-fit: fill;[^}]*transform: translateX\(4.091875rem\) scale\(2\.6\);[^}]*transform-origin: center;/s);
-    expect(stylesheet).toMatch(/\.servicesPage \.serviceHero h1,\s*\.clientsPage \.clientHero h1\s*\{[^}]*line-height: 2.125rem;/s);
+    expect(stylesheet).toMatch(/\.clientsPage \.clientHero h1\s*\{[^}]*line-height: 2.125rem;/s);
   });
 
   it("uses the eight discrete landing reference states", () => {

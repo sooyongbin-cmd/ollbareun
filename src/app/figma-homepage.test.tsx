@@ -193,6 +193,29 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(servicesFrameRules).toMatch(
       /@media \(max-width: 480px\)[\s\S]*?padding-top: 100px;[\s\S]*?padding-bottom: 100px;[\s\S]*?max-width: 320px;/,
     );
+
+    for (const removedLegacyValue of [
+      "calc(1182px + 7.5vw)",
+      "calc(1183.22px + 10.92vw)",
+      "calc(1045px + 14.375vw)",
+      "calc(999px + 20.156vw)",
+      "calc(1182.61px + 7.452vw)",
+      "calc(1091.565px + 18.081vw)",
+      "calc(4052.175px - 220.561vw)",
+      "calc(607px + 50.781vw)",
+      "1258.922px",
+      "calc(996.713px + 27.344vw)",
+      "calc(1513.635px + 27.344vw)",
+    ]) {
+      expect(stylesheet).not.toContain(removedLegacyValue);
+    }
+
+    expect(stylesheet).not.toMatch(
+      /\.servicesPage \.operationSection\s*\{\s*padding-top: 4\.01125rem;\s*padding-bottom: 4\.375rem;/,
+    );
+    expect(stylesheet).not.toMatch(
+      /\.servicesPage \.disinfectionSection\s*\{\s*padding-top: 94px;/,
+    );
   });
 
   it("keeps the shared secondary heroes discrete without viewport calculations", () => {

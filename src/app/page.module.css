@@ -3597,11 +3597,6 @@
   }
 
   /* Services mobile design: values taken from Figma mobile_design3 (22.5rem). */
-  .servicesPage .operationSection {
-    padding-top: 4.01125rem;
-    padding-bottom: 4.375rem;
-  }
-
   .servicesPage .operationSection .sectionHeading {
     margin-bottom: 1.48125rem;
   }
@@ -3948,26 +3943,6 @@
   .aboutPage .socialSection {
     min-height: calc(347px + 30vw);
     height: calc(347px + 30vw);
-  }
-
-  .servicesPage .operationSection {
-    min-height: calc(1182px + 7.5vw);
-    height: calc(1182px + 7.5vw);
-  }
-
-  .servicesPage .dispatchSection {
-    min-height: calc(1183.22px + 10.92vw);
-    height: calc(1183.22px + 10.92vw);
-  }
-
-  .servicesPage .facilityManagementSection {
-    min-height: calc(1045px + 14.375vw);
-    height: calc(1045px + 14.375vw);
-  }
-
-  .servicesPage .disinfectionSection {
-    min-height: calc(999px + 20.156vw);
-    height: calc(999px + 20.156vw);
   }
 
   .servicesPage .dispatchDiagram {
@@ -5170,26 +5145,6 @@
     height: calc(1881px - 89.844vw);
   }
 
-  .servicesPage .operationSection {
-    min-height: calc(1182.61px + 7.452vw);
-    height: calc(1182.61px + 7.452vw);
-  }
-
-  .servicesPage .dispatchSection {
-    min-height: calc(1091.565px + 18.081vw);
-    height: calc(1091.565px + 18.081vw);
-  }
-
-  .servicesPage .facilityManagementSection {
-    min-height: calc(4052.175px - 220.561vw);
-    height: calc(4052.175px - 220.561vw);
-  }
-
-  .servicesPage .disinfectionSection {
-    min-height: calc(607px + 50.781vw);
-    height: calc(607px + 50.781vw);
-  }
-
   .servicesPage .dispatchDiagram {
     width: min(483.208px, 100%);
   }
@@ -5283,21 +5238,6 @@
     height: calc(986.923px + 0.14vw);
   }
 
-  .servicesPage .operationSection {
-    min-height: 1258.922px;
-    height: 1258.922px;
-  }
-
-  .servicesPage .dispatchSection {
-    min-height: calc(996.713px + 27.344vw);
-    height: calc(996.713px + 27.344vw);
-  }
-
-  .servicesPage .facilityManagementSection {
-    min-height: calc(1513.635px + 27.344vw);
-    height: calc(1513.635px + 27.344vw);
-  }
-
   .servicesPage .disinfectionSection {
     min-height: 1127px;
     height: 1127px;
@@ -5305,10 +5245,6 @@
 
   .servicesPage .dispatchDiagram {
     width: min(436.359px, 100%);
-  }
-
-  .servicesPage .disinfectionSection {
-    padding-top: 94px;
   }
 
   .servicesPage .disinfectionSection .airportCard {

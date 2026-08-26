@@ -578,7 +578,7 @@ export function AboutPage() {
             eyebrow="Social Impact"
             title={
               <>
-                <strong>이윤</strong>과 <strong>공익</strong>이 <strong>같은 방향</strong>으로
+                <strong>이윤</strong>과 <strong>공익</strong>이 <strong>같은 방향</strong>으로{" "}
                 <br className={styles.mobileOnlyBreak} />
                 흐르게 합니다.
               </>

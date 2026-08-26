@@ -9949,3 +9949,56 @@
     align-self: stretch;
   }
 }
+
+/* Services page section 1: six discrete Figma viewport states (914:2107–3210). */
+.servicesPage .serviceHero {
+  min-height: 502px;
+  height: 502px;
+}
+
+.servicesPage .serviceHero > div:last-child {
+  position: static;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.servicesPage .serviceHero h1 {
+  font-size: 53px;
+  line-height: 70px;
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .servicesPage .serviceHero {
+    min-height: 376px;
+    height: 376px;
+  }
+
+  .servicesPage .serviceHero h1 {
+    font-size: 45px;
+    line-height: normal;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .servicesPage .serviceHero {
+    min-height: 314px;
+    height: 314px;
+  }
+
+  .servicesPage .serviceHero h1 {
+    font-size: 38px;
+    line-height: normal;
+  }
+}
+
+@media (max-width: 480px) {
+  .servicesPage .serviceHero {
+    min-height: 280px;
+    height: 280px;
+  }
+
+  .servicesPage .serviceHero h1 {
+    font-size: 30px;
+    line-height: normal;
+  }
+}

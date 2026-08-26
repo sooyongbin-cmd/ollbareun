@@ -133,6 +133,30 @@ describe("Figma homepage desktop line heights", () => {
 });
 
 describe("Figma homepage mobile responsive layout", () => {
+  it("uses the six discrete services hero states down to the 480px design", () => {
+    const servicesHeroRules = stylesheet.split(
+      "/* Services page section 1: six discrete Figma viewport states (914:2107–3210). */",
+    )[1];
+
+    expect(servicesHeroRules).toBeDefined();
+    expect(servicesHeroRules).not.toMatch(/\b(?:clamp|calc)\(/);
+    expect(servicesHeroRules).toMatch(
+      /\.servicesPage \.serviceHero\s*\{[^}]*min-height: 502px;[^}]*height: 502px;/s,
+    );
+    expect(servicesHeroRules).toMatch(
+      /\.servicesPage \.serviceHero h1\s*\{[^}]*font-size: 53px;[^}]*line-height: 70px;/s,
+    );
+    expect(servicesHeroRules).toMatch(
+      /@media \(min-width: 641px\) and \(max-width: 768px\)[\s\S]*?min-height: 376px;[\s\S]*?font-size: 45px;/,
+    );
+    expect(servicesHeroRules).toMatch(
+      /@media \(min-width: 481px\) and \(max-width: 640px\)[\s\S]*?min-height: 314px;[\s\S]*?font-size: 38px;/,
+    );
+    expect(servicesHeroRules).toMatch(
+      /@media \(max-width: 480px\)[\s\S]*?min-height: 280px;[\s\S]*?font-size: 30px;/,
+    );
+  });
+
   it("uses the shared 48rem breakpoint and mobile service/client layouts", () => {
     expect(stylesheet).toContain("@media (min-width: 48rem)");
     expect(stylesheet).toContain("@media (max-width: 47.9375rem)");

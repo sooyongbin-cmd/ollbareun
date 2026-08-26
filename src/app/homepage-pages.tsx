@@ -640,132 +640,140 @@ export function ServicesPage() {
       </section>
 
       <section id="operation" className={`${styles.section} ${styles.operationSection}`}>
-        <SectionHeading
-          eyebrow="Operation System"
-          title={<b>운영 체계</b>}
-          description={
-            <>
-              아웃소싱은 인력 파견을 넘어 목표·비용·품질·리스크 관리가
+        <div className={styles.serviceSectionInner}>
+          <SectionHeading
+            eyebrow="Operation System"
+            title={<b>운영 체계</b>}
+            description={
+              <>
+                아웃소싱은 인력 파견을 넘어 목표·비용·품질·리스크 관리가
+                <br />
+                함께 설계되어야 현장이 흔들리지 않습니다.
+              </>
+            }
+          />
+          <div className={styles.teamImage}>
+            <Image src="/homepage/archive/operation.jpg" alt="공항 현장에서 일하는 올바름 서비스 전문가" fill sizes="(max-width: 47.5rem) 100vw, 75rem" />
+          </div>
+          <div className={styles.operationLayout}>
+            <h3>
+              처음 <strong>진단</strong>부터 <strong>운영 보고</strong>까지
               <br />
-              함께 설계되어야 현장이 흔들리지 않습니다.
-            </>
-          }
-        />
-        <div className={styles.teamImage}>
-          <Image src="/homepage/archive/operation.jpg" alt="공항 현장에서 일하는 올바름 서비스 전문가" fill sizes="(max-width: 47.5rem) 100vw, 75rem" />
-        </div>
-        <div className={styles.operationLayout}>
-          <h3>
-            처음 <strong>진단</strong>부터 <strong>운영 보고</strong>까지
-            <br />
-            같은 기준으로 움직입니다.
-          </h3>
-          <ol className={styles.operationSteps}>
-            {operationSteps.map(([number, title, description]) => (
-              <li className={styles.operationStep} key={number}>
-                <span className={styles.operationBadge} aria-hidden="true">
-                  <Image
-                    className={styles.operationBadgeRing}
-                    src="/homepage/archive/operation-step-ring.svg"
-                    alt=""
-                    width={97}
-                    height={97}
-                  />
-                  <Image
-                    className={styles.operationBadgeFill}
-                    src={`/homepage/archive/operation-step-${number}.svg`}
-                    alt=""
-                    width={95}
-                    height={95}
-                  />
-                  <span className={styles.operationNumber}>{number}</span>
-                </span>
-                <div className={styles.operationCopy}>
-                  <h4>{title}</h4>
-                  <p>{description}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
+              같은 기준으로 움직입니다.
+            </h3>
+            <ol className={styles.operationSteps}>
+              {operationSteps.map(([number, title, description]) => (
+                <li className={styles.operationStep} key={number}>
+                  <span className={styles.operationBadge} aria-hidden="true">
+                    <Image
+                      className={styles.operationBadgeRing}
+                      src="/homepage/archive/operation-step-ring.svg"
+                      alt=""
+                      width={97}
+                      height={97}
+                    />
+                    <Image
+                      className={styles.operationBadgeFill}
+                      src={`/homepage/archive/operation-step-${number}.svg`}
+                      alt=""
+                      width={95}
+                      height={95}
+                    />
+                    <span className={styles.operationNumber}>{number}</span>
+                  </span>
+                  <div className={styles.operationCopy}>
+                    <h4>{title}</h4>
+                    <p>{description}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
         </div>
       </section>
 
       <section id="dispatch" className={`${styles.section} ${styles.detailSection} ${styles.dispatchSection}`}>
-        <SectionHeading
-          eyebrow="Worker Dispatch"
-          title={<b>근로자 파견</b>}
-          description={
-            <>
-              고용과 사용이 분리된 체계적인 인력 운영을 통해
-              <br />
-              기업의 경영 효율성을 극대화합니다.
-            </>
-          }
-        />
-        <div className={styles.detailBanner}><Image src="/homepage/service-worker.webp" alt="의료 현장에서 근무하는 전문 인력" fill sizes="(max-width: 47.5rem) 100vw, 75rem" /></div>
-        <h3 className={styles.detailMessage}>사무관리, 생산·물류, IT·전산, 의료·간병, 콜센터 등<br />필요한 직무에 적합한 인력을 연결합니다.</h3>
-        <div className={styles.dispatchDiagram}>
-          <Image
-            src="/homepage/archive/worker-dispatch.svg"
-            alt="파견사업주와 사용사업주는 근로자 파견계약을 맺고, 파견사업주는 파견근로자와 고용계약관계를, 사용사업주는 파견근로자와 지휘 및 명령관계를 맺는 구조"
-            width={504}
-            height={397}
-            sizes="(max-width: 47.5rem) calc(100vw - 2.5rem), 38.75rem"
+        <div className={styles.serviceSectionInner}>
+          <SectionHeading
+            eyebrow="Worker Dispatch"
+            title={<b>근로자 파견</b>}
+            description={
+              <>
+                고용과 사용이 분리된 체계적인 인력 운영을 통해
+                <br />
+                기업의 경영 효율성을 극대화합니다.
+              </>
+            }
           />
+          <div className={styles.detailBanner}><Image src="/homepage/service-worker.webp" alt="의료 현장에서 근무하는 전문 인력" fill sizes="(max-width: 47.5rem) 100vw, 75rem" /></div>
+          <h3 className={styles.detailMessage}>사무관리, 생산·물류, IT·전산, 의료·간병, 콜센터 등<br />필요한 직무에 적합한 인력을 연결합니다.</h3>
+          <div className={styles.dispatchDiagram}>
+            <Image
+              src="/homepage/archive/worker-dispatch.svg"
+              alt="파견사업주와 사용사업주는 근로자 파견계약을 맺고, 파견사업주는 파견근로자와 고용계약관계를, 사용사업주는 파견근로자와 지휘 및 명령관계를 맺는 구조"
+              width={504}
+              height={397}
+              sizes="(max-width: 47.5rem) calc(100vw - 2.5rem), 38.75rem"
+            />
+          </div>
         </div>
       </section>
 
       <section id="facility" className={`${styles.section} ${styles.facilitySection} ${styles.facilityManagementSection}`}>
-        <SectionHeading
-          eyebrow="Facility Management"
-          title={<b>건물·시설물 종합 관리</b>}
-          description={
-            <>
-              보이지 않는 곳까지 세심하게, 빈틈없는 시설 관리로
-              <br />
-              공간의 품격을 높입니다.
-            </>
-          }
-        />
-        <div className={styles.detailBanner}><Image src="/homepage/archive/facility.jpg" alt="시설 설비를 점검하는 전문 인력" fill sizes="(max-width: 47.5rem) 100vw, 75rem" /></div>
-        <h3 className={styles.detailMessage}>전기·소방·기계·가스·건축 설비의 점검과 운영관리,<br />위생관리, 시설보안, 주차관리까지 통합 제공합니다.</h3>
-        <div className={styles.facilityGrid}>
-          {facilityItems.map(({ title, text, image }) => (
-            <article key={title}><Image src={image} alt="" width={46} height={42} aria-hidden="true" /><h3>{title}</h3><p>{text}</p></article>
-          ))}
+        <div className={styles.serviceSectionInner}>
+          <SectionHeading
+            eyebrow="Facility Management"
+            title={<b>건물·시설물 종합 관리</b>}
+            description={
+              <>
+                보이지 않는 곳까지 세심하게, 빈틈없는 시설 관리로
+                <br />
+                공간의 품격을 높입니다.
+              </>
+            }
+          />
+          <div className={styles.detailBanner}><Image src="/homepage/archive/facility.jpg" alt="시설 설비를 점검하는 전문 인력" fill sizes="(max-width: 47.5rem) 100vw, 75rem" /></div>
+          <h3 className={styles.detailMessage}>전기·소방·기계·가스·건축 설비의 점검과 운영관리,<br />위생관리, 시설보안, 주차관리까지 통합 제공합니다.</h3>
+          <div className={styles.facilityGrid}>
+            {facilityItems.map(({ title, text, image }) => (
+              <article key={title}><Image src={image} alt="" width={46} height={42} aria-hidden="true" /><h3>{title}</h3><p>{text}</p></article>
+            ))}
+          </div>
         </div>
       </section>
 
       <section id="disinfection" className={`${styles.section} ${styles.detailSection} ${styles.disinfectionSection}`}>
-        <SectionHeading
-          eyebrow="Certified Disinfection"
-          title={<b>방역·소독</b>}
-          description={
-            <>
-              전문적인 진단과 맞춤형 방역 시스템,
-              <br />
-              누구나 안심하고 머물 수 있는 공간을 약속합니다.
-            </>
-          }
-        />
-        <div className={styles.detailBanner}><Image src="/homepage/archive/disinfection.jpg" alt="항공기 객실에서 방역 작업을 진행하는 전문 인력" fill sizes="(max-width: 47.5rem) 100vw, 75rem" /></div>
-        <h3 className={styles.detailMessage}>현장 조건에 맞춘 법정·살충·살균 소독으로<br />대형 건축물과 항공기 검역 현장의 예방 체계를{" "}<br className={styles.mobileOnlyBreak} />지원합니다.</h3>
-        <div className={styles.airportCard}>
-          <Image
-            src="/homepage/airport-card-background.png"
-            alt=""
-            aria-hidden="true"
-            width={1050}
-            height={616}
-            sizes="(max-width: 47.5rem) calc(100vw - 3rem), 32.8125rem"
+        <div className={styles.serviceSectionInner}>
+          <SectionHeading
+            eyebrow="Certified Disinfection"
+            title={<b>방역·소독</b>}
+            description={
+              <>
+                전문적인 진단과 맞춤형 방역 시스템,
+                <br />
+                누구나 안심하고 머물 수 있는 공간을 약속합니다.
+              </>
+            }
           />
-          <p className={styles.airportCardText}>
-            당사는 현재 김해공항 내
-            <br />
-            전 항공기 검역 및
-            <br />
-            방역프로세스를 독자 수행중입니다
-          </p>
+          <div className={styles.detailBanner}><Image src="/homepage/archive/disinfection.jpg" alt="항공기 객실에서 방역 작업을 진행하는 전문 인력" fill sizes="(max-width: 47.5rem) 100vw, 75rem" /></div>
+          <h3 className={styles.detailMessage}>현장 조건에 맞춘 법정·살충·살균 소독으로<br />대형 건축물과 항공기 검역 현장의 예방 체계를{" "}<br className={styles.mobileOnlyBreak} />지원합니다.</h3>
+          <div className={styles.airportCard}>
+            <Image
+              src="/homepage/airport-card-background.png"
+              alt=""
+              aria-hidden="true"
+              width={1050}
+              height={616}
+              sizes="(max-width: 47.5rem) calc(100vw - 3rem), 32.8125rem"
+            />
+            <p className={styles.airportCardText}>
+              당사는 현재 김해공항 내
+              <br />
+              전 항공기 검역 및
+              <br />
+              방역프로세스를 독자 수행중입니다
+            </p>
+          </div>
         </div>
       </section>
       <BackToTop />

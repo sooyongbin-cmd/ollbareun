@@ -160,6 +160,39 @@ describe("Figma homepage mobile responsive layout", () => {
     );
   });
 
+  it("uses one centered content frame for services sections two through five", () => {
+    const { container } = render(<ServicesPage />);
+    const servicesFrameRules = stylesheet.split(
+      "/*\n * Authoritative services content-frame matrix from Figma page3.",
+    )[1];
+
+    for (const id of ["operation", "dispatch", "facility", "disinfection"]) {
+      const section = container.querySelector(`#${id}`);
+
+      expect(section?.children).toHaveLength(1);
+      expect(section?.firstElementChild?.className).toContain("serviceSectionInner");
+    }
+
+    expect(servicesFrameRules).toBeDefined();
+    expect(servicesFrameRules).not.toMatch(/\b(?:clamp|calc)\(/);
+    expect(servicesFrameRules).toMatch(/max-width: 1182px;/);
+    expect(servicesFrameRules).toMatch(
+      /@media \(min-width: 1025px\) and \(max-width: 1280px\)[\s\S]*?max-width: 960px;/,
+    );
+    expect(servicesFrameRules).toMatch(
+      /@media \(min-width: 769px\) and \(max-width: 1024px\)[\s\S]*?max-width: 728px;/,
+    );
+    expect(servicesFrameRules).toMatch(
+      /@media \(min-width: 641px\) and \(max-width: 768px\)[\s\S]*?max-width: 570px;/,
+    );
+    expect(servicesFrameRules).toMatch(
+      /@media \(min-width: 481px\) and \(max-width: 640px\)[\s\S]*?max-width: 440px;/,
+    );
+    expect(servicesFrameRules).toMatch(
+      /@media \(max-width: 480px\)[\s\S]*?max-width: 320px;/,
+    );
+  });
+
   it("keeps the shared secondary heroes discrete without viewport calculations", () => {
     expect(stylesheet).not.toMatch(
       /\.aboutHero,\s*\.clientHero\s*\{/s,

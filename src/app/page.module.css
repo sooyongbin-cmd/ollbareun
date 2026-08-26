@@ -10008,3 +10008,57 @@
     line-height: normal;
   }
 }
+
+/*
+ * Authoritative services content-frame matrix from Figma page3.
+ * Sections own vertical spacing only; their single content child owns width.
+ */
+.servicesPage .operationSection,
+.servicesPage .dispatchSection,
+.servicesPage .facilityManagementSection,
+.servicesPage .disinfectionSection {
+  display: flex;
+  width: 100%;
+  max-width: none;
+  margin-right: 0;
+  margin-left: 0;
+  padding-right: 0;
+  padding-left: 0;
+  flex-direction: column;
+  align-items: center;
+}
+
+.servicesPage .serviceSectionInner {
+  width: 100%;
+  max-width: 1182px;
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .servicesPage .serviceSectionInner {
+    max-width: 960px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .servicesPage .serviceSectionInner {
+    max-width: 728px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .servicesPage .serviceSectionInner {
+    max-width: 570px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .servicesPage .serviceSectionInner {
+    max-width: 440px;
+  }
+}
+
+@media (max-width: 480px) {
+  .servicesPage .serviceSectionInner {
+    max-width: 320px;
+  }
+}

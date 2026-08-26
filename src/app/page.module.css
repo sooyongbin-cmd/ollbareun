@@ -1273,8 +1273,7 @@
 }
 
 .aboutHero h1,
-.serviceHero h1,
-.clientHero h1 {
+.serviceHero h1 {
   width: fit-content;
   max-width: 100%;
   margin: 0 auto;
@@ -1989,11 +1988,6 @@
     line-height: 1.771875rem;
   }
 
-  .clientsPage .clientHero h1 {
-    font-size: 3.3125rem;
-    line-height: 4.375rem;
-  }
-
   .clientsPage .sectionHeading > p {
     font-size: 1.625rem;
     line-height: normal;
@@ -2489,8 +2483,7 @@
     width: calc(100% - 2.5rem);
   }
 
-  .aboutHero h1,
-  .clientHero h1 {
+  .aboutHero h1 {
     font-size: 2.0625rem;
   }
 
@@ -2970,17 +2963,12 @@
     margin: 0;
   }
 
-  .aboutHero h1,
-  .clientHero h1 {
+  .aboutHero h1 {
     font-size: 1.625rem;
     line-height: 1.3;
   }
 
   .aboutHero h1 {
-    line-height: 2.125rem;
-  }
-
-  .clientsPage .clientHero h1 {
     line-height: 2.125rem;
   }
 
@@ -4041,6 +4029,15 @@
   width: 100%;
   margin: 0;
   padding: 0 24px;
+  text-align: center;
+}
+
+.clientHero h1 {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  font-weight: 400;
+  letter-spacing: -0.05em;
   text-align: center;
 }
 
@@ -5422,8 +5419,7 @@
     min-height: 143px;
   }
 
-  .aboutHero,
-  .clientHero {
+  .aboutHero {
     min-height: 407px;
     height: 407px;
   }
@@ -5607,8 +5603,7 @@
     width: min(363px, 100%);
   }
 
-  .aboutHero,
-  .clientHero {
+  .aboutHero {
     min-height: 361px;
     height: 361px;
   }
@@ -5707,8 +5702,7 @@
     margin-left: auto;
   }
 
-  .aboutHero,
-  .clientHero {
+  .aboutHero {
     min-height: 308px;
     height: 308px;
   }
@@ -5826,8 +5820,8 @@
   }
 
   .clientHero {
-    min-height: 228px;
-    height: 228px;
+    min-height: 242px;
+    height: 242px;
   }
 
   .aboutPage .companySection {
@@ -9050,9 +9044,9 @@
   }
 
   .clientsPage .clientHero h1 {
-    width: clamp(491px, calc(1.40625vw + 473px), 500px);
-    font-size: clamp(52px, calc(0.15625vw + 50px), 53px);
-    letter-spacing: clamp(-1.59px, calc(-1.5px - 0.0046875vw), -1.56px);
+    width: 500px;
+    font-size: 53px;
+    letter-spacing: -1.59px;
     line-height: 70px;
   }
 
@@ -9996,6 +9990,71 @@
 
   .servicesPage .serviceHero h1 {
     font-size: 30px;
+    line-height: normal;
+  }
+}
+
+/* Clients page section 1: six discrete Figma viewport states (853:882–855:8568). */
+.clientsPage .clientHero {
+  min-height: 502px;
+  height: 502px;
+}
+
+.clientsPage .clientHero > div:last-child {
+  position: static;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.clientsPage .clientHero h1 {
+  font-size: 53px;
+  line-height: 70px;
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .clientsPage .clientHero {
+    min-height: 376px;
+    height: 376px;
+  }
+
+  .clientsPage .clientHero h1 {
+    font-size: 45px;
+    line-height: 52.5px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .clientsPage .clientHero {
+    min-height: 314px;
+    height: 314px;
+  }
+
+  .clientsPage .clientHero h1 {
+    font-size: 38px;
+    line-height: normal;
+  }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+  .clientsPage .clientHero {
+    min-height: 280px;
+    height: 280px;
+  }
+
+  .clientsPage .clientHero h1 {
+    font-size: 30px;
+    line-height: normal;
+  }
+}
+
+@media (max-width: 360px) {
+  .clientsPage .clientHero {
+    min-height: 242px;
+    height: 242px;
+  }
+
+  .clientsPage .clientHero h1 {
+    font-size: 22.47px;
     line-height: normal;
   }
 }

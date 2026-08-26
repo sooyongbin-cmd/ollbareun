@@ -102,7 +102,7 @@ describe("Figma homepage desktop line heights", () => {
     expect(stylesheet).toMatch(/\.servicePreview \.sectionHeading > span\s*\{[^}]*width: 18.1875rem;[^}]*line-height: 1.25rem;[^}]*white-space: nowrap;/s);
     expect(stylesheet).toMatch(/\.homeClientLogos\s*\{[^}]*margin-top: 2.5rem;[^}]*padding: 0.46875rem 0 0.36875rem;[^}]*grid-template-columns: repeat\(2, 1fr\);/s);
     expect(stylesheet).toMatch(/\.homeClientLogos > div\s*\{[^}]*min-height: 6.0625rem;/s);
-    expect(stylesheet).toMatch(/\.clientsPage \.clientHero h1\s*\{[^}]*line-height: 4.375rem;/s);
+    expect(stylesheet).toMatch(/\.clientsPage \.clientHero h1\s*\{[^}]*font-size: 53px;[^}]*line-height: 70px;/s);
     expect(stylesheet).toMatch(/\.clientsPage \.sectionHeading > p\s*\{[^}]*margin-bottom: 1.3125rem;/s);
     expect(stylesheet).toMatch(/\.clientsPage \.sectionHeading > span\s*\{[^}]*margin-top: 1.3125rem;/s);
     expect(stylesheet).toMatch(/\.servicesPage \.serviceHero h1\s*\{[^}]*line-height: 4.375rem;/s);
@@ -162,16 +162,38 @@ describe("Figma homepage mobile responsive layout", () => {
 
   it("keeps the shared secondary heroes discrete without viewport calculations", () => {
     expect(stylesheet).not.toMatch(
-      /\.aboutHero,\s*\.clientHero\s*\{[^}]*\bcalc\(/s,
+      /\.aboutHero,\s*\.clientHero\s*\{/s,
     );
     expect(stylesheet).toMatch(
-      /@media \(min-width: 641px\) and \(max-width: 768px\)[\s\S]*?\.aboutHero,\s*\.clientHero\s*\{[^}]*min-height: 407px;[^}]*height: 407px;/,
+      /@media \(min-width: 641px\) and \(max-width: 768px\)[\s\S]*?\.aboutHero\s*\{[^}]*min-height: 407px;[^}]*height: 407px;/,
     );
     expect(stylesheet).toMatch(
-      /@media \(min-width: 481px\) and \(max-width: 640px\)[\s\S]*?\.aboutHero,\s*\.clientHero\s*\{[^}]*min-height: 361px;[^}]*height: 361px;/,
+      /@media \(min-width: 481px\) and \(max-width: 640px\)[\s\S]*?\.aboutHero\s*\{[^}]*min-height: 361px;[^}]*height: 361px;/,
     );
     expect(stylesheet).toMatch(
-      /@media \(min-width: 361px\) and \(max-width: 480px\)[\s\S]*?\.aboutHero,\s*\.clientHero\s*\{[^}]*min-height: 308px;[^}]*height: 308px;/,
+      /@media \(min-width: 361px\) and \(max-width: 480px\)[\s\S]*?\.aboutHero\s*\{[^}]*min-height: 308px;[^}]*height: 308px;/,
+    );
+  });
+
+  it("uses the six discrete clients hero states including 45px at 768px", () => {
+    const clientsHeroRules = stylesheet.split(
+      "/* Clients page section 1: six discrete Figma viewport states (853:882–855:8568). */",
+    )[1];
+
+    expect(clientsHeroRules).toBeDefined();
+    expect(clientsHeroRules).not.toMatch(/\b(?:clamp|calc)\(/);
+    expect(clientsHeroRules).toMatch(/font-size: 53px;/);
+    expect(clientsHeroRules).toMatch(
+      /@media \(min-width: 641px\) and \(max-width: 768px\)[\s\S]*?min-height: 376px;[\s\S]*?font-size: 45px;/,
+    );
+    expect(clientsHeroRules).toMatch(
+      /@media \(min-width: 481px\) and \(max-width: 640px\)[\s\S]*?min-height: 314px;[\s\S]*?font-size: 38px;/,
+    );
+    expect(clientsHeroRules).toMatch(
+      /@media \(min-width: 361px\) and \(max-width: 480px\)[\s\S]*?min-height: 280px;[\s\S]*?font-size: 30px;/,
+    );
+    expect(clientsHeroRules).toMatch(
+      /@media \(max-width: 360px\)[\s\S]*?min-height: 242px;[\s\S]*?font-size: 22.47px;/,
     );
   });
 
@@ -225,7 +247,6 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(stylesheet).toMatch(/\.servicesPage \.teamImage img\s*\{[^}]*object-position: 61\.43% center;/s);
     expect(stylesheet).toMatch(/\.servicesPage \.operationLayout\s*\{[^}]*gap: 1.725rem;/s);
     expect(stylesheet).toMatch(/\.servicesPage \.dispatchSection \.detailBanner img\s*\{[^}]*object-fit: fill;[^}]*transform: translateX\(4.091875rem\) scale\(2\.6\);[^}]*transform-origin: center;/s);
-    expect(stylesheet).toMatch(/\.clientsPage \.clientHero h1\s*\{[^}]*line-height: 2.125rem;/s);
   });
 
   it("uses the eight discrete landing reference states", () => {

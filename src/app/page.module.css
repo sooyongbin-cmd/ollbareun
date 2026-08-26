@@ -8444,10 +8444,6 @@
     justify-content: center;
   }
 
-  .aboutPage .socialSection {
-    height: calc(826.394px + 95.9317vw);
-  }
-
 }
 
 @media (max-width: 480px) {

@@ -5299,11 +5299,6 @@
     height: calc(986.923px + 0.14vw);
   }
 
-  .aboutPage .socialSection {
-    min-height: 140px;
-    height: 140px;
-  }
-
   .servicesPage .operationSection {
     min-height: 1258.922px;
     height: 1258.922px;
@@ -8315,10 +8310,6 @@
     height: 988px;
     align-items: center;
     justify-content: center;
-  }
-
-  .aboutPage .socialSection {
-    height: 140px;
   }
 
 }

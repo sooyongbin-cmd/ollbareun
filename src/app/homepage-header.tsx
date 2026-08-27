@@ -65,7 +65,7 @@ function HeaderBrand({ mobileOpen = false }: { mobileOpen?: boolean }) {
         src={mobileOpen ? "/icons/header-logo-color.svg" : "/icons/header-logo-white.svg"}
         alt="주식회사 올바름"
         width={mobileOpen ? 162 : 173}
-        height={mobileOpen ? 28 : 30}
+        height={mobileOpen ? 28 : 29}
         style={{ width: "100%", height: "100%" }}
         priority
       />

@@ -438,6 +438,39 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(stylesheet).toMatch(/\.servicesPage \.dispatchSection \.detailBanner img\s*\{[^}]*object-fit: fill;[^}]*transform: translateX\(4.091875rem\) scale\(2\.6\);[^}]*transform-origin: center;/s);
   });
 
+  it("lets the mobile operation description use its natural width", () => {
+    const mobileOperationDescription = stylesheet.match(
+      /@media \(max-width: 47\.9375rem\) \{[\s\S]*?\.servicesPage \.operationSection \.sectionHeading > span\s*\{([^}]*)\}/,
+    )?.[1];
+
+    expect(mobileOperationDescription).toBeDefined();
+    expect(mobileOperationDescription).not.toMatch(/\b(?:width|max-width)\s*:/);
+  });
+
+  it("uses the eight discrete Figma states for the landing header", () => {
+    const headerRules = stylesheet.split(
+      "/* Landing page header: eight discrete Figma viewport states. */",
+    )[1];
+
+    expect(headerRules).toBeDefined();
+    expect(headerRules).not.toMatch(/\b(?:clamp|calc)\(/);
+    expect(headerRules).toMatch(
+      /--landing-header-height: 64px;[\s\S]*?--landing-header-logo-width: 173px;[\s\S]*?--landing-header-logo-height: 29px;[\s\S]*?--landing-header-certification-font: 15px;[\s\S]*?--landing-header-menu-font: 16px;/,
+    );
+    expect(headerRules).toMatch(
+      /@media \(min-width: 641px\) and \(max-width: 768px\)[\s\S]*?--landing-header-logo-width: 179px;[\s\S]*?--landing-header-logo-height: 30px;[\s\S]*?--landing-header-hamburger-width: 27px;/,
+    );
+    expect(headerRules).toMatch(
+      /@media \(min-width: 481px\) and \(max-width: 640px\)[\s\S]*?--landing-header-height: 54px;[\s\S]*?--landing-header-logo-width: 144px;[\s\S]*?--landing-header-logo-height: 25px;[\s\S]*?--landing-header-certification-font: 13px;[\s\S]*?--landing-header-hamburger-width: 22px;[\s\S]*?--landing-header-hamburger-height: 11px;/,
+    );
+    expect(headerRules).toMatch(
+      /@media \(min-width: 361px\) and \(max-width: 480px\)[\s\S]*?--landing-header-height: 47px;[\s\S]*?--landing-header-logo-width: 130px;[\s\S]*?--landing-header-logo-height: 22px;[\s\S]*?--landing-header-certification-font: 11px;[\s\S]*?--landing-header-hamburger-width: 20px;[\s\S]*?--landing-header-hamburger-height: 10px;/,
+    );
+    expect(headerRules).toMatch(
+      /@media \(max-width: 360px\)[\s\S]*?--landing-header-height: 39px;[\s\S]*?--landing-header-logo-width: 108px;[\s\S]*?--landing-header-logo-height: 18px;[\s\S]*?--landing-header-certification-font: 9px;[\s\S]*?--landing-header-hamburger-width: 16px;[\s\S]*?--landing-header-hamburger-height: 9px;/,
+    );
+  });
+
   it("uses the eight discrete landing reference states", () => {
     expect(stylesheet).toContain("--landing-content-width: 1182px");
     expect(stylesheet).toContain("--landing-hero-height: 833px");

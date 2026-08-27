@@ -7725,7 +7725,7 @@
   }
 
   .aboutPage .values .sectionHeading {
-    margin-bottom: clamp(33px, calc(9px + 6.6667vw), 41px);
+    margin-bottom: 41px;
   }
 
   .aboutPage .values .sectionHeading > p {

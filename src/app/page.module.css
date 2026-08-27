@@ -10635,6 +10635,13 @@
   justify-content: space-between;
 }
 
+.landingPage .header:not(.mobileHeaderOpen) .megaMenuInner {
+  width: 100%;
+  max-width: 1320px;
+  padding-right: var(--landing-header-padding-right);
+  padding-left: var(--landing-header-padding-left);
+}
+
 .landingPage .header:not(.mobileHeaderOpen) .brandCluster {
   position: static;
   display: flex;

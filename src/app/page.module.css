@@ -8135,7 +8135,6 @@
 
   .aboutPage .values {
     display: flex;
-    height: 988px;
     align-items: center;
     justify-content: center;
   }
@@ -8233,10 +8232,6 @@
   .aboutPage .valueGrid {
     width: 570px;
     height: 508px;
-  }
-
-  .aboutPage .socialSection {
-    height: calc(1105px + 36.875vw);
   }
 
   .aboutPage .socialGrid {

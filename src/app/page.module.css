@@ -7773,8 +7773,7 @@
   }
 
   .aboutPage .socialSection {
-    padding: clamp(65px, calc(32px + 9.1667vw), 76px) 0
-      clamp(54px, calc(-63px + 32.5vw), 93px);
+    padding: 76px 0 93px;
   }
 
   .socialInner {

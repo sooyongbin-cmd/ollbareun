@@ -8135,6 +8135,7 @@
 
   .aboutPage .values {
     display: flex;
+    height: 988px;
     align-items: center;
     justify-content: center;
   }
@@ -8220,7 +8221,6 @@
 
   .aboutPage .values {
     display: flex;
-    height: 988px;
     align-items: center;
     justify-content: center;
   }

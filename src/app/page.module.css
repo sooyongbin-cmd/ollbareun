@@ -7792,9 +7792,9 @@
 
   .aboutPage .socialSection .sectionHeading > span {
     width: 100%;
-    margin-top: clamp(21px, calc(15px + 1.6667vw), 23px);
-    font-size: clamp(14px, calc(-1px + 4.1667vw), 19px);
-    line-height: clamp(20px, calc(-1px + 5.8333vw), 27px);
+    margin-top: 23px;
+    font-size: 19px;
+    line-height: 27px;
   }
 
   .aboutPage .socialGrid {

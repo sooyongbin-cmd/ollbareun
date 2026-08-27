@@ -447,12 +447,18 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(mobileOperationDescription).not.toMatch(/\b(?:width|max-width)\s*:/);
   });
 
-  it("does not override the responsive contact section padding with viewport calculations", () => {
+  it("does not override the responsive contact section or inner frame", () => {
     expect(stylesheet).not.toMatch(
       /\.aboutPage \.contactSection\s*\{\s*padding: clamp\(107px, calc\(-1px \+ 14\.0625vw\), 125px\)/,
     );
     expect(stylesheet).not.toMatch(
       /\.aboutPage \.contactSection\s*\{\s*padding: clamp\(51px, calc\(-54px \+ 29\.1667vw\), 86px\)/,
+    );
+    expect(stylesheet).not.toMatch(
+      /\.contactInner\s*\{\s*width: 568px;\s*gap: clamp\(65px, calc\(60px \+ 0\.7813vw\), 66px\);/,
+    );
+    expect(stylesheet).not.toMatch(
+      /\.contactInner\s*\{\s*width: clamp\(320px, calc\(83\.3333vw \+ 20px\), 420px\);\s*gap: clamp\(40px, calc\(-11px \+ 14\.1667vw\), 57px\);/,
     );
   });
 

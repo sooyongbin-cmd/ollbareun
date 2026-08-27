@@ -7588,11 +7588,6 @@
     width: 100%;
   }
 
-  .contactInner {
-    width: 568px;
-    gap: clamp(65px, calc(60px + 0.7813vw), 66px);
-  }
-
   .aboutPage .contactSection .map {
     height: 425px;
   }
@@ -7839,11 +7834,6 @@
     margin-top: 9px;
     font-size: 14px;
     line-height: 20px;
-  }
-
-  .contactInner {
-    width: clamp(320px, calc(83.3333vw + 20px), 420px);
-    gap: clamp(40px, calc(-11px + 14.1667vw), 57px);
   }
 
   .aboutPage .contactSection .map {

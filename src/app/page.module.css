@@ -6053,7 +6053,7 @@
 @media (min-width: 481px) and (max-width: 768px) {
   .header,
   .headerInner {
-    height: 58px;
+    height: 64px;
   }
 
   .headerInner {
@@ -6101,10 +6101,17 @@
   }
 }
 
+@media (min-width: 481px) and (max-width: 640px) {
+  .header,
+  .headerInner {
+    height: 54px;
+  }
+}
+
 @media (min-width: 361px) and (max-width: 480px) {
   .header,
   .headerInner {
-    height: 58px;
+    height: 47px;
   }
 
   .headerInner {
@@ -6155,7 +6162,7 @@
 @media (max-width: 360px) {
   .header,
   .headerInner {
-    height: 52px;
+    height: 39px;
   }
 
   .headerInner {

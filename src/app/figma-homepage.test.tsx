@@ -457,9 +457,13 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(headerRules).toMatch(
       /--landing-header-height: 64px;[\s\S]*?--landing-header-logo-width: 173px;[\s\S]*?--landing-header-logo-height: 29px;[\s\S]*?--landing-header-certification-font: 15px;[\s\S]*?--landing-header-menu-font: 16px;/,
     );
-    expect(headerRules).toMatch(
-      /@media \(min-width: 641px\) and \(max-width: 768px\)[\s\S]*?--landing-header-logo-width: 179px;[\s\S]*?--landing-header-logo-height: 30px;[\s\S]*?--landing-header-hamburger-width: 27px;/,
-    );
+    const tabletHeaderRules = headerRules.match(
+      /@media \(min-width: 641px\) and \(max-width: 768px\) \{([\s\S]*?)\n\}/,
+    )?.[1];
+
+    expect(tabletHeaderRules).toBeDefined();
+    expect(tabletHeaderRules).not.toMatch(/--landing-header-logo-(?:width|height):/);
+    expect(tabletHeaderRules).toContain("--landing-header-hamburger-width: 27px;");
     expect(headerRules).toMatch(
       /@media \(min-width: 481px\) and \(max-width: 640px\)[\s\S]*?--landing-header-height: 54px;[\s\S]*?--landing-header-logo-width: 144px;[\s\S]*?--landing-header-logo-height: 25px;[\s\S]*?--landing-header-certification-font: 13px;[\s\S]*?--landing-header-hamburger-width: 22px;[\s\S]*?--landing-header-hamburger-height: 11px;/,
     );

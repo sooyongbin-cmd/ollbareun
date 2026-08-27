@@ -7969,7 +7969,6 @@
 
 @media (min-width: 769px) and (max-width: 1024px) {
   .aboutPage .companySection {
-    height: calc(1872px + 16.0156vw);
     padding-top: 140px;
     padding-bottom: 140px;
   }
@@ -8127,7 +8126,6 @@
 
   .aboutPage .values {
     display: flex;
-    height: 988px;
     align-items: center;
     justify-content: center;
   }

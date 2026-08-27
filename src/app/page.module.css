@@ -7777,7 +7777,7 @@
   }
 
   .socialInner {
-    gap: clamp(47px, calc(50px - 0.625vw), 48px);
+    gap: 47px;
   }
 
   .aboutPage .socialSection .sectionHeading {

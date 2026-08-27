@@ -465,6 +465,24 @@ describe("Figma homepage mobile responsive layout", () => {
     );
   });
 
+  it("does not size the mobile company heading with viewport calculations", () => {
+    expect(stylesheet).not.toMatch(
+      /\.aboutPage \.companySection \.sectionHeading\s*\{\s*width: 100%;\s*height: clamp\(183px, calc\(35\.8333vw \+ 54px\), 226px\);\s*margin-bottom: clamp\(35px, calc\(33\.3333vw - 85px\), 75px\);/,
+    );
+  });
+
+  it("uses constants for the mobile contact copy layout", () => {
+    expect(stylesheet).toMatch(
+      /@media \(max-width: 480px\)[\s\S]*?\.aboutPage \.contactSection \.contactCopy\s*\{[^}]*align-items: center;[^}]*gap: 41px;/,
+    );
+    expect(stylesheet).toMatch(
+      /\.aboutPage \.contactSection \.contactCopy h2\s*\{[^}]*align-self: center;[^}]*font-size: 37px;[^}]*line-height: 49px;[^}]*text-align: center;/,
+    );
+    expect(stylesheet).toMatch(
+      /\.aboutPage \.contactSection \.contactCopy address\s*\{[^}]*width: 100%;[^}]*gap: 11px 12px;[^}]*grid-template-columns: 13px 84\.75px 1fr;/,
+    );
+  });
+
   it("uses the eight discrete Figma states for the landing header", () => {
     const headerRules = stylesheet.split(
       "/* Landing page header: eight discrete Figma viewport states. */",

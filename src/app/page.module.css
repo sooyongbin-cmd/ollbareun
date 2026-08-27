@@ -7628,12 +7628,6 @@
     line-height: clamp(34px, calc(16px + 5vw), 40px);
   }
 
-  .aboutPage .companySection .sectionHeading {
-    width: 100%;
-    height: clamp(183px, calc(35.8333vw + 54px), 226px);
-    margin-bottom: clamp(35px, calc(33.3333vw - 85px), 75px);
-  }
-
   .aboutPage .companySection .sectionHeading > p {
     margin-bottom: clamp(14px, calc(5vw - 4px), 20px);
     font-size: clamp(18px, calc(12px + 1.6667vw), 20px);
@@ -8324,20 +8318,20 @@
 @media (max-width: 480px) {
   .aboutPage .contactSection .contactCopy {
     align-items: center;
-    gap: clamp(36px, calc(21px + 4.1667vw), 41px);
+    gap: 41px;
   }
 
   .aboutPage .contactSection .contactCopy h2 {
     align-self: center;
-    font-size: clamp(27px, calc(-3px + 8.3333vw), 37px);
-    line-height: clamp(32px, calc(-19px + 14.1667vw), 49px);
+    font-size: 37px;
+    line-height: 49px;
     text-align: center;
   }
 
   .aboutPage .contactSection .contactCopy address {
     width: 100%;
     gap: 11px 12px;
-    grid-template-columns: 13px clamp(61px, calc(-10px + 19.7917vw), 84.75px) 1fr;
+    grid-template-columns: 13px 84.75px 1fr;
   }
 
   .aboutPage .contactSection .contactCopy address strong {

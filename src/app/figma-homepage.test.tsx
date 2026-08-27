@@ -471,15 +471,33 @@ describe("Figma homepage mobile responsive layout", () => {
     );
   });
 
-  it("uses constants for the mobile contact copy layout", () => {
+  it("uses the discrete Figma typography matrix for the about contact section", () => {
+    expect(stylesheet).toMatch(
+      /\.aboutPage \.contactSection \.contactCopy h2\s*\{[^}]*font-size: 42px;/,
+    );
+    expect(stylesheet).toMatch(
+      /\.aboutPage \.contactSection \.contactCopy address strong\s*\{[^}]*font-size: 18px;/,
+    );
+    expect(stylesheet).toMatch(
+      /\.aboutPage \.contactSection \.contactCopy address \.contactValue\s*\{[^}]*font-size: 16px;/,
+    );
+    expect(stylesheet).toMatch(
+      /@media \(min-width: 481px\) and \(max-width: 640px\)[\s\S]*?\.aboutPage \.contactSection \.contactCopy h2\s*\{[^}]*font-size: 39px;[\s\S]*?\.aboutPage \.contactSection \.contactCopy address strong\s*\{[^}]*font-size: 17px;[\s\S]*?\.aboutPage \.contactSection \.contactCopy address \.contactValue\s*\{[^}]*font-size: 15px;/,
+    );
     expect(stylesheet).toMatch(
       /@media \(max-width: 480px\)[\s\S]*?\.aboutPage \.contactSection \.contactCopy\s*\{[^}]*align-items: center;[^}]*gap: 41px;/,
     );
     expect(stylesheet).toMatch(
-      /\.aboutPage \.contactSection \.contactCopy h2\s*\{[^}]*align-self: center;[^}]*font-size: 37px;[^}]*line-height: 49px;[^}]*text-align: center;/,
+      /\.aboutPage \.contactSection \.contactCopy h2\s*\{[^}]*align-self: center;[^}]*font-size: 30px;[^}]*line-height: 49px;[^}]*text-align: center;/,
     );
     expect(stylesheet).toMatch(
-      /\.aboutPage \.contactSection \.contactCopy address\s*\{[^}]*width: 100%;[^}]*gap: 11px 12px;[^}]*grid-template-columns: 13px 84\.75px 1fr;/,
+      /\.aboutPage \.contactSection \.contactCopy address\s*\{[^}]*width: 100%;[^}]*gap: 11px 12px;[^}]*grid-template-columns: 13px 1fr;/,
+    );
+    expect(stylesheet).toMatch(
+      /\.aboutPage \.contactSection \.contactCopy address strong\s*\{[^}]*display: none;/,
+    );
+    expect(stylesheet).toMatch(
+      /\.aboutPage \.contactSection \.contactCopy address \.contactValue\s*\{[^}]*font-size: 14px;/,
     );
   });
 

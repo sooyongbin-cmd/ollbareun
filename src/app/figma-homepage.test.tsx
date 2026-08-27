@@ -483,6 +483,12 @@ describe("Figma homepage mobile responsive layout", () => {
     );
   });
 
+  it("gives every page 2 content section a 20px inset at 360px", () => {
+    expect(stylesheet).toMatch(
+      /@media \(max-width: 360px\) \{\s*\.aboutPage \.companySection,\s*\.aboutPage \.values,\s*\.aboutPage \.socialSection,\s*\.aboutPage \.contactSection\s*\{[^}]*width: 100vw;[^}]*box-sizing: border-box;[^}]*padding-right: 20px;[^}]*padding-left: 20px;/,
+    );
+  });
+
   it("uses the eight discrete Figma states for the landing header", () => {
     const headerRules = stylesheet.split(
       "/* Landing page header: eight discrete Figma viewport states. */",

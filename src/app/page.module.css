@@ -7359,8 +7359,8 @@
 
   .aboutPage .historyWrap {
     display: flex;
-    width: clamp(473px, calc(398px + 9.7656vw), 498px);
-    height: clamp(939.55px, calc(769px + 22.2656vw), 996.2px);
+    width: 498px;
+    height: 996.2px;
     flex-direction: column;
     gap: 0;
   }
@@ -7636,17 +7636,17 @@
 
   .aboutPage .companySection .sectionHeading h2 {
     width: 100%;
-    font-size: clamp(29px, calc(17px + 3.3333vw), 33px);
+    font-size: 33px;
     letter-spacing: -0.03em;
-    line-height: clamp(35px, calc(20px + 4.1667vw), 40px);
+    line-height: 40px;
     white-space: normal;
   }
 
   .aboutPage .companySection .sectionHeading > span {
     width: 100%;
-    margin-top: clamp(14px, calc(-4px + 5vw), 20px);
-    font-size: clamp(15px, calc(6px + 2.5vw), 18px);
-    line-height: clamp(21px, calc(-1px + 6.25vw), 29px);
+    margin-top: 20px;
+    font-size: 18px;
+    line-height: 29px;
   }
 
   .aboutPage .stats {
@@ -7656,7 +7656,7 @@
   }
 
   .aboutPage .stats > div {
-    gap: clamp(3px, 1.25vw, 6px);
+    gap: 6px;
   }
 
   .aboutPage .stats > div > img {
@@ -7676,7 +7676,7 @@
 
 
   .aboutPage .historyImage {
-    height: clamp(282px, calc(75vw + 12px), 372px);
+    height: 372px;
   }
 
   .aboutPage .historyImage span {

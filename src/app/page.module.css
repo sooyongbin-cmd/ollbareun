@@ -8215,7 +8215,6 @@
 
 @media (min-width: 481px) and (max-width: 640px) {
   .aboutPage .companySection {
-    height: calc(1370px + 96.875vw);
     padding-top: 110px;
     padding-bottom: 110px;
   }

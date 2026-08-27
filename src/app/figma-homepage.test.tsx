@@ -471,6 +471,15 @@ describe("Figma homepage mobile responsive layout", () => {
     );
   });
 
+  it("lets the narrow about company section height follow its content", () => {
+    expect(stylesheet).not.toMatch(
+      /@media \(min-width: 361px\) and \(max-width: 480px\)[\s\S]*?\.aboutPage \.companySection\s*\{[^}]*(?:min-)?height\s*:/,
+    );
+    expect(stylesheet).not.toMatch(
+      /@media \(max-width: 360px\)[\s\S]*?\.aboutPage \.companySection\s*\{[^}]*(?:min-)?height\s*:/,
+    );
+  });
+
   it("uses the discrete Figma typography matrix for the about contact section", () => {
     expect(stylesheet).toMatch(
       /\.aboutPage \.contactSection \.contactCopy h2\s*\{[^}]*font-size: 42px;/,

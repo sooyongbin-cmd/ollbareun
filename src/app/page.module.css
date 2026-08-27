@@ -7674,10 +7674,6 @@
     line-height: 17px;
   }
 
-  .aboutPage .historyWrap {
-    width: clamp(320px, calc(84.1667vw + 17px), 421px);
-    height: clamp(651px, calc(154.1667vw + 96px), 836px);
-  }
 
   .aboutPage .historyImage {
     height: clamp(282px, calc(75vw + 12px), 372px);

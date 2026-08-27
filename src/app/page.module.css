@@ -7315,8 +7315,8 @@
   }
 
   .aboutPage .companySection .sectionHeading {
-    height: clamp(169px, 23.307vw, 179px);
-    margin: 0 0 clamp(99px, calc(90px + 1.1719vw), 102px);
+    height: 170px;
+    margin: 0 0 100px;
   }
 
   .aboutPage .companySection .sectionHeading > p {

@@ -7350,7 +7350,6 @@
   .aboutPage .historyWrap {
     display: flex;
     width: 498px;
-    height: 996.2px;
     flex-direction: column;
     gap: 0;
   }
@@ -7530,7 +7529,6 @@
 
   .aboutPage .historyWrap {
     width: 473px;
-    height: 939.55px;
   }
 
   .aboutPage .historyImage {

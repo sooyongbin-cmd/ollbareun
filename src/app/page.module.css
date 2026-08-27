@@ -7994,8 +7994,8 @@
   }
 
   .aboutPage .historyWrap {
-    width: calc(398.313px + 9.7244vw);
-    gap: calc(-61.353px + 7.9887vw);
+    width: 498px;
+    gap: 20px;
     align-items: flex-start;
   }
 

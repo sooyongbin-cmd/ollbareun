@@ -7826,7 +7826,7 @@
   }
 
   .aboutPage .contactSection .map {
-    height: clamp(247px, calc(-101px + 96.6667vw), 363px);
+    height: 363px;
   }
 
   .aboutPage .contactCopy {

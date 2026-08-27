@@ -10727,7 +10727,6 @@
 
 @media (min-width: 641px) and (max-width: 768px) {
   .landingPage {
-    --landing-header-hamburger-width: 27px;
     --landing-header-padding-left: 40px;
     --landing-header-padding-right: 40px;
     --landing-header-brand-gap: 31px;

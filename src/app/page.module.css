@@ -10727,6 +10727,118 @@
   }
 }
 
+/* Page 2 360px typography (Figma node 864:1927). */
+@media (max-width: 360px) {
+  .aboutPage .aboutHero h1 {
+    font-size: 22.465px;
+    line-height: normal;
+  }
+
+  .aboutPage .companySection .sectionHeading > p,
+  .aboutPage .socialSection .sectionHeading > p {
+    font-size: 18px;
+    line-height: normal;
+  }
+
+  .aboutPage .companySection .sectionHeading h2,
+  .aboutPage .socialSection .sectionHeading h2 {
+    font-size: 28px;
+    line-height: normal;
+  }
+
+  .aboutPage .companySection .sectionHeading > span,
+  .aboutPage .socialSection .sectionHeading > span {
+    font-size: 16px;
+    line-height: 23px;
+  }
+
+  .aboutPage .stats strong {
+    font-size: 36.364px;
+    line-height: normal;
+  }
+
+  .aboutPage .stats span {
+    font-size: 14px;
+    line-height: normal;
+  }
+
+  .aboutPage .historyImage span {
+    font-size: 40.912px;
+    line-height: normal;
+  }
+
+  .aboutPage .historyImage p {
+    font-size: 14.319px;
+    line-height: 20.456px;
+  }
+
+  .aboutPage .timeline time {
+    font-size: 25.911px;
+    line-height: normal;
+  }
+
+  .aboutPage .timeline p {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .aboutPage .values .sectionHeading > p {
+    font-size: 18px;
+    line-height: normal;
+  }
+
+  .aboutPage .values .sectionHeading h2 {
+    font-size: 32px;
+    line-height: normal;
+  }
+
+  .aboutPage .values .sectionHeading > span {
+    font-size: 16px;
+    line-height: 25px;
+  }
+
+  .aboutPage .values .sectionHeading > span strong {
+    font-size: 17px;
+    line-height: 25px;
+  }
+
+  .aboutPage .valueGrid strong {
+    font-size: 53.818px;
+    line-height: normal;
+  }
+
+  .aboutPage .valueGrid span {
+    font-size: 18.909px;
+    line-height: normal;
+  }
+
+  .aboutPage .valueGrid p {
+    font-size: 13px;
+    line-height: normal;
+  }
+
+  .aboutPage .socialGrid h3 {
+    font-size: 21.767px;
+    line-height: normal;
+  }
+
+  .aboutPage .socialGrid p {
+    font-size: 15.198px;
+    line-height: 21.108px;
+  }
+
+  .aboutPage .contactSection .contactCopy h2 {
+    font-size: 30px;
+    line-height: normal;
+  }
+
+  .aboutPage .contactSection .contactCopy address,
+  .aboutPage .contactSection .contactCopy address .contactValue {
+    font-size: 13.583px;
+    line-height: 22.639px;
+  }
+}
+
 @media (min-width: 481px) and (max-width: 640px) {
   .landingPage {
     --landing-header-height: 54px;

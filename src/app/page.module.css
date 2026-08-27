@@ -8728,6 +8728,13 @@
     padding-right: 20px;
     padding-left: 20px;
   }
+
+  .aboutPage .companySection > div,
+  .aboutPage .values > div,
+  .aboutPage .socialSection > div,
+  .aboutPage .contactSection > div {
+    width: 100%;
+  }
 }
 
 /* Keep each timeline marker in the same normal-flow row as its date and copy. */

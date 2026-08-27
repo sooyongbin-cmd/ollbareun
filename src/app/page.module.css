@@ -6648,7 +6648,7 @@
 .valuesInner,
 .socialInner,
 .contactInner {
-  width: min(1240px, calc(100% - 40px));
+  width: 1240px;
   margin: 0 auto;
 }
 
@@ -7362,12 +7362,12 @@
   }
 
   .aboutPage .historyImage span {
-    font-size: clamp(61.75px, calc(115px - 5.1992vw), 66px);
+    font-size: 61.75px;
   }
 
   .aboutPage .historyImage p {
     margin-top: 26px;
-    font-size: clamp(24.7px, calc(38px - 1.298vw), 25.9px);
+    font-size: 24.7px;
     line-height: 35px;
   }
 
@@ -7619,9 +7619,9 @@
   }
 
   .aboutPage .companySection .sectionHeading > p {
-    margin-bottom: clamp(14px, calc(5vw - 4px), 20px);
-    font-size: clamp(18px, calc(12px + 1.6667vw), 20px);
-    line-height: clamp(22px, calc(7px + 4.1667vw), 27px);
+    margin-bottom: 20px;
+    font-size: 20px;
+    line-height: 27px;
   }
 
   .aboutPage .companySection .sectionHeading h2 {
@@ -7650,17 +7650,17 @@
   }
 
   .aboutPage .stats > div > img {
-    max-width: clamp(34px, calc(-26px + 16.6667vw), 54px);
-    height: clamp(23px, calc(-16px + 10.8333vw), 36px);
+    max-width: 54px;
+    height: 36px;
   }
 
   .aboutPage .stats strong {
-    font-size: clamp(30px, calc(0px + 8.3333vw), 40px);
-    line-height: clamp(36px, calc(0px + 10vw), 48px);
+    font-size: 40px;
+    line-height: 48px;
   }
 
   .aboutPage .stats span {
-    font-size: clamp(13px, calc(11.5px + 0.4167vw), 13.5px);
+    font-size: 13.5px;
     line-height: 17px;
   }
 
@@ -7670,13 +7670,13 @@
   }
 
   .aboutPage .historyImage span {
-    font-size: clamp(46px, calc(19px + 7.5vw), 55px);
+    font-size: 55px;
   }
 
   .aboutPage .historyImage p {
-    margin-top: clamp(11px, calc(-27px + 10.4167vw), 23.5px);
-    font-size: clamp(18px, calc(6px + 3.3333vw), 22px);
-    line-height: clamp(30px, calc(26px + 0.8333vw), 31px);
+    margin-top: 23.5px;
+    font-size: 22px;
+    line-height: 31px;
   }
 
   .aboutPage .timeline {
@@ -7719,22 +7719,22 @@
   }
 
   .aboutPage .values .sectionHeading > p {
-    margin-bottom: clamp(8px, 2.0833vw, 10px);
-    font-size: clamp(16.61px, calc(12.44px + 1.1575vw), 18px);
-    line-height: clamp(20px, calc(11px + 2.5vw), 23px);
+    margin-bottom: 10px;
+    font-size: 18px;
+    line-height: 23px;
   }
 
   .aboutPage .values .sectionHeading h2 {
-    font-size: clamp(28.06px, calc(13.24px + 4.1167vw), 33px);
-    line-height: clamp(33px, calc(15px + 5vw), 39px);
+    font-size: 33px;
+    line-height: 39px;
   }
 
   .aboutPage .values .sectionHeading > span {
-    width: calc(100% - 40px);
-    margin: clamp(16px, calc(4px + 3.3333vw), 20px) auto 0;
+    width: 269px;
+    margin: 20px auto 0;
     padding: 0;
-    font-size: clamp(15px, calc(6px + 2.5vw), 18px);
-    line-height: clamp(23px, calc(8px + 4.1667vw), 28px);
+    font-size: 18px;
+    line-height: 28px;
   }
 
   .aboutPage .values .sectionHeading > span strong {
@@ -7742,24 +7742,24 @@
   }
 
   .aboutPage .valueGrid {
-    width: calc(100% - 40px);
+    width: 320px;
     height: 380px;
   }
 
   .aboutPage .valueGrid strong {
-    font-size: clamp(46.61px, calc(16.61px + 8.3333vw), 56.61px);
-    line-height: clamp(56px, calc(20px + 10vw), 68px);
+    font-size: 56.61px;
+    line-height: 68px;
   }
 
   .aboutPage .valueGrid span {
-    margin-top: clamp(4px, 1.6667vw, 8px);
-    font-size: clamp(14px, calc(8px + 1.6667vw), 16px);
+    margin-top: 8px;
+    font-size: 16px;
   }
 
   .aboutPage .valueGrid p {
-    margin-top: clamp(7px, 2.0833vw, 10px);
-    font-size: clamp(9.45px, calc(4.8px + 1.2917vw), 11px);
-    line-height: clamp(12px, calc(3px + 2.5vw), 15px);
+    margin-top: 10px;
+    font-size: 11px;
+    line-height: 15px;
   }
 
   .aboutPage .socialSection {
@@ -7776,8 +7776,8 @@
 
   .aboutPage .socialSection .sectionHeading h2 {
     width: 100%;
-    font-size: clamp(27px, calc(-9px + 10vw), 39px);
-    line-height: clamp(32px, calc(-19px + 14.1667vw), 49px);
+    font-size: 39px;
+    line-height: 49px;
   }
 
   .aboutPage .socialSection .sectionHeading > span {
@@ -8284,7 +8284,7 @@
 
   .aboutPage .values {
     display: flex;
-    height: calc(131.965px + 126.46875vw);
+    height: 803px;
     align-items: center;
     justify-content: center;
   }

@@ -472,12 +472,17 @@ describe("Figma homepage mobile responsive layout", () => {
   });
 
   it("lets the narrow about company section height follow its content", () => {
-    expect(stylesheet).not.toMatch(
-      /@media \(min-width: 361px\) and \(max-width: 480px\)[\s\S]*?\.aboutPage \.companySection\s*\{[^}]*(?:min-)?height\s*:/,
-    );
-    expect(stylesheet).not.toMatch(
-      /@media \(max-width: 360px\)[\s\S]*?\.aboutPage \.companySection\s*\{[^}]*(?:min-)?height\s*:/,
-    );
+    for (const mediaQuery of [
+      "@media \\(min-width: 361px\\) and \\(max-width: 480px\\)",
+      "@media \\(max-width: 360px\\)",
+    ]) {
+      const companyRules = stylesheet.match(
+        new RegExp(`${mediaQuery} \\{\\s*\\.aboutPage \\.companySection\\s*\\{([^}]*)\\}`),
+      )?.[1];
+
+      expect(companyRules).toBeDefined();
+      expect(companyRules).not.toMatch(/(?:min-)?height\s*:/);
+    }
   });
 
   it("uses the discrete Figma typography matrix for the about contact section", () => {

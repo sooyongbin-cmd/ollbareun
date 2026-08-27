@@ -7753,7 +7753,7 @@
 
   .aboutPage .valueGrid {
     width: calc(100% - 40px);
-    height: clamp(296px, calc(70vw + 44px), 380px);
+    height: 380px;
   }
 
   .aboutPage .valueGrid strong {

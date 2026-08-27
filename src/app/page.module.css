@@ -7624,8 +7624,8 @@
   }
 
   .aboutPage .aboutHero h1 {
-    font-size: clamp(26px, calc(5px + 5.8333vw), 33px);
-    line-height: clamp(34px, calc(16px + 5vw), 40px);
+    font-size: 33px;
+    line-height: 40px;
   }
 
   .aboutPage .companySection .sectionHeading > p {

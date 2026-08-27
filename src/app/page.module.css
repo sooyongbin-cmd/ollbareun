@@ -7878,11 +7878,6 @@
   }
 }
 
-/* Exact parent-frame reconciliation after the child layout contracts above. */
-.aboutPage .companySection {
-  height: 1387.38px;
-}
-
 .aboutPage .values {
   display: flex;
   height: 781.359px;

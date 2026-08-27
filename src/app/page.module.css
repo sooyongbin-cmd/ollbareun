@@ -8394,12 +8394,14 @@
   --about-company-history-width: 1182px;
   --about-history-image-width: 522px;
   --about-timeline-width: 539.954px;
+  --about-values-content-width: 1240px;
   --about-values-heading-width: 1240px;
   --about-values-grid-width: 1240px;
   --about-social-content-width: 1182px;
   --about-social-heading-width: 686px;
   --about-social-grid-width: 1182px;
   --about-social-card-width: 285px;
+  --about-contact-content-width: 1182px;
   --about-contact-map-width: 1182px;
   --about-contact-copy-width: 1096px;
   --about-contact-details-width: 539px;
@@ -8409,18 +8411,20 @@
   .aboutPage {
     --about-hero-height: 502.03px;
     --about-hero-font-size: 53px;
-    --about-company-content-width: 1182px;
+    --about-company-content-width: 1075px;
     --about-company-heading-width: 604px;
     --about-company-stats-width: 1075px;
     --about-company-history-width: 1055px;
     --about-history-image-width: 522px;
     --about-timeline-width: 443.954px;
+    --about-values-content-width: 981px;
     --about-values-heading-width: 1240px;
     --about-values-grid-width: 981px;
     --about-social-content-width: 686px;
     --about-social-heading-width: 686px;
     --about-social-grid-width: 584px;
     --about-social-card-width: 285px;
+    --about-contact-content-width: 741px;
     --about-contact-map-width: 740px;
     --about-contact-copy-width: 741px;
     --about-contact-details-width: 535px;
@@ -8431,18 +8435,20 @@
   .aboutPage {
     --about-hero-height: 502.03px;
     --about-hero-font-size: 53px;
-    --about-company-content-width: 604px;
+    --about-company-content-width: 590px;
     --about-company-heading-width: 604px;
     --about-company-stats-width: 590px;
     --about-company-history-width: 494px;
     --about-history-image-width: 496px;
     --about-timeline-width: 494px;
+    --about-values-content-width: 660px;
     --about-values-heading-width: 667px;
     --about-values-grid-width: 660px;
     --about-social-content-width: 1024px;
     --about-social-heading-width: 686px;
     --about-social-grid-width: 584px;
     --about-social-card-width: 285px;
+    --about-contact-content-width: 741px;
     --about-contact-map-width: 690px;
     --about-contact-copy-width: 741px;
     --about-contact-details-width: 535px;
@@ -8459,12 +8465,14 @@
     --about-company-history-width: 522px;
     --about-history-image-width: 522px;
     --about-timeline-width: 494px;
+    --about-values-content-width: 568px;
     --about-values-heading-width: 542px;
     --about-values-grid-width: 568px;
     --about-social-content-width: 768px;
     --about-social-heading-width: 686px;
     --about-social-grid-width: 768px;
     --about-social-card-width: 379px;
+    --about-contact-content-width: 741px;
     --about-contact-map-width: 568px;
     --about-contact-copy-width: 741px;
     --about-contact-details-width: 507px;
@@ -8475,18 +8483,20 @@
   .aboutPage {
     --about-hero-height: 323.165px;
     --about-hero-font-size: 38px;
-    --about-company-content-width: 640px;
+    --about-company-content-width: 440px;
     --about-company-heading-width: 468px;
     --about-company-stats-width: 440px;
     --about-company-history-width: 469.3px;
     --about-history-image-width: 440px;
     --about-timeline-width: 469.3px;
+    --about-values-content-width: 440px;
     --about-values-heading-width: 542px;
     --about-values-grid-width: 440px;
     --about-social-content-width: 640px;
     --about-social-heading-width: 506px;
     --about-social-grid-width: 341.1px;
     --about-social-card-width: 341.1px;
+    --about-contact-content-width: 540px;
     --about-contact-map-width: 440px;
     --about-contact-copy-width: 540px;
     --about-contact-details-width: 440px;
@@ -8503,12 +8513,14 @@
     --about-company-history-width: 320px;
     --about-history-image-width: 300.021px;
     --about-timeline-width: 320px;
+    --about-values-content-width: 320px;
     --about-values-heading-width: 269px;
     --about-values-grid-width: 320px;
     --about-social-content-width: 480px;
     --about-social-heading-width: 346px;
     --about-social-grid-width: 320px;
     --about-social-card-width: 320px;
+    --about-contact-content-width: 480px;
     --about-contact-map-width: 320px;
     --about-contact-copy-width: 480px;
     --about-contact-details-width: 320px;
@@ -8525,12 +8537,14 @@
     --about-company-history-width: 320px;
     --about-history-image-width: 300.021px;
     --about-timeline-width: 320px;
+    --about-values-content-width: 320px;
     --about-values-heading-width: 269px;
     --about-values-grid-width: 320px;
     --about-social-content-width: 360px;
     --about-social-heading-width: 346px;
     --about-social-grid-width: 320px;
     --about-social-card-width: 320px;
+    --about-contact-content-width: 480px;
     --about-contact-map-width: 320px;
     --about-contact-copy-width: 480px;
     --about-contact-details-width: 320px;
@@ -8547,8 +8561,8 @@
 }
 
 .aboutPage .companyInner {
-  width: var(--about-company-content-width);
-  max-width: 460px;
+  width: 100%;
+  max-width: var(--about-company-content-width);
 }
 
 .aboutPage .companySection .sectionHeading {
@@ -8557,8 +8571,8 @@
 }
 
 .aboutPage .stats {
-  width: var(--about-company-stats-width);
-  max-width: none;
+  width: 100%;
+  max-width: var(--about-company-stats-width);
 }
 
 .aboutPage .historyWrap {
@@ -8579,7 +8593,7 @@
 .aboutPage .valuesInner {
   display: flex;
   width: 100%;
-  max-width: none;
+  max-width: var(--about-values-content-width);
   flex-direction: column;
   align-items: center;
 }
@@ -8590,13 +8604,13 @@
 }
 
 .aboutPage .valueGrid {
-  width: var(--about-values-grid-width);
-  max-width: none;
+  width: 100%;
+  max-width: var(--about-values-grid-width);
 }
 
 .aboutPage .socialInner {
-  width: var(--about-social-content-width);
-  max-width: none;
+  width: 100%;
+  max-width: var(--about-social-content-width);
 }
 
 .aboutPage .socialGrid {
@@ -8611,24 +8625,36 @@
 
 .aboutPage .contactInner {
   width: 100%;
-  max-width: none;
+  max-width: var(--about-contact-content-width);
   align-items: center;
 }
 
 .aboutPage .contactSection .map {
-  width: var(--about-contact-map-width);
-  max-width: none;
+  width: 100%;
+  max-width: var(--about-contact-map-width);
 }
 
 .aboutPage .contactSection .contactCopy {
-  width: var(--about-contact-copy-width);
-  max-width: none;
+  width: 100%;
+  max-width: var(--about-contact-copy-width);
   flex: none;
 }
 
 @media (max-width: 360px) {
   .aboutPage .contactSection .contactCopy {
     width: 100%;
+  }
+
+  .aboutPage .companyInner,
+  .aboutPage .stats,
+  .aboutPage .valuesInner,
+  .aboutPage .valueGrid,
+  .aboutPage .socialInner,
+  .aboutPage .contactInner,
+  .aboutPage .contactSection .map,
+  .aboutPage .contactSection .contactCopy {
+    width: 100%;
+    max-width: none;
   }
 }
 
@@ -8659,7 +8685,6 @@
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
-  .aboutPage .socialInner,
   .aboutPage .socialSection .sectionHeading,
   .aboutPage .socialGrid {
     max-width: 686px;

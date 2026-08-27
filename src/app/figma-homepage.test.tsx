@@ -460,6 +460,9 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(stylesheet).not.toMatch(
       /\.contactInner\s*\{\s*width: clamp\(320px, calc\(83\.3333vw \+ 20px\), 420px\);\s*gap: clamp\(40px, calc\(-11px \+ 14\.1667vw\), 57px\);/,
     );
+    expect(stylesheet).toMatch(
+      /@media \(max-width: 360px\) \{\s*\.aboutPage \.contactSection \.contactCopy\s*\{\s*width: 100%;/,
+    );
   });
 
   it("uses the eight discrete Figma states for the landing header", () => {

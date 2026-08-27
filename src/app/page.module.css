@@ -8649,6 +8649,12 @@
   flex: none;
 }
 
+@media (max-width: 360px) {
+  .aboutPage .contactSection .contactCopy {
+    width: 100%;
+  }
+}
+
 .aboutPage .contactSection .contactCopy address {
   width: var(--about-contact-details-width);
   max-width: none;

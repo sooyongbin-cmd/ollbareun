@@ -7367,7 +7367,7 @@
 
   .aboutPage .historyImage {
     width: 100%;
-    height: clamp(418.47px, calc(352px + 8.6589vw), 440.49px);
+    height: 440.49px;
     flex: 0 0 auto;
   }
 

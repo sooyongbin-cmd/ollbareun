@@ -7337,9 +7337,9 @@
   }
 
   .aboutPage .stats {
-    width: clamp(570px, calc(525px + 5.8594vw), 585px);
+    width: 585px;
     height: 486px;
-    margin: 0 0 clamp(80px, calc(63px + 2.1484vw), 86px);
+    margin: 0 0 85px;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(2, 1fr);
   }
@@ -7534,8 +7534,8 @@
   }
 
   .aboutPage .stats {
-    width: clamp(570px, calc(495px + 11.7188vw), 585px);
-    margin-bottom: clamp(80px, calc(75px + 0.7813vw), 81px);
+    width: 585px;
+    margin-bottom: 81px;
   }
 
   .aboutPage .historyWrap {
@@ -7650,9 +7650,9 @@
   }
 
   .aboutPage .stats {
-    width: clamp(320px, calc(84.1667vw + 17px), 421px);
-    height: clamp(253px, calc(153.3333vw - 299px), 437px);
-    margin-bottom: clamp(51px, calc(45vw - 111px), 105px);
+    width: 421px;
+    height: 437px;
+    margin-bottom: 105px;
   }
 
   .aboutPage .stats > div {

@@ -7588,11 +7588,6 @@
     width: 100%;
   }
 
-  .aboutPage .contactSection {
-    padding: clamp(107px, calc(-1px + 14.0625vw), 125px) 0
-      clamp(97px, calc(37px + 9.375vw), 109px);
-  }
-
   .contactInner {
     width: 568px;
     gap: clamp(65px, calc(60px + 0.7813vw), 66px);
@@ -7844,11 +7839,6 @@
     margin-top: 9px;
     font-size: 14px;
     line-height: 20px;
-  }
-
-  .aboutPage .contactSection {
-    padding: clamp(51px, calc(-54px + 29.1667vw), 86px) 0
-      clamp(58px, calc(10px + 13.3333vw), 74px);
   }
 
   .contactInner {

@@ -447,6 +447,15 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(mobileOperationDescription).not.toMatch(/\b(?:width|max-width)\s*:/);
   });
 
+  it("does not override the responsive contact section padding with viewport calculations", () => {
+    expect(stylesheet).not.toMatch(
+      /\.aboutPage \.contactSection\s*\{\s*padding: clamp\(107px, calc\(-1px \+ 14\.0625vw\), 125px\)/,
+    );
+    expect(stylesheet).not.toMatch(
+      /\.aboutPage \.contactSection\s*\{\s*padding: clamp\(51px, calc\(-54px \+ 29\.1667vw\), 86px\)/,
+    );
+  });
+
   it("uses the eight discrete Figma states for the landing header", () => {
     const headerRules = stylesheet.split(
       "/* Landing page header: eight discrete Figma viewport states. */",

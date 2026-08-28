@@ -8640,6 +8640,10 @@
   flex: none;
 }
 
+.aboutPage .contactSection .contactCopy h2 {
+  line-height: normal;
+}
+
 @media (max-width: 360px) {
   .aboutPage .contactSection .contactCopy {
     width: 100%;

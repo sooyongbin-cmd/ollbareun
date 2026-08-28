@@ -568,15 +568,32 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(stylesheet).toMatch(/\.landingPage \.homeClientLogos\s*\{[^}]*grid-auto-flow: column;/s);
   });
 
-  it("uses one shared content frame for each landing preview section", () => {
-    expect(stylesheet).toMatch(
-      /\.landingPage \.serviceContent,\s*\.landingPage \.clientContent\s*\{[^}]*width: var\(--landing-content-width\);/s,
+  it("uses the edited sheet's discrete section 2-4 sizing contract", () => {
+    const contract = stylesheet.slice(
+      stylesheet.lastIndexOf("Landing section 2-4 sizing contract"),
     );
-    expect(stylesheet).toMatch(/\.landingPage \.splitIntro\s*\{[^}]*width: var\(--landing-content-width\);/s);
-    expect(stylesheet).toMatch(/\.landingPage \.serviceBody,\s*\.landingPage \.clientBody\s*\{[^}]*width: 100%;/s);
-    expect(stylesheet).toMatch(/\.landingPage \.serviceBody > \.sectionHeading\s*\{[^}]*align-self: flex-start;/s);
-    expect(stylesheet).toMatch(/\.landingPage \.clientBody > \.sectionHeading\s*\{/s);
-    expect(stylesheet).toMatch(/@media \(min-width: 641px\) and \(max-width: 768px\)\s*\{[^}]*\.landingPage \.homeClientLogos\s*\{[^}]*align-self: center;[^}]*max-width: none;/s);
-    expect(stylesheet).toMatch(/\.landingPage \.clientContent > \.moreLink\s*\{[^}]*font-weight: 400;/s);
+
+    expect(contract).not.toMatch(/\b(?:calc|clamp)\(/);
+    expect(contract).toMatch(
+      /\.landingPage \.trustSection,[\s\S]*?padding-top: 200px;[\s\S]*?padding-right: 0;[\s\S]*?padding-bottom: 200px;[\s\S]*?padding-left: 0;/,
+    );
+    expect(contract).toMatch(
+      /\.landingPage \.splitIntro,\s*\.landingPage \.serviceContent,\s*\.landingPage \.clientContent\s*\{[^}]*width: 100%;/s,
+    );
+    expect(contract).toMatch(/\.landingPage \.splitIntro\s*\{[^}]*max-width: 1182px;/s);
+    expect(contract).toMatch(/\.landingPage \.serviceContent\s*\{[^}]*max-width: 1182px;/s);
+    expect(contract).toMatch(/\.landingPage \.clientContent\s*\{[^}]*max-width: 1182px;/s);
+    expect(contract).toMatch(
+      /@media \(min-width: 769px\) and \(max-width: 1024px\)[\s\S]*?\.landingPage \.splitIntro\s*\{\s*max-width: 769px;[\s\S]*?\.landingPage \.serviceContent,[\s\S]*?max-width: 708px;/s,
+    );
+    expect(contract).toMatch(
+      /@media \(min-width: 641px\) and \(max-width: 768px\)[\s\S]*?\.landingPage \.splitIntro\s*\{\s*max-width: 571px;[\s\S]*?\.landingPage \.serviceContent\s*\{\s*max-width: 560px;[\s\S]*?\.landingPage \.clientContent\s*\{\s*max-width: 600px;/s,
+    );
+    expect(contract).toMatch(
+      /@media \(min-width: 361px\) and \(max-width: 480px\)[\s\S]*?\.landingPage \.splitIntro,[\s\S]*?max-width: 320px;[\s\S]*?\.landingPage \.clientContent\s*\{\s*max-width: 420px;/s,
+    );
+    expect(contract).toMatch(
+      /@media \(max-width: 360px\)[\s\S]*?\.landingPage \.trustSection \.splitIntro,[\s\S]*?width: 100%;[\s\S]*?max-width: none;/s,
+    );
   });
 });

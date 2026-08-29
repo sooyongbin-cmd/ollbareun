@@ -6,7 +6,6 @@ import { useEffect, useState, type ReactNode } from "react";
 import styles from "./page.module.css";
 import HomepageContactMap from "./homepage-contact-map";
 import HomepageFooter from "./homepage-footer";
-import HomepageHeader from "./homepage-header";
 
 type ServiceItem = {
   title: string;
@@ -361,7 +360,6 @@ function HomeClientPreview() {
 export function MainPage() {
   return (
     <main id="top" className={`${styles.site} ${styles.landingPage}`}>
-      <HomepageHeader />
       <section className={styles.hero} aria-labelledby="hero-title">
         <Image
           src="/homepage/hero-lighthouse-figma.png"
@@ -484,7 +482,6 @@ export function MainPage() {
 export function AboutPage() {
   return (
     <main id="top" className={`${styles.site} ${styles.aboutPage}`}>
-      <HomepageHeader />
       <section className={styles.aboutHero}>
         <Image
           src="/homepage/archive/hero-about.jpg"
@@ -625,7 +622,6 @@ export function AboutPage() {
 export function ServicesPage() {
   return (
     <main id="top" className={`${styles.site} ${styles.servicesPage}`}>
-      <HomepageHeader />
       <section className={styles.serviceHero}>
         <Image src="/homepage/archive/hero-services.jpg" alt="" fill priority sizes="100vw" className={styles.coverImage} />
         <div className={styles.serviceHeroOverlay} />
@@ -784,7 +780,6 @@ export function ServicesPage() {
 export function ClientsPage() {
   return (
     <main id="top" className={`${styles.site} ${styles.clientsPage}`}>
-      <HomepageHeader />
       <section className={styles.clientHero}>
         <Image src="/homepage/archive/hero-clients.jpg" alt="" fill priority sizes="100vw" className={styles.coverImage} />
         <div className={styles.clientOverlay} />

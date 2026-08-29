@@ -10638,7 +10638,7 @@
 }
 
 /* Landing page header: eight discrete Figma viewport states. */
-.landingPage {
+.site:has(.landingPage) {
   --landing-header-height: 64px;
   --landing-header-logo-width: 173px;
   --landing-header-logo-height: 29px;
@@ -10651,12 +10651,12 @@
   --landing-header-brand-gap: 50px;
 }
 
-.landingPage .header:not(.mobileHeaderOpen),
-.landingPage .header:not(.mobileHeaderOpen) .headerInner {
+.site:has(.landingPage) .header:not(.mobileHeaderOpen),
+.site:has(.landingPage) .header:not(.mobileHeaderOpen) .headerInner {
   height: var(--landing-header-height);
 }
 
-.landingPage .header:not(.mobileHeaderOpen) .headerInner {
+.site:has(.landingPage) .header:not(.mobileHeaderOpen) .headerInner {
   width: 100%;
   max-width: 1320px;
   padding-right: var(--landing-header-padding-right);
@@ -10664,14 +10664,14 @@
   justify-content: space-between;
 }
 
-.landingPage .header:not(.mobileHeaderOpen) .megaMenuInner {
+.site:has(.landingPage) .header:not(.mobileHeaderOpen) .megaMenuInner {
   width: 100%;
   max-width: 1320px;
   padding-right: var(--landing-header-padding-right);
   padding-left: var(--landing-header-padding-left);
 }
 
-.landingPage .header:not(.mobileHeaderOpen) .brandCluster {
+.site:has(.landingPage) .header:not(.mobileHeaderOpen) .brandCluster {
   position: static;
   display: flex;
   width: auto;
@@ -10680,9 +10680,9 @@
   gap: var(--landing-header-brand-gap);
 }
 
-.landingPage .header:not(.mobileHeaderOpen) .brandCluster > a,
-.landingPage .header:not(.mobileHeaderOpen) .brand,
-.landingPage .header:not(.mobileHeaderOpen) .brandLogo {
+.site:has(.landingPage) .header:not(.mobileHeaderOpen) .brandCluster > a,
+.site:has(.landingPage) .header:not(.mobileHeaderOpen) .brand,
+.site:has(.landingPage) .header:not(.mobileHeaderOpen) .brandLogo {
   position: static;
   width: var(--landing-header-logo-width);
   height: var(--landing-header-logo-height);
@@ -10691,7 +10691,7 @@
   flex: none;
 }
 
-.landingPage .header:not(.mobileHeaderOpen) .certification {
+.site:has(.landingPage) .header:not(.mobileHeaderOpen) .certification {
   position: static;
   width: auto;
   height: auto;
@@ -10703,17 +10703,17 @@
   white-space: nowrap;
 }
 
-.landingPage .header:not(.mobileHeaderOpen) .desktopNav {
+.site:has(.landingPage) .header:not(.mobileHeaderOpen) .desktopNav {
   font-size: var(--landing-header-menu-font);
 }
 
-.landingPage .header:not(.mobileHeaderOpen) .mobileMenuButton,
-.landingPage .header:not(.mobileHeaderOpen) .mobileMenuGlyph {
+.site:has(.landingPage) .header:not(.mobileHeaderOpen) .mobileMenuButton,
+.site:has(.landingPage) .header:not(.mobileHeaderOpen) .mobileMenuGlyph {
   width: var(--landing-header-hamburger-width);
   height: var(--landing-header-hamburger-height);
 }
 
-.landingPage .header:not(.mobileHeaderOpen) .mobileMenuButton {
+.site:has(.landingPage) .header:not(.mobileHeaderOpen) .mobileMenuButton {
   position: relative;
   margin-left: auto;
   padding: 0;
@@ -10721,37 +10721,37 @@
   background: transparent;
 }
 
-.landingPage .header:not(.mobileHeaderOpen) .mobileMenuGlyph {
+.site:has(.landingPage) .header:not(.mobileHeaderOpen) .mobileMenuGlyph {
   position: absolute;
   top: 0;
   left: 0;
 }
 
-.landingPage .header:not(.mobileHeaderOpen) .mobileMenuGlyph img {
+.site:has(.landingPage) .header:not(.mobileHeaderOpen) .mobileMenuGlyph img {
   width: 100%;
   height: 100%;
 }
 
 @media (min-width: 769px) and (max-width: 1062px) {
-  .landingPage {
+  .site:has(.landingPage) {
     --landing-header-padding-left: 50px;
     --landing-header-padding-right: 50px;
     --landing-header-brand-gap: 30px;
   }
 
-  .landingPage .header:not(.mobileHeaderOpen) .headerInner {
+  .site:has(.landingPage) .header:not(.mobileHeaderOpen) .headerInner {
     max-width: 1240px;
   }
 }
 
 @media (min-width: 641px) and (max-width: 768px) {
-  .landingPage {
+  .site:has(.landingPage) {
     --landing-header-padding-left: 40px;
     --landing-header-padding-right: 40px;
     --landing-header-brand-gap: 31px;
   }
 
-  .landingPage .header:not(.mobileHeaderOpen) .headerInner {
+  .site:has(.landingPage) .header:not(.mobileHeaderOpen) .headerInner {
     max-width: none;
   }
 }
@@ -11035,7 +11035,7 @@
 }
 
 @media (min-width: 481px) and (max-width: 640px) {
-  .landingPage {
+  .site:has(.landingPage) {
     --landing-header-height: 54px;
     --landing-header-logo-width: 144px;
     --landing-header-logo-height: 25px;
@@ -11047,13 +11047,13 @@
     --landing-header-brand-gap: 25px;
   }
 
-  .landingPage .header:not(.mobileHeaderOpen) .headerInner {
+  .site:has(.landingPage) .header:not(.mobileHeaderOpen) .headerInner {
     max-width: none;
   }
 }
 
 @media (min-width: 361px) and (max-width: 480px) {
-  .landingPage {
+  .site:has(.landingPage) {
     --landing-header-height: 47px;
     --landing-header-logo-width: 130px;
     --landing-header-logo-height: 22px;
@@ -11065,13 +11065,13 @@
     --landing-header-brand-gap: 22px;
   }
 
-  .landingPage .header:not(.mobileHeaderOpen) .headerInner {
+  .site:has(.landingPage) .header:not(.mobileHeaderOpen) .headerInner {
     max-width: none;
   }
 }
 
 @media (max-width: 360px) {
-  .landingPage {
+  .site:has(.landingPage) {
     --landing-header-height: 39px;
     --landing-header-logo-width: 108px;
     --landing-header-logo-height: 18px;
@@ -11083,7 +11083,7 @@
     --landing-header-brand-gap: 19px;
   }
 
-  .landingPage .header:not(.mobileHeaderOpen) .headerInner {
+  .site:has(.landingPage) .header:not(.mobileHeaderOpen) .headerInner {
     max-width: none;
   }
 }

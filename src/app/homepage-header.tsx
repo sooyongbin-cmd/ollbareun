@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import styles from "./page.module.css";
 
 type MenuKey = "about" | "services" | "clients";
@@ -73,11 +73,57 @@ function HeaderBrand({ mobileOpen = false }: { mobileOpen?: boolean }) {
   );
 }
 
+type HeaderState = {
+  pathname: string;
+  openMenu: MenuKey | null;
+  mobileOpen: boolean;
+  mobileOpenMenu: MenuKey | null;
+};
+
+function createClosedHeaderState(pathname: string): HeaderState {
+  return {
+    pathname,
+    openMenu: null,
+    mobileOpen: false,
+    mobileOpenMenu: null,
+  };
+}
+
 export default function HomepageHeader() {
   const pathname = usePathname();
-  const [openMenu, setOpenMenu] = useState<MenuKey | null>(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [mobileOpenMenu, setMobileOpenMenu] = useState<MenuKey | null>(null);
+  const [headerState, setHeaderState] = useState<HeaderState>(() =>
+    createClosedHeaderState(pathname),
+  );
+  const currentHeaderState =
+    headerState.pathname === pathname
+      ? headerState
+      : createClosedHeaderState(pathname);
+  const { openMenu, mobileOpen, mobileOpenMenu } = currentHeaderState;
+
+  const updateHeaderState = useCallback((update: (state: HeaderState) => HeaderState) => {
+    setHeaderState((current) =>
+      update(current.pathname === pathname ? current : createClosedHeaderState(pathname)),
+    );
+  }, [pathname]);
+
+  const setOpenMenu = useCallback((next: MenuKey | null) => {
+    updateHeaderState((state) => ({ ...state, openMenu: next }));
+  }, [updateHeaderState]);
+
+  const setMobileOpen = useCallback((
+    next: boolean | ((current: boolean) => boolean),
+  ) => {
+    updateHeaderState((state) => ({
+      ...state,
+      mobileOpen:
+        typeof next === "function" ? next(state.mobileOpen) : next,
+    }));
+  }, [updateHeaderState]);
+
+  const setMobileOpenMenu = useCallback((next: MenuKey | null) => {
+    updateHeaderState((state) => ({ ...state, mobileOpenMenu: next }));
+  }, [updateHeaderState]);
+
   const activeMenu: MenuKey | null = pathname.startsWith("/about")
     ? "about"
     : pathname.startsWith("/services")
@@ -98,7 +144,7 @@ export default function HomepageHeader() {
 
     document.addEventListener("keydown", closeOnEscape);
     return () => document.removeEventListener("keydown", closeOnEscape);
-  }, [mobileOpen]);
+  }, [mobileOpen, setMobileOpen, setMobileOpenMenu]);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -165,12 +211,11 @@ export default function HomepageHeader() {
           aria-label={mobileOpen ? "메뉴 닫기" : "메뉴 열기"}
           aria-expanded={mobileOpen}
           aria-controls="homepage-mobile-menu"
-          onClick={() =>
-            setMobileOpen((open) => {
-              if (open) setMobileOpenMenu(null);
-              return !open;
-            })
-          }
+          onClick={() => {
+            const wasOpen = mobileOpen;
+            setMobileOpen(!wasOpen);
+            if (wasOpen) setMobileOpenMenu(null);
+          }}
         >
           <span className={styles.mobileMenuGlyph} aria-hidden="true">
             <Image
@@ -230,11 +275,7 @@ export default function HomepageHeader() {
                   className={`${styles.mobileMenuTitle} ${isExpanded ? styles.mobileMenuTitleActive : ""}`}
                   aria-expanded={isExpanded}
                   aria-controls={`homepage-mobile-submenu-${column.key}`}
-                  onClick={() =>
-                    setMobileOpenMenu((current) =>
-                      current === column.key ? null : column.key,
-                    )
-                  }
+                  onClick={() => setMobileOpenMenu(isExpanded ? null : column.key)}
                 >
                   <span aria-hidden="true">
                     <Image

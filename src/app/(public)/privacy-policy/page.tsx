@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import HomepageFooter from "../homepage-footer";
-import HomepageHeader from "../homepage-header";
-import homepageStyles from "../page.module.css";
+import HomepageFooter from "../../homepage-footer";
+import homepageStyles from "../../page.module.css";
 import styles from "./privacy-policy.module.css";
 
 export const metadata: Metadata = {
@@ -20,7 +19,6 @@ const retentionItems = [
 export default function PrivacyPolicyPage() {
   return (
     <main id="top" className={`${homepageStyles.site} ${styles.page}`}>
-      <HomepageHeader />
       <article className={styles.policy}>
         <h1>개인정보처리방침</h1>
         <div className={styles.content}>

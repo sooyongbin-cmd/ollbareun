@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ServicesPage } from "../homepage-pages";
+import { ServicesPage } from "../../homepage-pages";
 
 export const metadata: Metadata = {
   title: "서비스 | 주식회사 올바름",

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AboutPage } from "../homepage-pages";
+import { AboutPage } from "../../homepage-pages";
 
 export const metadata: Metadata = {
   title: "올바름 소개 | 주식회사 올바름",

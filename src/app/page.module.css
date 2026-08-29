@@ -10657,7 +10657,7 @@
 
 .site:has(.landingPage) .header:not(.mobileHeaderOpen) .megaMenuInner {
   width: 100%;
-  max-width: 1320px;
+  max-width: 1290px;
   padding-right: var(--landing-header-padding-right);
   padding-left: var(--landing-header-padding-left);
 }

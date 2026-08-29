@@ -11366,3 +11366,42 @@
     line-height: 35px;
   }
 }
+
+/* Landing text-frame gaps follow the gap sheet. */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .landingPage .homeClientSection .sectionHeading > p {
+    margin-bottom: 18px;
+  }
+
+  .landingPage .homeClientSection .sectionHeading > span {
+    margin-top: 18px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .landingPage .homeClientSection .sectionHeading > p {
+    margin-bottom: 18px;
+  }
+
+  .landingPage .homeClientSection .sectionHeading > span {
+    margin-top: 18px;
+  }
+}
+
+@media (min-width: 361px) and (max-width: 640px) {
+  .landingPage .sectionHeading > p {
+    margin-bottom: 18px;
+  }
+
+  .landingPage .sectionHeading > span {
+    margin-top: 18px;
+  }
+
+  .landingPage .homeClientSection .sectionHeading > p {
+    margin-bottom: 15px;
+  }
+
+  .landingPage .homeClientSection .sectionHeading > span {
+    margin-top: 15px;
+  }
+}

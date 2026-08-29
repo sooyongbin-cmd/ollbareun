@@ -5756,10 +5756,6 @@
     /* width: min(1290px, calc(100% - 40px)); */
   }
 
-  .headerInner {
-    height: 64px;
-  }
-
   .brandCluster {
     height: 29.463px;
     align-self: center;

@@ -7,7 +7,7 @@ export default function PublicLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className={styles.site}>
+    <div className={`${styles.site} ${styles.publicSite}`}>
       <HomepageHeader />
       {children}
     </div>

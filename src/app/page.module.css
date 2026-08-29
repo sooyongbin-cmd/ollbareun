@@ -9247,7 +9247,6 @@
   align-self: flex-start;
   width: var(--landing-service-heading-width);
   max-width: 100%;
-  height: var(--landing-service-heading-height);
   margin-bottom: var(--landing-service-heading-grid-gap);
 }
 

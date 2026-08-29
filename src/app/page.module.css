@@ -9618,6 +9618,7 @@
   }
 
   .landingPage .homeClientLogos {
+    width: 100%;
     align-self: center;
     max-width: none;
   }

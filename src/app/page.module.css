@@ -9294,7 +9294,6 @@
 .landingPage .clientBody > .sectionHeading {
   width: var(--landing-client-heading-width);
   max-width: 100%;
-  height: var(--landing-client-heading-height);
   margin-bottom: var(--landing-client-heading-logo-gap);
 }
 

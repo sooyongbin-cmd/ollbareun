@@ -11481,4 +11481,8 @@
   .landingPage .mobileServiceBreak {
     display: none;
   }
+
+  .landingPage .homeClientSection .mobileOnlyCopy br {
+    display: none;
+  }
 }

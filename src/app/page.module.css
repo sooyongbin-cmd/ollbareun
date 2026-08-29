@@ -5758,7 +5758,7 @@
 
   .headerInner,
   .megaMenuInner {
-    width: min(1290px, calc(100% - 40px));
+    /* width: min(1290px, calc(100% - 40px)); */
   }
 
   .headerInner {

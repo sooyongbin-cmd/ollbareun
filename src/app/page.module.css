@@ -10650,6 +10650,8 @@
 .site:has(.landingPage) .header:not(.mobileHeaderOpen) .headerInner {
   width: 100%;
   max-width: 1290px;
+  padding-right: var(--landing-header-padding-right);
+  padding-left: var(--landing-header-padding-left);
   justify-content: space-between;
 }
 

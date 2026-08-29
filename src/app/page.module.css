@@ -5751,11 +5751,6 @@
 
 /* Figma header component: desktop from 1063px, mobile through 1062px. */
 @media (min-width: 1063px) {
-  .header,
-  .headerMenuOpen {
-    background: rgb(0 0 0 / 35%);
-  }
-
   .headerInner,
   .megaMenuInner {
     /* width: min(1290px, calc(100% - 40px)); */

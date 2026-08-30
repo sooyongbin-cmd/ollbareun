@@ -7726,7 +7726,7 @@
   }
 
   .aboutPage .values .sectionHeading > span {
-    width: 269px;
+    width: 281px;
     margin: 20px auto 0;
     padding: 0;
     font-size: 18px;
@@ -7734,6 +7734,7 @@
   }
 
   .aboutPage .values .sectionHeading > span strong {
+    display: block;
     font-size: inherit;
   }
 

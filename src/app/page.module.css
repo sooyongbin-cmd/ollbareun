@@ -3930,18 +3930,18 @@
   }
 
   .aboutPage .companySection {
-    min-height: calc(1101.24px + 14.903vw);
-    height: calc(1101.24px + 14.903vw);
+    /* min-height: calc(1101.24px + 14.903vw); */
+    /* height: calc(1101.24px + 14.903vw); */
   }
 
   .aboutPage .values {
-    min-height: calc(801.282px - 1.038vw);
-    height: calc(801.282px - 1.038vw);
+    /* min-height: calc(801.282px - 1.038vw); */
+    /* height: calc(801.282px - 1.038vw); */
   }
 
   .aboutPage .socialSection {
-    min-height: calc(347px + 30vw);
-    height: calc(347px + 30vw);
+    /* min-height: calc(347px + 30vw); */
+    /* height: calc(347px + 30vw); */
   }
 
   .servicesPage .dispatchDiagram {
@@ -5130,18 +5130,18 @@
   }
 
   .aboutPage .companySection {
-    min-height: calc(5012px - 290.625vw);
-    height: calc(5012px - 290.625vw);
+    /* min-height: calc(5012px - 290.625vw); */
+    /* height: calc(5012px - 290.625vw); */
   }
 
   .aboutPage .values {
-    min-height: calc(1789.795px - 78.265vw);
-    height: calc(1789.795px - 78.265vw);
+    /* min-height: calc(1789.795px - 78.265vw); */
+    /* height: calc(1789.795px - 78.265vw); */
   }
 
   .aboutPage .socialSection {
-    min-height: calc(1881px - 89.844vw);
-    height: calc(1881px - 89.844vw);
+    /* min-height: calc(1881px - 89.844vw); */
+    /* height: calc(1881px - 89.844vw); */
   }
 
   .servicesPage .dispatchDiagram {
@@ -5228,13 +5228,13 @@
   }
 
   .aboutPage .companySection {
-    min-height: calc(1872px + 16.016vw);
-    height: calc(1872px + 16.016vw);
+    /* min-height: calc(1872px + 16.016vw); */
+    /* height: calc(1872px + 16.016vw); */
   }
 
   .aboutPage .values {
-    min-height: calc(986.923px + 0.14vw);
-    height: calc(986.923px + 0.14vw);
+    /* min-height: calc(986.923px + 0.14vw); */
+    /* height: calc(986.923px + 0.14vw); */
   }
 
   .servicesPage .disinfectionSection {
@@ -5355,13 +5355,13 @@
   }
 
   .aboutPage .companySection {
-    min-height: calc(1965px + 3.906vw);
-    height: calc(1965px + 3.906vw);
+    /* min-height: calc(1965px + 3.906vw); */
+    /* height: calc(1965px + 3.906vw); */
   }
 
   .aboutPage .values {
-    min-height: 988px;
-    height: 988px;
+    /* min-height: 988px; */
+    /* height: 988px; */
   }
 
   .clientsPage .clientsSection {
@@ -5539,18 +5539,18 @@
   }
 
   .aboutPage .companySection {
-    min-height: calc(1370px + 96.875vw);
-    height: calc(1370px + 96.875vw);
+    /* min-height: calc(1370px + 96.875vw); */
+    /* height: calc(1370px + 96.875vw); */
   }
 
   .aboutPage .values {
-    min-height: calc(-4.4px + 155.063vw);
-    height: calc(-4.4px + 155.063vw);
+    /* min-height: calc(-4.4px + 155.063vw); */
+    /* height: calc(-4.4px + 155.063vw); */
   }
 
   .aboutPage .socialSection {
-    min-height: calc(1121px + 34.375vw);
-    height: calc(1121px + 34.375vw);
+    /* min-height: calc(1121px + 34.375vw); */
+    /* height: calc(1121px + 34.375vw); */
   }
 
   .clientsPage .clientsSection {
@@ -5618,13 +5618,13 @@
   }
 
   .aboutPage .values {
-    min-height: calc(129.3px + 127.208vw);
-    height: calc(129.3px + 127.208vw);
+    /* min-height: calc(129.3px + 127.208vw); */
+    /* height: calc(129.3px + 127.208vw); */
   }
 
   .aboutPage .socialSection {
-    min-height: calc(829.72px + 95.058vw);
-    height: calc(829.72px + 95.058vw);
+    /* min-height: calc(829.72px + 95.058vw); */
+    /* height: calc(829.72px + 95.058vw); */
   }
 
   .clientsPage .clientsSection {
@@ -5705,13 +5705,13 @@
   }
 
   .aboutPage .values {
-    min-height: 587.25px;
-    height: 587.25px;
+    /* min-height: 587.25px; */
+    /* height: 587.25px; */
   }
 
   .aboutPage .socialSection {
-    min-height: 1171.93px;
-    height: 1171.93px;
+    /* min-height: 1171.93px; */
+    /* height: 1171.93px; */
   }
 
   .clientsPage .clientsSection {
@@ -7937,11 +7937,11 @@
 
 @media (min-width: 1025px) and (max-width: 1280px) {
   .aboutPage .companySection {
-    height: 1292px;
+    /* height: 1292px; */
   }
 
   .aboutPage .values {
-    height: 788px;
+    /* height: 788px; */
   }
 
   .socialInner {
@@ -8154,14 +8154,14 @@
 
 @media (min-width: 641px) and (max-width: 768px) {
   .aboutPage .companySection {
-    height: calc(1965px + 3.90625vw);
+    /* height: calc(1965px + 3.90625vw); */
     padding-top: 120px;
     padding-bottom: 120px;
   }
 
   .aboutPage .values {
     display: flex;
-    height: 988px;
+    /* height: 988px; */
     align-items: center;
     justify-content: center;
   }
@@ -8266,7 +8266,7 @@
 
   .aboutPage .values {
     display: flex;
-    height: 803px;
+    /* height: 803px; */
     align-items: center;
     justify-content: center;
   }
@@ -8335,7 +8335,7 @@
   }
 
   .aboutPage .socialSection {
-    height: 1171.75px;
+    /* height: 1171.75px; */
   }
 
   .aboutPage .contactSection .contactCopy {

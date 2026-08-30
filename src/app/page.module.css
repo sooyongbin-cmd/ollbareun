@@ -13113,6 +13113,18 @@
   }
 }
 
+/* Page 2 company description: match the Figma three-line copy at 480px and below. */
+@media (max-width: 480px) {
+  .aboutPage .companySection .companyDescriptionBreak {
+    display: none;
+  }
+
+  .aboutPage .companySection .sectionHeading > span {
+    white-space: normal;
+    letter-spacing: -0.48px;
+  }
+}
+
 @media (max-width: 360px) {
   .aboutPage .companyInner {
     gap: 0;

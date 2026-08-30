@@ -11829,3 +11829,756 @@
     padding-bottom: 120px;
   }
 }
+
+/* Page 2 section2-section5 text typography matrix from page2/text. */
+@media (min-width: 1281px) {
+  .aboutPage .companySection .sectionHeading > p {
+    font-size: 29px;
+    line-height: 35px;
+  }
+
+  .aboutPage .companySection .sectionHeading h2 {
+    font-size: 43px;
+    line-height: 51px;
+  }
+
+  .aboutPage .companySection .sectionHeading > span {
+    font-size: 21px;
+    line-height: 28px;
+  }
+
+  .aboutPage .stats strong {
+    font-size: 59px;
+    line-height: 71px;
+  }
+
+  .aboutPage .stats span {
+    font-size: 17px;
+    line-height: 20px;
+  }
+
+  .aboutPage .timeline time {
+    font-size: 40px;
+    line-height: 48px;
+  }
+
+  .aboutPage .timeline p {
+    font-size: 16px;
+    line-height: 27px;
+  }
+
+  .aboutPage .values .sectionHeading > p {
+    font-size: 26px;
+    line-height: 31px;
+  }
+
+  .aboutPage .values .sectionHeading h2 {
+    font-size: 49px;
+    line-height: 58px;
+  }
+
+  .aboutPage .values .sectionHeading > span {
+    font-size: 19px;
+    line-height: 24px;
+  }
+
+  .aboutPage .valueGrid strong {
+    font-size: 74px;
+    line-height: 88px;
+  }
+
+  .aboutPage .valueGrid span {
+    font-size: 26px;
+    line-height: 31px;
+  }
+
+  .aboutPage .valueGrid article:not(:last-child) p {
+    font-size: 15px;
+    line-height: 18px;
+  }
+
+  .aboutPage .valueGrid article:last-child p {
+    font-size: 15px;
+    line-height: 20px;
+  }
+
+  .aboutPage .socialSection .sectionHeading h2 {
+    font-size: 42px;
+    line-height: 50px;
+  }
+
+  .aboutPage .socialSection .sectionHeading > span {
+    font-size: 20px;
+    line-height: 29px;
+  }
+
+  .aboutPage .socialGrid h3 {
+    font-size: 26px;
+    line-height: 31px;
+  }
+
+  .aboutPage .socialGrid p {
+    font-size: 18px;
+    line-height: 25px;
+  }
+
+  .aboutPage .socialGrid article:nth-child(4) p {
+    line-height: 25px;
+  }
+
+  .aboutPage .contactSection .contactCopy h2 {
+    font-size: 39px;
+    line-height: 49px;
+  }
+
+  .aboutPage .contactSection .contactCopy address strong {
+    font-size: 18px;
+    line-height: 21px;
+  }
+
+  .aboutPage .contactSection .contactCopy address .contactValue {
+    font-size: 16px;
+    line-height: 25px;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .aboutPage .companySection .sectionHeading > p {
+    font-size: 29px;
+    line-height: 35px;
+  }
+
+  .aboutPage .companySection .sectionHeading h2 {
+    font-size: 43px;
+    line-height: 51px;
+  }
+
+  .aboutPage .companySection .sectionHeading > span {
+    font-size: 21px;
+    line-height: 28px;
+  }
+
+  .aboutPage .stats strong {
+    font-size: 59px;
+    line-height: 71px;
+  }
+
+  .aboutPage .stats span {
+    font-size: 17px;
+    line-height: 20px;
+  }
+
+  .aboutPage .timeline time {
+    font-size: 40px;
+    line-height: 48px;
+  }
+
+  .aboutPage .timeline p {
+    font-size: 16px;
+    line-height: 27px;
+  }
+
+  .aboutPage .values .sectionHeading > p {
+    font-size: 26px;
+    line-height: 31px;
+  }
+
+  .aboutPage .values .sectionHeading h2 {
+    font-size: 49px;
+    line-height: 58px;
+  }
+
+  .aboutPage .values .sectionHeading > span {
+    font-size: 19px;
+    line-height: 24px;
+  }
+
+  .aboutPage .valueGrid strong {
+    font-size: 74px;
+    line-height: 88px;
+  }
+
+  .aboutPage .valueGrid span {
+    font-size: 26px;
+    line-height: 31px;
+  }
+
+  .aboutPage .valueGrid article:not(:last-child) p {
+    font-size: 15px;
+    line-height: 18px;
+  }
+
+  .aboutPage .valueGrid article:last-child p {
+    font-size: 15px;
+    line-height: 20px;
+  }
+
+  .aboutPage .socialSection .sectionHeading h2 {
+    font-size: 42px;
+    line-height: 50px;
+  }
+
+  .aboutPage .socialSection .sectionHeading > span {
+    font-size: 20px;
+    line-height: 29px;
+  }
+
+  .aboutPage .socialGrid h3 {
+    font-size: 26px;
+    line-height: 31px;
+  }
+
+  .aboutPage .socialGrid p {
+    font-size: 18px;
+    line-height: 25px;
+  }
+
+  .aboutPage .contactSection .contactCopy h2 {
+    font-size: 42px;
+    line-height: 49px;
+  }
+
+  .aboutPage .contactSection .contactCopy address strong {
+    font-size: 18px;
+    line-height: 21px;
+  }
+
+  .aboutPage .contactSection .contactCopy address .contactValue {
+    font-size: 16px;
+    line-height: 25px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .aboutPage .companySection .sectionHeading > p {
+    font-size: 23px;
+    line-height: 27px;
+  }
+
+  .aboutPage .companySection .sectionHeading h2 {
+    font-size: 42px;
+    line-height: 50px;
+  }
+
+  .aboutPage .companySection .sectionHeading > span {
+    font-size: 20px;
+    line-height: 28px;
+  }
+
+  .aboutPage .stats strong {
+    font-size: 59px;
+    line-height: 71px;
+  }
+
+  .aboutPage .stats span {
+    font-size: 17px;
+    line-height: 20px;
+  }
+
+  .aboutPage .timeline time {
+    font-size: 40px;
+    line-height: 48px;
+  }
+
+  .aboutPage .timeline p {
+    font-size: 16px;
+    line-height: 27px;
+  }
+
+  .aboutPage .values .sectionHeading > p {
+    font-size: 23px;
+    line-height: 27px;
+  }
+
+  .aboutPage .values .sectionHeading h2 {
+    font-size: 49px;
+    line-height: 58px;
+  }
+
+  .aboutPage .values .sectionHeading > span {
+    font-size: 19px;
+    line-height: 24px;
+  }
+
+  .aboutPage .valueGrid strong {
+    font-size: 74px;
+    line-height: 88px;
+  }
+
+  .aboutPage .valueGrid span {
+    font-size: 26px;
+    line-height: 31px;
+  }
+
+  .aboutPage .valueGrid article:not(:last-child) p {
+    font-size: 15px;
+    line-height: 18px;
+  }
+
+  .aboutPage .valueGrid article:last-child p {
+    font-size: 15px;
+    line-height: 20px;
+  }
+
+  .aboutPage .socialSection .sectionHeading h2 {
+    font-size: 42px;
+    line-height: 50px;
+  }
+
+  .aboutPage .socialSection .sectionHeading > span {
+    font-size: 20px;
+    line-height: 29px;
+  }
+
+  .aboutPage .socialGrid h3 {
+    font-size: 26px;
+    line-height: 31px;
+  }
+
+  .aboutPage .socialGrid p {
+    font-size: 18px;
+    line-height: 25px;
+  }
+
+  .aboutPage .contactSection .contactCopy h2 {
+    font-size: 42px;
+    line-height: 49px;
+  }
+
+  .aboutPage .contactSection .contactCopy address strong {
+    font-size: 18px;
+    line-height: 21px;
+  }
+
+  .aboutPage .contactSection .contactCopy address .contactValue {
+    font-size: 16px;
+    line-height: 25px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .aboutPage .companySection .sectionHeading > p {
+    font-size: 23px;
+    line-height: 27px;
+  }
+
+  .aboutPage .companySection .sectionHeading h2 {
+    font-size: 39px;
+    line-height: 47px;
+  }
+
+  .aboutPage .companySection .sectionHeading > span {
+    font-size: 18px;
+    line-height: 25px;
+  }
+
+  .aboutPage .stats strong {
+    font-size: 59px;
+    line-height: 71px;
+  }
+
+  .aboutPage .stats span {
+    font-size: 17px;
+    line-height: 20px;
+  }
+
+  .aboutPage .timeline time {
+    font-size: 40px;
+    line-height: 48px;
+  }
+
+  .aboutPage .timeline p {
+    font-size: 16px;
+    line-height: 27px;
+  }
+
+  .aboutPage .values .sectionHeading > p {
+    font-size: 23px;
+    line-height: 27px;
+  }
+
+  .aboutPage .values .sectionHeading h2 {
+    font-size: 49px;
+    line-height: 58px;
+  }
+
+  .aboutPage .values .sectionHeading > span {
+    font-size: 19px;
+    line-height: 30px;
+  }
+
+  .aboutPage .valueGrid strong {
+    font-size: 74px;
+    line-height: 88px;
+  }
+
+  .aboutPage .valueGrid span {
+    font-size: 26px;
+    line-height: 31px;
+  }
+
+  .aboutPage .valueGrid article p {
+    font-size: 15px;
+    line-height: 18px;
+  }
+
+  .aboutPage .socialSection .sectionHeading h2 {
+    font-size: 39px;
+    line-height: 47px;
+  }
+
+  .aboutPage .socialSection .sectionHeading > span {
+    font-size: 18px;
+    line-height: 29px;
+  }
+
+  .aboutPage .socialGrid h3 {
+    font-size: 26px;
+    line-height: 31px;
+  }
+
+  .aboutPage .socialGrid p {
+    font-size: 18px;
+    line-height: 25px;
+  }
+
+  .aboutPage .contactSection .contactCopy h2 {
+    font-size: 42px;
+    line-height: 49px;
+  }
+
+  .aboutPage .contactSection .contactCopy address strong {
+    font-size: 18px;
+    line-height: 21px;
+  }
+
+  .aboutPage .contactSection .contactCopy address .contactValue {
+    font-size: 16px;
+    line-height: 25px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .aboutPage .companySection .sectionHeading > p {
+    font-size: 23px;
+    line-height: 27px;
+  }
+
+  .aboutPage .companySection .sectionHeading h2 {
+    font-size: 39px;
+    line-height: 50px;
+  }
+
+  .aboutPage .companySection .sectionHeading > span {
+    font-size: 18px;
+    line-height: 25px;
+  }
+
+  .aboutPage .stats > div > strong {
+    font-size: 50px;
+    line-height: 53px;
+  }
+
+  .aboutPage .stats > div > span {
+    font-size: 16px;
+    line-height: 15px;
+  }
+
+  .aboutPage .stats > div:nth-child(3) > strong {
+    line-height: 60px;
+  }
+
+  .aboutPage .stats > div:nth-child(3) > span {
+    line-height: 19px;
+  }
+
+  .aboutPage .timeline time {
+    font-size: 38px;
+    line-height: 45px;
+  }
+
+  .aboutPage .timeline p {
+    font-size: 15px;
+    line-height: 26px;
+  }
+
+  .aboutPage .values .sectionHeading > p {
+    font-size: 23px;
+    line-height: 27px;
+  }
+
+  .aboutPage .values .sectionHeading h2 {
+    font-size: 49px;
+    line-height: 58px;
+  }
+
+  .aboutPage .values .sectionHeading > span {
+    font-size: 19px;
+    line-height: 35px;
+  }
+
+  .aboutPage .valueGrid strong {
+    font-size: 74px;
+    line-height: 88px;
+  }
+
+  .aboutPage .valueGrid span {
+    font-size: 26px;
+    line-height: 31px;
+  }
+
+  .aboutPage .valueGrid article:not(:last-child) p {
+    font-size: 14px;
+    line-height: 17px;
+  }
+
+  .aboutPage .valueGrid article:last-child p {
+    font-size: 14px;
+    line-height: 18px;
+  }
+
+  .aboutPage .socialSection .sectionHeading h2 {
+    font-size: 39px;
+    line-height: 50px;
+  }
+
+  .aboutPage .socialSection .sectionHeading > span {
+    font-size: 18px;
+    line-height: 29px;
+  }
+
+  .aboutPage .socialGrid h3 {
+    font-size: 23px;
+    line-height: 28px;
+  }
+
+  .aboutPage .socialGrid p {
+    font-size: 16px;
+    line-height: 23px;
+  }
+
+  .aboutPage .contactSection .contactCopy h2 {
+    font-size: 39px;
+    line-height: 49px;
+  }
+
+  .aboutPage .contactSection .contactCopy address strong {
+    font-size: 17px;
+    line-height: 20px;
+  }
+
+  .aboutPage .contactSection .contactCopy address .contactValue {
+    font-size: 15px;
+    line-height: 25px;
+  }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+  .aboutPage .companySection .sectionHeading > p {
+    font-size: 18px;
+    line-height: 21px;
+  }
+
+  .aboutPage .companySection .sectionHeading h2 {
+    font-size: 30px;
+    line-height: 36px;
+  }
+
+  .aboutPage .companySection .sectionHeading > span {
+    font-size: 16px;
+    line-height: 23px;
+  }
+
+  .aboutPage .stats > div > strong {
+    font-size: 36px;
+    line-height: 39px;
+  }
+
+  .aboutPage .stats > div > span {
+    font-size: 15px;
+    line-height: 11px;
+  }
+
+  .aboutPage .stats > div:nth-child(3) > strong {
+    line-height: 43px;
+  }
+
+  .aboutPage .stats > div:nth-child(3) > span {
+    line-height: 18px;
+  }
+
+  .aboutPage .timeline time {
+    font-size: 26px;
+    line-height: 31px;
+  }
+
+  .aboutPage .timeline p {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .aboutPage .values .sectionHeading > p {
+    font-size: 18px;
+    line-height: 21px;
+  }
+
+  .aboutPage .values .sectionHeading h2 {
+    font-size: 35px;
+    line-height: 42px;
+  }
+
+  .aboutPage .values .sectionHeading > span {
+    font-size: 16px;
+    line-height: 25px;
+  }
+
+  .aboutPage .valueGrid strong {
+    font-size: 54px;
+    line-height: 64px;
+  }
+
+  .aboutPage .valueGrid span {
+    font-size: 19px;
+    line-height: 23px;
+  }
+
+  .aboutPage .valueGrid article p {
+    font-size: 13px;
+    line-height: 16px;
+  }
+
+  .aboutPage .socialSection .sectionHeading h2 {
+    font-size: 30px;
+    line-height: 36px;
+  }
+
+  .aboutPage .socialSection .sectionHeading > span {
+    font-size: 16px;
+    line-height: 23px;
+  }
+
+  .aboutPage .socialGrid h3 {
+    font-size: 22px;
+    line-height: 26px;
+  }
+
+  .aboutPage .socialGrid p {
+    font-size: 15px;
+    line-height: 21px;
+  }
+
+  .aboutPage .contactSection .contactCopy h2 {
+    font-size: 30px;
+    line-height: 36px;
+  }
+
+  .aboutPage .contactSection .contactCopy address .contactValue {
+    font-size: 14px;
+    line-height: 23px;
+  }
+}
+
+@media (max-width: 360px) {
+  .aboutPage .companySection .sectionHeading > p {
+    font-size: 18px;
+    line-height: 21px;
+  }
+
+  .aboutPage .companySection .sectionHeading h2 {
+    font-size: 28px;
+    line-height: 33px;
+  }
+
+  .aboutPage .companySection .sectionHeading > span {
+    font-size: 16px;
+    line-height: 23px;
+  }
+
+  .aboutPage .stats > div > strong {
+    font-size: 36px;
+    line-height: 39px;
+  }
+
+  .aboutPage .stats > div > span {
+    font-size: 14px;
+    line-height: 11px;
+  }
+
+  .aboutPage .stats > div:nth-child(3) > strong {
+    line-height: 43px;
+  }
+
+  .aboutPage .stats > div:nth-child(3) > span {
+    line-height: 17px;
+  }
+
+  .aboutPage .timeline time {
+    font-size: 26px;
+    line-height: 31px;
+  }
+
+  .aboutPage .timeline p {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .aboutPage .values .sectionHeading > p {
+    font-size: 18px;
+    line-height: 21px;
+  }
+
+  .aboutPage .values .sectionHeading h2 {
+    font-size: 32px;
+    line-height: 38px;
+  }
+
+  .aboutPage .values .sectionHeading > span {
+    font-size: 16px;
+    line-height: 25px;
+  }
+
+  .aboutPage .valueGrid strong {
+    font-size: 54px;
+    line-height: 64px;
+  }
+
+  .aboutPage .valueGrid span {
+    font-size: 19px;
+    line-height: 23px;
+  }
+
+  .aboutPage .valueGrid article p {
+    font-size: 13px;
+    line-height: 16px;
+  }
+
+  .aboutPage .socialSection .sectionHeading h2 {
+    font-size: 28px;
+    line-height: 33px;
+  }
+
+  .aboutPage .socialSection .sectionHeading > span {
+    font-size: 16px;
+    line-height: 23px;
+  }
+
+  .aboutPage .socialGrid h3 {
+    font-size: 22px;
+    line-height: 26px;
+  }
+
+  .aboutPage .socialGrid p {
+    font-size: 15px;
+    line-height: 21px;
+  }
+
+  .aboutPage .contactSection .contactCopy h2 {
+    font-size: 30px;
+    line-height: 36px;
+  }
+
+  .aboutPage .contactSection .contactCopy address .contactValue {
+    font-size: 14px;
+    line-height: 23px;
+  }
+}

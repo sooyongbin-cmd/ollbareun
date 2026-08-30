@@ -12582,3 +12582,621 @@
     line-height: 23px;
   }
 }
+
+/* Page 2 gap matrix from page2/gap. Keep each Figma state discrete. */
+@media (min-width: 1281px) {
+  .aboutPage .companyInner {
+    gap: 0;
+  }
+
+  .aboutPage .companySection .sectionHeading {
+    margin-bottom: 130px;
+  }
+
+  .aboutPage .companySection .sectionHeading > p {
+    margin-bottom: 23px;
+  }
+
+  .aboutPage .companySection .sectionHeading > span {
+    margin-top: 23px;
+  }
+
+  .aboutPage .stats {
+    margin-bottom: 130px;
+  }
+
+  .aboutPage .stats > div {
+    gap: 25px;
+  }
+
+  .aboutPage .historyWrap {
+    column-gap: 8px;
+    row-gap: 40px;
+  }
+
+  .aboutPage .historyImage p {
+    margin-top: 17px;
+  }
+
+  .aboutPage .timeline {
+    row-gap: 46px;
+  }
+
+  .aboutPage .values .sectionHeading {
+    margin-bottom: 130px;
+  }
+
+  .aboutPage .values .sectionHeading > p {
+    margin-bottom: 23px;
+  }
+
+  .aboutPage .values .sectionHeading > span {
+    margin-top: 23px;
+  }
+
+  .aboutPage .valueGrid span,
+  .aboutPage .valueGrid p {
+    margin-top: 12px;
+  }
+
+  .aboutPage .socialInner {
+    gap: 80px;
+  }
+
+  .aboutPage .socialGrid {
+    gap: 13px;
+  }
+
+  .aboutPage .socialSection .sectionHeading > span {
+    margin-top: 23px;
+  }
+
+  .aboutPage .socialGrid h3 {
+    margin-top: 30px;
+  }
+
+  .aboutPage .socialGrid p {
+    margin-top: 12px;
+  }
+
+  .aboutPage .contactInner {
+    gap: 100px;
+  }
+
+  .aboutPage .contactSection .contactCopy {
+    column-gap: 156px;
+    row-gap: 0;
+  }
+
+  .aboutPage .contactSection .contactCopy address {
+    row-gap: 14px;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .aboutPage .companyInner {
+    gap: 0;
+  }
+
+  .aboutPage .companySection .sectionHeading {
+    margin-bottom: 130px;
+  }
+
+  .aboutPage .companySection .sectionHeading > p {
+    margin-bottom: 23px;
+  }
+
+  .aboutPage .companySection .sectionHeading > span {
+    margin-top: 23px;
+  }
+
+  .aboutPage .stats {
+    margin-bottom: 140px;
+  }
+
+  .aboutPage .stats > div {
+    gap: 25px;
+  }
+
+  .aboutPage .historyWrap {
+    column-gap: 8px;
+    row-gap: 40px;
+  }
+
+  .aboutPage .historyImage p {
+    margin-top: 17px;
+  }
+
+  .aboutPage .timeline {
+    row-gap: 46px;
+  }
+
+  .aboutPage .values .sectionHeading {
+    margin-bottom: 130px;
+  }
+
+  .aboutPage .values .sectionHeading > p {
+    margin-bottom: 23px;
+  }
+
+  .aboutPage .values .sectionHeading > span {
+    margin-top: 23px;
+  }
+
+  .aboutPage .valueGrid span,
+  .aboutPage .valueGrid p {
+    margin-top: 12px;
+  }
+
+  .aboutPage .socialInner {
+    gap: 80px;
+  }
+
+  .aboutPage .socialGrid {
+    gap: 13px;
+  }
+
+  .aboutPage .socialSection .sectionHeading > span {
+    margin-top: 23px;
+  }
+
+  .aboutPage .socialGrid h3 {
+    margin-top: 30px;
+  }
+
+  .aboutPage .socialGrid p {
+    margin-top: 12px;
+  }
+
+  .aboutPage .contactInner {
+    gap: 90px;
+  }
+
+  .aboutPage .contactSection .contactCopy {
+    gap: 49px;
+  }
+
+  .aboutPage .contactSection .contactCopy address {
+    row-gap: 14px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .aboutPage .companyInner {
+    gap: 0;
+  }
+
+  .aboutPage .companySection .sectionHeading {
+    margin-bottom: 70px;
+  }
+
+  .aboutPage .companySection .sectionHeading > p {
+    margin-bottom: 22px;
+  }
+
+  .aboutPage .companySection .sectionHeading > span {
+    margin-top: 22px;
+  }
+
+  .aboutPage .stats {
+    margin-bottom: 70px;
+  }
+
+  .aboutPage .stats > div {
+    gap: 25px;
+  }
+
+  .aboutPage .historyWrap {
+    column-gap: 51px;
+    row-gap: 80px;
+  }
+
+  .aboutPage .historyImage p {
+    margin-top: 17px;
+  }
+
+  .aboutPage .timeline {
+    row-gap: 48px;
+  }
+
+  .aboutPage .values .sectionHeading {
+    margin-bottom: 130px;
+  }
+
+  .aboutPage .values .sectionHeading > p {
+    margin-bottom: 22px;
+  }
+
+  .aboutPage .values .sectionHeading > span {
+    margin-top: 22px;
+  }
+
+  .aboutPage .valueGrid span,
+  .aboutPage .valueGrid p {
+    margin-top: 12px;
+  }
+
+  .aboutPage .socialInner {
+    gap: 80px;
+  }
+
+  .aboutPage .socialGrid {
+    gap: 13px;
+  }
+
+  .aboutPage .socialSection .sectionHeading > span {
+    margin-top: 23px;
+  }
+
+  .aboutPage .socialGrid h3 {
+    margin-top: 30px;
+  }
+
+  .aboutPage .socialGrid p {
+    margin-top: 12px;
+  }
+
+  .aboutPage .contactInner {
+    gap: 80px;
+  }
+
+  .aboutPage .contactSection .contactCopy {
+    gap: 49px;
+  }
+
+  .aboutPage .contactSection .contactCopy address {
+    row-gap: 14px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .aboutPage .companyInner {
+    gap: 0;
+  }
+
+  .aboutPage .companySection .sectionHeading {
+    margin-bottom: 77px;
+  }
+
+  .aboutPage .companySection .sectionHeading > p {
+    margin-bottom: 22px;
+  }
+
+  .aboutPage .companySection .sectionHeading > span {
+    margin-top: 22px;
+  }
+
+  .aboutPage .stats {
+    margin-bottom: 116px;
+  }
+
+  .aboutPage .stats > div {
+    gap: 25px;
+  }
+
+  .aboutPage .historyWrap {
+    column-gap: 0;
+    row-gap: 60px;
+  }
+
+  .aboutPage .historyImage p {
+    margin-top: 17px;
+  }
+
+  .aboutPage .timeline {
+    row-gap: 48px;
+  }
+
+  .aboutPage .values .sectionHeading {
+    margin-bottom: 130px;
+  }
+
+  .aboutPage .values .sectionHeading > p {
+    margin-bottom: 22px;
+  }
+
+  .aboutPage .values .sectionHeading > span {
+    margin-top: 22px;
+  }
+
+  .aboutPage .valueGrid span,
+  .aboutPage .valueGrid p {
+    margin-top: 12px;
+  }
+
+  .aboutPage .socialInner {
+    gap: 80px;
+  }
+
+  .aboutPage .socialGrid {
+    gap: 13px;
+  }
+
+  .aboutPage .socialSection .sectionHeading > span {
+    margin-top: 23px;
+  }
+
+  .aboutPage .socialGrid h3 {
+    margin-top: 30px;
+  }
+
+  .aboutPage .socialGrid p {
+    margin-top: 12px;
+  }
+
+  .aboutPage .contactInner {
+    gap: 80px;
+  }
+
+  .aboutPage .contactSection .contactCopy {
+    gap: 49px;
+  }
+
+  .aboutPage .contactSection .contactCopy address {
+    row-gap: 14px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .aboutPage .companyInner {
+    gap: 0;
+  }
+
+  .aboutPage .companySection .sectionHeading {
+    margin-bottom: 77px;
+  }
+
+  .aboutPage .companySection .sectionHeading > p {
+    margin-bottom: 22px;
+  }
+
+  .aboutPage .companySection .sectionHeading > span {
+    margin-top: 22px;
+  }
+
+  .aboutPage .stats {
+    margin-bottom: 118px;
+  }
+
+  .aboutPage .stats > div {
+    gap: 18px;
+  }
+
+  .aboutPage .historyWrap {
+    column-gap: 0;
+    row-gap: 49px;
+  }
+
+  .aboutPage .historyImage p {
+    margin-top: 14px;
+  }
+
+  .aboutPage .timeline {
+    row-gap: 45px;
+  }
+
+  .aboutPage .values .sectionHeading {
+    margin-bottom: 59px;
+  }
+
+  .aboutPage .values .sectionHeading > p {
+    margin-bottom: 22px;
+  }
+
+  .aboutPage .values .sectionHeading > span {
+    margin-top: 22px;
+  }
+
+  .aboutPage .valueGrid span,
+  .aboutPage .valueGrid p {
+    margin-top: 10px;
+  }
+
+  .aboutPage .socialInner {
+    gap: 80px;
+  }
+
+  .aboutPage .socialGrid {
+    gap: 20px;
+  }
+
+  .aboutPage .socialSection .sectionHeading > span {
+    margin-top: 23px;
+  }
+
+  .aboutPage .socialGrid h3 {
+    margin-top: 27px;
+  }
+
+  .aboutPage .socialGrid p {
+    margin-top: 11px;
+  }
+
+  .aboutPage .contactInner {
+    gap: 80px;
+  }
+
+  .aboutPage .contactSection .contactCopy {
+    gap: 49px;
+  }
+
+  .aboutPage .contactSection .contactCopy address {
+    row-gap: 14px;
+  }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+  .aboutPage .companyInner {
+    gap: 0;
+  }
+
+  .aboutPage .companySection .sectionHeading {
+    margin-bottom: 50px;
+  }
+
+  .aboutPage .companySection .sectionHeading > p {
+    margin-bottom: 20px;
+  }
+
+  .aboutPage .companySection .sectionHeading > span {
+    margin-top: 20px;
+  }
+
+  .aboutPage .stats {
+    margin-bottom: 90px;
+  }
+
+  .aboutPage .stats > div {
+    gap: 13px;
+  }
+
+  .aboutPage .historyWrap {
+    column-gap: 0;
+    row-gap: 25px;
+  }
+
+  .aboutPage .historyImage p {
+    margin-top: 10px;
+  }
+
+  .aboutPage .timeline {
+    row-gap: 22px;
+  }
+
+  .aboutPage .values .sectionHeading {
+    margin-bottom: 59px;
+  }
+
+  .aboutPage .values .sectionHeading > p {
+    margin-bottom: 13px;
+  }
+
+  .aboutPage .values .sectionHeading > span {
+    margin-top: 13px;
+  }
+
+  .aboutPage .valueGrid span,
+  .aboutPage .valueGrid p {
+    margin-top: 8px;
+  }
+
+  .aboutPage .socialInner {
+    gap: 60px;
+  }
+
+  .aboutPage .socialGrid {
+    gap: 19px;
+  }
+
+  .aboutPage .socialSection .sectionHeading > span {
+    margin-top: 23px;
+  }
+
+  .aboutPage .socialGrid h3 {
+    margin-top: 25px;
+  }
+
+  .aboutPage .socialGrid p {
+    margin-top: 10px;
+  }
+
+  .aboutPage .contactInner {
+    gap: 60px;
+  }
+
+  .aboutPage .contactSection .contactCopy {
+    gap: 29px;
+  }
+
+  .aboutPage .contactSection .contactCopy address {
+    row-gap: 13px;
+  }
+}
+
+@media (max-width: 360px) {
+  .aboutPage .companyInner {
+    gap: 0;
+  }
+
+  .aboutPage .companySection .sectionHeading {
+    margin-bottom: 50px;
+  }
+
+  .aboutPage .companySection .sectionHeading > p {
+    margin-bottom: 20px;
+  }
+
+  .aboutPage .companySection .sectionHeading > span {
+    margin-top: 20px;
+  }
+
+  .aboutPage .stats {
+    margin-bottom: 60px;
+  }
+
+  .aboutPage .stats > div {
+    gap: 13px;
+  }
+
+  .aboutPage .historyWrap {
+    column-gap: 0;
+    row-gap: 25px;
+  }
+
+  .aboutPage .historyImage p {
+    margin-top: 10px;
+  }
+
+  .aboutPage .timeline {
+    row-gap: 22px;
+  }
+
+  .aboutPage .values .sectionHeading {
+    margin-bottom: 59px;
+  }
+
+  .aboutPage .values .sectionHeading > p {
+    margin-bottom: 13px;
+  }
+
+  .aboutPage .values .sectionHeading > span {
+    margin-top: 13px;
+  }
+
+  .aboutPage .valueGrid span,
+  .aboutPage .valueGrid p {
+    margin-top: 8px;
+  }
+
+  .aboutPage .socialInner {
+    gap: 40px;
+  }
+
+  .aboutPage .socialGrid {
+    gap: 19px;
+  }
+
+  .aboutPage .socialSection .sectionHeading > span {
+    margin-top: 23px;
+  }
+
+  .aboutPage .socialGrid h3 {
+    margin-top: 25px;
+  }
+
+  .aboutPage .socialGrid p {
+    margin-top: 10px;
+  }
+
+  .aboutPage .contactInner {
+    gap: 40px;
+  }
+
+  .aboutPage .contactSection .contactCopy {
+    gap: 29px;
+  }
+
+  .aboutPage .contactSection .contactCopy address {
+    row-gap: 13px;
+  }
+}

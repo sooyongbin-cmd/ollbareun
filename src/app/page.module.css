@@ -8427,20 +8427,20 @@
   .aboutPage {
     --about-hero-height: 502.03px;
     --about-hero-font-size: 53px;
-    --about-company-content-width: 590px;
+    --about-company-content-width: 604px;
     --about-company-heading-width: 604px;
     --about-company-stats-width: 590px;
     --about-company-history-width: 494px;
     --about-history-image-width: 496px;
     --about-timeline-width: 494px;
-    --about-values-content-width: 660px;
+    --about-values-content-width: 667px;
     --about-values-heading-width: 667px;
     --about-values-grid-width: 660px;
-    --about-social-content-width: 1024px;
+    --about-social-content-width: 686px;
     --about-social-heading-width: 686px;
     --about-social-grid-width: 584px;
     --about-social-card-width: 285px;
-    --about-contact-content-width: 741px;
+    --about-contact-content-width: 690px;
     --about-contact-map-width: 690px;
     --about-contact-copy-width: 741px;
     --about-contact-details-width: 535px;
@@ -8460,11 +8460,11 @@
     --about-values-content-width: 568px;
     --about-values-heading-width: 542px;
     --about-values-grid-width: 568px;
-    --about-social-content-width: 768px;
+    --about-social-content-width: 506px;
     --about-social-heading-width: 686px;
     --about-social-grid-width: 768px;
     --about-social-card-width: 379px;
-    --about-contact-content-width: 741px;
+    --about-contact-content-width: 568px;
     --about-contact-map-width: 568px;
     --about-contact-copy-width: 741px;
     --about-contact-details-width: 507px;
@@ -8475,20 +8475,20 @@
   .aboutPage {
     --about-hero-height: 323.165px;
     --about-hero-font-size: 38px;
-    --about-company-content-width: 440px;
+    --about-company-content-width: 469px;
     --about-company-heading-width: 468px;
     --about-company-stats-width: 440px;
     --about-company-history-width: 469.3px;
     --about-history-image-width: 440px;
     --about-timeline-width: 469.3px;
-    --about-values-content-width: 440px;
+    --about-values-content-width: 542px;
     --about-values-heading-width: 542px;
     --about-values-grid-width: 440px;
-    --about-social-content-width: 640px;
+    --about-social-content-width: 506px;
     --about-social-heading-width: 506px;
     --about-social-grid-width: 341.1px;
     --about-social-card-width: 341.1px;
-    --about-contact-content-width: 540px;
+    --about-contact-content-width: 440px;
     --about-contact-map-width: 440px;
     --about-contact-copy-width: 540px;
     --about-contact-details-width: 440px;
@@ -8499,7 +8499,7 @@
   .aboutPage {
     --about-hero-height: 280px;
     --about-hero-font-size: 30px;
-    --about-company-content-width: 320px;
+    --about-company-content-width: 326px;
     --about-company-heading-width: 326px;
     --about-company-stats-width: 320px;
     --about-company-history-width: 320px;
@@ -8508,11 +8508,11 @@
     --about-values-content-width: 320px;
     --about-values-heading-width: 269px;
     --about-values-grid-width: 320px;
-    --about-social-content-width: 480px;
+    --about-social-content-width: 346px;
     --about-social-heading-width: 346px;
     --about-social-grid-width: 320px;
     --about-social-card-width: 320px;
-    --about-contact-content-width: 480px;
+    --about-contact-content-width: 320px;
     --about-contact-map-width: 320px;
     --about-contact-copy-width: 480px;
     --about-contact-details-width: 320px;
@@ -11553,5 +11553,279 @@
 
   .landingPage .homeClientSection .mobileOnlyCopy br {
     display: none;
+  }
+}
+
+/* Page 2 section2-section5 spacing and direct-child width matrix. */
+@media (min-width: 1281px) {
+  .aboutPage .companySection,
+  .aboutPage .values,
+  .aboutPage .socialSection,
+  .aboutPage .contactSection {
+    padding-top: 200px;
+    padding-right: 0;
+    padding-bottom: 200px;
+    padding-left: 0;
+  }
+
+  .aboutPage .companyInner,
+  .aboutPage .valuesInner,
+  .aboutPage .socialInner,
+  .aboutPage .contactInner {
+    width: 100%;
+    max-width: 1182px;
+  }
+
+  .aboutPage .valuesInner {
+    max-width: 1240px;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .aboutPage .companySection,
+  .aboutPage .values,
+  .aboutPage .socialSection,
+  .aboutPage .contactSection {
+    padding-top: 140px;
+    padding-right: 0;
+    padding-bottom: 140px;
+    padding-left: 0;
+  }
+
+  .aboutPage .companyInner,
+  .aboutPage .valuesInner,
+  .aboutPage .socialInner,
+  .aboutPage .contactInner {
+    width: 100%;
+  }
+
+  .aboutPage .companyInner {
+    max-width: 1075px;
+  }
+
+  .aboutPage .valuesInner {
+    max-width: 981px;
+  }
+
+  .aboutPage .socialInner {
+    max-width: 686px;
+  }
+
+  .aboutPage .contactInner {
+    max-width: 741px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .aboutPage .companySection,
+  .aboutPage .values,
+  .aboutPage .socialSection,
+  .aboutPage .contactSection {
+    padding-top: 140px;
+    padding-right: 0;
+    padding-bottom: 140px;
+    padding-left: 0;
+  }
+
+  .aboutPage .companyInner,
+  .aboutPage .valuesInner,
+  .aboutPage .socialInner,
+  .aboutPage .contactInner {
+    width: 100%;
+  }
+
+  .aboutPage .companyInner {
+    max-width: 604px;
+  }
+
+  .aboutPage .valuesInner {
+    max-width: 667px;
+  }
+
+  .aboutPage .socialInner {
+    max-width: 686px;
+  }
+
+  .aboutPage .contactInner {
+    max-width: 690px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .aboutPage .companySection,
+  .aboutPage .values,
+  .aboutPage .socialSection,
+  .aboutPage .contactSection {
+    padding-top: 120px;
+    padding-right: 0;
+    padding-bottom: 120px;
+    padding-left: 0;
+  }
+
+  .aboutPage .companyInner,
+  .aboutPage .valuesInner,
+  .aboutPage .socialInner,
+  .aboutPage .contactInner {
+    width: 100%;
+  }
+
+  .aboutPage .companyInner {
+    max-width: 590px;
+  }
+
+  .aboutPage .valuesInner {
+    max-width: 568px;
+  }
+
+  .aboutPage .socialInner {
+    max-width: 506px;
+  }
+
+  .aboutPage .contactInner {
+    max-width: 568px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .aboutPage .companySection,
+  .aboutPage .values,
+  .aboutPage .socialSection,
+  .aboutPage .contactSection {
+    padding-top: 110px;
+    padding-right: 0;
+    padding-bottom: 110px;
+    padding-left: 0;
+  }
+
+  .aboutPage .companyInner,
+  .aboutPage .valuesInner,
+  .aboutPage .socialInner,
+  .aboutPage .contactInner {
+    width: 100%;
+  }
+
+  .aboutPage .companyInner {
+    max-width: 469px;
+  }
+
+  .aboutPage .valuesInner {
+    max-width: 542px;
+  }
+
+  .aboutPage .socialInner {
+    max-width: 506px;
+  }
+
+  .aboutPage .contactInner {
+    max-width: 440px;
+  }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+  .aboutPage .companySection,
+  .aboutPage .values,
+  .aboutPage .socialSection,
+  .aboutPage .contactSection {
+    padding-top: 100px;
+    padding-right: 0;
+    padding-bottom: 100px;
+    padding-left: 0;
+  }
+
+  .aboutPage .companyInner,
+  .aboutPage .valuesInner,
+  .aboutPage .socialInner,
+  .aboutPage .contactInner {
+    width: 100%;
+  }
+
+  .aboutPage .companyInner {
+    max-width: 326px;
+  }
+
+  .aboutPage .valuesInner {
+    max-width: 320px;
+  }
+
+  .aboutPage .socialInner {
+    max-width: 346px;
+  }
+
+  .aboutPage .contactInner {
+    max-width: 320px;
+  }
+}
+
+@media (max-width: 360px) {
+  .aboutPage .companySection,
+  .aboutPage .values,
+  .aboutPage .socialSection,
+  .aboutPage .contactSection {
+    width: 100vw;
+    box-sizing: border-box;
+    padding-top: 80px;
+    padding-right: 20px;
+    padding-bottom: 80px;
+    padding-left: 20px;
+  }
+
+  .aboutPage .companySection .companyInner,
+  .aboutPage .values .valuesInner,
+  .aboutPage .socialSection .socialInner,
+  .aboutPage .contactSection .contactInner {
+    width: 100%;
+    max-width: none;
+  }
+
+  .aboutPage .values {
+    padding-bottom: 90px;
+  }
+}
+
+/* Section-specific bottom/top padding from page2/max-width. */
+@media (min-width: 1281px) {
+  .aboutPage .values {
+    padding-top: 140px;
+    padding-bottom: 200px;
+  }
+
+  .aboutPage .socialSection {
+    padding-top: 200px;
+    padding-bottom: 250px;
+  }
+
+  .aboutPage .contactSection {
+    padding-top: 200px;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .aboutPage .values,
+  .aboutPage .socialSection {
+    padding-bottom: 200px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .aboutPage .socialSection {
+    padding-bottom: 180px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .aboutPage .values {
+    padding-bottom: 140px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .aboutPage .values {
+    padding-bottom: 130px;
+  }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+  .aboutPage .values {
+    padding-bottom: 120px;
   }
 }

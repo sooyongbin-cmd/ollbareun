@@ -13520,6 +13520,381 @@
   }
 }
 
+/* Page 3 text matrix: discrete Figma font-size and line-height values. */
+@media (min-width: 1281px) {
+  .servicesPage .serviceSectionInner > .sectionHeading > p {
+    font-size: 26px;
+    line-height: 31px;
+  }
+
+  .servicesPage .serviceSectionInner > .sectionHeading h2 {
+    font-size: 43px;
+    line-height: 51px;
+  }
+
+  .servicesPage .operationSection .serviceSectionInner > .sectionHeading > span,
+  .servicesPage .dispatchSection .serviceSectionInner > .sectionHeading > span {
+    font-size: 21px;
+    line-height: 32px;
+  }
+
+  .servicesPage .facilityManagementSection .serviceSectionInner > .sectionHeading > span {
+    font-size: 21px;
+    line-height: 25px;
+  }
+
+  .servicesPage .disinfectionSection .serviceSectionInner > .sectionHeading > span {
+    font-size: 21px;
+    line-height: 28px;
+  }
+
+  .servicesPage .operationLayout > h3 {
+    font-size: 40px;
+    line-height: 50px;
+  }
+
+  .servicesPage .operationLayout h4 {
+    font-size: 21px;
+    line-height: 25px;
+  }
+
+  .servicesPage .operationLayout li p {
+    font-size: 16px;
+    line-height: 20px;
+  }
+
+  .servicesPage .operationNumber {
+    font-size: 44px;
+    line-height: 51px;
+  }
+
+  .servicesPage .dispatchSection .detailMessage {
+    font-size: 35px;
+    line-height: 47px;
+  }
+
+  .servicesPage .facilityManagementSection .detailMessage,
+  .servicesPage .disinfectionSection .detailMessage {
+    font-size: 35px;
+    line-height: 44px;
+  }
+
+  .servicesPage .facilityGrid h3 {
+    font-size: 26px;
+    line-height: 31px;
+  }
+
+  .servicesPage .facilityGrid p {
+    font-size: 18px;
+    line-height: 25px;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .servicesPage .serviceSectionInner > .sectionHeading > p {
+    font-size: 25px;
+    line-height: 30px;
+  }
+
+  .servicesPage .serviceSectionInner > .sectionHeading h2 {
+    font-size: 42px;
+    line-height: 50px;
+  }
+
+  .servicesPage .operationSection .serviceSectionInner > .sectionHeading > span,
+  .servicesPage .dispatchSection .serviceSectionInner > .sectionHeading > span {
+    font-size: 20px;
+    line-height: 32px;
+  }
+
+  .servicesPage .facilityManagementSection .serviceSectionInner > .sectionHeading > span {
+    font-size: 20px;
+    line-height: 24px;
+  }
+
+  .servicesPage .disinfectionSection .serviceSectionInner > .sectionHeading > span {
+    font-size: 21px;
+    line-height: 28px;
+  }
+
+  .servicesPage .operationLayout > h3 {
+    font-size: 38px;
+    line-height: 48px;
+  }
+
+  .servicesPage .operationLayout h4 {
+    font-size: 21px;
+    line-height: 25px;
+  }
+
+  .servicesPage .operationLayout li p {
+    font-size: 16px;
+    line-height: 20px;
+  }
+
+  .servicesPage .operationNumber {
+    font-size: 44px;
+    line-height: 51px;
+  }
+
+  .servicesPage .dispatchSection .detailMessage {
+    font-size: 35px;
+    line-height: 47px;
+  }
+
+  .servicesPage .facilityManagementSection .detailMessage,
+  .servicesPage .disinfectionSection .detailMessage {
+    font-size: 35px;
+    line-height: 44px;
+  }
+
+  .servicesPage .facilityGrid h3 {
+    font-size: 26px;
+    line-height: 31px;
+  }
+
+  .servicesPage .facilityGrid p {
+    font-size: 18px;
+    line-height: 25px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .servicesPage .serviceSectionInner > .sectionHeading > p {
+    font-size: 23px;
+    line-height: 27px;
+  }
+
+  .servicesPage .serviceSectionInner > .sectionHeading h2 {
+    font-size: 39px;
+    line-height: 47px;
+  }
+
+  .servicesPage .operationSection .serviceSectionInner > .sectionHeading > span,
+  .servicesPage .dispatchSection .serviceSectionInner > .sectionHeading > span,
+  .servicesPage .facilityManagementSection .serviceSectionInner > .sectionHeading > span,
+  .servicesPage .disinfectionSection .serviceSectionInner > .sectionHeading > span {
+    font-size: 18px;
+    line-height: 28px;
+  }
+
+  .servicesPage .operationLayout > h3 {
+    font-size: 38px;
+    line-height: 48px;
+  }
+
+  .servicesPage .operationLayout h4 {
+    font-size: 21px;
+    line-height: 25px;
+  }
+
+  .servicesPage .operationLayout li p {
+    font-size: 16px;
+    line-height: 20px;
+  }
+
+  .servicesPage .operationNumber {
+    font-size: 44px;
+    line-height: 51px;
+  }
+
+  .servicesPage .dispatchSection .detailMessage {
+    font-size: 30px;
+    line-height: 47px;
+  }
+
+  .servicesPage .facilityManagementSection .detailMessage,
+  .servicesPage .disinfectionSection .detailMessage {
+    font-size: 30px;
+    line-height: 44px;
+  }
+
+  .servicesPage .facilityGrid h3 {
+    font-size: 26px;
+    line-height: 31px;
+  }
+
+  .servicesPage .facilityGrid p {
+    font-size: 18px;
+    line-height: 25px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .servicesPage .serviceSectionInner > .sectionHeading > p {
+    font-size: 22px;
+    line-height: 26px;
+  }
+
+  .servicesPage .serviceSectionInner > .sectionHeading h2 {
+    font-size: 39px;
+    line-height: 47px;
+  }
+
+  .servicesPage .operationSection .serviceSectionInner > .sectionHeading > span,
+  .servicesPage .dispatchSection .serviceSectionInner > .sectionHeading > span,
+  .servicesPage .facilityManagementSection .serviceSectionInner > .sectionHeading > span,
+  .servicesPage .disinfectionSection .serviceSectionInner > .sectionHeading > span {
+    font-size: 18px;
+    line-height: 28px;
+  }
+
+  .servicesPage .operationLayout > h3 {
+    font-size: 38px;
+    line-height: 48px;
+  }
+
+  .servicesPage .operationLayout h4 {
+    font-size: 21px;
+    line-height: 25px;
+  }
+
+  .servicesPage .operationLayout li p {
+    font-size: 16px;
+    line-height: 20px;
+  }
+
+  .servicesPage .operationNumber {
+    font-size: 44px;
+    line-height: 51px;
+  }
+
+  .servicesPage .dispatchSection .detailMessage {
+    font-size: 29px;
+    line-height: 47px;
+  }
+
+  .servicesPage .facilityManagementSection .detailMessage,
+  .servicesPage .disinfectionSection .detailMessage {
+    font-size: 29px;
+    line-height: 44px;
+  }
+
+  .servicesPage .facilityGrid h3 {
+    font-size: 26px;
+    line-height: 31px;
+  }
+
+  .servicesPage .facilityGrid p {
+    font-size: 18px;
+    line-height: 25px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .servicesPage .serviceSectionInner > .sectionHeading > p {
+    font-size: 23px;
+    line-height: 27px;
+  }
+
+  .servicesPage .serviceSectionInner > .sectionHeading h2 {
+    font-size: 39px;
+    line-height: 47px;
+  }
+
+  .servicesPage .operationSection .serviceSectionInner > .sectionHeading > span,
+  .servicesPage .dispatchSection .serviceSectionInner > .sectionHeading > span,
+  .servicesPage .facilityManagementSection .serviceSectionInner > .sectionHeading > span,
+  .servicesPage .disinfectionSection .serviceSectionInner > .sectionHeading > span {
+    font-size: 18px;
+    line-height: 25px;
+  }
+
+  .servicesPage .operationLayout > h3 {
+    font-size: 38px;
+    line-height: 48px;
+  }
+
+  .servicesPage .operationLayout h4 {
+    font-size: 19px;
+    line-height: 23px;
+  }
+
+  .servicesPage .operationLayout li p {
+    font-size: 15px;
+    line-height: 18px;
+  }
+
+  .servicesPage .operationNumber {
+    font-size: 40px;
+    line-height: 46px;
+  }
+
+  .servicesPage .dispatchSection .detailMessage,
+  .servicesPage .facilityManagementSection .detailMessage,
+  .servicesPage .disinfectionSection .detailMessage {
+    font-size: 23px;
+    line-height: 32px;
+  }
+
+  .servicesPage .facilityGrid h3 {
+    font-size: 20px;
+    line-height: 24px;
+  }
+
+  .servicesPage .facilityGrid p {
+    font-size: 16px;
+    line-height: 23px;
+  }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+  .servicesPage .serviceSectionInner > .sectionHeading > p {
+    font-size: 18px;
+    line-height: 21px;
+  }
+
+  .servicesPage .serviceSectionInner > .sectionHeading h2 {
+    font-size: 30px;
+    line-height: 36px;
+  }
+
+  .servicesPage .operationSection .serviceSectionInner > .sectionHeading > span,
+  .servicesPage .dispatchSection .serviceSectionInner > .sectionHeading > span,
+  .servicesPage .facilityManagementSection .serviceSectionInner > .sectionHeading > span,
+  .servicesPage .disinfectionSection .serviceSectionInner > .sectionHeading > span {
+    font-size: 16px;
+    line-height: 23px;
+  }
+
+  .servicesPage .operationLayout > h3 {
+    font-size: 26px;
+    line-height: 35px;
+  }
+
+  .servicesPage .operationLayout h4 {
+    font-size: 16px;
+    line-height: 19px;
+  }
+
+  .servicesPage .operationLayout li p {
+    font-size: 13px;
+    line-height: 16px;
+  }
+
+  .servicesPage .operationNumber {
+    font-size: 32px;
+    line-height: 37px;
+  }
+
+  .servicesPage .dispatchSection .detailMessage,
+  .servicesPage .facilityManagementSection .detailMessage,
+  .servicesPage .disinfectionSection .detailMessage {
+    font-size: 20px;
+    line-height: 28px;
+  }
+
+  .servicesPage .facilityGrid h3 {
+    font-size: 20px;
+    line-height: 24px;
+  }
+
+  .servicesPage .facilityGrid p {
+    font-size: 16px;
+    line-height: 23px;
+  }
+}
+
 @media (min-width: 361px) and (max-width: 480px) {
   .servicesPage .serviceSectionInner {
     gap: 50px;

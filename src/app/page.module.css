@@ -891,6 +891,14 @@
   display: none;
 }
 
+.clientsDesktopDescriptionBreak {
+  display: block;
+}
+
+.clientsMobileDescriptionBreak {
+  display: none;
+}
+
 .desktopOnlyCopy {
   display: inline;
 }
@@ -14218,5 +14226,15 @@
   .clientsPage .clientGroups > div > h3 {
     font-size: 15px;
     line-height: 19px;
+  }
+}
+
+@media (max-width: 480px) {
+  .clientsPage .clientsSection .clientsDesktopDescriptionBreak {
+    display: none;
+  }
+
+  .clientsPage .clientsSection .clientsMobileDescriptionBreak {
+    display: block;
   }
 }

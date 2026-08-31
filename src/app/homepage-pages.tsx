@@ -797,9 +797,13 @@ export function ClientsPage() {
           title={<b>고객사</b>}
           description={
             <>
-              수많은 현장에서 쌓아온 탄탄한 경험과 전문성을 바탕으로,
-              <br />
-              고객의 기대를 뛰어넘는 최적의 솔루션을 완성합니다.
+              수많은 현장에서 쌓아온 탄탄한 경험과 전문성을
+              <br className={styles.clientsMobileDescriptionBreak} />
+              바탕으로,{" "}
+              <br className={styles.clientsDesktopDescriptionBreak} />
+              고객의 기대를 뛰어넘는 최적의 솔루션을
+              <br className={styles.clientsMobileDescriptionBreak} />
+              완성합니다.
             </>
           }
         />

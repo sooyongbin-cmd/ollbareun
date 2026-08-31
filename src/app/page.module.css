@@ -8304,7 +8304,7 @@
 
   .aboutPage .contactSection .contactCopy address {
     width: 100%;
-    gap: 11px 12px;
+    gap: 11px 3px;
     grid-template-columns: 13px 1fr;
   }
 

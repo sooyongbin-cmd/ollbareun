@@ -13213,3 +13213,147 @@
     row-gap: 13px;
   }
 }
+
+/* Shared section rhythm: apply the measured top and bottom padding to every
+ * content section on the landing, about, services, and clients pages. */
+.landingPage .trustSection,
+.landingPage .servicePreview,
+.landingPage .homeClientSection,
+.aboutPage .companySection,
+.aboutPage .values,
+.aboutPage .socialSection,
+.aboutPage .contactSection,
+.servicesPage .operationSection,
+.servicesPage .dispatchSection,
+.servicesPage .facilityManagementSection,
+.servicesPage .disinfectionSection,
+.clientsPage .clientsSection {
+  padding-top: 200px;
+  padding-bottom: 200px;
+}
+
+@media (min-width: 1063px) and (max-width: 1280px) {
+  .landingPage .trustSection,
+  .landingPage .servicePreview,
+  .landingPage .homeClientSection,
+  .aboutPage .companySection,
+  .aboutPage .values,
+  .aboutPage .socialSection,
+  .aboutPage .contactSection,
+  .servicesPage .operationSection,
+  .servicesPage .dispatchSection,
+  .servicesPage .facilityManagementSection,
+  .servicesPage .disinfectionSection,
+  .clientsPage .clientsSection {
+    padding-top: 160px;
+    padding-bottom: 160px;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1062px) {
+  .landingPage .trustSection,
+  .landingPage .servicePreview,
+  .landingPage .homeClientSection,
+  .aboutPage .companySection,
+  .aboutPage .values,
+  .aboutPage .socialSection,
+  .aboutPage .contactSection,
+  .servicesPage .operationSection,
+  .servicesPage .dispatchSection,
+  .servicesPage .facilityManagementSection,
+  .servicesPage .disinfectionSection,
+  .clientsPage .clientsSection {
+    padding-top: 140px;
+    padding-bottom: 140px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .landingPage .trustSection,
+  .landingPage .servicePreview,
+  .landingPage .homeClientSection,
+  .aboutPage .companySection,
+  .aboutPage .values,
+  .aboutPage .socialSection,
+  .aboutPage .contactSection,
+  .servicesPage .operationSection,
+  .servicesPage .dispatchSection,
+  .servicesPage .facilityManagementSection,
+  .servicesPage .disinfectionSection,
+  .clientsPage .clientsSection {
+    padding-top: 130px;
+    padding-bottom: 130px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .landingPage .trustSection,
+  .landingPage .servicePreview,
+  .landingPage .homeClientSection,
+  .aboutPage .companySection,
+  .aboutPage .values,
+  .aboutPage .socialSection,
+  .aboutPage .contactSection,
+  .servicesPage .operationSection,
+  .servicesPage .dispatchSection,
+  .servicesPage .facilityManagementSection,
+  .servicesPage .disinfectionSection,
+  .clientsPage .clientsSection {
+    padding-top: 120px;
+    padding-bottom: 120px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .landingPage .trustSection,
+  .landingPage .servicePreview,
+  .landingPage .homeClientSection,
+  .aboutPage .companySection,
+  .aboutPage .values,
+  .aboutPage .socialSection,
+  .aboutPage .contactSection,
+  .servicesPage .operationSection,
+  .servicesPage .dispatchSection,
+  .servicesPage .facilityManagementSection,
+  .servicesPage .disinfectionSection,
+  .clientsPage .clientsSection {
+    padding-top: 110px;
+    padding-bottom: 110px;
+  }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+  .landingPage .trustSection,
+  .landingPage .servicePreview,
+  .landingPage .homeClientSection,
+  .aboutPage .companySection,
+  .aboutPage .values,
+  .aboutPage .socialSection,
+  .aboutPage .contactSection,
+  .servicesPage .operationSection,
+  .servicesPage .dispatchSection,
+  .servicesPage .facilityManagementSection,
+  .servicesPage .disinfectionSection,
+  .clientsPage .clientsSection {
+    padding-top: 100px;
+    padding-bottom: 100px;
+  }
+}
+
+@media (max-width: 360px) {
+  .landingPage .trustSection,
+  .landingPage .servicePreview,
+  .landingPage .homeClientSection,
+  .aboutPage .companySection,
+  .aboutPage .values,
+  .aboutPage .socialSection,
+  .aboutPage .contactSection,
+  .servicesPage .operationSection,
+  .servicesPage .dispatchSection,
+  .servicesPage .facilityManagementSection,
+  .servicesPage .disinfectionSection,
+  .clientsPage .clientsSection {
+    padding-top: 80px;
+    padding-bottom: 80px;
+  }
+}

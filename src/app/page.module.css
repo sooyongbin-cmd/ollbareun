@@ -5250,10 +5250,6 @@
     margin-bottom: 40px;
   }
 
-  .clientsPage .clientsSection {
-    min-height: calc(835px + 118.75vw);
-    height: calc(835px + 118.75vw);
-  }
 }
 
 @media (min-width: 641px) and (max-width: 768px) {
@@ -5358,11 +5354,6 @@
   .aboutPage .values {
     /* min-height: 988px; */
     /* height: 988px; */
-  }
-
-  .clientsPage .clientsSection {
-    min-height: calc(2587px - 109.375vw);
-    height: calc(2587px - 109.375vw);
   }
 
   .aboutPage .socialGrid,
@@ -5623,11 +5614,6 @@
     /* height: calc(829.72px + 95.058vw); */
   }
 
-  .clientsPage .clientsSection {
-    min-height: calc(1226.166px + 184.398vw);
-    height: calc(1226.166px + 184.398vw);
-  }
-
   .aboutPage .socialGrid,
   .servicesPage .facilityGrid {
     width: min(320px, calc(100% - 40px));
@@ -5708,11 +5694,6 @@
   .aboutPage .socialSection {
     /* min-height: 1171.93px; */
     /* height: 1171.93px; */
-  }
-
-  .clientsPage .clientsSection {
-    min-height: 1890px;
-    height: 1890px;
   }
 
   .servicePreview .serviceGrid {

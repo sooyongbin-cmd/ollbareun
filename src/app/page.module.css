@@ -8864,7 +8864,7 @@
     display: grid;
     width: 320px;
     height: 310.672px;
-    padding: 12.955px 33.059px 9.717px 19.092px;
+    padding: 12.955px 33.059px 9.717px 3px;
     flex: 0 0 auto;
     grid-template-rows: repeat(5, 40px);
     row-gap: 22px;
@@ -8873,7 +8873,7 @@
   .aboutPage .timeline::before {
     top: 3.816px;
     bottom: 3.816px;
-    left: 167.915px;
+    left: 152px;
     height: auto;
   }
 

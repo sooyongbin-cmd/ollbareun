@@ -8764,7 +8764,7 @@
     display: grid;
     width: 494px;
     height: 470px;
-    padding: 15px 10.046px 15px 40px;
+    padding: 15px 10.046px 15px 10px;
     flex: 0 0 auto;
     grid-template-rows: repeat(5, 50px);
     row-gap: 47.5px;

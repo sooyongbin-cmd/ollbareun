@@ -5540,11 +5540,6 @@
     /* height: calc(1121px + 34.375vw); */
   }
 
-  .clientsPage .clientsSection {
-    min-height: calc(2784.112px - 140.174vw);
-    height: calc(2784.112px - 140.174vw);
-  }
-
   .aboutPage .socialGrid,
   .servicesPage .facilityGrid {
     width: min(320px, calc(100% - 40px));

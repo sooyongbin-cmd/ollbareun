@@ -8914,8 +8914,6 @@
   }
 
   .clientsPage .clientsSection .sectionHeading {
-    width: clamp(432px, calc(3.4375vw + 388px), 454px);
-    max-width: none;
     margin-bottom: clamp(100px, calc(145px - 2.34375vw), 115px);
   }
 

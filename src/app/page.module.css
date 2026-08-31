@@ -3492,7 +3492,7 @@
   }
 
   .aboutPage .contactSection .contactCopy address > span img {
-    align-self: start;
+    align-self: center;
     width: 0.625rem;
     height: 0.9375rem;
   }

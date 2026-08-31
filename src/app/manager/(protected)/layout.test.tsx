@@ -216,6 +216,22 @@ describe("manager layout", () => {
       "href",
       "/manager/system/configs",
     );
+    expect(screen.getByRole("link", { name: "프로젝트 문서" })).toHaveAttribute(
+      "href",
+      "https://ollbareun.vercel.app/docs/documents/",
+    );
+
+    const systemLinks = screen
+      .getByText("시스템")
+      .closest("[data-sidebar=group]")
+      ?.querySelectorAll("a");
+    expect(Array.from(systemLinks ?? []).map((link) => link.textContent?.trim())).toEqual([
+      "로그현황",
+      "패스키 요청 관리",
+      "관리자관리",
+      "프로젝트 문서",
+      "시스템설정",
+    ]);
   });
 
   it("marks the current route active and shows its breadcrumb", () => {

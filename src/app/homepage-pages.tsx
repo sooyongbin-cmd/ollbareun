@@ -593,10 +593,12 @@ export function AboutPage() {
                   올바름은 취약계층에게 안정된 일자리를 제공하고,
                   <br />
                   균등한 교육기회와 복리후생을 통해 직무에 전념할 수 있는
-                  <br />
+                  <br />{" "}
                   환경을 만듭니다. 지역사회 재투자와 사회서비스 확충을
-                  <br />
-                  기업 운영의 중요한 기준으로 둡니다.
+                  <br />{" "}
+                  기업 운영의 중요한
+                  <br className={styles.socialMobileNarrowBreak} />{" "}
+                  기준으로 둡니다.
                 </span>
               </>
             }

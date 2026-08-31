@@ -887,6 +887,10 @@
   display: none;
 }
 
+.socialMobileNarrowBreak {
+  display: none;
+}
+
 .mobileServiceBreak {
   display: none;
 }
@@ -13114,6 +13118,15 @@
 @media (max-width: 360px) {
   .aboutPage .companyInner {
     gap: 0;
+  }
+
+  .aboutPage .socialSection .mobileOnlyCopy br:nth-of-type(2),
+  .aboutPage .socialSection .mobileOnlyCopy br:nth-of-type(3) {
+    display: none;
+  }
+
+  .aboutPage .socialSection .mobileOnlyCopy .socialMobileNarrowBreak {
+    display: inline;
   }
 
   .aboutPage .companySection .sectionHeading {

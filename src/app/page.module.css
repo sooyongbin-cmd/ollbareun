@@ -3948,10 +3948,6 @@
     width: min(508.639px, 100%);
   }
 
-  .clientsPage .clientsSection {
-    min-height: calc(1252px + 58.438vw);
-    height: calc(1252px + 58.438vw);
-  }
 }
 
 /* Landing page reconstruction from Figma.

@@ -8943,10 +8943,6 @@
     box-sizing: border-box;
     width: clamp(933px, calc(38.90625vw + 435.6px), 1182px);
     max-width: none;
-    min-height: 0;
-    height: clamp(1844px, calc(82.8125vw + 784px), 2374px);
-    padding-top: clamp(122px, calc(12.1875vw - 34px), 200px);
-    padding-bottom: clamp(67px, calc(5.15625vw + 1px), 100px);
   }
 
   .clientsPage .clientsSection .sectionHeading {

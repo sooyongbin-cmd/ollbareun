@@ -13520,6 +13520,134 @@
   }
 }
 
+/* Page 4 gap matrix: discrete Figma spacing for the clients section. */
+.clientsPage .clientsSection .sectionHeading {
+  display: flex;
+  flex-direction: column;
+}
+
+.clientsPage .clientsSection .sectionHeading > p,
+.clientsPage .clientsSection .sectionHeading h2,
+.clientsPage .clientsSection .sectionHeading > span {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.clientsPage .clientGroups > div:nth-child(1),
+.clientsPage .clientGroups > div:nth-child(2),
+.clientsPage .clientGroups > div:nth-child(3) {
+  margin-bottom: 0;
+}
+
+.clientsPage .clientGroups > div > h3 {
+  margin-top: 0;
+}
+
+@media (min-width: 1281px) {
+  .clientsPage .clientsSection .sectionHeading {
+    gap: 23px;
+    margin-bottom: 100px;
+  }
+
+  .clientsPage .clientGroups {
+    gap: 100px;
+  }
+
+  .clientsPage .clientGroups > div > h3 {
+    margin-bottom: 100px;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .clientsPage .clientsSection .sectionHeading {
+    gap: 23px;
+    margin-bottom: 80px;
+  }
+
+  .clientsPage .clientGroups {
+    gap: 80px;
+  }
+
+  .clientsPage .clientGroups > div > h3 {
+    margin-bottom: 80px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .clientsPage .clientsSection .sectionHeading {
+    gap: 23px;
+    margin-bottom: 80px;
+  }
+
+  .clientsPage .clientGroups {
+    gap: 70px;
+  }
+
+  .clientsPage .clientGroups > div > h3 {
+    margin-bottom: 70px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .clientsPage .clientsSection .sectionHeading {
+    gap: 22px;
+    margin-bottom: 80px;
+  }
+
+  .clientsPage .clientGroups {
+    gap: 70px;
+  }
+
+  .clientsPage .clientGroups > div > h3 {
+    margin-bottom: 70px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .clientsPage .clientsSection .sectionHeading {
+    gap: 22px;
+    margin-bottom: 50px;
+  }
+
+  .clientsPage .clientGroups {
+    gap: 60px;
+  }
+
+  .clientsPage .clientGroups > div > h3 {
+    margin-bottom: 60px;
+  }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+  .clientsPage .clientsSection .sectionHeading {
+    gap: 22px;
+    margin-bottom: 50px;
+  }
+
+  .clientsPage .clientGroups {
+    gap: 54px;
+  }
+
+  .clientsPage .clientGroups > div > h3 {
+    margin-bottom: 54px;
+  }
+}
+
+@media (max-width: 360px) {
+  .clientsPage .clientsSection .sectionHeading {
+    gap: 22px;
+    margin-bottom: 50px;
+  }
+
+  .clientsPage .clientGroups {
+    gap: 54px;
+  }
+
+  .clientsPage .clientGroups > div > h3 {
+    margin-bottom: 54px;
+  }
+}
+
 /* Page 3 text matrix: discrete Figma font-size and line-height values. */
 @media (min-width: 1281px) {
   .servicesPage .serviceSectionInner > .sectionHeading > p {

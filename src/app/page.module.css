@@ -6896,11 +6896,11 @@
 @media (min-width: 1281px) {
   .aboutPage .timeline {
     padding-right: 59px;
-    padding-left: 30px;
+    padding-left: 80px;
   }
 
   .aboutPage .timeline::before {
-    left: 255px;
+    left: 304px;
     width: 1px;
     background: #6b6c6b;
   }

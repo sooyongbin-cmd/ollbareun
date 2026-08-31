@@ -5148,10 +5148,6 @@
     width: min(483.208px, 100%);
   }
 
-  .clientsPage .clientsSection {
-    min-height: calc(2255px - 19.922vw);
-    height: calc(2255px - 19.922vw);
-  }
 }
 
 @media (min-width: 769px) and (max-width: 1062px) {

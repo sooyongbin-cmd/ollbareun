@@ -14612,3 +14612,16 @@
     max-width: 310px;
   }
 }
+
+/* Page 2 section 5 contact icon size matrix. */
+.aboutPage .contactSection .contactCopy address img {
+  width: 19px;
+  height: 17px;
+}
+
+@media (max-width: 480px) {
+  .aboutPage .contactSection .contactCopy address img {
+    width: 17px;
+    height: 15px;
+  }
+}

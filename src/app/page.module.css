@@ -6745,7 +6745,7 @@
 }
 
 .aboutPage .historyImage span {
-  font-size: 43.871px;
+  font-size: 44px;
   font-weight: 900;
   line-height: normal;
 }
@@ -6754,6 +6754,7 @@
   margin-top: 17.1px;
   font-size: 18.05px;
   line-height: 28.5px;
+  letter-spacing: -0.5415px;
 }
 
 .aboutPage .timeline {
@@ -7164,7 +7165,7 @@
   }
 
   .aboutPage .historyImage {
-    width: 496px;
+    width: 522px;
     height: 462px;
   }
 
@@ -7381,18 +7382,19 @@
 
   .aboutPage .historyImage {
     width: 100%;
-    height: 440.49px;
+    height: 462px;
     flex: 0 0 auto;
   }
 
   .aboutPage .historyImage span {
-    font-size: 61.75px;
+    font-size: 44px;
   }
 
   .aboutPage .historyImage p {
     margin-top: 26px;
-    font-size: 24.7px;
-    line-height: 35px;
+    font-size: 18.05px;
+    line-height: 28.5px;
+    letter-spacing: -0.5415px;
   }
 
   .aboutPage .timeline {
@@ -7557,7 +7559,7 @@
   }
 
   .aboutPage .historyImage {
-    height: 418.467px;
+    height: 390px;
   }
 
   .aboutPage .timeline {
@@ -7689,17 +7691,18 @@
 
 
   .aboutPage .historyImage {
-    height: 372px;
+    height: 265px;
   }
 
   .aboutPage .historyImage span {
-    font-size: 55px;
+    font-size: 41px;
   }
 
   .aboutPage .historyImage p {
     margin-top: 23.5px;
-    font-size: 22px;
-    line-height: 31px;
+    font-size: 14.319px;
+    line-height: 20.456px;
+    letter-spacing: -0.4296px;
   }
 
   .aboutPage .timeline {
@@ -8006,7 +8009,7 @@
   }
 
   .aboutPage .historyImage {
-    width: calc(398.159px + 9.7207vw);
+    width: 522px;
   }
 
   .aboutPage .timeline {
@@ -8459,7 +8462,7 @@
     --about-company-heading-width: 604px;
     --about-company-stats-width: 590px;
     --about-company-history-width: 494px;
-    --about-history-image-width: 496px;
+    --about-history-image-width: 522px;
     --about-timeline-width: 494px;
     --about-values-content-width: 667px;
     --about-values-heading-width: 667px;
@@ -8531,7 +8534,7 @@
     --about-company-heading-width: 326px;
     --about-company-stats-width: 320px;
     --about-company-history-width: 320px;
-    --about-history-image-width: 300.021px;
+    --about-history-image-width: 300px;
     --about-timeline-width: 320px;
     --about-values-content-width: 320px;
     --about-values-heading-width: 269px;
@@ -8555,7 +8558,7 @@
     --about-company-heading-width: 326px;
     --about-company-stats-width: 320px;
     --about-company-history-width: 320px;
-    --about-history-image-width: 300.021px;
+    --about-history-image-width: 300px;
     --about-timeline-width: 320px;
     --about-values-content-width: 320px;
     --about-values-heading-width: 269px;
@@ -11020,13 +11023,14 @@
   }
 
   .aboutPage .historyImage span {
-    font-size: 40.912px;
+    font-size: 41px;
     line-height: normal;
   }
 
   .aboutPage .historyImage p {
     font-size: 14.319px;
     line-height: 20.456px;
+    letter-spacing: -0.4296px;
   }
 
   .aboutPage .timeline time {
@@ -13047,8 +13051,15 @@
     row-gap: 49px;
   }
 
+  .aboutPage .historyImage span {
+    font-size: 60px;
+  }
+
   .aboutPage .historyImage p {
     margin-top: 14px;
+    font-size: 21px;
+    line-height: 30px;
+    letter-spacing: -0.63px;
   }
 
   .aboutPage .timeline {
@@ -14358,5 +14369,72 @@
 
   .clientsPage .clientsSection .clientsMobileDescriptionBreak {
     display: block;
+  }
+}
+
+/* Page 2 history image/text matrix: values copied from the current h_img sheet. */
+.aboutPage .historyImage {
+  width: 522px;
+  height: 462px;
+}
+
+.aboutPage .historyImage span {
+  font-size: 44px;
+}
+
+.aboutPage .historyImage p {
+  font-size: 18.05px;
+  line-height: 28.5px;
+  letter-spacing: -0.5415px;
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .aboutPage .historyImage {
+    width: 440px;
+    height: 390px;
+  }
+
+  .aboutPage .historyImage span {
+    font-size: 60px;
+  }
+
+  .aboutPage .historyImage p {
+    font-size: 21px;
+    line-height: 30px;
+    letter-spacing: -0.63px;
+  }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+  .aboutPage .historyImage {
+    width: 300px;
+    height: 265px;
+  }
+
+  .aboutPage .historyImage span {
+    font-size: 41px;
+  }
+
+  .aboutPage .historyImage p {
+    font-size: 14.319px;
+    line-height: 20.456px;
+    letter-spacing: -0.4296px;
+  }
+}
+
+@media (max-width: 360px) {
+  .aboutPage .historyImage {
+    width: 300px;
+    height: 265px;
+  }
+
+  .aboutPage .historyImage span {
+    font-size: 41px;
+  }
+
+  .aboutPage .historyImage p {
+    font-size: 14.319px;
+    line-height: 20.456px;
+    letter-spacing: -0.4296px;
   }
 }

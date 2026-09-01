@@ -617,4 +617,29 @@ describe("Figma homepage mobile responsive layout", () => {
       /@media \(max-width: 360px\)[\s\S]*?\.landingPage \.trustSection \.splitIntro,[\s\S]*?width: 100%;[\s\S]*?max-width: none;/s,
     );
   });
+
+  it("matches the current Page 2 history image/text sheet", () => {
+    const historyRules = stylesheet.slice(
+      stylesheet.lastIndexOf("Page 2 history image/text matrix"),
+    );
+
+    expect(historyRules).toMatch(
+      /\.aboutPage \.historyImage\s*\{\s*width: 522px;\s*height: 462px;/,
+    );
+    expect(historyRules).toMatch(
+      /\.aboutPage \.historyImage span\s*\{\s*font-size: 44px;/,
+    );
+    expect(historyRules).toMatch(
+      /\.aboutPage \.historyImage p\s*\{\s*font-size: 18\.05px;\s*line-height: 28\.5px;\s*letter-spacing: -0\.5415px;/,
+    );
+    expect(historyRules).toMatch(
+      /@media \(min-width: 481px\) and \(max-width: 640px\)[\s\S]*?\.aboutPage \.historyImage\s*\{\s*width: 440px;\s*height: 390px;[\s\S]*?font-size: 60px;[\s\S]*?font-size: 21px;\s*line-height: 30px;\s*letter-spacing: -0\.63px;/,
+    );
+    expect(historyRules).toMatch(
+      /@media \(min-width: 361px\) and \(max-width: 480px\)[\s\S]*?\.aboutPage \.historyImage\s*\{\s*width: 300px;\s*height: 265px;[\s\S]*?font-size: 41px;[\s\S]*?font-size: 14\.319px;\s*line-height: 20\.456px;\s*letter-spacing: -0\.4296px;/,
+    );
+    expect(historyRules).toMatch(
+      /@media \(max-width: 360px\)[\s\S]*?\.aboutPage \.historyImage\s*\{\s*width: 300px;\s*height: 265px;[\s\S]*?font-size: 41px;[\s\S]*?font-size: 14\.319px;\s*line-height: 20\.456px;\s*letter-spacing: -0\.4296px;/,
+    );
+  });
 });

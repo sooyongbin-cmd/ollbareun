@@ -891,6 +891,10 @@
   display: none;
 }
 
+.valueGridEarningBreak {
+  display: none;
+}
+
 .socialMobileNarrowBreak {
   display: none;
 }
@@ -14511,6 +14515,12 @@
 
 @media (min-width: 361px) and (max-width: 480px) {
   .aboutPage .valueGrid .valueGridMobileBreak {
+    display: block;
+  }
+}
+
+@media (max-width: 360px) {
+  .aboutPage .valueGrid .valueGridEarningBreak {
     display: block;
   }
 }

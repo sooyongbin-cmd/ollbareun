@@ -11438,6 +11438,7 @@
 
 @media (min-width: 361px) and (max-width: 480px) {
   .landingPage .trustSection .sectionHeading h2 {
+    width: 323px;
     font-size: 36px;
   }
 

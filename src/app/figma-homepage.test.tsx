@@ -562,6 +562,12 @@ describe("Figma homepage mobile responsive layout", () => {
     );
   });
 
+  it("keeps the 480px trust heading at the measured width", () => {
+    expect(stylesheet).toMatch(
+      /@media \(min-width: 361px\) and \(max-width: 480px\)[\s\S]*?\.landingPage \.trustSection \.sectionHeading h2\s*\{[\s\S]*?width: 323px;[\s\S]*?font-size: 36px;/,
+    );
+  });
+
   it("uses the eight discrete landing reference states", () => {
     expect(stylesheet).toContain("--landing-content-width: 1182px");
     expect(stylesheet).toContain("--landing-hero-height: 833px");

@@ -20,7 +20,15 @@ describe("root layout", () => {
       locale: "ko_KR",
       url: "/",
       siteName: "올바름",
-      title: "(주)올바름",
+      title: "주식회사 올바름",
+      images: [
+        {
+          url: "/og-image.png",
+          width: 1180,
+          height: 594,
+          alt: "주식회사 올바름",
+        },
+      ],
     });
     expect(metadata.twitter).toMatchObject({
       card: "summary_large_image",

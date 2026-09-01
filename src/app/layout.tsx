@@ -3,6 +3,7 @@ import "./globals.css";
 
 const siteUrl = new URL("https://ollbareun.vercel.app");
 const siteTitle = "(주)올바름";
+const openGraphTitle = "주식회사 올바름";
 const siteDescription =
   "근로자 파견, 건물·시설물 종합 관리, 방역·소독까지 사람과 공간을 위한 현장 운영 서비스를 제공합니다.";
 
@@ -18,8 +19,16 @@ export const metadata: Metadata = {
     locale: "ko_KR",
     url: "/",
     siteName: "올바름",
-    title: siteTitle,
+    title: openGraphTitle,
     description: siteDescription,
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1180,
+        height: 594,
+        alt: openGraphTitle,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",

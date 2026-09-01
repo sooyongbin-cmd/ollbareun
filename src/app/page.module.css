@@ -10800,7 +10800,8 @@
   }
 
   .publicSite .header:not(.mobileHeaderOpen) .headerInner {
-    max-width: 1240px;
+    width: 962px;
+    padding: 0;
   }
 }
 

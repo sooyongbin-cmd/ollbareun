@@ -537,6 +537,9 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(headerRules).toMatch(
       /@media \(min-width: 769px\) and \(max-width: 1062px\)[\s\S]*?--landing-header-logo-width: 173\.342px;[\s\S]*?--landing-header-logo-height: 29\.463px;[\s\S]*?--landing-header-certification-width: 219px;[\s\S]*?--landing-header-hamburger-width: 26\.15px;[\s\S]*?--landing-header-hamburger-height: 13\.66px;[\s\S]*?--landing-header-brand-gap: 30px;/,
     );
+    expect(headerRules).toMatch(
+      /@media \(min-width: 769px\) and \(max-width: 1062px\)[\s\S]*?\.publicSite \.header:not\(\.mobileHeaderOpen\) \.headerInner\s*\{\s*width: 962px;\s*padding: 0;\s*\}/,
+    );
     const tabletHeaderRules = headerRules.match(
       /@media \(min-width: 641px\) and \(max-width: 768px\) \{([\s\S]*?)\n\}/,
     )?.[1];

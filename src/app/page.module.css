@@ -1662,6 +1662,12 @@
   gap: 5rem;
 }
 
+@media (max-width: 80rem) {
+  .servicesPage .operationLayout {
+    grid-template-columns: 1fr;
+  }
+}
+
 .operationLayout > h3 {
   margin: 1rem 0 0;
   font-size: clamp(1.75rem, 3vw, 2.625rem);

@@ -891,6 +891,10 @@
   display: none;
 }
 
+.socialMobileReflowBreak {
+  display: none;
+}
+
 .mobileServiceBreak {
   display: none;
 }
@@ -13181,11 +13185,11 @@
     letter-spacing: -0.48px;
   }
 
-  .aboutPage .socialSection .mobileOnlyCopy br:nth-of-type(2),
-  .aboutPage .socialSection .mobileOnlyCopy br:nth-of-type(3) {
+  .aboutPage .socialSection .mobileOnlyCopy .socialMobileDefaultBreak {
     display: none;
   }
 
+  .aboutPage .socialSection .mobileOnlyCopy .socialMobileReflowBreak,
   .aboutPage .socialSection .mobileOnlyCopy .socialMobileNarrowBreak {
     display: inline;
   }

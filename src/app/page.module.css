@@ -1397,7 +1397,12 @@
   position: absolute;
   z-index: -1;
   inset: 0;
-  background: linear-gradient(180deg, transparent, rgb(0 23 42 / 72%));
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgb(0 23 42 / 72%) 50%,
+    transparent 100%
+  );
   content: "";
 }
 

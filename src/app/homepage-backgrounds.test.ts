@@ -27,6 +27,12 @@ describe("homepage PDF background colors", () => {
     );
   });
 
+  it("fades the history image through a dark center with transparent edges", () => {
+    expect(stylesheet).toMatch(
+      /\.historyImage::after\s*\{[^}]*background: linear-gradient\(\s*180deg,\s*transparent 0%,\s*rgb\(0 23 42 \/ 72%\) 50%,\s*transparent 100%\s*\);/s,
+    );
+  });
+
   it("makes the Social Impact background full-bleed with white cards", () => {
     expect(stylesheet).toMatch(
       /\.socialSection\s*\{[^}]*width: 100%;[^}]*padding-right: max\(1.5rem, calc\(\(100% - 80rem\) \/ 2\)\);[^}]*padding-left: max\(1.5rem, calc\(\(100% - 80rem\) \/ 2\)\);/s,

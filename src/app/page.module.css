@@ -911,6 +911,10 @@
   display: none;
 }
 
+.disinfectionMobileBreak {
+  display: none;
+}
+
 .clientsDesktopDescriptionBreak {
   display: block;
 }
@@ -10370,6 +10374,14 @@
 
   .servicesPage .facilityManagementSection .facilityMobileBreak {
     display: block;
+  }
+
+  .servicesPage .disinfectionSection .disinfectionMobileBreak {
+    display: block;
+  }
+
+  .servicesPage .disinfectionSection .mobileOnlyBreak {
+    display: none;
   }
 }
 

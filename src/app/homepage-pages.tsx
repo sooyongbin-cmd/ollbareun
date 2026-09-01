@@ -754,7 +754,7 @@ export function ServicesPage() {
             }
           />
           <div className={styles.detailBanner}><Image src="/homepage/archive/disinfection.jpg" alt="항공기 객실에서 방역 작업을 진행하는 전문 인력" fill sizes="(max-width: 47.5rem) 100vw, 75rem" /></div>
-          <h3 className={styles.detailMessage}>현장 조건에 맞춘 법정·살충·살균 소독으로<br />대형 건축물과 항공기 검역 현장의 예방 체계를{" "}<br className={styles.mobileOnlyBreak} />지원합니다.</h3>
+          <h3 className={styles.detailMessage}>현장 조건에 맞춘 법정·살충·살균 소독으로<br />대형 건축물과 항공기 검역 현장의{" "}<br className={styles.disinfectionMobileBreak} />예방 체계를{" "}<br className={styles.mobileOnlyBreak} />지원합니다.</h3>
           <div className={styles.airportCard}>
             <Image
               src="/homepage/airport-card-background.png"

@@ -8054,7 +8054,7 @@
   display: grid;
   width: 559px;
   margin: 0;
-  gap: 12px 20px;
+  gap: 14px 42px;
   grid-template-columns: 13px 94px 1fr;
   font-size: 15px;
   line-height: 18px;
@@ -12868,6 +12868,10 @@
     column-gap: 156px;
     row-gap: 0;
   }
+
+  .aboutPage .contactSection .contactCopy address {
+    gap: 14px 42px;
+  }
 }
 
 @media (min-width: 1025px) and (max-width: 1280px) {
@@ -12954,7 +12958,7 @@
   }
 
   .aboutPage .contactSection .contactCopy address {
-    row-gap: 14px;
+    gap: 14px 42px;
   }
 }
 
@@ -13042,7 +13046,7 @@
   }
 
   .aboutPage .contactSection .contactCopy address {
-    row-gap: 14px;
+    gap: 14px 42px;
   }
 }
 
@@ -13130,7 +13134,7 @@
   }
 
   .aboutPage .contactSection .contactCopy address {
-    row-gap: 14px;
+    gap: 14px 25px;
   }
 }
 
@@ -13225,7 +13229,7 @@
   }
 
   .aboutPage .contactSection .contactCopy address {
-    row-gap: 14px;
+    gap: 14px 5px;
   }
 }
 
@@ -13313,7 +13317,7 @@
   }
 
   .aboutPage .contactSection .contactCopy address {
-    row-gap: 13px;
+    gap: 13px 5px;
   }
 }
 
@@ -13422,7 +13426,7 @@
   }
 
   .aboutPage .contactSection .contactCopy address {
-    row-gap: 13px;
+    gap: 13px 5px;
   }
 }
 

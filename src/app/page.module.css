@@ -6770,14 +6770,19 @@
 
 /* CSS-Tricks' typed custom property + CSS counter pattern. */
 .aboutPage .companyYearCounter {
+  position: relative;
+  display: inline-block;
   counter-reset: company-year var(--company-year);
   color: transparent;
   transition: --company-year 1.4s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 .aboutPage .companyYearCounter::after {
+  position: absolute;
+  inset: 0;
   color: var(--home-blue);
   content: counter(company-year);
+  text-align: center;
 }
 
 .aboutPage .historyWrap {
@@ -7996,7 +8001,7 @@
   width: 559px;
   margin: 0;
   gap: 12px 20px;
-  grid-template-columns: 13px 94px 1fr;
+  /* grid-template-columns: 13px 94px 1fr; */
   font-size: 15px;
   line-height: 18px;
 }

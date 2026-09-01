@@ -895,6 +895,22 @@
   display: none;
 }
 
+.dispatchDesktopBreak {
+  display: block;
+}
+
+.dispatchMobileBreak {
+  display: none;
+}
+
+.facilityDesktopBreak {
+  display: block;
+}
+
+.facilityMobileBreak {
+  display: none;
+}
+
 .clientsDesktopDescriptionBreak {
   display: block;
 }
@@ -10328,6 +10344,32 @@
 
   .servicesPage .dispatchSection .detailMessage {
     font-size: 20px;
+  }
+}
+
+@media (max-width: 489px) {
+  .servicesPage .dispatchSection .detailMessage {
+    width: min(400px, 100%);
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .servicesPage .dispatchSection .dispatchDesktopBreak {
+    display: none;
+  }
+
+  .servicesPage .dispatchSection .dispatchMobileBreak {
+    display: block;
+  }
+}
+
+@media (max-width: 480px) {
+  .servicesPage .facilityManagementSection .facilityDesktopBreak {
+    display: none;
+  }
+
+  .servicesPage .facilityManagementSection .facilityMobileBreak {
+    display: block;
   }
 }
 

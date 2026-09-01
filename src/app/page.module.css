@@ -1,3 +1,9 @@
+@property --company-year {
+  syntax: "<integer>";
+  initial-value: 2018;
+  inherits: false;
+}
+
 .site {
   --home-blue: #009fe3;
   --home-deep-blue: #0667ad;
@@ -6760,6 +6766,18 @@
   margin: 0;
   font-size: 17px;
   line-height: 20px;
+}
+
+/* CSS-Tricks' typed custom property + CSS counter pattern. */
+.aboutPage .companyYearCounter {
+  counter-reset: company-year var(--company-year);
+  color: transparent;
+  transition: --company-year 1.4s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.aboutPage .companyYearCounter::after {
+  color: var(--home-blue);
+  content: counter(company-year);
 }
 
 .aboutPage .historyWrap {

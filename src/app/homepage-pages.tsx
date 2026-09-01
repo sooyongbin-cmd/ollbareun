@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import styles from "./page.module.css";
 import HomepageContactMap from "./homepage-contact-map";
 import HomepageFooter from "./homepage-footer";
@@ -56,6 +56,8 @@ const values = [
   ["S", "Social", "사회 환원을 통한 가치 실현"],
   ["T", "Talented", "취약계층 육성을 통한 역량강화"],
 ];
+
+const COMPANY_FOUNDING_YEAR = 2018;
 
 const operationSteps = [
   {
@@ -376,6 +378,49 @@ function ContactSection() {
   );
 }
 
+function CompanyFoundingYear() {
+  const currentYear = new Date().getFullYear();
+  const [year, setYear] = useState(currentYear);
+  const counterRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const counter = counterRef.current;
+
+    if (!counter) {
+      return;
+    }
+
+    const animate = () => setYear(COMPANY_FOUNDING_YEAR);
+
+    if (!("IntersectionObserver" in window)) {
+      animate();
+      return;
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry?.isIntersecting) {
+        animate();
+        observer.disconnect();
+      }
+    }, { threshold: 0.4 });
+
+    observer.observe(counter);
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <strong
+      ref={counterRef}
+      className={styles.companyYearCounter}
+      style={{ "--company-year": year } as CSSProperties}
+      aria-label={String(COMPANY_FOUNDING_YEAR)}
+    >
+      {COMPANY_FOUNDING_YEAR}
+    </strong>
+  );
+}
+
 function HomeClientPreview() {
   const previewLogos = [
     {
@@ -636,7 +681,7 @@ export function AboutPage() {
             }
           />
           <div className={styles.stats}>
-            <div><Image src="/homepage/archive/stat-company.svg" alt="" width={31} height={36} aria-hidden="true" /><strong>2018</strong><span>법인 설립</span></div>
+            <div><Image src="/homepage/archive/stat-company.svg" alt="" width={31} height={36} aria-hidden="true" /><CompanyFoundingYear /><span>법인 설립</span></div>
             <div><Image src="/homepage/archive/stat-employees.svg" alt="" width={54} height={28} aria-hidden="true" /><strong>26</strong><span>2026 임직원</span></div>
             <div><Image src="/homepage/archive/stat-sales.svg" alt="" width={37} height={34} aria-hidden="true" /><strong>10.3억</strong><span>2025 매출</span></div>
             <div><Image src="/homepage/archive/stat-growth.svg" alt="" width={34} height={34} aria-hidden="true" /><strong>220%</strong><span>2022~25 매출 성장률</span></div>

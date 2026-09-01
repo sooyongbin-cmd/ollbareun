@@ -7146,7 +7146,7 @@
   width: 559px;
   margin: 0;
   gap: 12px 20px;
-  grid-template-columns: 13px 94px 1fr;
+  /* grid-template-columns: 13px 94px 1fr; */
   font-size: 15px;
   line-height: 18px;
 }

@@ -3734,8 +3734,8 @@
   }
 
   .servicesPage .dispatchSection .detailBanner img {
-    object-fit: fill;
-    transform: translateX(4.091875rem) scale(2.6);
+    object-fit: cover;
+    /* transform: translateX(4.091875rem) scale(2.6); */
     transform-origin: center;
   }
 

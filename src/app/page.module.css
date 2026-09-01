@@ -10014,7 +10014,7 @@
   }
 }
 
-@media (min-width: 768px) and (max-width: 1024px) {
+@media (min-width: 640px) and (max-width: 1024px) {
   .servicesPage .detailBanner {
     height: auto;
     aspect-ratio: 16 / 5;

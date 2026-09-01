@@ -12714,6 +12714,7 @@
   }
 
   .aboutPage .stats > div:nth-child(3) > strong {
+    font-size: 35px;
     line-height: 43px;
   }
 

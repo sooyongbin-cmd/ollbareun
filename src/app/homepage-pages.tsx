@@ -54,7 +54,7 @@ const values = [
   ["B", "Benefit", "차별화된 서비스로 고객감동 극대화"],
   ["E", "Earning", "경쟁력 강화로 수익 창출"],
   ["S", "Social", "사회 환원을 통한 가치 실현"],
-  ["T", "Talented", "취약계측 육성을 통한 역걍강화"],
+  ["T", "Talented", "취약계층 육성을 통한 역량강화"],
 ];
 
 const operationSteps = [
@@ -562,7 +562,29 @@ export function AboutPage() {
               <article key={letter}>
                 <strong>{letter}</strong>
                 <span>{title}</span>
-                <p className={letter === "B" ? styles.benefitDescription : undefined}>{description}</p>
+                <p className={letter === "B" ? styles.benefitDescription : undefined}>
+                  {letter === "E" ? (
+                    <>
+                      {description}
+                      <br className={styles.valueGridMobileBreak} />
+                      {"\u00a0"}
+                    </>
+                  ) : letter === "S" ? (
+                    <>
+                      사회 환원을 통한 가치{" "}
+                      <br className={styles.valueGridMobileBreak} />
+                      실현
+                    </>
+                  ) : letter === "T" ? (
+                    <>
+                      취약계층 육성을 통한{" "}
+                      <br className={styles.valueGridMobileBreak} />
+                      역량강화
+                    </>
+                  ) : (
+                    description
+                  )}
+                </p>
               </article>
             ))}
           </div>

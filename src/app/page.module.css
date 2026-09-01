@@ -887,6 +887,10 @@
   display: none;
 }
 
+.valueGridMobileBreak {
+  display: none;
+}
+
 .socialMobileNarrowBreak {
   display: none;
 }
@@ -14434,5 +14438,11 @@
     font-size: 14.319px;
     line-height: 20.456px;
     letter-spacing: -0.4296px;
+  }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+  .aboutPage .valueGrid .valueGridMobileBreak {
+    display: block;
   }
 }

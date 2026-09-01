@@ -69,9 +69,28 @@ describe("Figma homepage text updates", () => {
     render(<AboutPage />);
 
     expectHeadingText("사람 중심의 가치를 심고, 지속 가능한 내일을 가꿉니다.");
-    expect(screen.getByText("취약계측 육성을 통한 역걍강화")).toBeInTheDocument();
+    expect(screen.getByText("취약계층 육성을 통한 역량강화")).toBeInTheDocument();
     expect(screen.getByText("e-mail", { selector: "strong" })).toBeInTheDocument();
     expect(screen.getAllByText(/217・218호/, { selector: "span" }).length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("renders the corrected core value copy and 480px-only line breaks", () => {
+    const { container } = render(<AboutPage />);
+    const descriptions = Array.from(container.querySelectorAll('[class*="valueGrid"] article p'));
+
+    expect(descriptions.map((description) => description.textContent?.replace(/\u00a0/g, " "))).toEqual([
+      "차별화된 서비스로 고객감동 극대화",
+      "경쟁력 강화로 수익 창출 ",
+      "사회 환원을 통한 가치 실현",
+      "취약계층 육성을 통한 역량강화",
+    ]);
+    expect(descriptions[0]?.querySelector("br")).toBeNull();
+    expect(descriptions[1]?.querySelector("br")).not.toBeNull();
+    expect(descriptions[2]?.querySelector("br")).not.toBeNull();
+    expect(descriptions[3]?.querySelector("br")).not.toBeNull();
+    expect(stylesheet).toMatch(
+      /@media \(min-width: 361px\) and \(max-width: 480px\)[\s\S]*?\.aboutPage \.valueGrid \.valueGridMobileBreak\s*\{\s*display: block;/,
+    );
   });
 
   it("matches the exact services-page hero and facility-card copy", () => {

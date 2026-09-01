@@ -221,10 +221,7 @@ describe("Figma homepage mobile responsive layout", () => {
       /@media \(max-width: 1280px\)[\s\S]*?\.servicesPage \.facilityGrid\s*\{[^}]*width: 100%;[^}]*max-width: 590px;[^}]*margin-right: auto;[^}]*margin-left: auto;[^}]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/,
     );
     expect(servicesFrameRules).toMatch(
-      /@media \(max-width: 768px\)[\s\S]*?\.servicesPage \.facilityGrid\s*\{[^}]*grid-template-columns: 1fr;/,
-    );
-    expect(servicesFrameRules).toMatch(
-      /@media \(max-width: 640px\)[\s\S]*?\.servicesPage \.facilityGrid\s*\{[^}]*max-width: 254px;/,
+      /@media \(max-width: 640px\)[\s\S]*?\.servicesPage \.facilityGrid\s*\{[^}]*max-width: 254px;[^}]*grid-template-columns: 1fr;/,
     );
     expect(servicesFrameRules).toMatch(
       /\.servicesPage \.airportCard\s*\{[^}]*width: 533px;[^}]*height: 314px;/,

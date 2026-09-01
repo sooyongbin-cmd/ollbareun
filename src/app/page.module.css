@@ -10094,15 +10094,10 @@
   }
 }
 
-@media (max-width: 768px) {
-  .servicesPage .facilityGrid {
-    grid-template-columns: 1fr;
-  }
-}
-
 @media (max-width: 640px) {
   .servicesPage .facilityGrid {
     max-width: 254px;
+    grid-template-columns: 1fr;
   }
 }
 

@@ -540,6 +540,9 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(headerRules).toMatch(
       /@media \(min-width: 769px\) and \(max-width: 1062px\)[\s\S]*?\.publicSite \.header:not\(\.mobileHeaderOpen\) \.headerInner\s*\{\s*width: 962px;\s*padding: 0;\s*\}/,
     );
+    expect(headerRules).toMatch(
+      /@media \(min-width: 769px\) and \(max-width: 1024px\)[\s\S]*?\.publicSite \.header:not\(\.mobileHeaderOpen\) \.headerInner\s*\{\s*width: 924px;\s*padding: 0;\s*\}/,
+    );
     const tabletHeaderRules = headerRules.match(
       /@media \(min-width: 641px\) and \(max-width: 768px\) \{([\s\S]*?)\n\}/,
     )?.[1];

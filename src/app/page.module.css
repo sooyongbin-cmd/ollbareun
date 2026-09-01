@@ -10805,6 +10805,13 @@
   }
 }
 
+@media (min-width: 769px) and (max-width: 1024px) {
+  .publicSite .header:not(.mobileHeaderOpen) .headerInner {
+    width: 924px;
+    padding: 0;
+  }
+}
+
 @media (min-width: 641px) and (max-width: 768px) {
   .publicSite {
     --landing-header-logo-width: 178.758px;

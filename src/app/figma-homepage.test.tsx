@@ -534,23 +534,31 @@ describe("Figma homepage mobile responsive layout", () => {
     expect(headerRules).toMatch(
       /--landing-header-height: 64px;[\s\S]*?--landing-header-logo-width: 173px;[\s\S]*?--landing-header-logo-height: 29px;[\s\S]*?--landing-header-certification-font: 15px;[\s\S]*?--landing-header-menu-font: 16px;/,
     );
+    expect(headerRules).toMatch(
+      /@media \(min-width: 769px\) and \(max-width: 1062px\)[\s\S]*?--landing-header-logo-width: 173\.342px;[\s\S]*?--landing-header-logo-height: 29\.463px;[\s\S]*?--landing-header-certification-width: 219px;[\s\S]*?--landing-header-hamburger-width: 26\.15px;[\s\S]*?--landing-header-hamburger-height: 13\.66px;[\s\S]*?--landing-header-brand-gap: 30px;/,
+    );
     const tabletHeaderRules = headerRules.match(
       /@media \(min-width: 641px\) and \(max-width: 768px\) \{([\s\S]*?)\n\}/,
     )?.[1];
 
     expect(tabletHeaderRules).toBeDefined();
-    expect(tabletHeaderRules).not.toMatch(/--landing-header-logo-(?:width|height):/);
-    expect(tabletHeaderRules).not.toMatch(
-      /--landing-header-hamburger-(?:width|height):/,
+    expect(tabletHeaderRules).toMatch(
+      /--landing-header-logo-width: 178\.758px;[\s\S]*?--landing-header-logo-height: 30\.383px;[\s\S]*?--landing-header-certification-font: 15\.469px;[\s\S]*?--landing-header-hamburger-width: 26\.967px;[\s\S]*?--landing-header-hamburger-height: 14\.087px;/,
     );
     expect(headerRules).toMatch(
-      /@media \(min-width: 481px\) and \(max-width: 640px\)[\s\S]*?--landing-header-height: 54px;[\s\S]*?--landing-header-logo-width: 144px;[\s\S]*?--landing-header-logo-height: 25px;[\s\S]*?--landing-header-certification-font: 13px;[\s\S]*?--landing-header-hamburger-width: 22px;[\s\S]*?--landing-header-hamburger-height: 11px;/,
+      /@media \(min-width: 481px\) and \(max-width: 640px\)[\s\S]*?--landing-header-height: 54px;[\s\S]*?--landing-header-logo-width: 144\.445px;[\s\S]*?--landing-header-logo-height: 24\.551px;[\s\S]*?--landing-header-certification-font: 12\.5px;[\s\S]*?--landing-header-hamburger-width: 21\.791px;[\s\S]*?--landing-header-hamburger-height: 11\.383px;/,
     );
     expect(headerRules).toMatch(
-      /@media \(min-width: 361px\) and \(max-width: 480px\)[\s\S]*?--landing-header-height: 47px;[\s\S]*?--landing-header-logo-width: 130px;[\s\S]*?--landing-header-logo-height: 22px;[\s\S]*?--landing-header-certification-font: 11px;[\s\S]*?--landing-header-hamburger-width: 20px;[\s\S]*?--landing-header-hamburger-height: 10px;/,
+      /@media \(min-width: 361px\) and \(max-width: 480px\)[\s\S]*?--landing-header-height: 47px;[\s\S]*?--landing-header-logo-width: 129\.995px;[\s\S]*?--landing-header-logo-height: 22\.096px;[\s\S]*?--landing-header-certification-font: 11\.249px;[\s\S]*?--landing-header-hamburger-width: 19\.611px;[\s\S]*?--landing-header-hamburger-height: 10\.244px;/,
     );
     expect(headerRules).toMatch(
-      /@media \(max-width: 360px\)[\s\S]*?--landing-header-height: 39px;[\s\S]*?--landing-header-logo-width: 108px;[\s\S]*?--landing-header-logo-height: 18px;[\s\S]*?--landing-header-certification-font: 9px;[\s\S]*?--landing-header-hamburger-width: 16px;[\s\S]*?--landing-header-hamburger-height: 9px;/,
+      /@media \(max-width: 360px\)[\s\S]*?--landing-header-height: 39px;[\s\S]*?--landing-header-logo-width: 108\.329px;[\s\S]*?--landing-header-logo-height: 18\.413px;[\s\S]*?--landing-header-certification-font: 9\.374px;[\s\S]*?--landing-header-hamburger-width: 16\.343px;[\s\S]*?--landing-header-hamburger-height: 8\.537px;/,
+    );
+    expect(headerRules).toMatch(
+      /@media \(max-width: 360px\)[\s\S]*?--landing-header-padding-left: 20px;[\s\S]*?--landing-header-padding-right: 20px;/,
+    );
+    expect(headerRules).toMatch(
+      /@media \(max-width: 360px\)[\s\S]*?\.publicSite \.header:not\(\.mobileHeaderOpen\) \{[\s\S]*?width: 100%;[\s\S]*?\.publicSite \.header:not\(\.mobileHeaderOpen\) \.headerInner \{[\s\S]*?width: 100%;/,
     );
   });
 

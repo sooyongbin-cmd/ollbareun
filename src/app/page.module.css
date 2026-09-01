@@ -10745,7 +10745,7 @@
 
 .publicSite .header:not(.mobileHeaderOpen) .certification {
   position: static;
-  width: auto;
+  width: var(--landing-header-certification-width, auto);
   height: auto;
   margin: 0;
   overflow: visible;
@@ -10786,6 +10786,12 @@
 
 @media (min-width: 769px) and (max-width: 1062px) {
   .publicSite {
+    --landing-header-logo-width: 173.342px;
+    --landing-header-logo-height: 29.463px;
+    --landing-header-certification-font: 15px;
+    --landing-header-certification-width: 219px;
+    --landing-header-hamburger-width: 26.15px;
+    --landing-header-hamburger-height: 13.66px;
     --landing-header-padding-left: 50px;
     --landing-header-padding-right: 50px;
     --landing-header-brand-gap: 30px;
@@ -10798,9 +10804,15 @@
 
 @media (min-width: 641px) and (max-width: 768px) {
   .publicSite {
+    --landing-header-logo-width: 178.758px;
+    --landing-header-logo-height: 30.383px;
+    --landing-header-certification-font: 15.469px;
+    --landing-header-certification-width: 225.844px;
+    --landing-header-hamburger-width: 26.967px;
+    --landing-header-hamburger-height: 14.087px;
     --landing-header-padding-left: 40px;
     --landing-header-padding-right: 40px;
-    --landing-header-brand-gap: 31px;
+    --landing-header-brand-gap: 30.938px;
   }
 
   .publicSite .header:not(.mobileHeaderOpen) .headerInner {
@@ -11089,14 +11101,15 @@
 @media (min-width: 481px) and (max-width: 640px) {
   .publicSite {
     --landing-header-height: 54px;
-    --landing-header-logo-width: 144px;
-    --landing-header-logo-height: 25px;
-    --landing-header-certification-font: 13px;
-    --landing-header-hamburger-width: 22px;
-    --landing-header-hamburger-height: 11px;
-    --landing-header-padding-left: 42px;
-    --landing-header-padding-right: 42px;
-    --landing-header-brand-gap: 25px;
+    --landing-header-logo-width: 144.445px;
+    --landing-header-logo-height: 24.551px;
+    --landing-header-certification-font: 12.5px;
+    --landing-header-certification-width: 182.493px;
+    --landing-header-hamburger-width: 21.791px;
+    --landing-header-hamburger-height: 11.383px;
+    --landing-header-padding-left: 41.665px;
+    --landing-header-padding-right: 41.665px;
+    --landing-header-brand-gap: 24.999px;
   }
 
   .publicSite .header:not(.mobileHeaderOpen) .headerInner {
@@ -11107,14 +11120,15 @@
 @media (min-width: 361px) and (max-width: 480px) {
   .publicSite {
     --landing-header-height: 47px;
-    --landing-header-logo-width: 130px;
-    --landing-header-logo-height: 22px;
-    --landing-header-certification-font: 11px;
-    --landing-header-hamburger-width: 20px;
-    --landing-header-hamburger-height: 10px;
+    --landing-header-logo-width: 129.995px;
+    --landing-header-logo-height: 22.096px;
+    --landing-header-certification-font: 11.249px;
+    --landing-header-certification-width: 164.239px;
+    --landing-header-hamburger-width: 19.611px;
+    --landing-header-hamburger-height: 10.244px;
     --landing-header-padding-left: 35px;
     --landing-header-padding-right: 35px;
-    --landing-header-brand-gap: 22px;
+    --landing-header-brand-gap: 22.499px;
   }
 
   .publicSite .header:not(.mobileHeaderOpen) .headerInner {
@@ -11196,17 +11210,23 @@
 @media (max-width: 360px) {
   .publicSite {
     --landing-header-height: 39px;
-    --landing-header-logo-width: 108px;
-    --landing-header-logo-height: 18px;
-    --landing-header-certification-font: 9px;
-    --landing-header-hamburger-width: 16px;
-    --landing-header-hamburger-height: 9px;
-    --landing-header-padding-left: 19px;
-    --landing-header-padding-right: 18px;
-    --landing-header-brand-gap: 19px;
+    --landing-header-logo-width: 108.329px;
+    --landing-header-logo-height: 18.413px;
+    --landing-header-certification-font: 9.374px;
+    --landing-header-certification-width: 136.866px;
+    --landing-header-hamburger-width: 16.343px;
+    --landing-header-hamburger-height: 8.537px;
+    --landing-header-padding-left: 20px;
+    --landing-header-padding-right: 20px;
+    --landing-header-brand-gap: 18.749px;
+  }
+
+  .publicSite .header:not(.mobileHeaderOpen) {
+    width: 100%;
   }
 
   .publicSite .header:not(.mobileHeaderOpen) .headerInner {
+    width: 100%;
     max-width: none;
   }
 }

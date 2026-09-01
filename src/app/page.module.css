@@ -14625,3 +14625,13 @@
     height: 15px;
   }
 }
+
+/* Page 3 mobile image sizing for the 360px design state. */
+@media (max-width: 360px) {
+  .servicesPage .operationSection .teamImage,
+  .servicesPage .dispatchSection .detailBanner,
+  .servicesPage .facilitySection .detailBanner {
+    width: 100%;
+    height: 90px;
+  }
+}

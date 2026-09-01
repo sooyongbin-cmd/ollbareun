@@ -12791,10 +12791,6 @@
     column-gap: 156px;
     row-gap: 0;
   }
-
-  .aboutPage .contactSection .contactCopy address {
-    row-gap: 14px;
-  }
 }
 
 @media (min-width: 1025px) and (max-width: 1280px) {

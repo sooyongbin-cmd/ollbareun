@@ -919,6 +919,11 @@
   display: none;
 }
 
+.facilityNarrowStartBreak,
+.facilityNarrowEndBreak {
+  display: none;
+}
+
 .disinfectionMobileBreak {
   display: none;
 }
@@ -4943,6 +4948,29 @@
 
   .landingPage .homeClientSection > .moreLink {
     margin-top: 5px;
+  }
+}
+
+/* Facility detail message line breaks for the 640px and smaller Figma states. */
+@media (max-width: 640px) {
+  .servicesPage .facilityManagementSection .facilityDesktopBreak {
+    display: none;
+  }
+
+  .servicesPage .facilityManagementSection .facilityNarrowStartBreak {
+    display: block;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .servicesPage .facilityManagementSection .facilityNarrowEndBreak {
+    display: block;
+  }
+}
+
+@media (max-width: 480px) {
+  .servicesPage .facilityManagementSection .facilityMobileBreak {
+    display: block;
   }
 }
 

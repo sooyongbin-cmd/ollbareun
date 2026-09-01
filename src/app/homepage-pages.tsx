@@ -871,7 +871,11 @@ export function ServicesPage() {
             }
           />
           <div className={styles.detailBanner}><Image src="/homepage/archive/facility.jpg" alt="시설 설비를 점검하는 전문 인력" fill sizes="(max-width: 47.5rem) 100vw, 75rem" /></div>
-          <h3 className={styles.detailMessage}>전기·소방·기계·가스·건축 설비의 점검과 운영관리,{" "}<br className={styles.facilityDesktopBreak} />위생관리, 시설보안,{" "}<br className={styles.facilityMobileBreak} />주차관리까지 통합 제공합니다.</h3>
+          <h3 className={styles.detailMessage}>
+            전기·소방·기계·가스·건축 설비의 점검과<br className={styles.facilityNarrowStartBreak} />{" "}운영관리,
+            <br className={styles.facilityDesktopBreak} />{" "}위생관리, 시설보안,
+            <br className={styles.facilityMobileBreak} />{" "}주차관리까지<br className={styles.facilityNarrowEndBreak} />{" "}통합 제공합니다.
+          </h3>
           <div className={styles.facilityGrid}>
             {facilityItems.map(({ title, text, image }) => (
               <article key={title}><Image src={image} alt="" width={46} height={42} aria-hidden="true" /><h3>{title}</h3><p>{text}</p></article>

@@ -14451,3 +14451,86 @@
     display: block;
   }
 }
+
+/* Page 3 image size matrix: dimensions rounded from the Page3 Mask group sheet. */
+.servicesPage .operationSection .teamImage {
+  width: 1182px;
+  height: 228px;
+}
+
+.servicesPage .dispatchSection .detailBanner,
+.servicesPage .facilitySection .detailBanner,
+.servicesPage .disinfectionSection .detailBanner {
+  width: 1182px;
+  height: 230px;
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .servicesPage .operationSection .teamImage {
+    width: 960px;
+    height: 228px;
+  }
+
+  .servicesPage .dispatchSection .detailBanner,
+  .servicesPage .facilitySection .detailBanner,
+  .servicesPage .disinfectionSection .detailBanner {
+    width: 960px;
+    height: 230px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .servicesPage .operationSection .teamImage {
+    width: 728px;
+    height: 173px;
+  }
+
+  .servicesPage .dispatchSection .detailBanner,
+  .servicesPage .facilitySection .detailBanner,
+  .servicesPage .disinfectionSection .detailBanner {
+    width: 728px;
+    height: 174px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .servicesPage .operationSection .teamImage {
+    width: 570px;
+    height: 135px;
+  }
+
+  .servicesPage .dispatchSection .detailBanner,
+  .servicesPage .facilitySection .detailBanner,
+  .servicesPage .disinfectionSection .detailBanner {
+    width: 570px;
+    height: 137px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .servicesPage .operationSection .teamImage,
+  .servicesPage .dispatchSection .detailBanner {
+    width: 440px;
+    height: 105px;
+  }
+
+  .servicesPage .facilitySection .detailBanner,
+  .servicesPage .disinfectionSection .detailBanner {
+    width: 440px;
+    height: 137px;
+  }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+  .servicesPage .operationSection .teamImage,
+  .servicesPage .facilitySection .detailBanner,
+  .servicesPage .disinfectionSection .detailBanner {
+    width: 320px;
+    height: 89px;
+  }
+
+  .servicesPage .dispatchSection .detailBanner {
+    width: 319px;
+    height: 89px;
+  }
+}

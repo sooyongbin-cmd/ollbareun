@@ -109,6 +109,27 @@ describe("homepage Figma typography", () => {
     );
   });
 
+  it("matches the Page 3 Mask group image size matrix", () => {
+    expect(stylesheet).toMatch(
+      /\/\* Page 3 image size matrix: dimensions rounded from the Page3 Mask group sheet\. \*\/[\s\S]*?\.servicesPage \.operationSection \.teamImage\s*\{\s*width: 1182px;\s*height: 228px;\s*\}[\s\S]*?\.servicesPage \.dispatchSection \.detailBanner,[\s\S]*?\.servicesPage \.disinfectionSection \.detailBanner\s*\{\s*width: 1182px;\s*height: 230px;/s,
+    );
+    expect(stylesheet).toMatch(
+      /@media \(min-width: 1025px\) and \(max-width: 1280px\)[\s\S]*?\.servicesPage \.operationSection \.teamImage\s*\{\s*width: 960px;\s*height: 228px;/s,
+    );
+    expect(stylesheet).toMatch(
+      /@media \(min-width: 769px\) and \(max-width: 1024px\)[\s\S]*?\.servicesPage \.operationSection \.teamImage\s*\{\s*width: 728px;\s*height: 173px;/s,
+    );
+    expect(stylesheet).toMatch(
+      /@media \(min-width: 641px\) and \(max-width: 768px\)[\s\S]*?\.servicesPage \.operationSection \.teamImage\s*\{\s*width: 570px;\s*height: 135px;/s,
+    );
+    expect(stylesheet).toMatch(
+      /@media \(min-width: 481px\) and \(max-width: 640px\)[\s\S]*?\.servicesPage \.operationSection \.teamImage,[\s\S]*?\.servicesPage \.dispatchSection \.detailBanner\s*\{\s*width: 440px;\s*height: 105px;/s,
+    );
+    expect(stylesheet).toMatch(
+      /@media \(min-width: 361px\) and \(max-width: 480px\)[\s\S]*?\.servicesPage \.operationSection \.teamImage,[\s\S]*?\.servicesPage \.disinfectionSection \.detailBanner\s*\{\s*width: 320px;\s*height: 89px;[\s\S]*?\.servicesPage \.dispatchSection \.detailBanner\s*\{\s*width: 319px;\s*height: 89px;/s,
+    );
+  });
+
   it("matches the Figma clients-page body typography", () => {
     expect(stylesheet).toMatch(/\.clientsPage \.clientHero h1\s*\{[^}]*font-size: 3.3125rem;[^}]*line-height: 4.375rem;/s);
     expect(stylesheet).toMatch(/\.clientsPage \.sectionHeading > p\s*\{[^}]*font-size: 1.625rem;[^}]*line-height: normal;/s);

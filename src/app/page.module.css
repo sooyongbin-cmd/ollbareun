@@ -5872,7 +5872,6 @@
     min-width: 0;
     width: 407px;
     height: 29.463px;
-    border: 1px solid white;
   }
 
   .brandCluster > a {
@@ -5913,7 +5912,6 @@
     line-height: 18px;
     white-space: nowrap;
     opacity: 1;
-    border: 1px solid red;
   }
 
   .desktopNav,

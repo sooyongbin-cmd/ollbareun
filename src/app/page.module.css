@@ -10798,18 +10798,6 @@
     --landing-header-padding-right: 50px;
     --landing-header-brand-gap: 30px;
   }
-
-  .publicSite .header:not(.mobileHeaderOpen) .headerInner {
-    width: 962px;
-    padding: 0;
-  }
-}
-
-@media (min-width: 769px) and (max-width: 1024px) {
-  .publicSite .header:not(.mobileHeaderOpen) .headerInner {
-    width: 924px;
-    padding: 0;
-  }
 }
 
 @media (min-width: 641px) and (max-width: 768px) {
@@ -11117,8 +11105,8 @@
     --landing-header-certification-width: 182.493px;
     --landing-header-hamburger-width: 21.791px;
     --landing-header-hamburger-height: 11.383px;
-    --landing-header-padding-left: 41.665px;
-    --landing-header-padding-right: 41.665px;
+    --landing-header-padding-left: 40px;
+    --landing-header-padding-right: 40px;
     --landing-header-brand-gap: 24.999px;
   }
 
@@ -11226,8 +11214,8 @@
     --landing-header-certification-width: 136.866px;
     --landing-header-hamburger-width: 16.343px;
     --landing-header-hamburger-height: 8.537px;
-    --landing-header-padding-left: 20px;
-    --landing-header-padding-right: 20px;
+    --landing-header-padding-left: 18px;
+    --landing-header-padding-right: 18px;
     --landing-header-brand-gap: 18.749px;
   }
 

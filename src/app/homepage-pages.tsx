@@ -644,7 +644,7 @@ export function AboutPage() {
           <div className={styles.historyWrap}>
             <div className={styles.historyImage}>
               <Image src="/homepage/archive/history.jpg" alt="불이 켜진 사무실 건물" fill sizes="(max-width: 47.5rem) 100vw, 42vw" />
-              <div><span>HISTORY</span><p>사람 중심의 가치를 심고,<br />지속 가능한 내일을 가꿔갑니다.</p></div>
+              <div><span>HISTORY</span><p>사회적 책임을 다하며<br />온기를 더해온 동행의 역사</p></div>
             </div>
             <ol className={styles.timeline}>
               {history.map(([date, title, detail]) => (

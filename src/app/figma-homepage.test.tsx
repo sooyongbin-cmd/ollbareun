@@ -553,7 +553,10 @@ describe("Figma homepage mobile responsive layout", () => {
       /@media \(min-width: 481px\) and \(max-width: 640px\)[\s\S]*?--landing-header-height: 54px;[\s\S]*?--landing-header-logo-width: 144\.445px;[\s\S]*?--landing-header-logo-height: 24\.551px;[\s\S]*?--landing-header-certification-font: 12\.5px;[\s\S]*?--landing-header-hamburger-width: 21\.791px;[\s\S]*?--landing-header-hamburger-height: 11\.383px;[\s\S]*?--landing-header-padding-left: 40px;[\s\S]*?--landing-header-padding-right: 40px;/,
     );
     expect(headerRules).toMatch(
-      /@media \(min-width: 361px\) and \(max-width: 480px\)[\s\S]*?--landing-header-height: 47px;[\s\S]*?--landing-header-logo-width: 129\.995px;[\s\S]*?--landing-header-logo-height: 22\.096px;[\s\S]*?--landing-header-certification-font: 11\.249px;[\s\S]*?--landing-header-hamburger-width: 19\.611px;[\s\S]*?--landing-header-hamburger-height: 10\.244px;/,
+      /@media \(min-width: 361px\) and \(max-width: 480px\)[\s\S]*?--landing-header-height: 47px;[\s\S]*?--landing-header-logo-width: 108\.329px;[\s\S]*?--landing-header-logo-height: 18\.413px;[\s\S]*?--landing-header-certification-font: 9\.374px;[\s\S]*?--landing-header-hamburger-width: 16\.343px;[\s\S]*?--landing-header-hamburger-height: 8\.537px;/,
+    );
+    expect(headerRules).toMatch(
+      /@media \(min-width: 361px\) and \(max-width: 480px\)[\s\S]*?--landing-header-padding-left: 20px;[\s\S]*?--landing-header-padding-right: 20px;[\s\S]*?--landing-header-brand-gap: 18\.749px;/,
     );
     expect(headerRules).toMatch(
       /@media \(max-width: 360px\)[\s\S]*?--landing-header-height: 39px;[\s\S]*?--landing-header-logo-width: 108\.329px;[\s\S]*?--landing-header-logo-height: 18\.413px;[\s\S]*?--landing-header-certification-font: 9\.374px;[\s\S]*?--landing-header-hamburger-width: 16\.343px;[\s\S]*?--landing-header-hamburger-height: 8\.537px;/,

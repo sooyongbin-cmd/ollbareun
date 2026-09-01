@@ -678,9 +678,7 @@ export function AboutPage() {
                   {letter === "E" ? (
                     <>
                       {description}
-                      <br
-                        className={`${styles.valueGridMobileBreak} ${styles.valueGridEarningBreak}`}
-                      />
+                      <br className={styles.valueGridMobileBreak} />
                       {"\u00a0"}
                     </>
                   ) : letter === "S" ? (

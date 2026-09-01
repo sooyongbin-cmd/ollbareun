@@ -14597,3 +14597,18 @@
     height: 89px;
   }
 }
+
+/* Page 3 facility card grid widths for the 640px and 480px Figma states. */
+@media (min-width: 481px) and (max-width: 640px) {
+  .servicesPage .facilityGrid {
+    width: 340px;
+    max-width: 340px;
+  }
+}
+
+@media (max-width: 480px) {
+  .servicesPage .facilityGrid {
+    width: 310px;
+    max-width: 310px;
+  }
+}

@@ -138,6 +138,27 @@ describe("public homepage pages", () => {
     expect(container.querySelector('img[src*="operation-step-04.svg"]')).toBeInTheDocument();
   });
 
+  it("keeps operation card descriptions aligned to the Figma line-break variants", () => {
+    const { container } = render(<ServicesPage />);
+
+    expect(container.querySelectorAll('[class*="operationDescriptionWide"]')).toHaveLength(4);
+    expect(container.querySelectorAll('[class*="operationDescriptionNarrow"]')).toHaveLength(4);
+    expect(container.querySelectorAll('[class*="operationDescriptionMobile"]')).toHaveLength(4);
+
+    expect(container.querySelector('[class*="operationDescriptionWide"]')?.innerHTML).toContain(
+      "업무 범위,<br",
+    );
+    expect(container.querySelectorAll('[class*="operationDescriptionMobile"]')[0].innerHTML).toContain(
+      "추진 배경,<br",
+    );
+    expect(container.querySelectorAll('[class*="operationDescriptionMobile"]')[0].innerHTML).toContain(
+      "수행기준을<br",
+    );
+    expect(container.querySelectorAll('[class*="operationDescriptionNarrow"]')[1].innerHTML).toContain(
+      "개선목표를<br",
+    );
+  });
+
   it("uses the supplied archive icons for facility management cards", () => {
     const { container } = render(<ServicesPage />);
 

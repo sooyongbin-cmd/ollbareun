@@ -58,10 +58,122 @@ const values = [
 ];
 
 const operationSteps = [
-  ["01", "준비단계와 목표 설정", "현재 경영상황을 진단하고 추진 배경, 업무 범위, 품질수준, 수행기준을 구체화합니다."],
-  ["02", "비용 분석과 계약 협상", "현재 수행수준과 원가를 분석해 개선목표를 세우고, 장애 요소와 대처 시나리오를 준비합니다."],
-  ["03", "운영 모니터링과 평가", "관리팀을 중심으로 의사소통 채널, 수행결과 모니터링, 평가 시스템을 구축합니다."],
-  ["04", "이슈 대응과 현장 존중", "쟁점사항을 등록·공유·처리하고, 현장직원을 존중하는 관리감독으로 업무 시너지를 만듭니다."],
+  {
+    number: "01",
+    title: "준비단계와 목표 설정",
+    description: {
+      wide: (
+        <>
+          현재 경영상황을 진단하고 추진 배경, 업무 범위,
+          <br />
+          품질수준, 수행기준을 구체화합니다.
+        </>
+      ),
+      narrow: (
+        <>
+          현재 경영상황을 진단하고 추진 배경, 업무 범위,
+          <br />
+          품질수준, 수행기준을 구체화합니다.
+        </>
+      ),
+      mobile: (
+        <>
+          현재 경영상황을 진단하고 추진 배경,
+          <br />
+          업무 범위, 품질수준, 수행기준을
+          <br />
+          구체화합니다.
+        </>
+      ),
+    },
+  },
+  {
+    number: "02",
+    title: "비용 분석과 계약 협상",
+    description: {
+      wide: (
+        <>
+          현재 수행수준과 원가를 분석해 개선목표를 세우고,
+          <br />
+          장애 요소와 대처 시나리오를 준비합니다.
+        </>
+      ),
+      narrow: (
+        <>
+          현재 수행수준과 원가를 분석해 개선목표를
+          <br />
+          세우고, 장애 요소와 대처 시나리오를 준비합니다.
+        </>
+      ),
+      mobile: (
+        <>
+          현재 수행수준과 원가를 분석해
+          <br />
+          개선목표를 세우고, 장애 요소와 대처
+          <br />
+          시나리오를 준비합니다.
+        </>
+      ),
+    },
+  },
+  {
+    number: "03",
+    title: "운영 모니터링과 평가",
+    description: {
+      wide: (
+        <>
+          관리팀을 중심으로 의사소통 채널, 수행결과 모니터링,
+          <br />
+          평가 시스템을 구축합니다.
+        </>
+      ),
+      narrow: (
+        <>
+          관리팀을 중심으로 의사소통 채널, 수행결과
+          <br />
+          모니터링, 평가 시스템을 구축합니다.
+        </>
+      ),
+      mobile: (
+        <>
+          관리팀을 중심으로 의사소통 채널,
+          <br />
+          수행결과 모니터링, 평가 시스템을
+          <br />
+          구축합니다.
+        </>
+      ),
+    },
+  },
+  {
+    number: "04",
+    title: "이슈 대응과 현장 존중",
+    description: {
+      wide: (
+        <>
+          쟁점사항을 등록·공유·처리하고, 현장직원을 존중하는
+          <br />
+          관리감독으로 업무 시너지를 만듭니다.
+        </>
+      ),
+      narrow: (
+        <>
+          쟁점사항을 등록·공유·처리하고, 현장직원을
+          <br />
+          존중하는 관리감독으로 업무 시너지를 만듭니다.
+        </>
+      ),
+      mobile: (
+        <>
+          쟁점사항을 등록·공유·처리하고,
+          <br />
+          현장직원을 존중하는 관리감독으로
+          <br />
+          업무 시너지를 만듭니다.
+        </>
+      ),
+    },
+  },
 ];
 
 const facilityItems = [
@@ -686,7 +798,7 @@ export function ServicesPage() {
               같은 기준으로 움직입니다.
             </h3>
             <ol className={styles.operationSteps}>
-              {operationSteps.map(([number, title, description]) => (
+              {operationSteps.map(({ number, title, description }) => (
                 <li className={styles.operationStep} key={number}>
                   <span className={styles.operationBadge} aria-hidden="true">
                     <Image
@@ -707,7 +819,9 @@ export function ServicesPage() {
                   </span>
                   <div className={styles.operationCopy}>
                     <h4>{title}</h4>
-                    <p>{description}</p>
+                    <p className={styles.operationDescriptionWide}>{description.wide}</p>
+                    <p className={styles.operationDescriptionNarrow}>{description.narrow}</p>
+                    <p className={styles.operationDescriptionMobile}>{description.mobile}</p>
                   </div>
                 </li>
               ))}

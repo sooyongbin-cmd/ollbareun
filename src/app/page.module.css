@@ -1777,6 +1777,11 @@
   line-height: 1.5;
 }
 
+.operationDescriptionNarrow,
+.operationDescriptionMobile {
+  display: none;
+}
+
 .detailSection,
 .facilitySection {
   width: 100%;
@@ -13624,6 +13629,14 @@
     gap: 50px;
   }
 
+  .servicesPage .operationDescriptionWide {
+    display: none;
+  }
+
+  .servicesPage .operationDescriptionNarrow {
+    display: block;
+  }
+
   .servicesPage .serviceSectionInner > .sectionHeading {
     gap: 22px;
   }
@@ -13659,6 +13672,16 @@
 
   .servicesPage .dispatchSection .serviceSectionInner > .dispatchDiagram {
     margin-top: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .servicesPage .operationDescriptionWide {
+    display: none;
+  }
+
+  .servicesPage .operationDescriptionMobile {
+    display: block;
   }
 }
 

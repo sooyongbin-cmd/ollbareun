@@ -14637,6 +14637,43 @@
   }
 }
 
+/* Page 3 facility icon size matrix: values copied from the icon_cv1 sheet. */
+@media (min-width: 641px) {
+  .servicesPage .facilityGrid article:nth-child(1) > img {
+    width: 38px;
+    height: 42px;
+  }
+
+  .servicesPage .facilityGrid article:nth-child(2) > img,
+  .servicesPage .facilityGrid article:nth-child(3) > img {
+    width: 40px;
+    height: 42px;
+  }
+
+  .servicesPage .facilityGrid article:nth-child(4) > img {
+    width: 46px;
+    height: 31px;
+  }
+}
+
+@media (max-width: 640px) {
+  .servicesPage .facilityGrid article:nth-child(1) > img {
+    width: 30px;
+    height: 32px;
+  }
+
+  .servicesPage .facilityGrid article:nth-child(2) > img,
+  .servicesPage .facilityGrid article:nth-child(3) > img {
+    width: 31px;
+    height: 32px;
+  }
+
+  .servicesPage .facilityGrid article:nth-child(4) > img {
+    width: 36px;
+    height: 24px;
+  }
+}
+
 /* Page 3 os+card Frame17 padding-left matrix: values copied from the oscard_frame17 sheet. */
 .servicesPage .operationStep {
   padding-left: 128px;

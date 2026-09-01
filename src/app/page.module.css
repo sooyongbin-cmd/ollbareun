@@ -1675,7 +1675,7 @@
   gap: 5rem;
 }
 
-@media (max-width: 80rem) {
+@media (max-width: 64rem) {
   .servicesPage .operationLayout {
     grid-template-columns: 1fr;
   }

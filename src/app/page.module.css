@@ -8744,8 +8744,8 @@
 }
 
 .aboutPage .contactSection .contactCopy address {
-  width: var(--about-contact-details-width);
-  max-width: none;
+  /* width: var(--about-contact-details-width); */
+  /* max-width: none; */
 }
 
 @media (min-width: 1281px) {

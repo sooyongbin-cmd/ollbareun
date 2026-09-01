@@ -378,19 +378,70 @@ function ContactSection() {
   );
 }
 
-function CompanyFoundingYear() {
+function CompanyFoundingYear({ isAnimated }: { isAnimated: boolean }) {
   const currentYear = new Date().getFullYear();
-  const [year, setYear] = useState(currentYear);
-  const counterRef = useRef<HTMLElement>(null);
+
+  return (
+    <strong
+      className={styles.companyYearCounter}
+      style={{ "--company-year": isAnimated ? COMPANY_FOUNDING_YEAR : currentYear } as CSSProperties}
+      aria-label={String(COMPANY_FOUNDING_YEAR)}
+    >
+      {COMPANY_FOUNDING_YEAR}
+    </strong>
+  );
+}
+
+type CompanyStatKind = "integer" | "decimal" | "percent";
+
+function CompanyStatValue({
+  target,
+  kind,
+  isAnimated,
+  label,
+}: {
+  target: number;
+  kind: CompanyStatKind;
+  isAnimated: boolean;
+  label: string;
+}) {
+  const className = {
+    integer: styles.companyIntegerCounter,
+    decimal: styles.companyDecimalCounter,
+    percent: styles.companyPercentCounter,
+  }[kind];
+
+  const decimalValue = Math.round(target * 10);
+  const style = kind === "decimal"
+    ? {
+        "--company-stat-whole": isAnimated ? Math.floor(decimalValue / 10) : 0,
+        "--company-stat-tenths": isAnimated ? decimalValue % 10 : 0,
+      }
+    : { "--company-stat-value": isAnimated ? target : 0 };
+
+  return (
+    <strong
+      className={`${styles.companyStatCounter} ${className}`}
+      style={style as CSSProperties}
+      aria-label={label}
+    >
+      {label}
+    </strong>
+  );
+}
+
+function CompanyStats() {
+  const [isAnimated, setIsAnimated] = useState(false);
+  const statsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const counter = counterRef.current;
+    const stats = statsRef.current;
 
-    if (!counter) {
+    if (!stats) {
       return;
     }
 
-    const animate = () => setYear(COMPANY_FOUNDING_YEAR);
+    const animate = () => setIsAnimated(true);
 
     if (!("IntersectionObserver" in window)) {
       animate();
@@ -404,20 +455,18 @@ function CompanyFoundingYear() {
       }
     }, { threshold: 0.4 });
 
-    observer.observe(counter);
+    observer.observe(stats);
 
     return () => observer.disconnect();
   }, []);
 
   return (
-    <strong
-      ref={counterRef}
-      className={styles.companyYearCounter}
-      style={{ "--company-year": year } as CSSProperties}
-      aria-label={String(COMPANY_FOUNDING_YEAR)}
-    >
-      {COMPANY_FOUNDING_YEAR}
-    </strong>
+    <div ref={statsRef} className={styles.stats}>
+      <div><Image src="/homepage/archive/stat-company.svg" alt="" width={31} height={36} aria-hidden="true" /><CompanyFoundingYear isAnimated={isAnimated} /><span>법인 설립</span></div>
+      <div><Image src="/homepage/archive/stat-employees.svg" alt="" width={54} height={28} aria-hidden="true" /><CompanyStatValue target={26} kind="integer" isAnimated={isAnimated} label="26" /><span>2026 임직원</span></div>
+      <div><Image src="/homepage/archive/stat-sales.svg" alt="" width={37} height={34} aria-hidden="true" /><CompanyStatValue target={10.3} kind="decimal" isAnimated={isAnimated} label="10.3억" /><span>2025 매출</span></div>
+      <div><Image src="/homepage/archive/stat-growth.svg" alt="" width={34} height={34} aria-hidden="true" /><CompanyStatValue target={220} kind="percent" isAnimated={isAnimated} label="220%" /><span>2022~25 매출 성장률</span></div>
+    </div>
   );
 }
 
@@ -680,12 +729,7 @@ export function AboutPage() {
               </>
             }
           />
-          <div className={styles.stats}>
-            <div><Image src="/homepage/archive/stat-company.svg" alt="" width={31} height={36} aria-hidden="true" /><CompanyFoundingYear /><span>법인 설립</span></div>
-            <div><Image src="/homepage/archive/stat-employees.svg" alt="" width={54} height={28} aria-hidden="true" /><strong>26</strong><span>2026 임직원</span></div>
-            <div><Image src="/homepage/archive/stat-sales.svg" alt="" width={37} height={34} aria-hidden="true" /><strong>10.3억</strong><span>2025 매출</span></div>
-            <div><Image src="/homepage/archive/stat-growth.svg" alt="" width={34} height={34} aria-hidden="true" /><strong>220%</strong><span>2022~25 매출 성장률</span></div>
-          </div>
+          <CompanyStats />
           <div className={styles.historyWrap}>
             <div className={styles.historyImage}>
               <Image src="/homepage/archive/history.jpg" alt="불이 켜진 사무실 건물" fill sizes="(max-width: 47.5rem) 100vw, 42vw" />

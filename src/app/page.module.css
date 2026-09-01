@@ -4,6 +4,24 @@
   inherits: false;
 }
 
+@property --company-stat-value {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --company-stat-whole {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --company-stat-tenths {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: false;
+}
+
 .site {
   --home-blue: #009fe3;
   --home-deep-blue: #0667ad;
@@ -6769,20 +6787,56 @@
 }
 
 /* CSS-Tricks' typed custom property + CSS counter pattern. */
-.aboutPage .companyYearCounter {
+.aboutPage .companyYearCounter,
+.aboutPage .companyStatCounter {
   position: relative;
   display: inline-block;
-  counter-reset: company-year var(--company-year);
   color: transparent;
+}
+
+.aboutPage .companyYearCounter {
+  counter-reset: company-year var(--company-year);
   transition: --company-year 1.4s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
-.aboutPage .companyYearCounter::after {
+.aboutPage .companyStatCounter {
+  transition:
+    --company-stat-value 1.4s cubic-bezier(0.33, 1, 0.68, 1),
+    --company-stat-whole 1.4s cubic-bezier(0.33, 1, 0.68, 1),
+    --company-stat-tenths 1.4s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.aboutPage .companyYearCounter::after,
+.aboutPage .companyStatCounter::after {
   position: absolute;
   inset: 0;
   color: var(--home-blue);
-  content: counter(company-year);
   text-align: center;
+}
+
+.aboutPage .companyYearCounter::after {
+  content: counter(company-year);
+}
+
+.aboutPage .companyIntegerCounter,
+.aboutPage .companyPercentCounter {
+  counter-reset: company-stat var(--company-stat-value);
+}
+
+.aboutPage .companyIntegerCounter::after {
+  content: counter(company-stat);
+}
+
+.aboutPage .companyPercentCounter::after {
+  content: counter(company-stat) "%";
+}
+
+.aboutPage .companyDecimalCounter {
+  counter-reset: company-stat-whole var(--company-stat-whole) company-stat-tenths var(--company-stat-tenths);
+}
+
+.aboutPage .companyDecimalCounter::after {
+  content: counter(company-stat-whole) "." counter(company-stat-tenths) "억";
 }
 
 .aboutPage .historyWrap {

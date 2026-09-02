@@ -99,7 +99,13 @@ describe("homepage Figma typography", () => {
       /\.operationStep\s*\{[^}]*min-height: 6.25rem;[^}]*padding: 0.875rem 1rem 0.875rem 4.25rem;[^}]*border-radius: 1.25rem;/s,
     );
     expect(stylesheet).toMatch(
-      /\.operationBadge\s*\{[^}]*left: -1.5rem;[^}]*width: 4.75rem;[^}]*height: 4.75rem;/s,
+      /\/\* Page 3 os\+card Frame16 size matrix: values copied from the frame16_icons sheet\. \*\/[\s\S]*?@media \(min-width: 641px\)[\s\S]*?\.servicesPage \.operationBadge\s*\{[^}]*width: 112\.66px;[^}]*height: 112\.66px;/s,
+    );
+    expect(stylesheet).toMatch(
+      /@media \(min-width: 481px\) and \(max-width: 640px\)[\s\S]*?\.servicesPage \.operationBadge\s*\{[^}]*width: 101\.68px;[^}]*height: 101\.68px;/s,
+    );
+    expect(stylesheet).toMatch(
+      /@media \(max-width: 480px\)[\s\S]*?\.servicesPage \.operationBadge\s*\{[^}]*width: 81\.34px;[^}]*height: 81\.34px;/s,
     );
     expect(stylesheet).toMatch(
       /\.servicesPage \.dispatchSection \.detailMessage\s*\{[^}]*font-weight: 500;[^}]*line-height: 1.4375rem;/s,

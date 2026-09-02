@@ -1748,8 +1748,6 @@
   top: 50%;
   left: -2.3125rem;
   display: grid;
-  width: 7.04125rem;
-  height: 7.04125rem;
   transform: translateY(-50%);
   place-items: center;
   border-radius: 50%;
@@ -2705,8 +2703,6 @@
 
   .operationBadge {
     left: -1.5rem;
-    width: 4.75rem;
-    height: 4.75rem;
   }
 
   .operationNumber {
@@ -14792,5 +14788,27 @@
 @media (max-width: 480px) {
   .servicesPage .operationStep {
     padding-left: 75px;
+  }
+}
+
+/* Page 3 os+card Frame16 size matrix: values copied from the frame16_icons sheet. */
+@media (min-width: 641px) {
+  .servicesPage .operationBadge {
+    width: 112.66px;
+    height: 112.66px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  .servicesPage .operationBadge {
+    width: 101.68px;
+    height: 101.68px;
+  }
+}
+
+@media (max-width: 480px) {
+  .servicesPage .operationBadge {
+    width: 81.34px;
+    height: 81.34px;
   }
 }

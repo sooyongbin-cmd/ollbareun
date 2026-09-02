@@ -1,5 +1,10 @@
 import { getSystemConfigContent } from "./system-configs";
-import { DEFAULT_COMPANY_ADDRESS, normalizeCompanyAddress } from "./company-address";
+import {
+  DEFAULT_COMPANY_ADDRESS,
+  DEFAULT_COMPANY_MAP_COORDINATES,
+  normalizeCompanyAddress,
+  parseCompanyMapCoordinates,
+} from "./company-address";
 
 export async function getPublicCompanyAddress() {
   try {
@@ -9,15 +14,10 @@ export async function getPublicCompanyAddress() {
   }
 }
 
-export async function getPublicMapAddress(fallbackAddress = DEFAULT_COMPANY_ADDRESS) {
-  const fallback = normalizeCompanyAddress(fallbackAddress);
-
+export async function getPublicMapCoordinates() {
   try {
-    return normalizeCompanyAddress(
-      await getSystemConfigContent("code_map_address"),
-      fallback,
-    );
+    return parseCompanyMapCoordinates(await getSystemConfigContent("code_map_address")) ?? DEFAULT_COMPANY_MAP_COORDINATES;
   } catch {
-    return fallback;
+    return DEFAULT_COMPANY_MAP_COORDINATES;
   }
 }

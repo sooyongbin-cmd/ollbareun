@@ -60,7 +60,7 @@ describe("homepage contact map", () => {
     expect(screen.queryByText("지도를 불러오는 중입니다.")).not.toBeInTheDocument();
   });
 
-  it("geocodes the supplied company address before placing the marker", async () => {
+  it("uses the supplied map coordinates before placing the marker", async () => {
     const setCenter = vi.fn();
     const relayout = vi.fn();
     const map = { relayout, setCenter };
@@ -78,14 +78,8 @@ describe("homepage contact map", () => {
         longitude,
       };
     });
-    const addressSearch = vi.fn((
-      _address: string,
-      callback: (result: { x: string; y: string }[], status: string) => void,
-    ) => callback([{ x: "128.901234", y: "35.123456" }], "OK"));
-    const Geocoder = vi.fn(function Geocoder() {
-      return { addressSearch };
-    });
-    const companyAddress = "부산광역시 강서구 유통단지1로 41";
+    const companyAddress = "부산광역시 강서구 유통단지1로 41, 105동 217・218호";
+    const coordinates = { latitude: 35.123456, longitude: 128.901234 };
 
     Object.defineProperty(window, "kakao", {
       configurable: true,
@@ -95,18 +89,16 @@ describe("homepage contact map", () => {
           LatLng,
           Map,
           Marker,
-          services: { Geocoder },
         },
       },
     });
 
-    render(<HomepageContactMap address={companyAddress} />);
+    render(<HomepageContactMap address={companyAddress} coordinates={coordinates} />);
 
     await waitFor(() => {
       expect(Map).toHaveBeenCalledTimes(1);
     });
 
-    expect(addressSearch).toHaveBeenCalledWith(companyAddress, expect.any(Function));
     const position = expect.objectContaining({
       latitude: 35.123456,
       longitude: 128.901234,

@@ -1,30 +1,33 @@
 "use client";
 
 import { createContext, useContext, type ReactNode } from "react";
-import { DEFAULT_COMPANY_ADDRESS, normalizeCompanyAddress } from "@/lib/company-address";
+import {
+  DEFAULT_COMPANY_ADDRESS,
+  DEFAULT_COMPANY_MAP_COORDINATES,
+  normalizeCompanyAddress,
+  type CompanyMapCoordinates,
+} from "@/lib/company-address";
 
 const HomepageCompanyAddressContext = createContext(DEFAULT_COMPANY_ADDRESS);
-const HomepageMapAddressContext = createContext(DEFAULT_COMPANY_ADDRESS);
+const HomepageMapCoordinatesContext = createContext(DEFAULT_COMPANY_MAP_COORDINATES);
 
 export function HomepageCompanyAddressProvider({
   companyAddress,
-  mapAddress,
+  mapCoordinates,
   children,
 }: {
   companyAddress: string;
-  mapAddress?: string;
+  mapCoordinates?: CompanyMapCoordinates;
   children: ReactNode;
 }) {
   const normalizedCompanyAddress = normalizeCompanyAddress(companyAddress);
-  const normalizedMapAddress = normalizeCompanyAddress(
-    mapAddress?.trim() ? mapAddress : normalizedCompanyAddress,
-  );
+  const normalizedMapCoordinates = mapCoordinates ?? DEFAULT_COMPANY_MAP_COORDINATES;
 
   return (
     <HomepageCompanyAddressContext.Provider value={normalizedCompanyAddress}>
-      <HomepageMapAddressContext.Provider value={normalizedMapAddress}>
+      <HomepageMapCoordinatesContext.Provider value={normalizedMapCoordinates}>
         {children}
-      </HomepageMapAddressContext.Provider>
+      </HomepageMapCoordinatesContext.Provider>
     </HomepageCompanyAddressContext.Provider>
   );
 }
@@ -33,6 +36,6 @@ export function useHomepageCompanyAddress() {
   return useContext(HomepageCompanyAddressContext);
 }
 
-export function useHomepageMapAddress() {
-  return useContext(HomepageMapAddressContext);
+export function useHomepageMapCoordinates() {
+  return useContext(HomepageMapCoordinatesContext);
 }

@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { DEFAULT_COMPANY_ADDRESS } from "@/lib/company-address";
+import {
+  DEFAULT_COMPANY_ADDRESS,
+  DEFAULT_COMPANY_MAP_COORDINATES,
+  type CompanyMapCoordinates,
+} from "@/lib/company-address";
 import styles from "./page.module.css";
 
 type HomepageKakaoLatLng = {
@@ -19,25 +23,6 @@ type HomepageKakaoMarker = {
 };
 
 type HomepageKakaoMarkerImage = object;
-
-type HomepageKakaoAddressSearchResult = {
-  x: string;
-  y: string;
-};
-
-type HomepageKakaoGeocoder = {
-  addressSearch: (
-    address: string,
-    callback: (result: HomepageKakaoAddressSearchResult[], status: string) => void,
-  ) => void;
-};
-
-type HomepageKakaoServices = {
-  Geocoder: new () => HomepageKakaoGeocoder;
-  Status?: {
-    OK: string;
-  };
-};
 
 type HomepageKakaoGlobal = {
   maps: {
@@ -59,7 +44,6 @@ type HomepageKakaoGlobal = {
     ) => HomepageKakaoMarkerImage;
     Size?: new (width: number, height: number) => object;
     Point?: new (x: number, y: number) => object;
-    services?: HomepageKakaoServices;
   };
 };
 
@@ -69,70 +53,7 @@ type HomepageKakaoWindow = {
   __ollbareunKakaoMapSdkError?: () => void;
 };
 
-const HEAD_OFFICE = {
-  latitude: 35.1673384631299,
-  longitude: 128.955819688911,
-};
-
 let kakaoLoader: Promise<void> | null = null;
-
-function getAddressSearchCandidates(address: string) {
-  const normalizedAddress = address.trim().replace(/\s+/g, " ");
-  const baseAddress = normalizedAddress.split(",", 1)[0]?.trim();
-
-  return Array.from(new Set([normalizedAddress, baseAddress].filter(Boolean)));
-}
-
-function resolveCompanyPosition(kakao: HomepageKakaoGlobal, address: string) {
-  const fallbackPosition = new kakao.maps.LatLng(HEAD_OFFICE.latitude, HEAD_OFFICE.longitude);
-  const Geocoder = kakao.maps.services?.Geocoder;
-
-  if (!Geocoder) {
-    return Promise.resolve(fallbackPosition);
-  }
-
-  return new Promise<HomepageKakaoLatLng>((resolve) => {
-    const geocoder = new Geocoder();
-    const candidates = getAddressSearchCandidates(address);
-    let candidateIndex = 0;
-    let settled = false;
-
-    const finish = (position: HomepageKakaoLatLng) => {
-      if (!settled) {
-        settled = true;
-        resolve(position);
-      }
-    };
-
-    const searchNextCandidate = () => {
-      const candidate = candidates[candidateIndex++];
-      if (!candidate) {
-        finish(fallbackPosition);
-        return;
-      }
-
-      try {
-        geocoder.addressSearch(candidate, (result, status) => {
-          const isSuccess = status === "OK" || status === kakao.maps.services?.Status?.OK;
-          const match = isSuccess
-            ? result.find((item) => Number.isFinite(Number(item.y)) && Number.isFinite(Number(item.x)))
-            : undefined;
-
-          if (match) {
-            finish(new kakao.maps.LatLng(Number(match.y), Number(match.x)));
-            return;
-          }
-
-          searchNextCandidate();
-        });
-      } catch {
-        searchNextCandidate();
-      }
-    };
-
-    searchNextCandidate();
-  });
-}
 
 function getKakaoWindow() {
   return window as unknown as HomepageKakaoWindow;
@@ -186,10 +107,13 @@ function loadKakaoMap() {
 
 export default function HomepageContactMap({
   address = DEFAULT_COMPANY_ADDRESS,
+  coordinates = DEFAULT_COMPANY_MAP_COORDINATES,
 }: {
   address?: string;
+  coordinates?: CompanyMapCoordinates;
 }) {
   const companyAddress = address.trim() || DEFAULT_COMPANY_ADDRESS;
+  const mapCoordinates = coordinates ?? DEFAULT_COMPANY_MAP_COORDINATES;
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<HomepageKakaoMap | null>(null);
   const markerRef = useRef<HomepageKakaoMarker | null>(null);
@@ -211,7 +135,7 @@ export default function HomepageContactMap({
           throw new Error("카카오 지도를 불러오지 못했습니다.");
         }
 
-        const position = await resolveCompanyPosition(kakao, companyAddress);
+        const position = new kakao.maps.LatLng(mapCoordinates.latitude, mapCoordinates.longitude);
         if (ignore || !mapElementRef.current) {
           return;
         }
@@ -255,7 +179,7 @@ export default function HomepageContactMap({
       markerRef.current = null;
       mapRef.current = null;
     };
-  }, [companyAddress]);
+  }, [companyAddress, mapCoordinates.latitude, mapCoordinates.longitude]);
 
   return (
     <div className={styles.map}>

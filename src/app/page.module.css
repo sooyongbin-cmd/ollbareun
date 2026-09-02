@@ -14049,6 +14049,7 @@
   .servicesPage .operationLayout li p {
     font-size: 16px;
     line-height: 20px;
+    letter-spacing: -0.48px;
   }
 
   .servicesPage .operationNumber {

@@ -12481,10 +12481,6 @@
     line-height: 15px;
   }
 
-  .aboutPage .stats > div:nth-child(3) > strong {
-    line-height: 60px;
-  }
-
   .aboutPage .stats > div:nth-child(3) > span {
     line-height: 19px;
   }

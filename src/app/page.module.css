@@ -3560,12 +3560,6 @@
     object-fit: contain;
   }
 
-  .aboutPage .contactSection .contactCopy address > span > img,
-  .aboutPage .contactSection .contactCopy address > a > img {
-    grid-column: 1;
-    place-self: center;
-  }
-
   .aboutPage .contactSection .contactCopy address > span img {
     align-self: center;
     width: 0.625rem;
@@ -8056,6 +8050,12 @@
   display: block;
   align-self: center;
   margin: 0;
+}
+
+.aboutPage .contactSection .contactCopy address > a > img,
+.aboutPage .contactSection .contactCopy address > span > img {
+  grid-column: 1;
+  place-self: center;
 }
 
 .aboutPage .contactSection .contactCopy address strong {

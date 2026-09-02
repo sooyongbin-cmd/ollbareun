@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { AboutPage, ClientsPage, MainPage, ServicesPage } from "./homepage-pages";
+import { HomepageCompanyAddressProvider } from "./homepage-company-address";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/",
@@ -97,6 +98,18 @@ describe("homepage back to top button", () => {
 });
 
 describe("public homepage pages", () => {
+  it("uses the configured company address in the contact section and footer", () => {
+    const companyAddress = "부산광역시 강서구 새 주소 1길 2";
+
+    render(
+      <HomepageCompanyAddressProvider companyAddress={companyAddress}>
+        <AboutPage />
+      </HomepageCompanyAddressProvider>,
+    );
+
+    expect(screen.getAllByText(companyAddress)).toHaveLength(2);
+  });
+
   it("renders the Figma company content", () => {
     const { container } = render(<AboutPage />);
 

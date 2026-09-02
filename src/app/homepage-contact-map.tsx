@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { DEFAULT_COMPANY_ADDRESS } from "@/lib/company-address";
 import styles from "./page.module.css";
 
 type HomepageKakaoLatLng = {
@@ -18,6 +19,25 @@ type HomepageKakaoMarker = {
 };
 
 type HomepageKakaoMarkerImage = object;
+
+type HomepageKakaoAddressSearchResult = {
+  x: string;
+  y: string;
+};
+
+type HomepageKakaoGeocoder = {
+  addressSearch: (
+    address: string,
+    callback: (result: HomepageKakaoAddressSearchResult[], status: string) => void,
+  ) => void;
+};
+
+type HomepageKakaoServices = {
+  Geocoder: new () => HomepageKakaoGeocoder;
+  Status?: {
+    OK: string;
+  };
+};
 
 type HomepageKakaoGlobal = {
   maps: {
@@ -39,6 +59,7 @@ type HomepageKakaoGlobal = {
     ) => HomepageKakaoMarkerImage;
     Size?: new (width: number, height: number) => object;
     Point?: new (x: number, y: number) => object;
+    services?: HomepageKakaoServices;
   };
 };
 
@@ -54,6 +75,64 @@ const HEAD_OFFICE = {
 };
 
 let kakaoLoader: Promise<void> | null = null;
+
+function getAddressSearchCandidates(address: string) {
+  const normalizedAddress = address.trim().replace(/\s+/g, " ");
+  const baseAddress = normalizedAddress.split(",", 1)[0]?.trim();
+
+  return Array.from(new Set([normalizedAddress, baseAddress].filter(Boolean)));
+}
+
+function resolveCompanyPosition(kakao: HomepageKakaoGlobal, address: string) {
+  const fallbackPosition = new kakao.maps.LatLng(HEAD_OFFICE.latitude, HEAD_OFFICE.longitude);
+  const Geocoder = kakao.maps.services?.Geocoder;
+
+  if (!Geocoder) {
+    return Promise.resolve(fallbackPosition);
+  }
+
+  return new Promise<HomepageKakaoLatLng>((resolve) => {
+    const geocoder = new Geocoder();
+    const candidates = getAddressSearchCandidates(address);
+    let candidateIndex = 0;
+    let settled = false;
+
+    const finish = (position: HomepageKakaoLatLng) => {
+      if (!settled) {
+        settled = true;
+        resolve(position);
+      }
+    };
+
+    const searchNextCandidate = () => {
+      const candidate = candidates[candidateIndex++];
+      if (!candidate) {
+        finish(fallbackPosition);
+        return;
+      }
+
+      try {
+        geocoder.addressSearch(candidate, (result, status) => {
+          const isSuccess = status === "OK" || status === kakao.maps.services?.Status?.OK;
+          const match = isSuccess
+            ? result.find((item) => Number.isFinite(Number(item.y)) && Number.isFinite(Number(item.x)))
+            : undefined;
+
+          if (match) {
+            finish(new kakao.maps.LatLng(Number(match.y), Number(match.x)));
+            return;
+          }
+
+          searchNextCandidate();
+        });
+      } catch {
+        searchNextCandidate();
+      }
+    };
+
+    searchNextCandidate();
+  });
+}
 
 function getKakaoWindow() {
   return window as unknown as HomepageKakaoWindow;
@@ -105,7 +184,12 @@ function loadKakaoMap() {
   return kakaoLoader;
 }
 
-export default function HomepageContactMap() {
+export default function HomepageContactMap({
+  address = DEFAULT_COMPANY_ADDRESS,
+}: {
+  address?: string;
+}) {
+  const companyAddress = address.trim() || DEFAULT_COMPANY_ADDRESS;
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<HomepageKakaoMap | null>(null);
   const markerRef = useRef<HomepageKakaoMarker | null>(null);
@@ -127,7 +211,11 @@ export default function HomepageContactMap() {
           throw new Error("카카오 지도를 불러오지 못했습니다.");
         }
 
-        const position = new kakao.maps.LatLng(HEAD_OFFICE.latitude, HEAD_OFFICE.longitude);
+        const position = await resolveCompanyPosition(kakao, companyAddress);
+        if (ignore || !mapElementRef.current) {
+          return;
+        }
+
         mapRef.current = new kakao.maps.Map(mapElementRef.current, {
           center: position,
           level: 3,
@@ -167,14 +255,14 @@ export default function HomepageContactMap() {
       markerRef.current = null;
       mapRef.current = null;
     };
-  }, []);
+  }, [companyAddress]);
 
   return (
     <div className={styles.map}>
       <div
         ref={mapElementRef}
         className={styles.mapCanvas}
-        aria-label="부산광역시 강서구 올바름 본사 위치 지도"
+        aria-label={`${companyAddress} 올바름 본사 위치 지도`}
         data-testid="homepage-contact-map"
         role="region"
       />
@@ -183,7 +271,7 @@ export default function HomepageContactMap() {
           <p>{status}</p>
           {hasError ? (
             <address>
-              <span>부산광역시 강서구 유통단지1로 41, 105동 217·218호</span>
+              <span>{companyAddress}</span>
               <a href="tel:0514657767">전화 051-465-7767</a>
               <a href="mailto:olbareum@naver.com">olbareum@naver.com</a>
             </address>

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 
 import styles from "./page.module.css";
 import HomepageContactMap from "./homepage-contact-map";
 import HomepageFooter from "./homepage-footer";
+import { useHomepageCompanyAddress } from "./homepage-company-address";
 
 type ServiceItem = {
   title: string;
@@ -338,10 +339,12 @@ function MoreViewIcon({
 }
 
 function ContactSection() {
+  const companyAddress = useHomepageCompanyAddress();
+
   return (
     <section id="contact" className={`${styles.section} ${styles.contactSection}`}>
       <div className={styles.contactInner}>
-        <HomepageContactMap />
+        <HomepageContactMap address={companyAddress} />
         <div className={styles.contactCopy}>
           <h2>
             <strong>현장 운영</strong>의 <strong>기준</strong>을 세울 때,
@@ -353,7 +356,7 @@ function ContactSection() {
               <Image src="/homepage/archive/contact-address.svg" alt="" width={10} height={15} aria-hidden="true" />
               <strong>ADDRESS</strong>
               <span className={styles.contactValue}>
-                부산광역시 강서구 유통단지1로 41, 105동 217・218호
+                {companyAddress}
               </span>
             </span>
             <a href="tel:0514657767">

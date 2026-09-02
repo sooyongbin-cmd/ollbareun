@@ -1,7 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import styles from "./page.module.css";
+import { useHomepageCompanyAddress } from "./homepage-company-address";
 
 export default function HomepageFooter() {
+  const companyAddress = useHomepageCompanyAddress();
+
   return (
     <footer className={styles.footer}>
       <div className={styles.footerInner}>
@@ -40,7 +45,7 @@ export default function HomepageFooter() {
           <div className={styles.footerMeta}>
             <p className={styles.footerAddress}>
               <span className={styles.footerAddressLine}>
-                부산광역시 강서구 유통단지1로 41, 105동 217・218호
+                {companyAddress}
               </span>
               <span className={styles.footerAddressLine}>
                 대표이사 윤지욱・사업자등록번호 213-87-01208

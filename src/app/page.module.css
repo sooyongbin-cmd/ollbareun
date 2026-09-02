@@ -8447,7 +8447,7 @@
   .aboutPage .contactSection .contactCopy address {
     width: 322px;
     gap: 11px 3px;
-    grid-template-columns: 13px 1fr;
+    grid-template-columns: 17.21px 1fr;
   }
 
   .aboutPage .contactSection .contactCopy address strong {

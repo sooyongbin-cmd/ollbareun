@@ -12592,10 +12592,6 @@
     line-height: 11px;
   }
 
-  .aboutPage .stats > div:nth-child(3) > strong {
-    line-height: 43px;
-  }
-
   .aboutPage .stats > div:nth-child(3) > span {
     line-height: 18px;
   }

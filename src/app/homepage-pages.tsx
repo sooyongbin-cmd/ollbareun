@@ -354,24 +354,24 @@ function ContactSection() {
           </h2>
           <address>
             <span>
-              <Image src="/homepage/archive/contact-address.svg" alt="" width={10} height={15} aria-hidden="true" />
+              <Image className={styles.addressIcon} src="/homepage/archive/contact-address.svg" alt="" width={10} height={15} aria-hidden="true" />
               <strong>ADDRESS</strong>
               <span className={styles.contactValue}>
                 {companyAddress}
               </span>
             </span>
             <a href="tel:0514657767">
-              <Image src="/homepage/archive/contact-phone.svg" alt="" width={12} height={16} aria-hidden="true" />
+              <Image className={styles.telIcon} src="/homepage/archive/contact-phone.svg" alt="" width={12} height={16} aria-hidden="true" />
               <strong>TEL</strong>
               <span className={styles.contactValue}>051-465-7767</span>
             </a>
             <a href="fax:0519617767">
-              <Image src="/homepage/archive/contact-fax.svg" alt="" width={12} height={15} aria-hidden="true" />
+              <Image className={styles.faxIcon} src="/homepage/archive/contact-fax.svg" alt="" width={12} height={15} aria-hidden="true" />
               <strong>FAX</strong>
               <span className={styles.contactValue}>051-961-7767</span>
             </a>
             <a href="mailto:olbareum@naver.com">
-              <Image src="/homepage/archive/contact-email.svg" alt="" width={13} height={9} aria-hidden="true" />
+              <Image className={styles.emailIcon} src="/homepage/archive/contact-email.svg" alt="" width={13} height={9} aria-hidden="true" />
               <strong>e-mail</strong>
               <span className={styles.contactValue}>olbareum@naver.com</span>
             </a>

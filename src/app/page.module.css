@@ -14696,16 +14696,38 @@
   }
 }
 
-/* Page 2 section 5 contact icon size matrix. */
-.aboutPage .contactSection .contactCopy address img {
+/* Page 2 section 5 contact icon width matrix from frame460_address!A10:E12. */
+.aboutPage .contactSection .contactCopy address img.addressIcon {
   width: 19px;
-  height: 17px;
+}
+
+.aboutPage .contactSection .contactCopy address img.telIcon {
+  width: 19px;
+}
+
+.aboutPage .contactSection .contactCopy address img.faxIcon {
+  width: 19px;
+}
+
+.aboutPage .contactSection .contactCopy address img.emailIcon {
+  width: 19px;
 }
 
 @media (max-width: 480px) {
-  .aboutPage .contactSection .contactCopy address img {
+  .aboutPage .contactSection .contactCopy address img.addressIcon {
     width: 17px;
-    height: 15px;
+  }
+
+  .aboutPage .contactSection .contactCopy address img.telIcon {
+    width: 17px;
+  }
+
+  .aboutPage .contactSection .contactCopy address img.faxIcon {
+    width: 17px;
+  }
+
+  .aboutPage .contactSection .contactCopy address img.emailIcon {
+    width: 17px;
   }
 }
 

@@ -14722,6 +14722,13 @@
   }
 }
 
+/* Page 2 section 5 contact address columns for viewports 481px and wider. */
+@media (min-width: 481px) {
+  .aboutPage .contactSection .contactCopy address {
+    grid-template-columns: 19px 92px 1fr;
+  }
+}
+
 /* Page 3 mobile image sizing for the 360px design state. */
 @media (max-width: 360px) {
   .servicesPage .operationSection .teamImage,

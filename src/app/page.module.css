@@ -14698,36 +14698,36 @@
 
 /* Page 2 section 5 contact icon width matrix from frame460_address!A10:E12. */
 .aboutPage .contactSection .contactCopy address img.addressIcon {
-  width: 19px;
+  width: 9.43px;
 }
 
 .aboutPage .contactSection .contactCopy address img.telIcon {
-  width: 19px;
+  width: 12.24px;
 }
 
 .aboutPage .contactSection .contactCopy address img.faxIcon {
-  width: 19px;
+  width: 12px;
 }
 
 .aboutPage .contactSection .contactCopy address img.emailIcon {
-  width: 19px;
+  width: 13.3px;
 }
 
 @media (max-width: 480px) {
   .aboutPage .contactSection .contactCopy address img.addressIcon {
-    width: 17px;
+    width: 8.54px;
   }
 
   .aboutPage .contactSection .contactCopy address img.telIcon {
-    width: 17px;
+    width: 11.08px;
   }
 
   .aboutPage .contactSection .contactCopy address img.faxIcon {
-    width: 17px;
+    width: 10.87px;
   }
 
   .aboutPage .contactSection .contactCopy address img.emailIcon {
-    width: 17px;
+    width: 12.04px;
   }
 }
 

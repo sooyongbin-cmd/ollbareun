@@ -8076,6 +8076,7 @@
 .aboutPage .contactSection .contactCopy address .contactValue {
   margin: 0;
   font-size: 16px;
+  font-weight: 500;
   line-height: 23px;
 }
 

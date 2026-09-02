@@ -8431,7 +8431,7 @@
 
 @media (max-width: 640px) {
   .aboutPage .contactSection .contactCopy address {
-    width: 443px;
+    width: 448px;
     gap: 15px 23px;
     grid-template-columns: 13px 94px 1fr;
   }

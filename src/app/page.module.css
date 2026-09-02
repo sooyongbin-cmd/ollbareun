@@ -3566,16 +3566,6 @@
     height: 0.9375rem;
   }
 
-  .aboutPage .contactSection .contactCopy address > a:nth-of-type(1) img,
-  .aboutPage .contactSection .contactCopy address > a:nth-of-type(2) img {
-    width: 0.75rem;
-    height: 0.9375rem;
-  }
-
-  .aboutPage .contactSection .contactCopy address > a:nth-of-type(1) img {
-    height: 1rem;
-  }
-
   .aboutPage .contactSection .contactCopy address > a:nth-of-type(3) img {
     width: 0.8125rem;
     height: 0.5625rem;

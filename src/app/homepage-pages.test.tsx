@@ -8,7 +8,9 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("./homepage-contact-map", () => ({
-  default: () => <div data-testid="homepage-contact-map" />,
+  default: ({ address }: { address?: string }) => (
+    <div data-testid="homepage-contact-map" data-address={address} />
+  ),
 }));
 
 describe("homepage back to top button", () => {
@@ -100,14 +102,16 @@ describe("homepage back to top button", () => {
 describe("public homepage pages", () => {
   it("uses the configured company address in the contact section and footer", () => {
     const companyAddress = "부산광역시 강서구 새 주소 1길 2";
+    const mapAddress = "부산광역시 강서구 지도용 주소";
 
     render(
-      <HomepageCompanyAddressProvider companyAddress={companyAddress}>
+      <HomepageCompanyAddressProvider companyAddress={companyAddress} mapAddress={mapAddress}>
         <AboutPage />
       </HomepageCompanyAddressProvider>,
     );
 
     expect(screen.getAllByText(companyAddress)).toHaveLength(2);
+    expect(screen.getByTestId("homepage-contact-map")).toHaveAttribute("data-address", mapAddress);
   });
 
   it("renders the Figma company content", () => {

@@ -6,7 +6,7 @@ import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 
 import styles from "./page.module.css";
 import HomepageContactMap from "./homepage-contact-map";
 import HomepageFooter from "./homepage-footer";
-import { useHomepageCompanyAddress } from "./homepage-company-address";
+import { useHomepageCompanyAddress, useHomepageMapAddress } from "./homepage-company-address";
 
 type ServiceItem = {
   title: string;
@@ -340,11 +340,12 @@ function MoreViewIcon({
 
 function ContactSection() {
   const companyAddress = useHomepageCompanyAddress();
+  const mapAddress = useHomepageMapAddress();
 
   return (
     <section id="contact" className={`${styles.section} ${styles.contactSection}`}>
       <div className={styles.contactInner}>
-        <HomepageContactMap address={companyAddress} />
+        <HomepageContactMap address={mapAddress} />
         <div className={styles.contactCopy}>
           <h2>
             <strong>현장 운영</strong>의 <strong>기준</strong>을 세울 때,

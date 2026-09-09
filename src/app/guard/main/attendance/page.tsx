@@ -2,7 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { PageHeader } from "@/components/app-page";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { canClockIn, canClockOut, canClockOutAtWorksite, type AttendanceRecord, type Worksite } from "@/lib/phase1";
 import { type GpsInfo } from "@/lib/gps";
 import AttendanceMapSection from "./attendance-map-section";
@@ -106,7 +109,15 @@ function readCurrentPosition(geolocation: Geolocation): Promise<GeolocationPosit
 }
 
 export default function GuardAttendancePage() {
-  const [message, setMessage] = useState("");
+  const router = useRouter();
+  const processingRef = useRef(false);
+  const [process, setProcess] = useState<{
+    action: "출근" | "퇴근";
+    status: "processing" | "success" | "error";
+    step: number;
+    error: string;
+  } | null>(null);
+  const isProcessing = process?.status === "processing";
   const [error, setError] = useState("");
   const [guard, setGuard] = useState<GuardSession | null>(readStoredGuardSession);
   const [latitude, setLatitude] = useState("");
@@ -195,93 +206,86 @@ export default function GuardAttendancePage() {
     };
   }, []);
 
-  async function handleClockIn() {
-    const activeGuard = readStoredGuardSession();
-    if (!activeGuard?.employee || !activeGuard.worksite) {
-      setGuard(activeGuard);
-      return;
-    }
+  async function handleAttendance(action: "출근" | "퇴근") {
+    if (processingRef.current) return;
+    processingRef.current = true;
+    setProcess({ action, status: "processing", step: 0, error: "" });
+    setError("");
 
-    const geolocation = navigator.geolocation;
-    if (!geolocation) {
-      setError("이 브라우저에서는 위치 확인을 사용할 수 없습니다.");
-      return;
+    function advanceStep(step: number) {
+      setProcess((current) => current ? { ...current, step } : current);
     }
 
     try {
-      setError("");
-      const position = await readCurrentPosition(geolocation);
+      const activeGuard = readStoredGuardSession();
+      if (!activeGuard?.employee || !activeGuard.worksite) {
+        setGuard(activeGuard);
+        throw new Error("로그인 정보 또는 배정된 근무지를 확인할 수 없습니다.");
+      }
+
+      advanceStep(1);
+      const geolocation = navigator.geolocation;
+      if (!geolocation) {
+        throw new Error("이 브라우저에서는 위치 확인을 사용할 수 없습니다.");
+      }
+      let position: GeolocationPosition;
+      try {
+        position = await readCurrentPosition(geolocation);
+      } catch {
+        throw new Error("현재 위치를 확인하지 못했습니다. 위치 권한과 GPS 상태를 확인한 뒤 다시 시도해주세요.");
+      }
       const nextLatitude = String(position.coords.latitude);
       const nextLongitude = String(position.coords.longitude);
-
       setLatitude(nextLatitude);
       setLongitude(nextLongitude);
 
-      const result = await postJson<{ attendance: AttendanceRow }>("/api/attendance/clock-in", {
-        employeeId: activeGuard.employee.id,
-        worksiteId: activeGuard.worksite.id,
-        latitude: nextLatitude,
-        longitude: nextLongitude,
-      });
+      if (action === "퇴근") {
+        const decision = canClockOutAtWorksite({
+          attendance: asAttendance(activeGuard.attendance),
+          worksite: asWorksite(activeGuard.worksite),
+          currentLatitude: position.coords.latitude,
+          currentLongitude: position.coords.longitude,
+        });
+        if (!decision.allowed) throw new Error(decision.reason);
+      }
+
+      advanceStep(2);
+      const result = await postJson<{ attendance: AttendanceRow }>(
+        action === "출근" ? "/api/attendance/clock-in" : "/api/attendance/clock-out",
+        {
+          employeeId: activeGuard.employee.id,
+          ...(action === "출근" ? { worksiteId: activeGuard.worksite.id } : {}),
+          latitude: nextLatitude,
+          longitude: nextLongitude,
+        },
+      );
+
+      advanceStep(3);
       const nextGuard = { ...activeGuard, attendance: result.attendance };
       setGuard(nextGuard);
       writeStoredGuardSession(nextGuard);
-      setMessage("출근 처리되었습니다.");
-    } catch (clockInError) {
-      setError(clockInError instanceof Error ? clockInError.message : "출근 처리에 실패했습니다.");
+      setProcess({ action, status: "success", step: 4, error: "" });
+    } catch (attendanceError) {
+      const detail = attendanceError instanceof Error ? attendanceError.message : action + " 처리에 실패했습니다.";
+      setProcess((current) => current ? { ...current, status: "error", error: detail } : current);
+    } finally {
+      processingRef.current = false;
     }
   }
 
-  async function handleClockOut() {
-    const activeGuard = readStoredGuardSession();
-    if (!activeGuard?.employee || !activeGuard.worksite) {
-      setGuard(activeGuard);
-      return;
-    }
-
-    const geolocation = navigator.geolocation;
-    if (!geolocation) {
-      setError("이 브라우저에서는 위치 확인을 사용할 수 없습니다.");
-      return;
-    }
-
-    try {
-      setError("");
-      const position = await readCurrentPosition(geolocation);
-      const nextLatitude = String(position.coords.latitude);
-      const nextLongitude = String(position.coords.longitude);
-      const decision = canClockOutAtWorksite({
-        attendance: asAttendance(activeGuard.attendance),
-        worksite: asWorksite(activeGuard.worksite),
-        currentLatitude: position.coords.latitude,
-        currentLongitude: position.coords.longitude,
-      });
-
-      setLatitude(nextLatitude);
-      setLongitude(nextLongitude);
-
-      if (!decision.allowed) {
-        setError(decision.reason);
-        return;
-      }
-
-      const result = await postJson<{ attendance: AttendanceRow }>("/api/attendance/clock-out", {
-        employeeId: activeGuard.employee.id,
-        latitude: nextLatitude,
-        longitude: nextLongitude,
-      });
-      const nextGuard = { ...activeGuard, attendance: result.attendance };
-      setGuard(nextGuard);
-      writeStoredGuardSession(nextGuard);
-      setMessage("퇴근 처리되었습니다.");
-    } catch (clockOutError) {
-      setError(clockOutError instanceof Error ? clockOutError.message : "퇴근 처리에 실패했습니다.");
+  function handleProcessConfirm() {
+    if (!process || process.status === "processing") return;
+    if (process.status === "success") {
+      router.push("/guard/main");
+    } else {
+      setProcess(null);
     }
   }
 
   return (
-    <div className="mx-auto max-w-[61.25rem] w-full px-5 py-[5rem]">
-      <div className="max-w-[37.5rem] mx-auto">
+    <div className="mx-auto w-full max-w-xl space-y-6 px-4 py-6">
+      <PageHeader title="출퇴근" />
+      <div>
         {guard ? (
           <section className="bg-muted/40 rounded-xl p-[1rem] border border-border/50">
             <div className="space-y-[2rem]">
@@ -305,23 +309,22 @@ export default function GuardAttendancePage() {
                   className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"
                   data-testid="clock-in"
                   type="button"
-                  disabled={!clockInDecision.allowed || !!guard.attendance?.clock_in_at}
-                  onClick={handleClockIn}
+                  disabled={isProcessing || !clockInDecision.allowed || !!guard.attendance?.clock_in_at}
+                  onClick={() => void handleAttendance("출근")}
                 >
                   출근
                 </Button>
                 <Button
                   data-testid="clock-out"
                   type="button"
-                  disabled={!clockOutDecision.allowed}
-                  onClick={handleClockOut}
+                  disabled={isProcessing || !clockOutDecision.allowed}
+                  onClick={() => void handleAttendance("퇴근")}
                   variant="outline"
                 >
                   퇴근
                 </Button>
               </div>
 
-              {message ? <p className="rounded-md border border-border bg-muted px-4 py-3 text-sm text-foreground text-center">{message}</p> : null}
               {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive text-center">{error}</p> : null}
               <GuardLocationPermissionPrompt />
             </div>
@@ -338,6 +341,44 @@ export default function GuardAttendancePage() {
           </section>
         )}
       </div>
+      <Dialog open={process !== null}>
+        <DialogContent
+          showCloseButton={false}
+          onEscapeKeyDown={(event) => event.preventDefault()}
+          onInteractOutside={(event) => event.preventDefault()}
+        >
+          <DialogHeader>
+            <DialogTitle>{process?.action} 처리</DialogTitle>
+            <DialogDescription aria-live="polite">
+              {process?.status === "success"
+                ? process.action + "처리 되었습니다."
+                : process?.status === "error"
+                  ? process.action + " 처리에 실패했습니다."
+                  : (process?.action ?? "출퇴근") + " 처리중입니다..."}
+            </DialogDescription>
+          </DialogHeader>
+          <ol className="space-y-3 text-sm" aria-label="출퇴근 처리 과정" aria-live="polite">
+            {["로그인 및 근무지 확인", "현재 위치 확인", (process?.action ?? "출퇴근") + " 기록 저장", "화면 정보 갱신"].map((label, index) => (
+              <li key={label} className="flex items-center justify-between gap-3">
+                <span>{label}</span>
+                <span className={process?.status === "error" && process.step === index ? "text-destructive" : "text-muted-foreground"}>
+                  {process && index < process.step
+                    ? "완료"
+                    : process?.step === index
+                      ? process.status === "error" ? "실패" : "진행중"
+                      : "대기"}
+                </span>
+              </li>
+            ))}
+          </ol>
+          {process?.status === "error" ? <p role="alert" className="text-sm text-destructive">{process.error}</p> : null}
+          <DialogFooter>
+            <Button type="button" className="w-full" disabled={isProcessing} onClick={handleProcessConfirm}>
+              {isProcessing ? "처리중..." : "확인"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

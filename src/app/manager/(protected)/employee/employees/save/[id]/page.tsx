@@ -9,7 +9,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import ManagerLoadingMessage from "../../../../manager-loading-message";
 import { SaveIcon } from "@/components/icons/save-icon";
 import { DeleteIcon } from "@/components/icons/delete-icon";
-import { XmarkIcon } from "@/components/icons/xmark-icon";
+import { CancelIcon } from "@/components/icons/cancel-icon";
 import ConfirmModal from "@/components/modals/confirm-modal";
 import AlertModal from "@/components/modals/alert-modal";
 
@@ -229,7 +229,7 @@ export default function EmployeeSavePage() {
                 variant="outline"
                 onClick={() => router.push("/manager/employee/employees")}
               >
-                <XmarkIcon size={20} />
+                <CancelIcon size={20} />
               </Button>
             </div>
           </form>

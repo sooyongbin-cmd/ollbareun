@@ -3,6 +3,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { guardSessionStorageKey } from "../../guard-session-storage";
 import GuardAttendancePage from "./page";
 
+const push = vi.fn();
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push }),
+}));
+
 vi.mock("./attendance-map-section", () => ({
   default: () => <div data-testid="attendance-map" />,
 }));

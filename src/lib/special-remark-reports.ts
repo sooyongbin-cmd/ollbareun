@@ -368,20 +368,26 @@ export async function createSpecialRemarkReport(input: {
     return report;
   }
 
+  return sendSpecialRemarkReportEmail(report, options.emailProvider);
+}
+
+export async function sendSpecialRemarkReportEmail(report: SpecialRemarkReportRow, emailProvider: EmailProvider = "resend") {
+  const supabase = getSupabaseAdmin();
   try {
+    const emailTo = report.email_to ?? await getSystemConfigContent("manager_email");
     const emailInput = {
-      to: email_to!,
-      employeeName: employee_name,
-      worksiteName: worksite_name,
+      to: emailTo,
+      employeeName: report.employee_name,
+      worksiteName: report.worksite_name,
       reportedAt: report.reported_at,
-      content,
-      photoUrl: photo_url,
-      gpsInfo: gps_info,
+      content: report.content,
+      photoUrl: report.photo_url,
+      gpsInfo: report.gps_info,
     };
 
-    if (options.emailProvider === "formspree") {
+    if (emailProvider === "formspree") {
       await sendRemarkEmailWithFormspree(emailInput);
-    } else if (options.emailProvider === "naver") {
+    } else if (emailProvider === "naver") {
       await sendRemarkEmailWithNaver(emailInput);
     } else {
       await sendRemarkEmail(emailInput);
@@ -390,6 +396,7 @@ export async function createSpecialRemarkReport(input: {
     const { data: updated, error: updateError } = await supabase
       .from("inspection_special_reports")
       .update({
+        email_to: emailTo,
         email_status: "sent",
         email_sent_at: new Date().toISOString(),
         email_error: null,

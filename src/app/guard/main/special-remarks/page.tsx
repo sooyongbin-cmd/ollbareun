@@ -101,6 +101,7 @@ function captureCompressedPhoto(video: HTMLVideoElement) {
 
 export default function GuardSpecialRemarksPage() {
   const router = useRouter();
+  const reportingRef = useRef(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -199,6 +200,7 @@ export default function GuardSpecialRemarksPage() {
   }
 
   async function handleReport(provider: "resend" | "formspree" | "naver" | "push") {
+    if (reportingRef.current) return;
     const activeSession = readStoredGuardSession<GuardSession>({ touch: true });
     const employeeId = activeSession?.employee?.id;
     const employeeName = activeSession?.employee?.name;
@@ -210,6 +212,7 @@ export default function GuardSpecialRemarksPage() {
       return;
     }
 
+    reportingRef.current = true;
     setSavingProvider(provider);
     setError("");
 
@@ -270,13 +273,17 @@ export default function GuardSpecialRemarksPage() {
             }
           | undefined;
 
+        const emailMessage = payload.email?.status === "sent"
+          ? " NAVER 이메일 보고가 전송되었습니다."
+          : " NAVER 이메일 보고에 실패했습니다. " + (payload.email?.error ?? "발송 결과를 확인하지 못했습니다.");
+
         if (delivery?.error) {
           setAlertMessage(
-            `특이사항 보고는 저장되었지만 관리자 푸시알림 전송에 실패했습니다. ${delivery.error}`,
+            `특이사항 보고는 저장되었지만 관리자 푸시알림 전송에 실패했습니다. ${delivery.error}` + emailMessage,
           );
         } else {
           setAlertMessage(
-            `특이사항 보고가 저장되었습니다. 푸시 전송 성공 ${delivery?.successCount ?? 0}건, 실패 ${delivery?.failedCount ?? 0}건, 미등록 관리자 ${delivery?.unregisteredCount ?? 0}명입니다.`,
+            `특이사항 보고가 저장되었습니다. 푸시 전송 성공 ${delivery?.successCount ?? 0}건, 실패 ${delivery?.failedCount ?? 0}건, 미등록 관리자 ${delivery?.unregisteredCount ?? 0}명입니다.` + emailMessage,
           );
         }
       } else {
@@ -287,6 +294,7 @@ export default function GuardSpecialRemarksPage() {
     } catch (reportError) {
       setError(reportError instanceof Error ? reportError.message : "특이사항 보고를 전송하지 못했습니다.");
     } finally {
+      reportingRef.current = false;
       setSavingProvider(null);
     }
   }
@@ -338,6 +346,7 @@ export default function GuardSpecialRemarksPage() {
           <Button
             className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center disabled:opacity-50"
             disabled
+            hidden
             onClick={() => handleReport("resend")}
             type="button"
           >
@@ -346,6 +355,7 @@ export default function GuardSpecialRemarksPage() {
           <Button
             className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center disabled:opacity-50"
             disabled={saving || !content.trim()}
+            hidden
             onClick={() => handleReport("formspree")}
             type="button"
           >
@@ -354,6 +364,7 @@ export default function GuardSpecialRemarksPage() {
           <Button
             className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center disabled:opacity-50"
             disabled={saving || !content.trim()}
+            hidden
             onClick={() => handleReport("naver")}
             type="button"
           >
@@ -366,7 +377,7 @@ export default function GuardSpecialRemarksPage() {
             type="button"
           >
             <BellIcon aria-hidden="true" size={18} />
-            {savingProvider === "push" ? "전송 중..." : "푸쉬알림"}
+            {savingProvider === "push" ? "전송 중..." : "보고하기"}
           </Button>
         </section>
       </div>

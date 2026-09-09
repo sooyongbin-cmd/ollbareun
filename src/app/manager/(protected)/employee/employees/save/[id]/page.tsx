@@ -17,6 +17,9 @@ type Employee = {
   id: string;
   name: string;
   phone: string;
+  work_style: "1" | "2";
+  in_time: string;
+  out_time: string;
   is_retired: boolean;
   role: "경비원" | "미화원" | "파견";
 };
@@ -52,6 +55,9 @@ export default function EmployeeSavePage() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState<"경비원" | "미화원" | "파견">("경비원");
+  const [workStyle, setWorkStyle] = useState("1");
+  const [inTime, setInTime] = useState("06:00");
+  const [outTime, setOutTime] = useState("06:00");
   const [isRetired, setIsRetired] = useState(false);
   const [loading, setLoading] = useState(Boolean(employeeId));
   const [error, setError] = useState("");
@@ -72,6 +78,9 @@ export default function EmployeeSavePage() {
           setName(data.employee.name);
           setPhone(data.employee.phone);
           setRole(data.employee.role);
+          setWorkStyle(data.employee.work_style ?? "1");
+          setInTime((data.employee.in_time ?? "06:00").slice(0, 5));
+          setOutTime((data.employee.out_time ?? "06:00").slice(0, 5));
           setIsRetired(data.employee.is_retired);
         }
       } catch (loadError) {
@@ -112,7 +121,7 @@ export default function EmployeeSavePage() {
       await fetchJson<EmployeeResponse>(`/api/employees/${employeeId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, role, is_retired: isRetired }),
+        body: JSON.stringify({ name, phone, role, is_retired: isRetired, work_style: workStyle, in_time: inTime, out_time: outTime }),
       });
 
       setSaveSuccessOpen(true);
@@ -198,6 +207,23 @@ export default function EmployeeSavePage() {
                   <NativeSelectOption value="미화원">미화원</NativeSelectOption>
                   <NativeSelectOption value="파견">파견</NativeSelectOption>
                 </NativeSelect>
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="employee-work-style" className="text-sm font-semibold text-muted-foreground">근무형태</label>
+                <NativeSelect id="employee-work-style" value={workStyle} onChange={(event) => setWorkStyle(event.target.value)} required>
+                  <NativeSelectOption value="1">24시간근무</NativeSelectOption>
+                  <NativeSelectOption value="2">야간근무</NativeSelectOption>
+                </NativeSelect>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <label htmlFor="employee-in-time" className="text-sm font-semibold text-muted-foreground">출근</label>
+                  <Input id="employee-in-time" type="time" value={inTime} onChange={(event) => setInTime(event.target.value)} required />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="employee-out-time" className="text-sm font-semibold text-muted-foreground">퇴근</label>
+                  <Input id="employee-out-time" type="time" value={outTime} onChange={(event) => setOutTime(event.target.value)} required />
+                </div>
               </div>
               <label className="flex items-center gap-3 text-[0.875rem] font-semibold text-muted-foreground ml-1">
                 <Checkbox

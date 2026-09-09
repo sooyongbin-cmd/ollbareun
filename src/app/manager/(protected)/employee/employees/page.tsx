@@ -2,7 +2,7 @@
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
@@ -13,6 +13,9 @@ type EmployeeRow = {
   id: string;
   name: string;
   phone: string;
+  work_style: "1" | "2";
+  in_time: string;
+  out_time: string;
   phone_normalized: string;
   is_retired: boolean;
   role: "경비원" | "미화원" | "파견";
@@ -43,6 +46,11 @@ const emptyBootstrap: Bootstrap = {
     currentlyClockedIn: 0,
   },
 };
+
+function formatScheduleTime(value: string = "06:00") {
+  const [hour, minute] = value.split(":").map(Number);
+  return (hour < 12 ? "오전 " : "오후 ") + (hour % 12 || 12) + "시" + (minute ? " " + minute + "분" : "");
+}
 
 export default function EmployeeRosterPage() {
   const [data, setData] = useState<Bootstrap>(emptyBootstrap);
@@ -290,6 +298,9 @@ export default function EmployeeRosterPage() {
                   >
                     역할
                   </SortableHeader>
+                  <TableHead>근무형태</TableHead>
+                  <TableHead>출근</TableHead>
+                  <TableHead>퇴근</TableHead>
                   <SortableHeader
                     sortKey="worksite"
                     currentSortKey={sortKey}
@@ -313,7 +324,7 @@ export default function EmployeeRosterPage() {
               <TableBody>
                 {sortedEmployees.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={5} className="p-8 text-center text-muted-foreground italic">
+                    <TableCell data-responsive-empty colSpan={8} className="p-8 text-center text-muted-foreground italic">
                       조회 결과에 해당하는 직원이 없습니다.
                     </TableCell>
                   </TableRow>
@@ -330,6 +341,9 @@ export default function EmployeeRosterPage() {
                       </TableCell>
                       <TableCell data-label="연락처" className="text-muted-foreground">{employee.phone}</TableCell>
                       <TableCell data-label="역할" className="text-muted-foreground">{employee.role}</TableCell>
+                      <TableCell data-label="근무형태" className="whitespace-nowrap">{employee.work_style === "2" ? "야간근무" : "24시간근무"}</TableCell>
+                      <TableCell data-label="출근" className="whitespace-nowrap">{formatScheduleTime(employee.in_time)}</TableCell>
+                      <TableCell data-label="퇴근" className="whitespace-nowrap">{formatScheduleTime(employee.out_time)}</TableCell>
                       <TableCell data-label="근무지" className="text-muted-foreground">
                         {worksiteById.get(worksiteByEmployeeId.get(employee.id) ?? "") ?? "-"}
                       </TableCell>

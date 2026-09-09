@@ -101,7 +101,7 @@ export default function HolidaysPage() {
           </Link>
         </div>
         {!valid && <p role="alert" className="mt-6 rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive text-center">연도는 1900~9998 사이로 입력해주세요.</p>}
-        {error && <p role="alert" className="mt-6 rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive text-center">{error}</p>}
+        {error && <p role="alert" className="mt-6 whitespace-pre-wrap break-words rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive text-left">{error}</p>}
         {message && <p role="status" className="mt-6 rounded-md border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-primary text-center">{message}</p>}
       </section>
 

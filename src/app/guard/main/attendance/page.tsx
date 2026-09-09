@@ -1,5 +1,7 @@
 "use client";
 
+import { getAttendanceStatus } from "../attendance-status";
+import { subscribeToGuardSessionChange } from "../../guard-session-storage";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -123,6 +125,9 @@ export default function GuardAttendancePage() {
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
 
+  useEffect(() => subscribeToGuardSessionChange(() => setGuard(readGuardSessionFromStorage<GuardSession>())), []);
+
+  const attendanceStatus = getAttendanceStatus(guard?.attendance);
   const clockInDecision =
     guard?.isDayOff
       ? {
@@ -137,7 +142,7 @@ export default function GuardAttendancePage() {
         })
       : {
           allowed: false,
-          reason: guard?.worksite ? "현재 위치를 입력하거나 확인하세요." : "오늘 배정된 근무지가 없습니다.",
+          reason: guard?.worksite ? "현재 위치를 확인중입니다...." : "오늘 배정된 근무지가 없습니다.",
         };
 
   const attendance = asAttendance(guard?.attendance ?? null);
@@ -153,10 +158,10 @@ export default function GuardAttendancePage() {
       : attendanceClockOutDecision.allowed
         ? {
             allowed: false,
-            reason: guard?.worksite ? "현재 위치를 입력하거나 확인하세요." : "오늘 배정된 근무지가 없습니다.",
+            reason: guard?.worksite ? "현재 위치를 확인중입니다...." : "오늘 배정된 근무지가 없습니다.",
           }
         : attendanceClockOutDecision;
-  const activeDecision = guard?.attendance?.clock_in_at ? clockOutDecision : clockInDecision;
+  const activeDecision = attendanceStatus.isOpen || attendanceStatus.clockedOutToday ? clockOutDecision : clockInDecision;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -310,24 +315,26 @@ export default function GuardAttendancePage() {
                 {activeDecision.reason}
               </div>
 
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-3" id="attendance-actions-section">
+              <div className="grid gap-4" id="attendance-actions-section">
                 <Button
                   className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"
                   data-testid="clock-in"
                   type="button"
-                  disabled={isProcessing || !clockInDecision.allowed || !!guard.attendance?.clock_in_at}
+                  hidden={attendanceStatus.isOpen}
+                  disabled={isProcessing || !clockInDecision.allowed || !attendanceStatus.canStart}
                   onClick={() => void handleAttendance("출근")}
                 >
-                  출근
+                  출근하기
                 </Button>
                 <Button
                   data-testid="clock-out"
                   type="button"
+                  hidden={!attendanceStatus.isOpen}
                   disabled={isProcessing || !clockOutDecision.allowed}
                   onClick={() => void handleAttendance("퇴근")}
                   variant="outline"
                 >
-                  퇴근
+                  퇴근하기
                 </Button>
               </div>
 

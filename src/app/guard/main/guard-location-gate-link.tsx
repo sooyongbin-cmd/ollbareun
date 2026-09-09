@@ -14,6 +14,7 @@ type GuardLocationGateLinkProps = {
   children: React.ReactNode;
   href: string;
   hasAssignedWorksite?: boolean;
+  disabled?: boolean;
 };
 
 const geolocationOptions: PositionOptions = { enableHighAccuracy: true, maximumAge: 3000, timeout: 8000 };
@@ -41,14 +42,14 @@ function requestCurrentPosition() {
   });
 }
 
-export default function GuardLocationGateLink({ children, href, hasAssignedWorksite = true }: GuardLocationGateLinkProps) {
+export default function GuardLocationGateLink({ children, href, hasAssignedWorksite = true, disabled = false }: GuardLocationGateLinkProps) {
   const router = useRouter();
   const [blockedState, setBlockedState] = useState<GeolocationPermissionState | null>(null);
   const [isMissingWorksite, setIsMissingWorksite] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
 
   async function handleClick() {
-    if (isChecking) {
+    if (disabled || isChecking) {
       return;
     }
 
@@ -87,7 +88,7 @@ export default function GuardLocationGateLink({ children, href, hasAssignedWorks
     <>
       <Button
         className="w-full"
-        disabled={isChecking}
+        disabled={disabled || isChecking}
         onClick={handleClick}
         type="button"
         variant="outline"

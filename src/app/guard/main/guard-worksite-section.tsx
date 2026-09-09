@@ -3,7 +3,10 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { readStoredGuardSessionSnapshot, subscribeToGuardSessionChange } from "../guard-session-storage";
 
+import { getAttendanceStatus, formatAttendanceTime, formatWorkingTime, type AttendanceTimes } from "./attendance-status";
+
 type GuardSession = {
+  attendance?: AttendanceTimes | null;
   isDayOff?: boolean;
   worksite?: {
     id?: unknown;
@@ -44,7 +47,7 @@ export default function GuardWorksiteSection() {
       const startDate = typeof session.assignment?.start_date === "string" ? session.assignment.start_date : null;
       const endDate = typeof session.assignment?.end_date === "string" ? session.assignment.end_date : null;
       
-      return { worksiteId, worksiteName, startDate, endDate, isDayOff: session.isDayOff === true };
+      return { attendance: session.attendance, worksiteId, worksiteName, startDate, endDate, isDayOff: session.isDayOff === true };
     } catch {
       return null;
     }
@@ -79,6 +82,9 @@ export default function GuardWorksiteSection() {
   }, [worksiteId]);
 
   const currentSites = siteResult?.worksiteId === worksiteId ? siteResult : null;
+
+  const attendance = sessionData?.attendance;
+  const attendanceStatus = getAttendanceStatus(attendance);
 
   if (!sessionData?.worksiteName) {
     return (
@@ -130,6 +136,26 @@ export default function GuardWorksiteSection() {
             </ul>
           )}
         </div>
+      )}
+      {attendanceStatus.showTimes && attendance?.clock_in_at && (
+        <dl className="space-y-2 border-t border-border/30 pt-2 text-[0.8125rem]">
+          <div className="flex gap-2">
+            <dt className="w-[5rem] shrink-0 font-semibold text-muted-foreground">출근시각 :</dt>
+            <dd>{formatAttendanceTime(attendance.clock_in_at)}</dd>
+          </div>
+          {attendance.clock_out_at && (
+            <>
+              <div className="flex gap-2">
+                <dt className="w-[5rem] shrink-0 font-semibold text-muted-foreground">퇴근시각 :</dt>
+                <dd>{formatAttendanceTime(attendance.clock_out_at)}</dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="w-[5rem] shrink-0 font-semibold text-muted-foreground">근무시간 :</dt>
+                <dd>{formatWorkingTime(attendance.clock_in_at, attendance.clock_out_at)}</dd>
+              </div>
+            </>
+          )}
+        </dl>
       )}
     </section>
   );

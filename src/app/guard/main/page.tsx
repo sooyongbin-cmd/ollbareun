@@ -10,7 +10,10 @@ import GuardPushRegister from "./guard-push-register";
 import GuardLocationGateLink from "./guard-location-gate-link";
 import { readStoredGuardSessionSnapshot, subscribeToGuardSessionChange } from "../guard-session-storage";
 
+import { getAttendanceStatus, type AttendanceTimes } from "./attendance-status";
+
 type GuardSession = {
+  attendance?: AttendanceTimes | null;
   employee?: {
     role?: string;
   } | null;
@@ -55,6 +58,13 @@ export default function GuardMainPage() {
     () => null,
   );
 
+  let attendanceStatus = getAttendanceStatus();
+  try {
+    attendanceStatus = getAttendanceStatus(storedSession ? (JSON.parse(storedSession) as GuardSession).attendance : null);
+  } catch {
+    // Ignore malformed session data.
+  }
+
   const role = useMemo(() => {
     if (!storedSession) return "경비원";
     try {
@@ -95,8 +105,8 @@ export default function GuardMainPage() {
         
         <section className="bg-muted/40 rounded-xl p-[1rem] border border-border/50">
           <div className="flex flex-col gap-3">
-            <GuardLocationGateLink href="/guard/main/attendance" hasAssignedWorksite={hasAssignedWorksite}>
-              출근하기
+            <GuardLocationGateLink href="/guard/main/attendance" hasAssignedWorksite={hasAssignedWorksite} disabled={attendanceStatus.clockedOutToday}>
+              {attendanceStatus.isOpen ? "퇴근하기" : "출근하기"}
             </GuardLocationGateLink>
             {inspectionBaseLabel !== null && (
               <>

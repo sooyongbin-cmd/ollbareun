@@ -1,3 +1,4 @@
+import { getManagerUser } from "@/lib/manager-auth";
 import { createAssignment, listAssignments } from "@/lib/phase1-data";
 
 export async function GET() {
@@ -13,6 +14,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    if (!await getManagerUser()) {
+      return Response.json({ error: "관리자 인증이 필요합니다." }, { status: 401 });
+    }
     const body = await request.json();
     return Response.json({ assignment: await createAssignment(body) });
   } catch (error) {

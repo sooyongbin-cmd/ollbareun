@@ -1,6 +1,7 @@
 import { canClockIn, canClockOut, canClockOutAtWorksite, normalizePhone } from "./phase1";
 import { requireGpsInfo, type GpsInfo } from "./gps";
 import { getSupabase } from "./supabase";
+import { getSupabaseAdmin } from "./supabase-admin";
 import { getAssignmentDayOffCounts, isAssignmentDayOff } from "./assignment-days-off";
 
 export type EmployeeRow = {
@@ -325,26 +326,14 @@ export async function createAssignment(input: {
   const { start_date, end_date } = requireDateRange(input);
 
   const schedule = validateEmployeeSchedule({ in_time: input.in_time, out_time: input.out_time });
-  const supabase = getSupabase();
-  const { data: overlappingAssignment, error: overlapError } = await supabase
-    .from("work_assignments")
-    .select("id")
-    .eq("employee_id", employee_id)
-    .lte("start_date", end_date)
-    .gte("end_date", start_date)
-    .limit(1)
-    .maybeSingle();
-
-  throwIfError(overlapError);
-  if (overlappingAssignment) {
-    throwAssignmentOverlapError();
-  }
-
-  const { data, error } = await supabase
-    .from("work_assignments")
-    .insert({ employee_id, worksite_id, start_date, end_date, ...schedule })
-    .select("*")
-    .single();
+  const { data, error } = await getSupabaseAdmin().rpc("create_assignment_with_daily_attendance", {
+    p_employee_id: employee_id,
+    p_worksite_id: worksite_id,
+    p_start_date: start_date,
+    p_end_date: end_date,
+    p_in_time: schedule.in_time ?? null,
+    p_out_time: schedule.out_time ?? null,
+  }).single();
 
   throwIfAssignmentWriteError(error);
   return data as AssignmentRow;

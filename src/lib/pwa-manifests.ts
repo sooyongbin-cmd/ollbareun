@@ -1,10 +1,10 @@
 import type { MetadataRoute } from "next";
 
 const brandIcons: MetadataRoute.Manifest["icons"] = [
-  { src: "/icons/header-logo-color-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
-  { src: "/icons/header-logo-color-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
-  { src: "/icons/header-logo-color-192.png", sizes: "192x192", type: "image/png", purpose: "maskable" },
-  { src: "/icons/header-logo-color-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+  { src: "/icons/logo_only_color-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+  { src: "/icons/logo_only_color-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+  { src: "/icons/logo_only_color-192.png", sizes: "192x192", type: "image/png", purpose: "maskable" },
+  { src: "/icons/logo_only_color-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
 ];
 
 export function guardPwaManifest(): MetadataRoute.Manifest {

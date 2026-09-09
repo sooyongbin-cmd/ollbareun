@@ -56,7 +56,7 @@ export default function ManagerInstallPrompt() {
       <div className="mx-auto flex w-full max-w-[37.5rem] items-center gap-4 rounded-xl border border-border bg-background p-4 shadow-lg">
         {/* A fixed-size PWA icon does not need Next.js image optimization. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="h-12 w-12 shrink-0 rounded-[0.875rem]" src="/icons/header-logo-color-192.png" alt="" width={48} height={48} />
+        <img className="h-12 w-12 shrink-0 rounded-[0.875rem]" src="/icons/logo_only_color-192.png" alt="" width={48} height={48} />
         <div className="min-w-0 flex-1">
           <h2 id="manager-install-title" className="text-[1.0625rem] font-semibold text-foreground">
             올바름 관리자 설치

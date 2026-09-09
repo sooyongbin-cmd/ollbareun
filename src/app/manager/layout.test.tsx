@@ -10,7 +10,7 @@ describe("manager root layout", () => {
   it("links the manager manifest, sets title and favicon icon", () => {
     expect(metadata.title).toBe("주식회사 올바름");
     expect(metadata.manifest).toBe("/manager/manifest.webmanifest");
-    expect(metadata.icons).toEqual({ icon: "/icons/header-logo-color.svg", apple: "/icons/header-logo-color-180.png" });
+    expect(metadata.icons).toEqual({ icon: "/icons/logo_only_color.svg", apple: "/icons/logo_only_color-180.png" });
   });
 
   it("renders manager routes inside the manager theme scope", async () => {

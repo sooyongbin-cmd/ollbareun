@@ -6,8 +6,8 @@ export const metadata: Metadata = {
   title: "주식회사 올바름",
   manifest: "/manager/manifest.webmanifest",
   icons: {
-    icon: "/icons/header-logo-color.svg",
-    apple: "/icons/header-logo-color-180.png",
+    icon: "/icons/logo_only_color.svg",
+    apple: "/icons/logo_only_color-180.png",
   },
 };
 

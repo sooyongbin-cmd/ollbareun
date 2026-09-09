@@ -3,7 +3,7 @@ import { getManagerTheme } from "@/lib/system-configs";
 import ManagerThemeProvider from "./manager-theme-provider";
 
 export const metadata: Metadata = {
-  title: "(주)올바름 관리자",
+  title: "주식회사 올바름",
   manifest: "/manager/manifest.webmanifest",
   icons: {
     icon: "/manager-icon.ico",

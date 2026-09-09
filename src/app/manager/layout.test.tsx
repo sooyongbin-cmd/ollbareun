@@ -8,7 +8,7 @@ vi.mock("@/lib/system-configs", () => ({
 
 describe("manager root layout", () => {
   it("links the manager manifest, sets title and favicon icon", () => {
-    expect(metadata.title).toBe("(주)올바름 관리자");
+    expect(metadata.title).toBe("주식회사 올바름");
     expect(metadata.manifest).toBe("/manager/manifest.webmanifest");
     expect(metadata.icons).toEqual({ icon: "/manager-icon.ico" });
   });

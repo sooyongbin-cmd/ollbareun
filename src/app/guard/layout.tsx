@@ -24,7 +24,7 @@ export async function generateMetadata(
   const parentMetadata = await parent;
 
   return {
-    title: "(주)올바름 근무자",
+    title: "주식회사 올바름",
     manifest: "/guard/manifest.webmanifest",
     openGraph: {
       ...parentMetadata.openGraph,

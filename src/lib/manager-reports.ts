@@ -210,6 +210,17 @@ export async function loadAttendanceRecord(recordId: string): Promise<Attendance
   };
 }
 
+export async function deleteAttendanceRecord(recordId: string) {
+  if (!recordId.trim()) {
+    throw new Error("근태 기록을 확인할 수 없습니다.");
+  }
+
+  const supabase = getSupabaseAdmin();
+  const { error } = await supabase.from("attendance_records").delete().eq("id", recordId);
+
+  throwIfError(error);
+}
+
 export function buildEducationReport(input: {
   year: string;
   employees: EmployeeInput[];

@@ -6,6 +6,8 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import AlertModal from "@/components/modals/alert-modal";
+import ConfirmModal from "@/components/modals/confirm-modal";
+import { DeleteIcon } from "@/components/icons/delete-icon";
 import { SaveIcon } from "@/components/icons/save-icon";
 import ManagerLoadingMessage from "../../../../manager-loading-message";
 
@@ -31,6 +33,15 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   return payload as T;
 }
 
+async function deleteRequest(url: string) {
+  const response = await fetch(url, { method: "DELETE" });
+
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    throw new Error(payload.error ?? "근태 기록을 삭제하지 못했습니다.");
+  }
+}
+
 function currentKstDateTimeLocal() {
   const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
   return now.toISOString().slice(0, 16);
@@ -53,6 +64,10 @@ export default function AttendanceSavePage() {
   const [clockOutDateTime, setClockOutDateTime] = useState("");
   const [loading, setLoading] = useState(Boolean(attendanceId));
   const [error, setError] = useState("");
+  const [saveConfirmOpen, setSaveConfirmOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [saveSuccessOpen, setSaveSuccessOpen] = useState(false);
   const routeError = attendanceId ? error : "근태 기록을 불러오지 못했습니다.";
 
@@ -91,8 +106,15 @@ export default function AttendanceSavePage() {
     };
   }, [attendanceId]);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setSaveConfirmOpen(true);
+  }
+
+  async function handleSave() {
+    if (saving || !attendanceId) return;
+
+    setSaving(true);
     setError("");
 
     try {
@@ -105,6 +127,26 @@ export default function AttendanceSavePage() {
       setSaveSuccessOpen(true);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "근태 기록을 수정하지 못했습니다.");
+    } finally {
+      setSaving(false);
+      setSaveConfirmOpen(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (deleting || !attendanceId) return;
+
+    setDeleting(true);
+    setError("");
+
+    try {
+      await deleteRequest(`/api/manager/reports/attendance/${attendanceId}`);
+      router.push("/manager/reports/attendance");
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : "근태 기록을 삭제하지 못했습니다.");
+    } finally {
+      setDeleting(false);
+      setDeleteConfirmOpen(false);
     }
   }
 
@@ -166,6 +208,15 @@ export default function AttendanceSavePage() {
               <Button aria-label="저장" className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto" type="submit">
                 <SaveIcon size={20} />
               </Button>
+              <Button
+                aria-label="삭제"
+                className="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:w-auto"
+                type="button"
+                onClick={() => setDeleteConfirmOpen(true)}
+                variant="outline"
+              >
+                <DeleteIcon size={20} />
+              </Button>
               <Link
                 className="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:w-auto"
                 href="/manager/reports/attendance"
@@ -178,6 +229,27 @@ export default function AttendanceSavePage() {
 
         {error ? <p className="mt-6 text-[1rem] text-destructive">{error}</p> : null}
       </section>
+
+      <ConfirmModal
+        isOpen={saveConfirmOpen}
+        onClose={() => {
+          if (!saving) setSaveConfirmOpen(false);
+        }}
+        onConfirm={handleSave}
+        title="변경사항을 저장할까요?"
+        loading={saving}
+      />
+
+      <ConfirmModal
+        isOpen={deleteConfirmOpen}
+        onClose={() => {
+          if (!deleting) setDeleteConfirmOpen(false);
+        }}
+        onConfirm={handleDelete}
+        title="현재 근태기록을 삭제할까요?"
+        description="삭제한 근태기록은 복구할 수 없습니다."
+        loading={deleting}
+      />
 
       <AlertModal
         isOpen={saveSuccessOpen}

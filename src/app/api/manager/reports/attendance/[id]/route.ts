@@ -1,5 +1,5 @@
 import { getManagerUser } from "@/lib/manager-auth";
-import { loadAttendanceRecord, updateAttendanceRecord } from "@/lib/manager-reports";
+import { deleteAttendanceRecord, loadAttendanceRecord, updateAttendanceRecord } from "@/lib/manager-reports";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -41,6 +41,24 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "근태 기록 수정에 실패했습니다." },
+      { status: 400 },
+    );
+  }
+}
+
+export async function DELETE(_: Request, { params }: RouteContext) {
+  try {
+    const manager = await getManagerUser();
+    if (!manager) {
+      return Response.json({ error: "인증 정보가 올바르지 않습니다." }, { status: 401 });
+    }
+
+    const { id } = await params;
+    await deleteAttendanceRecord(id);
+    return new Response(null, { status: 204 });
+  } catch (error) {
+    return Response.json(
+      { error: error instanceof Error ? error.message : "근태 기록을 삭제하지 못했습니다." },
       { status: 400 },
     );
   }

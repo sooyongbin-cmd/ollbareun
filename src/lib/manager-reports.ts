@@ -34,6 +34,13 @@ export type AttendanceReportRow = {
   workDuration: string;
 };
 
+export type AttendanceRecord = {
+  id: string;
+  employeeName: string;
+  clockInDateTime: string;
+  clockOutDateTime: string | null;
+};
+
 export type EducationReportRow = {
   employeeName: string;
   completedCount: number;
@@ -168,6 +175,39 @@ export async function updateAttendanceRecord(input: {
 
   throwIfError(error);
   return data;
+}
+
+export async function loadAttendanceRecord(recordId: string): Promise<AttendanceRecord> {
+  if (!recordId.trim()) {
+    throw new Error("근태 기록을 확인할 수 없습니다.");
+  }
+
+  const supabase = getSupabase();
+  const { data: attendance, error: attendanceError } = await supabase
+    .from("attendance_records")
+    .select("id,employee_id,clock_in_at,clock_out_at")
+    .eq("id", recordId)
+    .single();
+
+  throwIfError(attendanceError);
+  if (!attendance) {
+    throw new Error("근태 기록을 확인할 수 없습니다.");
+  }
+
+  const { data: employee, error: employeeError } = await supabase
+    .from("employees")
+    .select("name")
+    .eq("id", attendance.employee_id)
+    .maybeSingle();
+
+  throwIfError(employeeError);
+
+  return {
+    id: attendance.id,
+    employeeName: employee?.name ?? "-",
+    clockInDateTime: toKstDateTime(attendance.clock_in_at)?.dateTime ?? "-",
+    clockOutDateTime: toKstDateTime(attendance.clock_out_at)?.dateTime ?? null,
+  };
 }
 
 export function buildEducationReport(input: {

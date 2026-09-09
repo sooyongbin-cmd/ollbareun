@@ -1,0 +1,193 @@
+"use client";
+
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState, type FormEvent } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import AlertModal from "@/components/modals/alert-modal";
+import { SaveIcon } from "@/components/icons/save-icon";
+import ManagerLoadingMessage from "../../../../manager-loading-message";
+
+type AttendanceRecord = {
+  id: string;
+  employeeName: string;
+  clockInDateTime: string;
+  clockOutDateTime: string | null;
+};
+
+type AttendanceResponse = {
+  attendance: AttendanceRecord;
+};
+
+async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(url, init);
+  const payload = await response.json();
+
+  if (!response.ok) {
+    throw new Error(payload.error ?? "근태 기록을 불러오지 못했습니다.");
+  }
+
+  return payload as T;
+}
+
+function currentKstDateTimeLocal() {
+  const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  return now.toISOString().slice(0, 16);
+}
+
+function toDateTimeLocal(value: string | null) {
+  if (!value || value === "-") {
+    return "";
+  }
+
+  return value.replace(" ", "T");
+}
+
+export default function AttendanceSavePage() {
+  const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const attendanceId = params.id;
+  const [employeeName, setEmployeeName] = useState("");
+  const [clockInDateTime, setClockInDateTime] = useState("");
+  const [clockOutDateTime, setClockOutDateTime] = useState("");
+  const [loading, setLoading] = useState(Boolean(attendanceId));
+  const [error, setError] = useState("");
+  const [saveSuccessOpen, setSaveSuccessOpen] = useState(false);
+  const routeError = attendanceId ? error : "근태 기록을 불러오지 못했습니다.";
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadAttendance() {
+      try {
+        const data = await fetchJson<AttendanceResponse>(`/api/manager/reports/attendance/${attendanceId}`);
+        if (!ignore) {
+          setEmployeeName(data.attendance.employeeName);
+          setClockInDateTime(toDateTimeLocal(data.attendance.clockInDateTime));
+          setClockOutDateTime(toDateTimeLocal(data.attendance.clockOutDateTime) || currentKstDateTimeLocal());
+        }
+      } catch (loadError) {
+        if (!ignore) {
+          setError(loadError instanceof Error ? loadError.message : "근태 기록을 불러오지 못했습니다.");
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+
+    if (!attendanceId) {
+      return () => {
+        ignore = true;
+      };
+    }
+
+    void loadAttendance();
+
+    return () => {
+      ignore = true;
+    };
+  }, [attendanceId]);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+
+    try {
+      await fetchJson(`/api/manager/reports/attendance/${attendanceId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clockInDateTime, clockOutDateTime }),
+      });
+
+      setSaveSuccessOpen(true);
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "근태 기록을 수정하지 못했습니다.");
+    }
+  }
+
+  return (
+    <section className="space-y-[1.5rem]">
+      <header>
+        <p className="text-[0.875rem] font-semibold text-muted-foreground uppercase">관리자 화면</p>
+        <div className="space-y-3">
+          <h1 className="text-[1.75rem] leading-[1.2]">근태기록수정</h1>
+          <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground max-w-[40rem]">
+            선택한 근태 기록의 출근일시와 퇴근일시를 수정합니다.
+          </p>
+        </div>
+      </header>
+
+      <section className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
+        {loading ? (
+          <ManagerLoadingMessage />
+        ) : routeError ? (
+          <p className="text-[1rem] text-destructive">{routeError}</p>
+        ) : (
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="attendance-employee-name">
+                  직원이름
+                </label>
+                <Input className="w-full" id="attendance-employee-name" value={employeeName} readOnly />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="clock-in-date-time">
+                  출근일시
+                </label>
+                <Input
+                  autoFocus
+                  className="w-full"
+                  id="clock-in-date-time"
+                  type="datetime-local"
+                  value={clockInDateTime}
+                  onChange={(event) => setClockInDateTime(event.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="clock-out-date-time">
+                  퇴근일시
+                </label>
+                <Input
+                  className="w-full"
+                  id="clock-out-date-time"
+                  type="datetime-local"
+                  value={clockOutDateTime}
+                  onChange={(event) => setClockOutDateTime(event.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <Button aria-label="저장" className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto" type="submit">
+                <SaveIcon size={20} />
+              </Button>
+              <Link
+                className="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:w-auto"
+                href="/manager/reports/attendance"
+              >
+                취소
+              </Link>
+            </div>
+          </form>
+        )}
+
+        {error ? <p className="mt-6 text-[1rem] text-destructive">{error}</p> : null}
+      </section>
+
+      <AlertModal
+        isOpen={saveSuccessOpen}
+        onClose={() => {
+          setSaveSuccessOpen(false);
+          router.push("/manager/reports/attendance");
+        }}
+        title="알림"
+        description="수정이 완료되었습니다."
+      />
+    </section>
+  );
+}

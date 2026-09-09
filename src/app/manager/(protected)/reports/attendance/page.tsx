@@ -1,9 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useCallback, useEffect, useRef, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 import { saveRowsAsXls } from "../export-xls";
@@ -20,11 +20,6 @@ function currentYear() {
   return new Date().getFullYear();
 }
 
-function currentKstDateTimeLocal() {
-  const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
-  return now.toISOString().slice(0, 16);
-}
-
 export default function AttendanceReportPage() {
   const [employeeName, setEmployeeName] = useState("");
   const [employeeNames, setEmployeeNames] = useState<string[]>([]);
@@ -34,11 +29,6 @@ export default function AttendanceReportPage() {
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [selectedRow, setSelectedRow] = useState<AttendanceReportRow | null>(null);
-  const [clockInDateTime, setClockInDateTime] = useState("");
-  const [clockOutDateTime, setClockOutDateTime] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [modalError, setModalError] = useState("");
   const searchRequestRef = useRef(0);
 
   useEffect(() => {
@@ -130,48 +120,6 @@ export default function AttendanceReportPage() {
     });
   }
 
-  function openEditModal(row: AttendanceReportRow) {
-    setSelectedRow(row);
-    setClockInDateTime(row.clockInDateTime.replace(" ", "T"));
-    setClockOutDateTime(row.clockOutDateTime?.replace(" ", "T") ?? currentKstDateTimeLocal());
-    setModalError("");
-  }
-
-  function closeEditModal() {
-    if (saving) return;
-    setSelectedRow(null);
-    setModalError("");
-  }
-
-  async function handleAttendanceSave() {
-    if (!selectedRow) return;
-
-    setSaving(true);
-    setModalError("");
-    try {
-      const response = await fetch("/api/manager/reports/attendance", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          recordId: selectedRow.id,
-          clockInDateTime,
-          clockOutDateTime,
-        }),
-      });
-      const payload = await response.json();
-      if (!response.ok) {
-        throw new Error(payload.error ?? "근태 기록 수정에 실패했습니다.");
-      }
-
-      setSelectedRow(null);
-      await handleSearch();
-    } catch (saveError) {
-      setModalError(saveError instanceof Error ? saveError.message : "근태 기록 수정에 실패했습니다.");
-    } finally {
-      setSaving(false);
-    }
-  }
-
   return (
     <section className="space-y-[1.5rem]">
       <header>
@@ -243,20 +191,16 @@ export default function AttendanceReportPage() {
                   </TableRow>
                 ) : (
                   rows.map((row) => (
-                    <TableRow key={row.id} id={`attendance-${row.id}`}>
+                    <TableRow key={row.id}>
                       {showEmployeeColumn ? <TableCell data-label="직원이름">{row.employeeName}</TableCell> : null}
                       <TableCell data-label="출근일시">
-                        <a
-                          href={`#attendance-${row.id}`}
+                        <Link
+                          href={`/manager/reports/attendance/save/${row.id}`}
                           className="text-left text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"
-                          onClick={(event) => {
-                            event.preventDefault();
-                            openEditModal(row);
-                          }}
                           aria-label={`${row.clockInDateTime} 근태 기록 수정`}
                         >
                           {row.clockInDateTime}
-                        </a>
+                        </Link>
                       </TableCell>
                       <TableCell data-label="퇴근일시">{row.clockOutDateTime ?? "-"}</TableCell>
                       <TableCell data-label="근무시간">{row.workDuration}</TableCell>
@@ -269,53 +213,6 @@ export default function AttendanceReportPage() {
         )}
       </section>
 
-      <Dialog open={selectedRow !== null} onOpenChange={(open) => !open && closeEditModal()}>
-        <DialogContent className="max-w-[27.5rem]">
-          <DialogHeader>
-            <DialogTitle>근태 기록 수정</DialogTitle>
-            <DialogDescription>출근일시와 퇴근일시를 확인한 뒤 저장하세요.</DialogDescription>
-          </DialogHeader>
-            <div className="mt-6 space-y-2">
-              <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="clock-in-date-time">
-                출근일시
-              </label>
-              <Input
-                autoFocus
-                className="w-full"
-                id="clock-in-date-time"
-                type="datetime-local"
-                value={clockInDateTime}
-                onChange={(event) => setClockInDateTime(event.target.value)}
-              />
-            </div>
-            <div className="mt-4 space-y-2">
-              <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="clock-out-date-time">
-                퇴근일시
-              </label>
-              <Input
-                className="w-full"
-                id="clock-out-date-time"
-                type="datetime-local"
-                value={clockOutDateTime}
-                onChange={(event) => setClockOutDateTime(event.target.value)}
-              />
-            </div>
-            {modalError && <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mt-4">{modalError}</p>}
-            <div className="mt-8 flex gap-3">
-              <Button
-                className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 flex-1"
-                type="button"
-                disabled={saving || !clockInDateTime}
-                onClick={handleAttendanceSave}
-              >
-                {saving ? "저장 중..." : "저장"}
-              </Button>
-              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 flex-1" type="button" disabled={saving} onClick={closeEditModal} variant="outline">
-                취소
-              </Button>
-            </div>
-        </DialogContent>
-      </Dialog>
     </section>
   );
 }

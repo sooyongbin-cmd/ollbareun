@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildAttendanceReport, buildEducationReport, updateAttendanceRecord } from "./manager-reports";
+import { buildAttendanceReport, buildEducationReport, createAttendanceRecord, updateAttendanceRecord } from "./manager-reports";
 import { getSupabaseAdmin } from "./supabase-admin";
 
 vi.mock("./supabase-admin", () => ({
@@ -7,6 +7,17 @@ vi.mock("./supabase-admin", () => ({
 }));
 
 describe("manager reports", () => {
+  it("inserts a new attendance record in KST with optional clock-out", async () => {
+    const single = vi.fn().mockResolvedValue({ data: { id: "new-1" }, error: null });
+    const insert = vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ single }) });
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from: vi.fn().mockReturnValue({ insert }) } as never);
+    await createAttendanceRecord({ employeeId: "emp-1", worksiteId: "site-1", clockInDateTime: "2026-09-09T09:00", clockOutDateTime: "" });
+    expect(insert).toHaveBeenCalledWith({ employee_id: "emp-1", worksite_id: "site-1", work_date: "2026-09-09", clock_in_at: "2026-09-09T00:00:00.000Z", clock_out_at: null });
+    single.mockResolvedValue({ data: null, error: { code: "23505" } } as never);
+    await expect(createAttendanceRecord({ employeeId: "emp-1", worksiteId: "site-1", clockInDateTime: "2026-09-09T09:00", clockOutDateTime: "" })).rejects.toThrow("이미 있습니다");
+    await expect(createAttendanceRecord({ employeeId: "emp-1", worksiteId: "site-1", clockInDateTime: "2026-09-09T09:00", clockOutDateTime: "2026-09-09T08:00" })).rejects.toThrow("이후여야");
+  });
+
   it("does not update clock-out when it is omitted", async () => {
     const update = vi.fn().mockReturnValue({
       eq: vi.fn().mockReturnValue({

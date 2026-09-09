@@ -169,6 +169,32 @@ export async function updateAttendanceRecord(input: {
   return data;
 }
 
+export async function createAttendanceRecord(input: {
+  employeeId: unknown;
+  worksiteId: unknown;
+  clockInDateTime: unknown;
+  clockOutDateTime: unknown;
+}) {
+  if (typeof input.employeeId !== "string" || !input.employeeId.trim()) throw new Error("직원을 선택하세요.");
+  if (typeof input.worksiteId !== "string" || !input.worksiteId.trim()) throw new Error("근무지를 선택하세요.");
+  const clockInAt = kstDateTimeLocalToIso(input.clockInDateTime, "출근일시");
+  const clockOutAt = input.clockOutDateTime === "" || input.clockOutDateTime == null
+    ? null : kstDateTimeLocalToIso(input.clockOutDateTime, "퇴근일시");
+  if (clockOutAt && new Date(clockOutAt).getTime() < new Date(clockInAt).getTime()) {
+    throw new Error("퇴근일시는 출근일시 이후여야 합니다.");
+  }
+  const { data, error } = await getSupabaseAdmin().from("attendance_records").insert({
+    employee_id: input.employeeId,
+    worksite_id: input.worksiteId,
+    work_date: String(input.clockInDateTime).slice(0, 10),
+    clock_in_at: clockInAt,
+    clock_out_at: clockOutAt,
+  }).select("id").single();
+  if (error?.code === "23505") throw new Error("해당 직원의 같은 날짜 출근 기록이 이미 있습니다.");
+  throwIfError(error);
+  return data;
+}
+
 export async function loadAttendanceRecord(recordId: string): Promise<AttendanceRecord> {
   if (!recordId.trim()) {
     throw new Error("근태 기록을 확인할 수 없습니다.");

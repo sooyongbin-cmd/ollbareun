@@ -1,5 +1,19 @@
-import { loadAttendanceReport, updateAttendanceRecord } from "@/lib/manager-reports";
+import { createAttendanceRecord, loadAttendanceReport, updateAttendanceRecord } from "@/lib/manager-reports";
 import { getManagerUser } from "@/lib/manager-auth";
+
+export async function POST(request: Request) {
+  try {
+    if (!await getManagerUser()) return Response.json({ error: "인증 정보가 올바르지 않습니다." }, { status: 401 });
+    const body = await request.json();
+    const attendance = await createAttendanceRecord({
+      employeeId: body.employeeId, worksiteId: body.worksiteId,
+      clockInDateTime: body.clockInDateTime, clockOutDateTime: body.clockOutDateTime,
+    });
+    return Response.json({ attendance }, { status: 201 });
+  } catch (error) {
+    return Response.json({ error: error instanceof Error ? error.message : "출근 등록에 실패했습니다." }, { status: 400 });
+  }
+}
 
 export async function GET(request: Request) {
   try {

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -128,7 +129,7 @@ export default function AttendanceReportPage() {
       </header>
 
       <section aria-label="근태내역 조회" className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
-        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_10rem_auto] md:items-end">
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_10rem_auto_auto] md:items-end">
           <div className="space-y-2">
             <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="attendance-employee-name">
               직원이름
@@ -161,6 +162,7 @@ export default function AttendanceReportPage() {
               onChange={(event) => setYear(Number(event.target.value))}
             />
           </div>
+          <Link href="/manager/reports/attendance/new" className="inline-flex h-[3rem] items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"><span>출근등록</span><ArrowRightIcon size={18} /></Link>
           <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 h-[3rem]" type="button" onClick={handleExport} disabled={rows.length === 0}>
             엑셀
           </Button>

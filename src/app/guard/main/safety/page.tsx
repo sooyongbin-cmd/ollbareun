@@ -1,5 +1,6 @@
 "use client";
 
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -203,10 +204,7 @@ export default function GuardSafetyEducationPage() {
           return currentResource;
         }
 
-        return (
-          resources.find((resource) => resource.id !== resourceId && !completedResourceIdsRef.current.has(resource.id)) ??
-          null
-        );
+        return null;
       });
     } catch (completionError) {
       completedResourceIdsRef.current.delete(resourceId);
@@ -214,7 +212,7 @@ export default function GuardSafetyEducationPage() {
         completionError instanceof Error ? completionError.message : "교육이수 정보를 저장하지 못했습니다.",
       );
     }
-  }, [resources]);
+  }, []);
 
   useEffect(() => {
     let ignore = false;
@@ -243,13 +241,10 @@ export default function GuardSafetyEducationPage() {
               .filter((completion) => completion.employee_id === employeeId && completion.is_completed)
               .map((completion) => completion.resource_id),
           );
-          const firstAvailableResource =
-            nextResources.find((resource) => !nextCompletedResourceIds.has(resource.id)) ?? null;
 
           completedResourceIdsRef.current = nextCompletedResourceIds;
           setResources(nextResources);
           setCompletedResourceIds([...nextCompletedResourceIds]);
-          setSelectedResource(firstAvailableResource);
           setMessage("");
         }
       } catch (loadError) {
@@ -463,6 +458,7 @@ export default function GuardSafetyEducationPage() {
                             type="button"
                             variant="link"
                             onClick={() => {
+                              setLoadedIframeResourceId(null);
                               setSelectedResource(resource);
                               setMessage("");
                               setCompletionError("");
@@ -480,32 +476,41 @@ export default function GuardSafetyEducationPage() {
           )}
         </section>
 
-        <section
-          aria-label="안전교육 영상"
-          className="bg-muted/40 rounded-xl p-0 border border-border/50"
+        {message ? <p role="status" className="text-[1rem] text-primary">{message}</p> : null}
+        <Dialog
+          open={selectedResource !== null}
+          onOpenChange={(open) => {
+            if (!open) {
+              setSelectedResource(null);
+              setLoadedIframeResourceId(null);
+              setCompletionError("");
+            }
+          }}
         >
-          <div className="rounded-lg border border-border bg-background p-0">
-            {selectedResource && selectedEmbedUrl ? (
-              <iframe
-                key={selectedResource.id}
-                ref={iframeRef}
-                className="aspect-video w-full rounded-[0.75rem] border border-border bg-black"
-                src={selectedEmbedUrl}
-                title={selectedResource.title}
-                onLoad={() => setLoadedIframeResourceId(selectedResource.id)}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-              />
-            ) : (
-              <p className="p-8 text-center text-muted-foreground italic">
-                재생할 안전교육 링크를 선택하세요.
-              </p>
-            )}
-          </div>
-
-          {message ? <p className="mt-4 text-[1rem] text-primary">{message}</p> : null}
-          {completionError ? <p className="mt-4 text-[1rem] text-destructive">{completionError}</p> : null}
-        </section>
+          <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-4xl">
+            <DialogHeader>
+              <DialogTitle className="pr-6">{selectedResource?.title ?? "안전교육 영상"}</DialogTitle>
+              <DialogDescription>영상을 끝까지 시청하면 교육이수가 처리됩니다.</DialogDescription>
+            </DialogHeader>
+            <section aria-label="안전교육 영상" className="space-y-4">
+              {selectedResource && selectedEmbedUrl ? (
+                <iframe
+                  key={selectedResource.id}
+                  ref={iframeRef}
+                  className="aspect-video w-full rounded-[0.75rem] border border-border bg-black"
+                  src={selectedEmbedUrl}
+                  title={selectedResource.title}
+                  onLoad={() => setLoadedIframeResourceId(selectedResource.id)}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              ) : (
+                <p className="p-8 text-center text-muted-foreground">재생할 수 없는 안전교육 링크입니다.</p>
+              )}
+              {completionError ? <p role="alert" className="text-[1rem] text-destructive">{completionError}</p> : null}
+            </section>
+          </DialogContent>
+        </Dialog>
       </section>
     </div>
   );

@@ -157,7 +157,7 @@ export default function AssignmentManagementClient() {
         <div className="space-y-3">
           <h1 className="text-[1.75rem] leading-[1.2]">근무지배정</h1>
           <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground max-w-[40rem]">
-            날짜, 근무지, 이름으로 배정 현황을 확인하고 필요하면 수정합니다.
+            이름, 근무지, 날짜로 배정 현황을 확인하고 필요하면 수정합니다.
           </p>
         </div>
       </header>
@@ -169,15 +169,15 @@ export default function AssignmentManagementClient() {
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="grid gap-4 flex-1 md:grid-cols-3">
             <div className="space-y-2">
-              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-date-search">
-                날짜
+              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-name-search">
+                이름
               </label>
               <Input
                 className="w-full"
-                id="assignment-date-search"
-                type="date"
-                value={dateQuery}
-                onChange={(event) => setDateQuery(event.target.value)}
+                id="assignment-name-search"
+                value={nameQuery}
+                onChange={(event) => setNameQuery(event.target.value)}
+                placeholder="직원 이름 입력"
               />
             </div>
             <div className="space-y-2">
@@ -199,15 +199,15 @@ export default function AssignmentManagementClient() {
               </NativeSelect>
             </div>
             <div className="space-y-2">
-              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-name-search">
-                이름
+              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-date-search">
+                날짜
               </label>
               <Input
                 className="w-full"
-                id="assignment-name-search"
-                value={nameQuery}
-                onChange={(event) => setNameQuery(event.target.value)}
-                placeholder="직원 이름 입력"
+                id="assignment-date-search"
+                type="date"
+                value={dateQuery}
+                onChange={(event) => setDateQuery(event.target.value)}
               />
             </div>
           </div>
@@ -241,13 +241,13 @@ export default function AssignmentManagementClient() {
               <TableHeader>
                 <TableRow>
                   <SortableHeader
-                    sortKey="date"
+                    sortKey="name"
                     currentSortKey={sortKey}
                     sortDirection={sortDirection}
                     onSort={handleSort}
                     className="text-left"
                   >
-                    날짜
+                    이름
                   </SortableHeader>
                   <SortableHeader
                     sortKey="worksite"
@@ -259,13 +259,13 @@ export default function AssignmentManagementClient() {
                     근무지
                   </SortableHeader>
                   <SortableHeader
-                    sortKey="name"
+                    sortKey="date"
                     currentSortKey={sortKey}
                     sortDirection={sortDirection}
                     onSort={handleSort}
                     className="text-left"
                   >
-                    이름
+                    날짜
                   </SortableHeader>
                   <SortableHeader
                     sortKey="daysOff"
@@ -301,9 +301,9 @@ export default function AssignmentManagementClient() {
                       role="link"
                       tabIndex={0}
                     >
-                      <TableCell data-label="날짜" className="font-semibold">{formatPeriod(assignment)}</TableCell>
-                      <TableCell data-label="근무지">{assignment.worksite_name}</TableCell>
                       <TableCell data-label="이름" className="text-muted-foreground">{assignment.employee_name}</TableCell>
+                      <TableCell data-label="근무지">{assignment.worksite_name}</TableCell>
+                      <TableCell data-label="날짜" className="font-semibold">{formatPeriod(assignment)}</TableCell>
                       <TableCell data-label="휴무">{`${assignment.days_off_count ?? 0}일`}</TableCell>
                     </TableRow>
                   ))

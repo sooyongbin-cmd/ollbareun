@@ -13,6 +13,7 @@ type SpecialRemarkReport = {
   employee_name: string;
   content: string;
   photo_url: string | null;
+  processing_status: "Y" | "N";
 };
 
 function formatDateTime(value: string) {
@@ -50,9 +51,11 @@ async function fetchReports(year: string) {
 
 export default function SpecialRemarksPage() {
   const [year, setYear] = useState("");
+  const [completed, setCompleted] = useState(false);
   const [reports, setReports] = useState<SpecialRemarkReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const filteredReports = reports.filter((report) => (report.processing_status === "Y") === completed);
 
   async function loadReports(nextYear = year) {
     await Promise.resolve();
@@ -122,6 +125,16 @@ export default function SpecialRemarksPage() {
               value={year}
             />
           </div>
+          <label className="flex min-h-10 items-center gap-2 text-sm font-semibold" htmlFor="special-remark-completed">
+            <input
+              id="special-remark-completed"
+              type="checkbox"
+              className="size-4 accent-primary"
+              checked={completed}
+              onChange={(event) => setCompleted(event.target.checked)}
+            />
+            처리완료
+          </label>
           <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 min-w-[6rem]" type="submit" variant="outline">
             조회
           </Button>
@@ -142,17 +155,18 @@ export default function SpecialRemarksPage() {
                   <TableHead className="text-left">점검자</TableHead>
                   <TableHead className="text-left">특이사항내용</TableHead>
                   <TableHead className="text-left">첨부사진</TableHead>
+                  <TableHead className="text-left">처리</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {reports.length === 0 ? (
+                {filteredReports.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={4} className="p-8 text-center text-muted-foreground italic">
+                    <TableCell data-responsive-empty colSpan={5} className="p-8 text-center text-muted-foreground italic">
                       조회 결과에 해당하는 특이사항이 없습니다.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  reports.map((report) => (
+                  filteredReports.map((report) => (
                     <TableRow key={report.id} className="hover:bg-muted/40 transition-colors">
                       <TableCell data-label="점검일시">
                         <Link
@@ -175,6 +189,9 @@ export default function SpecialRemarksPage() {
                         ) : (
                           <span className="text-muted-foreground">-</span>
                         )}
+                      </TableCell>
+                      <TableCell data-label="처리" className="whitespace-nowrap">
+                        {report.processing_status === "Y" ? "완료" : "미완료"}
                       </TableCell>
                     </TableRow>
                   ))

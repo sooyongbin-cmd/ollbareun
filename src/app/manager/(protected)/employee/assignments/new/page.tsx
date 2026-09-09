@@ -10,7 +10,7 @@ import { SaveIcon } from "@/components/icons/save-icon";
 import AlertModal from "@/components/modals/alert-modal";
 
 type Bootstrap = {
-  employees: { id: string; name: string; work_style: "1" | "2"; in_time: string; out_time: string }[];
+  employees: { id: string; name: string; work_style: "0" | "1" | "2"; in_time: string; out_time: string }[];
   worksites: { id: string; name: string }[];
 };
 
@@ -205,7 +205,7 @@ export default function AssignmentNewPage() {
 
             {selectedEmployee && (
               <dl className="grid gap-4 rounded-lg border border-border bg-background p-4 sm:grid-cols-3">
-                <div><dt className="text-sm text-muted-foreground">근무형태</dt><dd className="mt-1 font-semibold">{selectedEmployee.work_style === "2" ? "야간근무" : "24시간근무"}</dd></div>
+                <div><dt className="text-sm text-muted-foreground">근무형태</dt><dd className="mt-1 font-semibold">{selectedEmployee.work_style === "0" ? "일반근무" : selectedEmployee.work_style === "2" ? "야간근무" : "24시간근무"}</dd></div>
                 <div><dt><label htmlFor="assignment-in-time" className="text-sm text-muted-foreground">출근</label></dt><dd className="mt-1"><Input id="assignment-in-time" type="time" value={inTime} onChange={(event) => setInTime(event.target.value)} required /></dd></div>
                 <div><dt><label htmlFor="assignment-out-time" className="text-sm text-muted-foreground">퇴근</label></dt><dd className="mt-1"><Input id="assignment-out-time" type="time" value={outTime} onChange={(event) => setOutTime(event.target.value)} required /></dd></div>
               </dl>

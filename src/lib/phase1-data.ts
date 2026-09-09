@@ -159,7 +159,7 @@ export async function loadBootstrap() {
 function validateEmployeeSchedule(input: { work_style?: unknown; in_time?: unknown; out_time?: unknown }) {
   const schedule: { work_style?: string; in_time?: string; out_time?: string } = {};
   if (input.work_style !== undefined) {
-    if (input.work_style !== "1" && input.work_style !== "2") throw new Error("올바르지 않은 근무형태입니다.");
+    if (input.work_style !== "0" && input.work_style !== "1" && input.work_style !== "2") throw new Error("올바르지 않은 근무형태입니다.");
     schedule.work_style = input.work_style;
   }
   for (const key of ["in_time", "out_time"] as const) {

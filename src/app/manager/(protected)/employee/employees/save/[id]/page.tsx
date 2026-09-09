@@ -17,7 +17,7 @@ type Employee = {
   id: string;
   name: string;
   phone: string;
-  work_style: "1" | "2";
+  work_style: "0" | "1" | "2";
   in_time: string;
   out_time: string;
   is_retired: boolean;
@@ -210,8 +210,9 @@ export default function EmployeeSavePage() {
               </div>
               <div className="space-y-2">
                 <label htmlFor="employee-work-style" className="text-sm font-semibold text-muted-foreground">근무형태</label>
-                <NativeSelect id="employee-work-style" value={workStyle} onChange={(event) => { setWorkStyle(event.target.value); setInTime(event.target.value === "2" ? "22:00" : "06:00"); setOutTime("06:00"); }} required>
-                  <NativeSelectOption value="1">24시간근무</NativeSelectOption>
+                <NativeSelect id="employee-work-style" value={workStyle} onChange={(event) => { setWorkStyle(event.target.value); setInTime(event.target.value === "0" ? "08:00" : event.target.value === "2" ? "22:00" : "06:00"); setOutTime(event.target.value === "0" ? "18:00" : "06:00"); }} required>
+                  <NativeSelectOption value="0">일반근무</NativeSelectOption>
+                <NativeSelectOption value="1">24시간근무</NativeSelectOption>
                   <NativeSelectOption value="2">야간근무</NativeSelectOption>
                 </NativeSelect>
               </div>

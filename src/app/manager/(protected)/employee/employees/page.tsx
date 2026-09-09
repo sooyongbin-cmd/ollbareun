@@ -13,7 +13,7 @@ type EmployeeRow = {
   id: string;
   name: string;
   phone: string;
-  work_style: "1" | "2";
+  work_style: "0" | "1" | "2";
   phone_normalized: string;
   is_retired: boolean;
   role: "경비원" | "미화원" | "파견";
@@ -332,7 +332,7 @@ export default function EmployeeRosterPage() {
                       </TableCell>
                       <TableCell data-label="연락처" className="text-muted-foreground">{employee.phone}</TableCell>
                       <TableCell data-label="역할" className="text-muted-foreground">{employee.role}</TableCell>
-                      <TableCell data-label="근무형태" className="whitespace-nowrap">{employee.work_style === "2" ? "야간근무" : "24시간근무"}</TableCell>
+                      <TableCell data-label="근무형태" className="whitespace-nowrap">{employee.work_style === "0" ? "일반근무" : employee.work_style === "2" ? "야간근무" : "24시간근무"}</TableCell>
                       <TableCell data-label="근무지" className="text-muted-foreground">
                         {worksiteById.get(worksiteByEmployeeId.get(employee.id) ?? "") ?? "-"}
                       </TableCell>

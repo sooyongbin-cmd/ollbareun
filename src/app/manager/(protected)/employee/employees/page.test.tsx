@@ -64,7 +64,7 @@ describe("employee roster page", () => {
     const user = userEvent.setup();
     renderWithManagerLayout(<EmployeeRosterPage />);
 
-    expect(await screen.findByRole("heading", { name: "직원명부관리" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "직원관리" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "직원 등록" })).toHaveAttribute(
       "href",
       "/manager/employee/employees/new",
@@ -116,7 +116,7 @@ describe("employee roster page", () => {
   it("does not show the manager home and exit links on the roster page", async () => {
     renderWithManagerLayout(<EmployeeRosterPage />);
 
-    await screen.findByRole("heading", { name: "직원명부관리" });
+    await screen.findByRole("heading", { name: "직원관리" });
     expect(screen.queryByRole("link", { name: "관리자화면으로" })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "나가기" })).not.toBeInTheDocument();
   });
@@ -124,7 +124,7 @@ describe("employee roster page", () => {
   it("exposes the roster route from the manager menu", () => {
     renderWithManagerLayout(<ManagerPage />);
 
-    expect(screen.getByRole("link", { name: "직원명부관리" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "직원관리" })).toHaveAttribute(
       "href",
       "/manager/employee/employees",
     );

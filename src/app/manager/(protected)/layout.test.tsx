@@ -190,7 +190,7 @@ describe("manager layout", () => {
       </ManagerLayout>,
     );
 
-    expect(screen.getByText("직원관리")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "직원관리" })).toHaveAttribute("href", "/manager/employee/employees");
     expect(screen.getByText("현장점검")).toBeInTheDocument();
     expect(screen.getByText("안전교육")).toBeInTheDocument();
     expect(screen.getByText("리포트출력")).toBeInTheDocument();

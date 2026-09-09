@@ -44,7 +44,7 @@ describe("manager dashboard page", () => {
   it("renders four summary cards, a comparison chart, and both data tables", async () => {
     render(<ManagerPage />);
 
-    expect(await screen.findByRole("heading", { name: "관리자 대시보드" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "대시보드" })).toBeInTheDocument();
 
     const summary = screen.getByRole("region", { name: "운영 요약" });
     expect(within(summary).getByText("전체 직원")).toBeInTheDocument();

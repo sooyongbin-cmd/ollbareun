@@ -38,7 +38,7 @@ describe("attendance report page", () => {
 
     render(<AttendanceReportPage />);
 
-    expect(screen.getByRole("heading", { name: "근태내역" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "근태관리" })).toBeInTheDocument();
     expect(screen.getByLabelText("연도")).toHaveValue(year);
     expect(screen.getByRole("button", { name: "엑셀" })).toBeDisabled();
     await waitFor(() => expect(document.querySelector('datalist option[value="김철수"]')).toBeInTheDocument());

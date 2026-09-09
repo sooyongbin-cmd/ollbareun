@@ -62,6 +62,8 @@ describe("manager reports", () => {
           clock_out_at: null,
         },
       ],
+      assignments: [{ id: "assignment-1", employee_id: "emp-1", worksite_id: "site-1" }],
+      dailyAttendance: [{ work_assignment_id: "assignment-1", work_date: "2026-03-02", intime: "2026-03-02T00:00:00.000Z" }],
     });
 
     expect(rows).toEqual([
@@ -72,7 +74,45 @@ describe("manager reports", () => {
         clockInDateTime: "2026-03-02 09:00",
         clockOutDateTime: "2026-03-02 18:30",
         workDuration: "9시간 30분",
+        isLate: false,
       },
+    ]);
+  });
+
+  it("marks attendance as late when clock-in is after the assigned daily start time", () => {
+    const rows = buildAttendanceReport({
+      employeeName: "김철수",
+      year: "2026",
+      employees: [{ id: "emp-1", name: "김철수" }],
+      worksites: [{ id: "site-1", name: "본사" }],
+      assignments: [{ id: "assignment-1", employee_id: "emp-1", worksite_id: "site-1" }],
+      dailyAttendance: [
+        { work_assignment_id: "assignment-1", work_date: "2026-03-02", intime: "2026-03-02T00:00:00.000Z" },
+        { work_assignment_id: "assignment-1", work_date: "2026-03-03", intime: "2026-03-03T00:00:00.000Z" },
+      ],
+      attendance: [
+        {
+          id: "late-attendance",
+          worksite_id: "site-1",
+          employee_id: "emp-1",
+          work_date: "2026-03-02",
+          clock_in_at: "2026-03-02T00:01:00.000Z",
+          clock_out_at: null,
+        },
+        {
+          id: "on-time-attendance",
+          worksite_id: "site-1",
+          employee_id: "emp-1",
+          work_date: "2026-03-03",
+          clock_in_at: "2026-03-03T00:00:00.000Z",
+          clock_out_at: null,
+        },
+      ],
+    });
+
+    expect(rows.map((row) => ({ id: row.id, isLate: row.isLate }))).toEqual([
+      { id: "late-attendance", isLate: true },
+      { id: "on-time-attendance", isLate: false },
     ]);
   });
 

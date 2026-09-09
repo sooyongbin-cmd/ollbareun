@@ -16,6 +16,7 @@ type AttendanceReportRow = {
   clockInDateTime: string;
   clockOutDateTime: string | null;
   workDuration: string;
+  isLate: boolean;
 };
 
 function currentYear() {
@@ -109,15 +110,15 @@ export default function AttendanceReportPage() {
 
   async function handleExport() {
     const headers = showEmployeeColumn
-      ? ["직원이름", "근무지", "출근일시", "퇴근일시", "근무시간"]
-      : ["근무지", "출근일시", "퇴근일시", "근무시간"];
+      ? ["직원이름", "근무지", "출근일시", "퇴근일시", "근무시간", "상태"]
+      : ["근무지", "출근일시", "퇴근일시", "근무시간", "상태"];
     await saveRowsAsXls({
       fileName: `올바름_근태_${employeeName.trim() || "전체"}_${year}`,
       headers,
       rows: rows.map((row) =>
         showEmployeeColumn
-          ? [row.employeeName, row.worksiteName, row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration]
-          : [row.worksiteName, row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration],
+          ? [row.employeeName, row.worksiteName, row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration, row.isLate ? "지각" : "-"]
+          : [row.worksiteName, row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration, row.isLate ? "지각" : "-"],
       ),
     });
   }
@@ -184,12 +185,13 @@ export default function AttendanceReportPage() {
                   <TableHead className="text-left">출근일시</TableHead>
                   <TableHead className="text-left">퇴근일시</TableHead>
                   <TableHead className="text-left">근무시간</TableHead>
+                  <TableHead className="text-left">상태</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {rows.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={showEmployeeColumn ? 5 : 4} className="p-8 text-center text-muted-foreground italic">
+                    <TableCell data-responsive-empty colSpan={showEmployeeColumn ? 6 : 5} className="p-8 text-center text-muted-foreground italic">
                       {searched ? "조회 결과가 없습니다." : "조회 조건을 입력하세요."}
                     </TableCell>
                   </TableRow>
@@ -209,6 +211,9 @@ export default function AttendanceReportPage() {
                       </TableCell>
                       <TableCell data-label="퇴근일시">{row.clockOutDateTime ?? "-"}</TableCell>
                       <TableCell data-label="근무시간">{row.workDuration}</TableCell>
+                      <TableCell data-label="상태">
+                        {row.isLate ? <span className="font-semibold text-destructive">지각</span> : "-"}
+                      </TableCell>
                     </TableRow>
                   ))
                 )}

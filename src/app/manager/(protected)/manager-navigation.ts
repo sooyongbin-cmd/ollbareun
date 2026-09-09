@@ -4,6 +4,7 @@ import {
   BellRing,
   BookOpen,
   Building2,
+  CalendarDays,
   ClipboardCheck,
   FileCheck2,
   FileClock,
@@ -46,6 +47,7 @@ export const managerNavigationGroups: ManagerNavigationGroup[] = [
       { label: "직원관리", href: "/manager/employee/employees", icon: Users },
       { label: "근무지관리", href: "/manager/employee/worksites", icon: Building2 },
       { label: "근무지배정", href: "/manager/employee/assignments", icon: UserRoundCheck },
+      { label: "공휴일관리", href: "/manager/employee/holidays", icon: CalendarDays },
     ],
   },
   {

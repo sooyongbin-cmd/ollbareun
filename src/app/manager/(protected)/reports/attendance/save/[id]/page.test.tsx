@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import AttendanceSavePage from "./page";
 import userEvent from "@testing-library/user-event";
@@ -10,7 +10,7 @@ vi.mock("next/navigation", () => ({
 
 afterEach(() => vi.unstubAllGlobals());
 
-function mockAttendance(coordinates: Record<string, number | null>, failAddress = false) {
+function mockAttendance(coordinates: Record<string, number | null>, failAddress = false, clockOutDateTime: string | null = null) {
   const fetchMock = vi.fn(async (url: string) => {
     if (url.startsWith("/api/kakao/reverse-geocode")) {
       return failAddress
@@ -19,7 +19,7 @@ function mockAttendance(coordinates: Record<string, number | null>, failAddress 
     }
     return Response.json({ attendance: {
       id: "record-1", employeeName: "홍길동", worksiteName: "본사",
-      clockInDateTime: "2026-09-09 09:00", clockOutDateTime: null,
+      clockInDateTime: "2026-09-09 09:00", clockOutDateTime,
       ...coordinates,
     } });
   });
@@ -28,6 +28,31 @@ function mockAttendance(coordinates: Record<string, number | null>, failAddress 
 }
 
 describe("attendance addresses", () => {
+  it("reveals clock-out after processing and saves the entered time", async () => {
+    const user = userEvent.setup();
+    const fetchMock = mockAttendance({});
+    render(<AttendanceSavePage />);
+    await screen.findByDisplayValue("홍길동");
+    await user.click(screen.getByRole("button", { name: "퇴근처리" }));
+    expect(screen.queryByRole("button", { name: "퇴근처리" })).not.toBeInTheDocument();
+    expect(screen.getByLabelText("퇴근일시")).toBeVisible();
+    fireEvent.change(screen.getByLabelText("퇴근일시"), { target: { value: "2026-09-09T18:00" } });
+    await user.click(screen.getByRole("button", { name: "저장" }));
+    await user.click(screen.getByRole("button", { name: "예" }));
+    expect(fetchMock).toHaveBeenCalledWith("/api/manager/reports/attendance/record-1", expect.objectContaining({
+      method: "PATCH", body: JSON.stringify({ clockInDateTime: "2026-09-09T09:00", clockOutDateTime: "2026-09-09T18:00" }),
+    }));
+  });
+
+  it("shows existing clock-out time and hides processing button", async () => {
+    mockAttendance({}, false, "2026-09-09 18:00");
+    render(<AttendanceSavePage />);
+    await screen.findByDisplayValue("홍길동");
+    expect(screen.getByLabelText("퇴근일시")).toBeVisible();
+    expect(screen.getByLabelText("퇴근일시")).toHaveValue("2026-09-09T18:00");
+    expect(screen.queryByRole("button", { name: "퇴근처리" })).not.toBeInTheDocument();
+  });
+
   it("hides GPS fields and missing clock-out time and omits clock-out from saves", async () => {
     const user = userEvent.setup();
     const fetchMock = mockAttendance({ clockInLatitude: 37, clockInLongitude: 127 });

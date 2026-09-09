@@ -86,6 +86,7 @@ export default function AttendanceSavePage() {
   const [record, setRecord] = useState<AttendanceRecord | null>(null);
   const [clockInDateTime, setClockInDateTime] = useState("");
   const [clockOutDateTime, setClockOutDateTime] = useState("");
+  const [clockOutEnabled, setClockOutEnabled] = useState(false);
   const [loading, setLoading] = useState(Boolean(attendanceId));
   const [error, setError] = useState("");
   const [saveConfirmOpen, setSaveConfirmOpen] = useState(false);
@@ -106,6 +107,7 @@ export default function AttendanceSavePage() {
           setRecord(data.attendance);
           setClockInDateTime(toDateTimeLocal(data.attendance.clockInDateTime));
           setClockOutDateTime(toDateTimeLocal(data.attendance.clockOutDateTime));
+          setClockOutEnabled(Boolean(data.attendance.clockOutDateTime));
         }
       } catch (loadError) {
         if (!ignore) {
@@ -146,7 +148,7 @@ export default function AttendanceSavePage() {
       await fetchJson(`/api/manager/reports/attendance/${attendanceId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clockInDateTime, ...(record?.clockOutDateTime ? { clockOutDateTime } : {}) }),
+        body: JSON.stringify({ clockInDateTime, ...(clockOutEnabled ? { clockOutDateTime } : {}) }),
       });
 
       setSaveSuccessOpen(true);
@@ -236,7 +238,7 @@ export default function AttendanceSavePage() {
                   required
                 />
               </div>
-              <div className="space-y-2" hidden={!record?.clockOutDateTime}>
+              <div className="space-y-2" hidden={!clockOutEnabled}>
                 <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="clock-out-date-time">
                   퇴근일시
                 </label>
@@ -244,6 +246,7 @@ export default function AttendanceSavePage() {
                   className="w-full"
                   id="clock-out-date-time"
                   type="datetime-local"
+                  required={clockOutEnabled && !record?.clockOutDateTime}
                   value={clockOutDateTime}
                   onChange={(event) => setClockOutDateTime(event.target.value)}
                 />
@@ -263,6 +266,16 @@ export default function AttendanceSavePage() {
               >
                 <DeleteIcon size={20} />
               </Button>
+              {!clockOutEnabled && (
+                <Button
+                  className="min-h-10 w-full md:w-auto"
+                  type="button"
+                  variant="outline"
+                  onClick={() => setClockOutEnabled(true)}
+                >
+                  퇴근처리
+                </Button>
+              )}
               <Link
                 aria-label="취소"
                 title="취소"

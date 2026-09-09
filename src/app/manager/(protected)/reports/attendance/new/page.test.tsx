@@ -18,13 +18,13 @@ it("selects employee and worksite, creates attendance and returns to the list", 
   await user.selectOptions(screen.getByLabelText("직원이름"), "emp-1");
   await user.selectOptions(screen.getByLabelText("근무지"), "site-1");
   fireEvent.change(screen.getByLabelText("출근일시"), { target: { value: "2026-09-09T09:00" } });
-  expect(screen.getByLabelText("퇴근일시")).toHaveValue("");
+  expect(screen.queryByLabelText("퇴근일시")).not.toBeInTheDocument();
   expect(screen.getByRole("link", { name: "취소" })).toHaveAttribute("href", "/manager/reports/attendance");
   expect(screen.queryByRole("button", { name: "삭제" })).not.toBeInTheDocument();
   await user.click(screen.getByRole("button", { name: "저장" }));
   await user.click(screen.getByRole("button", { name: "예" }));
   expect(fetchMock).toHaveBeenCalledWith("/api/manager/reports/attendance", expect.objectContaining({
-    method: "POST", body: JSON.stringify({ employeeId: "emp-1", worksiteId: "site-1", clockInDateTime: "2026-09-09T09:00", clockOutDateTime: "" }),
+    method: "POST", body: JSON.stringify({ employeeId: "emp-1", worksiteId: "site-1", clockInDateTime: "2026-09-09T09:00" }),
   }));
   await user.click(await screen.findByRole("button", { name: "확인" }));
   expect(push).toHaveBeenCalledWith("/manager/reports/attendance");

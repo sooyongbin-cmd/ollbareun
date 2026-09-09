@@ -21,7 +21,6 @@ export default function AttendanceNewPage() {
   const [employeeId, setEmployeeId] = useState("");
   const [worksiteId, setWorksiteId] = useState("");
   const [clockInDateTime, setClockInDateTime] = useState("");
-  const [clockOutDateTime, setClockOutDateTime] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -62,7 +61,7 @@ export default function AttendanceNewPage() {
     try {
       const response = await fetch("/api/manager/reports/attendance", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ employeeId, worksiteId, clockInDateTime, clockOutDateTime }),
+        body: JSON.stringify({ employeeId, worksiteId, clockInDateTime }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? "출근 등록에 실패했습니다.");
@@ -81,7 +80,7 @@ export default function AttendanceNewPage() {
         <p className="text-[0.875rem] font-semibold text-muted-foreground">관리자 화면</p>
         <div className="space-y-3">
           <h1 className="text-[1.75rem] leading-[1.2]">출근등록</h1>
-          <p className="text-[0.875rem] text-muted-foreground">직원과 근무지를 선택하고 출퇴근일시를 입력합니다. 퇴근일시는 비워 둘 수 있습니다.</p>
+          <p className="text-[0.875rem] text-muted-foreground">직원과 근무지를 선택하고 출근일시를 입력합니다.</p>
         </div>
       </header>
       <section className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
@@ -103,10 +102,6 @@ export default function AttendanceNewPage() {
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-muted-foreground" htmlFor="clock-in-date-time">출근일시</label>
                 <Input id="clock-in-date-time" type="datetime-local" value={clockInDateTime} onChange={(event) => setClockInDateTime(event.target.value)} required />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-muted-foreground" htmlFor="clock-out-date-time">퇴근일시</label>
-                <Input id="clock-out-date-time" type="datetime-local" value={clockOutDateTime} onChange={(event) => setClockOutDateTime(event.target.value)} />
               </div>
             </div>
             <div className="flex gap-3">

@@ -174,7 +174,7 @@ export default function EmployeeRosterPage() {
     <section className="space-y-[1.5rem]">
       <header>
         <div className="space-y-3">
-          <h1 className="text-[1.75rem] leading-[1.2]">직원명부관리</h1>
+          <h1 className="text-[1.75rem] leading-[1.2]">직원관리</h1>
           <p className="max-w-[40rem] text-[0.875rem] font-normal leading-relaxed text-muted-foreground">
             등록된 직원의 이름과 연락처를 검색해 확인합니다.
           </p>

@@ -20,7 +20,7 @@ describe("assignment new page", () => {
 
         if (!init && url.endsWith("/api/bootstrap")) {
           return Response.json({
-            employees: [{ id: "emp-1", name: "홍길동" }],
+            employees: [{ id: "emp-1", name: "홍길동", work_style: "0", in_time: "09:00", out_time: "18:00" }],
             worksites: [{ id: "work-1", name: "본사" }],
           });
         }
@@ -31,6 +31,8 @@ describe("assignment new page", () => {
             worksiteId: "work-1",
             startDate: "2026-05-21",
             endDate: "2026-05-23",
+            in_time: "09:00",
+            out_time: "18:00",
           });
           return Response.json({ assignment: { id: "assign-1" } });
         }
@@ -54,6 +56,10 @@ describe("assignment new page", () => {
     await user.type(screen.getByLabelText("종료일"), "2026-05-23");
     await user.selectOptions(screen.getByLabelText("근무지"), "work-1");
     await user.selectOptions(screen.getByLabelText("직원"), "emp-1");
+    expect(screen.getByText("09:00")).toBeInTheDocument();
+    expect(screen.getByText("18:00")).toBeInTheDocument();
+    expect(screen.queryByLabelText("출근")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("퇴근")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "저장" }));
 
     expect(await screen.findByText("자료를 저장하였습니다.")).toBeInTheDocument();

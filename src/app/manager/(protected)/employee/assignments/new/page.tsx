@@ -206,8 +206,8 @@ export default function AssignmentNewPage() {
             {selectedEmployee && (
               <dl className="grid gap-4 rounded-lg border border-border bg-background p-4 sm:grid-cols-3">
                 <div><dt className="text-sm text-muted-foreground">근무형태</dt><dd className="mt-1 font-semibold">{selectedEmployee.work_style === "0" ? "일반근무" : selectedEmployee.work_style === "2" ? "야간근무" : "24시간근무"}</dd></div>
-                <div><dt><label htmlFor="assignment-in-time" className="text-sm text-muted-foreground">출근</label></dt><dd className="mt-1"><Input id="assignment-in-time" type="time" value={inTime} onChange={(event) => setInTime(event.target.value)} required /></dd></div>
-                <div><dt><label htmlFor="assignment-out-time" className="text-sm text-muted-foreground">퇴근</label></dt><dd className="mt-1"><Input id="assignment-out-time" type="time" value={outTime} onChange={(event) => setOutTime(event.target.value)} required /></dd></div>
+                <div><dt className="text-sm text-muted-foreground">출근</dt><dd className="mt-1 font-semibold">{inTime}</dd></div>
+                <div><dt className="text-sm text-muted-foreground">퇴근</dt><dd className="mt-1 font-semibold">{outTime}</dd></div>
               </dl>
             )}
 

@@ -1,10 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { authenticateGuard, clockIn, clockOut, createAssignment, listAssignments } from "./phase1-data";
 import { getSupabase } from "./supabase";
+import { getSupabaseAdmin } from "./supabase-admin";
 import { getAssignmentDayOffCounts, isAssignmentDayOff } from "./assignment-days-off";
 
 vi.mock("./supabase", () => ({
   getSupabase: vi.fn(),
+}));
+
+vi.mock("./supabase-admin", () => ({
+  getSupabaseAdmin: vi.fn(),
 }));
 
 vi.mock("./assignment-days-off", () => ({
@@ -225,21 +230,15 @@ describe("guard authentication data rules", () => {
   });
 
   it("rejects overlapping assignment periods for the same employee", async () => {
-    const overlapQuery = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      lte: vi.fn().mockReturnThis(),
-      gte: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockResolvedValue({
-        data: { id: "assign-1" },
-        error: null,
+    const supabaseAdmin = {
+      rpc: vi.fn().mockReturnValue({
+        single: vi.fn().mockResolvedValue({
+          data: null,
+          error: { message: "이미 겹치는 근무기간 배정이 있습니다." },
+        }),
       }),
     };
-    const supabase = {
-      from: vi.fn().mockReturnValue(overlapQuery),
-    };
-    vi.mocked(getSupabase).mockReturnValue(supabase as never);
+    vi.mocked(getSupabaseAdmin).mockReturnValue(supabaseAdmin as never);
 
     await expect(
       createAssignment({
@@ -249,8 +248,12 @@ describe("guard authentication data rules", () => {
         endDate: "2026-05-27",
       }),
     ).rejects.toThrow("이미 겹치는 근무기간 배정이 있습니다.");
-    expect(overlapQuery.lte).toHaveBeenCalledWith("start_date", "2026-05-27");
-    expect(overlapQuery.gte).toHaveBeenCalledWith("end_date", "2026-05-25");
+    expect(supabaseAdmin.rpc).toHaveBeenCalledWith("create_assignment_with_daily_attendance", expect.objectContaining({
+      p_employee_id: "emp-1",
+      p_worksite_id: "work-1",
+      p_start_date: "2026-05-25",
+      p_end_date: "2026-05-27",
+    }));
   });
 
   it("clocks out the latest open attendance record from a previous day", async () => {

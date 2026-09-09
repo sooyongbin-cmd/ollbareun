@@ -119,7 +119,9 @@ export default function GuardMainPage() {
           </div>
         </section>
         <GuardSafetySection />
-        <GuardAttendanceSection />
+        <div hidden>
+          <GuardAttendanceSection />
+        </div>
         <GuardPushRegister />
       </div>
     </div>

@@ -191,6 +191,7 @@ export default function GuardPushRegister() {
     "로그인 이후 교육알림 수신을 위한 브라우저 구독 상태를 확인합니다.",
   );
   const [pushSteps, setPushSteps] = useState<PushStep[]>(initialPushSteps);
+  const isPushSetupComplete = pushSteps.every((step) => step.status === "success");
 
   const updateStep = useCallback((id: string, status: PushStepStatus, detail: string) => {
     setPushSteps((currentSteps) =>
@@ -472,7 +473,12 @@ export default function GuardPushRegister() {
 
   return (
     <>
-      <section className="mb-6 bg-muted/40 rounded-xl p-[1.5rem] border border-border/50">
+      {isPushSetupComplete && (
+        <p role="status" className="mb-6 text-[0.875rem] font-semibold text-primary">
+          Push 알림 세팅 완료
+        </p>
+      )}
+      <section hidden={isPushSetupComplete} className="mb-6 bg-muted/40 rounded-xl p-[1.5rem] border border-border/50">
         <div className="flex flex-col gap-2">
           <p className="text-[0.8125rem] font-semibold text-primary">Push 알림</p>
           <h3 className="text-[1.3125rem] font-semibold">{pushStatusTitle}</h3>

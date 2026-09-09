@@ -50,6 +50,39 @@ function toDateTimeLocal(value: string | null) {
   return value.replace(" ", "T");
 }
 
+function AttendanceAddress({ id, label, latitude, longitude }: {
+  id: string;
+  label: string;
+  latitude: number;
+  longitude: number;
+}) {
+  const [address, setAddress] = useState("주소 조회 중…");
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const params = new URLSearchParams({ lat: String(latitude), lng: String(longitude) });
+    async function loadAddress() {
+      try {
+        const data = await fetchJson<{ address: string }>(`/api/kakao/reverse-geocode?${params}`, {
+          signal: controller.signal,
+        });
+        if (!controller.signal.aborted) setAddress(data.address || "주소를 찾을 수 없습니다.");
+      } catch {
+        if (!controller.signal.aborted) setAddress("주소를 조회하지 못했습니다.");
+      }
+    }
+    void loadAddress();
+    return () => controller.abort();
+  }, [latitude, longitude]);
+
+  return (
+    <div className="space-y-2">
+      <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor={id}>{label}</label>
+      <Input className="w-full bg-muted/50" id={id} value={address} readOnly />
+    </div>
+  );
+}
+
 export default function AttendanceSavePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -186,6 +219,15 @@ export default function AttendanceSavePage() {
                   </label>
                   <Input className="w-full bg-muted/50" id={field.id} value={field.value ?? "-"} readOnly />
                 </div>
+              ))}
+              {[
+                { id: "clock-in-address", label: "출근 주소", latitude: record?.clockInLatitude, longitude: record?.clockInLongitude },
+                { id: "clock-out-address", label: "퇴근 주소", latitude: record?.clockOutLatitude, longitude: record?.clockOutLongitude },
+              ].map(({ id, label, latitude, longitude }) => (
+                typeof latitude === "number" && Number.isFinite(latitude) &&
+                typeof longitude === "number" && Number.isFinite(longitude)
+                  ? <AttendanceAddress key={`${id}-${latitude}-${longitude}`} id={id} label={label} latitude={latitude} longitude={longitude} />
+                  : null
               ))}
               <div className="space-y-2">
                 <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="clock-in-date-time">

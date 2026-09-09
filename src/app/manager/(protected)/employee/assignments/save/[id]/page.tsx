@@ -10,7 +10,7 @@ import { SaveIcon } from "@/components/icons/save-icon";
 import { DeleteIcon } from "@/components/icons/delete-icon";
 import ConfirmModal from "@/components/modals/confirm-modal";
 import AlertModal from "@/components/modals/alert-modal";
-import AssignmentDaysOffCalendar from "./assignment-days-off-calendar";
+import AssignmentDaysOffCalendar, { type DailyAttendance } from "./assignment-days-off-calendar";
 
 type Assignment = {
   id: string;
@@ -76,6 +76,7 @@ export default function AssignmentSavePage() {
   const [savedStartDate, setSavedStartDate] = useState("");
   const [savedEndDate, setSavedEndDate] = useState("");
   const [currentMonth, setCurrentMonth] = useState("");
+  const [dailyAttendance, setDailyAttendance] = useState<DailyAttendance[]>([]);
   const [daysOff, setDaysOff] = useState<Set<string>>(new Set());
   const [pendingDayOff, setPendingDayOff] = useState<string | null>(null);
   const [loading, setLoading] = useState(Boolean(assignmentId));
@@ -89,13 +90,15 @@ export default function AssignmentSavePage() {
 
     async function loadData() {
       try {
-        const [assignmentPayload, bootstrapPayload, daysOffPayload] = await Promise.all([
+        const [assignmentPayload, bootstrapPayload, daysOffPayload, dailyAttendancePayload] = await Promise.all([
           fetchJson<AssignmentResponse>(`/api/assignments/${assignmentId}`),
           fetchJson<Bootstrap>("/api/bootstrap"),
           fetchJson<DaysOffResponse>(`/api/manager/assignments/${assignmentId}/days-off`),
+          fetchJson<{ dailyAttendance: DailyAttendance[] }>(`/api/manager/assignments/${assignmentId}/daily-attendance`),
         ]);
 
         if (!ignore) {
+          setDailyAttendance(dailyAttendancePayload.dailyAttendance ?? []);
           setEmployeeId(assignmentPayload.assignment.employee_id);
           setWorksiteId(assignmentPayload.assignment.worksite_id);
           setStartDate(assignmentPayload.assignment.start_date);
@@ -309,6 +312,7 @@ export default function AssignmentSavePage() {
 
         {!loading && savedStartDate && savedEndDate && currentMonth ? (
           <AssignmentDaysOffCalendar
+            dailyAttendance={dailyAttendance}
             currentMonth={currentMonth}
             daysOff={daysOff}
             disabled={periodChanged}

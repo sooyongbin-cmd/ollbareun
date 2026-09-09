@@ -3,7 +3,10 @@
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+export type DailyAttendance = { work_date: string; intime: string | null; outtime: string | null };
+
 type Props = {
+  dailyAttendance?: DailyAttendance[];
   startDate: string;
   endDate: string;
   currentMonth: string;
@@ -46,6 +49,7 @@ function getMonthCells(month: string) {
 }
 
 export default function AssignmentDaysOffCalendar({
+  dailyAttendance = [],
   startDate,
   endDate,
   currentMonth,
@@ -55,6 +59,8 @@ export default function AssignmentDaysOffCalendar({
   onMonthChange,
   onToggle,
 }: Props) {
+  const timesByDate = new Map(dailyAttendance.map((row) => [row.work_date, row]));
+  const formatTime = (value: string) => new Date(value).toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit", hour12: false });
   const startMonth = monthKey(startDate);
   const endMonth = monthKey(endDate);
   const previousMonth = shiftMonth(currentMonth, -1);
@@ -69,7 +75,7 @@ export default function AssignmentDaysOffCalendar({
           휴무일 지정
         </h2>
         <p className="text-sm text-muted-foreground">
-          근무기간 안의 날짜를 선택하면 즉시 휴무일로 저장됩니다.
+          날짜별 출퇴근 예정시각은 한국 시간 기준입니다. 근무기간 안의 날짜를 선택하면 즉시 휴무일로 저장됩니다.
         </p>
         {disabled ? (
           <p className="text-sm font-medium text-destructive" role="status">
@@ -123,7 +129,7 @@ export default function AssignmentDaysOffCalendar({
                 aria-label={`${date} ${daysOff.has(date) ? "휴무일 해제" : "휴무일 지정"}`}
                 aria-pressed={daysOff.has(date)}
                 className={[
-                  "aspect-square min-h-10 rounded-lg border text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50",
+                  "flex min-w-0 min-h-24 flex-col items-center justify-start gap-1 px-0.5 py-2 rounded-lg border text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50",
                   daysOff.has(date)
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-transparent bg-muted/40 hover:border-primary/40 hover:bg-primary/10",
@@ -136,7 +142,13 @@ export default function AssignmentDaysOffCalendar({
                 onClick={() => onToggle(date)}
                 type="button"
               >
-                {Number(date.slice(-2))}
+                <span>{Number(date.slice(-2))}</span>
+                {timesByDate.get(date)?.intime ? (
+                  <span className="text-[0.625rem] leading-tight sm:text-xs"><span className="block sm:inline">출근 </span>{formatTime(timesByDate.get(date)!.intime!)}</span>
+                ) : null}
+                {timesByDate.get(date)?.outtime ? (
+                  <span className="text-[0.625rem] leading-tight sm:text-xs"><span className="block sm:inline">퇴근 </span>{formatTime(timesByDate.get(date)!.outtime!)}</span>
+                ) : null}
                 {daysOff.has(date) ? <span className="sr-only"> 휴무일</span> : null}
               </button>
             ) : (

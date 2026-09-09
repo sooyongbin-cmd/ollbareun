@@ -114,9 +114,9 @@ export default function GuardAttendancePage() {
   const [process, setProcess] = useState<{
     action: "출근" | "퇴근";
     status: "processing" | "success" | "error";
-    step: number;
     error: string;
   } | null>(null);
+  const [encouragement, setEncouragement] = useState("");
   const isProcessing = process?.status === "processing";
   const [error, setError] = useState("");
   const [guard, setGuard] = useState<GuardSession | null>(readStoredGuardSession);
@@ -157,6 +157,19 @@ export default function GuardAttendancePage() {
           }
         : attendanceClockOutDecision;
   const activeDecision = guard?.attendance?.clock_in_at ? clockOutDecision : clockInDecision;
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/system/configs/system_0001", { cache: "no-store", signal: controller.signal })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => {
+        if (!controller.signal.aborted && typeof data?.config?.content === "string") {
+          setEncouragement(data.config.content.trim());
+        }
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     const geolocation = navigator.geolocation;
@@ -209,12 +222,8 @@ export default function GuardAttendancePage() {
   async function handleAttendance(action: "출근" | "퇴근") {
     if (processingRef.current) return;
     processingRef.current = true;
-    setProcess({ action, status: "processing", step: 0, error: "" });
+    setProcess({ action, status: "processing", error: "" });
     setError("");
-
-    function advanceStep(step: number) {
-      setProcess((current) => current ? { ...current, step } : current);
-    }
 
     try {
       const activeGuard = readStoredGuardSession();
@@ -223,7 +232,6 @@ export default function GuardAttendancePage() {
         throw new Error("로그인 정보 또는 배정된 근무지를 확인할 수 없습니다.");
       }
 
-      advanceStep(1);
       const geolocation = navigator.geolocation;
       if (!geolocation) {
         throw new Error("이 브라우저에서는 위치 확인을 사용할 수 없습니다.");
@@ -249,7 +257,6 @@ export default function GuardAttendancePage() {
         if (!decision.allowed) throw new Error(decision.reason);
       }
 
-      advanceStep(2);
       const result = await postJson<{ attendance: AttendanceRow }>(
         action === "출근" ? "/api/attendance/clock-in" : "/api/attendance/clock-out",
         {
@@ -260,11 +267,10 @@ export default function GuardAttendancePage() {
         },
       );
 
-      advanceStep(3);
       const nextGuard = { ...activeGuard, attendance: result.attendance };
       setGuard(nextGuard);
       writeStoredGuardSession(nextGuard);
-      setProcess({ action, status: "success", step: 4, error: "" });
+      setProcess({ action, status: "success", error: "" });
     } catch (attendanceError) {
       const detail = attendanceError instanceof Error ? attendanceError.message : action + " 처리에 실패했습니다.";
       setProcess((current) => current ? { ...current, status: "error", error: detail } : current);
@@ -350,27 +356,16 @@ export default function GuardAttendancePage() {
           <DialogHeader>
             <DialogTitle>{process?.action} 처리</DialogTitle>
             <DialogDescription aria-live="polite">
+              {process?.status === "success" && process.action === "출근" && encouragement ? (
+                <span className="mb-3 block whitespace-pre-wrap break-words text-foreground">{encouragement}</span>
+              ) : null}
               {process?.status === "success"
-                ? process.action + "처리 되었습니다."
+                ? process.action + "처리되었습니다."
                 : process?.status === "error"
                   ? process.action + " 처리에 실패했습니다."
-                  : (process?.action ?? "출퇴근") + " 처리중입니다..."}
+                  : (process?.action ?? "출퇴근") + "처리중입니다..."}
             </DialogDescription>
           </DialogHeader>
-          <ol className="space-y-3 text-sm" aria-label="출퇴근 처리 과정" aria-live="polite">
-            {["로그인 및 근무지 확인", "현재 위치 확인", (process?.action ?? "출퇴근") + " 기록 저장", "화면 정보 갱신"].map((label, index) => (
-              <li key={label} className="flex items-center justify-between gap-3">
-                <span>{label}</span>
-                <span className={process?.status === "error" && process.step === index ? "text-destructive" : "text-muted-foreground"}>
-                  {process && index < process.step
-                    ? "완료"
-                    : process?.step === index
-                      ? process.status === "error" ? "실패" : "진행중"
-                      : "대기"}
-                </span>
-              </li>
-            ))}
-          </ol>
           {process?.status === "error" ? <p role="alert" className="text-sm text-destructive">{process.error}</p> : null}
           <DialogFooter>
             <Button type="button" className="w-full" disabled={isProcessing} onClick={handleProcessConfirm}>

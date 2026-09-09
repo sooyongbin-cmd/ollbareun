@@ -121,7 +121,7 @@ export default function GuardWorksiteSection() {
       )}
       {worksiteId && (
         <div className="flex items-start gap-2 text-[0.8125rem] text-muted-foreground border-t border-border/30 pt-2">
-          <span className="font-semibold w-[5rem] shrink-0">현장이름 :</span>
+          <span className="font-semibold w-[7rem] shrink-0">NFC체크포인트 :</span>
           {!currentSites ? (
             <p role="status">현장 목록을 불러오는 중입니다.</p>
           ) : currentSites.error ? (

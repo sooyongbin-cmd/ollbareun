@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import GuardInspectionNfcPage from "./page";
 
@@ -39,6 +39,28 @@ function stubInspectionLogFetch() {
 }
 
 describe("guard inspection NFC page", () => {
+  it("uses the cleaner title and marks only today's own worksite inspections complete", async () => {
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify({ employee: { id: "emp-1", name: "홍길동", role: "미화원" }, worksite: { id: "work-1" } }));
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      if (url === "/api/inspection/sites") return Response.json({ sites: [
+        { id: "site-1", name: "정문", worksite_id: "work-1" },
+        { id: "site-2", name: "후문", worksite_id: "work-1" },
+        { id: "site-3", name: "다른 근무지", worksite_id: "work-2" },
+      ] });
+      return Response.json({ logs: [
+        { inspection_site_id: "site-1", employee_id: "emp-1", worksite_id: "work-1", inspected_at: new Date().toISOString() },
+        { inspection_site_id: "site-2", employee_id: "emp-2", worksite_id: "work-1", inspected_at: new Date().toISOString() },
+        { inspection_site_id: "site-2", employee_id: "emp-1", worksite_id: "work-1", inspected_at: "2000-01-01T00:00:00Z" },
+      ] });
+    }));
+    render(<GuardInspectionNfcPage />);
+    expect(screen.getByRole("heading", { name: "청소구역(NFC태그)" })).toBeInTheDocument();
+    const front = await screen.findByText("정문");
+    expect(within(front.closest("li")!).getByText("점검완료")).toBeInTheDocument();
+    expect(within(screen.getByText("후문").closest("li")!).queryByText("점검완료")).not.toBeInTheDocument();
+    expect(screen.queryByText("다른 근무지")).not.toBeInTheDocument();
+  });
+
   beforeEach(() => {
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
@@ -232,7 +254,7 @@ describe("guard inspection NFC page", () => {
     render(<GuardInspectionNfcPage />);
 
     expect(await screen.findByText("이 브라우저에서는 NFC 태그 읽기를 사용할 수 없습니다.")).toBeInTheDocument();
-    expect(fetch).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalledWith("/api/inspection/logs", expect.objectContaining({ method: "POST" }));
   });
 
   it("does not save invalid NFC payloads", async () => {
@@ -242,6 +264,6 @@ describe("guard inspection NFC page", () => {
     render(<GuardInspectionNfcPage />);
 
     expect(await screen.findByText("QR 코드 내용을 읽을 수 없습니다.")).toBeInTheDocument();
-    expect(fetch).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalledWith("/api/inspection/logs", expect.objectContaining({ method: "POST" }));
   });
 });

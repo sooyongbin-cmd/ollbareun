@@ -11,6 +11,7 @@ import { saveRowsAsXls } from "../export-xls";
 type AttendanceReportRow = {
   id: string;
   employeeName: string;
+  worksiteName: string;
   clockInDateTime: string;
   clockOutDateTime: string | null;
   workDuration: string;
@@ -107,15 +108,15 @@ export default function AttendanceReportPage() {
 
   async function handleExport() {
     const headers = showEmployeeColumn
-      ? ["직원이름", "출근일시", "퇴근일시", "근무시간"]
-      : ["출근일시", "퇴근일시", "근무시간"];
+      ? ["직원이름", "근무지", "출근일시", "퇴근일시", "근무시간"]
+      : ["근무지", "출근일시", "퇴근일시", "근무시간"];
     await saveRowsAsXls({
       fileName: `올바름_근태_${employeeName.trim() || "전체"}_${year}`,
       headers,
       rows: rows.map((row) =>
         showEmployeeColumn
-          ? [row.employeeName, row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration]
-          : [row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration],
+          ? [row.employeeName, row.worksiteName, row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration]
+          : [row.worksiteName, row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration],
       ),
     });
   }
@@ -177,6 +178,7 @@ export default function AttendanceReportPage() {
               <TableHeader>
                 <TableRow>
                   {showEmployeeColumn ? <TableHead className="text-left">직원이름</TableHead> : null}
+                  <TableHead className="text-left">근무지</TableHead>
                   <TableHead className="text-left">출근일시</TableHead>
                   <TableHead className="text-left">퇴근일시</TableHead>
                   <TableHead className="text-left">근무시간</TableHead>
@@ -185,7 +187,7 @@ export default function AttendanceReportPage() {
               <TableBody>
                 {rows.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={showEmployeeColumn ? 4 : 3} className="p-8 text-center text-muted-foreground italic">
+                    <TableCell data-responsive-empty colSpan={showEmployeeColumn ? 5 : 4} className="p-8 text-center text-muted-foreground italic">
                       {searched ? "조회 결과가 없습니다." : "조회 조건을 입력하세요."}
                     </TableCell>
                   </TableRow>
@@ -193,6 +195,7 @@ export default function AttendanceReportPage() {
                   rows.map((row) => (
                     <TableRow key={row.id}>
                       {showEmployeeColumn ? <TableCell data-label="직원이름">{row.employeeName}</TableCell> : null}
+                      <TableCell data-label="근무지">{row.worksiteName ?? "-"}</TableCell>
                       <TableCell data-label="출근일시">
                         <Link
                           href={`/manager/reports/attendance/save/${row.id}`}

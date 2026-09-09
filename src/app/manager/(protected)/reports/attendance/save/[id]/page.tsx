@@ -11,13 +11,7 @@ import { DeleteIcon } from "@/components/icons/delete-icon";
 import { SaveIcon } from "@/components/icons/save-icon";
 import { CancelIcon } from "@/components/icons/cancel-icon";
 import ManagerLoadingMessage from "../../../../manager-loading-message";
-
-type AttendanceRecord = {
-  id: string;
-  employeeName: string;
-  clockInDateTime: string;
-  clockOutDateTime: string | null;
-};
+import type { AttendanceRecord } from "@/lib/manager-reports";
 
 type AttendanceResponse = {
   attendance: AttendanceRecord;
@@ -61,6 +55,7 @@ export default function AttendanceSavePage() {
   const router = useRouter();
   const attendanceId = params.id;
   const [employeeName, setEmployeeName] = useState("");
+  const [record, setRecord] = useState<AttendanceRecord | null>(null);
   const [clockInDateTime, setClockInDateTime] = useState("");
   const [clockOutDateTime, setClockOutDateTime] = useState("");
   const [loading, setLoading] = useState(Boolean(attendanceId));
@@ -80,6 +75,7 @@ export default function AttendanceSavePage() {
         const data = await fetchJson<AttendanceResponse>(`/api/manager/reports/attendance/${attendanceId}`);
         if (!ignore) {
           setEmployeeName(data.attendance.employeeName);
+          setRecord(data.attendance);
           setClockInDateTime(toDateTimeLocal(data.attendance.clockInDateTime));
           setClockOutDateTime(toDateTimeLocal(data.attendance.clockOutDateTime) || currentKstDateTimeLocal());
         }
@@ -177,6 +173,20 @@ export default function AttendanceSavePage() {
                 </label>
                 <Input className="w-full" id="attendance-employee-name" value={employeeName} readOnly />
               </div>
+              {[
+                { id: "worksite-name", label: "근무지", value: record?.worksiteName },
+                { id: "clock-in-latitude", label: "출근 위도", value: record?.clockInLatitude },
+                { id: "clock-in-longitude", label: "출근 경도", value: record?.clockInLongitude },
+                { id: "clock-out-latitude", label: "퇴근 위도", value: record?.clockOutLatitude },
+                { id: "clock-out-longitude", label: "퇴근 경도", value: record?.clockOutLongitude },
+              ].map((field) => (
+                <div className="space-y-2" key={field.id}>
+                  <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor={field.id}>
+                    {field.label}
+                  </label>
+                  <Input className="w-full bg-muted/50" id={field.id} value={field.value ?? "-"} readOnly />
+                </div>
+              ))}
               <div className="space-y-2">
                 <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="clock-in-date-time">
                   출근일시

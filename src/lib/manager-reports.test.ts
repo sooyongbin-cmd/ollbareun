@@ -11,6 +11,7 @@ describe("manager reports", () => {
     const rows = buildAttendanceReport({
       employeeName: "김철수",
       year: "2026",
+      worksites: [{ id: "site-1", name: "본사" }],
       employees: [
         { id: "emp-1", name: "김철수" },
         { id: "emp-2", name: "이영희" },
@@ -18,6 +19,7 @@ describe("manager reports", () => {
       attendance: [
         {
           id: "attendance-1",
+          worksite_id: "site-1",
           employee_id: "emp-1",
           work_date: "2026-03-02",
           clock_in_at: "2026-03-02T00:00:00.000Z",
@@ -44,6 +46,7 @@ describe("manager reports", () => {
       {
         id: "attendance-1",
         employeeName: "김철수",
+        worksiteName: "본사",
         clockInDateTime: "2026-03-02 09:00",
         clockOutDateTime: "2026-03-02 18:30",
         workDuration: "9시간 30분",

@@ -9,6 +9,7 @@ type EmployeeInput = {
 
 type AttendanceInput = {
   id: string;
+  worksite_id?: string | null;
   employee_id: string;
   work_date: string;
   clock_in_at: string | null;
@@ -28,6 +29,7 @@ type CompletionInput = {
 
 export type AttendanceReportRow = {
   id: string;
+  worksiteName: string;
   employeeName: string;
   clockInDateTime: string;
   clockOutDateTime: string | null;
@@ -36,6 +38,11 @@ export type AttendanceReportRow = {
 
 export type AttendanceRecord = {
   id: string;
+  worksiteName: string;
+  clockInLatitude: number | null;
+  clockInLongitude: number | null;
+  clockOutLatitude: number | null;
+  clockOutLongitude: number | null;
   employeeName: string;
   clockInDateTime: string;
   clockOutDateTime: string | null;
@@ -102,6 +109,7 @@ export function buildAttendanceReport(input: {
   year: string;
   employees: EmployeeInput[];
   attendance: AttendanceInput[];
+  worksites?: { id: string; name: string }[];
 }): AttendanceReportRow[] {
   assertYear(input.year);
   const query = input.employeeName.trim().toLowerCase();
@@ -111,12 +119,14 @@ export function buildAttendanceReport(input: {
       .map((employee) => employee.id),
   );
   const employeeNamesById = new Map(input.employees.map((employee) => [employee.id, employee.name]));
+  const worksiteNamesById = new Map((input.worksites ?? []).map((worksite) => [worksite.id, worksite.name]));
 
   return input.attendance
     .filter((record) => record.work_date.startsWith(`${input.year}-`) && employeeIds.has(record.employee_id))
     .sort((left, right) => left.work_date.localeCompare(right.work_date))
     .map((record) => ({
       id: record.id,
+      worksiteName: worksiteNamesById.get(record.worksite_id ?? "") ?? "-",
       employeeName: employeeNamesById.get(record.employee_id) ?? "-",
       clockInDateTime: toKstDateTime(record.clock_in_at)?.dateTime ?? "-",
       clockOutDateTime: toKstDateTime(record.clock_out_at)?.dateTime ?? null,
@@ -185,7 +195,7 @@ export async function loadAttendanceRecord(recordId: string): Promise<Attendance
   const supabase = getSupabase();
   const { data: attendance, error: attendanceError } = await supabase
     .from("attendance_records")
-    .select("id,employee_id,clock_in_at,clock_out_at")
+    .select("id,employee_id,worksite_id,clock_in_at,clock_out_at,clock_in_latitude,clock_in_longitude,clock_out_latitude,clock_out_longitude")
     .eq("id", recordId)
     .single();
 
@@ -202,8 +212,18 @@ export async function loadAttendanceRecord(recordId: string): Promise<Attendance
 
   throwIfError(employeeError);
 
+  const worksiteResult = attendance.worksite_id
+    ? await supabase.from("worksites").select("name").eq("id", attendance.worksite_id).maybeSingle()
+    : { data: null, error: null };
+  throwIfError(worksiteResult.error);
+
   return {
     id: attendance.id,
+    worksiteName: worksiteResult.data?.name ?? "-",
+    clockInLatitude: attendance.clock_in_latitude ?? null,
+    clockInLongitude: attendance.clock_in_longitude ?? null,
+    clockOutLatitude: attendance.clock_out_latitude ?? null,
+    clockOutLongitude: attendance.clock_out_longitude ?? null,
     employeeName: employee?.name ?? "-",
     clockInDateTime: toKstDateTime(attendance.clock_in_at)?.dateTime ?? "-",
     clockOutDateTime: toKstDateTime(attendance.clock_out_at)?.dateTime ?? null,
@@ -256,24 +276,27 @@ export function buildEducationReport(input: {
 export async function loadAttendanceReport(input: { employeeName: string; year: string }) {
   assertYear(input.year);
   const supabase = getSupabase();
-  const [employeesResult, attendanceResult] = await Promise.all([
+  const [employeesResult, attendanceResult, worksitesResult] = await Promise.all([
     supabase.from("employees").select("id,name").ilike("name", `%${input.employeeName.trim()}%`),
     supabase
       .from("attendance_records")
-      .select("id,employee_id,work_date,clock_in_at,clock_out_at")
+      .select("id,employee_id,worksite_id,work_date,clock_in_at,clock_out_at")
       .gte("work_date", `${input.year}-01-01`)
       .lte("work_date", `${input.year}-12-31`)
       .order("work_date", { ascending: true }),
+    supabase.from("worksites").select("id,name"),
   ]);
 
   throwIfError(employeesResult.error);
   throwIfError(attendanceResult.error);
+  throwIfError(worksitesResult.error);
 
   return buildAttendanceReport({
     employeeName: input.employeeName,
     year: input.year,
     employees: employeesResult.data ?? [],
     attendance: attendanceResult.data ?? [],
+    worksites: worksitesResult.data ?? [],
   });
 }
 

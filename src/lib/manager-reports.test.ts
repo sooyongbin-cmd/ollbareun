@@ -7,6 +7,17 @@ vi.mock("./supabase-admin", () => ({
 }));
 
 describe("manager reports", () => {
+  it("does not update clock-out when it is omitted", async () => {
+    const update = vi.fn().mockReturnValue({
+      eq: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: {}, error: null }) }),
+      }),
+    });
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from: vi.fn().mockReturnValue({ update }) } as never);
+    await updateAttendanceRecord({ recordId: "attendance-1", clockInDateTime: "2026-09-09T09:00", clockOutDateTime: undefined });
+    expect(update.mock.calls[0][0]).not.toHaveProperty("clock_out_at");
+  });
+
   it("filters attendance by employee name and year and formats duration", () => {
     const rows = buildAttendanceReport({
       employeeName: "김철수",

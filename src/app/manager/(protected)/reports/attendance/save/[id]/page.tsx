@@ -37,11 +37,6 @@ async function deleteRequest(url: string) {
   }
 }
 
-function currentKstDateTimeLocal() {
-  const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
-  return now.toISOString().slice(0, 16);
-}
-
 function toDateTimeLocal(value: string | null) {
   if (!value || value === "-") {
     return "";
@@ -110,7 +105,7 @@ export default function AttendanceSavePage() {
           setEmployeeName(data.attendance.employeeName);
           setRecord(data.attendance);
           setClockInDateTime(toDateTimeLocal(data.attendance.clockInDateTime));
-          setClockOutDateTime(toDateTimeLocal(data.attendance.clockOutDateTime) || currentKstDateTimeLocal());
+          setClockOutDateTime(toDateTimeLocal(data.attendance.clockOutDateTime));
         }
       } catch (loadError) {
         if (!ignore) {
@@ -151,7 +146,7 @@ export default function AttendanceSavePage() {
       await fetchJson(`/api/manager/reports/attendance/${attendanceId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clockInDateTime, clockOutDateTime }),
+        body: JSON.stringify({ clockInDateTime, ...(record?.clockOutDateTime ? { clockOutDateTime } : {}) }),
       });
 
       setSaveSuccessOpen(true);
@@ -208,10 +203,6 @@ export default function AttendanceSavePage() {
               </div>
               {[
                 { id: "worksite-name", label: "근무지", value: record?.worksiteName },
-                { id: "clock-in-latitude", label: "출근 위도", value: record?.clockInLatitude },
-                { id: "clock-in-longitude", label: "출근 경도", value: record?.clockInLongitude },
-                { id: "clock-out-latitude", label: "퇴근 위도", value: record?.clockOutLatitude },
-                { id: "clock-out-longitude", label: "퇴근 경도", value: record?.clockOutLongitude },
               ].map((field) => (
                 <div className="space-y-2" key={field.id}>
                   <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor={field.id}>
@@ -243,7 +234,7 @@ export default function AttendanceSavePage() {
                   required
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2" hidden={!record?.clockOutDateTime}>
                 <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="clock-out-date-time">
                   퇴근일시
                 </label>

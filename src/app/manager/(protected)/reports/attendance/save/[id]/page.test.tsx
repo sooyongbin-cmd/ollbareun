@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import AttendanceSavePage from "./page";
+import userEvent from "@testing-library/user-event";
 
 vi.mock("next/navigation", () => ({
   useParams: () => ({ id: "record-1" }),
@@ -27,6 +28,23 @@ function mockAttendance(coordinates: Record<string, number | null>, failAddress 
 }
 
 describe("attendance addresses", () => {
+  it("hides GPS fields and missing clock-out time and omits clock-out from saves", async () => {
+    const user = userEvent.setup();
+    const fetchMock = mockAttendance({ clockInLatitude: 37, clockInLongitude: 127 });
+    render(<AttendanceSavePage />);
+    await screen.findByDisplayValue("홍길동");
+    expect(screen.queryByLabelText("출근 위도")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("출근 경도")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("퇴근 위도")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("퇴근 경도")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("퇴근일시")).not.toBeVisible();
+    await user.click(screen.getByRole("button", { name: "저장" }));
+    await user.click(screen.getByRole("button", { name: "예" }));
+    expect(fetchMock).toHaveBeenCalledWith("/api/manager/reports/attendance/record-1", expect.objectContaining({
+      method: "PATCH", body: JSON.stringify({ clockInDateTime: "2026-09-09T09:00" }),
+    }));
+  });
+
   it("looks up both coordinate pairs and displays read-only addresses, including zero coordinates", async () => {
     const fetchMock = mockAttendance({ clockInLatitude: 0, clockInLongitude: 127, clockOutLatitude: 37.5, clockOutLongitude: 128 });
     render(<AttendanceSavePage />);

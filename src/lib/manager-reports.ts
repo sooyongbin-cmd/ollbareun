@@ -176,7 +176,7 @@ export async function updateAttendanceRecord(input: {
     .update({
       work_date: String(input.clockInDateTime).slice(0, 10),
       clock_in_at: clockInAt,
-      clock_out_at: clockOutAt,
+      ...(input.clockOutDateTime !== undefined ? { clock_out_at: clockOutAt } : {}),
       updated_at: new Date().toISOString(),
     })
     .eq("id", input.recordId)

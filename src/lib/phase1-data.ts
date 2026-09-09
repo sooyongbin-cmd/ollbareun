@@ -317,11 +317,14 @@ export async function createAssignment(input: {
   worksiteId: unknown;
   startDate?: unknown;
   endDate?: unknown;
+  in_time?: unknown;
+  out_time?: unknown;
 }) {
   const employee_id = requireString(input.employeeId, "직원");
   const worksite_id = requireString(input.worksiteId, "근무지");
   const { start_date, end_date } = requireDateRange(input);
 
+  const schedule = validateEmployeeSchedule({ in_time: input.in_time, out_time: input.out_time });
   const supabase = getSupabase();
   const { data: overlappingAssignment, error: overlapError } = await supabase
     .from("work_assignments")
@@ -339,7 +342,7 @@ export async function createAssignment(input: {
 
   const { data, error } = await supabase
     .from("work_assignments")
-    .insert({ employee_id, worksite_id, start_date, end_date })
+    .insert({ employee_id, worksite_id, start_date, end_date, ...schedule })
     .select("*")
     .single();
 

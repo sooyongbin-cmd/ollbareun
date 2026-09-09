@@ -35,11 +35,6 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
   return payload as T;
 }
 
-function formatScheduleTime(value: string = "06:00") {
-  const [hour, minute] = value.split(":").map(Number);
-  return (hour < 12 ? "오전 " : "오후 ") + String(hour % 12 || 12).padStart(2, "0") + ":" + String(minute).padStart(2, "0");
-}
-
 function todayDate() {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
 }
@@ -55,6 +50,8 @@ function defaultEndDate(startDate: string) {
 export default function AssignmentNewPage() {
   const [startDate, setStartDate] = useState(todayDate);
   const [endDate, setEndDate] = useState(() => defaultEndDate(startDate));
+  const [inTime, setInTime] = useState("06:00");
+  const [outTime, setOutTime] = useState("06:00");
   const [employeeId, setEmployeeId] = useState("");
   const [data, setData] = useState<Bootstrap>({ employees: [], worksites: [] });
   const [alertMessage, setAlertMessage] = useState("");
@@ -112,6 +109,8 @@ export default function AssignmentNewPage() {
         worksiteId: formData.get("worksiteId"),
         startDate: formData.get("startDate"),
         endDate: formData.get("endDate"),
+        in_time: inTime,
+        out_time: outTime,
       });
 
       setAlertMessage("자료를 저장하였습니다.");
@@ -139,7 +138,13 @@ export default function AssignmentNewPage() {
                 <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-employee">
                   직원
                 </label>
-                <NativeSelect className="w-full appearance-none" id="assignment-employee" name="employeeId" value={employeeId} onChange={(event) => setEmployeeId(event.target.value)} required>
+                <NativeSelect className="w-full appearance-none" id="assignment-employee" name="employeeId" value={employeeId} onChange={(event) => {
+                  const id = event.target.value;
+                  const employee = data.employees.find((item) => item.id === id);
+                  setEmployeeId(id);
+                  setInTime((employee?.in_time ?? "06:00").slice(0, 5));
+                  setOutTime((employee?.out_time ?? "06:00").slice(0, 5));
+                }} required>
                   <NativeSelectOption value="">선택</NativeSelectOption>
                   {data.employees.map((employee) => (
                     <NativeSelectOption key={employee.id} value={employee.id}>
@@ -201,8 +206,8 @@ export default function AssignmentNewPage() {
             {selectedEmployee && (
               <dl className="grid gap-4 rounded-lg border border-border bg-background p-4 sm:grid-cols-3">
                 <div><dt className="text-sm text-muted-foreground">근무형태</dt><dd className="mt-1 font-semibold">{selectedEmployee.work_style === "2" ? "야간근무" : "24시간근무"}</dd></div>
-                <div><dt className="text-sm text-muted-foreground">출근</dt><dd className="mt-1 font-semibold">{formatScheduleTime(selectedEmployee.in_time)}</dd></div>
-                <div><dt className="text-sm text-muted-foreground">퇴근</dt><dd className="mt-1 font-semibold">{formatScheduleTime(selectedEmployee.out_time)}</dd></div>
+                <div><dt><label htmlFor="assignment-in-time" className="text-sm text-muted-foreground">출근</label></dt><dd className="mt-1"><Input id="assignment-in-time" type="time" value={inTime} onChange={(event) => setInTime(event.target.value)} required /></dd></div>
+                <div><dt><label htmlFor="assignment-out-time" className="text-sm text-muted-foreground">퇴근</label></dt><dd className="mt-1"><Input id="assignment-out-time" type="time" value={outTime} onChange={(event) => setOutTime(event.target.value)} required /></dd></div>
               </dl>
             )}
 

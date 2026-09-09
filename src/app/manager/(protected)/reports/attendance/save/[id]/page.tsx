@@ -12,6 +12,7 @@ import { SaveIcon } from "@/components/icons/save-icon";
 import { CancelIcon } from "@/components/icons/cancel-icon";
 import ManagerLoadingMessage from "../../../../manager-loading-message";
 import type { AttendanceRecord } from "@/lib/manager-reports";
+import { durationLabel } from "@/lib/work-duration";
 
 type AttendanceResponse = {
   attendance: AttendanceRecord;
@@ -252,6 +253,20 @@ export default function AttendanceSavePage() {
                 />
               </div>
             </div>
+
+            {clockInDateTime && clockOutEnabled && clockOutDateTime && (
+              <div className="space-y-2">
+                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="work-duration">
+                  근무시간
+                </label>
+                <Input
+                  id="work-duration"
+                  className="w-full bg-muted/50"
+                  value={durationLabel(`${clockInDateTime}:00+09:00`, `${clockOutDateTime}:00+09:00`)}
+                  readOnly
+                />
+              </div>
+            )}
 
             <div className="flex flex-wrap gap-3">
               <Button aria-label="저장" className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto" type="submit">

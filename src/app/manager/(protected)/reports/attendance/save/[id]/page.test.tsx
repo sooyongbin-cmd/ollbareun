@@ -55,6 +55,12 @@ describe("attendance addresses", () => {
     await screen.findByDisplayValue("홍길동");
     expect(screen.getByLabelText("퇴근일시")).toBeVisible();
     expect(screen.getByLabelText("퇴근일시")).toHaveValue("2026-09-09T18:00");
+    expect(screen.getByLabelText("근무시간")).toHaveValue("9시간");
+    expect(screen.getByLabelText("근무시간")).toHaveAttribute("readonly");
+    fireEvent.change(screen.getByLabelText("퇴근일시"), { target: { value: "2026-09-10T10:30" } });
+    expect(screen.getByLabelText("근무시간")).toHaveValue("25시간 30분");
+    fireEvent.change(screen.getByLabelText("출근일시"), { target: { value: "2026-09-10T10:00" } });
+    expect(screen.getByLabelText("근무시간")).toHaveValue("30분");
     expect(screen.queryByRole("button", { name: "퇴근처리" })).not.toBeInTheDocument();
   });
 
@@ -68,6 +74,7 @@ describe("attendance addresses", () => {
     expect(screen.queryByLabelText("퇴근 위도")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("퇴근 경도")).not.toBeInTheDocument();
     expect(screen.getByLabelText("퇴근일시")).not.toBeVisible();
+    expect(screen.queryByLabelText("근무시간")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "저장" }));
     await user.click(screen.getByRole("button", { name: "예" }));
     expect(fetchMock).toHaveBeenCalledWith("/api/manager/reports/attendance/record-1", expect.objectContaining({

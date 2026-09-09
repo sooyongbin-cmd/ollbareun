@@ -1,3 +1,4 @@
+import { durationLabel } from "./work-duration";
 import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
 
@@ -77,25 +78,6 @@ function toKstDateTime(value: string | null) {
     dateTime: `${kst.toISOString().slice(0, 10)} ${kst.toISOString().slice(11, 16)}`,
     timestamp: date.getTime(),
   };
-}
-
-function durationLabel(clockInAt: string | null, clockOutAt: string | null) {
-  const clockIn = toKstDateTime(clockInAt);
-  const clockOut = toKstDateTime(clockOutAt);
-  if (!clockIn || !clockOut || clockOut.timestamp < clockIn.timestamp) {
-    return "-";
-  }
-
-  const totalMinutes = Math.round((clockOut.timestamp - clockIn.timestamp) / 60000);
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  if (hours > 0 && minutes > 0) {
-    return `${hours}시간 ${minutes}분`;
-  }
-  if (hours > 0) {
-    return `${hours}시간`;
-  }
-  return `${minutes}분`;
 }
 
 function assertYear(year: string) {

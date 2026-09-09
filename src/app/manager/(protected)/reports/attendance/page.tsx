@@ -125,7 +125,7 @@ export default function AttendanceReportPage() {
   return (
     <section className="space-y-[1.5rem]">
       <header>
-        <h1 className="text-[1.75rem] leading-[1.2]">근태내역</h1>
+        <h1 className="text-[1.75rem] leading-[1.2]">근태관리</h1>
       </header>
 
       <section aria-label="근태내역 조회" className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">

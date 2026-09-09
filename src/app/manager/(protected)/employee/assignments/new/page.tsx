@@ -41,10 +41,20 @@ function formatScheduleTime(value: string = "06:00") {
 }
 
 function todayDate() {
-  return new Date().toISOString().slice(0, 10);
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
+}
+
+function defaultEndDate(startDate: string) {
+  if (!startDate) return "";
+  const [year, month, day] = startDate.split("-").map(Number);
+  // Date overflow also handles a February 29 start in a leap year.
+  const endDate = new Date(Date.UTC(year + 1, month - 1, day - 1));
+  return endDate.toISOString().slice(0, 10);
 }
 
 export default function AssignmentNewPage() {
+  const [startDate, setStartDate] = useState(todayDate);
+  const [endDate, setEndDate] = useState(() => defaultEndDate(startDate));
   const [employeeId, setEmployeeId] = useState("");
   const [data, setData] = useState<Bootstrap>({ employees: [], worksites: [] });
   const [alertMessage, setAlertMessage] = useState("");
@@ -163,7 +173,12 @@ export default function AssignmentNewPage() {
                     id="assignment-start-date"
                     name="startDate"
                     type="date"
-                    defaultValue={todayDate()}
+                    value={startDate}
+                    onChange={(event) => {
+                      const nextStartDate = event.target.value;
+                      setStartDate(nextStartDate);
+                      setEndDate(defaultEndDate(nextStartDate));
+                    }}
                     required
                   />
                   <label className="sr-only" htmlFor="assignment-end-date">
@@ -175,7 +190,8 @@ export default function AssignmentNewPage() {
                     id="assignment-end-date"
                     name="endDate"
                     type="date"
-                    defaultValue={todayDate()}
+                    value={endDate}
+                    onChange={(event) => setEndDate(event.target.value)}
                     required
                   />
                 </div>

@@ -243,17 +243,20 @@ export default function AttendanceReportPage() {
                   </TableRow>
                 ) : (
                   rows.map((row) => (
-                    <TableRow key={row.id}>
+                    <TableRow key={row.id} id={`attendance-${row.id}`}>
                       {showEmployeeColumn ? <TableCell data-label="직원이름">{row.employeeName}</TableCell> : null}
                       <TableCell data-label="출근일시">
-                        <button
-                          type="button"
+                        <a
+                          href={`#attendance-${row.id}`}
                           className="text-left text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"
-                          onClick={() => openEditModal(row)}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            openEditModal(row);
+                          }}
                           aria-label={`${row.clockInDateTime} 근태 기록 수정`}
                         >
                           {row.clockInDateTime}
-                        </button>
+                        </a>
                       </TableCell>
                       <TableCell data-label="퇴근일시">{row.clockOutDateTime ?? "-"}</TableCell>
                       <TableCell data-label="근무시간">{row.workDuration}</TableCell>

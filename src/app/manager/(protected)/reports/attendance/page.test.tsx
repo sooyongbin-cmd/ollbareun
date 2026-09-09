@@ -56,7 +56,7 @@ describe("attendance report page", () => {
     expect(screen.getByRole("button", { name: "엑셀" })).toBeEnabled();
     expect(screen.queryByRole("columnheader", { name: "직원이름" })).not.toBeInTheDocument();
     expect(screen.queryByRole("columnheader", { name: "수정" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /2026-06-04 09:00 근태 기록 수정/ })).toBeEnabled();
+    expect(screen.getByRole("link", { name: /2026-06-04 09:00 근태 기록 수정/ })).toHaveAttribute("href", "#attendance-attendance-1");
   });
 
   it("opens the edit modal for an unfinished row and saves both date-time values", async () => {
@@ -88,7 +88,7 @@ describe("attendance report page", () => {
     render(<AttendanceReportPage />);
     await waitFor(() => expect(document.querySelector('datalist option[value="김철수"]')).toBeInTheDocument());
     await user.type(screen.getByLabelText("직원이름"), "김철수");
-    await user.click(await screen.findByRole("button", { name: /2026-06-04 09:00 근태 기록 수정/ }));
+    await user.click(await screen.findByRole("link", { name: /2026-06-04 09:00 근태 기록 수정/ }));
 
     const dialog = screen.getByRole("dialog", { name: "근태 기록 수정" });
     const clockInInput = screen.getByLabelText("출근일시");
@@ -119,6 +119,6 @@ describe("attendance report page", () => {
     expect(await screen.findByText("2026-06-04 08:30")).toBeInTheDocument();
     expect(await screen.findByText("2026-06-04 19:00")).toBeInTheDocument();
     expect(screen.queryByRole("dialog", { name: "근태 기록 수정" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /2026-06-04 08:30 근태 기록 수정/ })).toBeEnabled();
+    expect(screen.getByRole("link", { name: /2026-06-04 08:30 근태 기록 수정/ })).toHaveAttribute("href", "#attendance-attendance-1");
   });
 });

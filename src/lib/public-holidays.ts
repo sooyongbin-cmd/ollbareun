@@ -48,16 +48,18 @@ function extractXmlValue(body: string, tagName: string) {
 
 function getApiErrorDetails(payload: unknown, rawBody: string) {
   const root = asRecord(payload);
-  const response = asRecord(root?.response);
+  const serviceResponse = asRecord(root?.OpenAPI_ServiceResponse);
+  const errorRoot = serviceResponse ?? root;
+  const response = asRecord(errorRoot?.response);
   const responseHeader = asRecord(response?.header);
-  const rootHeader = asRecord(root?.header);
-  const commonHeader = asRecord(root?.cmmMsgHeader);
+  const rootHeader = asRecord(errorRoot?.header);
+  const commonHeader = asRecord(errorRoot?.cmmMsgHeader);
   const resultCode = firstText(
     responseHeader?.resultCode,
     rootHeader?.resultCode,
     commonHeader?.returnCode,
     commonHeader?.returnReasonCode,
-    root?.resultCode,
+    errorRoot?.resultCode,
     extractXmlValue(rawBody, "resultCode"),
     extractXmlValue(rawBody, "returnCode"),
     extractXmlValue(rawBody, "returnReasonCode"),
@@ -65,9 +67,9 @@ function getApiErrorDetails(payload: unknown, rawBody: string) {
   const resultMessage = firstText(
     responseHeader?.resultMsg,
     rootHeader?.resultMsg,
-    commonHeader?.errMsg,
     commonHeader?.returnAuthMsg,
-    root?.resultMsg,
+    commonHeader?.errMsg,
+    errorRoot?.resultMsg,
     extractXmlValue(rawBody, "resultMsg"),
     extractXmlValue(rawBody, "errMsg"),
     extractXmlValue(rawBody, "returnAuthMsg"),

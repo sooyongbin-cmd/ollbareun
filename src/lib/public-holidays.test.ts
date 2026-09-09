@@ -14,10 +14,11 @@ describe("public holidays import errors", () => {
       vi.fn(async () =>
         Response.json(
           {
-            response: {
-              header: {
-                resultCode: "30",
-                resultMsg: "SERVICE_KEY_IS_NOT_REGISTERED_ERROR",
+            OpenAPI_ServiceResponse: {
+              cmmMsgHeader: {
+                errMsg: "DEADLINE_HAS_EXPIRED_ERROR",
+                returnAuthMsg: "기한 만료된 서비스키",
+                returnReasonCode: "31",
               },
             },
           },
@@ -27,7 +28,7 @@ describe("public holidays import errors", () => {
     );
 
     await expect(importHolidays("2026")).rejects.toThrow(
-      "특일정보 API가 HTTP 401 Unauthorized를 반환했습니다. (resultCode: 30, resultMsg: SERVICE_KEY_IS_NOT_REGISTERED_ERROR)",
+      "특일정보 API가 HTTP 401 Unauthorized를 반환했습니다. (resultCode: 31, resultMsg: 기한 만료된 서비스키)",
     );
   });
 

@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { readStoredGuardSessionSnapshot, subscribeToGuardSessionChange } from "../guard-session-storage";
 
 type GuardSession = {
   isDayOff?: boolean;
   worksite?: {
+    id?: unknown;
     name?: unknown;
   } | null;
   assignment?: {
@@ -23,6 +24,11 @@ function subscribeToSessionChange(onStoreChange: () => void) {
 }
 
 export default function GuardWorksiteSection() {
+  const [siteResult, setSiteResult] = useState<{
+    worksiteId: string;
+    sites: Array<{ id: string; name: string }>;
+    error: boolean;
+  } | null>(null);
   const storedSession = useSyncExternalStore(
     subscribeToSessionChange,
     readGuardSessionSnapshot,
@@ -34,14 +40,45 @@ export default function GuardWorksiteSection() {
     try {
       const session = JSON.parse(storedSession) as GuardSession;
       const worksiteName = typeof session.worksite?.name === "string" ? session.worksite.name : null;
+      const worksiteId = typeof session.worksite?.id === "string" ? session.worksite.id : null;
       const startDate = typeof session.assignment?.start_date === "string" ? session.assignment.start_date : null;
       const endDate = typeof session.assignment?.end_date === "string" ? session.assignment.end_date : null;
       
-      return { worksiteName, startDate, endDate, isDayOff: session.isDayOff === true };
+      return { worksiteId, worksiteName, startDate, endDate, isDayOff: session.isDayOff === true };
     } catch {
       return null;
     }
   }, [storedSession]);
+
+  const worksiteId = sessionData?.worksiteId;
+
+  useEffect(() => {
+    if (!worksiteId) return;
+    const controller = new AbortController();
+
+    async function loadSites() {
+      try {
+        const response = await fetch("/api/inspection/sites", { cache: "no-store", signal: controller.signal });
+        if (!response.ok) throw new Error("현장 목록 조회 실패");
+        const payload = await response.json() as {
+          sites: Array<{ id: string; name: string; worksite_id: string }>;
+        };
+        const sites = payload.sites.filter((site) => site.worksite_id === worksiteId);
+        if (!controller.signal.aborted) {
+          setSiteResult({ worksiteId: worksiteId!, sites, error: false });
+        }
+      } catch {
+        if (!controller.signal.aborted) {
+          setSiteResult({ worksiteId: worksiteId!, sites: [], error: true });
+        }
+      }
+    }
+
+    void loadSites();
+    return () => controller.abort();
+  }, [worksiteId]);
+
+  const currentSites = siteResult?.worksiteId === worksiteId ? siteResult : null;
 
   if (!sessionData?.worksiteName) {
     return (
@@ -74,6 +111,24 @@ export default function GuardWorksiteSection() {
               ? sessionData.startDate 
               : `${sessionData.startDate} ~ ${sessionData.endDate}`}
           </span>
+        </div>
+      )}
+      {worksiteId && (
+        <div className="flex items-start gap-2 text-[0.8125rem] text-muted-foreground border-t border-border/30 pt-2">
+          <span className="font-semibold w-[5rem] shrink-0">현장이름 :</span>
+          {!currentSites ? (
+            <p role="status">현장 목록을 불러오는 중입니다.</p>
+          ) : currentSites.error ? (
+            <p role="alert">현장 목록을 불러오지 못했습니다.</p>
+          ) : currentSites.sites.length === 0 ? (
+            <p>등록된 현장이 없습니다.</p>
+          ) : (
+            <ul className="min-w-0 space-y-1 font-medium text-foreground">
+              {currentSites.sites.map((site) => (
+                <li key={site.id} className="break-words">{site.name}</li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
     </section>

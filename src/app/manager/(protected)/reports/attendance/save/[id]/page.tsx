@@ -194,7 +194,7 @@ export default function AttendanceSavePage() {
           <p className="text-[1rem] text-destructive">{routeError}</p>
         ) : (
           <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <div className="space-y-2">
                 <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="attendance-employee-name">
                   직원이름
@@ -211,6 +211,7 @@ export default function AttendanceSavePage() {
                   <Input className="w-full bg-muted/50" id={field.id} value={field.value ?? "-"} readOnly />
                 </div>
               ))}
+              <div className="space-y-4 lg:col-span-2 empty:hidden">
               {[
                 { id: "clock-in-address", label: "출근 주소", latitude: record?.clockInLatitude, longitude: record?.clockInLongitude },
                 { id: "clock-out-address", label: "퇴근 주소", latitude: record?.clockOutLatitude, longitude: record?.clockOutLongitude },
@@ -220,6 +221,7 @@ export default function AttendanceSavePage() {
                   ? <AttendanceAddress key={`${id}-${latitude}-${longitude}`} id={id} label={label} latitude={latitude} longitude={longitude} />
                   : null
               ))}
+              </div>
               <div className="space-y-2">
                 <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="clock-in-date-time">
                   출근일시

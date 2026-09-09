@@ -33,6 +33,9 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
 }
 
 export default function EmployeeNewPage() {
+  const [workStyle, setWorkStyle] = useState("1");
+  const [inTime, setInTime] = useState("06:00");
+  const [outTime, setOutTime] = useState("06:00");
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
@@ -49,6 +52,9 @@ export default function EmployeeNewPage() {
         name: data.get("name"),
         phone: data.get("phone"),
         role: data.get("role"),
+        work_style: workStyle,
+        in_time: inTime,
+        out_time: outTime,
       });
 
       setSuccessMessage(`직원이름(${result.employee.name}) 연락처(${result.employee.phone}) 역할(${result.employee.role}) 등록완료`);
@@ -96,6 +102,23 @@ export default function EmployeeNewPage() {
                 <NativeSelectOption value="미화원">미화원</NativeSelectOption>
                 <NativeSelectOption value="파견">파견</NativeSelectOption>
               </NativeSelect>
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="employee-work-style" className="text-sm font-semibold text-muted-foreground">근무형태</label>
+              <NativeSelect id="employee-work-style" value={workStyle} onChange={(event) => { setWorkStyle(event.target.value); setInTime(event.target.value === "2" ? "22:00" : "06:00"); setOutTime("06:00"); }} required>
+                <NativeSelectOption value="1">24시간근무</NativeSelectOption>
+                <NativeSelectOption value="2">야간근무</NativeSelectOption>
+              </NativeSelect>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label htmlFor="employee-in-time" className="text-sm font-semibold text-muted-foreground">출근</label>
+                <Input id="employee-in-time" type="time" value={inTime} onChange={(event) => setInTime(event.target.value)} required />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="employee-out-time" className="text-sm font-semibold text-muted-foreground">퇴근</label>
+                <Input id="employee-out-time" type="time" value={outTime} onChange={(event) => setOutTime(event.target.value)} required />
+              </div>
             </div>
           </div>
 

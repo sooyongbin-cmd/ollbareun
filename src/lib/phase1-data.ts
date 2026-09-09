@@ -155,7 +155,25 @@ export async function loadBootstrap() {
   };
 }
 
-export async function createEmployee(input: { name: unknown; phone: unknown; role?: unknown }) {
+function validateEmployeeSchedule(input: { work_style?: unknown; in_time?: unknown; out_time?: unknown }) {
+  const schedule: { work_style?: string; in_time?: string; out_time?: string } = {};
+  if (input.work_style !== undefined) {
+    if (input.work_style !== "1" && input.work_style !== "2") throw new Error("올바르지 않은 근무형태입니다.");
+    schedule.work_style = input.work_style;
+  }
+  for (const key of ["in_time", "out_time"] as const) {
+    const value = input[key];
+    if (value !== undefined) {
+      if (typeof value !== "string" || !/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/.test(value)) {
+        throw new Error(key === "in_time" ? "출근시간을 올바르게 입력하세요." : "퇴근시간을 올바르게 입력하세요.");
+      }
+      schedule[key] = value;
+    }
+  }
+  return schedule;
+}
+
+export async function createEmployee(input: { name: unknown; phone: unknown; role?: unknown; work_style?: unknown; in_time?: unknown; out_time?: unknown }) {
   const name = requireString(input.name, "직원이름");
   const phone = requireString(input.phone, "연락처");
   const phone_normalized = normalizePhone(phone);
@@ -164,11 +182,12 @@ export async function createEmployee(input: { name: unknown; phone: unknown; rol
     throw new Error("올바르지 않은 역할입니다.");
   }
 
+  const schedule = validateEmployeeSchedule(input);
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("employees")
     .upsert(
-      { name, phone, phone_normalized, is_retired: false, role },
+      { name, phone, phone_normalized, is_retired: false, role, ...schedule },
       { onConflict: "name,phone_normalized" },
     )
     .select("*")
@@ -208,20 +227,7 @@ export async function updateEmployee(input: {
     throw new Error("올바르지 않은 역할입니다.");
   }
 
-  const schedule: { work_style?: string; in_time?: string; out_time?: string } = {};
-  if (input.work_style !== undefined) {
-    if (input.work_style !== "1" && input.work_style !== "2") throw new Error("올바르지 않은 근무형태입니다.");
-    schedule.work_style = input.work_style;
-  }
-  for (const key of ["in_time", "out_time"] as const) {
-    const value = input[key];
-    if (value !== undefined) {
-      if (typeof value !== "string" || !/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/.test(value)) {
-        throw new Error(key === "in_time" ? "출근시간을 올바르게 입력하세요." : "퇴근시간을 올바르게 입력하세요.");
-      }
-      schedule[key] = value;
-    }
-  }
+  const schedule = validateEmployeeSchedule(input);
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("employees")

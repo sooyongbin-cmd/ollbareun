@@ -10,7 +10,7 @@ import { SaveIcon } from "@/components/icons/save-icon";
 import AlertModal from "@/components/modals/alert-modal";
 
 type Bootstrap = {
-  employees: { id: string; name: string }[];
+  employees: { id: string; name: string; work_style: "1" | "2"; in_time: string; out_time: string }[];
   worksites: { id: string; name: string }[];
 };
 
@@ -35,16 +35,23 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
   return payload as T;
 }
 
+function formatScheduleTime(value: string = "06:00") {
+  const [hour, minute] = value.split(":").map(Number);
+  return (hour < 12 ? "오전 " : "오후 ") + String(hour % 12 || 12).padStart(2, "0") + ":" + String(minute).padStart(2, "0");
+}
+
 function todayDate() {
   return new Date().toISOString().slice(0, 10);
 }
 
 export default function AssignmentNewPage() {
+  const [employeeId, setEmployeeId] = useState("");
   const [data, setData] = useState<Bootstrap>({ employees: [], worksites: [] });
   const [alertMessage, setAlertMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const selectedEmployee = data.employees.find((employee) => employee.id === employeeId);
 
   useEffect(() => {
     let ignore = false;
@@ -117,7 +124,33 @@ export default function AssignmentNewPage() {
           <ManagerLoadingMessage />
         ) : (
           <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="grid gap-4 lg:grid-cols-[minmax(22.5rem,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(22.5rem,2fr)]">
+              <div className="space-y-2">
+                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-employee">
+                  직원
+                </label>
+                <NativeSelect className="w-full appearance-none" id="assignment-employee" name="employeeId" value={employeeId} onChange={(event) => setEmployeeId(event.target.value)} required>
+                  <NativeSelectOption value="">선택</NativeSelectOption>
+                  {data.employees.map((employee) => (
+                    <NativeSelectOption key={employee.id} value={employee.id}>
+                      {employee.name}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-worksite">
+                  근무지
+                </label>
+                <NativeSelect className="w-full appearance-none" id="assignment-worksite" name="worksiteId" required>
+                  <NativeSelectOption value="">선택</NativeSelectOption>
+                  {data.worksites.map((worksite) => (
+                    <NativeSelectOption key={worksite.id} value={worksite.id}>
+                      {worksite.name}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </div>
               <div className="space-y-2 lg:min-w-[22.5rem]">
                 <p className="text-[0.875rem] font-semibold text-muted-foreground ml-1">근무기간</p>
                 <div className="grid gap-2 sm:grid-cols-2">
@@ -147,33 +180,15 @@ export default function AssignmentNewPage() {
                   />
                 </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-worksite">
-                  근무지
-                </label>
-                <NativeSelect className="w-full appearance-none" id="assignment-worksite" name="worksiteId" required>
-                  <NativeSelectOption value="">선택</NativeSelectOption>
-                  {data.worksites.map((worksite) => (
-                    <NativeSelectOption key={worksite.id} value={worksite.id}>
-                      {worksite.name}
-                    </NativeSelectOption>
-                  ))}
-                </NativeSelect>
-              </div>
-              <div className="space-y-2">
-                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-employee">
-                  직원
-                </label>
-                <NativeSelect className="w-full appearance-none" id="assignment-employee" name="employeeId" required>
-                  <NativeSelectOption value="">선택</NativeSelectOption>
-                  {data.employees.map((employee) => (
-                    <NativeSelectOption key={employee.id} value={employee.id}>
-                      {employee.name}
-                    </NativeSelectOption>
-                  ))}
-                </NativeSelect>
-              </div>
             </div>
+
+            {selectedEmployee && (
+              <dl className="grid gap-4 rounded-lg border border-border bg-background p-4 sm:grid-cols-3">
+                <div><dt className="text-sm text-muted-foreground">근무형태</dt><dd className="mt-1 font-semibold">{selectedEmployee.work_style === "2" ? "야간근무" : "24시간근무"}</dd></div>
+                <div><dt className="text-sm text-muted-foreground">출근</dt><dd className="mt-1 font-semibold">{formatScheduleTime(selectedEmployee.in_time)}</dd></div>
+                <div><dt className="text-sm text-muted-foreground">퇴근</dt><dd className="mt-1 font-semibold">{formatScheduleTime(selectedEmployee.out_time)}</dd></div>
+              </dl>
+            )}
 
             <Button
               aria-label="저장"

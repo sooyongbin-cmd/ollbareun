@@ -15,7 +15,18 @@ type SpecialRemarkReport = {
   employee_name: string;
   content: string;
   photo_url: string | null;
+  email_to: string | null;
+  email_status: "pending" | "sent" | "failed" | "not_requested";
+  email_sent_at: string | null;
+  email_error: string | null;
   gps_info: { latitude: number; longitude: number } | null;
+};
+
+const emailStatusLabels = {
+  pending: "발송 대기",
+  sent: "발송 완료",
+  failed: "발송 실패",
+  not_requested: "발송 미요청",
 };
 
 function formatDateTime(value: string) {
@@ -195,6 +206,27 @@ export default function SpecialRemarkDetailPage({ params }: PageProps) {
                 <p className="mt-3 text-muted-foreground">첨부사진이 없습니다.</p>
               )}
             </div>
+
+            <dl className="grid gap-4 md:grid-cols-2">
+              <div className="min-w-0 rounded-[0.75rem] border border-border bg-background p-4">
+                <dt className="text-[0.8125rem] font-semibold text-muted-foreground">보고서 수신 이메일 주소</dt>
+                <dd className="mt-2 break-words text-[1rem]">{report.email_to || "기록 없음"}</dd>
+              </div>
+              <div className="rounded-[0.75rem] border border-border bg-background p-4">
+                <dt className="text-[0.8125rem] font-semibold text-muted-foreground">이메일 발송 상태</dt>
+                <dd className={`mt-2 text-[1rem] font-semibold ${report.email_status === "failed" ? "text-destructive" : report.email_status === "sent" ? "text-primary" : "text-foreground"}`}>
+                  {emailStatusLabels[report.email_status] ?? "기록 없음"}
+                </dd>
+              </div>
+              <div className="rounded-[0.75rem] border border-border bg-background p-4">
+                <dt className="text-[0.8125rem] font-semibold text-muted-foreground">이메일 발송 시각</dt>
+                <dd className="mt-2 text-[1rem]">{report.email_sent_at ? formatDateTime(report.email_sent_at) : "기록 없음"}</dd>
+              </div>
+              <div className="min-w-0 rounded-[0.75rem] border border-border bg-background p-4">
+                <dt className="text-[0.8125rem] font-semibold text-muted-foreground">이메일 발송 실패 사유</dt>
+                <dd className="mt-2 whitespace-pre-wrap break-words text-[1rem]">{report.email_error || "없음"}</dd>
+              </div>
+            </dl>
 
             {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p> : null}
 

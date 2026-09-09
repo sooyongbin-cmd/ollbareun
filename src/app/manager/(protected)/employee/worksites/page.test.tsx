@@ -22,6 +22,9 @@ describe("worksite management page", () => {
       "fetch",
       vi.fn(async (input: RequestInfo | URL) => {
         const url = String(input);
+        if (url.startsWith("/api/kakao/reverse-geocode?")) {
+          return Response.json({ address: url.includes("lat=37.5&") ? "서울특별시 본사 주소" : "서울특별시 지점 주소" });
+        }
         if (url.endsWith("/api/bootstrap")) {
           return Response.json({
             worksites: [
@@ -74,10 +77,11 @@ describe("worksite management page", () => {
       ),
     ).toBe("본사");
 
-    expect(screen.getByRole("columnheader", { name: "GPS정보" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "주소" })).toBeInTheDocument();
     expect(screen.queryByRole("columnheader", { name: "위도" })).not.toBeInTheDocument();
     expect(screen.queryByRole("columnheader", { name: "경도" })).not.toBeInTheDocument();
-    expect(screen.getByText("37.500000, 127.000000")).toBeInTheDocument();
+    expect(await screen.findByText("서울특별시 본사 주소")).toBeInTheDocument();
+    expect(screen.queryByText("37.500000, 127.000000")).not.toBeInTheDocument();
     expect(screen.getByText("100m")).toBeInTheDocument();
 
     await user.type(screen.getByRole("textbox"), "서울");

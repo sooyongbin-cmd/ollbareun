@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { formatGpsInfo, type GpsInfo } from "@/lib/gps";
+import { type GpsInfo } from "@/lib/gps";
 import ManagerLoadingMessage from "../../manager-loading-message";
 import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
 import { SortableHeader } from "@/components/sortable-header";
@@ -40,6 +40,35 @@ export default function WorksiteManagementClient() {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [addresses, setAddresses] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const coordinates = new Map<string, GpsInfo>();
+    for (const worksite of data.worksites) {
+      const gps = worksite.gps_info;
+      if (gps && Number.isFinite(gps.latitude) && Number.isFinite(gps.longitude)) {
+        coordinates.set(`${gps.latitude},${gps.longitude}`, gps);
+      }
+    }
+    async function loadAddresses() {
+      for (const [key, gps] of coordinates) {
+        if (controller.signal.aborted) return;
+        let address = "주소를 조회하지 못했습니다.";
+        try {
+          const params = new URLSearchParams({ lat: String(gps.latitude), lng: String(gps.longitude) });
+          const response = await fetch(`/api/kakao/reverse-geocode?${params}`, { signal: controller.signal });
+          const payload = await response.json();
+          if (response.ok) address = payload.address || "주소 정보 없음";
+        } catch {
+          // Keep each lookup failure local to its address cell.
+        }
+        if (!controller.signal.aborted) setAddresses((current) => ({ ...current, [key]: address }));
+      }
+    }
+    void loadAddresses();
+    return () => controller.abort();
+  }, [data.worksites]);
 
   useEffect(() => {
     let ignore = false;
@@ -202,7 +231,7 @@ export default function WorksiteManagementClient() {
                   >
                     배정인원수
                   </SortableHeader>
-                  <TableHead className="text-left">GPS정보</TableHead>
+                  <TableHead className="text-left">주소</TableHead>
                   <SortableHeader
                     sortKey="radius"
                     currentSortKey={sortKey}
@@ -246,7 +275,11 @@ export default function WorksiteManagementClient() {
                             <span className="text-muted-foreground">{count}</span>
                           )}
                         </TableCell>
-                        <TableCell data-label="GPS정보" className="text-muted-foreground">{formatGpsInfo(worksite.gps_info)}</TableCell>
+                        <TableCell data-label="주소" className="text-muted-foreground whitespace-normal break-words">
+                          {worksite.gps_info && Number.isFinite(worksite.gps_info.latitude) && Number.isFinite(worksite.gps_info.longitude)
+                            ? addresses[`${worksite.gps_info.latitude},${worksite.gps_info.longitude}`] ?? "주소 조회 중…"
+                            : "-"}
+                        </TableCell>
                         <TableCell data-label="허용반경" className="text-right">{worksite.radius_meters}m</TableCell>
                       </TableRow>
                     );

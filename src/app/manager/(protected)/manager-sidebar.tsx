@@ -56,13 +56,13 @@ export default function ManagerSidebar() {
               <Link href="/manager" onClick={closeMobileMenu}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/manager-icon.svg"
+                  src="/icons/header-logo-color.svg"
                   alt=""
-                  width={32}
-                  height={32}
-                  className="size-8 shrink-0 rounded-lg"
+                  width={162}
+                  height={28}
+                  className="h-auto w-[10.125rem] max-w-full shrink-0 object-contain group-data-[collapsible=icon]:w-8"
                 />
-                <span className="grid flex-1 text-left leading-tight">
+                <span className="sr-only">
                   <span className="truncate font-semibold">올바름 관리자</span>
                 </span>
               </Link>

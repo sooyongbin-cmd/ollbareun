@@ -1,57 +1,10 @@
 import type { MetadataRoute } from "next";
 
-const guardIcons: MetadataRoute.Manifest["icons"] = [
-  {
-    src: "/guard-icon-192.png",
-    sizes: "192x192",
-    type: "image/png",
-    purpose: "any",
-  },
-  {
-    src: "/guard-icon-512.png",
-    sizes: "512x512",
-    type: "image/png",
-    purpose: "any",
-  },
-  {
-    src: "/guard-icon-192.png",
-    sizes: "192x192",
-    type: "image/png",
-    purpose: "maskable",
-  },
-  {
-    src: "/guard-icon-512.png",
-    sizes: "512x512",
-    type: "image/png",
-    purpose: "maskable",
-  },
-];
-
-const managerIcons: MetadataRoute.Manifest["icons"] = [
-  {
-    src: "/manager-icon-192.png",
-    sizes: "192x192",
-    type: "image/png",
-    purpose: "any",
-  },
-  {
-    src: "/manager-icon-512.png",
-    sizes: "512x512",
-    type: "image/png",
-    purpose: "any",
-  },
-  {
-    src: "/manager-icon-192.png",
-    sizes: "192x192",
-    type: "image/png",
-    purpose: "maskable",
-  },
-  {
-    src: "/manager-icon-512.png",
-    sizes: "512x512",
-    type: "image/png",
-    purpose: "maskable",
-  },
+const brandIcons: MetadataRoute.Manifest["icons"] = [
+  { src: "/icons/header-logo-color-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+  { src: "/icons/header-logo-color-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+  { src: "/icons/header-logo-color-192.png", sizes: "192x192", type: "image/png", purpose: "maskable" },
+  { src: "/icons/header-logo-color-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
 ];
 
 export function guardPwaManifest(): MetadataRoute.Manifest {
@@ -66,7 +19,7 @@ export function guardPwaManifest(): MetadataRoute.Manifest {
     orientation: "portrait",
     background_color: "#ffffff",
     theme_color: "#0066cc",
-    icons: guardIcons,
+    icons: brandIcons,
   };
 }
 
@@ -81,7 +34,7 @@ export function managerPwaManifest(): MetadataRoute.Manifest {
     display: "standalone",
     background_color: "#ffffff",
     theme_color: "#0066cc",
-    icons: managerIcons,
+    icons: brandIcons,
   };
 }
 
@@ -97,6 +50,6 @@ export function legacyPwaManifest(): MetadataRoute.Manifest {
     orientation: "portrait",
     background_color: "#ffffff",
     theme_color: "#0066cc",
-    icons: guardIcons,
+    icons: brandIcons,
   };
 }

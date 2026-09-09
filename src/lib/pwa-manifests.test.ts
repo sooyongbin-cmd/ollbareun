@@ -23,7 +23,7 @@ describe("PWA manifests", () => {
       display: "standalone",
     });
     expect(manager).not.toHaveProperty("orientation");
-    expect(guard.icons).not.toEqual(manager.icons);
+    expect(guard.icons).toEqual(manager.icons);
   });
 
   it("limits the legacy installed app to the guard scope", () => {

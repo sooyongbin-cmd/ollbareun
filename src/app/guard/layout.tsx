@@ -26,6 +26,7 @@ export async function generateMetadata(
   return {
     title: "주식회사 올바름",
     manifest: "/guard/manifest.webmanifest",
+    icons: { icon: "/icons/header-logo-color.svg", apple: "/icons/header-logo-color-180.png" },
     openGraph: {
       ...parentMetadata.openGraph,
       url: "/guard",

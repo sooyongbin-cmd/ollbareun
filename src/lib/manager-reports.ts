@@ -28,6 +28,7 @@ type CompletionInput = {
 
 export type AttendanceReportRow = {
   id: string;
+  employeeName: string;
   clockInDateTime: string;
   clockOutDateTime: string | null;
   workDuration: string;
@@ -102,12 +103,14 @@ export function buildAttendanceReport(input: {
       .filter((employee) => employee.name.toLowerCase().includes(query))
       .map((employee) => employee.id),
   );
+  const employeeNamesById = new Map(input.employees.map((employee) => [employee.id, employee.name]));
 
   return input.attendance
     .filter((record) => record.work_date.startsWith(`${input.year}-`) && employeeIds.has(record.employee_id))
     .sort((left, right) => left.work_date.localeCompare(right.work_date))
     .map((record) => ({
       id: record.id,
+      employeeName: employeeNamesById.get(record.employee_id) ?? "-",
       clockInDateTime: toKstDateTime(record.clock_in_at)?.dateTime ?? "-",
       clockOutDateTime: toKstDateTime(record.clock_out_at)?.dateTime ?? null,
       workDuration: durationLabel(record.clock_in_at, record.clock_out_at),

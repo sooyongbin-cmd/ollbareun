@@ -43,6 +43,7 @@ describe("manager reports", () => {
     expect(rows).toEqual([
       {
         id: "attendance-1",
+        employeeName: "김철수",
         clockInDateTime: "2026-03-02 09:00",
         clockOutDateTime: "2026-03-02 18:30",
         workDuration: "9시간 30분",

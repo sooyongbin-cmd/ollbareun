@@ -8,7 +8,7 @@ describe("attendance report page", () => {
     vi.restoreAllMocks();
   });
 
-  it("loads employee names into a dropdown and enables excel only after search has rows", async () => {
+  it("loads employee names into an editable input and searches when the conditions change", async () => {
     const user = userEvent.setup();
     const year = new Date().getFullYear();
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
@@ -26,6 +26,7 @@ describe("attendance report page", () => {
         rows: [
           {
             id: "attendance-1",
+            employeeName: "김철수",
             clockInDateTime: "2026-06-04 09:00",
             clockOutDateTime: "2026-06-04 18:00",
             workDuration: "9시간",
@@ -40,12 +41,11 @@ describe("attendance report page", () => {
     expect(screen.getByRole("heading", { name: "근태내역" })).toBeInTheDocument();
     expect(screen.getByLabelText("연도")).toHaveValue(year);
     expect(screen.getByRole("button", { name: "엑셀" })).toBeDisabled();
-    expect(await screen.findByRole("option", { name: "김철수" })).toBeInTheDocument();
-    expect(screen.getByRole("option", { name: "홍길동" })).toBeInTheDocument();
-    expect(screen.queryByRole("option", { name: "퇴직자" })).not.toBeInTheDocument();
+    await waitFor(() => expect(document.querySelector('datalist option[value="김철수"]')).toBeInTheDocument());
+    expect(document.querySelector('datalist option[value="홍길동"]')).toBeInTheDocument();
+    expect(document.querySelector('datalist option[value="퇴직자"]')).not.toBeInTheDocument();
 
-    await user.selectOptions(screen.getByLabelText("직원이름"), "김철수");
-    await user.click(screen.getByRole("button", { name: "조회" }));
+    await user.type(screen.getByLabelText("직원이름"), "김철수");
 
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith(
@@ -54,7 +54,9 @@ describe("attendance report page", () => {
     );
     expect(await screen.findByText("2026-06-04 09:00")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "엑셀" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "수정" })).toBeEnabled();
+    expect(screen.queryByRole("columnheader", { name: "직원이름" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "수정" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /2026-06-04 09:00 근태 기록 수정/ })).toBeEnabled();
   });
 
   it("opens the edit modal for an unfinished row and saves both date-time values", async () => {
@@ -73,6 +75,7 @@ describe("attendance report page", () => {
         rows: [
           {
             id: "attendance-1",
+            employeeName: "김철수",
             clockInDateTime: saved ? "2026-06-04 08:30" : "2026-06-04 09:00",
             clockOutDateTime: saved ? "2026-06-04 19:00" : null,
             workDuration: saved ? "10시간 30분" : "-",
@@ -83,9 +86,9 @@ describe("attendance report page", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     render(<AttendanceReportPage />);
-    await screen.findByRole("option", { name: "김철수" });
-    await user.click(screen.getByRole("button", { name: "조회" }));
-    await user.click(await screen.findByRole("button", { name: "수정" }));
+    await waitFor(() => expect(document.querySelector('datalist option[value="김철수"]')).toBeInTheDocument());
+    await user.type(screen.getByLabelText("직원이름"), "김철수");
+    await user.click(await screen.findByRole("button", { name: /2026-06-04 09:00 근태 기록 수정/ }));
 
     const dialog = screen.getByRole("dialog", { name: "근태 기록 수정" });
     const clockInInput = screen.getByLabelText("출근일시");
@@ -116,6 +119,6 @@ describe("attendance report page", () => {
     expect(await screen.findByText("2026-06-04 08:30")).toBeInTheDocument();
     expect(await screen.findByText("2026-06-04 19:00")).toBeInTheDocument();
     expect(screen.queryByRole("dialog", { name: "근태 기록 수정" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "수정" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: /2026-06-04 08:30 근태 기록 수정/ })).toBeEnabled();
   });
 });

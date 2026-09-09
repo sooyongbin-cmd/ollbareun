@@ -1,10 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 
 type SpecialRemarkReport = {
@@ -57,48 +56,30 @@ export default function SpecialRemarksPage() {
   const [error, setError] = useState("");
   const filteredReports = reports.filter((report) => (report.processing_status === "Y") === completed);
 
-  async function loadReports(nextYear = year) {
-    await Promise.resolve();
-    setLoading(true);
-    setError("");
-    try {
-      setReports(await fetchReports(nextYear));
-    } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "특이사항 목록을 불러오지 못했습니다.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
   useEffect(() => {
     let ignore = false;
-
-    fetchReports("")
-      .then((nextReports) => {
-        if (!ignore) {
-          setReports(nextReports);
-        }
-      })
-      .catch((loadError) => {
-        if (!ignore) {
-          setError(loadError instanceof Error ? loadError.message : "특이사항 목록을 불러오지 못했습니다.");
-        }
-      })
-      .finally(() => {
-        if (!ignore) {
-          setLoading(false);
-        }
-      });
-
+    const timer = setTimeout(async () => {
+      if (year && !/^\d{4}$/.test(year)) {
+        setError("조회연도는 4자리 숫자로 입력하세요.");
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      setError("");
+      try {
+        const nextReports = await fetchReports(year);
+        if (!ignore) setReports(nextReports);
+      } catch (loadError) {
+        if (!ignore) setError(loadError instanceof Error ? loadError.message : "특이사항 목록을 불러오지 못했습니다.");
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }, 300);
     return () => {
       ignore = true;
+      clearTimeout(timer);
     };
-  }, []);
-
-  function handleSearch(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    void loadReports(year);
-  }
+  }, [year]);
 
   return (
     <section className="space-y-[1.5rem]">
@@ -110,7 +91,7 @@ export default function SpecialRemarksPage() {
       </header>
 
       <section aria-label="특이사항 검색" className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
-        <form className="flex flex-col gap-4 md:flex-row md:items-end" onSubmit={handleSearch}>
+        <div className="flex flex-col gap-4 md:flex-row md:items-end">
           <div className="space-y-2 w-full md:max-w-[15rem]">
             <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="special-remark-year">
               조회연도
@@ -135,10 +116,7 @@ export default function SpecialRemarksPage() {
             />
             처리완료
           </label>
-          <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 min-w-[6rem]" type="submit" variant="outline">
-            조회
-          </Button>
-        </form>
+        </div>
       </section>
 
       <section aria-label="특이사항 목록" className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">

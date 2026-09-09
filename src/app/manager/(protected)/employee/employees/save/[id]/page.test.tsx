@@ -75,9 +75,26 @@ describe("employee save page", () => {
     await user.click(screen.getByRole("checkbox", { name: "퇴직" }));
     await user.click(screen.getByRole("button", { name: "저장" }));
 
+    expect(screen.getByText("변경사항을 저장하시겠습니까?")).toBeInTheDocument();
+    expect(fetch).toHaveBeenCalledTimes(1);
+    await user.click(screen.getByRole("button", { name: "아니오" }));
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(screen.getByDisplayValue("Alice Kim")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "저장" }));
+    await user.click(screen.getByRole("button", { name: "예" }));
+
     expect(await screen.findByText("수정이 완료되었습니다.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "확인" }));
     expect(push).toHaveBeenCalledWith("/manager/employee/employees");
+  });
+
+  it("returns to the list without saving when cancelled", async () => {
+    const user = userEvent.setup();
+    render(<EmployeeSavePage />);
+    await screen.findByDisplayValue("Alice");
+    await user.click(screen.getByRole("button", { name: "취소" }));
+    expect(push).toHaveBeenCalledWith("/manager/employee/employees");
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 
   it("confirms and deletes the employee", async () => {

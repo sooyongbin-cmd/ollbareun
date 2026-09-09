@@ -271,7 +271,11 @@ export default function AttendanceSavePage() {
                   className="min-h-10 w-full md:w-auto"
                   type="button"
                   variant="outline"
-                  onClick={() => setClockOutEnabled(true)}
+                  onClick={() => {
+                    const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
+                    setClockOutDateTime(now.toISOString().slice(0, 16));
+                    setClockOutEnabled(true);
+                  }}
                 >
                   퇴근처리
                 </Button>

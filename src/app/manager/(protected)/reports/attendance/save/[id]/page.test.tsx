@@ -8,7 +8,10 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
 }));
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
 
 function mockAttendance(coordinates: Record<string, number | null>, failAddress = false, clockOutDateTime: string | null = null) {
   const fetchMock = vi.fn(async (url: string) => {
@@ -29,6 +32,7 @@ function mockAttendance(coordinates: Record<string, number | null>, failAddress 
 
 describe("attendance addresses", () => {
   it("reveals clock-out after processing and saves the entered time", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(new Date("2026-09-09T09:30:00Z").getTime());
     const user = userEvent.setup();
     const fetchMock = mockAttendance({});
     render(<AttendanceSavePage />);
@@ -36,6 +40,7 @@ describe("attendance addresses", () => {
     await user.click(screen.getByRole("button", { name: "퇴근처리" }));
     expect(screen.queryByRole("button", { name: "퇴근처리" })).not.toBeInTheDocument();
     expect(screen.getByLabelText("퇴근일시")).toBeVisible();
+    expect(screen.getByLabelText("퇴근일시")).toHaveValue("2026-09-09T18:30");
     fireEvent.change(screen.getByLabelText("퇴근일시"), { target: { value: "2026-09-09T18:00" } });
     await user.click(screen.getByRole("button", { name: "저장" }));
     await user.click(screen.getByRole("button", { name: "예" }));

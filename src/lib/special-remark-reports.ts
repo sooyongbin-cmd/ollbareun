@@ -20,6 +20,7 @@ export type SpecialRemarkReportRow = {
   email_status: "pending" | "sent" | "failed" | "not_requested";
   email_sent_at: string | null;
   email_error: string | null;
+  processing_status?: "Y" | "N";
   reported_at: string;
   gps_info: { latitude: number; longitude: number } | null;
   created_at?: string;
@@ -437,6 +438,16 @@ export async function listSpecialRemarkReports(input: { year?: unknown } = {}) {
   const { data, error } = await query;
   throwIfError(error);
   return (data ?? []) as SpecialRemarkReportRow[];
+}
+
+export async function completeSpecialRemarkReport(idInput: unknown) {
+  const id = requireString(idInput, "특이사항 보고");
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase.from("inspection_special_reports")
+    .update({ processing_status: "Y", updated_at: new Date().toISOString() })
+    .eq("id", id).select("*").single();
+  throwIfError(error);
+  return data as SpecialRemarkReportRow;
 }
 
 export async function getSpecialRemarkReport(idInput: unknown) {

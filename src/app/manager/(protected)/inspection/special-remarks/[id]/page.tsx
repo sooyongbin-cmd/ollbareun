@@ -19,6 +19,7 @@ type SpecialRemarkReport = {
   email_status: "pending" | "sent" | "failed" | "not_requested";
   email_sent_at: string | null;
   email_error: string | null;
+  processing_status: "Y" | "N";
   gps_info: { latitude: number; longitude: number } | null;
 };
 
@@ -61,6 +62,7 @@ export default function SpecialRemarkDetailPage({ params }: PageProps) {
   const [reportId, setReportId] = useState("");
   const [report, setReport] = useState<SpecialRemarkReport | null>(null);
   const [loading, setLoading] = useState(true);
+  const [completing, setCompleting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
   const [address, setAddress] = useState("");
@@ -130,6 +132,28 @@ export default function SpecialRemarkDetailPage({ params }: PageProps) {
       ignore = true;
     };
   }, [report]);
+
+  async function handleComplete() {
+    if (!reportId || completing || deleting || report?.processing_status === "Y") return;
+    if (!window.confirm("처리완료로 변경할까요?")) return;
+    setCompleting(true);
+    setError("");
+    try {
+      const response = await fetch(
+        "/api/inspection/special-remarks/" + encodeURIComponent(reportId),
+        { method: "PATCH" },
+      );
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error ?? "처리상태를 변경하지 못했습니다.");
+      setReport(payload.report);
+      router.push("/manager/inspection/special-remarks");
+      router.refresh();
+    } catch (completionError) {
+      setError(completionError instanceof Error ? completionError.message : "처리상태를 변경하지 못했습니다.");
+    } finally {
+      setCompleting(false);
+    }
+  }
 
   async function handleDelete() {
     if (!reportId || !window.confirm("특이사항 보고를 삭제하시겠습니까?")) {
@@ -230,8 +254,16 @@ export default function SpecialRemarkDetailPage({ params }: PageProps) {
 
             {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p> : null}
 
-            <div className="flex justify-end">
-              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" disabled={deleting} onClick={handleDelete} type="button" variant="outline">
+            <div className="rounded-[0.75rem] border border-border bg-background p-4">
+              <p className="text-[0.8125rem] font-semibold text-muted-foreground">처리상태</p>
+              <p className="mt-2 text-[1rem] font-semibold">{report.processing_status === "Y" ? "처리완료" : "미처리"}</p>
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <Button hidden={report.processing_status === "Y"} disabled={completing || deleting} onClick={handleComplete} type="button">
+                {completing ? "처리 중..." : "처리완료"}
+              </Button>
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" disabled={deleting || completing} onClick={handleDelete} type="button" variant="outline">
                 삭제
               </Button>
             </div>

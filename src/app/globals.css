@@ -4,6 +4,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+.dark :is(button, input, optgroup, select, textarea) {
+  color: var(--muted-foreground);
+}
+
 @font-face {
   font-family: "Pretendard Variable";
   font-style: normal;

@@ -198,6 +198,42 @@ describe("inspection data helpers", () => {
     expect(sitesQuery.ilike).toHaveBeenCalledWith("name", "%정%");
   });
 
+  it("sorts inspection sites by worksite_name (descending) then name (descending)", async () => {
+    const sitesQuery = {
+      select: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({
+        data: [
+          { id: "s-1", worksite_id: "w-1", name: "101동" },
+          { id: "s-2", worksite_id: "w-2", name: "정문" },
+          { id: "s-3", worksite_id: "w-1", name: "102동" },
+          { id: "s-4", worksite_id: "w-2", name: "후문" },
+        ],
+        error: null,
+      }),
+    };
+    const worksitesQuery = {
+      select: vi.fn().mockResolvedValue({
+        data: [
+          { id: "w-1", name: "강남빌딩" },
+          { id: "w-2", name: "홍대타워" },
+        ],
+        error: null,
+      }),
+    };
+    const supabase = {
+      from: vi.fn().mockReturnValueOnce(sitesQuery).mockReturnValueOnce(worksitesQuery),
+    };
+    vi.mocked(getSupabase).mockReturnValue(supabase as never);
+
+    const result = await listInspectionSites({});
+    expect(result.map((s) => `${s.worksite_name} - ${s.name}`)).toEqual([
+      "홍대타워 - 후문",
+      "홍대타워 - 정문",
+      "강남빌딩 - 102동",
+      "강남빌딩 - 101동",
+    ]);
+  });
+
   it("saves an inspection log with canonical site and worksite data", async () => {
     const payload = buildInspectionQrPayload({
       id: "site-1",

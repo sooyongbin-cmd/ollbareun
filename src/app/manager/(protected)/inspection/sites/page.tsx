@@ -27,6 +27,16 @@ async function fetchSites(name: string) {
   return (payload.sites ?? []) as InspectionSite[];
 }
 
+export function sortInspectionSites(sites: InspectionSite[]) {
+  return [...sites].sort((left, right) => {
+    const worksiteComparison = (right.worksite_name ?? "").localeCompare(left.worksite_name ?? "", "ko-KR");
+    if (worksiteComparison !== 0) {
+      return worksiteComparison;
+    }
+    return (right.name ?? "").localeCompare(left.name ?? "", "ko-KR");
+  });
+}
+
 export default function InspectionSitesPage() {
   const [query, setQuery] = useState("");
   const [sites, setSites] = useState<InspectionSite[]>([]);
@@ -38,7 +48,7 @@ export default function InspectionSitesPage() {
     setLoading(true);
     setError("");
     try {
-      setSites(await fetchSites(name));
+      setSites(sortInspectionSites(await fetchSites(name)));
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "현장 목록을 불러오지 못했습니다.");
     } finally {
@@ -52,7 +62,7 @@ export default function InspectionSitesPage() {
     fetchSites("")
       .then((nextSites) => {
         if (!ignore) {
-          setSites(nextSites);
+          setSites(sortInspectionSites(nextSites));
         }
       })
       .catch((loadError) => {

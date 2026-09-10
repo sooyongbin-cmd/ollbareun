@@ -114,6 +114,17 @@ export function parseInspectionQrPayload(value: unknown): InspectionQrPayload {
   };
 }
 
+export function compareInspectionSites<T extends { worksite_name?: string | null; name?: string | null }>(
+  left: T,
+  right: T,
+) {
+  const worksiteComparison = (right.worksite_name ?? "").localeCompare(left.worksite_name ?? "", "ko-KR");
+  if (worksiteComparison !== 0) {
+    return worksiteComparison;
+  }
+  return (right.name ?? "").localeCompare(left.name ?? "", "ko-KR");
+}
+
 export async function listInspectionSites(input: { name?: unknown } = {}) {
   const name = typeof input.name === "string" ? input.name.trim() : "";
   const supabase = getSupabase();
@@ -130,7 +141,9 @@ export async function listInspectionSites(input: { name?: unknown } = {}) {
   throwIfError(sitesResult.error);
   throwIfError(worksitesResult.error);
 
-  return attachWorksiteNames((sitesResult.data ?? []) as RawInspectionSite[], worksitesResult.data ?? []);
+  const sites = attachWorksiteNames((sitesResult.data ?? []) as RawInspectionSite[], worksitesResult.data ?? []);
+
+  return sites.sort(compareInspectionSites);
 }
 
 export async function createInspectionSite(input: {

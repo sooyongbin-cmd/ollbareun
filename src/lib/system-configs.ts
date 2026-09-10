@@ -64,6 +64,14 @@ export async function getSystemConfigContent(systemCodeInput: unknown) {
   return (await getSystemConfig(systemCodeInput)).content;
 }
 
+export async function isSystemConfigEnabled(systemCodeInput: unknown) {
+  try {
+    return (await getSystemConfigContent(systemCodeInput)).trim().toUpperCase() === "Y";
+  } catch {
+    return false;
+  }
+}
+
 export async function getManagerTheme() {
   try {
     return normalizeManagerTheme(await getSystemConfigContent("THEME_CODE"));

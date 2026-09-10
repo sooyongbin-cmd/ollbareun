@@ -4,6 +4,7 @@ import {
   defaultKakaoOpenGraphMetadata,
   getKakaoOpenGraphMetadata,
   getManagerTheme,
+  isSystemConfigEnabled,
 } from "./system-configs";
 
 vi.mock("./supabase-admin", () => ({
@@ -110,5 +111,33 @@ describe("getManagerTheme", () => {
     vi.mocked(getSupabaseAdmin).mockReturnValue({ from } as never);
 
     await expect(getManagerTheme()).resolves.toBe("system");
+  });
+});
+
+describe("isSystemConfigEnabled", () => {
+  it("returns true only when the setting is Y, ignoring whitespace and case", async () => {
+    const single = vi.fn().mockResolvedValue({ data: { content: " y " }, error: null });
+    const eq = vi.fn(() => ({ single }));
+    const select = vi.fn(() => ({ eq }));
+    const from = vi.fn(() => ({ select }));
+
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from } as never);
+
+    await expect(isSystemConfigEnabled("system_log_001")).resolves.toBe(true);
+    expect(from).toHaveBeenCalledWith("system_configs");
+    expect(eq).toHaveBeenCalledWith("system_code", "system_log_001");
+  });
+
+  it("returns false for N or an unavailable setting", async () => {
+    const single = vi.fn().mockResolvedValue({ data: { content: "N" }, error: null });
+    const eq = vi.fn(() => ({ single }));
+    const select = vi.fn(() => ({ eq }));
+    const from = vi.fn(() => ({ select }));
+
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from } as never);
+    await expect(isSystemConfigEnabled("system_log_002")).resolves.toBe(false);
+
+    single.mockResolvedValue({ data: null, error: { message: "not found" } });
+    await expect(isSystemConfigEnabled("system_log_002")).resolves.toBe(false);
   });
 });

@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       loginStatus: "success",
     });
 
-    return Response.json({ ...session, sessionLogId: log.id });
+    return Response.json({ ...session, sessionLogId: log?.id ?? null });
   } catch (error) {
     const message = error instanceof Error ? error.message : "경비원 인증에 실패했습니다.";
 

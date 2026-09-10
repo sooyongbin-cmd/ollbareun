@@ -14,7 +14,7 @@ export async function POST(request: Request) {
       loginStatus: "success",
     });
 
-    return Response.json({ ...session, sessionLogId: log.id });
+    return Response.json({ ...session, sessionLogId: log?.id ?? null });
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "패스키 로그인에 실패했습니다." },

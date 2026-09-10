@@ -6,14 +6,45 @@ import {
   updateGuardSessionMainPushLog,
 } from "./guard-session-logs";
 import { getSupabase } from "./supabase";
+import { isSystemConfigEnabled } from "./system-configs";
 
 vi.mock("./supabase", () => ({
   getSupabase: vi.fn(),
 }));
 
+vi.mock("./system-configs", () => ({
+  isSystemConfigEnabled: vi.fn(),
+}));
+
 describe("guard session logs", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.mocked(isSystemConfigEnabled).mockResolvedValue(true);
+  });
+
+  it("does not write when guard session logging is disabled", async () => {
+    const from = vi.fn();
+    vi.mocked(isSystemConfigEnabled).mockResolvedValue(false);
+    vi.mocked(getSupabase).mockReturnValue({ from } as never);
+
+    await expect(
+      createGuardSessionLog({ employeeId: "emp-1", guardName: "홍길동", loginStatus: "success" }),
+    ).resolves.toBeNull();
+
+    await expect(
+      updateGuardSessionMainPushLog({ id: "log-1", status: "success", result: null }),
+    ).resolves.toBeNull();
+    await expect(
+      updateGuardSessionLogoutLog({
+        id: "log-1",
+        browserPushStatus: "removed",
+        serverPushStatus: "removed",
+        sessionStatus: "removed",
+        result: null,
+      }),
+    ).resolves.toBeNull();
+
+    expect(from).not.toHaveBeenCalled();
   });
 
   it("creates a successful login log", async () => {

@@ -1,4 +1,7 @@
 import { getSupabase } from "./supabase";
+import { isSystemConfigEnabled } from "./system-configs";
+
+const guardSessionLogEnabledConfigCode = "system_log_001";
 
 export type GuardLoginStatus = "success" | "failed";
 export type MainPushStatus = "success" | "warning" | "error" | "skipped";
@@ -77,6 +80,10 @@ export async function createGuardSessionLog(input: {
   loginStatus: GuardLoginStatus;
   loginError?: string | null;
 }) {
+  if (!(await isSystemConfigEnabled(guardSessionLogEnabledConfigCode))) {
+    return null;
+  }
+
   const guardName = typeof input.guardName === "string" && input.guardName.trim() ? input.guardName.trim() : "확인불가";
   const supabase = getSupabase();
   const { data, error } = await supabase
@@ -108,6 +115,10 @@ export async function updateGuardSessionMainPushLog(input: {
   status: MainPushStatus;
   result: unknown;
 }) {
+  if (!(await isSystemConfigEnabled(guardSessionLogEnabledConfigCode))) {
+    return null;
+  }
+
   const id = requireLogId(input.id);
   const supabase = getSupabase();
   const { data, error } = await supabase
@@ -133,6 +144,10 @@ export async function updateGuardSessionLogoutLog(input: {
   sessionStatus: unknown;
   result: unknown;
 }) {
+  if (!(await isSystemConfigEnabled(guardSessionLogEnabledConfigCode))) {
+    return null;
+  }
+
   const id = requireLogId(input.id);
   const supabase = getSupabase();
   const { data, error } = await supabase

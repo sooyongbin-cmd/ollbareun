@@ -183,7 +183,7 @@ export default function AttendanceSavePage() {
       <header>
         <p className="text-[0.875rem] font-semibold text-muted-foreground uppercase">관리자 화면</p>
         <div className="space-y-3">
-          <h1 className="text-[1.75rem] leading-[1.2]">근태기록수정</h1>
+          <h1 className="text-[1.75rem] leading-[1.2]">근태 상세</h1>
           <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground max-w-[40rem]">
             선택한 근태 기록의 출근일시와 퇴근일시를 수정합니다.
           </p>

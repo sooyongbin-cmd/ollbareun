@@ -66,7 +66,7 @@ describe("worksite save page", () => {
 
     render(<WorksiteSavePage />);
 
-    expect(await screen.findByRole("heading", { name: "근무지수정" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "근무지 상세" })).toBeInTheDocument();
     expect(await screen.findByDisplayValue("본사")).toBeInTheDocument();
     expect(await screen.findByDisplayValue("부산광역시 부산진구 중앙대로 1")).toBeInTheDocument();
 
@@ -90,7 +90,7 @@ describe("worksite save page", () => {
 
     render(<WorksiteSavePage />);
 
-    expect(await screen.findByRole("heading", { name: "근무지수정" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "근무지 상세" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "삭제" }));
     expect(screen.getByText("자료를 삭제하시겠습니까?")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "예" }));

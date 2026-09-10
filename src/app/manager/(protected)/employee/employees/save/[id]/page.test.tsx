@@ -27,6 +27,10 @@ describe("employee save page", () => {
               id: "emp-1",
               name: "Alice",
               phone: "010-1234-5678",
+              role: "경비원",
+              work_style: "1",
+              in_time: "06:00",
+              out_time: "06:00",
               is_retired: false,
             },
           });
@@ -37,6 +41,10 @@ describe("employee save page", () => {
           expect(body).toEqual({
             name: "Alice Kim",
             phone: "010-9999-8888",
+            role: "경비원",
+            work_style: "1",
+            in_time: "06:00",
+            out_time: "06:00",
             is_retired: true,
           });
           return Response.json({
@@ -44,6 +52,10 @@ describe("employee save page", () => {
               id: "emp-1",
               name: "Alice Kim",
               phone: "010-9999-8888",
+              role: "경비원",
+              work_style: "1",
+              in_time: "06:00",
+              out_time: "06:00",
               is_retired: true,
             },
           });
@@ -63,7 +75,7 @@ describe("employee save page", () => {
 
     render(<EmployeeSavePage />);
 
-    expect(await screen.findByRole("heading", { name: "직원수정" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "직원 상세" })).toBeInTheDocument();
     expect(await screen.findByDisplayValue("Alice")).toBeInTheDocument();
     expect(screen.getByDisplayValue("010-1234-5678")).toBeInTheDocument();
     expect(screen.getByRole("checkbox", { name: "퇴직" })).not.toBeChecked();
@@ -102,7 +114,7 @@ describe("employee save page", () => {
 
     render(<EmployeeSavePage />);
 
-    expect(await screen.findByRole("heading", { name: "직원수정" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "직원 상세" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "삭제" }));
     expect(screen.getByText("현재자료를 삭제할까요?")).toBeInTheDocument();

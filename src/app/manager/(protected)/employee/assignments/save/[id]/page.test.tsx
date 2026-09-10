@@ -52,6 +52,16 @@ describe("assignment save page", () => {
           });
         }
 
+        if (!init && url.endsWith("/api/manager/assignments/assign-1/daily-attendance")) {
+          return Response.json({
+            dailyAttendance: [
+              { work_date: "2026-05-21", intime: "2026-05-20T21:00:00.000Z", outtime: null },
+              { work_date: "2026-05-22", intime: null, outtime: "2026-05-22T21:00:00.000Z" },
+              { work_date: "2026-05-23", intime: "2026-05-22T21:00:00.000Z", outtime: null },
+            ],
+          });
+        }
+
         if (init?.method === "PUT" && url.endsWith("/api/manager/assignments/assign-1/days-off/2026-05-23")) {
           return Response.json({
             dayOff: { day_off_date: "2026-05-23" },
@@ -94,7 +104,7 @@ describe("assignment save page", () => {
 
     render(<AssignmentSavePage />);
 
-    expect(await screen.findByRole("heading", { name: "배정수정" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "근무지배정 상세" })).toBeInTheDocument();
     expect(await screen.findByDisplayValue("2026-05-21")).toBeInTheDocument();
     expect(await screen.findByDisplayValue("2026-05-23")).toBeInTheDocument();
 
@@ -116,7 +126,7 @@ describe("assignment save page", () => {
 
     render(<AssignmentSavePage />);
 
-    expect(await screen.findByRole("heading", { name: "배정수정" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "근무지배정 상세" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "삭제" }));
     expect(screen.getByText("자료를 삭제하시겠습니까?")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "예" }));

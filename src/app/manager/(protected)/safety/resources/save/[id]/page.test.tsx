@@ -56,7 +56,7 @@ describe("education resource save page", () => {
 
     render(<EducationResourceSavePage />);
 
-    expect(await screen.findByRole("heading", { name: "교육자료수정" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "교육자료 상세" })).toBeInTheDocument();
     expect(await screen.findByDisplayValue("화재 안전 교육")).toBeInTheDocument();
     expect(screen.getByDisplayValue("https://www.youtube.com/watch?v=fireSafety")).toBeInTheDocument();
 

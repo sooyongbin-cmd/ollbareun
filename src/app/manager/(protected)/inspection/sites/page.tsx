@@ -27,7 +27,7 @@ async function fetchSites(name: string) {
   return (payload.sites ?? []) as InspectionSite[];
 }
 
-export function sortInspectionSites(sites: InspectionSite[]) {
+function sortInspectionSites(sites: InspectionSite[]) {
   return [...sites].sort((left, right) => {
     const worksiteComparison = (right.worksite_name ?? "").localeCompare(left.worksite_name ?? "", "ko-KR");
     if (worksiteComparison !== 0) {

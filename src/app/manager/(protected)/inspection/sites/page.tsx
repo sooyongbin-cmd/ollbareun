@@ -29,11 +29,11 @@ async function fetchSites(name: string) {
 
 function sortInspectionSites(sites: InspectionSite[]) {
   return [...sites].sort((left, right) => {
-    const worksiteComparison = (right.worksite_name ?? "").localeCompare(left.worksite_name ?? "", "ko-KR");
+    const worksiteComparison = (left.worksite_name ?? "").localeCompare(right.worksite_name ?? "", "ko-KR");
     if (worksiteComparison !== 0) {
       return worksiteComparison;
     }
-    return (right.name ?? "").localeCompare(left.name ?? "", "ko-KR");
+    return (left.name ?? "").localeCompare(right.name ?? "", "ko-KR");
   });
 }
 

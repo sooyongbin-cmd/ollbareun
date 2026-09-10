@@ -56,7 +56,7 @@ describe("inspection sites page", () => {
     });
   });
 
-  it("sorts sites by worksite (descending) then site name (descending)", async () => {
+  it("sorts sites by worksite (ascending) then site name (ascending)", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: RequestInfo | URL) => {
@@ -85,10 +85,10 @@ describe("inspection sites page", () => {
     });
 
     expect(renderedNames).toEqual([
-      "홍대타워 - 후문",
-      "홍대타워 - 정문",
-      "강남빌딩 - 102동",
       "강남빌딩 - 101동",
+      "강남빌딩 - 102동",
+      "홍대타워 - 정문",
+      "홍대타워 - 후문",
     ]);
   });
 });

@@ -212,6 +212,10 @@ describe("manager layout", () => {
       "href",
       "/manager/system/logs",
     );
+    expect(screen.getByRole("link", { name: "DB I/O" })).toHaveAttribute(
+      "href",
+      "/manager/system/db-io",
+    );
     expect(screen.getByRole("link", { name: "시스템설정" })).toHaveAttribute(
       "href",
       "/manager/system/configs",
@@ -230,6 +234,7 @@ describe("manager layout", () => {
       "패스키 요청 관리",
       "관리자관리",
       "프로젝트 문서",
+      "DB I/O",
       "시스템설정",
     ]);
   });

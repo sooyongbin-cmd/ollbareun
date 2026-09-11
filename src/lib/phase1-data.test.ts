@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { authenticateGuard, clockIn, clockOut, createAssignment, listAssignments } from "./phase1-data";
+import { authenticateGuard, clockIn, clockOut, createAssignment, listAssignments, listAssignmentsForEmployee } from "./phase1-data";
 import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
 import { getAssignmentDayOffCounts, isAssignmentDayOff } from "./assignment-days-off";
@@ -425,5 +425,47 @@ describe("guard authentication data rules", () => {
         days_off_count: 0,
       },
     ]);
+  });
+
+  it("lists an employee's assignments with worksite names", async () => {
+    const assignmentsQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      then: (onfulfilled: (val: unknown) => unknown) =>
+        Promise.resolve({
+          data: [
+            { id: "assign-1", employee_id: "emp-1", worksite_id: "work-1", start_date: "2026-05-21", end_date: "2026-05-23" },
+          ],
+          error: null,
+        }).then(onfulfilled),
+    };
+    const worksitesQuery = {
+      select: vi.fn().mockResolvedValue({
+        data: [{ id: "work-1", name: "본사" }],
+        error: null,
+      }),
+    };
+    const supabase = {
+      from: vi.fn((table: string) => {
+        if (table === "work_assignments") return assignmentsQuery;
+        if (table === "worksites") return worksitesQuery;
+        throw new Error(`Unexpected table: ${table}`);
+      }),
+    };
+    vi.mocked(getSupabase).mockReturnValue(supabase as never);
+
+    await expect(listAssignmentsForEmployee("emp-1")).resolves.toEqual([
+      {
+        id: "assign-1",
+        employee_id: "emp-1",
+        worksite_id: "work-1",
+        start_date: "2026-05-21",
+        end_date: "2026-05-23",
+        worksite_name: "본사",
+      },
+    ]);
+    expect(assignmentsQuery.eq).toHaveBeenCalledWith("employee_id", "emp-1");
+    expect(assignmentsQuery.order).toHaveBeenCalledWith("start_date", { ascending: false });
   });
 });

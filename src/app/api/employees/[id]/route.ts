@@ -1,4 +1,4 @@
-import { deleteEmployee, getEmployeeById, updateEmployee } from "@/lib/phase1-data";
+import { deleteEmployee, getEmployeeById, listAssignmentsForEmployee, updateEmployee } from "@/lib/phase1-data";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -7,7 +7,11 @@ type RouteContext = {
 export async function GET(_: Request, { params }: RouteContext) {
   try {
     const { id } = await params;
-    return Response.json({ employee: await getEmployeeById(id) });
+    const [employee, assignments] = await Promise.all([
+      getEmployeeById(id),
+      listAssignmentsForEmployee(id),
+    ]);
+    return Response.json({ employee, assignments });
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "직원 정보를 불러오지 못했습니다." },

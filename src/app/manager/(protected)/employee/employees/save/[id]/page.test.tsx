@@ -1,10 +1,17 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import EmployeeSavePage from "./page";
 
 const push = vi.fn();
 const useParams = vi.fn();
+const assignment = {
+  id: "assignment-1",
+  worksite_name: "본사",
+  start_date: "2026-05-21",
+  end_date: "2026-05-23",
+};
+let employeeAssignments = [assignment];
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push }),
@@ -16,6 +23,7 @@ describe("employee save page", () => {
     vi.restoreAllMocks();
     push.mockReset();
     useParams.mockReturnValue({ id: "emp-1" });
+    employeeAssignments = [assignment];
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -33,6 +41,7 @@ describe("employee save page", () => {
               out_time: "06:00",
               is_retired: false,
             },
+            assignments: employeeAssignments,
           });
         }
 
@@ -79,6 +88,9 @@ describe("employee save page", () => {
     expect(await screen.findByDisplayValue("Alice")).toBeInTheDocument();
     expect(screen.getByDisplayValue("010-1234-5678")).toBeInTheDocument();
     expect(screen.getByRole("checkbox", { name: "퇴직" })).not.toBeChecked();
+    const assignmentSection = await screen.findByRole("region", { name: "근무지배정 정보" });
+    expect(within(assignmentSection).getByText("본사")).toBeInTheDocument();
+    expect(within(assignmentSection).getByText("2026-05-21 ~ 2026-05-23")).toBeInTheDocument();
 
     await user.clear(screen.getByLabelText("직원이름"));
     await user.type(screen.getByLabelText("직원이름"), "Alice Kim");
@@ -98,6 +110,15 @@ describe("employee save page", () => {
     expect(await screen.findByText("수정이 완료되었습니다.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "확인" }));
     expect(push).toHaveBeenCalledWith("/manager/employee/employees");
+  });
+
+  it("does not render the assignment section when the employee has no assignments", async () => {
+    employeeAssignments = [];
+
+    render(<EmployeeSavePage />);
+
+    expect(await screen.findByRole("heading", { name: "직원 상세" })).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "근무지배정 정보" })).not.toBeInTheDocument();
   });
 
   it("returns to the list without saving when cancelled", async () => {

@@ -26,6 +26,18 @@ type Employee = {
 
 type EmployeeResponse = {
   employee: Employee;
+  assignments: EmployeeAssignment[];
+};
+
+type EmployeeMutationResponse = {
+  employee: Employee;
+};
+
+type EmployeeAssignment = {
+  id: string;
+  worksite_name: string;
+  start_date: string;
+  end_date: string;
 };
 
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
@@ -48,6 +60,12 @@ async function deleteRequest(url: string): Promise<void> {
   }
 }
 
+function formatAssignmentPeriod(assignment: EmployeeAssignment) {
+  return assignment.start_date === assignment.end_date
+    ? assignment.start_date
+    : `${assignment.start_date} ~ ${assignment.end_date}`;
+}
+
 export default function EmployeeSavePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -59,6 +77,7 @@ export default function EmployeeSavePage() {
   const [inTime, setInTime] = useState("06:00");
   const [outTime, setOutTime] = useState("06:00");
   const [isRetired, setIsRetired] = useState(false);
+  const [assignments, setAssignments] = useState<EmployeeAssignment[]>([]);
   const [loading, setLoading] = useState(Boolean(employeeId));
   const [error, setError] = useState("");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -82,6 +101,7 @@ export default function EmployeeSavePage() {
           setInTime((data.employee.in_time ?? "06:00").slice(0, 5));
           setOutTime((data.employee.out_time ?? "06:00").slice(0, 5));
           setIsRetired(data.employee.is_retired);
+          setAssignments(data.assignments ?? []);
         }
       } catch (loadError) {
         if (!ignore) {
@@ -118,7 +138,7 @@ export default function EmployeeSavePage() {
     setError("");
 
     try {
-      await fetchJson<EmployeeResponse>(`/api/employees/${employeeId}`, {
+      await fetchJson<EmployeeMutationResponse>(`/api/employees/${employeeId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, phone, role, is_retired: isRetired, work_style: workStyle, in_time: inTime, out_time: outTime }),
@@ -264,6 +284,37 @@ export default function EmployeeSavePage() {
 
         {error ? <p className="mt-6 text-[1rem] text-destructive">{error}</p> : null}
       </section>
+
+      {!loading && !routeError && assignments.length > 0 ? (
+        <section
+          aria-label="근무지배정 정보"
+          className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
+        >
+          <div className="space-y-3">
+            <h2 className="text-[1.25rem] font-semibold">근무지배정 정보</h2>
+            <p className="text-[0.875rem] leading-relaxed text-muted-foreground">
+              해당 직원에게 등록된 근무지와 근무기간입니다.
+            </p>
+          </div>
+          <div className="mt-6 space-y-3">
+            {assignments.map((assignment) => (
+              <dl
+                className="grid gap-4 rounded-lg border border-border bg-background p-4 sm:grid-cols-2"
+                key={assignment.id}
+              >
+                <div>
+                  <dt className="text-[0.8125rem] font-semibold text-muted-foreground">근무지</dt>
+                  <dd className="mt-1 font-semibold">{assignment.worksite_name}</dd>
+                </div>
+                <div>
+                  <dt className="text-[0.8125rem] font-semibold text-muted-foreground">근무기간</dt>
+                  <dd className="mt-1 font-semibold tabular-nums">{formatAssignmentPeriod(assignment)}</dd>
+                </div>
+              </dl>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <ConfirmModal
         isOpen={saveConfirmOpen}

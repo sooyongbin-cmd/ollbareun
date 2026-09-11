@@ -38,6 +38,10 @@ export type AssignmentListRow = AssignmentRow & {
   days_off_count: number;
 };
 
+export type EmployeeAssignmentInfo = Pick<AssignmentRow, "id" | "employee_id" | "worksite_id" | "start_date" | "end_date"> & {
+  worksite_name: string;
+};
+
 export type AttendanceRow = {
   id: string;
   employee_id: string;
@@ -205,6 +209,28 @@ export async function getEmployeeById(id: unknown) {
 
   throwIfError(error);
   return data as EmployeeRow;
+}
+
+export async function listAssignmentsForEmployee(employeeIdInput: unknown) {
+  const employeeId = requireString(employeeIdInput, "직원");
+  const supabase = getSupabase();
+  const [assignmentsResult, worksitesResult] = await Promise.all([
+    supabase
+      .from("work_assignments")
+      .select("id,employee_id,worksite_id,start_date,end_date")
+      .eq("employee_id", employeeId)
+      .order("start_date", { ascending: false }),
+    supabase.from("worksites").select("id,name"),
+  ]);
+
+  throwIfError(assignmentsResult.error);
+  throwIfError(worksitesResult.error);
+
+  const worksitesById = new Map((worksitesResult.data ?? []).map((worksite) => [worksite.id, worksite.name]));
+  return (assignmentsResult.data ?? []).map((assignment) => ({
+    ...assignment,
+    worksite_name: worksitesById.get(assignment.worksite_id) ?? "근무지 없음",
+  })) as EmployeeAssignmentInfo[];
 }
 
 export async function updateEmployee(input: {

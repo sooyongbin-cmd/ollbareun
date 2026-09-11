@@ -129,6 +129,10 @@ describe("assignment save page", () => {
     expect(await screen.findByRole("heading", { name: "근무지배정 상세" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "삭제" }));
     expect(screen.getByText("자료를 삭제하시겠습니까?")).toBeInTheDocument();
+    expect(Array.from(screen.getByRole("alertdialog").querySelectorAll("button")).map((button) => button.textContent?.trim())).toEqual([
+      "예",
+      "아니오",
+    ]);
     await user.click(screen.getByRole("button", { name: "예" }));
 
     expect(await screen.findByText("자료가 삭제되었습니다.")).toBeInTheDocument();

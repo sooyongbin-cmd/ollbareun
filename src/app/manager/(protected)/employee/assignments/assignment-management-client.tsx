@@ -88,6 +88,11 @@ export default function AssignmentManagementClient() {
     return Array.from(names).sort((left, right) => left.localeCompare(right, "ko-KR"));
   }, [assignments, initialWorksite]);
 
+  const employeeOptions = useMemo(() => {
+    const names = new Set(assignments.map((assignment) => assignment.employee_name));
+    return Array.from(names).sort((left, right) => left.localeCompare(right, "ko-KR"));
+  }, [assignments]);
+
   const filteredAssignments = useMemo(() => {
     const normalizedDate = dateQuery.trim();
     const normalizedName = nameQuery.trim().toLowerCase();
@@ -172,13 +177,19 @@ export default function AssignmentManagementClient() {
               <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-name-search">
                 이름
               </label>
-              <Input
+              <NativeSelect
                 className="w-full"
                 id="assignment-name-search"
                 value={nameQuery}
                 onChange={(event) => setNameQuery(event.target.value)}
-                placeholder="직원 이름 입력"
-              />
+              >
+                <NativeSelectOption value="">전체 이름</NativeSelectOption>
+                {employeeOptions.map((employeeName) => (
+                  <NativeSelectOption key={employeeName} value={employeeName}>
+                    {employeeName}
+                  </NativeSelectOption>
+                ))}
+              </NativeSelect>
             </div>
             <div className="space-y-2">
               <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-worksite-search">

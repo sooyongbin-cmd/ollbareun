@@ -59,6 +59,9 @@ export default function AssignmentNewPage() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const selectedEmployee = data.employees.find((employee) => employee.id === employeeId);
+  const sortedEmployees = [...data.employees].sort((left, right) =>
+    left.name.localeCompare(right.name, "ko-KR"),
+  );
 
   useEffect(() => {
     let ignore = false;
@@ -146,7 +149,7 @@ export default function AssignmentNewPage() {
                   setOutTime((employee?.out_time ?? "06:00").slice(0, 5));
                 }} required>
                   <NativeSelectOption value="">선택</NativeSelectOption>
-                  {data.employees.map((employee) => (
+                  {sortedEmployees.map((employee) => (
                     <NativeSelectOption key={employee.id} value={employee.id}>
                       {employee.name}
                     </NativeSelectOption>

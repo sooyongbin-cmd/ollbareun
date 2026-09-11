@@ -47,7 +47,7 @@ import {
 
 type DashboardPayload = {
   summary: {
-    totalEmployees: number;
+    scheduledEmployeesToday: number;
     currentlyClockedIn: number;
     educationUncompleted: number;
   };
@@ -72,7 +72,7 @@ type DashboardPayload = {
 
 const emptyDashboard: DashboardPayload = {
   summary: {
-    totalEmployees: 0,
+    scheduledEmployeesToday: 0,
     currentlyClockedIn: 0,
     educationUncompleted: 0,
   },
@@ -357,13 +357,13 @@ export default function ManagerPage() {
   }
 
   const todayAttendanceRate = data.dailyRates.at(-1)?.attendanceRate ?? 0;
-  const attendanceRate = data.summary.totalEmployees > 0
-    ? Math.round((data.summary.currentlyClockedIn / data.summary.totalEmployees) * 100)
+  const attendanceRate = data.summary.scheduledEmployeesToday > 0
+    ? Math.round((data.summary.currentlyClockedIn / data.summary.scheduledEmployeesToday) * 100)
     : 0;
   const summaryCards: SummaryCard[] = [
     {
       label: "출근현황",
-      value: `${data.summary.currentlyClockedIn}/${data.summary.totalEmployees} 명`,
+      value: `${data.summary.currentlyClockedIn}/${data.summary.scheduledEmployeesToday} 명`,
       description: `출근율 ${attendanceRate}%`,
       icon: Users,
       href: "/manager/reports/attendance",

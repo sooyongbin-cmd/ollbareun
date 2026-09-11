@@ -12,8 +12,8 @@ describe("manager dashboard data", () => {
       ],
       worksites: [{ id: "work-1", name: "문현동현장" }],
       assignments: [
-        { employee_id: "emp-1", worksite_id: "work-1", start_date: "2026-01-01", end_date: "2026-12-31" },
-        { employee_id: "emp-2", worksite_id: "work-1", start_date: "2026-01-01", end_date: "2026-12-31" },
+        { id: "assign-1", employee_id: "emp-1", worksite_id: "work-1", start_date: "2026-01-01", end_date: "2026-12-31" },
+        { id: "assign-2", employee_id: "emp-2", worksite_id: "work-1", start_date: "2026-01-01", end_date: "2026-12-31" },
       ],
       attendance: [
         {
@@ -31,6 +31,10 @@ describe("manager dashboard data", () => {
           clock_out_at: "2026-06-04T02:00:00.000Z",
         },
       ],
+      dailyAttendance: [
+        { work_assignment_id: "assign-1", work_date: "2026-06-04", intime: "2026-06-04T00:00:00.000Z" },
+        { work_assignment_id: "assign-2", work_date: "2026-06-04", intime: null },
+      ],
       educationResources: [{ id: "res-1" }, { id: "res-2" }],
       educationCompletions: [
         { employee_id: "emp-1", resource_id: "res-1", is_completed: true, completed_at: "2026-06-01T00:00:00.000Z" },
@@ -40,7 +44,7 @@ describe("manager dashboard data", () => {
     });
 
     expect(data.summary).toEqual({
-      totalEmployees: 2,
+      scheduledEmployeesToday: 1,
       currentlyClockedIn: 1,
       educationUncompleted: 1,
     });
@@ -68,6 +72,7 @@ describe("manager dashboard data", () => {
       worksites: [],
       assignments: [],
       attendance: [{ employee_id: "emp-1", worksite_id: "work-1", work_date: "2026-06-04", clock_in_at: "x", clock_out_at: null }],
+      dailyAttendance: [],
       educationResources: [{ id: "res-1" }],
       educationCompletions: [{ employee_id: "emp-1", resource_id: "res-1", is_completed: true, completed_at: "2026-06-04T00:00:00.000Z" }],
     });
@@ -101,6 +106,7 @@ describe("manager dashboard data", () => {
         { employee_id: "emp-3", worksite_id: "work-1", start_date: "2026-05-01", end_date: "2026-05-31" },
       ],
       attendance: [],
+      dailyAttendance: [],
       educationResources: [],
       educationCompletions: [],
     });
@@ -127,6 +133,7 @@ describe("manager dashboard data", () => {
       attendance: [],
       educationResources: [],
       educationCompletions: [],
+      dailyAttendance: [],
       daysOff: [{ work_assignment_id: "assign-2", day_off_date: "2026-06-04" }],
     });
 

@@ -25,6 +25,12 @@ type AssignmentDayOffInput = {
   day_off_date: string;
 };
 
+type DailyAttendanceInput = {
+  work_assignment_id: string;
+  work_date: string;
+  intime: string | null;
+};
+
 type AttendanceInput = {
   employee_id: string;
   worksite_id: string;
@@ -46,7 +52,7 @@ type EducationCompletionInput = {
 
 export type ManagerDashboardData = {
   summary: {
-    totalEmployees: number;
+    scheduledEmployeesToday: number;
     currentlyClockedIn: number;
     educationUncompleted: number;
   };
@@ -75,6 +81,7 @@ type BuildManagerDashboardInput = {
   worksites: WorksiteInput[];
   assignments: AssignmentInput[];
   attendance: AttendanceInput[];
+  dailyAttendance: DailyAttendanceInput[];
   educationResources: EducationResourceInput[];
   educationCompletions: EducationCompletionInput[];
   daysOff?: AssignmentDayOffInput[];
@@ -139,6 +146,23 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       .filter((dayOff) => dayOff.day_off_date === today)
       .map((dayOff) => dayOff.work_assignment_id),
   );
+  const assignmentsById = new Map<string, AssignmentInput>();
+  input.assignments.forEach((assignment) => {
+    if (assignment.id) {
+      assignmentsById.set(assignment.id, assignment);
+    }
+  });
+  const scheduledEmployeeIdsToday = new Set<string>();
+  input.dailyAttendance.forEach((dailyAttendance) => {
+    if (dailyAttendance.work_date !== today || !dailyAttendance.intime) {
+      return;
+    }
+
+    const assignment = assignmentsById.get(dailyAttendance.work_assignment_id);
+    if (assignment && activeEmployeeIds.has(assignment.employee_id)) {
+      scheduledEmployeeIdsToday.add(assignment.employee_id);
+    }
+  });
   const currentAssignmentCounts = input.assignments
     .filter(
       (assignment) =>
@@ -204,7 +228,7 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
 
   return {
     summary: {
-      totalEmployees: activeEmployees.length,
+      scheduledEmployeesToday: scheduledEmployeeIdsToday.size,
       currentlyClockedIn: todayAttendance.filter((record) => !record.clock_out_at).length,
       educationUncompleted,
     },
@@ -230,12 +254,17 @@ export async function loadManagerDashboardData() {
   const today = toKstDate(new Date());
   const startDate = addDays(today, -29);
 
-  const [employeesResult, worksitesResult, assignmentsResult, attendanceResult, resourcesResult, completionsResult, daysOffResult] =
+  const [employeesResult, worksitesResult, assignmentsResult, attendanceResult, dailyAttendanceResult, resourcesResult, completionsResult, daysOffResult] =
     await Promise.all([
       supabase.from("employees").select("id,name,is_retired"),
       supabase.from("worksites").select("id,name"),
       supabase.from("work_assignments").select("id,employee_id,worksite_id,start_date,end_date").lte("start_date", today).gte("end_date", startDate),
       supabase.from("attendance_records").select("employee_id,worksite_id,work_date,clock_in_at,clock_out_at").gte("work_date", startDate).lte("work_date", today),
+      supabaseAdmin
+        .from("work_assignment_daily_attendance")
+        .select("work_assignment_id,work_date,intime")
+        .eq("work_date", today)
+        .not("intime", "is", null),
       supabase.from("education_resources").select("id"),
       supabase.from("education_completions").select("employee_id,resource_id,is_completed,completed_at"),
       supabaseAdmin
@@ -248,6 +277,7 @@ export async function loadManagerDashboardData() {
   throwIfError(worksitesResult.error);
   throwIfError(assignmentsResult.error);
   throwIfError(attendanceResult.error);
+  throwIfError(dailyAttendanceResult.error);
   throwIfError(resourcesResult.error);
   throwIfError(completionsResult.error);
   throwIfError(daysOffResult.error);
@@ -257,6 +287,7 @@ export async function loadManagerDashboardData() {
     worksites: worksitesResult.data ?? [],
     assignments: assignmentsResult.data ?? [],
     attendance: attendanceResult.data ?? [],
+    dailyAttendance: dailyAttendanceResult.data ?? [],
     educationResources: resourcesResult.data ?? [],
     educationCompletions: completionsResult.data ?? [],
     daysOff: daysOffResult.data ?? [],

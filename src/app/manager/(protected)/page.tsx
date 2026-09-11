@@ -50,6 +50,7 @@ type DashboardPayload = {
   summary: {
     scheduledEmployeesToday: number;
     currentlyClockedIn: number;
+    onTimeEmployeesToday: number;
     waitingEmployeesToday: number;
     absentEmployeesToday: number;
     lateEmployeesToday: number;
@@ -78,6 +79,7 @@ const emptyDashboard: DashboardPayload = {
   summary: {
     scheduledEmployeesToday: 0,
     currentlyClockedIn: 0,
+    onTimeEmployeesToday: 0,
     waitingEmployeesToday: 0,
     absentEmployeesToday: 0,
     lateEmployeesToday: 0,
@@ -269,9 +271,9 @@ function DashboardTrendChart({ data }: { data: DashboardPayload["dailyRates"] })
 
 type SummaryCard = {
   label: string;
-  value: string;
+  value: ReactNode;
   description: ReactNode;
-  ariaDescription?: string;
+  ariaLabel?: string;
   icon: typeof Users;
   href?: string;
 };
@@ -295,7 +297,7 @@ function DashboardSummaryCard({ card }: { card: SummaryCard }) {
   if (card.href) {
     return (
       <Link
-        aria-label={`${card.label} ${card.value} ${card.ariaDescription ?? card.description}`}
+        aria-label={card.ariaLabel ?? `${card.label} ${card.value} ${card.description}`}
         className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         href={card.href}
       >
@@ -368,15 +370,16 @@ export default function ManagerPage() {
   const summaryCards: SummaryCard[] = [
     {
       label: "출근현황",
-      value: `출근 ${data.summary.currentlyClockedIn}/${data.summary.scheduledEmployeesToday} 명`,
-      description: (
-        <div className="flex flex-wrap gap-x-3 gap-y-1">
-          <span>대기{data.summary.waitingEmployeesToday}명</span>
-          <span className="text-red-600 dark:text-red-400">결근{data.summary.absentEmployeesToday}명</span>
-          <span className="text-pink-600 dark:text-pink-400">지각{data.summary.lateEmployeesToday}명</span>
-        </div>
+      value: (
+        <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[1.35rem] md:text-[1.5rem]">
+          <span>출근 {data.summary.onTimeEmployeesToday}</span>
+          <span className="text-pink-600 dark:text-pink-400">지각 {data.summary.lateEmployeesToday}</span>
+          <span className="text-red-600 dark:text-red-400">결근{data.summary.absentEmployeesToday}</span>
+          <span>대기 {data.summary.waitingEmployeesToday}</span>
+        </span>
       ),
-      ariaDescription: `대기${data.summary.waitingEmployeesToday}명 결근${data.summary.absentEmployeesToday}명 지각${data.summary.lateEmployeesToday}명`,
+      description: "오늘 출근 예정 직원 기준",
+      ariaLabel: `출근현황 출근 ${data.summary.onTimeEmployeesToday} 지각 ${data.summary.lateEmployeesToday} 결근${data.summary.absentEmployeesToday} 대기 ${data.summary.waitingEmployeesToday}`,
       icon: Users,
       href: "/manager/reports/attendance/status",
     },

@@ -54,6 +54,7 @@ export type ManagerDashboardData = {
   summary: {
     scheduledEmployeesToday: number;
     currentlyClockedIn: number;
+    onTimeEmployeesToday: number;
     waitingEmployeesToday: number;
     absentEmployeesToday: number;
     lateEmployeesToday: number;
@@ -177,12 +178,14 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
   });
   const todayAttendanceByEmployeeId = new Map(todayAttendance.map((record) => [record.employee_id, record]));
   const nowTimestamp = (input.now ?? new Date()).getTime();
+  let onTimeEmployeesToday = 0;
   let waitingEmployeesToday = 0;
   let absentEmployeesToday = 0;
   let lateEmployeesToday = 0;
   scheduledClockInsByEmployeeId.forEach((scheduledTimestamp, employeeId) => {
     const attendance = todayAttendanceByEmployeeId.get(employeeId);
-    if (!attendance?.clock_in_at) {
+    const clockInTimestamp = attendance?.clock_in_at ? new Date(attendance.clock_in_at).getTime() : Number.NaN;
+    if (!Number.isFinite(clockInTimestamp)) {
       if (nowTimestamp > scheduledTimestamp) {
         absentEmployeesToday += 1;
       } else {
@@ -191,8 +194,10 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       return;
     }
 
-    if (new Date(attendance.clock_in_at).getTime() > scheduledTimestamp) {
+    if (clockInTimestamp > scheduledTimestamp) {
       lateEmployeesToday += 1;
+    } else {
+      onTimeEmployeesToday += 1;
     }
   });
   const currentAssignmentCounts = input.assignments
@@ -262,6 +267,7 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
     summary: {
       scheduledEmployeesToday: scheduledEmployeeIdsToday.size,
       currentlyClockedIn: todayAttendance.filter((record) => !record.clock_out_at).length,
+      onTimeEmployeesToday,
       waitingEmployeesToday,
       absentEmployeesToday,
       lateEmployeesToday,

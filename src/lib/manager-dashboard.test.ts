@@ -46,6 +46,7 @@ describe("manager dashboard data", () => {
     expect(data.summary).toEqual({
       scheduledEmployeesToday: 1,
       currentlyClockedIn: 1,
+      onTimeEmployeesToday: 1,
       waitingEmployeesToday: 0,
       absentEmployeesToday: 0,
       lateEmployeesToday: 0,
@@ -113,6 +114,7 @@ describe("manager dashboard data", () => {
     expect(data.summary).toMatchObject({
       scheduledEmployeesToday: 4,
       currentlyClockedIn: 2,
+      onTimeEmployeesToday: 1,
       waitingEmployeesToday: 1,
       absentEmployeesToday: 1,
       lateEmployeesToday: 1,

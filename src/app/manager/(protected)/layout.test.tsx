@@ -202,7 +202,12 @@ describe("manager layout", () => {
       "근무지배정",
       "공휴일관리",
       "근태관리",
+      "출근현황",
     ]);
+    expect(screen.getByRole("link", { name: "출근현황" })).toHaveAttribute(
+      "href",
+      "/manager/reports/attendance/status",
+    );
     expect(screen.getByText("현장점검")).toBeInTheDocument();
     expect(screen.getByText("안전교육")).toBeInTheDocument();
     expect(screen.getByText("리포트출력")).toBeInTheDocument();

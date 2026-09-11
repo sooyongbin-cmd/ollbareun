@@ -79,13 +79,14 @@ export default function EmployeeSavePage() {
   const [isRetired, setIsRetired] = useState(false);
   const [assignments, setAssignments] = useState<EmployeeAssignment[]>([]);
   const [loading, setLoading] = useState(Boolean(employeeId));
+  const [loadError, setLoadError] = useState("");
   const [error, setError] = useState("");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [saveConfirmOpen, setSaveConfirmOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveSuccessOpen, setSaveSuccessOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const routeError = employeeId ? error : "직원 정보를 불러오지 못했습니다.";
+  const routeError = employeeId ? loadError : "직원 정보를 불러오지 못했습니다.";
 
   useEffect(() => {
     let ignore = false;
@@ -103,9 +104,9 @@ export default function EmployeeSavePage() {
           setIsRetired(data.employee.is_retired);
           setAssignments(data.assignments ?? []);
         }
-      } catch (loadError) {
+      } catch (loadFailure) {
         if (!ignore) {
-          setError(loadError instanceof Error ? loadError.message : "직원 정보를 불러오지 못했습니다.");
+          setLoadError(loadFailure instanceof Error ? loadFailure.message : "직원 정보를 불러오지 못했습니다.");
         }
       } finally {
         if (!ignore) {
@@ -154,6 +155,12 @@ export default function EmployeeSavePage() {
   }
 
   async function handleDelete() {
+    if (assignments.length > 0) {
+      setError("해당직원의 근무지배정 정보가 있습니다.");
+      setDeleteConfirmOpen(false);
+      return;
+    }
+
     setDeleting(true);
     setError("");
 
@@ -166,6 +173,15 @@ export default function EmployeeSavePage() {
       setDeleting(false);
       setDeleteConfirmOpen(false);
     }
+  }
+
+  function handleDeleteRequest() {
+    if (assignments.length > 0) {
+      setError("해당직원의 근무지배정 정보가 있습니다.");
+      return;
+    }
+
+    setDeleteConfirmOpen(true);
   }
 
   return (
@@ -184,7 +200,7 @@ export default function EmployeeSavePage() {
         {loading ? (
           <ManagerLoadingMessage />
         ) : routeError ? (
-          <p className="text-[1rem] text-destructive">{routeError}</p>
+          <p role="alert" className="text-[1rem] text-destructive">{routeError}</p>
         ) : (
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
@@ -263,7 +279,7 @@ export default function EmployeeSavePage() {
                 aria-label="삭제"
                 className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto"
                 type="button"
-                onClick={() => setDeleteConfirmOpen(true)}
+                onClick={handleDeleteRequest}
                 variant="outline"
               >
                 <DeleteIcon size={20} />
@@ -282,7 +298,7 @@ export default function EmployeeSavePage() {
           </form>
         )}
 
-        {error ? <p className="mt-6 text-[1rem] text-destructive">{error}</p> : null}
+        {error ? <p role="alert" className="mt-6 text-[1rem] text-destructive">{error}</p> : null}
       </section>
 
       {!loading && !routeError && assignments.length > 0 ? (

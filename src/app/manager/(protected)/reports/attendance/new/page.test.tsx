@@ -9,14 +9,31 @@ afterEach(() => { vi.unstubAllGlobals(); push.mockReset(); });
 
 it("selects employee and worksite, creates attendance and returns to the list", async () => {
   const fetchMock = vi.fn(async (url: string) => Response.json(url === "/api/bootstrap"
-    ? { employees: [{ id: "emp-1", name: "홍길동" }], worksites: [{ id: "site-1", name: "본사" }] }
+    ? {
+        employees: [{ id: "emp-1", name: "홍길동" }, { id: "emp-2", name: "김철수" }],
+        worksites: [{ id: "site-1", name: "본사" }, { id: "site-2", name: "서울지점" }],
+        assignments: [{ employee_id: "emp-1", worksite_id: "site-1" }],
+      }
     : { attendance: { id: "new-1" } }));
   vi.stubGlobal("fetch", fetchMock);
   const user = userEvent.setup();
   render(<AttendanceNewPage />);
-  await screen.findByLabelText("직원이름");
-  await user.selectOptions(screen.getByLabelText("직원이름"), "emp-1");
-  await user.selectOptions(screen.getByLabelText("근무지"), "site-1");
+  const employeeInput = await screen.findByLabelText("직원이름");
+  const worksiteInput = screen.getByLabelText("근무지");
+  expect(employeeInput).toHaveAttribute("list", "attendance-employee-options");
+  expect(worksiteInput).toHaveAttribute("list", "attendance-worksite-options");
+  expect(Array.from(document.querySelectorAll("#attendance-employee-options option")).map((option) => option.value)).toEqual([
+    "김철수",
+    "홍길동",
+  ]);
+  expect(Array.from(document.querySelectorAll("#attendance-worksite-options option")).map((option) => option.value)).toEqual([
+    "본사",
+    "서울지점",
+  ]);
+  await user.type(employeeInput, "홍길동");
+  expect(worksiteInput).toHaveValue("본사");
+  await user.clear(worksiteInput);
+  await user.type(worksiteInput, "본사");
   fireEvent.change(screen.getByLabelText("출근일시"), { target: { value: "2026-09-09T09:00" } });
   expect(screen.queryByLabelText("퇴근일시")).not.toBeInTheDocument();
   expect(screen.getByRole("link", { name: "취소" })).toHaveAttribute("href", "/manager/reports/attendance");
@@ -28,4 +45,23 @@ it("selects employee and worksite, creates attendance and returns to the list", 
   }));
   await user.click(await screen.findByRole("button", { name: "확인" }));
   expect(push).toHaveBeenCalledWith("/manager/reports/attendance");
+});
+
+it("shows an error when the selected employee has no assignment today", async () => {
+  const fetchMock = vi.fn(async (url: string) => Response.json(url === "/api/bootstrap"
+    ? {
+        employees: [{ id: "emp-1", name: "홍길동" }],
+        worksites: [{ id: "site-1", name: "본사" }],
+        assignments: [],
+      }
+    : {}));
+  vi.stubGlobal("fetch", fetchMock);
+  const user = userEvent.setup();
+
+  render(<AttendanceNewPage />);
+
+  await user.type(await screen.findByLabelText("직원이름"), "홍길동");
+
+  expect(await screen.findByRole("alert")).toHaveTextContent("직원(홍길동)의 오늘 배정된 근무지가 없습니다.");
+  expect(screen.getByLabelText("근무지")).toHaveValue("");
 });

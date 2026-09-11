@@ -132,6 +132,7 @@ describe("employee save page", () => {
 
   it("confirms and deletes the employee", async () => {
     const user = userEvent.setup();
+    employeeAssignments = [];
 
     render(<EmployeeSavePage />);
 
@@ -143,5 +144,18 @@ describe("employee save page", () => {
     await user.click(screen.getByRole("button", { name: "예" }));
 
     expect(push).toHaveBeenCalledWith("/manager/employee/employees");
+  });
+
+  it("blocks employee deletion when assignments exist", async () => {
+    const user = userEvent.setup();
+
+    render(<EmployeeSavePage />);
+
+    await screen.findByRole("heading", { name: "직원 상세" });
+    await user.click(screen.getByRole("button", { name: "삭제" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("해당직원의 근무지배정 정보가 있습니다.");
+    expect(screen.queryByText("현재자료를 삭제할까요?")).not.toBeInTheDocument();
+    expect(fetch).not.toHaveBeenCalledWith("/api/employees/emp-1", expect.objectContaining({ method: "DELETE" }));
   });
 });

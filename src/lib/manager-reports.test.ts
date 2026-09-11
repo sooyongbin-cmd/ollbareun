@@ -119,6 +119,7 @@ describe("manager reports", () => {
   it("builds today's expected attendance status and excludes retired employees", () => {
     const rows = buildAttendanceStatus({
       date: "2026-09-11",
+      now: new Date("2026-09-11T01:00:00.000Z"),
       employees: [
         { id: "emp-1", name: "김철수", role: "경비원", is_retired: false },
         { id: "emp-2", name: "이영희", role: "미화원", is_retired: false },
@@ -164,9 +165,27 @@ describe("manager reports", () => {
         worksiteName: "본사",
         scheduledClockIn: "07:00",
         clockInTime: null,
-        status: "미출근",
+        status: "결근",
       },
     ]);
+  });
+
+  it("shows an employee as waiting before the scheduled clock-in time", () => {
+    const rows = buildAttendanceStatus({
+      date: "2026-09-11",
+      now: new Date("2026-09-11T00:30:00.000Z"),
+      employees: [{ id: "emp-1", name: "김철수", role: "경비원", is_retired: false }],
+      assignments: [{ id: "assignment-1", employee_id: "emp-1", worksite_id: "site-1" }],
+      worksites: [{ id: "site-1", name: "본사" }],
+      dailyAttendance: [{ work_assignment_id: "assignment-1", work_date: "2026-09-11", intime: "2026-09-11T01:00:00.000Z" }],
+      attendance: [],
+    });
+
+    expect(rows[0]).toMatchObject({
+      employeeName: "김철수",
+      clockInTime: null,
+      status: "대기",
+    });
   });
 
   it("computes education completion count per active employee", () => {

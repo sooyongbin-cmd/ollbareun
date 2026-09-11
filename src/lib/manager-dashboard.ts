@@ -54,6 +54,7 @@ export type ManagerDashboardData = {
   summary: {
     scheduledEmployeesToday: number;
     currentlyClockedIn: number;
+    waitingEmployeesToday: number;
     absentEmployeesToday: number;
     lateEmployeesToday: number;
     educationUncompleted: number;
@@ -176,6 +177,7 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
   });
   const todayAttendanceByEmployeeId = new Map(todayAttendance.map((record) => [record.employee_id, record]));
   const nowTimestamp = (input.now ?? new Date()).getTime();
+  let waitingEmployeesToday = 0;
   let absentEmployeesToday = 0;
   let lateEmployeesToday = 0;
   scheduledClockInsByEmployeeId.forEach((scheduledTimestamp, employeeId) => {
@@ -183,6 +185,8 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
     if (!attendance?.clock_in_at) {
       if (nowTimestamp > scheduledTimestamp) {
         absentEmployeesToday += 1;
+      } else {
+        waitingEmployeesToday += 1;
       }
       return;
     }
@@ -258,6 +262,7 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
     summary: {
       scheduledEmployeesToday: scheduledEmployeeIdsToday.size,
       currentlyClockedIn: todayAttendance.filter((record) => !record.clock_out_at).length,
+      waitingEmployeesToday,
       absentEmployeesToday,
       lateEmployeesToday,
       educationUncompleted,

@@ -13,7 +13,7 @@ type AttendanceStatusRow = {
   worksiteName: string;
   scheduledClockIn: string;
   clockInTime: string | null;
-  status: "출근" | "지각" | "결근";
+  status: "출근" | "지각" | "대기" | "결근";
 };
 
 function todayInKorea() {

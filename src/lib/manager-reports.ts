@@ -61,7 +61,7 @@ export type AttendanceStatusRow = {
   worksiteName: string;
   scheduledClockIn: string;
   clockInTime: string | null;
-  status: "출근" | "지각" | "결근";
+  status: "출근" | "지각" | "대기" | "결근";
 };
 
 export type AttendanceRecord = {
@@ -191,6 +191,7 @@ function assertDate(date: string) {
 
 export function buildAttendanceStatus(input: {
   date: string;
+  now?: Date;
   employees: AttendanceStatusEmployeeInput[];
   assignments: AssignmentInput[];
   worksites: { id: string; name: string }[];
@@ -198,6 +199,7 @@ export function buildAttendanceStatus(input: {
   attendance: AttendanceInput[];
 }): AttendanceStatusRow[] {
   assertDate(input.date);
+  const nowTimestamp = (input.now ?? new Date()).getTime();
 
   const assignmentsById = new Map(input.assignments.map((assignment) => [assignment.id, assignment]));
   const employeesById = new Map(input.employees.map((employee) => [employee.id, employee]));
@@ -223,7 +225,7 @@ export function buildAttendanceStatus(input: {
       const scheduledTimestamp = new Date(dailyAttendance.intime as string).getTime();
       const clockInTimestamp = attendance?.clock_in_at ? new Date(attendance.clock_in_at).getTime() : Number.NaN;
       const status: AttendanceStatusRow["status"] = !Number.isFinite(clockInTimestamp)
-        ? "결근"
+        ? Number.isFinite(scheduledTimestamp) && scheduledTimestamp >= nowTimestamp ? "대기" : "결근"
         : Number.isFinite(scheduledTimestamp) && clockInTimestamp > scheduledTimestamp
           ? "지각"
           : "출근";
@@ -475,6 +477,7 @@ export async function loadAttendanceStatus(input: { date: string }) {
 
   return buildAttendanceStatus({
     date: input.date,
+    now: new Date(),
     employees: employeesResult.data ?? [],
     assignments: assignmentsResult.data ?? [],
     worksites: worksitesResult.data ?? [],

@@ -50,6 +50,7 @@ type DashboardPayload = {
   summary: {
     scheduledEmployeesToday: number;
     currentlyClockedIn: number;
+    waitingEmployeesToday: number;
     absentEmployeesToday: number;
     lateEmployeesToday: number;
     educationUncompleted: number;
@@ -77,6 +78,7 @@ const emptyDashboard: DashboardPayload = {
   summary: {
     scheduledEmployeesToday: 0,
     currentlyClockedIn: 0,
+    waitingEmployeesToday: 0,
     absentEmployeesToday: 0,
     lateEmployeesToday: 0,
     educationUncompleted: 0,
@@ -369,11 +371,12 @@ export default function ManagerPage() {
       value: `출근 ${data.summary.currentlyClockedIn}/${data.summary.scheduledEmployeesToday} 명`,
       description: (
         <div className="flex flex-wrap gap-x-3 gap-y-1">
+          <span>대기{data.summary.waitingEmployeesToday}명</span>
           <span className="text-red-600 dark:text-red-400">결근{data.summary.absentEmployeesToday}명</span>
           <span className="text-pink-600 dark:text-pink-400">지각{data.summary.lateEmployeesToday}명</span>
         </div>
       ),
-      ariaDescription: `결근${data.summary.absentEmployeesToday}명 지각${data.summary.lateEmployeesToday}명`,
+      ariaDescription: `대기${data.summary.waitingEmployeesToday}명 결근${data.summary.absentEmployeesToday}명 지각${data.summary.lateEmployeesToday}명`,
       icon: Users,
       href: "/manager/reports/attendance/status",
     },

@@ -46,6 +46,7 @@ describe("manager dashboard data", () => {
     expect(data.summary).toEqual({
       scheduledEmployeesToday: 1,
       currentlyClockedIn: 1,
+      waitingEmployeesToday: 0,
       absentEmployeesToday: 0,
       lateEmployeesToday: 0,
       educationUncompleted: 1,
@@ -67,19 +68,21 @@ describe("manager dashboard data", () => {
     });
   });
 
-  it("counts passed schedules without attendance as absent and late clock-ins separately", () => {
+  it("counts waiting, absent, and late employees separately", () => {
     const data = buildManagerDashboardData({
       now: new Date("2026-06-04T03:00:00.000Z"),
       employees: [
         { id: "emp-1", name: "김철수", is_retired: false },
         { id: "emp-2", name: "이영희", is_retired: false },
         { id: "emp-3", name: "박민수", is_retired: false },
+        { id: "emp-4", name: "최민수", is_retired: false },
       ],
       worksites: [{ id: "work-1", name: "문현동현장" }],
       assignments: [
         { id: "assign-1", employee_id: "emp-1", worksite_id: "work-1", start_date: "2026-01-01", end_date: "2026-12-31" },
         { id: "assign-2", employee_id: "emp-2", worksite_id: "work-1", start_date: "2026-01-01", end_date: "2026-12-31" },
         { id: "assign-3", employee_id: "emp-3", worksite_id: "work-1", start_date: "2026-01-01", end_date: "2026-12-31" },
+        { id: "assign-4", employee_id: "emp-4", worksite_id: "work-1", start_date: "2026-01-01", end_date: "2026-12-31" },
       ],
       attendance: [
         {
@@ -101,14 +104,16 @@ describe("manager dashboard data", () => {
         { work_assignment_id: "assign-1", work_date: "2026-06-04", intime: "2026-06-04T00:00:00.000Z" },
         { work_assignment_id: "assign-2", work_date: "2026-06-04", intime: "2026-06-04T01:00:00.000Z" },
         { work_assignment_id: "assign-3", work_date: "2026-06-04", intime: "2026-06-04T02:00:00.000Z" },
+        { work_assignment_id: "assign-4", work_date: "2026-06-04", intime: "2026-06-04T04:00:00.000Z" },
       ],
       educationResources: [],
       educationCompletions: [],
     });
 
     expect(data.summary).toMatchObject({
-      scheduledEmployeesToday: 3,
+      scheduledEmployeesToday: 4,
       currentlyClockedIn: 2,
+      waitingEmployeesToday: 1,
       absentEmployeesToday: 1,
       lateEmployeesToday: 1,
     });

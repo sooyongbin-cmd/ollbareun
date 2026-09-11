@@ -192,6 +192,17 @@ describe("manager layout", () => {
     );
 
     expect(screen.getByRole("link", { name: "직원관리" })).toHaveAttribute("href", "/manager/employee/employees");
+    const employeeLinks = screen
+      .getByRole("link", { name: "직원관리" })
+      .closest("[data-sidebar=group]")
+      ?.querySelectorAll("a");
+    expect(Array.from(employeeLinks ?? []).map((link) => link.textContent?.trim())).toEqual([
+      "직원관리",
+      "근무지관리",
+      "근무지배정",
+      "공휴일관리",
+      "근태관리",
+    ]);
     expect(screen.getByText("현장점검")).toBeInTheDocument();
     expect(screen.getByText("안전교육")).toBeInTheDocument();
     expect(screen.getByText("리포트출력")).toBeInTheDocument();
@@ -238,6 +249,12 @@ describe("manager layout", () => {
       "DB I/O",
       "시스템설정",
     ]);
+
+    const reportLinks = screen
+      .getByText("리포트출력")
+      .closest("[data-sidebar=group]")
+      ?.querySelectorAll("a");
+    expect(Array.from(reportLinks ?? []).map((link) => link.textContent?.trim())).toEqual(["교육이수자료"]);
   });
 
   it("hides passkey request navigation when the feature is disabled", () => {

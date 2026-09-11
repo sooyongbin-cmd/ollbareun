@@ -61,7 +61,8 @@ describe("guard login page", () => {
 
     expect(await screen.findByRole("button", { name: "로그인" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "경비원 인증" })).not.toBeInTheDocument();
-    expect(await screen.findByRole("heading", { name: "처리 내역 없음" })).toBeInTheDocument();
+    const resultSection = (await screen.findByText("처리 내역 없음")).closest("section");
+    expect(resultSection).toHaveAttribute("hidden");
   });
 
   it("places the passkey login section below the guard login section", async () => {
@@ -212,7 +213,7 @@ describe("guard login page", () => {
     });
   });
 
-  it("shows the last logout push cleanup result", async () => {
+  it("hides the last logout push cleanup result", async () => {
     setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1");
     setStandaloneMode(true);
     window.sessionStorage.setItem(
@@ -229,13 +230,11 @@ describe("guard login page", () => {
 
     render(<GuardPage />);
 
-    expect(await screen.findByRole("heading", { name: "마지막 로그아웃 처리 내역" })).toBeInTheDocument();
-    expect(await screen.findByText("브라우저 Push 구독 해제 완료")).toBeInTheDocument();
-    expect(await screen.findByText("Supabase 구독정보 삭제 완료")).toBeInTheDocument();
-    expect(await screen.findByText("로그인 세션 삭제 완료")).toBeInTheDocument();
+    const resultSection = (await screen.findByText("마지막 로그아웃 처리 내역")).closest("section");
+    expect(resultSection).toHaveAttribute("hidden");
   });
 
-  it("shows when there was no server push subscription to delete", async () => {
+  it("keeps the hidden push cleanup result section when there was no server subscription", async () => {
     setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1");
     setStandaloneMode(true);
     window.sessionStorage.setItem(
@@ -252,7 +251,8 @@ describe("guard login page", () => {
 
     render(<GuardPage />);
 
-    expect(await screen.findByText("삭제할 Supabase 구독정보 없음")).toBeInTheDocument();
+    const resultSection = (await screen.findByText("삭제할 Supabase 구독정보 없음")).closest("section");
+    expect(resultSection).toHaveAttribute("hidden");
   });
 
   it("shows an inline default browser guide in in-app browsers", async () => {

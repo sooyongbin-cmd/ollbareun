@@ -260,6 +260,45 @@ function DashboardTrendChart({ data }: { data: DashboardPayload["dailyRates"] })
   );
 }
 
+type SummaryCard = {
+  label: string;
+  value: string;
+  description: string;
+  icon: typeof Users;
+  href?: string;
+};
+
+function DashboardSummaryCard({ card }: { card: SummaryCard }) {
+  const content = (
+    <Card className="gap-4 bg-gradient-to-t from-primary/[0.035] to-card transition-shadow group-hover:shadow-md">
+      <CardHeader>
+        <CardDescription>{card.label}</CardDescription>
+        <CardTitle className="text-2xl tabular-nums md:text-3xl">{card.value}</CardTitle>
+        <CardAction>
+          <span className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <card.icon aria-hidden="true" className="size-4" />
+          </span>
+        </CardAction>
+      </CardHeader>
+      <CardContent className="text-xs text-muted-foreground">{card.description}</CardContent>
+    </Card>
+  );
+
+  if (card.href) {
+    return (
+      <Link
+        aria-label={`${card.label} ${card.value} ${card.description}`}
+        className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        href={card.href}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return content;
+}
+
 export default function ManagerPage() {
   const [data, setData] = useState<DashboardPayload>(emptyDashboard);
   const [loading, setLoading] = useState(true);
@@ -318,12 +357,16 @@ export default function ManagerPage() {
   }
 
   const todayAttendanceRate = data.dailyRates.at(-1)?.attendanceRate ?? 0;
-  const summaryCards = [
+  const attendanceRate = data.summary.totalEmployees > 0
+    ? Math.round((data.summary.currentlyClockedIn / data.summary.totalEmployees) * 100)
+    : 0;
+  const summaryCards: SummaryCard[] = [
     {
-      label: "전체 직원",
-      value: `${data.summary.totalEmployees}명`,
-      description: "현재 재직 중인 직원",
+      label: "출근현황",
+      value: `${data.summary.currentlyClockedIn}/${data.summary.totalEmployees} 명`,
+      description: `출근율 ${attendanceRate}%`,
       icon: Users,
+      href: "/manager/reports/attendance",
     },
     {
       label: "현재 출근",
@@ -356,18 +399,7 @@ export default function ManagerPage() {
 
       <section aria-label="운영 요약" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {summaryCards.map((card) => (
-          <Card key={card.label} className="gap-4 bg-gradient-to-t from-primary/[0.035] to-card">
-            <CardHeader>
-              <CardDescription>{card.label}</CardDescription>
-              <CardTitle className="text-2xl tabular-nums md:text-3xl">{card.value}</CardTitle>
-              <CardAction>
-                <span className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <card.icon aria-hidden="true" className="size-4" />
-                </span>
-              </CardAction>
-            </CardHeader>
-            <CardContent className="text-xs text-muted-foreground">{card.description}</CardContent>
-          </Card>
+          <DashboardSummaryCard key={card.label} card={card} />
         ))}
       </section>
 

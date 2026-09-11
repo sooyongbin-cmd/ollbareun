@@ -49,6 +49,7 @@ export const managerNavigationGroups: ManagerNavigationGroup[] = [
       { label: "근무지관리", href: "/manager/employee/worksites", icon: Building2 },
       { label: "근무지배정", href: "/manager/employee/assignments", icon: UserRoundCheck },
       { label: "공휴일관리", href: "/manager/employee/holidays", icon: CalendarDays },
+      { label: "근태관리", href: "/manager/reports/attendance", icon: FileClock },
     ],
   },
   {
@@ -73,7 +74,6 @@ export const managerNavigationGroups: ManagerNavigationGroup[] = [
     label: "리포트출력",
     icon: FileClock,
     items: [
-      { label: "근태관리", href: "/manager/reports/attendance", icon: FileClock },
       { label: "교육이수자료", href: "/manager/reports/education", icon: FileCheck2 },
     ],
   },

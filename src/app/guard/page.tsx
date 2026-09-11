@@ -381,7 +381,7 @@ export default function GuardPage() {
               </section>
             ) : null}
 
-            <section className="w-full rounded-xl border border-border/50 bg-muted/40 p-6">
+            <section hidden className="w-full rounded-xl border border-border/50 bg-muted/40 p-6">
               <div className="space-y-2">
                 <p className="text-[0.8125rem] font-semibold text-primary">로그아웃 Push 처리 결과</p>
                 <h2 className="text-[1.3125rem] font-semibold">

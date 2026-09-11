@@ -46,6 +46,8 @@ describe("manager dashboard data", () => {
     expect(data.summary).toEqual({
       scheduledEmployeesToday: 1,
       currentlyClockedIn: 1,
+      absentEmployeesToday: 0,
+      lateEmployeesToday: 0,
       educationUncompleted: 1,
     });
     expect(data.liveAttendance).toHaveLength(2);
@@ -62,6 +64,53 @@ describe("manager dashboard data", () => {
       clockInAt: "2026-06-04T01:00:00.000Z",
       educationStatus: "미이수",
       attendanceStatus: "퇴근",
+    });
+  });
+
+  it("counts passed schedules without attendance as absent and late clock-ins separately", () => {
+    const data = buildManagerDashboardData({
+      now: new Date("2026-06-04T03:00:00.000Z"),
+      employees: [
+        { id: "emp-1", name: "김철수", is_retired: false },
+        { id: "emp-2", name: "이영희", is_retired: false },
+        { id: "emp-3", name: "박민수", is_retired: false },
+      ],
+      worksites: [{ id: "work-1", name: "문현동현장" }],
+      assignments: [
+        { id: "assign-1", employee_id: "emp-1", worksite_id: "work-1", start_date: "2026-01-01", end_date: "2026-12-31" },
+        { id: "assign-2", employee_id: "emp-2", worksite_id: "work-1", start_date: "2026-01-01", end_date: "2026-12-31" },
+        { id: "assign-3", employee_id: "emp-3", worksite_id: "work-1", start_date: "2026-01-01", end_date: "2026-12-31" },
+      ],
+      attendance: [
+        {
+          employee_id: "emp-1",
+          worksite_id: "work-1",
+          work_date: "2026-06-04",
+          clock_in_at: "2026-06-04T00:00:00.000Z",
+          clock_out_at: null,
+        },
+        {
+          employee_id: "emp-2",
+          worksite_id: "work-1",
+          work_date: "2026-06-04",
+          clock_in_at: "2026-06-04T01:05:00.000Z",
+          clock_out_at: null,
+        },
+      ],
+      dailyAttendance: [
+        { work_assignment_id: "assign-1", work_date: "2026-06-04", intime: "2026-06-04T00:00:00.000Z" },
+        { work_assignment_id: "assign-2", work_date: "2026-06-04", intime: "2026-06-04T01:00:00.000Z" },
+        { work_assignment_id: "assign-3", work_date: "2026-06-04", intime: "2026-06-04T02:00:00.000Z" },
+      ],
+      educationResources: [],
+      educationCompletions: [],
+    });
+
+    expect(data.summary).toMatchObject({
+      scheduledEmployeesToday: 3,
+      currentlyClockedIn: 2,
+      absentEmployeesToday: 1,
+      lateEmployeesToday: 1,
     });
   });
 

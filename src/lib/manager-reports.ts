@@ -61,7 +61,7 @@ export type AttendanceStatusRow = {
   worksiteName: string;
   scheduledClockIn: string;
   clockInTime: string | null;
-  status: "출근" | "지각" | "미출근";
+  status: "출근" | "지각" | "결근";
 };
 
 export type AttendanceRecord = {
@@ -223,7 +223,7 @@ export function buildAttendanceStatus(input: {
       const scheduledTimestamp = new Date(dailyAttendance.intime as string).getTime();
       const clockInTimestamp = attendance?.clock_in_at ? new Date(attendance.clock_in_at).getTime() : Number.NaN;
       const status: AttendanceStatusRow["status"] = !Number.isFinite(clockInTimestamp)
-        ? "미출근"
+        ? "결근"
         : Number.isFinite(scheduledTimestamp) && clockInTimestamp > scheduledTimestamp
           ? "지각"
           : "출근";

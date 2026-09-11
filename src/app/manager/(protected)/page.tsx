@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
@@ -49,6 +50,8 @@ type DashboardPayload = {
   summary: {
     scheduledEmployeesToday: number;
     currentlyClockedIn: number;
+    absentEmployeesToday: number;
+    lateEmployeesToday: number;
     educationUncompleted: number;
   };
   dailyRates: {
@@ -74,6 +77,8 @@ const emptyDashboard: DashboardPayload = {
   summary: {
     scheduledEmployeesToday: 0,
     currentlyClockedIn: 0,
+    absentEmployeesToday: 0,
+    lateEmployeesToday: 0,
     educationUncompleted: 0,
   },
   dailyRates: [],
@@ -263,7 +268,8 @@ function DashboardTrendChart({ data }: { data: DashboardPayload["dailyRates"] })
 type SummaryCard = {
   label: string;
   value: string;
-  description: string;
+  description: ReactNode;
+  ariaDescription?: string;
   icon: typeof Users;
   href?: string;
 };
@@ -287,7 +293,7 @@ function DashboardSummaryCard({ card }: { card: SummaryCard }) {
   if (card.href) {
     return (
       <Link
-        aria-label={`${card.label} ${card.value} ${card.description}`}
+        aria-label={`${card.label} ${card.value} ${card.ariaDescription ?? card.description}`}
         className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         href={card.href}
       >
@@ -357,14 +363,17 @@ export default function ManagerPage() {
   }
 
   const todayAttendanceRate = data.dailyRates.at(-1)?.attendanceRate ?? 0;
-  const attendanceRate = data.summary.scheduledEmployeesToday > 0
-    ? Math.round((data.summary.currentlyClockedIn / data.summary.scheduledEmployeesToday) * 100)
-    : 0;
   const summaryCards: SummaryCard[] = [
     {
       label: "출근현황",
-      value: `${data.summary.currentlyClockedIn}/${data.summary.scheduledEmployeesToday} 명`,
-      description: `출근율 ${attendanceRate}%`,
+      value: `출근 ${data.summary.currentlyClockedIn}/${data.summary.scheduledEmployeesToday} 명`,
+      description: (
+        <div className="flex flex-wrap gap-x-3 gap-y-1">
+          <span className="text-red-600 dark:text-red-400">결근{data.summary.absentEmployeesToday}명</span>
+          <span className="text-pink-600 dark:text-pink-400">지각{data.summary.lateEmployeesToday}명</span>
+        </div>
+      ),
+      ariaDescription: `결근${data.summary.absentEmployeesToday}명 지각${data.summary.lateEmployeesToday}명`,
       icon: Users,
       href: "/manager/reports/attendance/status",
     },

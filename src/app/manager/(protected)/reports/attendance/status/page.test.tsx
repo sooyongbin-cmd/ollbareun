@@ -21,7 +21,7 @@ const statusPayload = {
       worksiteName: "센텀현장",
       scheduledClockIn: "07:00",
       clockInTime: null,
-      status: "미출근",
+      status: "결근",
     },
   ],
 };
@@ -45,7 +45,7 @@ describe("attendance status page", () => {
     expect(within(list).getByText("김철수")).toBeInTheDocument();
     expect(within(list).getByText("06:05")).toBeInTheDocument();
     expect(within(list).getByText("지각")).toBeInTheDocument();
-    expect(within(list).getByText("미출근")).toBeInTheDocument();
+    expect(within(list).getByText("결근")).toBeInTheDocument();
 
     const dateInput = within(search).getByLabelText("날짜");
     fireEvent.change(dateInput, { target: { value: "2026-09-10" } });

@@ -54,6 +54,8 @@ export type ManagerDashboardData = {
   summary: {
     scheduledEmployeesToday: number;
     currentlyClockedIn: number;
+    absentEmployeesToday: number;
+    lateEmployeesToday: number;
     educationUncompleted: number;
   };
   dailyRates: {
@@ -153,6 +155,7 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
     }
   });
   const scheduledEmployeeIdsToday = new Set<string>();
+  const scheduledClockInsByEmployeeId = new Map<string, number>();
   input.dailyAttendance.forEach((dailyAttendance) => {
     if (dailyAttendance.work_date !== today || !dailyAttendance.intime) {
       return;
@@ -161,6 +164,31 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
     const assignment = assignmentsById.get(dailyAttendance.work_assignment_id);
     if (assignment && activeEmployeeIds.has(assignment.employee_id)) {
       scheduledEmployeeIdsToday.add(assignment.employee_id);
+      const scheduledTimestamp = new Date(dailyAttendance.intime).getTime();
+      if (
+        Number.isFinite(scheduledTimestamp)
+        && (!scheduledClockInsByEmployeeId.has(assignment.employee_id)
+          || scheduledTimestamp < scheduledClockInsByEmployeeId.get(assignment.employee_id)!)
+      ) {
+        scheduledClockInsByEmployeeId.set(assignment.employee_id, scheduledTimestamp);
+      }
+    }
+  });
+  const todayAttendanceByEmployeeId = new Map(todayAttendance.map((record) => [record.employee_id, record]));
+  const nowTimestamp = (input.now ?? new Date()).getTime();
+  let absentEmployeesToday = 0;
+  let lateEmployeesToday = 0;
+  scheduledClockInsByEmployeeId.forEach((scheduledTimestamp, employeeId) => {
+    const attendance = todayAttendanceByEmployeeId.get(employeeId);
+    if (!attendance?.clock_in_at) {
+      if (nowTimestamp > scheduledTimestamp) {
+        absentEmployeesToday += 1;
+      }
+      return;
+    }
+
+    if (new Date(attendance.clock_in_at).getTime() > scheduledTimestamp) {
+      lateEmployeesToday += 1;
     }
   });
   const currentAssignmentCounts = input.assignments
@@ -230,6 +258,8 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
     summary: {
       scheduledEmployeesToday: scheduledEmployeeIdsToday.size,
       currentlyClockedIn: todayAttendance.filter((record) => !record.clock_out_at).length,
+      absentEmployeesToday,
+      lateEmployeesToday,
       educationUncompleted,
     },
     dailyRates,

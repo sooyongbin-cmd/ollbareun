@@ -6,6 +6,8 @@ const dashboardPayload = {
   summary: {
     scheduledEmployeesToday: 5,
     currentlyClockedIn: 3,
+    absentEmployeesToday: 2,
+    lateEmployeesToday: 1,
     educationUncompleted: 3,
   },
   dailyRates: [
@@ -47,11 +49,12 @@ describe("manager dashboard page", () => {
     expect(await screen.findByRole("heading", { name: "대시보드" })).toBeInTheDocument();
 
     const summary = screen.getByRole("region", { name: "운영 요약" });
-    const attendanceCard = within(summary).getByRole("link", { name: "출근현황 3/5 명 출근율 60%" });
+    const attendanceCard = within(summary).getByRole("link", { name: "출근현황 출근 3/5 명 결근2명 지각1명" });
     expect(attendanceCard).toHaveAttribute("href", "/manager/reports/attendance/status");
     expect(within(attendanceCard).getByText("출근현황")).toBeInTheDocument();
-    expect(within(attendanceCard).getByText("3/5 명")).toBeInTheDocument();
-    expect(within(attendanceCard).getByText("출근율 60%")).toBeInTheDocument();
+    expect(within(attendanceCard).getByText("출근 3/5 명")).toBeInTheDocument();
+    expect(within(attendanceCard).getByText("결근2명")).toHaveClass("text-red-600");
+    expect(within(attendanceCard).getByText("지각1명")).toHaveClass("text-pink-600");
     expect(within(summary).getByText("현재 출근")).toBeInTheDocument();
     expect(within(summary).getAllByText("3명")).toHaveLength(2);
     expect(within(summary).getByText("교육 미이수")).toBeInTheDocument();

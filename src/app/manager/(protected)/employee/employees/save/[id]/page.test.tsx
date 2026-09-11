@@ -87,6 +87,14 @@ describe("employee save page", () => {
     expect(await screen.findByRole("heading", { name: "직원 상세" })).toBeInTheDocument();
     expect(await screen.findByDisplayValue("Alice")).toBeInTheDocument();
     expect(screen.getByDisplayValue("010-1234-5678")).toBeInTheDocument();
+    expect(screen.getByLabelText("직원이름").closest("div.grid")).toHaveClass("sm:grid-cols-2");
+    expect(screen.getByLabelText("연락처").closest("div.grid")).toBe(
+      screen.getByLabelText("직원이름").closest("div.grid"),
+    );
+    expect(screen.getByLabelText("직군").closest("div.grid")).toHaveClass("sm:grid-cols-2");
+    expect(screen.getByLabelText("근무형태").closest("div.grid")).toBe(
+      screen.getByLabelText("직군").closest("div.grid"),
+    );
     expect(screen.getByRole("checkbox", { name: "퇴직" })).not.toBeChecked();
     const assignmentSection = await screen.findByRole("region", { name: "근무지배정 정보" });
     expect(within(assignmentSection).getByText("본사")).toBeInTheDocument();

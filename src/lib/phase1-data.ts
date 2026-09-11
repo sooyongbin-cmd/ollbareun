@@ -182,9 +182,9 @@ export async function createEmployee(input: { name: unknown; phone: unknown; rol
   const name = requireString(input.name, "직원이름");
   const phone = requireString(input.phone, "연락처");
   const phone_normalized = normalizePhone(phone);
-  const role = input.role ? requireString(input.role, "역할") : "경비원";
+  const role = input.role ? requireString(input.role, "직군") : "경비원";
   if (!["경비원", "미화원", "파견"].includes(role)) {
-    throw new Error("올바르지 않은 역할입니다.");
+    throw new Error("올바르지 않은 직군입니다.");
   }
 
   const schedule = validateEmployeeSchedule(input);
@@ -249,9 +249,9 @@ export async function updateEmployee(input: {
   const phone_normalized = normalizePhone(phone);
   const is_retired =
     input.is_retired === true || input.is_retired === "true" || input.is_retired === 1;
-  const role = input.role ? requireString(input.role, "역할") : "경비원";
+  const role = input.role ? requireString(input.role, "직군") : "경비원";
   if (!["경비원", "미화원", "파견"].includes(role)) {
-    throw new Error("올바르지 않은 역할입니다.");
+    throw new Error("올바르지 않은 직군입니다.");
   }
 
   const schedule = validateEmployeeSchedule(input);

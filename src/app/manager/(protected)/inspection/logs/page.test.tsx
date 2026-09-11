@@ -41,7 +41,7 @@ describe("inspection logs page", () => {
     expect(screen.getByRole("columnheader", { name: "근무지" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "현장명" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "점검자" })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "역할" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "직군" })).toBeInTheDocument();
 
     await user.selectOptions(screen.getByLabelText("근무지"), "work-1");
     await waitFor(() => {

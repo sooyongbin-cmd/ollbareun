@@ -22,7 +22,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     const role = body.role;
 
     if (role !== "admin" && role !== "super_admin") {
-      return NextResponse.json({ error: "올바르지 않은 역할입니다." }, { status: 400 });
+      return NextResponse.json({ error: "올바르지 않은 직군입니다." }, { status: 400 });
     }
 
     const updated = await updateAdminUserRole(id, role);

@@ -39,7 +39,7 @@ export async function registerAdminUser(
     throw new Error("관리자 이메일을 입력해주세요.");
   }
   if (roleInput !== "admin" && roleInput !== "super_admin") {
-    const err = new Error("올바르지 않은 역할입니다.") as Error & { status?: number };
+    const err = new Error("올바르지 않은 직군입니다.") as Error & { status?: number };
     err.status = 400;
     throw err;
   }

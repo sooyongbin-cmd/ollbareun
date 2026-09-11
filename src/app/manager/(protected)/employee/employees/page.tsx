@@ -208,7 +208,7 @@ export default function EmployeeRosterPage() {
             </div>
             <div className="flex-1 space-y-2">
               <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="employee-roster-role-search">
-                역할
+                직군
               </label>
               <NativeSelect
                 className="w-full appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"
@@ -216,7 +216,7 @@ export default function EmployeeRosterPage() {
                 value={roleQuery}
                 onChange={(event) => setRoleQuery(event.target.value)}
               >
-                <NativeSelectOption value="">전체 역할</NativeSelectOption>
+                <NativeSelectOption value="">전체 직군</NativeSelectOption>
                 <NativeSelectOption value="경비원">경비원</NativeSelectOption>
                 <NativeSelectOption value="미화원">미화원</NativeSelectOption>
                 <NativeSelectOption value="파견">파견</NativeSelectOption>
@@ -289,7 +289,7 @@ export default function EmployeeRosterPage() {
                     onSort={handleSort}
                     className="text-left"
                   >
-                    역할
+                    직군
                   </SortableHeader>
                   <TableHead>근무형태</TableHead>
                   <SortableHeader
@@ -331,7 +331,7 @@ export default function EmployeeRosterPage() {
                         </Link>
                       </TableCell>
                       <TableCell data-label="연락처" className="text-muted-foreground">{employee.phone}</TableCell>
-                      <TableCell data-label="역할" className="text-muted-foreground">{employee.role}</TableCell>
+                      <TableCell data-label="직군" className="text-muted-foreground">{employee.role}</TableCell>
                       <TableCell data-label="근무형태" className="whitespace-nowrap">{employee.work_style === "0" ? "일반근무" : employee.work_style === "2" ? "야간근무" : "24시간근무"}</TableCell>
                       <TableCell data-label="근무지" className="text-muted-foreground">
                         {worksiteById.get(worksiteByEmployeeId.get(employee.id) ?? "") ?? "-"}

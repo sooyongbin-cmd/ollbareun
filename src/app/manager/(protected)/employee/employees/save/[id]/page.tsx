@@ -204,53 +204,57 @@ export default function EmployeeSavePage() {
         ) : (
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="employee-name">
-                  직원이름
-                </label>
-                <Input
-                  className="w-full"
-                  id="employee-name"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  required
-                />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="employee-name">
+                    직원이름
+                  </label>
+                  <Input
+                    className="w-full"
+                    id="employee-name"
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="employee-phone">
+                    연락처
+                  </label>
+                  <Input
+                    className="w-full"
+                    id="employee-phone"
+                    value={phone}
+                    onChange={(event) => setPhone(event.target.value)}
+                    required
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="employee-phone">
-                  연락처
-                </label>
-                <Input
-                  className="w-full"
-                  id="employee-phone"
-                  value={phone}
-                  onChange={(event) => setPhone(event.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="employee-role">
-                  역할
-                </label>
-                <NativeSelect
-                  className="w-full appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"
-                  id="employee-role"
-                  value={role}
-                  onChange={(event) => setRole(event.target.value as "경비원" | "미화원" | "파견")}
-                  required
-                >
-                  <NativeSelectOption value="경비원">경비원</NativeSelectOption>
-                  <NativeSelectOption value="미화원">미화원</NativeSelectOption>
-                  <NativeSelectOption value="파견">파견</NativeSelectOption>
-                </NativeSelect>
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="employee-work-style" className="text-sm font-semibold text-muted-foreground">근무형태</label>
-                <NativeSelect id="employee-work-style" value={workStyle} onChange={(event) => { setWorkStyle(event.target.value); setInTime(event.target.value === "0" ? "08:00" : event.target.value === "2" ? "22:00" : "06:00"); setOutTime(event.target.value === "0" ? "18:00" : "06:00"); }} required>
-                  <NativeSelectOption value="0">일반근무</NativeSelectOption>
-                <NativeSelectOption value="1">24시간근무</NativeSelectOption>
-                  <NativeSelectOption value="2">야간근무</NativeSelectOption>
-                </NativeSelect>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="employee-role">
+                    직군
+                  </label>
+                  <NativeSelect
+                    className="w-full appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"
+                    id="employee-role"
+                    value={role}
+                    onChange={(event) => setRole(event.target.value as "경비원" | "미화원" | "파견")}
+                    required
+                  >
+                    <NativeSelectOption value="경비원">경비원</NativeSelectOption>
+                    <NativeSelectOption value="미화원">미화원</NativeSelectOption>
+                    <NativeSelectOption value="파견">파견</NativeSelectOption>
+                  </NativeSelect>
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="employee-work-style" className="text-sm font-semibold text-muted-foreground">근무형태</label>
+                  <NativeSelect id="employee-work-style" value={workStyle} onChange={(event) => { setWorkStyle(event.target.value); setInTime(event.target.value === "0" ? "08:00" : event.target.value === "2" ? "22:00" : "06:00"); setOutTime(event.target.value === "0" ? "18:00" : "06:00"); }} required>
+                    <NativeSelectOption value="0">일반근무</NativeSelectOption>
+                    <NativeSelectOption value="1">24시간근무</NativeSelectOption>
+                    <NativeSelectOption value="2">야간근무</NativeSelectOption>
+                  </NativeSelect>
+                </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">

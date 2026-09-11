@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "이메일을 입력해주세요." }, { status: 400 });
     }
     if (role !== "admin" && role !== "super_admin") {
-      return NextResponse.json({ error: "올바르지 않은 역할입니다." }, { status: 400 });
+      return NextResponse.json({ error: "올바르지 않은 직군입니다." }, { status: 400 });
     }
 
     const admin = await registerAdminUser(email, role, authInfo.user.id);

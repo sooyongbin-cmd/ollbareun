@@ -57,7 +57,7 @@ export default function EmployeeNewPage() {
         out_time: outTime,
       });
 
-      setSuccessMessage(`직원이름(${result.employee.name}) 연락처(${result.employee.phone}) 역할(${result.employee.role}) 등록완료`);
+      setSuccessMessage(`직원이름(${result.employee.name}) 연락처(${result.employee.phone}) 직군(${result.employee.role}) 등록완료`);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "요청을 처리하지 못했습니다.");
     }
@@ -89,7 +89,7 @@ export default function EmployeeNewPage() {
             </div>
             <div className="space-y-2">
               <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="employee-role">
-                역할
+                직군
               </label>
               <NativeSelect
                 className="w-full appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"

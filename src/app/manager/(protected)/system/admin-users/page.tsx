@@ -127,13 +127,13 @@ export default function AdminUsersPage() {
       const payload = await response.json();
 
       if (!response.ok) {
-        throw new Error(payload.error ?? "역할 변경에 실패했습니다.");
+        throw new Error(payload.error ?? "직군 변경에 실패했습니다.");
       }
 
-      setSuccessMessage("관리자 역할이 변경되었습니다.");
+      setSuccessMessage("관리자 직군이 변경되었습니다.");
       await loadAdmins();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "역할 변경을 처리하지 못했습니다.");
+      setError(err instanceof Error ? err.message : "직군 변경을 처리하지 못했습니다.");
     } finally {
       setActionLoadingId("");
     }
@@ -204,7 +204,7 @@ export default function AdminUsersPage() {
             </div>
             <div className="w-full sm:w-[11.25rem] space-y-2">
               <label htmlFor="new-admin-role" className="text-[0.875rem] font-semibold text-muted-foreground">
-                역할 설정
+                직군 설정
               </label>
               <NativeSelect
                 id="new-admin-role"
@@ -242,7 +242,7 @@ export default function AdminUsersPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-left">이메일</TableHead>
-                  <TableHead className="text-left">역할</TableHead>
+                  <TableHead className="text-left">직군</TableHead>
                   <TableHead className="text-left">활성화 여부</TableHead>
                   <TableHead className="text-left">최초 로그인 시각</TableHead>
                   <TableHead className="text-left">등록일</TableHead>
@@ -260,7 +260,7 @@ export default function AdminUsersPage() {
                   admins.map((admin) => (
                     <TableRow key={admin.id}>
                       <TableCell data-label="이메일" className="font-semibold">{admin.email}</TableCell>
-                      <TableCell data-label="역할">
+                      <TableCell data-label="직군">
                         {isSuperAdmin ? (
                           <NativeSelect
                             value={admin.role}

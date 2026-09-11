@@ -309,6 +309,6 @@ export async function listInspectionLogs(input: { worksiteId?: unknown } = {}) {
   const rolesByEmployeeId = new Map((employees ?? []).map((employee) => [employee.id, employee.role]));
   return logs.map((log) => ({
     ...log,
-    employee_role: log.employee_id ? rolesByEmployeeId.get(log.employee_id) ?? "역할 없음" : "역할 없음",
+    employee_role: log.employee_id ? rolesByEmployeeId.get(log.employee_id) ?? "직군 없음" : "직군 없음",
   }));
 }

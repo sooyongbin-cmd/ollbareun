@@ -162,7 +162,7 @@ export default function InspectionLogsPage() {
                   <TableHead className="text-left">근무지</TableHead>
                   <TableHead className="text-left">현장명</TableHead>
                   <TableHead className="text-left">점검자</TableHead>
-                  <TableHead className="text-left">역할</TableHead>
+                  <TableHead className="text-left">직군</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -179,7 +179,7 @@ export default function InspectionLogsPage() {
                       <TableCell data-label="근무지">{log.worksite_name}</TableCell>
                       <TableCell data-label="현장명" className="font-semibold">{log.site_name}</TableCell>
                       <TableCell data-label="점검자">{log.employee_name}</TableCell>
-                      <TableCell data-label="역할">{log.employee_role ?? "역할 없음"}</TableCell>
+                      <TableCell data-label="직군">{log.employee_role ?? "직군 없음"}</TableCell>
                     </TableRow>
                   ))
                 )}

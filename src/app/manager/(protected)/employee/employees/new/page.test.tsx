@@ -22,7 +22,7 @@ describe("employee new page", () => {
     expect(screen.getByLabelText("직원이름")).toBeInTheDocument();
     expect(screen.getByLabelText("연락처")).toBeInTheDocument();
     
-    const roleSelect = screen.getByLabelText("역할") as HTMLSelectElement;
+    const roleSelect = screen.getByLabelText("직군") as HTMLSelectElement;
     expect(roleSelect).toBeInTheDocument();
     expect(roleSelect.value).toBe("경비원"); // default value
 
@@ -58,10 +58,10 @@ describe("employee new page", () => {
 
     await user.type(screen.getByLabelText("직원이름"), "홍길동");
     await user.type(screen.getByLabelText("연락처"), "010-1234-5678");
-    await user.selectOptions(screen.getByLabelText("역할"), "미화원");
+    await user.selectOptions(screen.getByLabelText("직군"), "미화원");
     await user.click(screen.getByRole("button", { name: "저장" }));
 
-    expect(await screen.findByText("직원이름(홍길동) 연락처(010-1234-5678) 역할(미화원) 등록완료")).toBeInTheDocument();
+    expect(await screen.findByText("직원이름(홍길동) 연락처(010-1234-5678) 직군(미화원) 등록완료")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "확인" }));
     expect(push).toHaveBeenCalledWith("/manager/employee/employees");

@@ -29,6 +29,10 @@ type DailyAttendanceInput = {
   intime: string | null;
 };
 
+type AttendanceStatusEmployeeInput = EmployeeInput & {
+  role?: string | null;
+};
+
 type ResourceInput = {
   id: string;
 };
@@ -48,6 +52,16 @@ export type AttendanceReportRow = {
   clockOutDateTime: string | null;
   workDuration: string;
   isLate: boolean;
+};
+
+export type AttendanceStatusRow = {
+  id: string;
+  employeeName: string;
+  role: string;
+  worksiteName: string;
+  scheduledClockIn: string;
+  clockInTime: string | null;
+  status: "출근" | "지각" | "미출근";
 };
 
 export type AttendanceRecord = {
@@ -156,6 +170,78 @@ export function buildAttendanceReport(input: {
         isLate: Number.isFinite(clockInTimestamp) && Number.isFinite(scheduledClockInTimestamp)
           && clockInTimestamp > scheduledClockInTimestamp,
       };
+    });
+}
+
+function assertDate(date: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    throw new Error("날짜를 올바르게 입력하세요.");
+  }
+
+  const parsed = new Date(`${date}T00:00:00+09:00`);
+  if (Number.isNaN(parsed.getTime())) {
+    throw new Error("날짜를 올바르게 입력하세요.");
+  }
+
+  const normalized = toKstDateTime(parsed.toISOString())?.date;
+  if (normalized !== date) {
+    throw new Error("날짜를 올바르게 입력하세요.");
+  }
+}
+
+export function buildAttendanceStatus(input: {
+  date: string;
+  employees: AttendanceStatusEmployeeInput[];
+  assignments: AssignmentInput[];
+  worksites: { id: string; name: string }[];
+  dailyAttendance: DailyAttendanceInput[];
+  attendance: AttendanceInput[];
+}): AttendanceStatusRow[] {
+  assertDate(input.date);
+
+  const assignmentsById = new Map(input.assignments.map((assignment) => [assignment.id, assignment]));
+  const employeesById = new Map(input.employees.map((employee) => [employee.id, employee]));
+  const worksitesById = new Map(input.worksites.map((worksite) => [worksite.id, worksite.name]));
+  const attendanceByEmployeeAndWorksite = new Map(
+    input.attendance.map((record) => [`${record.employee_id}:${record.worksite_id ?? ""}`, record]),
+  );
+  const attendanceByEmployee = new Map(input.attendance.map((record) => [record.employee_id, record]));
+
+  return input.dailyAttendance
+    .filter((dailyAttendance) => dailyAttendance.work_date === input.date && dailyAttendance.intime)
+    .flatMap((dailyAttendance) => {
+      const assignment = assignmentsById.get(dailyAttendance.work_assignment_id);
+      const employee = assignment ? employeesById.get(assignment.employee_id) : undefined;
+      if (!assignment || !employee || employee.is_retired) {
+        return [];
+      }
+
+      const attendance =
+        attendanceByEmployeeAndWorksite.get(`${assignment.employee_id}:${assignment.worksite_id}`)
+        ?? attendanceByEmployee.get(assignment.employee_id);
+      const clockIn = attendance?.clock_in_at ? toKstDateTime(attendance.clock_in_at) : null;
+      const scheduledTimestamp = new Date(dailyAttendance.intime as string).getTime();
+      const clockInTimestamp = attendance?.clock_in_at ? new Date(attendance.clock_in_at).getTime() : Number.NaN;
+      const status: AttendanceStatusRow["status"] = !Number.isFinite(clockInTimestamp)
+        ? "미출근"
+        : Number.isFinite(scheduledTimestamp) && clockInTimestamp > scheduledTimestamp
+          ? "지각"
+          : "출근";
+
+      return [{
+        id: dailyAttendance.work_assignment_id,
+        employeeName: employee.name,
+        role: employee.role ?? "-",
+        worksiteName: worksitesById.get(assignment.worksite_id) ?? "-",
+        scheduledClockIn: toKstDateTime(dailyAttendance.intime)?.time ?? "-",
+        clockInTime: clockIn?.time ?? null,
+        status,
+      }];
+    })
+    .sort((left, right) => {
+      const leftScheduled = left.scheduledClockIn === "-" ? "99:99" : left.scheduledClockIn;
+      const rightScheduled = right.scheduledClockIn === "-" ? "99:99" : right.scheduledClockIn;
+      return leftScheduled.localeCompare(rightScheduled) || left.employeeName.localeCompare(right.employeeName, "ko-KR");
     });
 }
 
@@ -359,6 +445,41 @@ export async function loadAttendanceReport(input: { employeeName: string; year: 
     worksites: worksitesResult.data ?? [],
     assignments: assignmentsResult.data ?? [],
     dailyAttendance: dailyAttendanceResult.data ?? [],
+  });
+}
+
+export async function loadAttendanceStatus(input: { date: string }) {
+  assertDate(input.date);
+  const supabase = getSupabase();
+  const supabaseAdmin = getSupabaseAdmin();
+  const [dailyAttendanceResult, assignmentsResult, employeesResult, worksitesResult, attendanceResult] = await Promise.all([
+    supabaseAdmin
+      .from("work_assignment_daily_attendance")
+      .select("work_assignment_id,work_date,intime")
+      .eq("work_date", input.date)
+      .not("intime", "is", null),
+    supabaseAdmin.from("work_assignments").select("id,employee_id,worksite_id"),
+    supabase.from("employees").select("id,name,role,is_retired"),
+    supabase.from("worksites").select("id,name"),
+    supabase
+      .from("attendance_records")
+      .select("id,employee_id,worksite_id,work_date,clock_in_at,clock_out_at")
+      .eq("work_date", input.date),
+  ]);
+
+  throwIfError(dailyAttendanceResult.error);
+  throwIfError(assignmentsResult.error);
+  throwIfError(employeesResult.error);
+  throwIfError(worksitesResult.error);
+  throwIfError(attendanceResult.error);
+
+  return buildAttendanceStatus({
+    date: input.date,
+    employees: employeesResult.data ?? [],
+    assignments: assignmentsResult.data ?? [],
+    worksites: worksitesResult.data ?? [],
+    dailyAttendance: dailyAttendanceResult.data ?? [],
+    attendance: attendanceResult.data ?? [],
   });
 }
 

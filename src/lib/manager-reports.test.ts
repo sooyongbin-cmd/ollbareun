@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildAttendanceReport, buildEducationReport, createAttendanceRecord, updateAttendanceRecord } from "./manager-reports";
+import { buildAttendanceReport, buildAttendanceStatus, buildEducationReport, createAttendanceRecord, updateAttendanceRecord } from "./manager-reports";
 import { getSupabaseAdmin } from "./supabase-admin";
 
 vi.mock("./supabase-admin", () => ({
@@ -113,6 +113,59 @@ describe("manager reports", () => {
     expect(rows.map((row) => ({ id: row.id, isLate: row.isLate }))).toEqual([
       { id: "late-attendance", isLate: true },
       { id: "on-time-attendance", isLate: false },
+    ]);
+  });
+
+  it("builds today's expected attendance status and excludes retired employees", () => {
+    const rows = buildAttendanceStatus({
+      date: "2026-09-11",
+      employees: [
+        { id: "emp-1", name: "김철수", role: "경비원", is_retired: false },
+        { id: "emp-2", name: "이영희", role: "미화원", is_retired: false },
+        { id: "emp-3", name: "퇴직자", role: "파견", is_retired: true },
+      ],
+      assignments: [
+        { id: "assignment-1", employee_id: "emp-1", worksite_id: "site-1" },
+        { id: "assignment-2", employee_id: "emp-2", worksite_id: "site-1" },
+        { id: "assignment-3", employee_id: "emp-3", worksite_id: "site-1" },
+      ],
+      worksites: [{ id: "site-1", name: "본사" }],
+      dailyAttendance: [
+        { work_assignment_id: "assignment-1", work_date: "2026-09-11", intime: "2026-09-10T21:00:00.000Z" },
+        { work_assignment_id: "assignment-2", work_date: "2026-09-11", intime: "2026-09-10T22:00:00.000Z" },
+        { work_assignment_id: "assignment-3", work_date: "2026-09-11", intime: "2026-09-10T21:00:00.000Z" },
+      ],
+      attendance: [
+        {
+          id: "attendance-1",
+          employee_id: "emp-1",
+          worksite_id: "site-1",
+          work_date: "2026-09-11",
+          clock_in_at: "2026-09-10T21:05:00.000Z",
+          clock_out_at: null,
+        },
+      ],
+    });
+
+    expect(rows).toEqual([
+      {
+        id: "assignment-1",
+        employeeName: "김철수",
+        role: "경비원",
+        worksiteName: "본사",
+        scheduledClockIn: "06:00",
+        clockInTime: "06:05",
+        status: "지각",
+      },
+      {
+        id: "assignment-2",
+        employeeName: "이영희",
+        role: "미화원",
+        worksiteName: "본사",
+        scheduledClockIn: "07:00",
+        clockInTime: null,
+        status: "미출근",
+      },
     ]);
   });
 

@@ -48,7 +48,7 @@ describe("manager dashboard page", () => {
 
     const summary = screen.getByRole("region", { name: "운영 요약" });
     const attendanceCard = within(summary).getByRole("link", { name: "출근현황 3/5 명 출근율 60%" });
-    expect(attendanceCard).toHaveAttribute("href", "/manager/reports/attendance");
+    expect(attendanceCard).toHaveAttribute("href", "/manager/reports/attendance/status");
     expect(within(attendanceCard).getByText("출근현황")).toBeInTheDocument();
     expect(within(attendanceCard).getByText("3/5 명")).toBeInTheDocument();
     expect(within(attendanceCard).getByText("출근율 60%")).toBeInTheDocument();

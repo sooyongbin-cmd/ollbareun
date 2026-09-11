@@ -366,7 +366,7 @@ export default function ManagerPage() {
       value: `${data.summary.currentlyClockedIn}/${data.summary.scheduledEmployeesToday} 명`,
       description: `출근율 ${attendanceRate}%`,
       icon: Users,
-      href: "/manager/reports/attendance",
+      href: "/manager/reports/attendance/status",
     },
     {
       label: "현재 출근",

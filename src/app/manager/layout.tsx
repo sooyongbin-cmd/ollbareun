@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { getManagerTheme } from "@/lib/system-configs";
+import { getManagerTheme, isSystemConfigEnabled } from "@/lib/system-configs";
+import { PasskeyFeatureProvider } from "@/components/passkey-feature-provider";
 import ManagerThemeProvider from "./manager-theme-provider";
 
 export const metadata: Metadata = {
@@ -14,11 +15,14 @@ export const metadata: Metadata = {
 export default async function ManagerRootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const initialTheme = await getManagerTheme();
+  const [initialTheme, passkeyEnabled] = await Promise.all([
+    getManagerTheme(),
+    isSystemConfigEnabled("system_passkey"),
+  ]);
 
   return (
     <ManagerThemeProvider initialTheme={initialTheme}>
-      {children}
+      <PasskeyFeatureProvider enabled={passkeyEnabled}>{children}</PasskeyFeatureProvider>
     </ManagerThemeProvider>
   );
 }

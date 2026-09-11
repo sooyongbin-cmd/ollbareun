@@ -4,6 +4,7 @@ import ManagerRootLayout, { metadata } from "./layout";
 
 vi.mock("@/lib/system-configs", () => ({
   getManagerTheme: vi.fn().mockResolvedValue("system"),
+  isSystemConfigEnabled: vi.fn().mockResolvedValue(false),
 }));
 
 describe("manager root layout", () => {

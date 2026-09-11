@@ -15,6 +15,7 @@ import {
   hasActiveStoredGuardSession,
   writeStoredGuardSession,
 } from "./guard-session-storage";
+import { usePasskeyFeatureEnabled } from "@/components/passkey-feature-provider";
 
 type EmployeeRow = {
   id: string;
@@ -173,6 +174,7 @@ function getSessionText(status: LogoutPushResult["session"]) {
 
 export default function GuardPage() {
   const router = useRouter();
+  const passkeyEnabled = usePasskeyFeatureEnabled();
   const [savedGuardName, setSavedGuardName] = useState(readStoredGuardName);
   const [logoutPushResult] = useState(readLogoutPushResult);
   const [errorMessage, setErrorMessage] = useState("");
@@ -264,7 +266,7 @@ export default function GuardPage() {
   }
 
   async function handlePasskeyLogin() {
-    if (isGuardLoginPending) {
+    if (!passkeyEnabled || isGuardLoginPending) {
       return;
     }
     try {
@@ -368,14 +370,16 @@ export default function GuardPage() {
               </form>
             </section>
 
-            <section className="w-full rounded-xl border border-border/50 bg-muted/40 p-5">
-              <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full" onClick={handlePasskeyLogin} type="button">
-                패스키로 로그인
-              </Button>
-              <p className="mt-3 text-[0.8125rem] leading-relaxed text-muted-foreground">
-                관리자 승인을 받은 뒤 이 기기에 패스키를 등록한 근무자만 사용할 수 있습니다.
-              </p>
-            </section>
+            {passkeyEnabled ? (
+              <section className="w-full rounded-xl border border-border/50 bg-muted/40 p-5">
+                <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full" onClick={handlePasskeyLogin} type="button">
+                  패스키로 로그인
+                </Button>
+                <p className="mt-3 text-[0.8125rem] leading-relaxed text-muted-foreground">
+                  관리자 승인을 받은 뒤 이 기기에 패스키를 등록한 근무자만 사용할 수 있습니다.
+                </p>
+              </section>
+            ) : null}
 
             <section className="w-full rounded-xl border border-border/50 bg-muted/40 p-6">
               <div className="space-y-2">

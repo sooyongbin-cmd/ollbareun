@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import GuardPage from "./page";
+import { PasskeyFeatureProvider } from "@/components/passkey-feature-provider";
 
 const push = vi.fn();
 const replace = vi.fn();
@@ -77,6 +78,19 @@ describe("guard login page", () => {
     expect(loginSection).toContainElement(screen.getByRole("button", { name: "로그인" }));
     expect(passkeySection).not.toBeNull();
     expect(Boolean(loginSection.compareDocumentPosition(passkeySection!) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
+  });
+
+  it("hides the passkey login section when the feature is disabled", async () => {
+    setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1");
+    setStandaloneMode(true);
+    render(
+      <PasskeyFeatureProvider enabled={false}>
+        <GuardPage />
+      </PasskeyFeatureProvider>,
+    );
+
+    await screen.findByRole("region", { name: "근무자 로그인" });
+    expect(screen.queryByRole("button", { name: "패스키로 로그인" })).not.toBeInTheDocument();
   });
 
   it("redirects to guard main when an active guard session exists", () => {

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useEffect, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
+import { usePasskeyFeatureEnabled } from "@/components/passkey-feature-provider";
 
 type PasskeyRequestRow = {
   id: string;
@@ -34,6 +35,7 @@ function getStatusLabel(status: PasskeyRequestRow["status"]) {
 }
 
 export default function ManagerPasskeyRequestsPage() {
+  const passkeyEnabled = usePasskeyFeatureEnabled();
   const [requests, setRequests] = useState<PasskeyRequestRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState("");
@@ -57,6 +59,10 @@ export default function ManagerPasskeyRequestsPage() {
   }
 
   useEffect(() => {
+    if (!passkeyEnabled) {
+      return;
+    }
+
     let ignore = false;
 
     async function loadInitialRequests() {
@@ -87,7 +93,7 @@ export default function ManagerPasskeyRequestsPage() {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [passkeyEnabled]);
 
   async function runAction(requestId: string, action: "approve" | "reject" | "revoke") {
     try {
@@ -110,6 +116,10 @@ export default function ManagerPasskeyRequestsPage() {
     } finally {
       setActionLoadingId("");
     }
+  }
+
+  if (!passkeyEnabled) {
+    return null;
   }
 
   return (

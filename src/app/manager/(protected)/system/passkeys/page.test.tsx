@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ManagerPasskeyRequestsPage from "./page";
+import { PasskeyFeatureProvider } from "@/components/passkey-feature-provider";
 
 describe("manager passkey requests page", () => {
   beforeEach(() => {
@@ -46,5 +47,18 @@ describe("manager passkey requests page", () => {
       });
     });
     expect(await screen.findByText("패스키 요청 목록이 없습니다.")).toBeInTheDocument();
+  });
+
+  it("does not render the screen when the feature is disabled", () => {
+    vi.stubGlobal("fetch", vi.fn());
+
+    render(
+      <PasskeyFeatureProvider enabled={false}>
+        <ManagerPasskeyRequestsPage />
+      </PasskeyFeatureProvider>,
+    );
+
+    expect(screen.queryByRole("heading", { name: "패스키 요청 관리" })).not.toBeInTheDocument();
+    expect(fetch).not.toHaveBeenCalled();
   });
 });

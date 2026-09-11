@@ -17,6 +17,7 @@ import {
   subscribeToGuardFontZoomChange,
 } from "../../guard-zoom";
 import GuardLogoutButton from "../guard-logout-button";
+import { usePasskeyFeatureEnabled } from "@/components/passkey-feature-provider";
 
 type GuardSession = {
   employee?: {
@@ -150,6 +151,7 @@ function GuardFontZoomControlSection() {
 }
 
 export default function GuardProfilePage() {
+  const passkeyEnabled = usePasskeyFeatureEnabled();
   const employeeId = useSyncExternalStore(
     subscribeToGuardSessionChange,
     readGuardEmployeeIdSnapshot,
@@ -208,7 +210,7 @@ export default function GuardProfilePage() {
   }, [employeeId]);
 
   useEffect(() => {
-    if (!employeeId) {
+    if (!employeeId || !passkeyEnabled) {
       return;
     }
 
@@ -244,10 +246,10 @@ export default function GuardProfilePage() {
     return () => {
       ignore = true;
     };
-  }, [employeeId]);
+  }, [employeeId, passkeyEnabled]);
 
   async function handlePasskeyRequest() {
-    if (!employeeId) return;
+    if (!employeeId || !passkeyEnabled) return;
 
     try {
       setPasskeyLoading(true);
@@ -273,7 +275,7 @@ export default function GuardProfilePage() {
   }
 
   async function handlePasskeyRegistration() {
-    if (!employeeId) return;
+    if (!employeeId || !passkeyEnabled) return;
 
     try {
       setPasskeyLoading(true);
@@ -423,26 +425,28 @@ export default function GuardProfilePage() {
           </div>
         </section>
 
-        <section
-          aria-label="패스키 등록"
-          className="rounded-xl border border-border/50 bg-muted/40 p-[1rem]"
-        >
-          <h2 className="text-[1.5rem] font-semibold">패스키등록</h2>
-          <p className="mt-2 text-[0.875rem] leading-relaxed text-muted-foreground">{getPasskeyStatusText()}</p>
-          {passkeyMessage ? <p className="mt-3 text-[0.875rem] leading-relaxed text-primary">{passkeyMessage}</p> : null}
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-            {!passkeyRequest || passkeyRequest.status === "rejected" || passkeyRequest.status === "revoked" ? (
-              <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" disabled={passkeyLoading || !employeeId} onClick={handlePasskeyRequest} type="button">
-                패스키 등록 요청
-              </Button>
-            ) : null}
-            {passkeyRequest?.status === "approved" ? (
-              <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" disabled={passkeyLoading} onClick={handlePasskeyRegistration} type="button">
-                이 기기에 패스키 등록
-              </Button>
-            ) : null}
-          </div>
-        </section>
+        {passkeyEnabled ? (
+          <section
+            aria-label="패스키 등록"
+            className="rounded-xl border border-border/50 bg-muted/40 p-[1rem]"
+          >
+            <h2 className="text-[1.5rem] font-semibold">패스키등록</h2>
+            <p className="mt-2 text-[0.875rem] leading-relaxed text-muted-foreground">{getPasskeyStatusText()}</p>
+            {passkeyMessage ? <p className="mt-3 text-[0.875rem] leading-relaxed text-primary">{passkeyMessage}</p> : null}
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+              {!passkeyRequest || passkeyRequest.status === "rejected" || passkeyRequest.status === "revoked" ? (
+                <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" disabled={passkeyLoading || !employeeId} onClick={handlePasskeyRequest} type="button">
+                  패스키 등록 요청
+                </Button>
+              ) : null}
+              {passkeyRequest?.status === "approved" ? (
+                <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" disabled={passkeyLoading} onClick={handlePasskeyRegistration} type="button">
+                  이 기기에 패스키 등록
+                </Button>
+              ) : null}
+            </div>
+          </section>
+        ) : null}
       </div>
     </div>
   );

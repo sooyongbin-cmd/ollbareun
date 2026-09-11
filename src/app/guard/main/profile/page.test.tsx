@@ -4,6 +4,7 @@ import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import GuardProfilePage from "./page";
+import { PasskeyFeatureProvider } from "@/components/passkey-feature-provider";
 
 const push = vi.fn();
 const signInWithPassword = vi.fn();
@@ -70,6 +71,31 @@ describe("guard profile page", () => {
     expect(screen.getByText("25시간 30분")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "패스키 등록 요청" })).toBeInTheDocument();
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  });
+
+  it("hides the passkey registration section when the feature is disabled", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        if (String(input).startsWith("/api/guard/profile")) {
+          return Response.json({ schedules: [], monthlyAttendance: [] });
+        }
+        return Response.json({}, { status: 404 });
+      }),
+    );
+    window.sessionStorage.setItem(
+      "ollbareun.guard.session",
+      JSON.stringify({ employee: { id: "emp-1", name: "홍길동" } }),
+    );
+
+    render(
+      <PasskeyFeatureProvider enabled={false}>
+        <GuardProfilePage />
+      </PasskeyFeatureProvider>,
+    );
+
+    await screen.findByRole("heading", { name: "개인프로필" });
+    expect(screen.queryByRole("heading", { name: "패스키등록" })).not.toBeInTheDocument();
   });
 
   it("places logout directly above passkey registration at the bottom", async () => {

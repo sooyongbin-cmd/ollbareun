@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Metadata, ResolvingMetadata } from "next";
-import { getKakaoOpenGraphMetadata } from "@/lib/system-configs";
+import { getKakaoOpenGraphMetadata, isSystemConfigEnabled } from "@/lib/system-configs";
 import GuardLayout, { dynamic, generateMetadata } from "./layout";
 import { guardFontZoomStorageKey, guardZoomStorageKey } from "./guard-zoom";
 
@@ -11,6 +11,7 @@ vi.mock("@/lib/system-configs", () => ({
     description: "기본 카카오 설명",
   },
   getKakaoOpenGraphMetadata: vi.fn(),
+  isSystemConfigEnabled: vi.fn().mockResolvedValue(false),
 }));
 
 vi.mock("./guard-install-prompt", () => ({
@@ -32,6 +33,7 @@ describe("guard layout zoom scope", () => {
       title: "설정한 카카오 제목",
       description: "설정한 카카오 설명",
     });
+    vi.mocked(isSystemConfigEnabled).mockResolvedValue(false);
   });
 
   it("uses the configured Kakao title and description while preserving parent social metadata", async () => {
@@ -77,12 +79,8 @@ describe("guard layout zoom scope", () => {
     });
   });
 
-  it("wraps all guard content in the zoom scope", () => {
-    render(
-      <GuardLayout>
-        <main>Guard child</main>
-      </GuardLayout>,
-    );
+  it("wraps all guard content in the zoom scope", async () => {
+    render(await GuardLayout({ children: <main>Guard child</main> }));
 
     const scope = screen.getByTestId("guard-zoom-scope");
     expect(scope).toHaveClass("guard-zoom-scope");
@@ -94,27 +92,19 @@ describe("guard layout zoom scope", () => {
     expect(screen.getByTestId("in-app-browser-checker")).toBeInTheDocument();
   });
 
-  it("applies the stored guard zoom scale", () => {
+  it("applies the stored guard zoom scale", async () => {
     window.localStorage.setItem(guardZoomStorageKey, "125");
 
-    render(
-      <GuardLayout>
-        <main>Guard child</main>
-      </GuardLayout>,
-    );
+    render(await GuardLayout({ children: <main>Guard child</main> }));
 
     expect(screen.getByTestId("guard-zoom-scope")).toHaveStyle({ "--guard-zoom-scale": "1.25" });
   });
 
-  it("applies the stored guard font zoom scale independently from screen zoom", () => {
+  it("applies the stored guard font zoom scale independently from screen zoom", async () => {
     window.localStorage.setItem(guardZoomStorageKey, "110");
     window.localStorage.setItem(guardFontZoomStorageKey, "125");
 
-    render(
-      <GuardLayout>
-        <main>Guard child</main>
-      </GuardLayout>,
-    );
+    render(await GuardLayout({ children: <main>Guard child</main> }));
 
     expect(screen.getByTestId("guard-zoom-scope")).toHaveStyle({
       "--guard-zoom-scale": "1.1",

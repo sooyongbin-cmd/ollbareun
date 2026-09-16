@@ -10,8 +10,10 @@ declare const Deno: {
 
 const notificationCode = "education_reminder";
 const notificationHistoryEnabledConfigCode = "system_log_002";
+/* Supabase Cron이 발송 시간을 관리하므로 함수 내부 시간 조건은 일시 비활성화합니다.
 const dailyPushMessageTimeCode = "daily_push_message_time";
 const dailyPushTimePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
+*/
 
 function jsonResponse(body: unknown, init?: ResponseInit) {
   return new Response(JSON.stringify(body), {
@@ -32,12 +34,14 @@ function requireEnv(name: string) {
   return value;
 }
 
+/* Supabase Cron이 매일 09:00에 호출하므로 system_configs 시간 비교는 비활성화합니다.
 function parseDailyPushMessageTimes(content: string) {
   return content
     .split(",")
     .map((time) => time.trim())
     .filter((time) => dailyPushTimePattern.test(time));
 }
+*/
 
 function formatKstDate(date = new Date()) {
   return new Intl.DateTimeFormat("en-CA", {
@@ -83,6 +87,7 @@ Deno.serve(async (request) => {
   }
 
   const now = new Date();
+  // 한국 시간 값은 실행 이력과 응답에 사용하므로 유지합니다.
   const scheduledDate = formatKstDate(now);
   const scheduledTime = formatKstTime(now);
   const supabase = createClient(requireEnv("SUPABASE_URL"), requireEnv("SUPABASE_SERVICE_ROLE_KEY"), {
@@ -92,6 +97,7 @@ Deno.serve(async (request) => {
     },
   });
 
+  /*
   const { data: config, error: configError } = await supabase
     .from("system_configs")
     .select("content")
@@ -113,6 +119,7 @@ Deno.serve(async (request) => {
       configuredTimes: scheduledTimes,
     });
   }
+  */
 
   const shouldRecordHistory = await isNotificationHistoryEnabled(supabase);
   let runId: string | null = null;

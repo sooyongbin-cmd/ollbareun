@@ -73,6 +73,58 @@ describe("guard profile page", () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
   });
 
+  it("opens the work and absence detail modals from the monthly cards", async () => {
+    const today = new Date();
+    const monthKey = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "2-digit",
+    }).format(today);
+    const monthLabel = `${Number(monthKey.slice(5, 7))}월`;
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.startsWith("/api/guard/passkey-requests/me")) {
+        return Response.json({ request: null });
+      }
+      if (url.startsWith("/api/guard/profile")) {
+        return Response.json({
+          schedules: [],
+          monthlyAttendance: [{ yearMonth: monthKey, attendanceDays: 2, workHoursTotal: "16시간" }],
+          attendanceDetails: [
+            { workDate: `${monthKey}-01`, status: "정상 출근", timeRange: "(05:58~14:02)" },
+            { workDate: `${monthKey}-02`, status: "지각 출근", timeRange: "(06:58~14:02)" },
+          ],
+          absenceDetails: [{ workDate: `${monthKey}-03`, reason: "결근" }],
+        });
+      }
+      return Response.json({}, { status: 404 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    window.sessionStorage.setItem(
+      "ollbareun.guard.session",
+      JSON.stringify({ employee: { id: "emp-1", name: "홍길동" } }),
+    );
+
+    render(<GuardProfilePage />);
+
+    fireEvent.click(await screen.findByRole("button", { name: `${monthLabel} 근무 내역 보기` }));
+    expect(await screen.findByRole("dialog", { name: `${monthLabel} 근무 내역` })).toBeInTheDocument();
+    expect(screen.getByText(`${monthLabel} 1일`)).toBeInTheDocument();
+    expect(screen.getByText("정상 출근 (05:58~14:02)")).toBeInTheDocument();
+    expect(screen.getByText("지각 출근 (06:58~14:02)")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: `${monthLabel} 결근/휴가 내역 보기` }));
+    expect(await screen.findByRole("dialog", { name: `${monthLabel} 결근/휴가 내역` })).toBeInTheDocument();
+    expect(screen.getByText(`${monthLabel} 3일`)).toBeInTheDocument();
+    expect(screen.getByText("결근")).toBeInTheDocument();
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
   it("hides the passkey registration section when the feature is disabled", async () => {
     vi.stubGlobal(
       "fetch",

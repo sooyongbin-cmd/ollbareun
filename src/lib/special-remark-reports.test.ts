@@ -97,6 +97,27 @@ describe("special remark report storage deletion", () => {
     expect(deleteEq).not.toHaveBeenCalled();
   });
 
+  it("removes every attached photo before deleting a multi-photo report", async () => {
+    single.mockResolvedValue({
+      data: {
+        id: "report-1",
+        photo_url: "https://example.supabase.co/storage/v1/object/public/special-remarks/employee-1/photo-1.jpg",
+        photo_urls: [
+          "https://example.supabase.co/storage/v1/object/public/special-remarks/employee-1/photo-1.jpg",
+          "https://example.supabase.co/storage/v1/object/public/special-remarks/employee-1/photo-2.jpg",
+        ],
+      },
+      error: null,
+    });
+
+    await deleteSpecialRemarkReport("report-1");
+
+    expect(remove).toHaveBeenCalledWith([
+      "employee-1/photo-1.jpg",
+      "employee-1/photo-2.jpg",
+    ]);
+  });
+
   it("rejects images larger than 500KB before uploading them", async () => {
     vi.mocked(getSystemConfigContent).mockResolvedValue("admin@example.com");
 
@@ -159,6 +180,51 @@ describe("special remark push-only storage", () => {
     expect(nodemailerMock.sendMail).not.toHaveBeenCalled();
     expect(result.email_status).toBe("not_requested");
   });
+
+  it("stores all supplied photos while keeping the first photo as the legacy thumbnail", async () => {
+    const insertSingle = vi.fn(async () => ({
+      data: {
+        id: "report-1",
+        employee_name: "홍길동",
+        worksite_name: "본사",
+        content: "문이 파손되었습니다.",
+        photo_url: "https://example.com/photo-1.jpg",
+        photo_urls: ["https://example.com/photo-1.jpg", "https://example.com/photo-2.jpg"],
+        email_to: null,
+        email_status: "not_requested",
+        reported_at: "2026-07-23T00:00:00.000Z",
+      },
+      error: null,
+    }));
+    const insert = vi.fn(() => ({ select: () => ({ single: insertSingle }) }));
+    upload.mockResolvedValue({ error: null });
+    getPublicUrl
+      .mockReturnValueOnce({ data: { publicUrl: "https://example.com/photo-1.jpg" } })
+      .mockReturnValueOnce({ data: { publicUrl: "https://example.com/photo-2.jpg" } });
+    from.mockReturnValue({ insert });
+
+    const result = await createSpecialRemarkReport(
+      {
+        employeeId: "employee-1",
+        employeeName: "홍길동",
+        worksiteId: "work-1",
+        worksiteName: "본사",
+        content: "문이 파손되었습니다.",
+        photoDataUrls: [
+          "data:image/jpeg;base64,AAAA",
+          "data:image/jpeg;base64,BBBB",
+        ],
+      },
+      { sendEmail: false },
+    );
+
+    expect(upload).toHaveBeenCalledTimes(2);
+    expect(insert).toHaveBeenCalledWith(expect.objectContaining({
+      photo_url: "https://example.com/photo-1.jpg",
+      photo_urls: ["https://example.com/photo-1.jpg", "https://example.com/photo-2.jpg"],
+    }));
+    expect(result.photo_urls).toEqual(["https://example.com/photo-1.jpg", "https://example.com/photo-2.jpg"]);
+  });
 });
 
 describe("special remark report photo access", () => {
@@ -211,6 +277,30 @@ describe("special remark report photo access", () => {
 
     expect(createSignedUrl).toHaveBeenCalledWith("employee-1/photo.jpg", 60 * 60);
     expect(report.photo_url).toContain("/storage/v1/object/sign/special-remarks/");
+  });
+
+  it("returns signed URLs for every photo in the detail", async () => {
+    selectEq.mockReturnValue({
+      single: vi.fn(async () => ({
+        data: {
+          id: "report-1",
+          photo_url:
+            "https://example.supabase.co/storage/v1/object/public/special-remarks/employee-1/photo-1.jpg",
+          photo_urls: [
+            "https://example.supabase.co/storage/v1/object/public/special-remarks/employee-1/photo-1.jpg",
+            "https://example.supabase.co/storage/v1/object/public/special-remarks/employee-1/photo-2.jpg",
+          ],
+        },
+        error: null,
+      })),
+    });
+    select.mockReturnValue({ eq: selectEq });
+    from.mockReturnValue({ select });
+
+    const report = await getSpecialRemarkReport("report-1");
+
+    expect(createSignedUrl).toHaveBeenCalledTimes(2);
+    expect(report.photo_urls).toHaveLength(2);
   });
 });
 
@@ -499,6 +589,49 @@ describe("special remark report Formspree delivery", () => {
         gps_info: { latitude: 37.5665, longitude: 126.978 },
       }),
     );
+  });
+
+  it("includes every stored photo URL in the Formspree message", async () => {
+    getPublicUrl
+      .mockReturnValueOnce({ data: { publicUrl: "https://example.com/photo-1.jpg" } })
+      .mockReturnValueOnce({ data: { publicUrl: "https://example.com/photo-2.jpg" } });
+    const insertSingle = vi.fn(async () => ({
+      data: {
+        id: "report-1",
+        employee_name: "홍길동",
+        worksite_name: "본사",
+        content: "문이 파손되었습니다.",
+        photo_url: "https://example.com/photo-1.jpg",
+        photo_urls: ["https://example.com/photo-1.jpg", "https://example.com/photo-2.jpg"],
+        reported_at: "2026-06-12T00:00:00.000Z",
+      },
+      error: null,
+    }));
+    const updateSingle = vi.fn(async () => ({
+      data: { id: "report-1", email_status: "sent" },
+      error: null,
+    }));
+    const insert = vi.fn(() => ({ select: () => ({ single: insertSingle }) }));
+    const updateEq = vi.fn(() => ({ select: () => ({ single: updateSingle }) }));
+    const update = vi.fn(() => ({ eq: updateEq }));
+    from.mockReturnValue({ insert, update });
+
+    await createSpecialRemarkReport(
+      {
+        employeeId: "employee-1",
+        employeeName: "홍길동",
+        worksiteId: "work-1",
+        worksiteName: "본사",
+        content: "문이 파손되었습니다.",
+        photoDataUrls: ["data:image/jpeg;base64,AAAA", "data:image/jpeg;base64,BBBB"],
+      },
+      { emailProvider: "formspree" },
+    );
+
+    const [, init] = vi.mocked(fetch).mock.calls[0];
+    const body = JSON.parse(String(init?.body));
+    expect(body.message).toContain("https://example.com/photo-1.jpg");
+    expect(body.message).toContain("https://example.com/photo-2.jpg");
   });
 
   it("marks the stored report failed when Formspree rejects the submission", async () => {

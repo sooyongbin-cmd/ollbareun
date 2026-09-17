@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { BellIcon, MicIcon, SquareIcon } from "lucide-react";
+import { CameraIcon, CheckIcon, MicIcon, SendIcon, SquareIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import AlertModal from "@/components/modals/alert-modal";
@@ -34,6 +34,13 @@ type SpeechRecognition = EventTarget & {
 
 type SpeechRecognitionEvent = {
   results: ArrayLike<ArrayLike<{ transcript: string }>>;
+};
+
+type CapturedPhoto = {
+  id: string;
+  dataUrl: string;
+  touched: boolean;
+  selected: boolean;
 };
 
 const MAX_PHOTO_BYTES = 500 * 1024;
@@ -105,10 +112,12 @@ export default function GuardSpecialRemarksPage() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const photoIdRef = useRef(0);
   const [content, setContent] = useState("");
-  const [photoDataUrl, setPhotoDataUrl] = useState("");
+  const [photos, setPhotos] = useState<CapturedPhoto[]>([]);
   const [cameraStatus, setCameraStatus] = useState("카메라를 준비하고 있습니다.");
   const [listening, setListening] = useState(false);
+  const [continuousSpeechEnabled, setContinuousSpeechEnabled] = useState(false);
   const [savingProvider, setSavingProvider] = useState<"resend" | "formspree" | "naver" | "push" | null>(null);
   const [error, setError] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
@@ -146,6 +155,21 @@ export default function GuardSpecialRemarksPage() {
     };
   }, []);
 
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetch("/api/guard/configs/special_001", { cache: "no-store", signal: controller.signal })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!controller.signal.aborted && typeof data?.enabled === "boolean") {
+          setContinuousSpeechEnabled(data.enabled);
+        }
+      })
+      .catch(() => {});
+
+    return () => controller.abort();
+  }, []);
+
   function handleSpeech() {
     const Recognition = window.SpeechRecognition ?? window.webkitSpeechRecognition;
     if (!Recognition) {
@@ -162,7 +186,7 @@ export default function GuardSpecialRemarksPage() {
     const recognition = new Recognition();
     recognition.lang = "ko-KR";
     recognition.interimResults = false;
-    recognition.continuous = false;
+    recognition.continuous = continuousSpeechEnabled;
     recognition.onresult = (event) => {
       const transcript = Array.from(event.results)
         .map((result) => result[0]?.transcript ?? "")
@@ -191,12 +215,22 @@ export default function GuardSpecialRemarksPage() {
     }
 
     try {
-      setPhotoDataUrl(captureCompressedPhoto(videoRef.current));
+      const dataUrl = captureCompressedPhoto(videoRef.current);
+      const id = `photo-${photoIdRef.current++}`;
+      setPhotos((current) => [...current, { id, dataUrl, touched: false, selected: false }]);
       setCameraStatus("사진이 촬영되었습니다.");
       setError("");
     } catch (captureError) {
       setError(captureError instanceof Error ? captureError.message : "사진을 촬영하지 못했습니다.");
     }
+  }
+
+  function handlePhotoToggle(photoId: string) {
+    setPhotos((current) => current.map((photo) => (
+      photo.id === photoId
+        ? { ...photo, touched: true, selected: !photo.selected }
+        : photo
+    )));
   }
 
   async function handleReport(provider: "resend" | "formspree" | "naver" | "push") {
@@ -215,6 +249,7 @@ export default function GuardSpecialRemarksPage() {
     reportingRef.current = true;
     setSavingProvider(provider);
     setError("");
+    const selectedPhotoDataUrls = photos.filter((photo) => photo.selected).map((photo) => photo.dataUrl);
 
     let gpsInfo = null;
     if (typeof window !== "undefined" && navigator.geolocation) {
@@ -253,7 +288,8 @@ export default function GuardSpecialRemarksPage() {
           worksiteId,
           worksiteName,
           content,
-          photoDataUrl,
+          photoDataUrl: selectedPhotoDataUrls[0] ?? "",
+          photoDataUrls: selectedPhotoDataUrls,
           gpsInfo,
         }),
       });
@@ -290,7 +326,7 @@ export default function GuardSpecialRemarksPage() {
         setAlertMessage("특이사항 보고가 전송되었습니다.");
       }
       setContent("");
-      setPhotoDataUrl("");
+      setPhotos([]);
     } catch (reportError) {
       setError(reportError instanceof Error ? reportError.message : "특이사항 보고를 전송하지 못했습니다.");
     } finally {
@@ -300,87 +336,74 @@ export default function GuardSpecialRemarksPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[61.25rem] w-full px-5 py-[5rem]">
-      <div className="max-w-[37.5rem] mx-auto space-y-6">
-        <header>
-          <h1 className="text-[2.25rem] font-semibold leading-[1.1]">특이사항</h1>
-          <p className="mt-2 text-[1.125rem] text-muted-foreground">근무 중 확인한 특이사항을 작성하고 관리자에게 보고합니다.</p>
-        </header>
+    <main className="guard-special-remarks-page">
+      <section className="guard-special-remarks-intro-card">
+        <h1>특이사항</h1>
+        <p>근무 중 특이사항을 작성하여 관리자에게 보고합니다.</p>
+      </section>
 
-        <section className="bg-muted/40 rounded-xl p-[1.5rem] border border-border/50 space-y-5">
-          <div className="space-y-2">
-            <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="special-remark-content">
-              특이사항 내용
-            </label>
-            <Textarea
-              className="w-full min-h-[10rem] resize-y"
-              id="special-remark-content"
-              value={content}
-              onChange={(event) => setContent(event.target.value)}
-              placeholder="현재 위치와 함께 특이사항을 입력하세요."
-            />
-          </div>
-
-          <Button className="w-full gap-2" onClick={handleSpeech} type="button" variant="outline">
-            {listening ? <SquareIcon size={18} /> : <MicIcon size={18} />}
+      <section aria-label="특이사항 입력" className="guard-special-remarks-input-card">
+        <div className="guard-special-remarks-input-content">
+          <Textarea
+            aria-label="특이사항 내용"
+            className="guard-special-remarks-textarea"
+            id="special-remark-content"
+            value={content}
+            onChange={(event) => setContent(event.target.value)}
+            placeholder={'"1층 로비 유리창 깨짐" 처럼 현장 위치와 특이사항을\n말로 편하게 입력하면, 텍스트로 자동 변환되어\n보고서에 반영됩니다.'}
+          />
+          <Button className="guard-special-remarks-speech-button" onClick={handleSpeech} type="button">
+            {listening ? <SquareIcon aria-hidden="true" size={16} /> : <MicIcon aria-hidden="true" size={16} />}
             {listening ? "음성 중지" : "음성 입력"}
           </Button>
-        </section>
+        </div>
+      </section>
 
-        <section className="bg-muted/40 rounded-xl p-[1.5rem] border border-border/50 space-y-5">
-          <video
-            ref={videoRef}
-            className="aspect-[4/3] w-full rounded-[0.75rem] border border-border bg-foreground object-cover"
-            muted
-            playsInline
-          />
-          <p className="text-[0.875rem] font-semibold text-muted-foreground">{cameraStatus}</p>
-          {photoDataUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img alt="촬영된 첨부사진" className="w-full rounded-[0.75rem] border border-border" src={photoDataUrl} />
-          ) : null}
-          {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p> : null}
-          <Button className="w-full" onClick={handleCapture} type="button" variant="outline">
-            촬영
-          </Button>
-          <Button
-            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center disabled:opacity-50"
-            disabled
-            hidden
-            onClick={() => handleReport("resend")}
-            type="button"
-          >
-            이메일보고(resend)
-          </Button>
-          <Button
-            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center disabled:opacity-50"
-            disabled={saving || !content.trim()}
-            hidden
-            onClick={() => handleReport("formspree")}
-            type="button"
-          >
-            {savingProvider === "formspree" ? "보고 중..." : "이메일(Formspree)"}
-          </Button>
-          <Button
-            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center disabled:opacity-50"
-            disabled={saving || !content.trim()}
-            hidden
-            onClick={() => handleReport("naver")}
-            type="button"
-          >
-            {savingProvider === "naver" ? "보고 중..." : "이메일(NAVER)"}
-          </Button>
-          <Button
-            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center gap-2 disabled:opacity-50"
-            disabled={saving || !content.trim()}
-            onClick={() => handleReport("push")}
-            type="button"
-          >
-            <BellIcon aria-hidden="true" size={18} />
-            {savingProvider === "push" ? "전송 중..." : "보고하기"}
-          </Button>
-        </section>
-      </div>
+      <section aria-label="첨부사진" className="guard-special-remarks-photo-card">
+        <div className="guard-special-remarks-camera-frame">
+          <video ref={videoRef} muted playsInline />
+        </div>
+        <p aria-live="polite" className="guard-sr-only">{cameraStatus}</p>
+        <Button className="guard-special-remarks-capture-button" onClick={handleCapture} type="button">
+          <CameraIcon aria-hidden="true" size={16} />
+          촬영
+        </Button>
+        <p className="guard-special-remarks-photo-instruction">관리자에게 보고할 사진을 터치하여 선택해 주세요</p>
+        {photos.length > 0 ? (
+          <div className="guard-special-remarks-photo-list">
+            {photos.map((photo, index) => (
+              <button
+                aria-label={`사진 ${index + 1} ${photo.selected ? "선택 해제" : "선택"}`}
+                aria-pressed={photo.selected}
+                className="guard-special-remarks-photo-button"
+                key={photo.id}
+                onClick={() => handlePhotoToggle(photo.id)}
+                type="button"
+              >
+                {/* Runtime camera captures are data URLs and cannot use next/image optimization. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img alt={`촬영된 첨부사진 ${index + 1}`} src={photo.dataUrl} />
+                {photo.touched ? (
+                  <span aria-checked={photo.selected} aria-label={`사진 ${index + 1} 체크`} className={`guard-special-remarks-photo-check ${photo.selected ? "is-selected" : ""}`} role="checkbox">
+                    {photo.selected ? <CheckIcon aria-hidden="true" size={15} /> : null}
+                  </span>
+                ) : null}
+              </button>
+            ))}
+          </div>
+        ) : null}
+        {error ? <p className="guard-special-remarks-error">{error}</p> : null}
+      </section>
+
+      <Button
+        className="guard-general-button guard-special-remarks-report-button"
+        disabled={saving || !content.trim()}
+        onClick={() => handleReport("push")}
+        type="button"
+      >
+        <SendIcon aria-hidden="true" size={16} />
+        {savingProvider === "push" ? "전송 중..." : "보고하기"}
+      </Button>
 
       <AlertModal
         isOpen={Boolean(alertMessage)}
@@ -391,6 +414,6 @@ export default function GuardSpecialRemarksPage() {
         title="알림"
         description={alertMessage}
       />
-    </div>
+    </main>
   );
 }

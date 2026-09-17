@@ -19,6 +19,7 @@ describe("manager special remarks page", () => {
                 employee_name: "홍길동",
                 content: "출입문 파손\n두번째 줄 내용",
                 photo_url: "https://example.com/photo.jpg",
+                photo_urls: ["https://example.com/photo.jpg", "https://example.com/photo-2.jpg"],
               },
             ],
           });
@@ -33,13 +34,12 @@ describe("manager special remarks page", () => {
     render(<SpecialRemarksPage />);
 
     expect(await screen.findByRole("heading", { name: "특이사항" })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "점검일시" })).toBeInTheDocument();
+    expect(await screen.findByRole("columnheader", { name: "점검일시" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "점검자" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "특이사항내용" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "첨부사진" })).toBeInTheDocument();
 
     await user.type(screen.getByLabelText("조회연도"), "2026");
-    await user.click(screen.getByRole("button", { name: "조회" }));
 
     await waitFor(() => {
       expect(fetch).toHaveBeenLastCalledWith("/api/inspection/special-remarks?year=2026");
@@ -51,5 +51,6 @@ describe("manager special remarks page", () => {
       "/manager/inspection/special-remarks/report-1",
     );
     expect(screen.getByAltText("첨부사진 썸네일")).toHaveAttribute("src", "https://example.com/photo.jpg");
+    expect(screen.queryByAltText("첨부사진 2")).not.toBeInTheDocument();
   });
 });

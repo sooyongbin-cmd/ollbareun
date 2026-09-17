@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from "./supabase-admin";
 
 const STORAGE_BUCKET = "special-remarks";
 const MAX_PHOTO_BYTES = 500 * 1024;
+const MAX_PHOTOS_PER_REPORT = 6;
 const PHOTO_SIGNED_URL_EXPIRES_IN = 60 * 60;
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/mojzkwbp";
 
@@ -17,6 +18,7 @@ export type SpecialRemarkReportRow = {
   worksite_name: string;
   content: string;
   photo_url: string | null;
+  photo_urls?: string[] | null;
   email_to: string | null;
   email_status: "pending" | "sent" | "failed" | "not_requested";
   email_sent_at: string | null;
@@ -91,6 +93,38 @@ async function uploadPhoto(input: {
   return data.publicUrl;
 }
 
+function getPhotoUrls(report: Pick<SpecialRemarkReportRow, "photo_url" | "photo_urls">) {
+  const photoUrls = Array.isArray(report.photo_urls)
+    ? report.photo_urls.filter((photoUrl): photoUrl is string => typeof photoUrl === "string" && photoUrl.trim() !== "")
+    : [];
+
+  if (photoUrls.length > 0) {
+    return photoUrls;
+  }
+
+  return report.photo_url ? [report.photo_url] : [];
+}
+
+function normalizeReportPhotoUrls(report: SpecialRemarkReportRow) {
+  const photoUrls = getPhotoUrls(report);
+  return {
+    ...report,
+    photo_url: report.photo_url ?? photoUrls[0] ?? null,
+    photo_urls: photoUrls,
+  };
+}
+
+function getPhotoDataUrls(input: { photoDataUrl?: unknown; photoDataUrls?: unknown }) {
+  if (Array.isArray(input.photoDataUrls)) {
+    if (input.photoDataUrls.length > MAX_PHOTOS_PER_REPORT) {
+      throw new Error(`첨부사진은 최대 ${MAX_PHOTOS_PER_REPORT}장까지 업로드할 수 있습니다.`);
+    }
+    return input.photoDataUrls;
+  }
+
+  return input.photoDataUrl === undefined ? [] : [input.photoDataUrl];
+}
+
 function formatKstDateTime(value: string) {
   return new Intl.DateTimeFormat("ko-KR", {
     year: "numeric",
@@ -116,14 +150,18 @@ function buildEmailHtml(input: {
   employeeName: string;
   reportedAt: string;
   content: string;
-  photoUrl: string | null;
+  photoUrls: string[];
   gpsInfo: { latitude: number; longitude: number } | null;
 }) {
   const employeeName = escapeHtml(input.employeeName);
   const content = escapeHtml(input.content);
-  const photoUrl = input.photoUrl ? escapeHtml(input.photoUrl) : null;
-  const photoMarkup = input.photoUrl
-    ? `<p>첨부사진 : <a href="${photoUrl}">${photoUrl}</a></p><p><img src="${photoUrl}" alt="첨부사진" style="max-width: 640px; width: 100%; height: auto;" /></p>`
+  const photoMarkup = input.photoUrls.length > 0
+    ? `<p>첨부사진 :</p>${input.photoUrls
+        .map((photoUrl) => {
+          const escapedPhotoUrl = escapeHtml(photoUrl);
+          return `<p><a href="${escapedPhotoUrl}">${escapedPhotoUrl}</a></p><p><img src="${escapedPhotoUrl}" alt="첨부사진" style="max-width: 640px; width: 100%; height: auto;" /></p>`;
+        })
+        .join("")}`
     : "<p>첨부사진 : 없음</p>";
   const gpsMarkup = input.gpsInfo
     ? `<p>보고 위치 (GPS) : ${input.gpsInfo.latitude.toFixed(6)}, ${input.gpsInfo.longitude.toFixed(6)}</p>`
@@ -146,7 +184,7 @@ async function sendRemarkEmail(input: {
   worksiteName: string;
   reportedAt: string;
   content: string;
-  photoUrl: string | null;
+  photoUrls: string[];
   gpsInfo: { latitude: number; longitude: number } | null;
 }) {
   const apiKey = process.env.RESEND_API_KEY;
@@ -185,7 +223,7 @@ function buildFormspreeMessage(input: {
   worksiteName: string;
   reportedAt: string;
   content: string;
-  photoUrl: string | null;
+  photoUrls: string[];
   gpsInfo: { latitude: number; longitude: number } | null;
 }) {
   const gpsString = input.gpsInfo
@@ -202,7 +240,7 @@ function buildFormspreeMessage(input: {
     "특이사항 내용:",
     input.content,
     "",
-    `첨부사진: ${input.photoUrl ?? "없음"}`,
+    `첨부사진:\n${input.photoUrls.length > 0 ? input.photoUrls.join("\n") : "없음"}`,
   ].join("\n");
 }
 
@@ -243,7 +281,7 @@ async function sendRemarkEmailWithFormspree(input: {
   worksiteName: string;
   reportedAt: string;
   content: string;
-  photoUrl: string | null;
+  photoUrls: string[];
   gpsInfo: { latitude: number; longitude: number } | null;
 }) {
   const response = await fetch(FORMSPREE_ENDPOINT, {
@@ -256,7 +294,7 @@ async function sendRemarkEmailWithFormspree(input: {
         worksiteName: input.worksiteName,
         reportedAt: input.reportedAt,
         content: input.content,
-        photoUrl: input.photoUrl,
+        photoUrls: input.photoUrls,
         gpsInfo: input.gpsInfo,
       }),
     }),
@@ -285,7 +323,7 @@ async function sendRemarkEmailWithNaver(input: {
   worksiteName: string;
   reportedAt: string;
   content: string;
-  photoUrl: string | null;
+  photoUrls: string[];
   gpsInfo: { latitude: number; longitude: number } | null;
 }) {
   const user = process.env.NAVER_SMTP_USER;
@@ -321,6 +359,7 @@ export async function createSpecialRemarkReport(input: {
   worksiteName: unknown;
   content: unknown;
   photoDataUrl?: unknown;
+  photoDataUrls?: unknown;
   gpsInfo?: unknown;
 }, options: { emailProvider?: EmailProvider; sendEmail?: boolean } = {}) {
   const employee_id = requireString(input.employeeId, "현장점검자");
@@ -330,7 +369,11 @@ export async function createSpecialRemarkReport(input: {
   const content = requireString(input.content, "특이사항 내용");
   const shouldSendEmail = options.sendEmail !== false;
   const email_to = shouldSendEmail ? await getSystemConfigContent("manager_email") : null;
-  const photo_url = await uploadPhoto({ employeeId: employee_id, photoDataUrl: input.photoDataUrl });
+  const photoDataUrls = getPhotoDataUrls(input);
+  const photo_urls = await Promise.all(
+    photoDataUrls.map((photoDataUrl) => uploadPhoto({ employeeId: employee_id, photoDataUrl })),
+  ).then((photoUrls) => photoUrls.filter((photoUrl): photoUrl is string => Boolean(photoUrl)));
+  const photo_url = photo_urls[0] ?? null;
   const reported_at = new Date().toISOString();
 
   let gps_info = null;
@@ -355,6 +398,7 @@ export async function createSpecialRemarkReport(input: {
       worksite_name,
       content,
       photo_url,
+      photo_urls,
       email_to,
       email_status: shouldSendEmail ? "pending" : "not_requested",
       reported_at,
@@ -364,7 +408,7 @@ export async function createSpecialRemarkReport(input: {
     .single();
 
   throwIfError(error);
-  const report = data as SpecialRemarkReportRow;
+  const report = normalizeReportPhotoUrls(data as SpecialRemarkReportRow);
 
   if (!shouldSendEmail) {
     return report;
@@ -383,7 +427,7 @@ export async function sendSpecialRemarkReportEmail(report: SpecialRemarkReportRo
       worksiteName: report.worksite_name,
       reportedAt: report.reported_at,
       content: report.content,
-      photoUrl: report.photo_url,
+      photoUrls: getPhotoUrls(report),
       gpsInfo: report.gps_info,
     };
 
@@ -409,7 +453,7 @@ export async function sendSpecialRemarkReportEmail(report: SpecialRemarkReportRo
       .single();
 
     throwIfError(updateError);
-    return updated as SpecialRemarkReportRow;
+    return normalizeReportPhotoUrls(updated as SpecialRemarkReportRow);
   } catch (emailError) {
     const message = emailError instanceof Error ? emailError.message : "이메일 발송에 실패했습니다.";
     await supabase
@@ -438,7 +482,7 @@ export async function listSpecialRemarkReports(input: { year?: unknown } = {}) {
 
   const { data, error } = await query;
   throwIfError(error);
-  return Promise.all((data ?? []).map((report) => withSignedPhotoUrl(report as SpecialRemarkReportRow)));
+  return Promise.all((data ?? []).map((report) => withSignedPhotoUrls(report as SpecialRemarkReportRow)));
 }
 
 export async function completeSpecialRemarkReport(idInput: unknown) {
@@ -448,7 +492,7 @@ export async function completeSpecialRemarkReport(idInput: unknown) {
     .update({ processing_status: "Y", updated_at: new Date().toISOString() })
     .eq("id", id).select("*").single();
   throwIfError(error);
-  return withSignedPhotoUrl(data as SpecialRemarkReportRow);
+  return withSignedPhotoUrls(data as SpecialRemarkReportRow);
 }
 
 async function getSpecialRemarkReportRecord(idInput: unknown) {
@@ -461,7 +505,7 @@ async function getSpecialRemarkReportRecord(idInput: unknown) {
 }
 
 export async function getSpecialRemarkReport(idInput: unknown) {
-  return withSignedPhotoUrl(await getSpecialRemarkReportRecord(idInput));
+  return withSignedPhotoUrls(await getSpecialRemarkReportRecord(idInput));
 }
 
 export function getSpecialRemarkStoragePathFromPublicUrl(photoUrl: string | null | undefined) {
@@ -478,28 +522,40 @@ export function getSpecialRemarkStoragePathFromPublicUrl(photoUrl: string | null
   return decodeURIComponent(photoUrl.slice(markerIndex + marker.length));
 }
 
-async function withSignedPhotoUrl(report: SpecialRemarkReportRow) {
-  const storagePath = getSpecialRemarkStoragePathFromPublicUrl(report.photo_url);
-  if (!storagePath) {
-    return report;
-  }
+async function withSignedPhotoUrls(report: SpecialRemarkReportRow) {
+  const normalizedReport = normalizeReportPhotoUrls(report);
+  const signedPhotoUrls = await Promise.all(
+    (normalizedReport.photo_urls ?? []).map(async (photoUrl) => {
+      const storagePath = getSpecialRemarkStoragePathFromPublicUrl(photoUrl);
+      if (!storagePath) {
+        return photoUrl;
+      }
 
-  const { data, error } = await getSupabaseAdmin().storage
-    .from(STORAGE_BUCKET)
-    .createSignedUrl(storagePath, PHOTO_SIGNED_URL_EXPIRES_IN);
-  throwIfError(error);
+      const { data, error } = await getSupabaseAdmin().storage
+        .from(STORAGE_BUCKET)
+        .createSignedUrl(storagePath, PHOTO_SIGNED_URL_EXPIRES_IN);
+      throwIfError(error);
+      return data?.signedUrl ?? photoUrl;
+    }),
+  );
 
-  return data?.signedUrl ? { ...report, photo_url: data.signedUrl } : report;
+  return {
+    ...normalizedReport,
+    photo_url: signedPhotoUrls[0] ?? null,
+    photo_urls: signedPhotoUrls,
+  };
 }
 
 export async function deleteSpecialRemarkReport(idInput: unknown) {
   const id = requireString(idInput, "특이사항 보고");
   const supabase = getSupabaseAdmin();
   const report = await getSpecialRemarkReportRecord(id);
-  const storagePath = getSpecialRemarkStoragePathFromPublicUrl(report.photo_url);
+  const storagePaths = getPhotoUrls(report)
+    .map((photoUrl) => getSpecialRemarkStoragePathFromPublicUrl(photoUrl))
+    .filter((storagePath): storagePath is string => Boolean(storagePath));
 
-  if (storagePath) {
-    const { error: storageError } = await supabase.storage.from(STORAGE_BUCKET).remove([storagePath]);
+  if (storagePaths.length > 0) {
+    const { error: storageError } = await supabase.storage.from(STORAGE_BUCKET).remove(storagePaths);
     throwIfError(storageError);
   }
 

@@ -15,6 +15,7 @@ type SpecialRemarkReport = {
   employee_name: string;
   content: string;
   photo_url: string | null;
+  photo_urls?: string[] | null;
   processing_status: "Y" | "N";
   gps_info: { latitude: number; longitude: number } | null;
 };
@@ -33,6 +34,10 @@ function formatDateTime(value: string) {
     hour12: false,
     timeZone: "Asia/Seoul",
   }).format(new Date(value));
+}
+
+function getPhotoUrls(report: Pick<SpecialRemarkReport, "photo_url" | "photo_urls">) {
+  return report.photo_urls?.length ? report.photo_urls : report.photo_url ? [report.photo_url] : [];
 }
 
 async function fetchReport(id: string) {
@@ -212,9 +217,18 @@ export default function SpecialRemarkDetailPage({ params }: PageProps) {
 
             <div className="rounded-[0.75rem] border border-border bg-background p-4">
               <p className="text-[0.8125rem] font-semibold text-muted-foreground">첨부사진</p>
-              {report.photo_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img alt="첨부사진" className="mt-3 max-h-[70vh] w-full rounded-[0.75rem] object-contain" src={report.photo_url} />
+              {getPhotoUrls(report).length > 0 ? (
+                <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                  {getPhotoUrls(report).map((photoUrl, index) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      alt={index === 0 ? "첨부사진" : `첨부사진 ${index + 1}`}
+                      className="max-h-[70vh] w-full rounded-[0.75rem] object-contain"
+                      key={`${photoUrl}-${index}`}
+                      src={photoUrl}
+                    />
+                  ))}
+                </div>
               ) : (
                 <p className="mt-3 text-muted-foreground">첨부사진이 없습니다.</p>
               )}

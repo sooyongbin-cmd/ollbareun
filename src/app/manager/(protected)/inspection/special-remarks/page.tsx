@@ -12,6 +12,7 @@ type SpecialRemarkReport = {
   employee_name: string;
   content: string;
   photo_url: string | null;
+  photo_urls?: string[] | null;
   processing_status: "Y" | "N";
 };
 
@@ -34,6 +35,10 @@ function formatDateTime(value: string) {
 function summarizeContent(content: string) {
   const firstLine = content.split(/\r?\n/)[0]?.trim() ?? "";
   return `${firstLine}....`;
+}
+
+function getFirstPhotoUrl(report: Pick<SpecialRemarkReport, "photo_url" | "photo_urls">) {
+  return report.photo_urls?.[0] ?? report.photo_url;
 }
 
 async function fetchReports(year: string) {
@@ -157,12 +162,12 @@ export default function SpecialRemarksPage() {
                       <TableCell data-label="점검자">{report.employee_name}</TableCell>
                       <TableCell data-label="특이사항내용" className="max-w-[26.25rem]">{summarizeContent(report.content)}</TableCell>
                       <TableCell data-label="첨부사진">
-                        {report.photo_url ? (
+                        {getFirstPhotoUrl(report) ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
                             alt="첨부사진 썸네일"
                             className="h-14 w-20 rounded-[0.5rem] border border-border object-cover"
-                            src={report.photo_url}
+                            src={getFirstPhotoUrl(report) ?? undefined}
                           />
                         ) : (
                           <span className="text-muted-foreground">-</span>

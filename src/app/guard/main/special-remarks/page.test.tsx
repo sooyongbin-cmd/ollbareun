@@ -5,6 +5,8 @@ import GuardSpecialRemarksPage from "./page";
 
 const realCreateElement = document.createElement.bind(document);
 const push = vi.fn();
+let currentDataUrls = ["data:image/jpeg;base64,AAAA"];
+let dataUrlIndex = 0;
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push }),
@@ -21,28 +23,13 @@ const guardSession = {
   },
 };
 
-function createMockGeolocationPosition(): GeolocationPosition {
-  return {
-    coords: {
-      latitude: 37.5665,
-      longitude: 126.978,
-      accuracy: 10,
-      altitude: null,
-      altitudeAccuracy: null,
-      heading: null,
-      speed: null,
-      toJSON: () => ({}),
-    },
-    timestamp: Date.now(),
-    toJSON: () => ({}),
-  };
-}
-
 describe("guard special remarks page", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     window.sessionStorage.clear();
     window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
+    currentDataUrls = ["data:image/jpeg;base64,AAAA"];
+    dataUrlIndex = 0;
     Object.defineProperty(navigator, "mediaDevices", {
       configurable: true,
       value: {
@@ -68,262 +55,126 @@ describe("guard special remarks page", () => {
       if (tagName === "canvas") {
         Object.assign(element, {
           getContext: () => ({ drawImage: vi.fn() }),
-          toDataURL: () => "data:image/jpeg;base64,AAAA",
+          toDataURL: () => currentDataUrls[Math.min(dataUrlIndex++, currentDataUrls.length - 1)],
         });
       }
       return element;
     });
   });
 
-  it("captures a photo and shows the disabled Resend report button", async () => {
+  it("keeps the capture button before the attachment list and supports multiple photos", async () => {
+    currentDataUrls = [
+      "data:image/jpeg;base64,AAAA",
+      "data:image/jpeg;base64,BBBB",
+    ];
     const user = userEvent.setup();
-    const fetch = vi.fn(async () => Response.json({ report: { id: "report-1" } }));
-    vi.stubGlobal("fetch", fetch);
     render(<GuardSpecialRemarksPage />);
 
-    await user.type(screen.getByLabelText("특이사항 내용"), "문이 파손되었습니다.");
-    await user.click(screen.getByRole("button", { name: "촬영" }));
-    expect(await screen.findByAltText("촬영된 첨부사진")).toBeInTheDocument();
+    const captureButton = screen.getByRole("button", { name: "촬영" });
+    await user.click(captureButton);
+    await user.click(captureButton);
 
-    expect(screen.getByRole("button", { name: "이메일보고(resend)" })).toBeDisabled();
-    expect(fetch).not.toHaveBeenCalled();
+    const photos = screen.getAllByRole("img", { name: /촬영된 첨부사진/ });
+    expect(photos).toHaveLength(2);
+    expect(captureButton.compareDocumentPosition(photos[0]!)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
-  it("submits the special remark report through Formspree", async () => {
+  it("sends all selected photos in one report", async () => {
+    currentDataUrls = [
+      "data:image/jpeg;base64,AAAA",
+      "data:image/jpeg;base64,BBBB",
+    ];
     const user = userEvent.setup();
-    const fetch = vi.fn(async () => Response.json({ report: { id: "report-1" } }));
-    vi.stubGlobal("fetch", fetch);
-    render(<GuardSpecialRemarksPage />);
-
-    await user.type(screen.getByLabelText("특이사항 내용"), "문이 파손되었습니다.");
-    await user.click(screen.getByRole("button", { name: "촬영" }));
-
-    await user.click(screen.getByRole("button", { name: "이메일(Formspree)" }));
-
-    await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith(
-        "/api/guard/special-remarks/report/formspree",
-        expect.objectContaining({
-          method: "POST",
-          body: expect.stringContaining("문이 파손되었습니다."),
-        }),
-      );
-    });
-    expect(fetch).toHaveBeenCalledWith(
-      "/api/guard/special-remarks/report/formspree",
-      expect.objectContaining({
-        body: expect.stringContaining("data:image/jpeg;base64,AAAA"),
-      }),
-    );
-
-    expect(await screen.findByText("특이사항 보고가 전송되었습니다.")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "확인" }));
-    expect(push).toHaveBeenCalledWith("/guard/main");
-  });
-
-  it("submits the special remark report through Naver mail", async () => {
-    const user = userEvent.setup();
-    const fetch = vi.fn(async () => Response.json({ report: { id: "report-1" } }));
-    vi.stubGlobal("fetch", fetch);
-    render(<GuardSpecialRemarksPage />);
-
-    await user.type(screen.getByLabelText("특이사항 내용"), "문이 파손되었습니다.");
-    await user.click(screen.getByRole("button", { name: "촬영" }));
-
-    expect(screen.getByRole("button", { name: "이메일(NAVER)" })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "이메일(NAVER)" }));
-
-    await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith(
-        "/api/guard/special-remarks/report/naver",
-        expect.objectContaining({
-          method: "POST",
-          body: expect.stringContaining("문이 파손되었습니다."),
-        }),
-      );
-    });
-    expect(fetch).toHaveBeenCalledWith(
-      "/api/guard/special-remarks/report/naver",
-      expect.objectContaining({
-        body: expect.stringContaining("data:image/jpeg;base64,AAAA"),
-      }),
-    );
-  });
-
-  it("stores the report and sends manager push notifications", async () => {
-    const user = userEvent.setup();
-    const fetch = vi.fn(async () =>
-      Response.json({
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      if (String(input) === "/api/guard/configs/special_001") {
+        return Response.json({ enabled: false });
+      }
+      return Response.json({
         report: { id: "report-1" },
-        delivery: { successCount: 2, failedCount: 1, unregisteredCount: 1 },
-      }),
-    );
-    vi.stubGlobal("fetch", fetch);
+        delivery: { successCount: 1, failedCount: 0, unregisteredCount: 0 },
+        email: { status: "sent" },
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
     render(<GuardSpecialRemarksPage />);
 
+    const captureButton = screen.getByRole("button", { name: "촬영" });
+    await user.click(captureButton);
+    await user.click(captureButton);
+    await user.click(screen.getByRole("button", { name: "사진 1 선택" }));
+    await user.click(screen.getByRole("button", { name: "사진 2 선택" }));
     await user.type(screen.getByLabelText("특이사항 내용"), "문이 파손되었습니다.");
-    await user.click(screen.getByRole("button", { name: "푸쉬알림" }));
+    await user.click(screen.getByRole("button", { name: "보고하기" }));
 
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith(
-        "/api/guard/special-remarks/report/push",
-        expect.objectContaining({
-          method: "POST",
-          body: expect.stringContaining("문이 파손되었습니다."),
-        }),
-      );
+      expect(fetchMock.mock.calls.some(([input]) => String(input) === "/api/guard/special-remarks/report/push")).toBe(true);
     });
-    expect(
-      await screen.findByText(
-        "특이사항 보고가 저장되었습니다. 푸시 전송 성공 2건, 실패 1건, 미등록 관리자 1명입니다.",
-      ),
-    ).toBeInTheDocument();
+    const reportCall = fetchMock.mock.calls.find(([input]) => String(input) === "/api/guard/special-remarks/report/push");
+    const reportInit = reportCall?.[1] as RequestInit | undefined;
+    const body = JSON.parse(String(reportInit?.body));
+    expect(body.photoDataUrls).toEqual(currentDataUrls);
+    expect(body.photoDataUrl).toBe(currentDataUrls[0]);
   });
 
-  it("shows that the report was saved when manager push delivery fails", async () => {
+  it("uses continuous speech recognition when special_001 is enabled", async () => {
     const user = userEvent.setup();
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () =>
-        Response.json({
-          report: { id: "report-1" },
-          delivery: {
-            successCount: 0,
-            failedCount: 0,
-            unregisteredCount: 0,
-            error: "VAPID 오류",
-          },
-        }),
-      ),
-    );
-    render(<GuardSpecialRemarksPage />);
-
-    await user.type(screen.getByLabelText("특이사항 내용"), "문이 파손되었습니다.");
-    await user.click(screen.getByRole("button", { name: "푸쉬알림" }));
-
-    expect(
-      await screen.findByText(
-        "특이사항 보고는 저장되었지만 관리자 푸시알림 전송에 실패했습니다. VAPID 오류",
-      ),
-    ).toBeInTheDocument();
-    expect(screen.getByLabelText("특이사항 내용")).toHaveValue("");
-  });
-
-  it("submits the special remark report with GPS coordinates if geolocation is available", async () => {
-    const user = userEvent.setup();
-    const fetch = vi.fn(async () => Response.json({ report: { id: "report-1" } }));
-    vi.stubGlobal("fetch", fetch);
-
-    const mockGetCurrentPosition = vi.fn((success: PositionCallback) => {
-      success(createMockGeolocationPosition());
-    });
-    Object.defineProperty(navigator, "geolocation", {
-      configurable: true,
-      value: {
-        getCurrentPosition: mockGetCurrentPosition,
-      },
-    });
-
-    render(<GuardSpecialRemarksPage />);
-
-    await user.type(screen.getByLabelText("특이사항 내용"), "문이 파손되었습니다.");
-    await user.click(screen.getByRole("button", { name: "촬영" }));
-    await user.click(screen.getByRole("button", { name: "이메일(Formspree)" }));
-
-    await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith(
-        "/api/guard/special-remarks/report/formspree",
-        expect.objectContaining({
-          method: "POST",
-          body: expect.stringContaining('"gpsInfo":{"latitude":37.5665,"longitude":126.978}'),
-        }),
-      );
-    });
-
-    expect(await screen.findByText("특이사항 보고가 전송되었습니다.")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "확인" }));
-    expect(push).toHaveBeenCalledWith("/guard/main");
-  });
-
-  it("submits the Naver report with GPS coordinates if geolocation is available", async () => {
-    const user = userEvent.setup();
-    const fetch = vi.fn(async () => Response.json({ report: { id: "report-1" } }));
-    vi.stubGlobal("fetch", fetch);
-
-    const mockGetCurrentPosition = vi.fn((success: PositionCallback) => {
-      success(createMockGeolocationPosition());
-    });
-    Object.defineProperty(navigator, "geolocation", {
-      configurable: true,
-      value: {
-        getCurrentPosition: mockGetCurrentPosition,
-      },
-    });
-
-    render(<GuardSpecialRemarksPage />);
-
-    await user.type(screen.getByLabelText("특이사항 내용"), "문이 파손되었습니다.");
-    await user.click(screen.getByRole("button", { name: "촬영" }));
-    await user.click(screen.getByRole("button", { name: "이메일(NAVER)" }));
-
-    await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith(
-        "/api/guard/special-remarks/report/naver",
-        expect.objectContaining({
-          method: "POST",
-          body: expect.stringContaining('"gpsInfo":{"latitude":37.5665,"longitude":126.978}'),
-        }),
-      );
-    });
-  });
-
-  it("compresses captured photos until they are under 500KB", async () => {
-    const user = userEvent.setup();
-    const largeDataUrl = `data:image/jpeg;base64,${"A".repeat(700 * 1024)}`;
-    const smallDataUrl = "data:image/jpeg;base64,BBBB";
-    const toDataURL = vi
-      .fn()
-      .mockReturnValueOnce(largeDataUrl)
-      .mockReturnValueOnce(smallDataUrl);
-
-    vi.mocked(document.createElement).mockImplementation((tagName: string) => {
-      const element = realCreateElement(tagName);
-      if (tagName === "canvas") {
-        Object.assign(element, {
-          getContext: () => ({ drawImage: vi.fn() }),
-          toDataURL,
-        });
-      }
-      return element;
-    });
-
-    render(<GuardSpecialRemarksPage />);
-
-    await user.click(screen.getByRole("button", { name: "촬영" }));
-
-    expect(toDataURL).toHaveBeenNthCalledWith(1, "image/jpeg", 0.82);
-    expect(toDataURL).toHaveBeenNthCalledWith(2, "image/jpeg", 0.78);
-    expect(await screen.findByAltText("촬영된 첨부사진")).toHaveAttribute("src", smallDataUrl);
-  });
-
-  it("adds recognized speech to the text area", async () => {
-    const user = userEvent.setup();
+    const fetchMock = vi.fn(async () => Response.json({ enabled: true }));
+    vi.stubGlobal("fetch", fetchMock);
     const start = vi.fn(function start(this: { onresult?: (event: unknown) => void; onend?: () => void }) {
       this.onresult?.({ results: [[{ transcript: "음성 내용" }]] });
       this.onend?.();
     });
+    const recognitions: Array<Record<string, unknown>> = [];
     Object.assign(window, {
       webkitSpeechRecognition: vi.fn(function SpeechRecognition(this: Record<string, unknown>) {
         this.start = start;
         this.stop = vi.fn();
+        recognitions.push(this);
       }),
     });
-
     render(<GuardSpecialRemarksPage />);
 
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(
+      "/api/guard/configs/special_001",
+      expect.objectContaining({ cache: "no-store" }),
+    ));
     await user.click(screen.getByRole("button", { name: "음성 입력" }));
 
     expect(start).toHaveBeenCalled();
+    expect(recognitions[0]?.continuous).toBe(true);
     expect(await screen.findByDisplayValue("음성 내용")).toBeInTheDocument();
+  });
+
+  it("keeps one-shot speech recognition when special_001 is not enabled", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn(async () => Response.json({ enabled: false }));
+    vi.stubGlobal("fetch", fetchMock);
+    const start = vi.fn();
+    const recognitions: Array<Record<string, unknown>> = [];
+    Object.assign(window, {
+      webkitSpeechRecognition: vi.fn(function SpeechRecognition(this: Record<string, unknown>) {
+        this.start = start;
+        this.stop = vi.fn();
+        recognitions.push(this);
+      }),
+    });
+    render(<GuardSpecialRemarksPage />);
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    await user.click(screen.getByRole("button", { name: "음성 입력" }));
+
+    expect(start).toHaveBeenCalled();
+    expect(recognitions[0]?.continuous).toBe(false);
+  });
+
+  it("compresses captured photos until they are under 500KB", async () => {
+    const largeDataUrl = `data:image/jpeg;base64,${"A".repeat(700 * 1024)}`;
+    currentDataUrls = [largeDataUrl, "data:image/jpeg;base64,BBBB"];
+    const user = userEvent.setup();
+    render(<GuardSpecialRemarksPage />);
+
+    await user.click(screen.getByRole("button", { name: "촬영" }));
+
+    expect(screen.getByAltText("촬영된 첨부사진 1")).toHaveAttribute("src", "data:image/jpeg;base64,BBBB");
   });
 });

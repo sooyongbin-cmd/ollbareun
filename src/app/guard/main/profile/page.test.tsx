@@ -11,6 +11,23 @@ const signInWithPassword = vi.fn();
 const registerPasskey = vi.fn();
 const signOut = vi.fn();
 
+function dateKeyInSeoul() {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
+}
+
+function addDateDays(dateKey: string, amount: number) {
+  const date = new Date(`${dateKey}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + amount);
+  return date.toISOString().slice(0, 10);
+}
+
+function mondayOf(dateKey: string) {
+  const date = new Date(`${dateKey}T00:00:00Z`);
+  const day = date.getUTCDay();
+  date.setUTCDate(date.getUTCDate() + (day === 0 ? -6 : 1 - day));
+  return date.toISOString().slice(0, 10);
+}
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push }),
 }));
@@ -71,6 +88,50 @@ describe("guard profile page", () => {
     expect(screen.getByText("25시간 30분")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "패스키 등록 요청" })).toBeInTheDocument();
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  });
+
+  it("groups planned attendance into future weeks and renders Monday through Sunday from the selected week", async () => {
+    const today = dateKeyInSeoul();
+    const currentWeekStart = mondayOf(today);
+    const nextWeekStart = addDateDays(currentWeekStart, 7);
+    const currentWeekDayOff = addDateDays(currentWeekStart, 1);
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.startsWith("/api/guard/passkey-requests/me")) {
+        return Response.json({ request: null });
+      }
+      if (url.startsWith("/api/guard/profile")) {
+        return Response.json({
+          schedules: [{ id: "assign-1", period: `${currentWeekStart} ~ ${addDateDays(nextWeekStart, 2)}`, worksiteName: "본사" }],
+          plannedAttendance: [
+            { assignmentId: "assign-1", workDate: today, inTime: "2026-09-18T21:00:00.000Z", outTime: null, isDayOff: false },
+            { assignmentId: "assign-1", workDate: nextWeekStart, inTime: "2026-09-25T21:00:00.000Z", outTime: null, isDayOff: false },
+          ],
+          plannedDaysOff: [{ assignmentId: "assign-1", workDate: currentWeekDayOff }],
+          monthlyAttendance: [],
+        });
+      }
+      return Response.json({}, { status: 404 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    window.sessionStorage.setItem(
+      "ollbareun.guard.session",
+      JSON.stringify({ employee: { id: "emp-1", name: "홍길동" } }),
+    );
+
+    render(<GuardProfilePage />);
+
+    const scheduleSelect = await screen.findByRole("combobox", { name: "근무 스케줄 선택" });
+    await waitFor(() => expect(scheduleSelect).toHaveValue(currentWeekStart));
+    expect(scheduleSelect.querySelectorAll("option")).toHaveLength(2);
+    expect(screen.getByLabelText(`${today} 근무`)).toBeInTheDocument();
+    expect(screen.getByLabelText(`${currentWeekDayOff} 휴무`)).toBeInTheDocument();
+
+    fireEvent.change(scheduleSelect, { target: { value: nextWeekStart } });
+
+    expect(scheduleSelect).toHaveValue(nextWeekStart);
+    expect(screen.getByLabelText(`${nextWeekStart} 근무`)).toBeInTheDocument();
+    expect(screen.getByLabelText(`${addDateDays(nextWeekStart, 1)} 휴무`)).toBeInTheDocument();
   });
 
   it("opens the work and absence detail modals from the monthly cards", async () => {

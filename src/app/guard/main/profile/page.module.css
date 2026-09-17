@@ -112,7 +112,7 @@
 }
 
 .scheduleSection {
-  height: 109px;
+  min-height: 109px;
   padding: 15px 0;
 }
 
@@ -158,6 +158,29 @@
   white-space: nowrap;
 }
 
+.scheduleSelect {
+  position: relative;
+  display: inline-flex;
+  max-width: 170px;
+}
+
+.scheduleSelect .selectButton {
+  max-width: 170px;
+  padding-right: 29px;
+  cursor: pointer;
+}
+
+.scheduleSelect .selectButton:disabled {
+  cursor: not-allowed;
+}
+
+.scheduleSelect img {
+  position: absolute;
+  top: 3px;
+  right: 8px;
+  pointer-events: none;
+}
+
 .selectButton img {
   display: block;
   width: 16px;
@@ -167,7 +190,7 @@
 .weekdayGrid {
   display: grid;
   width: 100%;
-  height: 40px;
+  min-height: 54px;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 2px;
   margin-top: 15px;
@@ -176,7 +199,7 @@
 .weekday {
   display: flex;
   min-width: 0;
-  height: 40px;
+  min-height: 54px;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
@@ -186,6 +209,12 @@
   font-weight: 500;
   line-height: normal;
   text-align: center;
+}
+
+.weekdayDate {
+  color: #979797;
+  font-size: 10px;
+  line-height: 12px;
 }
 
 .weekdayStatus {
@@ -310,6 +339,14 @@
 
 .loadingMessage {
   color: #675d5d;
+}
+
+.emptySchedule {
+  margin: 15px 0 0;
+  color: #979797;
+  font-size: 12px;
+  line-height: 20px;
+  text-align: center;
 }
 
 .modalOverlay {

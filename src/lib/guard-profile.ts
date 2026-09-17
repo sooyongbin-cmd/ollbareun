@@ -1,4 +1,3 @@
-import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
 
 export type GuardProfileScheduleInput = {
@@ -329,11 +328,13 @@ export function buildGuardProfile(input: {
 export async function loadGuardProfile(employeeIdInput: unknown) {
   const employeeId = requireEmployeeId(employeeIdInput);
   const { startDate, endDate } = getRecentOneYearDateRange();
-  const supabase = getSupabase();
-  const supabaseAdmin = getSupabaseAdmin();
+  // Guard login is a legacy name/phone flow without a Supabase Auth session.
+  // Use the privileged client for every profile query so RLS cannot hide the
+  // assignment rows needed to look up the planned attendance rows.
+  const supabase = getSupabaseAdmin();
 
   const [employeeResult, schedulesResult, worksitesResult, attendanceResult] = await Promise.all([
-    supabaseAdmin
+    supabase
       .from("employees")
       .select("work_style")
       .eq("id", employeeId)
@@ -364,7 +365,7 @@ export async function loadGuardProfile(employeeIdInput: unknown) {
 
   const scheduleInputs = (schedulesResult.data ?? []) as GuardProfileScheduleInput[];
   const assignmentIds = scheduleInputs.map((schedule) => schedule.id);
-  const scheduleDataClient = supabaseAdmin;
+  const scheduleDataClient = supabase;
   const [scheduledAttendanceResult, daysOffResult] = assignmentIds.length
     ? await Promise.all([
         scheduleDataClient

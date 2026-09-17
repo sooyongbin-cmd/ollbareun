@@ -1,4 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { loadGuardProfile } from "./guard-profile";
+
+const supabaseMocks = vi.hoisted(() => ({
+  getSupabase: vi.fn(),
+  getSupabaseAdmin: vi.fn(),
+}));
+
+vi.mock("./supabase", () => ({ getSupabase: supabaseMocks.getSupabase }));
+vi.mock("./supabase-admin", () => ({ getSupabaseAdmin: supabaseMocks.getSupabaseAdmin }));
+
 import {
   buildGuardProfile,
   getRecentOneYearDateRange,
@@ -38,7 +48,79 @@ const worksites: GuardProfileWorksiteInput[] = [
   { id: "work-2", name: "문현동현장" },
 ];
 
+type QueryResult = { data: unknown; error: null };
+
+function createQuery(result: QueryResult) {
+  const query = {
+    select: vi.fn(),
+    eq: vi.fn(),
+    gte: vi.fn(),
+    lte: vi.fn(),
+    in: vi.fn(),
+    order: vi.fn(),
+    maybeSingle: vi.fn(),
+    then: (resolve: (value: QueryResult) => unknown, reject?: (reason: unknown) => unknown) =>
+      Promise.resolve(result).then(resolve, reject),
+  };
+
+  query.select.mockReturnValue(query);
+  query.eq.mockReturnValue(query);
+  query.gte.mockReturnValue(query);
+  query.lte.mockReturnValue(query);
+  query.in.mockReturnValue(query);
+  query.order.mockResolvedValue(result);
+  query.maybeSingle.mockResolvedValue(result);
+  return query;
+}
+
 describe("guard profile data", () => {
+  it("loads assignment schedules and planned attendance through the privileged client", async () => {
+    const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
+    const queries = {
+      employees: createQuery({ data: { work_style: "1" }, error: null }),
+      work_assignments: createQuery({
+        data: [{
+          id: "assign-1",
+          employee_id: "emp-1",
+          worksite_id: "work-1",
+          start_date: today,
+          end_date: today,
+          in_time: "09:00:00",
+          out_time: "18:00:00",
+        }],
+        error: null,
+      }),
+      worksites: createQuery({ data: worksites, error: null }),
+      attendance_records: createQuery({ data: [], error: null }),
+      work_assignment_daily_attendance: createQuery({
+        data: [{ work_assignment_id: "assign-1", work_date: today, intime: `${today}T00:00:00.000Z`, outtime: null }],
+        error: null,
+      }),
+      work_assignment_days_off: createQuery({ data: [], error: null }),
+    };
+    const adminClient = { from: vi.fn((table: keyof typeof queries) => queries[table]) };
+    supabaseMocks.getSupabase.mockImplementation(() => {
+      throw new Error("profile queries must not use the publishable client");
+    });
+    supabaseMocks.getSupabaseAdmin.mockReturnValue(adminClient);
+
+    const profile = await loadGuardProfile("emp-1");
+
+    expect(profile.schedules).toEqual([{ id: "assign-1", period: `${today} ~ ${today}`, worksiteName: "본사" }]);
+    expect(profile.plannedAttendance).toEqual([
+      {
+        assignmentId: "assign-1",
+        workDate: today,
+        inTime: `${today}T00:00:00.000Z`,
+        outTime: null,
+        isDayOff: false,
+      },
+    ]);
+    expect(supabaseMocks.getSupabase).not.toHaveBeenCalled();
+    expect(adminClient.from).toHaveBeenCalledWith("work_assignments");
+    expect(adminClient.from).toHaveBeenCalledWith("work_assignment_daily_attendance");
+  });
+
   it("includes the employee work style returned by the profile lookup", () => {
     expect(
       buildGuardProfile({

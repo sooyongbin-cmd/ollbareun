@@ -63,6 +63,17 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   return payload as T;
 }
 
+async function fetchQrCodeEnabled() {
+  try {
+    const payload = await fetchJson<{ config?: { content?: string } }>(
+      "/api/system/configs/USE_QR_CODE",
+    );
+    return payload.config?.content?.trim().toUpperCase() === "Y";
+  } catch {
+    return false;
+  }
+}
+
 function buildNfcUrl(siteId: string) {
   return `${window.location.host}/guard/main/inspection-nfc?s=${encodeURIComponent(siteId)}`;
 }
@@ -76,6 +87,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
   const [address, setAddress] = useState("");
   const [gpsInfo, setGpsInfo] = useState<GpsInfo | null>(null);
   const [savedSite, setSavedSite] = useState<InspectionSiteRow | null>(null);
+  const [useQrCode, setUseQrCode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -104,9 +116,10 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
     async function loadSite() {
       try {
         const { id } = await params;
-        const [sitePayload, bootstrapPayload] = await Promise.all([
+        const [sitePayload, bootstrapPayload, qrCodeEnabled] = await Promise.all([
           fetchJson<{ site: InspectionSiteRow }>(`/api/inspection/sites/${encodeURIComponent(id)}`),
           fetchJson<{ worksites?: Worksite[] }>("/api/bootstrap"),
+          fetchQrCodeEnabled(),
         ]);
 
         if (!ignore) {
@@ -118,6 +131,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
           setSiteName(nextSite.name);
           setAddress(nextSite.address);
           setGpsInfo(nextSite.gps_info);
+          setUseQrCode(qrCodeEnabled);
         }
       } catch (loadError) {
         if (!ignore) {
@@ -386,15 +400,17 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
                 <SaveIcon size={20} />
                 <span>저장</span>
               </Button>
-              <Button
-                className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center md:w-auto"
-                disabled={printing || !savedSite}
-                onClick={handleQrPrint}
-                type="button"
-                variant="outline"
-              >
-                QR코드
-              </Button>
+              {useQrCode ? (
+                <Button
+                  className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center md:w-auto"
+                  disabled={printing || !savedSite}
+                  onClick={handleQrPrint}
+                  type="button"
+                  variant="outline"
+                >
+                  QR코드
+                </Button>
+              ) : null}
               <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center md:w-auto" onClick={handleNfcUrl} type="button" variant="outline">
                 NFC(URL)
               </Button>

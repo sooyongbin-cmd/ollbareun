@@ -6,6 +6,7 @@ import InspectionSiteDetailPage from "./page";
 const push = vi.fn();
 const refresh = vi.fn();
 const writeText = vi.fn();
+let qrCodeConfigContent = "Y";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push, refresh }),
@@ -32,6 +33,7 @@ describe("inspection site detail page", () => {
     push.mockReset();
     refresh.mockReset();
     writeText.mockReset();
+    qrCodeConfigContent = "Y";
     writeText.mockResolvedValue(undefined);
     document.head.innerHTML = "";
     delete window.kakao;
@@ -58,6 +60,9 @@ describe("inspection site detail page", () => {
         const url = String(input);
         if (url.endsWith("/api/bootstrap")) {
           return Response.json({ worksites: [{ id: "work-1", name: "Worksite" }] });
+        }
+        if (url.endsWith("/api/system/configs/USE_QR_CODE")) {
+          return Response.json({ config: { content: qrCodeConfigContent } });
         }
         if (url.endsWith("/api/inspection/sites/site-1") && init?.method === "PATCH") {
           expect(JSON.parse(String(init.body))).toMatchObject({
@@ -136,6 +141,14 @@ describe("inspection site detail page", () => {
     });
     await user.click(screen.getByRole("button", { name: "QR코드" }));
     expect(click).toHaveBeenCalled();
+  });
+
+  it("hides the QR button when USE_QR_CODE is N", async () => {
+    qrCodeConfigContent = "N";
+    render(<InspectionSiteDetailPage params={Promise.resolve({ id: "site-1" })} />);
+
+    expect(await screen.findByDisplayValue("Gate")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "QR코드" })).not.toBeInTheDocument();
   });
 
   it("shows error when attempting NFC write on unsupported browser", async () => {

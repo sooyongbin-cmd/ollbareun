@@ -19,9 +19,9 @@ function getEducationResourceErrorMessage(error: unknown, fallback: string) {
 
 export async function GET() {
   try {
-    if (!(await getManagerUser())) {
-      return Response.json({ error: "관리자 인증이 필요합니다." }, { status: 401 });
-    }
+    // Guard safety education uses this read-only endpoint too. Keep writes
+    // manager-only, but read through the server client so RLS cannot hide the
+    // resources from a guard's custom (non-Supabase) session.
     return Response.json({ resources: await listEducationResources(getSupabaseAdmin()) });
   } catch (error) {
     return Response.json(

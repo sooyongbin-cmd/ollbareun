@@ -49,6 +49,17 @@ describe("education resources route", () => {
     });
   });
 
+  it("allows the guard safety page to read education resources without a manager session", async () => {
+    vi.mocked(getManagerUser).mockResolvedValue(null);
+    vi.mocked(listEducationResources).mockResolvedValue([]);
+
+    const response = await GET();
+
+    expect(response.status).toBe(200);
+    expect(getManagerUser).not.toHaveBeenCalled();
+    expect(listEducationResources).toHaveBeenCalledWith({});
+  });
+
   it("creates an education resource from a YouTube link", async () => {
     vi.mocked(createEducationResource).mockResolvedValue({
       id: "resource-1",

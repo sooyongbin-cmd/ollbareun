@@ -1,4 +1,5 @@
-import { getSupabase } from "./supabase";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { getSupabaseAdmin } from "./supabase-admin";
 
 export type EducationCompletionRow = {
   employee_id: string;
@@ -16,8 +17,7 @@ function throwIfError(error: { message?: string } | null) {
   }
 }
 
-export async function listEducationCompletions() {
-  const supabase = getSupabase();
+export async function listEducationCompletions(supabase: SupabaseClient = getSupabaseAdmin()) {
   const [completionsResult, employeesResult, resourcesResult] = await Promise.all([
     supabase
       .from("education_completions")
@@ -48,7 +48,10 @@ export async function listEducationCompletions() {
   })) as EducationCompletionRow[];
 }
 
-export async function markEducationCompletion(input: { employeeId: unknown; resourceId: unknown }) {
+export async function markEducationCompletion(
+  input: { employeeId: unknown; resourceId: unknown },
+  supabase: SupabaseClient = getSupabaseAdmin(),
+) {
   const employeeId = typeof input.employeeId === "string" && input.employeeId.trim() ? input.employeeId.trim() : "";
   const resourceId = typeof input.resourceId === "string" && input.resourceId.trim() ? input.resourceId.trim() : "";
 
@@ -60,7 +63,6 @@ export async function markEducationCompletion(input: { employeeId: unknown; reso
     throw new Error("교재 ID를 입력하세요.");
   }
 
-  const supabase = getSupabase();
   const { data, error } = await supabase
     .from("education_completions")
     .upsert(

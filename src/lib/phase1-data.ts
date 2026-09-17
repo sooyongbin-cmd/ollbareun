@@ -367,7 +367,10 @@ export async function createAssignment(input: {
 }
 
 export async function listAssignments() {
-  const supabase = getSupabase();
+  // This endpoint is manager-only. Use the privileged server client because
+  // a Route Handler does not forward the browser's Supabase auth cookies to
+  // the legacy publishable client, which would make RLS return an empty list.
+  const supabase = getSupabaseAdmin();
   const [assignmentsResult, employeesResult, worksitesResult, daysOffCountByAssignmentId] = await Promise.all([
     supabase.from("work_assignments").select("*").order("start_date", { ascending: false }).order("created_at", { ascending: false }),
     supabase.from("employees").select("id,name"),

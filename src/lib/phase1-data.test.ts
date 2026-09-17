@@ -399,10 +399,12 @@ describe("guard authentication data rules", () => {
         throw new Error(`Unexpected table: ${table}`);
       }),
     };
-    vi.mocked(getSupabase).mockReturnValue(supabase as never);
+    vi.mocked(getSupabaseAdmin).mockReturnValue(supabase as never);
     vi.mocked(getAssignmentDayOffCounts).mockResolvedValue(new Map([["assign-1", 2]]));
+    vi.mocked(getSupabase).mockClear();
 
     const result = await listAssignments();
+    expect(getSupabase).not.toHaveBeenCalled();
     expect(result).toEqual([
       {
         id: "assign-1",

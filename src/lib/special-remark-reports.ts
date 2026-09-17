@@ -82,6 +82,7 @@ async function uploadPhoto(input: {
   }
 
   const supabase = getSupabaseAdmin();
+  await ensureSpecialRemarkBucket();
   const path = `${input.employeeId}/${Date.now()}-${crypto.randomUUID()}.${parsed.extension}`;
   const { error } = await supabase.storage.from(STORAGE_BUCKET).upload(path, parsed.buffer, {
     contentType: parsed.mimeType,
@@ -91,6 +92,37 @@ async function uploadPhoto(input: {
 
   const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path);
   return data.publicUrl;
+}
+
+async function ensureSpecialRemarkBucket() {
+  const storage = getSupabaseAdmin().storage;
+  const { data: bucket, error: bucketError } = await storage.getBucket(STORAGE_BUCKET);
+
+  if (!bucketError && bucket) {
+    if (!bucket.public) {
+      const { error: updateError } = await storage.updateBucket(STORAGE_BUCKET, { public: true });
+      throwIfError(updateError);
+    }
+    return;
+  }
+
+  const { error: createError } = await storage.createBucket(STORAGE_BUCKET, { public: true });
+  if (!createError) {
+    return;
+  }
+
+  // A concurrent request may have created the bucket between getBucket and createBucket.
+  const { data: existingBucket, error: existingBucketError } = await storage.getBucket(STORAGE_BUCKET);
+  if (existingBucketError || !existingBucket) {
+    throwIfError(createError);
+    throwIfError(existingBucketError);
+    throw new Error("특이사항 첨부사진 저장소를 확인하지 못했습니다.");
+  }
+
+  if (!existingBucket.public) {
+    const { error: updateError } = await storage.updateBucket(STORAGE_BUCKET, { public: true });
+    throwIfError(updateError);
+  }
 }
 
 function getPhotoUrls(report: Pick<SpecialRemarkReportRow, "photo_url" | "photo_urls">) {
@@ -421,6 +453,9 @@ export async function sendSpecialRemarkReportEmail(report: SpecialRemarkReportRo
   const supabase = getSupabaseAdmin();
   try {
     const emailTo = report.email_to ?? await getSystemConfigContent("manager_email");
+    if (getPhotoUrls(report).length > 0) {
+      await ensureSpecialRemarkBucket();
+    }
     const emailInput = {
       to: emailTo,
       employeeName: report.employee_name,

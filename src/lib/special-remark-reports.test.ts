@@ -24,12 +24,18 @@ const remove = vi.fn();
 const upload = vi.fn();
 const getPublicUrl = vi.fn();
 const createSignedUrl = vi.fn();
+const getBucket = vi.fn();
+const createBucket = vi.fn();
+const updateBucket = vi.fn();
 const from = vi.fn();
 
 vi.mock("./supabase-admin", () => ({
   getSupabaseAdmin: () => ({
     from,
     storage: {
+      getBucket,
+      createBucket,
+      updateBucket,
       from: () => ({ remove, upload, getPublicUrl, createSignedUrl }),
     },
   }),
@@ -44,6 +50,12 @@ vi.mock("nodemailer", () => ({
     createTransport: nodemailerMock.createTransport,
   },
 }));
+
+beforeEach(() => {
+  getBucket.mockResolvedValue({ data: { public: true }, error: null });
+  createBucket.mockResolvedValue({ data: null, error: null });
+  updateBucket.mockResolvedValue({ data: null, error: null });
+});
 
 describe("special remark report storage deletion", () => {
   beforeEach(() => {
@@ -224,6 +236,37 @@ describe("special remark push-only storage", () => {
       photo_urls: ["https://example.com/photo-1.jpg", "https://example.com/photo-2.jpg"],
     }));
     expect(result.photo_urls).toEqual(["https://example.com/photo-1.jpg", "https://example.com/photo-2.jpg"]);
+  });
+
+  it("creates the public storage bucket before uploading when it is missing", async () => {
+    getBucket.mockResolvedValueOnce({ data: null, error: { message: "Bucket not found" } });
+    upload.mockResolvedValue({ error: null });
+    getPublicUrl.mockReturnValue({ data: { publicUrl: "https://example.com/photo.jpg" } });
+    const insertSingle = vi.fn(async () => ({
+      data: {
+        id: "report-1",
+        photo_url: "https://example.com/photo.jpg",
+        photo_urls: ["https://example.com/photo.jpg"],
+      },
+      error: null,
+    }));
+    const insert = vi.fn(() => ({ select: () => ({ single: insertSingle }) }));
+    from.mockReturnValue({ insert });
+
+    await createSpecialRemarkReport(
+      {
+        employeeId: "employee-1",
+        employeeName: "홍길동",
+        worksiteId: "work-1",
+        worksiteName: "본사",
+        content: "특이사항",
+        photoDataUrl: "data:image/jpeg;base64,AAAA",
+      },
+      { sendEmail: false },
+    );
+
+    expect(createBucket).toHaveBeenCalledWith("special-remarks", { public: true });
+    expect(upload).toHaveBeenCalled();
   });
 });
 

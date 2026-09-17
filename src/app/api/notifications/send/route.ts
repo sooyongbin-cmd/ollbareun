@@ -1,4 +1,4 @@
-import { getSupabase } from "@/lib/supabase";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import webpush from "web-push";
 
 function configureWebPush() {
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "notifications 배열이 유효하지 않거나 비어 있습니다." }, { status: 400 });
     }
 
-    const supabase = getSupabase();
+    const supabase = getSupabaseAdmin();
     const employeeIds = notifications.map((n) => n.employeeId);
 
     // Fetch all push subscriptions for the targeted employees

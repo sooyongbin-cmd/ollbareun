@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "./route";
-import { getSupabase } from "@/lib/supabase";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
-vi.mock("@/lib/supabase", () => ({
-  getSupabase: vi.fn(),
+vi.mock("@/lib/supabase-admin", () => ({
+  getSupabaseAdmin: vi.fn(),
 }));
 vi.mock("@/lib/active-employee", () => ({
   requireActiveEmployee: vi.fn().mockResolvedValue({ id: "emp-1" }),
@@ -48,7 +48,7 @@ describe("POST /api/notifications/subscribe", () => {
       }),
     };
 
-    vi.mocked(getSupabase).mockReturnValue(mockSupabase as never);
+    vi.mocked(getSupabaseAdmin).mockReturnValue(mockSupabase as never);
   });
 
   it("deletes any existing subscription with the same endpoint before upserting the new one", async () => {

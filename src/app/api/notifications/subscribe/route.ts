@@ -1,4 +1,4 @@
-import { getSupabase } from "@/lib/supabase";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { getActiveEmployeeErrorStatus, requireActiveEmployee } from "@/lib/active-employee";
 
 export async function POST(request: Request) {
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "유효한 구독 정보(subscription)가 필요합니다." }, { status: 400 });
     }
 
-    const supabase = getSupabase();
+    const supabase = getSupabaseAdmin();
 
     // Remove any existing subscription associated with this endpoint (device)
     // so that only the most recently logged-in employee on this device receives push notifications.

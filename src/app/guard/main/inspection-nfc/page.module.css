@@ -1,0 +1,196 @@
+.workPage {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 20px 20px 58px;
+}
+
+.workCard {
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 22px;
+  padding: 20px;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 0 4px rgb(0 0 0 / 25%);
+}
+
+.headingRow {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  line-height: normal;
+}
+
+.heading,
+.progress,
+.descriptionText,
+.checkpointTitle,
+.checkpointTime,
+.message,
+.error {
+  margin: 0;
+  word-break: keep-all;
+}
+
+.heading {
+  color: #141414;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: normal;
+}
+
+.progress {
+  color: #005bac;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: normal;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.description {
+  display: flex;
+  width: 100%;
+  min-height: 36px;
+  align-items: center;
+}
+
+.descriptionText {
+  color: #141414;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 18px;
+}
+
+.checkpointList {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.checkpointCard {
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  min-height: 102px;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+  border: 1px solid #ccd5de;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1e1e1e;
+}
+
+.checkpointCard[data-completed="true"] {
+  border-color: #00b9ef;
+  background: rgb(0 185 239 / 10%);
+}
+
+.checkpointDetails {
+  display: flex;
+  width: 100%;
+  min-height: 35px;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.checkpointTitle {
+  max-width: 100%;
+  overflow: hidden;
+  color: #1e1e1e;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 15px;
+  letter-spacing: -0.45px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.checkpointTime {
+  color: #1e1e1e;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 15px;
+  letter-spacing: -0.36px;
+}
+
+.checkpointActions {
+  display: flex;
+  width: 256px;
+  height: 25px;
+  align-items: center;
+  gap: 6px;
+}
+
+.siteLabel,
+.status {
+  display: flex;
+  width: 125px;
+  height: 25px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 13px;
+  letter-spacing: -0.39px;
+  white-space: nowrap;
+}
+
+.siteLabel {
+  border: 1px solid #ccd5de;
+  background: #ffffff;
+  color: #585a5c;
+}
+
+.checkpointCard[data-completed="true"] .siteLabel {
+  border-color: #00b9ef;
+  color: #005bac;
+}
+
+.completedStatus {
+  background: rgb(0 151 224 / 15%);
+  color: #005bac;
+}
+
+.incompleteStatus {
+  background: rgb(255 172 7 / 19%);
+  color: #ff7b00;
+}
+
+.message,
+.error {
+  font-size: 14px;
+  line-height: 18px;
+  text-align: center;
+}
+
+.message {
+  color: #898989;
+}
+
+.error {
+  color: #d92d20;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

@@ -71,6 +71,7 @@
   width: 100%;
   min-height: 284px;
   flex-direction: column;
+  gap: 12px;
   justify-content: space-between;
 }
 

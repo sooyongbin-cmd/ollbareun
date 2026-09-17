@@ -475,11 +475,6 @@ export default function GuardPushRegister() {
 
   return (
     <>
-      {isGuardHome && isPushSetupComplete && (
-        <p role="status" className="mb-6 text-[0.875rem] font-semibold text-primary">
-          Push 알림 세팅 완료
-        </p>
-      )}
       {isGuardHome && (
         <section hidden={isPushSetupComplete} className="mb-6 bg-muted/40 rounded-xl p-[1.5rem] border border-border/50">
           <div className="flex flex-col gap-2">

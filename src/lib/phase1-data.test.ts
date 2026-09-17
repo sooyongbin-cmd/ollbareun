@@ -310,7 +310,7 @@ describe("guard authentication data rules", () => {
         .mockReturnValueOnce(worksiteQuery)
         .mockReturnValueOnce(updateQuery),
     };
-    vi.mocked(getSupabase).mockReturnValue(supabase as never);
+    vi.mocked(getSupabaseAdmin).mockReturnValue(supabase as never);
 
     await expect(clockOut({ employeeId: "emp-1", latitude: 37.5, longitude: 127 })).resolves.toMatchObject({
       id: "attendance-1",
@@ -341,7 +341,7 @@ describe("guard authentication data rules", () => {
         error: null,
       }),
     };
-    vi.mocked(getSupabase).mockReturnValue({
+    vi.mocked(getSupabaseAdmin).mockReturnValue({
       from: vi.fn().mockReturnValue(assignmentQuery),
     } as never);
     vi.mocked(isAssignmentDayOff).mockResolvedValue(true);

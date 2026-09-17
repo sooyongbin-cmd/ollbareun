@@ -509,7 +509,7 @@ async function loadGuardSessionByEmployee(employee: EmployeeRow) {
   };
 }
 
-async function findLatestOpenAttendance(supabase: ReturnType<typeof getSupabase>, employeeId: string) {
+async function findLatestOpenAttendance(supabase: SupabaseClient, employeeId: string) {
   const { data, error } = await supabase
     .from("attendance_records")
     .select("*")
@@ -523,7 +523,7 @@ async function findLatestOpenAttendance(supabase: ReturnType<typeof getSupabase>
   return data as AttendanceRow | null;
 }
 
-async function findTodayAttendance(supabase: ReturnType<typeof getSupabase>, employeeId: string) {
+async function findTodayAttendance(supabase: SupabaseClient, employeeId: string) {
   const { data, error } = await supabase
     .from("attendance_records")
     .select("*")
@@ -535,7 +535,7 @@ async function findTodayAttendance(supabase: ReturnType<typeof getSupabase>, emp
   return data as AttendanceRow | null;
 }
 
-async function findGuardSessionAttendance(supabase: ReturnType<typeof getSupabase>, employeeId: string) {
+async function findGuardSessionAttendance(supabase: SupabaseClient, employeeId: string) {
   return (await findLatestOpenAttendance(supabase, employeeId)) ?? (await findTodayAttendance(supabase, employeeId));
 }
 
@@ -570,7 +570,10 @@ export async function clockIn(input: {
   const worksite_id = requireString(input.worksiteId, "근무지");
   const latitude = requireNumber(input.latitude, "위도");
   const longitude = requireNumber(input.longitude, "경도");
-  const supabase = getSupabase();
+  // Guard authentication is a legacy name/phone flow without a Supabase Auth
+  // session. Use the server client so RLS cannot hide the guard's assignment
+  // or attendance record from the attendance API.
+  const supabase = getSupabaseAdmin();
 
   const { data: assignment, error: assignmentError } = await supabase
     .from("work_assignments")
@@ -645,7 +648,9 @@ export async function clockOut(input: {
   const employee_id = requireString(input.employeeId, "직원");
   const latitude = requireNumber(input.latitude, "위도");
   const longitude = requireNumber(input.longitude, "경도");
-  const supabase = getSupabase();
+  // The guard session is not a Supabase Auth session, so the publishable
+  // client would not be able to see the existing attendance row under RLS.
+  const supabase = getSupabaseAdmin();
 
   const attendance = await findLatestOpenAttendance(supabase, employee_id);
 

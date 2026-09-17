@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DELETE, GET, PATCH } from "./route";
 import { deleteInspectionSite, getInspectionSiteById, updateInspectionSite } from "@/lib/inspection";
+import { getManagerUser } from "@/lib/manager-auth";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 vi.mock("@/lib/inspection", () => ({
   deleteInspectionSite: vi.fn(),
@@ -8,11 +10,21 @@ vi.mock("@/lib/inspection", () => ({
   updateInspectionSite: vi.fn(),
 }));
 
+vi.mock("@/lib/manager-auth", () => ({
+  getManagerUser: vi.fn(),
+}));
+
+vi.mock("@/lib/supabase-admin", () => ({
+  getSupabaseAdmin: vi.fn(),
+}));
+
 const context = { params: Promise.resolve({ id: "site-1" }) };
 
 describe("/api/inspection/sites/[id]", () => {
   beforeEach(() => {
-    vi.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.mocked(getManagerUser).mockResolvedValue({ id: "manager-1" } as never);
+    vi.mocked(getSupabaseAdmin).mockReturnValue({} as never);
   });
 
   it("returns an inspection site", async () => {
@@ -30,7 +42,7 @@ describe("/api/inspection/sites/[id]", () => {
 
     expect(response.status).toBe(200);
     expect(payload.site).toMatchObject({ id: "site-1", name: "Gate" });
-    expect(getInspectionSiteById).toHaveBeenCalledWith("site-1");
+    expect(getInspectionSiteById).toHaveBeenCalledWith("site-1", {});
   });
 
   it("updates an inspection site", async () => {
@@ -60,7 +72,7 @@ describe("/api/inspection/sites/[id]", () => {
 
     expect(response.status).toBe(200);
     expect(payload.site).toMatchObject({ id: "site-1", name: "Gate" });
-    expect(updateInspectionSite).toHaveBeenCalledWith({ id: "site-1", ...body });
+    expect(updateInspectionSite).toHaveBeenCalledWith({ id: "site-1", ...body }, {});
   });
 
   it("deletes an inspection site", async () => {
@@ -71,6 +83,6 @@ describe("/api/inspection/sites/[id]", () => {
 
     expect(response.status).toBe(200);
     expect(payload).toEqual({ success: true });
-    expect(deleteInspectionSite).toHaveBeenCalledWith("site-1");
+    expect(deleteInspectionSite).toHaveBeenCalledWith("site-1", {});
   });
 });

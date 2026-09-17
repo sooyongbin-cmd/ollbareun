@@ -1,3 +1,4 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { durationLabel } from "./work-duration";
 import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
@@ -326,12 +327,14 @@ export async function createAttendanceRecord(input: {
   return data;
 }
 
-export async function loadAttendanceRecord(recordId: string): Promise<AttendanceRecord> {
+export async function loadAttendanceRecord(
+  recordId: string,
+  supabase: SupabaseClient = getSupabase(),
+): Promise<AttendanceRecord> {
   if (!recordId.trim()) {
     throw new Error("근태 기록을 확인할 수 없습니다.");
   }
 
-  const supabase = getSupabase();
   const { data: attendance, error: attendanceError } = await supabase
     .from("attendance_records")
     .select("id,employee_id,worksite_id,clock_in_at,clock_out_at,clock_in_latitude,clock_in_longitude,clock_out_latitude,clock_out_longitude")

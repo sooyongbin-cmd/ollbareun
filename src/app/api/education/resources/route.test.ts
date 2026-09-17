@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createEducationResource, listEducationResources } from "@/lib/education-resources";
+import { getManagerUser } from "@/lib/manager-auth";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { GET, POST } from "./route";
 
 vi.mock("@/lib/education-resources", () => ({
@@ -7,10 +9,20 @@ vi.mock("@/lib/education-resources", () => ({
   listEducationResources: vi.fn(),
 }));
 
+vi.mock("@/lib/manager-auth", () => ({
+  getManagerUser: vi.fn(),
+}));
+
+vi.mock("@/lib/supabase-admin", () => ({
+  getSupabaseAdmin: vi.fn(),
+}));
+
 describe("education resources route", () => {
   beforeEach(() => {
     vi.mocked(createEducationResource).mockReset();
     vi.mocked(listEducationResources).mockReset();
+    vi.mocked(getManagerUser).mockResolvedValue({ id: "manager-1" } as never);
+    vi.mocked(getSupabaseAdmin).mockReturnValue({} as never);
   });
 
   it("lists education resources", async () => {
@@ -51,10 +63,13 @@ describe("education resources route", () => {
     const response = await POST({ formData: async () => body } as Request);
 
     expect(response.status).toBe(200);
-    expect(createEducationResource).toHaveBeenCalledWith({
-      title: "화재 안전 교육",
-      youtubeLink: "https://www.youtube.com/watch?v=fireSafety",
-    });
+    expect(createEducationResource).toHaveBeenCalledWith(
+      {
+        title: "화재 안전 교육",
+        youtubeLink: "https://www.youtube.com/watch?v=fireSafety",
+      },
+      {},
+    );
     await expect(response.json()).resolves.toEqual({
       resource: {
         id: "resource-1",

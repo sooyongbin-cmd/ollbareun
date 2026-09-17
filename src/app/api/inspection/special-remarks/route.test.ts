@@ -1,14 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { listSpecialRemarkReports } from "@/lib/special-remark-reports";
+import { getManagerUser } from "@/lib/manager-auth";
 import { GET } from "./route";
 
 vi.mock("@/lib/special-remark-reports", () => ({
   listSpecialRemarkReports: vi.fn(),
 }));
 
+vi.mock("@/lib/manager-auth", () => ({
+  getManagerUser: vi.fn(),
+}));
+
 describe("GET /api/inspection/special-remarks", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(getManagerUser).mockResolvedValue({ id: "manager-1" } as never);
   });
 
   it("passes the optional year filter to the report loader", async () => {

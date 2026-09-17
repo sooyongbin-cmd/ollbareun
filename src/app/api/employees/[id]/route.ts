@@ -1,4 +1,6 @@
 import { deleteEmployee, getEmployeeById, listAssignmentsForEmployee, updateEmployee } from "@/lib/phase1-data";
+import { getManagerUser } from "@/lib/manager-auth";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -6,10 +8,15 @@ type RouteContext = {
 
 export async function GET(_: Request, { params }: RouteContext) {
   try {
+    if (!(await getManagerUser())) {
+      return Response.json({ error: "관리자 인증이 필요합니다." }, { status: 401 });
+    }
+
     const { id } = await params;
+    const supabase = getSupabaseAdmin();
     const [employee, assignments] = await Promise.all([
-      getEmployeeById(id),
-      listAssignmentsForEmployee(id),
+      getEmployeeById(id, supabase),
+      listAssignmentsForEmployee(id, supabase),
     ]);
     return Response.json({ employee, assignments });
   } catch (error) {
@@ -22,8 +29,13 @@ export async function GET(_: Request, { params }: RouteContext) {
 
 export async function PATCH(request: Request, { params }: RouteContext) {
   try {
+    if (!(await getManagerUser())) {
+      return Response.json({ error: "관리자 인증이 필요합니다." }, { status: 401 });
+    }
+
     const { id } = await params;
     const body = await request.json();
+    const supabase = getSupabaseAdmin();
     return Response.json({
       employee: await updateEmployee({
         id,
@@ -34,7 +46,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
         work_style: body.work_style,
         in_time: body.in_time,
         out_time: body.out_time,
-      }),
+      }, supabase),
     });
   } catch (error) {
     return Response.json(
@@ -46,8 +58,12 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 
 export async function DELETE(_: Request, { params }: RouteContext) {
   try {
+    if (!(await getManagerUser())) {
+      return Response.json({ error: "관리자 인증이 필요합니다." }, { status: 401 });
+    }
+
     const { id } = await params;
-    await deleteEmployee(id);
+    await deleteEmployee(id, getSupabaseAdmin());
     return new Response(null, { status: 204 });
   } catch (error) {
     return Response.json(

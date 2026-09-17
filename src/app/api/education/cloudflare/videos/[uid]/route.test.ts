@@ -1,14 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getCloudflareVideoByUid } from "@/lib/cloudflare-stream";
+import { getManagerUser } from "@/lib/manager-auth";
 import { GET } from "./route";
 
 vi.mock("@/lib/cloudflare-stream", () => ({
   getCloudflareVideoByUid: vi.fn(),
 }));
 
+vi.mock("@/lib/manager-auth", () => ({
+  getManagerUser: vi.fn(),
+}));
+
 describe("cloudflare video detail route", () => {
   beforeEach(() => {
     vi.mocked(getCloudflareVideoByUid).mockReset();
+    vi.mocked(getManagerUser).mockResolvedValue({ id: "manager-1" } as never);
   });
 
   it("returns one Cloudflare video", async () => {

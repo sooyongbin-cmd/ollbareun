@@ -1,25 +1,9 @@
-type CloudflareVideoRow = {
-  uid: string;
-  title: string;
-  status: string;
-  pctComplete: string | null;
-  uploaded: string | null;
-  size: number | null;
-  duration: number | null;
-  readyToStream: boolean;
-};
+import { requireManagerUser } from "@/lib/manager-auth";
+import { getCloudflareVideoByUid, type CloudflareVideoRow } from "@/lib/cloudflare-stream";
 
 async function loadCloudflareVideo(uid: string) {
-  const response = await fetch(`/api/education/cloudflare/videos/${encodeURIComponent(uid)}`, {
-    cache: "no-store",
-  });
-  const payload = await response.json();
-
-  if (!response.ok) {
-    throw new Error(payload.error ?? "Cloudflare 동영상을 불러오지 못했습니다.");
-  }
-
-  return payload.video as CloudflareVideoRow;
+  await requireManagerUser(`/manager/safety/cloudflare/watch/${encodeURIComponent(uid)}`);
+  return getCloudflareVideoByUid(uid) as Promise<CloudflareVideoRow>;
 }
 
 function getStatusText(video: CloudflareVideoRow) {

@@ -1,4 +1,5 @@
 import { getManagerUser } from "@/lib/manager-auth";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { deleteAttendanceRecord, loadAttendanceRecord, updateAttendanceRecord } from "@/lib/manager-reports";
 
 type RouteContext = {
@@ -13,7 +14,7 @@ export async function GET(_: Request, { params }: RouteContext) {
     }
 
     const { id } = await params;
-    return Response.json({ attendance: await loadAttendanceRecord(id) });
+    return Response.json({ attendance: await loadAttendanceRecord(id, getSupabaseAdmin()) });
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "근태 기록을 불러오지 못했습니다." },

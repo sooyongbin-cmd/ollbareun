@@ -208,18 +208,19 @@ export async function createEmployee(
   return data as EmployeeRow;
 }
 
-export async function getEmployeeById(id: unknown) {
+export async function getEmployeeById(id: unknown, supabase: SupabaseClient = getSupabase()) {
   const employeeId = requireString(id, "직원");
-  const supabase = getSupabase();
   const { data, error } = await supabase.from("employees").select("*").eq("id", employeeId).single();
 
   throwIfError(error);
   return data as EmployeeRow;
 }
 
-export async function listAssignmentsForEmployee(employeeIdInput: unknown) {
+export async function listAssignmentsForEmployee(
+  employeeIdInput: unknown,
+  supabase: SupabaseClient = getSupabase(),
+) {
   const employeeId = requireString(employeeIdInput, "직원");
-  const supabase = getSupabase();
   const [assignmentsResult, worksitesResult] = await Promise.all([
     supabase
       .from("work_assignments")
@@ -248,7 +249,7 @@ export async function updateEmployee(input: {
   work_style?: unknown;
   in_time?: unknown;
   out_time?: unknown;
-}) {
+}, supabase: SupabaseClient = getSupabase()) {
   const id = requireString(input.id, "직원");
   const name = requireString(input.name, "직원이름");
   const phone = requireString(input.phone, "연락처");
@@ -261,7 +262,6 @@ export async function updateEmployee(input: {
   }
 
   const schedule = validateEmployeeSchedule(input);
-  const supabase = getSupabase();
   const { data, error } = await supabase
     .from("employees")
     .update({ name, phone, phone_normalized, is_retired, role, ...schedule })
@@ -273,9 +273,8 @@ export async function updateEmployee(input: {
   return data as EmployeeRow;
 }
 
-export async function deleteEmployee(id: unknown) {
+export async function deleteEmployee(id: unknown, supabase: SupabaseClient = getSupabase()) {
   const employeeId = requireString(id, "직원");
-  const supabase = getSupabase();
   const { error } = await supabase.from("employees").delete().eq("id", employeeId);
 
   throwIfError(error);
@@ -303,9 +302,8 @@ export async function createWorksite(input: {
   return data as WorksiteRow;
 }
 
-export async function getWorksiteById(id: unknown) {
+export async function getWorksiteById(id: unknown, supabase: SupabaseClient = getSupabase()) {
   const worksiteId = requireString(id, "근무지");
-  const supabase = getSupabase();
   const { data, error } = await supabase.from("worksites").select("*").eq("id", worksiteId).single();
 
   throwIfError(error);
@@ -318,14 +316,13 @@ export async function updateWorksite(input: {
   address: unknown;
   gpsInfo: unknown;
   radiusMeters: unknown;
-}) {
+}, supabase: SupabaseClient = getSupabase()) {
   const id = requireString(input.id, "근무지");
   const name = requireString(input.name, "근무지명");
   const address = requireString(input.address, "근무지주소");
   const gps_info = requireGpsInfo(input.gpsInfo);
   const radius_meters = Math.max(1, Math.round(requireNumber(input.radiusMeters, "허용반경")));
 
-  const supabase = getSupabase();
   const { data, error } = await supabase
     .from("worksites")
     .update({ name, address, gps_info, radius_meters })
@@ -337,9 +334,8 @@ export async function updateWorksite(input: {
   return data as WorksiteRow;
 }
 
-export async function deleteWorksite(id: unknown) {
+export async function deleteWorksite(id: unknown, supabase: SupabaseClient = getSupabase()) {
   const worksiteId = requireString(id, "근무지");
-  const supabase = getSupabase();
   const { error } = await supabase.from("worksites").delete().eq("id", worksiteId);
 
   throwIfError(error);
@@ -395,9 +391,8 @@ export async function listAssignments() {
   })) as AssignmentListRow[];
 }
 
-export async function getAssignmentById(id: unknown) {
+export async function getAssignmentById(id: unknown, supabase: SupabaseClient = getSupabase()) {
   const assignmentId = requireString(id, "배정");
-  const supabase = getSupabase();
   const { data, error } = await supabase
     .from("work_assignments")
     .select("*")
@@ -414,13 +409,12 @@ export async function updateAssignment(input: {
   worksiteId: unknown;
   startDate?: unknown;
   endDate?: unknown;
-}) {
+}, supabase: SupabaseClient = getSupabase()) {
   const id = requireString(input.id, "배정");
   const employee_id = requireString(input.employeeId, "직원");
   const worksite_id = requireString(input.worksiteId, "근무지");
   const { start_date, end_date } = requireDateRange(input);
 
-  const supabase = getSupabase();
   const { data: overlappingAssignment, error: overlapError } = await supabase
     .from("work_assignments")
     .select("id")
@@ -447,9 +441,8 @@ export async function updateAssignment(input: {
   return data as AssignmentRow;
 }
 
-export async function deleteAssignment(id: unknown) {
+export async function deleteAssignment(id: unknown, supabase: SupabaseClient = getSupabase()) {
   const assignmentId = requireString(id, "배정");
-  const supabase = getSupabase();
   const { error } = await supabase.from("work_assignments").delete().eq("id", assignmentId);
 
   throwIfError(error);

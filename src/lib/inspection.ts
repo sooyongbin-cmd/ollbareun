@@ -1,3 +1,4 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireGpsInfo, type GpsInfo } from "./gps";
 import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
@@ -125,9 +126,11 @@ export function compareInspectionSites<T extends { worksite_name?: string | null
   return (right.name ?? "").localeCompare(left.name ?? "", "ko-KR");
 }
 
-export async function listInspectionSites(input: { name?: unknown } = {}) {
+export async function listInspectionSites(
+  input: { name?: unknown } = {},
+  supabase: SupabaseClient = getSupabase(),
+) {
   const name = typeof input.name === "string" ? input.name.trim() : "";
-  const supabase = getSupabase();
   const sitesQuery = supabase
     .from("inspection_sites")
     .select("*")
@@ -151,13 +154,11 @@ export async function createInspectionSite(input: {
   name: unknown;
   address: unknown;
   gpsInfo: unknown;
-}) {
+}, supabase: SupabaseClient = getSupabase()) {
   const worksite_id = requireString(input.worksiteId, "근무지");
   const name = requireString(input.name, "현장명");
   const address = requireString(input.address, "현장주소");
   const gps_info = requireGpsInfo(input.gpsInfo);
-  const supabase = getSupabase();
-
   const { data, error } = await supabase
     .from("inspection_sites")
     .insert({ worksite_id, name, address, gps_info })
@@ -180,9 +181,8 @@ export async function createInspectionSite(input: {
   } as InspectionSiteRow;
 }
 
-export async function getInspectionSiteById(id: unknown) {
+export async function getInspectionSiteById(id: unknown, supabase: SupabaseClient = getSupabase()) {
   const siteId = requireString(id, "현장");
-  const supabase = getSupabase();
   const { data, error } = await supabase.from("inspection_sites").select("*").eq("id", siteId).single();
   throwIfError(error);
 
@@ -205,14 +205,12 @@ export async function updateInspectionSite(input: {
   name: unknown;
   address: unknown;
   gpsInfo: unknown;
-}) {
+}, supabase: SupabaseClient = getSupabaseAdmin()) {
   const siteId = requireString(input.id, "현장");
   const worksite_id = requireString(input.worksiteId, "근무지");
   const name = requireString(input.name, "현장명");
   const address = requireString(input.address, "현장주소");
   const gps_info = requireGpsInfo(input.gpsInfo);
-  const supabase = getSupabaseAdmin();
-
   const { data, error } = await supabase
     .from("inspection_sites")
     .update({ worksite_id, name, address, gps_info })
@@ -236,9 +234,8 @@ export async function updateInspectionSite(input: {
   } as InspectionSiteRow;
 }
 
-export async function deleteInspectionSite(id: unknown) {
+export async function deleteInspectionSite(id: unknown, supabase: SupabaseClient = getSupabaseAdmin()) {
   const siteId = requireString(id, "현장");
-  const supabase = getSupabaseAdmin();
   const { error } = await supabase.from("inspection_sites").delete().eq("id", siteId);
   throwIfError(error);
 }

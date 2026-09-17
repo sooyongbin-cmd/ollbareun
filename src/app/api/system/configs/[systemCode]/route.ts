@@ -7,6 +7,10 @@ type RouteContext = {
 
 export async function GET(_: Request, { params }: RouteContext) {
   try {
+    const manager = await getManagerUser();
+    if (!manager) {
+      return Response.json({ error: "인증 정보가 올바르지 않습니다." }, { status: 401 });
+    }
     const { systemCode } = await params;
     return Response.json({ config: await getSystemConfig(decodeURIComponent(systemCode)) });
   } catch (error) {

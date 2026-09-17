@@ -1,4 +1,6 @@
 import { createEducationResource, listEducationResources } from "@/lib/education-resources";
+import { getManagerUser } from "@/lib/manager-auth";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 function getEducationResourceErrorMessage(error: unknown, fallback: string) {
   const errorName = typeof error === "object" && error !== null && "name" in error ? String(error.name) : "";
@@ -17,7 +19,10 @@ function getEducationResourceErrorMessage(error: unknown, fallback: string) {
 
 export async function GET() {
   try {
-    return Response.json({ resources: await listEducationResources() });
+    if (!(await getManagerUser())) {
+      return Response.json({ error: "관리자 인증이 필요합니다." }, { status: 401 });
+    }
+    return Response.json({ resources: await listEducationResources(getSupabaseAdmin()) });
   } catch (error) {
     return Response.json(
       { error: getEducationResourceErrorMessage(error, "교육자료 목록을 불러오지 못했습니다.") },
@@ -28,12 +33,16 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    if (!(await getManagerUser())) {
+      return Response.json({ error: "관리자 인증이 필요합니다." }, { status: 401 });
+    }
     const formData = await request.formData();
+    const supabase = getSupabaseAdmin();
     return Response.json({
       resource: await createEducationResource({
         title: formData.get("title"),
         youtubeLink: formData.get("youtubeLink"),
-      }),
+      }, supabase),
     });
   } catch (error) {
     return Response.json(

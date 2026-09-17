@@ -1,3 +1,4 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabase } from "./supabase";
 
 export type EducationResourceRow = {
@@ -50,8 +51,7 @@ function throwIfError(error: { message?: string; hint?: string; code?: string } 
   }
 }
 
-export async function listEducationResources() {
-  const supabase = getSupabase();
+export async function listEducationResources(supabase: SupabaseClient = getSupabase()) {
   const { data, error } = await supabase
     .from("education_resources")
     .select("id,title,youtube_link,created_at")
@@ -61,9 +61,11 @@ export async function listEducationResources() {
   return (data ?? []) as EducationResourceRow[];
 }
 
-export async function getEducationResourceById(resourceId: string) {
+export async function getEducationResourceById(
+  resourceId: string,
+  supabase: SupabaseClient = getSupabase(),
+) {
   const id = requireString(resourceId, "교육자료 ID");
-  const supabase = getSupabase();
   const { data, error } = await supabase
     .from("education_resources")
     .select("id,title,youtube_link,created_at")
@@ -74,11 +76,13 @@ export async function getEducationResourceById(resourceId: string) {
   return data as EducationResourceRow;
 }
 
-export async function createEducationResource(input: { title: unknown; youtubeLink: unknown }) {
+export async function createEducationResource(
+  input: { title: unknown; youtubeLink: unknown },
+  supabase: SupabaseClient = getSupabase(),
+) {
   const title = requireString(input.title, "제목");
   const youtubeLink = requireYoutubeLink(input.youtubeLink);
 
-  const supabase = getSupabase();
   const { data, error } = await supabase
     .from("education_resources")
     .insert({
@@ -92,12 +96,14 @@ export async function createEducationResource(input: { title: unknown; youtubeLi
   return data as EducationResourceRow;
 }
 
-export async function updateEducationResource(input: { id: unknown; title: unknown; youtubeLink: unknown }) {
+export async function updateEducationResource(
+  input: { id: unknown; title: unknown; youtubeLink: unknown },
+  supabase: SupabaseClient = getSupabase(),
+) {
   const id = requireString(input.id, "교육자료 ID");
   const title = requireString(input.title, "제목");
   const youtubeLink = requireYoutubeLink(input.youtubeLink);
 
-  const supabase = getSupabase();
   const { data, error } = await supabase
     .from("education_resources")
     .update({
@@ -110,4 +116,14 @@ export async function updateEducationResource(input: { id: unknown; title: unkno
 
   throwIfError(error);
   return data as EducationResourceRow;
+}
+
+export async function deleteEducationResource(
+  resourceId: unknown,
+  supabase: SupabaseClient = getSupabase(),
+) {
+  const id = requireString(resourceId, "교육자료 ID");
+  const { error } = await supabase.from("education_resources").delete().eq("id", id);
+
+  throwIfError(error);
 }

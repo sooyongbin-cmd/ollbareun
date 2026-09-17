@@ -1,10 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { deleteSpecialRemarkReport, getSpecialRemarkReport } from "@/lib/special-remark-reports";
+import { getManagerUser } from "@/lib/manager-auth";
 import { DELETE, GET } from "./route";
 
 vi.mock("@/lib/special-remark-reports", () => ({
   deleteSpecialRemarkReport: vi.fn(),
   getSpecialRemarkReport: vi.fn(),
+}));
+
+vi.mock("@/lib/manager-auth", () => ({
+  getManagerUser: vi.fn(),
 }));
 
 const context = {
@@ -14,6 +19,7 @@ const context = {
 describe("/api/inspection/special-remarks/[id]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(getManagerUser).mockResolvedValue({ id: "manager-1" } as never);
   });
 
   it("returns a single special remark report", async () => {

@@ -1,14 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { listCloudflareVideos } from "@/lib/cloudflare-stream";
+import { getManagerUser } from "@/lib/manager-auth";
 import { GET } from "./route";
 
 vi.mock("@/lib/cloudflare-stream", () => ({
   listCloudflareVideos: vi.fn(),
 }));
 
+vi.mock("@/lib/manager-auth", () => ({
+  getManagerUser: vi.fn(),
+}));
+
 describe("cloudflare videos route", () => {
   beforeEach(() => {
     vi.mocked(listCloudflareVideos).mockReset();
+    vi.mocked(getManagerUser).mockResolvedValue({ id: "manager-1" } as never);
   });
 
   it("lists Cloudflare videos", async () => {

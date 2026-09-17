@@ -18,7 +18,8 @@ describe("/api/system/configs/[systemCode]", () => {
     vi.clearAllMocks();
   });
 
-  it("allows GET without requiring manager auth", async () => {
+  it("allows GET for an authenticated manager", async () => {
+    vi.mocked(getManagerUser).mockResolvedValue({ id: "manager-1" } as never);
     vi.mocked(getSystemConfig).mockResolvedValue({
       system_code: "USE_QR_CODE",
       parent_system_code: null,

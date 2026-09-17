@@ -7,6 +7,9 @@ type RouteContext = {
 
 export async function GET(_: Request, { params }: RouteContext) {
   try {
+    if (!await getManagerUser()) {
+      return Response.json({ error: "관리자 인증이 필요합니다." }, { status: 401 });
+    }
     const { id } = await params;
     return Response.json({ report: await getSpecialRemarkReport(id) });
   } catch (error) {
@@ -34,6 +37,9 @@ export async function PATCH(_: Request, { params }: RouteContext) {
 
 export async function DELETE(_: Request, { params }: RouteContext) {
   try {
+    if (!await getManagerUser()) {
+      return Response.json({ error: "관리자 인증이 필요합니다." }, { status: 401 });
+    }
     const { id } = await params;
     await deleteSpecialRemarkReport(id);
     return Response.json({ success: true });

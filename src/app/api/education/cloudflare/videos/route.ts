@@ -1,4 +1,5 @@
 import { listCloudflareVideos } from "@/lib/cloudflare-stream";
+import { getManagerUser } from "@/lib/manager-auth";
 
 function getCloudflareRouteError(error: unknown, fallback: string) {
   if (error instanceof Error && error.message.trim()) {
@@ -10,6 +11,9 @@ function getCloudflareRouteError(error: unknown, fallback: string) {
 
 export async function GET() {
   try {
+    if (!await getManagerUser()) {
+      return Response.json({ error: "관리자 인증이 필요합니다." }, { status: 401 });
+    }
     return Response.json({ videos: await listCloudflareVideos() });
   } catch (error) {
     return Response.json(

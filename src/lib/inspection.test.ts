@@ -245,7 +245,7 @@ describe("inspection data helpers", () => {
     const siteQuery = {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
-      single: vi.fn().mockResolvedValue({
+      maybeSingle: vi.fn().mockResolvedValue({
         data: {
           id: "site-1",
           worksite_id: "work-1",
@@ -258,7 +258,7 @@ describe("inspection data helpers", () => {
     const worksiteQuery = {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
-      single: vi.fn().mockResolvedValue({
+      maybeSingle: vi.fn().mockResolvedValue({
         data: { id: "work-1", name: "본사" },
         error: null,
       }),
@@ -274,7 +274,7 @@ describe("inspection data helpers", () => {
     const supabase = {
       from: vi.fn().mockReturnValueOnce(siteQuery).mockReturnValueOnce(worksiteQuery).mockReturnValueOnce(insertQuery),
     };
-    vi.mocked(getSupabase).mockReturnValue(supabase as never);
+    vi.mocked(getSupabaseAdmin).mockReturnValue(supabase as never);
 
     await expect(
       createInspectionLog({
@@ -296,6 +296,31 @@ describe("inspection data helpers", () => {
     );
   });
 
+  it("reports when an NFC tag points to a missing inspection site", async () => {
+    const payload = buildInspectionQrPayload({
+      id: "missing-site",
+      worksite_id: "work-1",
+      worksite_name: "본사",
+      name: "정문",
+      gps_info: { latitude: 37.5, longitude: 127 },
+    });
+    const siteQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+    };
+    const supabase = { from: vi.fn().mockReturnValue(siteQuery) };
+    vi.mocked(getSupabaseAdmin).mockReturnValue(supabase as never);
+
+    await expect(
+      createInspectionLog({
+        employeeId: "emp-1",
+        employeeName: "홍길동",
+        qrPayload: payload,
+      }),
+    ).rejects.toThrow("NFC 태그에 연결된 현장 정보를 찾을 수 없습니다.");
+  });
+
   it("filters inspection logs by worksite", async () => {
     const logsQuery = {
       select: vi.fn().mockReturnThis(),
@@ -308,7 +333,7 @@ describe("inspection data helpers", () => {
     const supabase = {
       from: vi.fn().mockReturnValue(logsQuery),
     };
-    vi.mocked(getSupabase).mockReturnValue(supabase as never);
+    vi.mocked(getSupabaseAdmin).mockReturnValue(supabase as never);
 
     await expect(listInspectionLogs({ worksiteId: "work-1" })).resolves.toHaveLength(1);
     expect(logsQuery.eq).toHaveBeenCalledWith("worksite_id", "work-1");
@@ -333,7 +358,7 @@ describe("inspection data helpers", () => {
     const supabase = {
       from: vi.fn().mockReturnValueOnce(logsQuery).mockReturnValueOnce(employeesQuery),
     };
-    vi.mocked(getSupabase).mockReturnValue(supabase as never);
+    vi.mocked(getSupabaseAdmin).mockReturnValue(supabase as never);
 
     await expect(listInspectionLogs({ worksiteId: "work-1" })).resolves.toMatchObject([
       { id: "log-1", employee_role: "경비원" },

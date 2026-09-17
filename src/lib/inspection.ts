@@ -244,25 +244,30 @@ export async function createInspectionLog(input: {
   employeeId: unknown;
   employeeName: unknown;
   qrPayload: unknown;
-}) {
+}, supabase: SupabaseClient = getSupabaseAdmin()) {
   const employee_id = requireString(input.employeeId, "점검자");
   const employee_name = requireString(input.employeeName, "점검자명");
   const qrPayload = parseInspectionQrPayload(input.qrPayload);
-  const supabase = getSupabase();
 
   const { data: site, error: siteError } = await supabase
     .from("inspection_sites")
     .select("*")
     .eq("id", qrPayload.siteId)
-    .single();
+    .maybeSingle();
   throwIfError(siteError);
+  if (!site) {
+    throw new Error("NFC 태그에 연결된 현장 정보를 찾을 수 없습니다.");
+  }
 
   const { data: worksite, error: worksiteError } = await supabase
     .from("worksites")
     .select("id,name")
     .eq("id", site.worksite_id)
-    .single();
+    .maybeSingle();
   throwIfError(worksiteError);
+  if (!worksite) {
+    throw new Error("NFC 태그에 연결된 근무지 정보를 찾을 수 없습니다.");
+  }
 
   const { data, error } = await supabase
     .from("inspection_logs")
@@ -285,7 +290,7 @@ export async function createInspectionLog(input: {
 
 export async function listInspectionLogs(input: { worksiteId?: unknown } = {}) {
   const worksiteId = typeof input.worksiteId === "string" ? input.worksiteId.trim() : "";
-  const supabase = getSupabase();
+  const supabase = getSupabaseAdmin();
   const query = supabase.from("inspection_logs").select("*").order("inspected_at", { ascending: false });
   const { data, error } = worksiteId ? await query.eq("worksite_id", worksiteId) : await query;
 

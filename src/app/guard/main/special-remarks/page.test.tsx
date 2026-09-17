@@ -1,6 +1,6 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import GuardSpecialRemarksPage from "./page";
 
 const realCreateElement = document.createElement.bind(document);
@@ -62,6 +62,11 @@ describe("guard special remarks page", () => {
     });
   });
 
+  afterEach(() => {
+    vi.clearAllTimers();
+    vi.useRealTimers();
+  });
+
   it("keeps the capture button before the attachment list and supports multiple photos", async () => {
     currentDataUrls = [
       "data:image/jpeg;base64,AAAA",
@@ -85,7 +90,8 @@ describe("guard special remarks page", () => {
       "data:image/jpeg;base64,BBBB",
     ];
     const user = userEvent.setup();
-    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, _init?: RequestInit) => {
+      void _init;
       if (String(input) === "/api/guard/configs/special_001") {
         return Response.json({ enabled: false });
       }
@@ -120,9 +126,8 @@ describe("guard special remarks page", () => {
     const user = userEvent.setup();
     const fetchMock = vi.fn(async () => Response.json({ enabled: true }));
     vi.stubGlobal("fetch", fetchMock);
-    const start = vi.fn(function start(this: { onresult?: (event: unknown) => void; onend?: () => void }) {
+    const start = vi.fn(function start(this: { onresult?: (event: unknown) => void }) {
       this.onresult?.({ results: [[{ transcript: "음성 내용" }]] });
-      this.onend?.();
     });
     const recognitions: Array<Record<string, unknown>> = [];
     Object.assign(window, {
@@ -142,7 +147,75 @@ describe("guard special remarks page", () => {
 
     expect(start).toHaveBeenCalled();
     expect(recognitions[0]?.continuous).toBe(true);
-    expect(await screen.findByDisplayValue("음성 내용")).toBeInTheDocument();
+  });
+
+  it("converts speech after five seconds of silence and flushes sooner when stopped", async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal("fetch", vi.fn(async () => Response.json({ enabled: false })));
+    const start = vi.fn();
+    const stop = vi.fn();
+    const recognitions: Array<Record<string, unknown> & {
+      onresult?: (event: unknown) => void;
+    }> = [];
+    Object.assign(window, {
+      webkitSpeechRecognition: vi.fn(function SpeechRecognition(
+        this: Record<string, unknown> & { onresult?: (event: unknown) => void },
+      ) {
+        this.start = start;
+        this.stop = stop;
+        recognitions.push(this);
+      }),
+    });
+    render(<GuardSpecialRemarksPage />);
+
+    const speechButton = screen.getByRole("button", { name: "음성 입력" });
+    await user.click(speechButton);
+    vi.useFakeTimers();
+    recognitions[0]?.onresult?.({ results: [[{ transcript: "첫 번째 문장" }]] });
+
+    expect(screen.getByLabelText("특이사항 내용")).toHaveValue("");
+    act(() => vi.advanceTimersByTime(4999));
+    expect(screen.getByLabelText("특이사항 내용")).toHaveValue("");
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.getByLabelText("특이사항 내용")).toHaveValue("첫 번째 문장");
+
+    recognitions[0]?.onresult?.({ results: [[{ transcript: "두 번째 문장" }]] });
+    fireEvent.click(speechButton);
+
+    expect(stop).toHaveBeenCalled();
+    expect(screen.getByLabelText("특이사항 내용")).toHaveValue("첫 번째 문장\n두 번째 문장");
+  });
+
+  it("restarts continuous recognition after an unexpected end until stopped", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn(async () => Response.json({ enabled: true }));
+    vi.stubGlobal("fetch", fetchMock);
+    const start = vi.fn();
+    const stop = vi.fn();
+    const recognitions: Array<Record<string, unknown> & { onend?: () => void }> = [];
+    Object.assign(window, {
+      webkitSpeechRecognition: vi.fn(function SpeechRecognition(
+        this: Record<string, unknown> & { onend?: () => void },
+      ) {
+        this.start = start;
+        this.stop = stop;
+        recognitions.push(this);
+      }),
+    });
+    render(<GuardSpecialRemarksPage />);
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    const speechButton = screen.getByRole("button", { name: "음성 입력" });
+    await user.click(speechButton);
+    expect(recognitions[0]?.continuous).toBe(true);
+
+    recognitions[0]?.onend?.();
+    await waitFor(() => expect(start).toHaveBeenCalledTimes(2));
+    expect(speechButton).toHaveAttribute("aria-pressed", "true");
+
+    await user.click(speechButton);
+    expect(stop).toHaveBeenCalled();
+    expect(speechButton).toHaveAttribute("aria-pressed", "false");
   });
 
   it("keeps one-shot speech recognition when special_001 is not enabled", async () => {

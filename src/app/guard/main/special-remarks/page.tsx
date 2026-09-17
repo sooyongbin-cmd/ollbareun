@@ -28,12 +28,19 @@ type SpeechRecognition = EventTarget & {
   start: () => void;
   stop: () => void;
   onresult: ((event: SpeechRecognitionEvent) => void) | null;
-  onerror: (() => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
   onend: (() => void) | null;
 };
 
+type SpeechRecognitionResult = ArrayLike<{ transcript: string }>;
+
 type SpeechRecognitionEvent = {
-  results: ArrayLike<ArrayLike<{ transcript: string }>>;
+  resultIndex?: number;
+  results: ArrayLike<SpeechRecognitionResult>;
+};
+
+type SpeechRecognitionErrorEvent = {
+  error?: string;
 };
 
 type CapturedPhoto = {
@@ -44,6 +51,7 @@ type CapturedPhoto = {
 };
 
 const MAX_PHOTO_BYTES = 500 * 1024;
+const SPEECH_SILENCE_DELAY_MS = 5000;
 const PHOTO_COMPRESSION_ATTEMPTS = [
   { maxSide: 1280, quality: 0.82 },
   { maxSide: 1024, quality: 0.78 },
@@ -112,6 +120,10 @@ export default function GuardSpecialRemarksPage() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const speechStopRequestedRef = useRef(false);
+  const speechSilenceTimerRef = useRef<number | null>(null);
+  const speechRestartTimerRef = useRef<number | null>(null);
+  const pendingSpeechRef = useRef("");
   const photoIdRef = useRef(0);
   const [content, setContent] = useState("");
   const [photos, setPhotos] = useState<CapturedPhoto[]>([]);
@@ -122,6 +134,31 @@ export default function GuardSpecialRemarksPage() {
   const [error, setError] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const saving = savingProvider !== null;
+
+  function clearSpeechSilenceTimer() {
+    if (speechSilenceTimerRef.current !== null) {
+      window.clearTimeout(speechSilenceTimerRef.current);
+      speechSilenceTimerRef.current = null;
+    }
+  }
+
+  function flushPendingSpeech() {
+    clearSpeechSilenceTimer();
+    const transcript = pendingSpeechRef.current.trim();
+    pendingSpeechRef.current = "";
+
+    if (transcript) {
+      setContent((current) => (current ? `${current}\n${transcript}` : transcript));
+    }
+  }
+
+  function scheduleSpeechFlush() {
+    clearSpeechSilenceTimer();
+    speechSilenceTimerRef.current = window.setTimeout(() => {
+      speechSilenceTimerRef.current = null;
+      flushPendingSpeech();
+    }, SPEECH_SILENCE_DELAY_MS);
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -149,7 +186,14 @@ export default function GuardSpecialRemarksPage() {
 
     return () => {
       cancelled = true;
+      speechStopRequestedRef.current = true;
+      clearSpeechSilenceTimer();
+      if (speechRestartTimerRef.current !== null) {
+        window.clearTimeout(speechRestartTimerRef.current);
+        speechRestartTimerRef.current = null;
+      }
       recognitionRef.current?.stop();
+      recognitionRef.current = null;
       streamRef.current?.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     };
@@ -178,28 +222,74 @@ export default function GuardSpecialRemarksPage() {
     }
 
     if (listening) {
+      speechStopRequestedRef.current = true;
+      if (speechRestartTimerRef.current !== null) {
+        window.clearTimeout(speechRestartTimerRef.current);
+        speechRestartTimerRef.current = null;
+      }
+      flushPendingSpeech();
       recognitionRef.current?.stop();
       setListening(false);
       return;
     }
 
+    speechStopRequestedRef.current = false;
+    flushPendingSpeech();
     const recognition = new Recognition();
     recognition.lang = "ko-KR";
     recognition.interimResults = false;
     recognition.continuous = continuousSpeechEnabled;
     recognition.onresult = (event) => {
+      const resultIndex = typeof event.resultIndex === "number"
+        ? event.resultIndex
+        : Math.max(event.results.length - 1, 0);
       const transcript = Array.from(event.results)
+        .slice(resultIndex)
         .map((result) => result[0]?.transcript ?? "")
         .join(" ")
         .trim();
       if (transcript) {
-        setContent((current) => (current ? `${current}\n${transcript}` : transcript));
+        pendingSpeechRef.current = [pendingSpeechRef.current, transcript]
+          .filter(Boolean)
+          .join(" ")
+          .trim();
+        scheduleSpeechFlush();
       }
     };
-    recognition.onerror = () => {
+    recognition.onerror = (event) => {
+      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+        speechStopRequestedRef.current = true;
+        setListening(false);
+      }
       setError("음성을 인식하지 못했습니다. 다시 시도해주세요.");
     };
     recognition.onend = () => {
+      if (continuousSpeechEnabled && !speechStopRequestedRef.current && recognitionRef.current === recognition) {
+        if (speechRestartTimerRef.current !== null) {
+          return;
+        }
+
+        speechRestartTimerRef.current = window.setTimeout(() => {
+          speechRestartTimerRef.current = null;
+          if (speechStopRequestedRef.current || recognitionRef.current !== recognition) {
+            return;
+          }
+
+          try {
+            recognition.start();
+          } catch (recognitionError) {
+            speechStopRequestedRef.current = true;
+            setListening(false);
+            setError(
+              recognitionError instanceof Error
+                ? recognitionError.message
+                : "음성 입력을 다시 시작하지 못했습니다.",
+            );
+          }
+        }, 0);
+        return;
+      }
+
       setListening(false);
     };
     recognitionRef.current = recognition;

@@ -344,11 +344,11 @@ function ProfileModal({
         </div>
         <button
           aria-label="닫기"
-          className={isWorkModal ? styles.closeButton : styles.srOnly}
+          className={styles.closeButton}
           onClick={onClose}
           type="button"
         >
-          {isWorkModal ? <img alt="" src="/guard-assets/profile-x-square.svg" /> : "닫기"}
+          <img alt="" src="/guard-assets/profile-x-square.svg" />
         </button>
       </section>
     </div>

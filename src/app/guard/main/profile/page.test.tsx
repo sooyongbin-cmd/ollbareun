@@ -121,6 +121,10 @@ describe("guard profile page", () => {
     expect(screen.getByText(`${monthLabel} 3일`)).toBeInTheDocument();
     expect(screen.getByText("결근")).toBeInTheDocument();
 
+    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: `${monthLabel} 결근/휴가 내역 보기` }));
     fireEvent.keyDown(document, { key: "Escape" });
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });

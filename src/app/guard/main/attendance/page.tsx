@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { canClockIn, canClockOut, canClockOutAtWorksite, type AttendanceRecord, type Worksite } from "@/lib/phase1";
@@ -219,6 +220,7 @@ function getAttendanceStatusCopy({
 }
 
 export default function GuardAttendancePage() {
+  const router = useRouter();
   const processingRef = useRef(false);
   const [process, setProcess] = useState<{
     action: "출근" | "퇴근";
@@ -415,7 +417,11 @@ export default function GuardAttendancePage() {
 
   function handleProcessConfirm() {
     if (!process || process.status === "processing") return;
+    const isCompleted = process.status === "success";
     setProcess(null);
+    if (isCompleted) {
+      router.push("/guard/main");
+    }
   }
 
   if (!guard) {

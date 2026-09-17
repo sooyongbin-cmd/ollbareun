@@ -181,5 +181,18 @@ describe("guard attendance page", () => {
       expect(push).toHaveBeenCalledWith("/guard/main");
     });
     expect(fetch).toHaveBeenCalledWith(endpoint, expect.anything());
+    expect(getCurrentPosition).not.toHaveBeenCalled();
+    expect(fetch).toHaveBeenCalledWith(
+      endpoint,
+      expect.objectContaining({
+        body: expect.stringContaining('"latitude":"35.138"'),
+      }),
+    );
+    expect(fetch).toHaveBeenCalledWith(
+      endpoint,
+      expect.objectContaining({
+        body: expect.stringContaining('"longitude":"129.064"'),
+      }),
+    );
   });
 });

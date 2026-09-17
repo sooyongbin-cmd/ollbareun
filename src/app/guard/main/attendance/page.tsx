@@ -111,12 +111,6 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
   return payload as T;
 }
 
-function readCurrentPosition(geolocation: Geolocation): Promise<GeolocationPosition> {
-  return new Promise((resolve, reject) => {
-    geolocation.getCurrentPosition(resolve, reject, geolocationOptions);
-  });
-}
-
 function formatAttendanceTime(value: string | null | undefined) {
   if (!value) return "미등록";
 
@@ -359,36 +353,25 @@ export default function GuardAttendancePage() {
         throw new Error("로그인 정보 또는 배정된 근무지를 확인할 수 없습니다.");
       }
 
-      const geolocation = navigator.geolocation;
-      if (!geolocation) {
-        throw new Error("이 브라우저에서는 위치 확인을 사용할 수 없습니다.");
-      }
-
-      let position: GeolocationPosition;
-      try {
-        position = await readCurrentPosition(geolocation);
-      } catch {
+      const currentLatitude = Number(latitude);
+      const currentLongitude = Number(longitude);
+      if (!hasLocation || !Number.isFinite(currentLatitude) || !Number.isFinite(currentLongitude)) {
         throw new Error("현재 위치를 확인하지 못했습니다. 위치 권한과 GPS 상태를 확인한 뒤 다시 시도해주세요.");
       }
-
-      const nextLatitude = String(position.coords.latitude);
-      const nextLongitude = String(position.coords.longitude);
-      setLatitude(nextLatitude);
-      setLongitude(nextLongitude);
 
       if (action === "출근") {
         const decision = canClockIn({
           worksite: asWorksite(activeGuard.worksite),
-          currentLatitude: position.coords.latitude,
-          currentLongitude: position.coords.longitude,
+          currentLatitude,
+          currentLongitude,
         });
         if (!decision.allowed) throw new Error(decision.reason);
       } else {
         const decision = canClockOutAtWorksite({
           attendance: asAttendance(activeGuard.attendance),
           worksite: asWorksite(activeGuard.worksite),
-          currentLatitude: position.coords.latitude,
-          currentLongitude: position.coords.longitude,
+          currentLatitude,
+          currentLongitude,
         });
         if (!decision.allowed) throw new Error(decision.reason);
       }
@@ -398,8 +381,8 @@ export default function GuardAttendancePage() {
         {
           employeeId: activeGuard.employee.id,
           ...(action === "출근" ? { worksiteId: activeGuard.worksite.id } : {}),
-          latitude: nextLatitude,
-          longitude: nextLongitude,
+          latitude,
+          longitude,
         },
       );
 

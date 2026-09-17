@@ -168,12 +168,11 @@ export default function GuardWorksiteSection() {
 
         <GuardLocationGateLink
           buttonClassName="guard-general-button"
-          disabled={attendanceStatus.clockedOutToday}
           href="/guard/main/attendance"
           hasAssignedWorksite={hasAssignedWorksite}
           variant="default"
         >
-          {attendanceStatus.isOpen ? "퇴근하기" : "출근하기"}
+          {attendanceStatus.clockedOutToday ? "금일 근무 완료" : attendanceStatus.isOpen ? "퇴근하기" : "출근하기"}
         </GuardLocationGateLink>
       </div>
     </section>

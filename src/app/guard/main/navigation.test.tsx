@@ -62,6 +62,7 @@ describe("guard main navigation", () => {
       configurable: true,
       value: undefined,
     });
+    window.localStorage.clear();
     window.sessionStorage.clear();
   });
 
@@ -382,25 +383,24 @@ describe("guard main navigation", () => {
   });
 
   it("displays attendance status on the main page", async () => {
+    const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
     const sessionWithAttendance = {
       ...guardSession,
       attendance: {
         id: "att-1",
         employee_id: "employee-1",
         worksite_id: "worksite-1",
-        work_date: "2026-05-24",
-        clock_in_at: "2026-05-24T08:00:00Z",
-        clock_out_at: "2026-05-24T17:00:00Z",
+        work_date: today,
+        clock_in_at: `${today}T08:00:00+09:00`,
+        clock_out_at: `${today}T17:00:00+09:00`,
       },
     };
     window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(sessionWithAttendance));
 
     render(<GuardMainPage />);
 
-    expect(await screen.findByText("출근 상황")).toBeInTheDocument();
-    expect(screen.getByText("출근 시각")).toBeInTheDocument();
-    expect(screen.getByText("퇴근 시각")).toBeInTheDocument();
-    expect(screen.getByText(/오늘의 근무가 모두 완료되었습니다/)).toBeInTheDocument();
+    expect(await screen.findByText("근무완료")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "금일 근무 완료" })).toBeEnabled();
   });
 
   it("shows the attendance workflow on the attendance page", async () => {

@@ -3,6 +3,7 @@ import GuardSessionGate from "./guard-session-gate";
 import GuardSessionSummary from "./guard-session-summary";
 import GuardCompanyLogo from "./guard-company-logo";
 import GuardBottomNavigation from "./guard-bottom-navigation";
+import GuardPushRegister from "./guard-push-register";
 
 export default function GuardMainLayout({
   children,
@@ -22,7 +23,10 @@ export default function GuardMainLayout({
         </div>
       </header>
 
-      <div className="guard-content">{children}</div>
+      <div className="guard-content">
+        {children}
+        <GuardPushRegister />
+      </div>
 
       <GuardBottomNavigation />
     </div>

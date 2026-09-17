@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useMemo, useSyncExternalStore } from "react";
 
 import GuardLocationGateLink from "./guard-location-gate-link";
-import GuardPushRegister from "./guard-push-register";
 import { readStoredGuardSessionSnapshot, subscribeToGuardSessionChange } from "../guard-session-storage";
 import GuardWorksiteSection from "./guard-worksite-section";
 
@@ -74,8 +73,6 @@ export default function GuardMainPage() {
           근무 정보
         </Link>
       </section>
-
-      <GuardPushRegister />
     </div>
   );
 }

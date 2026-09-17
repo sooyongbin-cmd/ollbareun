@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import AlertModal from "@/components/modals/alert-modal";
 import { readStoredGuardSession } from "../guard-session-storage";
 
@@ -181,6 +181,7 @@ async function recordMainPushResult(
 }
 
 export default function GuardPushRegister() {
+  const pathname = usePathname();
   const router = useRouter();
   const [showInAppModal, setShowInAppModal] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
@@ -192,6 +193,7 @@ export default function GuardPushRegister() {
   );
   const [pushSteps, setPushSteps] = useState<PushStep[]>(initialPushSteps);
   const isPushSetupComplete = pushSteps.every((step) => step.status === "success");
+  const isGuardHome = pathname === "/guard/main";
 
   const updateStep = useCallback((id: string, status: PushStepStatus, detail: string) => {
     setPushSteps((currentSteps) =>
@@ -473,35 +475,37 @@ export default function GuardPushRegister() {
 
   return (
     <>
-      {isPushSetupComplete && (
+      {isGuardHome && isPushSetupComplete && (
         <p role="status" className="mb-6 text-[0.875rem] font-semibold text-primary">
           Push 알림 세팅 완료
         </p>
       )}
-      <section hidden={isPushSetupComplete} className="mb-6 bg-muted/40 rounded-xl p-[1.5rem] border border-border/50">
-        <div className="flex flex-col gap-2">
-          <p className="text-[0.8125rem] font-semibold text-primary">Push 알림</p>
-          <h3 className="text-[1.3125rem] font-semibold">{pushStatusTitle}</h3>
-          <p className="text-[0.875rem] leading-relaxed text-muted-foreground">{pushStatusDetail}</p>
-        </div>
+      {isGuardHome && (
+        <section hidden={isPushSetupComplete} className="mb-6 bg-muted/40 rounded-xl p-[1.5rem] border border-border/50">
+          <div className="flex flex-col gap-2">
+            <p className="text-[0.8125rem] font-semibold text-primary">Push 알림</p>
+            <h3 className="text-[1.3125rem] font-semibold">{pushStatusTitle}</h3>
+            <p className="text-[0.875rem] leading-relaxed text-muted-foreground">{pushStatusDetail}</p>
+          </div>
 
-        <ol className="mt-5 grid gap-3">
-          {pushSteps.map((step) => (
-            <li
-              key={step.id}
-              className="grid gap-2 rounded-[0.75rem] border border-border/40 bg-background px-4 py-3 md:grid-cols-[9.375rem_1fr_auto] md:items-center"
-            >
-              <span className="text-[0.875rem] font-semibold text-foreground">{step.label}</span>
-              <span className="text-[0.8125rem] leading-relaxed text-muted-foreground">{step.detail}</span>
-              <span
-                className={`inline-flex w-fit items-center rounded-full px-3 py-1 text-[0.75rem] font-semibold ${getStepBadgeClass(step.status)}`}
+          <ol className="mt-5 grid gap-3">
+            {pushSteps.map((step) => (
+              <li
+                key={step.id}
+                className="grid gap-2 rounded-[0.75rem] border border-border/40 bg-background px-4 py-3 md:grid-cols-[9.375rem_1fr_auto] md:items-center"
               >
-                {getStepStatusLabel(step.status)}
-              </span>
-            </li>
-          ))}
-        </ol>
-      </section>
+                <span className="text-[0.875rem] font-semibold text-foreground">{step.label}</span>
+                <span className="text-[0.8125rem] leading-relaxed text-muted-foreground">{step.detail}</span>
+                <span
+                  className={`inline-flex w-fit items-center rounded-full px-3 py-1 text-[0.75rem] font-semibold ${getStepBadgeClass(step.status)}`}
+                >
+                  {getStepStatusLabel(step.status)}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
 
       <AlertModal
         isOpen={showInAppModal}

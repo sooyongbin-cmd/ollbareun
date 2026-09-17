@@ -158,6 +158,26 @@
   white-space: nowrap;
 }
 
+.monthlySelect {
+  position: relative;
+  display: inline-flex;
+  max-width: 170px;
+}
+
+.monthlySelect .selectButton {
+  max-width: 170px;
+  padding-right: 29px;
+  appearance: none;
+  cursor: pointer;
+}
+
+.monthlySelect img {
+  position: absolute;
+  top: 3px;
+  right: 8px;
+  pointer-events: none;
+}
+
 .selectButton img {
   display: block;
   width: 16px;

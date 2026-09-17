@@ -165,6 +165,9 @@ export function buildGuardProfile(input: {
   daysOff?: GuardProfileDayOffInput[];
 }): GuardProfile {
   const { startDate, endDate } = getRecentOneYearDateRange(input.today);
+  const employeeSchedules = input.schedules.filter((schedule) => schedule.employee_id === input.employeeId);
+  const employeeAssignmentIds = new Set(employeeSchedules.map((schedule) => schedule.id));
+  const employeeDaysOff = (input.daysOff ?? []).filter((dayOff) => employeeAssignmentIds.has(dayOff.work_assignment_id));
   const worksiteById = new Map(input.worksites.map((worksite) => [worksite.id, worksite.name]));
   const monthlyRows = new Map<string, { attendanceDates: Set<string>; workMinutes: number }>();
   const attendanceForEmployee = input.attendance
@@ -205,17 +208,18 @@ export function buildGuardProfile(input: {
 
   const actualAttendanceDates = new Set(attendanceForEmployee.map((record) => record.work_date));
   const dayOffDates = new Set(
-    (input.daysOff ?? [])
+    employeeDaysOff
       .filter((dayOff) => dayOff.day_off_date >= startDate && dayOff.day_off_date <= endDate)
       .map((dayOff) => dayOff.day_off_date),
   );
   const absenceDetails = [
-    ...(input.daysOff ?? [])
+    ...employeeDaysOff
       .filter((dayOff) => dayOff.day_off_date >= startDate && dayOff.day_off_date <= endDate)
       .map((dayOff) => ({ workDate: dayOff.day_off_date, reason: "휴무" as const })),
     ...(input.scheduledAttendance ?? [])
       .filter(
         (scheduled) =>
+          employeeAssignmentIds.has(scheduled.work_assignment_id) &&
           scheduled.work_date >= startDate &&
           scheduled.work_date <= (input.today ?? endDate) &&
           Boolean(scheduled.intime) &&
@@ -228,10 +232,14 @@ export function buildGuardProfile(input: {
   const uniqueAbsenceDetails = absenceDetails.filter(
     (detail, index, details) => index === details.findIndex((candidate) => candidate.workDate === detail.workDate),
   );
+  uniqueAbsenceDetails.forEach((detail) => {
+    if (!monthlyRows.has(detail.workDate.slice(0, 7))) {
+      monthlyRows.set(detail.workDate.slice(0, 7), { attendanceDates: new Set<string>(), workMinutes: 0 });
+    }
+  });
 
   return {
-    schedules: input.schedules
-      .filter((schedule) => schedule.employee_id === input.employeeId)
+    schedules: employeeSchedules
       .sort((left, right) => left.start_date.localeCompare(right.start_date) || left.end_date.localeCompare(right.end_date))
       .map((schedule) => ({
         id: schedule.id,

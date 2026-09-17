@@ -1,5 +1,6 @@
 import { canClockIn, canClockOut, canClockOutAtWorksite, normalizePhone } from "./phase1";
 import { requireGpsInfo, type GpsInfo } from "./gps";
+import { type SupabaseClient } from "@supabase/supabase-js";
 import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
 import { getAssignmentDayOffCounts, isAssignmentDayOff } from "./assignment-days-off";
@@ -181,7 +182,10 @@ function validateEmployeeSchedule(input: { work_style?: unknown; in_time?: unkno
   return schedule;
 }
 
-export async function createEmployee(input: { name: unknown; phone: unknown; role?: unknown; work_style?: unknown; in_time?: unknown; out_time?: unknown }) {
+export async function createEmployee(
+  input: { name: unknown; phone: unknown; role?: unknown; work_style?: unknown; in_time?: unknown; out_time?: unknown },
+  supabase: SupabaseClient = getSupabase(),
+) {
   const name = requireString(input.name, "직원이름");
   const phone = requireString(input.phone, "연락처");
   const phone_normalized = normalizePhone(phone);
@@ -191,7 +195,6 @@ export async function createEmployee(input: { name: unknown; phone: unknown; rol
   }
 
   const schedule = validateEmployeeSchedule(input);
-  const supabase = getSupabase();
   const { data, error } = await supabase
     .from("employees")
     .upsert(

@@ -1,22 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import GuardWorksiteSection from "./guard-worksite-section";
-import GuardAttendanceSection from "./guard-attendance-section";
-import GuardSafetySection from "./guard-safety-section";
-import GuardPushRegister from "./guard-push-register";
-import GuardLocationGateLink from "./guard-location-gate-link";
-import { readStoredGuardSessionSnapshot, subscribeToGuardSessionChange } from "../guard-session-storage";
+import { useMemo, useSyncExternalStore } from "react";
 
-import { getAttendanceStatus, type AttendanceTimes } from "./attendance-status";
+import GuardLocationGateLink from "./guard-location-gate-link";
+import GuardPushRegister from "./guard-push-register";
+import { readStoredGuardSessionSnapshot, subscribeToGuardSessionChange } from "../guard-session-storage";
+import GuardWorksiteSection from "./guard-worksite-section";
 
 type GuardSession = {
-  attendance?: AttendanceTimes | null;
-  employee?: {
-    role?: string;
-  } | null;
   assignment?: {
     id?: unknown;
   } | null;
@@ -30,56 +22,12 @@ function readGuardSessionSnapshot() {
   return readStoredGuardSessionSnapshot();
 }
 
-function subscribeToSessionChange(onStoreChange: () => void) {
-  return subscribeToGuardSessionChange(onStoreChange);
-}
-
 export default function GuardMainPage() {
-  const [useQrCode, setUseQrCode] = useState(false);
-
-  useEffect(() => {
-    let isMounted = true;
-    fetch("/api/system/configs/USE_QR_CODE")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (isMounted && data?.config?.content?.trim() === "Y") {
-          setUseQrCode(true);
-        }
-      })
-      .catch(() => {});
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
   const storedSession = useSyncExternalStore(
-    subscribeToSessionChange,
+    subscribeToGuardSessionChange,
     readGuardSessionSnapshot,
     () => null,
   );
-
-  let attendanceStatus = getAttendanceStatus();
-  try {
-    attendanceStatus = getAttendanceStatus(storedSession ? (JSON.parse(storedSession) as GuardSession).attendance : null);
-  } catch {
-    // Ignore malformed session data.
-  }
-
-  const role = useMemo(() => {
-    if (!storedSession) return "경비원";
-    try {
-      const session = JSON.parse(storedSession) as GuardSession;
-      return session.employee?.role || "경비원";
-    } catch {
-      return "경비원";
-    }
-  }, [storedSession]);
-
-  const inspectionBaseLabel = useMemo(() => {
-    if (role === "경비원") return "순찰";
-    if (role === "미화원") return "청소구역";
-    return null;
-  }, [role]);
 
   const hasAssignedWorksite = useMemo(() => {
     if (!storedSession) return false;
@@ -99,41 +47,35 @@ export default function GuardMainPage() {
   }, [storedSession]);
 
   return (
-    <div className="mx-auto max-w-[61.25rem] w-full px-5 py-[5rem]">
-      <div className="max-w-[37.5rem] mx-auto">
-        <GuardWorksiteSection />
-        
-        <section className="bg-muted/40 rounded-xl p-[1rem] border border-border/50">
-          <div className="flex flex-col gap-3">
-            <GuardLocationGateLink href="/guard/main/attendance" hasAssignedWorksite={hasAssignedWorksite} disabled={attendanceStatus.clockedOutToday}>
-              {attendanceStatus.isOpen ? "퇴근하기" : "출근하기"}
-            </GuardLocationGateLink>
-            {inspectionBaseLabel !== null && (
-              <>
-                {useQrCode && (
-                  <GuardLocationGateLink href="/guard/main/inspection" hasAssignedWorksite={hasAssignedWorksite}>
-                    {inspectionBaseLabel}(QR코드)
-                  </GuardLocationGateLink>
-                )}
-                <GuardLocationGateLink href="/guard/main/inspection-nfc" hasAssignedWorksite={hasAssignedWorksite}>
-                  {inspectionBaseLabel}(NFC태그)
-                </GuardLocationGateLink>
-              </>
-            )}
-            <GuardLocationGateLink href="/guard/main/special-remarks" hasAssignedWorksite={hasAssignedWorksite}>
-              특이사항
-            </GuardLocationGateLink>
-            <Button asChild className="w-full" variant="outline">
-              <Link href="/guard/main/profile">개인프로필</Link>
-            </Button>
-          </div>
-        </section>
-        <GuardSafetySection />
-        <div hidden>
-          <GuardAttendanceSection />
-        </div>
-        <GuardPushRegister />
-      </div>
+    <div className="guard-main-page">
+      <GuardWorksiteSection />
+
+      <section aria-label="근무자 바로가기" className="guard-main-menu">
+        <Link className="guard-menu-button" href="/guard/main/safety">
+          안전교육
+        </Link>
+        <GuardLocationGateLink
+          buttonClassName="guard-menu-button"
+          href="/guard/main/work"
+          hasAssignedWorksite={hasAssignedWorksite}
+          variant="outline"
+        >
+          순찰
+        </GuardLocationGateLink>
+        <GuardLocationGateLink
+          buttonClassName="guard-menu-button"
+          href="/guard/main/special-remarks"
+          hasAssignedWorksite={hasAssignedWorksite}
+          variant="outline"
+        >
+          특이사항 보고
+        </GuardLocationGateLink>
+        <Link className="guard-menu-button" href="/guard/main/profile">
+          근무 정보
+        </Link>
+      </section>
+
+      <GuardPushRegister />
     </div>
   );
 }

@@ -120,6 +120,11 @@ describe("guard authentication data rules", () => {
       eq: vi.fn().mockReturnThis(),
       maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
     };
+    const scheduledAttendanceQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({ data: [], error: null }),
+    };
     const supabase = {
       from: vi
         .fn()
@@ -127,7 +132,8 @@ describe("guard authentication data rules", () => {
         .mockReturnValueOnce(assignmentQuery)
         .mockReturnValueOnce(worksiteQuery)
         .mockReturnValueOnce(openAttendanceQuery)
-        .mockReturnValueOnce(todayAttendanceQuery),
+        .mockReturnValueOnce(todayAttendanceQuery)
+        .mockReturnValueOnce(scheduledAttendanceQuery),
     };
     vi.mocked(getSupabaseAdmin).mockReturnValue(supabase as never);
 
@@ -207,13 +213,19 @@ describe("guard authentication data rules", () => {
         error: null,
       }),
     };
+    const scheduledAttendanceQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({ data: [], error: null }),
+    };
     const supabase = {
       from: vi
         .fn()
         .mockReturnValueOnce(employeeQuery)
         .mockReturnValueOnce(assignmentQuery)
         .mockReturnValueOnce(worksiteQuery)
-        .mockReturnValueOnce(attendanceQuery),
+        .mockReturnValueOnce(attendanceQuery)
+        .mockReturnValueOnce(scheduledAttendanceQuery),
     };
     vi.mocked(getSupabaseAdmin).mockReturnValue(supabase as never);
 

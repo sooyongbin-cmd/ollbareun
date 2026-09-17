@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import AlertModal from "@/components/modals/alert-modal";
@@ -15,6 +16,8 @@ type GuardLocationGateLinkProps = {
   href: string;
   hasAssignedWorksite?: boolean;
   disabled?: boolean;
+  buttonClassName?: string;
+  variant?: "default" | "outline";
 };
 
 const geolocationOptions: PositionOptions = { enableHighAccuracy: true, maximumAge: 3000, timeout: 8000 };
@@ -42,7 +45,14 @@ function requestCurrentPosition() {
   });
 }
 
-export default function GuardLocationGateLink({ children, href, hasAssignedWorksite = true, disabled = false }: GuardLocationGateLinkProps) {
+export default function GuardLocationGateLink({
+  children,
+  href,
+  hasAssignedWorksite = true,
+  disabled = false,
+  buttonClassName,
+  variant = "outline",
+}: GuardLocationGateLinkProps) {
   const router = useRouter();
   const [blockedState, setBlockedState] = useState<GeolocationPermissionState | null>(null);
   const [isMissingWorksite, setIsMissingWorksite] = useState(false);
@@ -87,11 +97,11 @@ export default function GuardLocationGateLink({ children, href, hasAssignedWorks
   return (
     <>
       <Button
-        className="w-full"
+        className={cn("w-full", buttonClassName)}
         disabled={disabled || isChecking}
         onClick={handleClick}
         type="button"
-        variant="outline"
+        variant={variant}
       >
         {children}
       </Button>

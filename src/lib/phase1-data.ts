@@ -30,7 +30,17 @@ export type AssignmentRow = {
   worksite_id: string;
   start_date: string;
   end_date: string;
+  in_time?: string | null;
+  out_time?: string | null;
   created_at: string;
+};
+
+export type ScheduledAttendanceRow = {
+  id: string;
+  work_assignment_id: string;
+  work_date: string;
+  intime: string | null;
+  outtime: string | null;
 };
 
 export type AssignmentListRow = AssignmentRow & {
@@ -500,11 +510,25 @@ async function loadGuardSessionByEmployee(employee: EmployeeRow) {
 
   throwIfError(worksiteResult.error);
 
+  let scheduledAttendances: ScheduledAttendanceRow[] = [];
+  if (assignment) {
+    const scheduledAttendanceResult = await supabase
+      .from("work_assignment_daily_attendance")
+      .select("id,work_assignment_id,work_date,intime,outtime")
+      .eq("work_assignment_id", assignment.id)
+      .eq("work_date", todayDate())
+      .order("intime", { ascending: false });
+
+    throwIfError(scheduledAttendanceResult.error);
+    scheduledAttendances = (scheduledAttendanceResult.data ?? []) as ScheduledAttendanceRow[];
+  }
+
   return {
     employee: employee as EmployeeRow,
     assignment: assignment as AssignmentRow | null,
     worksite: worksiteResult.data as WorksiteRow | null,
     attendance,
+    scheduledAttendances,
     isDayOff,
   };
 }

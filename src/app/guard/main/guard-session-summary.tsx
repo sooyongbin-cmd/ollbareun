@@ -42,20 +42,12 @@ export default function GuardSessionSummary() {
   );
   const summary = useMemo(() => parseGuardSummary(storedSession), [storedSession]);
 
-  if (!summary) {
-    return null;
-  }
+  const name = summary?.name || "근무자";
+  const role = summary?.role || "경비원";
 
   return (
-    <div className="flex min-w-0 items-center gap-2 text-[0.75rem] text-muted-foreground sm:text-[0.8125rem]">
-      <span className="truncate font-medium text-foreground" title={summary.name}>
-        {summary.name}
-      </span>
-      {summary.worksiteName ? (
-        <span className="min-w-0 truncate" title={`오늘의 근무지 : ${summary.worksiteName}`}>
-          (오늘의 근무지 : {summary.worksiteName})
-        </span>
-      ) : null}
+    <div className="guard-user-badge" title={`${name}(${role})`}>
+      <span className="truncate">{name}({role})</span>
     </div>
   );
 }

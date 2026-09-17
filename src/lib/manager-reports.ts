@@ -417,8 +417,7 @@ export function buildEducationReport(input: {
 
 export async function loadAttendanceReport(input: { employeeName: string; year: string }) {
   assertYear(input.year);
-  const supabase = getSupabase();
-  const supabaseAdmin = getSupabaseAdmin();
+  const supabase = getSupabaseAdmin();
   const [employeesResult, attendanceResult, worksitesResult, assignmentsResult, dailyAttendanceResult] = await Promise.all([
     supabase.from("employees").select("id,name").ilike("name", `%${input.employeeName.trim()}%`),
     supabase
@@ -428,8 +427,8 @@ export async function loadAttendanceReport(input: { employeeName: string; year: 
       .lte("work_date", `${input.year}-12-31`)
       .order("work_date", { ascending: true }),
     supabase.from("worksites").select("id,name"),
-    supabaseAdmin.from("work_assignments").select("id,employee_id,worksite_id"),
-    supabaseAdmin
+    supabase.from("work_assignments").select("id,employee_id,worksite_id"),
+    supabase
       .from("work_assignment_daily_attendance")
       .select("work_assignment_id,work_date,intime")
       .gte("work_date", `${input.year}-01-01`)

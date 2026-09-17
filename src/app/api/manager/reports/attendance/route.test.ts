@@ -27,6 +27,15 @@ describe("/api/manager/reports/attendance", () => {
     expect(loadAttendanceReport).toHaveBeenCalledWith({ employeeName: "", year: "2026" });
   });
 
+  it("denies attendance report access without a manager session", async () => {
+    vi.mocked(getManagerUser).mockResolvedValue(null);
+
+    const response = await GET(new Request("http://localhost/api/manager/reports/attendance?employeeName=&year=2026"));
+
+    expect(response.status).toBe(401);
+    expect(loadAttendanceReport).not.toHaveBeenCalled();
+  });
+
   it("denies attendance editing if the manager is not logged in", async () => {
     vi.mocked(getManagerUser).mockResolvedValue(null);
 

@@ -17,6 +17,10 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
+    if (!(await getManagerUser())) {
+      return Response.json({ error: "인증 정보가 올바르지 않습니다." }, { status: 401 });
+    }
+
     const url = new URL(request.url);
     const employeeName = url.searchParams.get("employeeName") ?? "";
     const year = url.searchParams.get("year") ?? String(new Date().getFullYear());

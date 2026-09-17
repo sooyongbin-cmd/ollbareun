@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildAttendanceReport, buildAttendanceStatus, buildEducationReport, createAttendanceRecord, loadAttendanceStatus, updateAttendanceRecord } from "./manager-reports";
+import { buildAttendanceReport, buildAttendanceStatus, buildEducationReport, createAttendanceRecord, loadAttendanceReport, loadAttendanceStatus, updateAttendanceRecord } from "./manager-reports";
 import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
 
@@ -173,6 +173,56 @@ describe("manager reports", () => {
         status: "결근",
       },
     ]);
+  });
+
+  it("loads the attendance report through the admin client so RLS does not hide manager data", async () => {
+    const employeesQuery = { select: vi.fn(), ilike: vi.fn() };
+    employeesQuery.select.mockReturnValue(employeesQuery);
+    employeesQuery.ilike.mockResolvedValue({ data: [{ id: "emp-1", name: "김철수" }], error: null });
+
+    const attendanceQuery = { select: vi.fn(), gte: vi.fn(), lte: vi.fn(), order: vi.fn() };
+    attendanceQuery.select.mockReturnValue(attendanceQuery);
+    attendanceQuery.gte.mockReturnValue(attendanceQuery);
+    attendanceQuery.lte.mockReturnValue(attendanceQuery);
+    attendanceQuery.order.mockResolvedValue({
+      data: [{
+        id: "attendance-1",
+        employee_id: "emp-1",
+        worksite_id: "site-1",
+        work_date: "2026-09-17",
+        clock_in_at: "2026-09-17T00:00:00.000Z",
+        clock_out_at: null,
+      }],
+      error: null,
+    });
+
+    const worksitesQuery = { select: vi.fn() };
+    worksitesQuery.select.mockResolvedValue({ data: [{ id: "site-1", name: "본사" }], error: null });
+
+    const assignmentsQuery = { select: vi.fn() };
+    assignmentsQuery.select.mockResolvedValue({ data: [{ id: "assignment-1", employee_id: "emp-1", worksite_id: "site-1" }], error: null });
+
+    const dailyAttendanceQuery = { select: vi.fn(), gte: vi.fn(), lte: vi.fn() };
+    dailyAttendanceQuery.select.mockReturnValue(dailyAttendanceQuery);
+    dailyAttendanceQuery.gte.mockReturnValue(dailyAttendanceQuery);
+    dailyAttendanceQuery.lte.mockResolvedValue({ data: [], error: null });
+
+    const from = vi.fn((table: string) => ({
+      employees: employeesQuery,
+      attendance_records: attendanceQuery,
+      worksites: worksitesQuery,
+      work_assignments: assignmentsQuery,
+      work_assignment_daily_attendance: dailyAttendanceQuery,
+    })[table]);
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from } as never);
+    vi.mocked(getSupabase).mockClear();
+
+    await expect(loadAttendanceReport({ employeeName: "", year: "2026" })).resolves.toEqual([
+      expect.objectContaining({ id: "attendance-1", employeeName: "김철수", worksiteName: "본사" }),
+    ]);
+    expect(getSupabase).not.toHaveBeenCalled();
+    expect(from).toHaveBeenCalledWith("employees");
+    expect(from).toHaveBeenCalledWith("attendance_records");
   });
 
   it("shows an employee as waiting before the scheduled clock-in time", () => {

@@ -79,7 +79,7 @@ describe("employee roster page", () => {
     expect(screen.queryByRole("link", { name: "Bob" })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("checkbox", { name: "퇴직" }));
-    await user.selectOptions(screen.getByLabelText("이름"), "Bob");
+    await user.type(screen.getByLabelText("이름"), "ob");
     expect(await screen.findByRole("link", { name: "Bob" })).toBeInTheDocument();
     expect(within(screen.getByRole("table")).getByText("퇴직")).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Alice" })).not.toBeInTheDocument();
@@ -93,6 +93,7 @@ describe("employee roster page", () => {
 
     expect(within(searchSection).queryByRole("heading", { name: "직원 검색" })).not.toBeInTheDocument();
     expect(searchSection).toContainElement(screen.getByLabelText("이름"));
+    expect(screen.getByLabelText("이름")).toHaveAttribute("placeholder", "이름을 입력하세요.");
     expect(searchSection).toContainElement(screen.getByLabelText("직군"));
     expect(searchSection).toContainElement(screen.getByRole("checkbox", { name: "퇴직" }));
     expect(screen.getByRole("checkbox", { name: "퇴직" })).not.toBeChecked();

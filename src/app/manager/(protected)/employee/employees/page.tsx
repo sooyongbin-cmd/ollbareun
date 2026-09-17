@@ -1,6 +1,7 @@
 "use client";
 
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
@@ -99,11 +100,6 @@ export default function EmployeeRosterPage() {
     return data.employees.filter((e) => e.is_retired === showRetired);
   }, [data.employees, showRetired]);
 
-  const uniqueNames = useMemo(() => {
-    const names = availableEmployees.map((e) => e.name);
-    return Array.from(new Set(names)).sort();
-  }, [availableEmployees]);
-
   const filteredEmployees = useMemo(() => {
     const normalizedNameQuery = nameQuery.trim().toLowerCase();
 
@@ -192,19 +188,13 @@ export default function EmployeeRosterPage() {
               <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="employee-roster-name-search">
                 이름
               </label>
-              <NativeSelect
-                className="w-full appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"
+              <Input
+                className="w-full"
                 id="employee-roster-name-search"
+                placeholder="이름을 입력하세요."
                 value={nameQuery}
                 onChange={(event) => setNameQuery(event.target.value)}
-              >
-                <NativeSelectOption value="">전체 이름</NativeSelectOption>
-                {uniqueNames.map((name) => (
-                  <NativeSelectOption key={name} value={name}>
-                    {name}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
+              />
             </div>
             <div className="flex-1 space-y-2">
               <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="employee-roster-role-search">

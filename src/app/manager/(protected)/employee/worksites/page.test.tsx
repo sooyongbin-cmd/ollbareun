@@ -66,6 +66,7 @@ describe("worksite management page", () => {
       "href",
       "/manager/employee/worksites/new",
     );
+    expect(screen.getByLabelText("근무지")).toHaveAttribute("placeholder", "근무지 이름을 입력하세요.");
 
     const worksiteNameLink = await screen.findByRole("link", { name: "본사" });
     expect(worksiteNameLink).toHaveAttribute("href", "/manager/employee/worksites/save/work-1");

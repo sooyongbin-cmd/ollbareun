@@ -69,30 +69,25 @@ describe("assignment management page", () => {
     expect(within(row).getByText("2026-05-21 ~ 2026-05-23")).toBeInTheDocument();
     expect(within(row).getByText("본사")).toBeInTheDocument();
     expect(within(row).getByText("2일")).toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: "이름" })).toHaveValue("");
-    expect(within(screen.getByRole("combobox", { name: "이름" })).getAllByRole("option").map((option) => option.textContent)).toEqual([
-      "전체 이름",
-      "김철수",
-      "홍길동",
-    ]);
-    expect(screen.getByRole("combobox", { name: "근무지" })).toHaveValue("");
-    expect(within(screen.getByRole("combobox", { name: "근무지" })).getAllByRole("option").map((option) => option.textContent)).toEqual([
-      "전체",
-      "본사",
-      "서울지점",
-    ]);
+    expect(screen.getByRole("textbox", { name: "이름" })).toHaveValue("");
+    expect(screen.getByRole("textbox", { name: "이름" })).toHaveAttribute("placeholder", "이름을 입력하세요.");
+    expect(screen.getByRole("textbox", { name: "근무지" })).toHaveValue("");
+    expect(screen.getByRole("textbox", { name: "근무지" })).toHaveAttribute(
+      "placeholder",
+      "근무지 이름을 입력하세요.",
+    );
 
     await user.type(screen.getByLabelText("날짜"), "2026-05-22");
     expect(await screen.findByRole("link", { name: "홍길동" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "김철수" })).not.toBeInTheDocument();
 
     await user.clear(screen.getByLabelText("날짜"));
-    await user.selectOptions(screen.getByLabelText("근무지"), "서울지점");
+    await user.type(screen.getByLabelText("근무지"), "서울");
     expect(screen.queryByRole("link", { name: "홍길동" })).not.toBeInTheDocument();
     expect(await screen.findByRole("link", { name: "김철수" })).toBeInTheDocument();
 
-    await user.selectOptions(screen.getByLabelText("근무지"), "");
-    await user.selectOptions(screen.getByLabelText("이름"), "김철수");
+    await user.clear(screen.getByLabelText("근무지"));
+    await user.type(screen.getByLabelText("이름"), "철수");
     await user.click(await screen.findByRole("link", { name: "김철수" }));
     expect(push).toHaveBeenCalledWith("/manager/employee/assignments/save/assign-2");
   });

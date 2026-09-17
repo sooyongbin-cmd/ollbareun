@@ -1,7 +1,6 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -80,28 +79,17 @@ export default function AssignmentManagementClient() {
     };
   }, []);
 
-  const worksiteOptions = useMemo(() => {
-    const names = new Set(assignments.map((assignment) => assignment.worksite_name));
-    if (initialWorksite) {
-      names.add(initialWorksite);
-    }
-    return Array.from(names).sort((left, right) => left.localeCompare(right, "ko-KR"));
-  }, [assignments, initialWorksite]);
-
-  const employeeOptions = useMemo(() => {
-    const names = new Set(assignments.map((assignment) => assignment.employee_name));
-    return Array.from(names).sort((left, right) => left.localeCompare(right, "ko-KR"));
-  }, [assignments]);
-
   const filteredAssignments = useMemo(() => {
     const normalizedDate = dateQuery.trim();
     const normalizedName = nameQuery.trim().toLowerCase();
+    const normalizedWorksite = worksiteQuery.trim().toLowerCase();
 
     return assignments.filter((assignment) => {
       const matchesDate =
         !normalizedDate ||
         (assignment.start_date <= normalizedDate && normalizedDate <= assignment.end_date);
-      const matchesWorksite = !worksiteQuery || assignment.worksite_name === worksiteQuery;
+      const matchesWorksite =
+        !normalizedWorksite || assignment.worksite_name.toLowerCase().includes(normalizedWorksite);
       const matchesName =
         !normalizedName || assignment.employee_name.toLowerCase().includes(normalizedName);
 
@@ -177,37 +165,25 @@ export default function AssignmentManagementClient() {
               <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-name-search">
                 이름
               </label>
-              <NativeSelect
+              <Input
                 className="w-full"
                 id="assignment-name-search"
+                placeholder="이름을 입력하세요."
                 value={nameQuery}
                 onChange={(event) => setNameQuery(event.target.value)}
-              >
-                <NativeSelectOption value="">전체 이름</NativeSelectOption>
-                {employeeOptions.map((employeeName) => (
-                  <NativeSelectOption key={employeeName} value={employeeName}>
-                    {employeeName}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
+              />
             </div>
             <div className="space-y-2">
               <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-worksite-search">
                 근무지
               </label>
-              <NativeSelect
+              <Input
                 className="w-full"
                 id="assignment-worksite-search"
+                placeholder="근무지 이름을 입력하세요."
                 value={worksiteQuery}
                 onChange={(event) => setWorksiteQuery(event.target.value)}
-              >
-                <NativeSelectOption value="">전체</NativeSelectOption>
-                {worksiteOptions.map((worksite) => (
-                  <NativeSelectOption key={worksite} value={worksite}>
-                    {worksite}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
+              />
             </div>
             <div className="space-y-2">
               <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-date-search">

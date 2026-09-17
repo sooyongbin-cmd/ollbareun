@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   dashboardNavigationItem,
-  isManagerPathActive,
+  findManagerNavigation,
   managerNavigationGroups,
 } from "./manager-navigation";
 import ManagerPushConnect from "./manager-push-connect";
@@ -29,6 +29,7 @@ export default function ManagerSidebar() {
   const pathname = usePathname();
   const { openMobile, setOpenMobile } = useSidebar();
   const passkeyEnabled = usePasskeyFeatureEnabled();
+  const currentNavigation = findManagerNavigation(pathname);
 
   const closeMobileMenu = () => {
     if (openMobile) {
@@ -81,7 +82,7 @@ export default function ManagerSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={isManagerPathActive(pathname, dashboardNavigationItem.href)}
+                  isActive={currentNavigation.item.href === dashboardNavigationItem.href}
                   tooltip={dashboardNavigationItem.label}
                 >
                   <Link href={dashboardNavigationItem.href} onClick={closeMobileMenu}>
@@ -106,7 +107,7 @@ export default function ManagerSidebar() {
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
                       asChild
-                      isActive={isManagerPathActive(pathname, item.href)}
+                      isActive={currentNavigation.item.href === item.href}
                       tooltip={item.label}
                     >
                       <Link href={item.href} onClick={closeMobileMenu}>

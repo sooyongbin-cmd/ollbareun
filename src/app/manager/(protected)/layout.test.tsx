@@ -285,6 +285,21 @@ describe("manager layout", () => {
     expect(within(breadcrumb).getByText("현장점검현황")).toBeInTheDocument();
   });
 
+  it("marks only the most specific navigation item active", () => {
+    navigationMock.pathname = "/manager/reports/attendance/status";
+
+    render(
+      <ManagerLayout>
+        <div>관리자 본문</div>
+      </ManagerLayout>,
+    );
+
+    expect(screen.getByRole("link", { name: "출근현황" })).toHaveAttribute("data-active", "true");
+    expect(screen.getByRole("link", { name: "근태관리" })).toHaveAttribute("data-active", "false");
+    const breadcrumb = screen.getByRole("navigation", { name: "현재 위치" });
+    expect(within(breadcrumb).getByText("출근현황")).toBeInTheDocument();
+  });
+
   it("shows the signed-in manager email in the header", async () => {
     render(
       <ManagerLayout>

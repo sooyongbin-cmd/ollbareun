@@ -107,11 +107,15 @@ export function findManagerNavigation(pathname: string | null) {
     return { group: null, item: dashboardNavigationItem };
   }
 
-  for (const group of managerNavigationGroups) {
-    const item = group.items.find((candidate) => isManagerPathActive(currentPath, candidate.href));
-    if (item) {
-      return { group, item };
-    }
+  const matches = managerNavigationGroups.flatMap((group) =>
+    group.items
+      .filter((candidate) => isManagerPathActive(currentPath, candidate.href))
+      .map((item) => ({ group, item })),
+  );
+  const mostSpecificMatch = matches.sort((a, b) => b.item.href.length - a.item.href.length)[0];
+
+  if (mostSpecificMatch) {
+    return mostSpecificMatch;
   }
 
   return { group: null, item: dashboardNavigationItem };

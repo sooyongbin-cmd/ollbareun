@@ -100,6 +100,12 @@ export default function EmployeeRosterPage() {
     return data.employees.filter((e) => e.is_retired === showRetired);
   }, [data.employees, showRetired]);
 
+  const employeeNameOptions = useMemo(() => {
+    return Array.from(new Set(availableEmployees.map((employee) => employee.name))).sort((left, right) =>
+      left.localeCompare(right, "ko-KR"),
+    );
+  }, [availableEmployees]);
+
   const filteredEmployees = useMemo(() => {
     const normalizedNameQuery = nameQuery.trim().toLowerCase();
 
@@ -191,10 +197,14 @@ export default function EmployeeRosterPage() {
               <Input
                 className="w-full"
                 id="employee-roster-name-search"
+                list="employee-roster-name-options"
                 placeholder="이름을 입력하세요."
                 value={nameQuery}
                 onChange={(event) => setNameQuery(event.target.value)}
               />
+              <datalist id="employee-roster-name-options">
+                {employeeNameOptions.map((name) => <option key={name} value={name} />)}
+              </datalist>
             </div>
             <div className="flex-1 space-y-2">
               <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="employee-roster-role-search">

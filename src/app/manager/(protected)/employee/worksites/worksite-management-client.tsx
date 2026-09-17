@@ -113,6 +113,12 @@ export default function WorksiteManagementClient() {
     }, {});
   }, [data.assignments]);
 
+  const worksiteNameOptions = useMemo(() => {
+    return Array.from(new Set(data.worksites.map((worksite) => worksite.name))).sort((left, right) =>
+      left.localeCompare(right, "ko-KR"),
+    );
+  }, [data.worksites]);
+
   const filteredWorksites = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
@@ -179,10 +185,14 @@ export default function WorksiteManagementClient() {
             <Input
               className="w-full"
               id="worksite-search"
+              list="worksite-search-options"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="근무지 이름을 입력하세요."
             />
+            <datalist id="worksite-search-options">
+              {worksiteNameOptions.map((name) => <option key={name} value={name} />)}
+            </datalist>
           </div>
 
           <Link

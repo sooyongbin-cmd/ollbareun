@@ -52,6 +52,18 @@ export default function AssignmentManagementClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const employeeNameOptions = useMemo(() => {
+    return Array.from(new Set(assignments.map((assignment) => assignment.employee_name))).sort((left, right) =>
+      left.localeCompare(right, "ko-KR"),
+    );
+  }, [assignments]);
+
+  const worksiteNameOptions = useMemo(() => {
+    return Array.from(new Set(assignments.map((assignment) => assignment.worksite_name))).sort((left, right) =>
+      left.localeCompare(right, "ko-KR"),
+    );
+  }, [assignments]);
+
   useEffect(() => {
     let ignore = false;
 
@@ -168,10 +180,14 @@ export default function AssignmentManagementClient() {
               <Input
                 className="w-full"
                 id="assignment-name-search"
+                list="assignment-name-search-options"
                 placeholder="이름을 입력하세요."
                 value={nameQuery}
                 onChange={(event) => setNameQuery(event.target.value)}
               />
+              <datalist id="assignment-name-search-options">
+                {employeeNameOptions.map((name) => <option key={name} value={name} />)}
+              </datalist>
             </div>
             <div className="space-y-2">
               <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-worksite-search">
@@ -180,10 +196,14 @@ export default function AssignmentManagementClient() {
               <Input
                 className="w-full"
                 id="assignment-worksite-search"
+                list="assignment-worksite-search-options"
                 placeholder="근무지 이름을 입력하세요."
                 value={worksiteQuery}
                 onChange={(event) => setWorksiteQuery(event.target.value)}
               />
+              <datalist id="assignment-worksite-search-options">
+                {worksiteNameOptions.map((name) => <option key={name} value={name} />)}
+              </datalist>
             </div>
             <div className="space-y-2">
               <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-date-search">

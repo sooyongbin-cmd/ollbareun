@@ -67,6 +67,8 @@ describe("worksite management page", () => {
       "/manager/employee/worksites/new",
     );
     expect(screen.getByLabelText("근무지")).toHaveAttribute("placeholder", "근무지 이름을 입력하세요.");
+    expect(screen.getByLabelText("근무지")).toHaveAttribute("list", "worksite-search-options");
+    expect(Array.from(document.querySelectorAll("#worksite-search-options option")).map((option) => option.value)).toEqual(["본사", "서울지점"]);
 
     const worksiteNameLink = await screen.findByRole("link", { name: "본사" });
     expect(worksiteNameLink).toHaveAttribute("href", "/manager/employee/worksites/save/work-1");
@@ -85,7 +87,7 @@ describe("worksite management page", () => {
     expect(screen.queryByText("37.500000, 127.000000")).not.toBeInTheDocument();
     expect(screen.getByText("100m")).toBeInTheDocument();
 
-    await user.type(screen.getByRole("textbox"), "서울");
+    await user.type(screen.getByRole("combobox", { name: "근무지" }), "서울");
     expect(await screen.findByText("서울지점")).toBeInTheDocument();
     expect(screen.queryByText("본사")).not.toBeInTheDocument();
   });

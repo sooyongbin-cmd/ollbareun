@@ -94,6 +94,8 @@ describe("employee roster page", () => {
     expect(within(searchSection).queryByRole("heading", { name: "직원 검색" })).not.toBeInTheDocument();
     expect(searchSection).toContainElement(screen.getByLabelText("이름"));
     expect(screen.getByLabelText("이름")).toHaveAttribute("placeholder", "이름을 입력하세요.");
+    expect(screen.getByLabelText("이름")).toHaveAttribute("list", "employee-roster-name-options");
+    expect(Array.from(document.querySelectorAll("#employee-roster-name-options option")).map((option) => option.value)).toEqual(["Alice"]);
     expect(searchSection).toContainElement(screen.getByLabelText("직군"));
     expect(searchSection).toContainElement(screen.getByRole("checkbox", { name: "퇴직" }));
     expect(screen.getByRole("checkbox", { name: "퇴직" })).not.toBeChecked();

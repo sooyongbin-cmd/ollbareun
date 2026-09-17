@@ -69,13 +69,17 @@ describe("assignment management page", () => {
     expect(within(row).getByText("2026-05-21 ~ 2026-05-23")).toBeInTheDocument();
     expect(within(row).getByText("본사")).toBeInTheDocument();
     expect(within(row).getByText("2일")).toBeInTheDocument();
-    expect(screen.getByRole("textbox", { name: "이름" })).toHaveValue("");
-    expect(screen.getByRole("textbox", { name: "이름" })).toHaveAttribute("placeholder", "이름을 입력하세요.");
-    expect(screen.getByRole("textbox", { name: "근무지" })).toHaveValue("");
-    expect(screen.getByRole("textbox", { name: "근무지" })).toHaveAttribute(
+    expect(screen.getByRole("combobox", { name: "이름" })).toHaveValue("");
+    expect(screen.getByRole("combobox", { name: "이름" })).toHaveAttribute("placeholder", "이름을 입력하세요.");
+    expect(screen.getByRole("combobox", { name: "이름" })).toHaveAttribute("list", "assignment-name-search-options");
+    expect(Array.from(document.querySelectorAll("#assignment-name-search-options option")).map((option) => option.value)).toEqual(["김철수", "홍길동"]);
+    expect(screen.getByRole("combobox", { name: "근무지" })).toHaveValue("");
+    expect(screen.getByRole("combobox", { name: "근무지" })).toHaveAttribute(
       "placeholder",
       "근무지 이름을 입력하세요.",
     );
+    expect(screen.getByRole("combobox", { name: "근무지" })).toHaveAttribute("list", "assignment-worksite-search-options");
+    expect(Array.from(document.querySelectorAll("#assignment-worksite-search-options option")).map((option) => option.value)).toEqual(["본사", "서울지점"]);
 
     await user.type(screen.getByLabelText("날짜"), "2026-05-22");
     expect(await screen.findByRole("link", { name: "홍길동" })).toBeInTheDocument();

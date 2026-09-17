@@ -693,7 +693,13 @@ export default function GuardProfilePage() {
             </div>
           </section>
 
-          <button aria-label="내 정보 확인" className={styles.confirmButton} type="button">확인</button>
+          <GuardLogoutButton
+            ariaLabel="내 정보 확인"
+            className={styles.confirmButton}
+            label="확인"
+            showIcon={false}
+            variant="default"
+          />
         </article>
 
         {displayedError ? <p className={styles.message}>{displayedError}</p> : null}

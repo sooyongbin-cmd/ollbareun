@@ -81,7 +81,21 @@ async function recordLogoutResult(sessionLogId: string | null, result: LogoutPus
   }
 }
 
-export default function GuardLogoutButton() {
+type GuardLogoutButtonProps = {
+  ariaLabel?: string;
+  className?: string;
+  label?: string;
+  showIcon?: boolean;
+  variant?: "default" | "outline";
+};
+
+export default function GuardLogoutButton({
+  ariaLabel,
+  className,
+  label = "로그아웃",
+  showIcon = true,
+  variant = "outline",
+}: GuardLogoutButtonProps) {
   const router = useRouter();
 
   async function handleLogout() {
@@ -152,12 +166,13 @@ export default function GuardLogoutButton() {
   return (
     <Button
       type="button"
-      className="gap-2"
+      aria-label={ariaLabel}
+      className={className}
       onClick={handleLogout}
-      variant="outline"
+      variant={variant}
     >
-      <PowerIcon size={24} className="lucide lucide-power" />
-      <span>로그아웃</span>
+      {showIcon ? <PowerIcon size={24} className="lucide lucide-power" /> : null}
+      <span>{label}</span>
     </Button>
   );
 }

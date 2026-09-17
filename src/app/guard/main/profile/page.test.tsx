@@ -224,7 +224,7 @@ describe("guard profile page", () => {
     );
 
     render(<GuardProfilePage />);
-    fireEvent.click(await screen.findByRole("button", { name: "로그아웃" }));
+    fireEvent.click(await screen.findByRole("button", { name: "내 정보 확인" }));
 
     await waitFor(() => expect(push).toHaveBeenCalledWith("/guard"));
     expect(unsubscribe).toHaveBeenCalled();

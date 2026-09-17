@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { CameraIcon, CheckIcon, MicIcon, SendIcon, SquareIcon } from "lucide-react";
+import { CameraIcon, CheckIcon, MicIcon, SendIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import AlertModal from "@/components/modals/alert-modal";
@@ -352,9 +352,14 @@ export default function GuardSpecialRemarksPage() {
             onChange={(event) => setContent(event.target.value)}
             placeholder={'"1층 로비 유리창 깨짐" 처럼 현장 위치와 특이사항을\n말로 편하게 입력하면, 텍스트로 자동 변환되어\n보고서에 반영됩니다.'}
           />
-          <Button className="guard-special-remarks-speech-button" onClick={handleSpeech} type="button">
-            {listening ? <SquareIcon aria-hidden="true" size={16} /> : <MicIcon aria-hidden="true" size={16} />}
-            {listening ? "음성 중지" : "음성 입력"}
+          <Button
+            aria-pressed={listening}
+            className={`guard-special-remarks-speech-button${listening ? " is-listening" : ""}`}
+            onClick={handleSpeech}
+            type="button"
+          >
+            <MicIcon aria-hidden="true" size={16} />
+            음성 입력
           </Button>
         </div>
       </section>

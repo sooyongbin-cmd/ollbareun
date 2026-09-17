@@ -167,6 +167,29 @@ describe("guard special remarks page", () => {
     expect(recognitions[0]?.continuous).toBe(false);
   });
 
+  it("keeps the microphone icon and Figma active styling while listening", async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal("fetch", vi.fn(async () => Response.json({ enabled: false })));
+    const start = vi.fn();
+    Object.assign(window, {
+      webkitSpeechRecognition: vi.fn(function SpeechRecognition(this: Record<string, unknown>) {
+        this.start = start;
+        this.stop = vi.fn();
+      }),
+    });
+    render(<GuardSpecialRemarksPage />);
+
+    await waitFor(() => expect(fetch).toHaveBeenCalled());
+    const speechButton = screen.getByRole("button", { name: "음성 입력" });
+    await user.click(speechButton);
+
+    expect(speechButton).toHaveAttribute("aria-pressed", "true");
+    expect(speechButton).toHaveClass("is-listening");
+    expect(speechButton).toHaveTextContent("음성 입력");
+    expect(speechButton.querySelector("svg.lucide-mic")).toBeInTheDocument();
+    expect(speechButton.querySelector("svg.lucide-square")).not.toBeInTheDocument();
+  });
+
   it("compresses captured photos until they are under 500KB", async () => {
     const largeDataUrl = `data:image/jpeg;base64,${"A".repeat(700 * 1024)}`;
     currentDataUrls = [largeDataUrl, "data:image/jpeg;base64,BBBB"];

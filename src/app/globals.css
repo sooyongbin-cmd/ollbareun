@@ -1162,6 +1162,15 @@ html[data-manager-theme="dark"] {
   background: #0088ca;
 }
 
+.guard-special-remarks-speech-button.is-listening {
+  border-color: #005bac;
+  background: #00b9ef;
+}
+
+.guard-special-remarks-speech-button.is-listening:hover {
+  background: #00b9ef;
+}
+
 .guard-special-remarks-camera-frame {
   box-sizing: border-box;
   width: 100%;

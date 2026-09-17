@@ -86,6 +86,14 @@
 - 개인프로필 표기는 내 정보로 변경했다.
 - Footer 안전교육 표기는 Figma의 오탈자 대신 기능명에 맞춰 `안전교육`으로 사용했다.
 
+## 출퇴근 팝업 모달
+
+- 출근 처리 완료 모달은 화면 전체를 기준으로 가로·세로 중앙에 배치한다.
+- 모달은 콘텐츠에 따라 높이가 늘어나는 `hug` 방식으로 구성하고, 공통 폭은 `380px`로 한다.
+- 좌우 여백이 필요한 작은 화면에서는 `width: calc(100% - 40px)`, `max-width: 380px`을 사용한다.
+- 모달 내부는 좌우 padding `20px`, 상하 padding `30px`, 요소 간 gap `16px`을 사용한다.
+- 모달 제목은 Pretendard Bold `24px`, 안내 문구는 Pretendard Medium `16px` 및 Pretendard SemiBold `13px`, 확인 버튼은 일반버튼 스타일을 사용한다.
+
 ## 구현 파일
 
 - 공통 shell: `src/app/guard/main/layout.tsx`, `src/app/globals.css`

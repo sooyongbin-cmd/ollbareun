@@ -1,15 +1,12 @@
 "use client";
 
-import { getAttendanceStatus } from "../attendance-status";
-import { subscribeToGuardSessionChange } from "../../guard-session-storage";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { PageHeader } from "@/components/app-page";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { canClockIn, canClockOut, canClockOutAtWorksite, type AttendanceRecord, type Worksite } from "@/lib/phase1";
 import { type GpsInfo } from "@/lib/gps";
+import { getAttendanceStatus } from "../attendance-status";
+import { subscribeToGuardSessionChange } from "../../guard-session-storage";
 import AttendanceMapSection from "./attendance-map-section";
 import GuardLocationPermissionPrompt from "../guard-location-permission-prompt";
 import { locationPermissionGrantedEvent, queryGeolocationPermission } from "../location-permission";
@@ -53,6 +50,15 @@ type GuardSession = {
   assignment: AssignmentRow | null;
   worksite: WorksiteRow | null;
   attendance: AttendanceRow | null;
+};
+
+type AttendanceViewState = "pending" | "ready" | "outside" | "working" | "complete" | "unavailable";
+
+type AttendanceStatusCopy = {
+  state: AttendanceViewState;
+  title: string;
+  description: string;
+  isOutside: boolean;
 };
 
 const geolocationOptions: PositionOptions = { enableHighAccuracy: true, maximumAge: 3000, timeout: 8000 };
@@ -110,8 +116,109 @@ function readCurrentPosition(geolocation: Geolocation): Promise<GeolocationPosit
   });
 }
 
+function formatAttendanceTime(value: string | null | undefined) {
+  if (!value) return "미등록";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "미등록";
+
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Seoul",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
+function getAttendanceStatusCopy({
+  guard,
+  isClockedIn,
+  isClockedOut,
+  hasLocation,
+  locationError,
+  activeDecisionAllowed,
+}: {
+  guard: GuardSession | null;
+  isClockedIn: boolean;
+  isClockedOut: boolean;
+  hasLocation: boolean;
+  locationError: string;
+  activeDecisionAllowed: boolean;
+}): AttendanceStatusCopy {
+  if (!guard?.worksite) {
+    return {
+      state: "unavailable",
+      title: "근무지 미배정",
+      description: "오늘 배정된 근무지가 없어 출퇴근할 수 없습니다.",
+      isOutside: false,
+    };
+  }
+
+  if (guard.isDayOff && !isClockedIn && !isClockedOut) {
+    return {
+      state: "unavailable",
+      title: "오늘은 휴무일입니다",
+      description: "휴무일에는 출근할 수 없습니다.",
+      isOutside: false,
+    };
+  }
+
+  if (isClockedOut) {
+    return {
+      state: "complete",
+      title: "금일 근무 종료",
+      description: "퇴근 GPS 인증이 완료되었습니다.",
+      isOutside: false,
+    };
+  }
+
+  if (!hasLocation) {
+    return {
+      state: "pending",
+      title: "현재 위치 확인 중",
+      description: locationError || "출퇴근을 위해 현재 위치를 확인하고 있습니다.",
+      isOutside: false,
+    };
+  }
+
+  const radius = `${guard.worksite.radius_meters}m`;
+  if (isClockedIn) {
+    if (activeDecisionAllowed) {
+      return {
+        state: "working",
+        title: "현재 위치 인증 완료 (근무 중)",
+        description: `근무지 반경 (${radius}) 이내 정상 위치 확인됨`,
+        isOutside: false,
+      };
+    }
+
+    return {
+      state: "outside",
+      title: "근무지 반경 이탈 상태",
+      description: `근무지 반경(${radius})이내에서만 퇴근이 가능합니다`,
+      isOutside: true,
+    };
+  }
+
+  if (activeDecisionAllowed) {
+    return {
+      state: "ready",
+      title: `근무지 반경 ${radius} 이내 위치`,
+      description: "출근 인증 대기 중",
+      isOutside: false,
+    };
+  }
+
+  return {
+    state: "outside",
+    title: "근무지 반경 이탈 상태",
+    description: `근무지 반경(${radius})이내에서만 출근이 가능합니다`,
+    isOutside: true,
+  };
+}
+
 export default function GuardAttendancePage() {
-  const router = useRouter();
   const processingRef = useRef(false);
   const [process, setProcess] = useState<{
     action: "출근" | "퇴근";
@@ -128,27 +235,30 @@ export default function GuardAttendancePage() {
   useEffect(() => subscribeToGuardSessionChange(() => setGuard(readGuardSessionFromStorage<GuardSession>())), []);
 
   const attendanceStatus = getAttendanceStatus(guard?.attendance);
+  const isClockedIn = attendanceStatus.isOpen;
+  const isClockedOut = attendanceStatus.clockedOutToday;
+  const hasLocation = Boolean(latitude.trim() && longitude.trim());
   const clockInDecision =
     guard?.isDayOff
       ? {
           allowed: false,
           reason: "오늘은 휴무일로 지정되어 출근할 수 없습니다.",
         }
-      : guard?.worksite && latitude && longitude
-      ? canClockIn({
-          worksite: asWorksite(guard.worksite),
-          currentLatitude: Number(latitude),
-          currentLongitude: Number(longitude),
-        })
-      : {
-          allowed: false,
-          reason: guard?.worksite ? "현재 위치를 확인중입니다...." : "오늘 배정된 근무지가 없습니다.",
-        };
+      : guard?.worksite && hasLocation
+        ? canClockIn({
+            worksite: asWorksite(guard.worksite),
+            currentLatitude: Number(latitude),
+            currentLongitude: Number(longitude),
+          })
+        : {
+            allowed: false,
+            reason: guard?.worksite ? "현재 위치를 확인중입니다...." : "오늘 배정된 근무지가 없습니다.",
+          };
 
   const attendance = asAttendance(guard?.attendance ?? null);
   const attendanceClockOutDecision = canClockOut(attendance);
   const clockOutDecision =
-    attendanceClockOutDecision.allowed && guard?.worksite && latitude && longitude
+    attendanceClockOutDecision.allowed && guard?.worksite && hasLocation
       ? canClockOutAtWorksite({
           attendance,
           worksite: asWorksite(guard.worksite),
@@ -161,7 +271,17 @@ export default function GuardAttendancePage() {
             reason: guard?.worksite ? "현재 위치를 확인중입니다...." : "오늘 배정된 근무지가 없습니다.",
           }
         : attendanceClockOutDecision;
-  const activeDecision = attendanceStatus.isOpen || attendanceStatus.clockedOutToday ? clockOutDecision : clockInDecision;
+
+  const activeDecision = isClockedIn || isClockedOut ? clockOutDecision : clockInDecision;
+  const statusCopy = getAttendanceStatusCopy({
+    guard,
+    isClockedIn,
+    isClockedOut,
+    hasLocation,
+    locationError: error,
+    activeDecisionAllowed: activeDecision.allowed,
+  });
+  const actionDisabled = isProcessing || statusCopy.state === "unavailable" || statusCopy.state === "pending" || statusCopy.isOutside;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -241,18 +361,27 @@ export default function GuardAttendancePage() {
       if (!geolocation) {
         throw new Error("이 브라우저에서는 위치 확인을 사용할 수 없습니다.");
       }
+
       let position: GeolocationPosition;
       try {
         position = await readCurrentPosition(geolocation);
       } catch {
         throw new Error("현재 위치를 확인하지 못했습니다. 위치 권한과 GPS 상태를 확인한 뒤 다시 시도해주세요.");
       }
+
       const nextLatitude = String(position.coords.latitude);
       const nextLongitude = String(position.coords.longitude);
       setLatitude(nextLatitude);
       setLongitude(nextLongitude);
 
-      if (action === "퇴근") {
+      if (action === "출근") {
+        const decision = canClockIn({
+          worksite: asWorksite(activeGuard.worksite),
+          currentLatitude: position.coords.latitude,
+          currentLongitude: position.coords.longitude,
+        });
+        if (!decision.allowed) throw new Error(decision.reason);
+      } else {
         const decision = canClockOutAtWorksite({
           attendance: asAttendance(activeGuard.attendance),
           worksite: asWorksite(activeGuard.worksite),
@@ -286,98 +415,137 @@ export default function GuardAttendancePage() {
 
   function handleProcessConfirm() {
     if (!process || process.status === "processing") return;
-    if (process.status === "success") {
-      router.push("/guard/main");
-    } else {
-      setProcess(null);
-    }
+    setProcess(null);
   }
 
-  return (
-    <div className="mx-auto w-full max-w-xl space-y-6 px-4 py-6">
-      <PageHeader title="출퇴근" />
-      <div>
-        {guard ? (
-          <section className="bg-muted/40 rounded-xl p-[1rem] border border-border/50">
-            <div className="space-y-[2rem]">
-              <AttendanceMapSection
-                currentLatitude={latitude}
-                currentLongitude={longitude}
-                worksite={guard.worksite}
-              />
-
-              <div
-                className={`p-4 rounded-xl text-center text-[0.9375rem] font-medium transition-colors ${
-                  activeDecision.allowed ? "bg-primary/5 text-primary" : "bg-destructive text-foreground"
-                }`}
-                id="attendance-decision-section"
-              >
-                {activeDecision.reason}
-              </div>
-
-              <div className="grid gap-4" id="attendance-actions-section">
-                <Button
-                  className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"
-                  data-testid="clock-in"
-                  type="button"
-                  hidden={attendanceStatus.isOpen}
-                  disabled={isProcessing || !clockInDecision.allowed || !attendanceStatus.canStart}
-                  onClick={() => void handleAttendance("출근")}
-                >
-                  출근하기
-                </Button>
-                <Button
-                  data-testid="clock-out"
-                  type="button"
-                  hidden={!attendanceStatus.isOpen}
-                  disabled={isProcessing || !clockOutDecision.allowed}
-                  onClick={() => void handleAttendance("퇴근")}
-                  variant="outline"
-                >
-                  퇴근하기
-                </Button>
-              </div>
-
-              {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive text-center">{error}</p> : null}
-              <GuardLocationPermissionPrompt />
-            </div>
-          </section>
-        ) : (
-          <section
-            className="bg-muted/40 rounded-xl p-[1rem] border border-border/50 text-center"
-            id="attendance-auth-required-section"
-          >
-            <p className="text-[1.0625rem] text-muted-foreground">현장 근로자 인증 후 이용할 수 있습니다.</p>
-            <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 mt-6 inline-flex" href="/guard">
-              인증하러 가기
-            </Link>
-          </section>
-        )}
+  if (!guard) {
+    return (
+      <div className="guard-attendance-page">
+        <section className="guard-attendance-card guard-attendance-auth-card" id="attendance-auth-required-section">
+          <p>현장 근로자 인증 후 이용할 수 있습니다.</p>
+          <Link className="guard-attendance-action-button is-primary" href="/guard">
+            인증하러 가기
+          </Link>
+        </section>
       </div>
+    );
+  }
+
+  const clockInTime = guard.attendance?.clock_in_at
+    ? formatAttendanceTime(guard.attendance.clock_in_at)
+    : "미등록 (출근 전)";
+  const clockOutTime = formatAttendanceTime(guard.attendance?.clock_out_at);
+  const worksiteName = guard.worksite?.name ?? "근무지 미배정";
+
+  return (
+    <div className="guard-attendance-page">
+      <section aria-label="출퇴근" className="guard-attendance-card">
+        <div className="guard-attendance-heading">
+          <h1>출퇴근</h1>
+          <p>{worksiteName}</p>
+        </div>
+
+        <AttendanceMapSection
+          currentLatitude={latitude}
+          currentLongitude={longitude}
+          worksite={guard.worksite}
+        />
+
+        <div
+          aria-live="polite"
+          className={`guard-attendance-status-box is-${statusCopy.state}`}
+          id="attendance-decision-section"
+          role="status"
+        >
+          <p>{statusCopy.title}</p>
+          <p>{statusCopy.description}</p>
+          {!activeDecision.allowed ? <span className="guard-sr-only">{activeDecision.reason}</span> : null}
+        </div>
+
+        <div className="guard-attendance-times" id="attendance-record-section">
+          <div>
+            <span>∙ 출근시각 : </span>
+            <strong>{clockInTime}</strong>
+          </div>
+          <div>
+            <span>∙ 퇴근시각 : </span>
+            <strong>{clockOutTime}</strong>
+          </div>
+        </div>
+
+        <div id="attendance-actions-section">
+          <button
+            aria-label="출근하기"
+            className={`guard-attendance-action-button is-primary ${actionDisabled ? "is-disabled" : ""}`}
+            data-testid="clock-in"
+            disabled={actionDisabled}
+            hidden={isClockedIn || isClockedOut}
+            type="button"
+            onClick={() => void handleAttendance("출근")}
+          >
+            {isProcessing && !isClockedIn ? "처리 중..." : "출근하기"}
+          </button>
+          <button
+            aria-label="퇴근하기"
+            className={`guard-attendance-action-button is-working ${actionDisabled ? "is-disabled" : ""}`}
+            data-testid="clock-out"
+            disabled={actionDisabled}
+            hidden={!isClockedIn}
+            type="button"
+            onClick={() => void handleAttendance("퇴근")}
+          >
+            {isProcessing && isClockedIn ? "처리 중..." : "퇴근하기"}
+          </button>
+          <button
+            aria-label="금일 근무 완료"
+            className="guard-attendance-action-button is-complete is-disabled"
+            data-testid="attendance-complete"
+            disabled
+            hidden={!isClockedOut}
+            type="button"
+          >
+            금일 근무 완료
+          </button>
+        </div>
+      </section>
+
+      {error ? <p className="guard-attendance-error">{error}</p> : null}
+      <GuardLocationPermissionPrompt />
+
       <Dialog open={process !== null}>
         <DialogContent
+          className="guard-attendance-dialog"
           showCloseButton={false}
           onEscapeKeyDown={(event) => event.preventDefault()}
           onInteractOutside={(event) => event.preventDefault()}
         >
-          <DialogHeader>
-            <DialogTitle>{process?.action} 처리</DialogTitle>
-            <DialogDescription aria-live="polite">
-              {process?.status === "success" && process.action === "출근" && encouragement ? (
-                <span className="mb-3 block whitespace-pre-wrap break-words text-foreground">{encouragement}</span>
-              ) : null}
-              {process?.status === "success"
-                ? process.action + "처리되었습니다."
-                : process?.status === "error"
-                  ? process.action + " 처리에 실패했습니다."
-                  : (process?.action ?? "출퇴근") + "처리중입니다..."}
-            </DialogDescription>
+          <DialogHeader className="guard-attendance-dialog-header">
+            <DialogTitle className="guard-attendance-dialog-title">
+              {process?.status === "success" && process.action === "출근" ? "출근 완료" : `${process?.action ?? "출퇴근"} 처리`}
+            </DialogTitle>
           </DialogHeader>
-          {process?.status === "error" ? <p role="alert" className="text-sm text-destructive">{process.error}</p> : null}
-          <DialogFooter>
-            <Button type="button" className="w-full" disabled={isProcessing} onClick={handleProcessConfirm}>
+          <DialogDescription aria-live="polite" className="guard-attendance-dialog-copy">
+            {process?.status === "success" ? (
+              <>
+                <span>{process.action === "출근" ? (encouragement || "오늘도 안전한 근무되세요") : "오늘도 안전한 근무되세요"}</span>
+                <span>{process.action} 처리가 완료 되었습니다</span>
+              </>
+            ) : process?.status === "error" ? (
+              <span>{process.action} 처리에 실패했습니다.</span>
+            ) : (
+              <span>{process?.action ?? "출퇴근"} 처리중입니다...</span>
+            )}
+          </DialogDescription>
+          {process?.status === "error" ? <p className="guard-attendance-dialog-error" role="alert">{process.error}</p> : null}
+          <DialogFooter className="guard-attendance-dialog-footer">
+            <button
+              className="guard-attendance-dialog-confirm"
+              disabled={isProcessing}
+              type="button"
+              onClick={handleProcessConfirm}
+            >
               {isProcessing ? "처리중..." : "확인"}
-            </Button>
+            </button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from "./supabase-admin";
 
 const STORAGE_BUCKET = "special-remarks";
 const MAX_PHOTO_BYTES = 500 * 1024;
+const PHOTO_SIGNED_URL_EXPIRES_IN = 60 * 60;
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/mojzkwbp";
 
 type EmailProvider = "resend" | "formspree" | "naver";
@@ -437,7 +438,7 @@ export async function listSpecialRemarkReports(input: { year?: unknown } = {}) {
 
   const { data, error } = await query;
   throwIfError(error);
-  return (data ?? []) as SpecialRemarkReportRow[];
+  return Promise.all((data ?? []).map((report) => withSignedPhotoUrl(report as SpecialRemarkReportRow)));
 }
 
 export async function completeSpecialRemarkReport(idInput: unknown) {
@@ -447,16 +448,20 @@ export async function completeSpecialRemarkReport(idInput: unknown) {
     .update({ processing_status: "Y", updated_at: new Date().toISOString() })
     .eq("id", id).select("*").single();
   throwIfError(error);
-  return data as SpecialRemarkReportRow;
+  return withSignedPhotoUrl(data as SpecialRemarkReportRow);
 }
 
-export async function getSpecialRemarkReport(idInput: unknown) {
+async function getSpecialRemarkReportRecord(idInput: unknown) {
   const id = requireString(idInput, "특이사항 보고");
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase.from("inspection_special_reports").select("*").eq("id", id).single();
 
   throwIfError(error);
   return data as SpecialRemarkReportRow;
+}
+
+export async function getSpecialRemarkReport(idInput: unknown) {
+  return withSignedPhotoUrl(await getSpecialRemarkReportRecord(idInput));
 }
 
 export function getSpecialRemarkStoragePathFromPublicUrl(photoUrl: string | null | undefined) {
@@ -473,10 +478,24 @@ export function getSpecialRemarkStoragePathFromPublicUrl(photoUrl: string | null
   return decodeURIComponent(photoUrl.slice(markerIndex + marker.length));
 }
 
+async function withSignedPhotoUrl(report: SpecialRemarkReportRow) {
+  const storagePath = getSpecialRemarkStoragePathFromPublicUrl(report.photo_url);
+  if (!storagePath) {
+    return report;
+  }
+
+  const { data, error } = await getSupabaseAdmin().storage
+    .from(STORAGE_BUCKET)
+    .createSignedUrl(storagePath, PHOTO_SIGNED_URL_EXPIRES_IN);
+  throwIfError(error);
+
+  return data?.signedUrl ? { ...report, photo_url: data.signedUrl } : report;
+}
+
 export async function deleteSpecialRemarkReport(idInput: unknown) {
   const id = requireString(idInput, "특이사항 보고");
   const supabase = getSupabaseAdmin();
-  const report = await getSpecialRemarkReport(id);
+  const report = await getSpecialRemarkReportRecord(id);
   const storagePath = getSpecialRemarkStoragePathFromPublicUrl(report.photo_url);
 
   if (storagePath) {

@@ -50,7 +50,7 @@ describe("guard authentication data rules", () => {
     const supabase = {
       from: vi.fn().mockReturnValue(employeeQuery),
     };
-    vi.mocked(getSupabase).mockReturnValue(supabase as never);
+    vi.mocked(getSupabaseAdmin).mockReturnValue(supabase as never);
 
     await expect(
       authenticateGuard({ name: "홍길동", phone: "010-1234-5678" }),
@@ -129,7 +129,7 @@ describe("guard authentication data rules", () => {
         .mockReturnValueOnce(openAttendanceQuery)
         .mockReturnValueOnce(todayAttendanceQuery),
     };
-    vi.mocked(getSupabase).mockReturnValue(supabase as never);
+    vi.mocked(getSupabaseAdmin).mockReturnValue(supabase as never);
 
     await expect(authenticateGuard({ name: "홍길동", phone: "010-1234-5678" })).resolves.toMatchObject({
       assignment: { id: "assign-1" },
@@ -215,7 +215,7 @@ describe("guard authentication data rules", () => {
         .mockReturnValueOnce(worksiteQuery)
         .mockReturnValueOnce(attendanceQuery),
     };
-    vi.mocked(getSupabase).mockReturnValue(supabase as never);
+    vi.mocked(getSupabaseAdmin).mockReturnValue(supabase as never);
 
     await expect(authenticateGuard({ name: "Guard", phone: "010-1234-5678" })).resolves.toMatchObject({
       attendance: {

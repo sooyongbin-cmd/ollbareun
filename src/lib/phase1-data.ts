@@ -453,7 +453,11 @@ export async function deleteAssignment(id: unknown, supabase: SupabaseClient = g
 export async function authenticateGuard(input: { name: unknown; phone: unknown }) {
   const name = requireString(input.name, "이름");
   const phone = requireString(input.phone, "연락처");
-  const supabase = getSupabase();
+  // Guard login is a legacy name/phone flow, so there is no Supabase Auth
+  // session to attach to the publishable client. Read the login data on the
+  // server with the privileged client so employee RLS cannot turn a valid
+  // employee into a false "not found" response.
+  const supabase = getSupabaseAdmin();
 
   const { data: employee, error: employeeError } = await supabase
     .from("employees")
@@ -475,7 +479,7 @@ export async function authenticateGuard(input: { name: unknown; phone: unknown }
 }
 
 async function loadGuardSessionByEmployee(employee: EmployeeRow) {
-  const supabase = getSupabase();
+  const supabase = getSupabaseAdmin();
   const { data: assignment, error: assignmentError } = await supabase
     .from("work_assignments")
     .select("*")
@@ -537,7 +541,7 @@ async function findGuardSessionAttendance(supabase: ReturnType<typeof getSupabas
 
 export async function loadGuardSessionByEmployeeId(employeeIdInput: unknown) {
   const employeeId = requireString(employeeIdInput, "경비원");
-  const supabase = getSupabase();
+  const supabase = getSupabaseAdmin();
   const { data: employee, error } = await supabase
     .from("employees")
     .select("*")

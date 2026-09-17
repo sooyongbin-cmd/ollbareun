@@ -61,6 +61,7 @@ function completionPosts() {
 }
 
 async function loadInitialYoutubeIframe() {
+  fireEvent.click(screen.getByRole("button", { name: fireTitle }));
   const iframe = await screen.findByTitle(fireTitle);
   fireEvent.load(iframe);
   await waitFor(() => {
@@ -134,29 +135,30 @@ describe("guard safety education page", () => {
     );
   });
 
-  it("shows only safety education titles in the education list", async () => {
+  it("shows safety education titles and their completion states", async () => {
     render(<GuardSafetyEducationPage />);
 
     expect(await screen.findByRole("button", { name: fireTitle })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "제목" })).toBeInTheDocument();
-    expect(screen.queryByRole("columnheader", { name: "링크" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: patrolTitle })).toBeInTheDocument();
+    expect(screen.getByText("0/2 완료 (0%)")).toBeInTheDocument();
+    expect(screen.getAllByText("미이수")).toHaveLength(2);
     expect(screen.queryByRole("button", { name: "https://www.youtube.com/watch?v=fireSafety" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "https://youtu.be/patrolSafety" })).not.toBeInTheDocument();
+  });
+
+  it("opens the selected education video without adding a title inside the video region", async () => {
+    render(<GuardSafetyEducationPage />);
+
+    expect(await screen.findByRole("button", { name: fireTitle })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: fireTitle }));
+
     await waitFor(() => {
       const iframeUrl = new URL(screen.getByTitle(fireTitle).getAttribute("src") ?? "");
       expect(`${iframeUrl.origin}${iframeUrl.pathname}`).toBe("https://www.youtube.com/embed/fireSafety");
       expect(iframeUrl.searchParams.get("enablejsapi")).toBe("1");
       expect(iframeUrl.searchParams.get("origin")).toBe(window.location.origin);
     });
-  });
-
-  it("removes the video section title and outer padding", async () => {
-    render(<GuardSafetyEducationPage />);
-
-    expect(await screen.findByRole("button", { name: fireTitle })).toBeInTheDocument();
-
     const videoSection = screen.getByRole("region", { name: "안전교육 영상" });
-    expect(videoSection).toHaveClass("p-0");
     expect(within(videoSection).queryByText(fireTitle)).not.toBeInTheDocument();
   });
 
@@ -166,6 +168,8 @@ describe("guard safety education page", () => {
     render(<GuardSafetyEducationPage />);
 
     expect(await screen.findByRole("button", { name: fireTitle })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: fireTitle }));
+    await user.click(screen.getByRole("button", { name: "Close" }));
     await user.click(screen.getByRole("button", { name: patrolTitle }));
 
     await waitFor(() => {
@@ -175,7 +179,7 @@ describe("guard safety education page", () => {
     });
   });
 
-  it("excludes completed safety education items from the list", async () => {
+  it("shows completed safety education items with a completed state", async () => {
     completionRows = [
       {
         employee_id: "employee-1",
@@ -188,17 +192,16 @@ describe("guard safety education page", () => {
     render(<GuardSafetyEducationPage />);
 
     expect(await screen.findByRole("button", { name: patrolTitle })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: fireTitle })).not.toBeInTheDocument();
-    await waitFor(() => {
-      const iframeUrl = new URL(screen.getByTitle(patrolTitle).getAttribute("src") ?? "");
-      expect(`${iframeUrl.origin}${iframeUrl.pathname}`).toBe("https://www.youtube.com/embed/patrolSafety");
-      expect(iframeUrl.searchParams.get("origin")).toBe(window.location.origin);
-    });
+    expect(screen.getByRole("button", { name: fireTitle })).toBeInTheDocument();
+    expect(screen.getByText("1/2 완료 (50%)")).toBeInTheDocument();
+    expect(screen.getByText("이수 완료")).toBeInTheDocument();
   });
 
   it("waits for the YouTube iframe to load before creating the API player", async () => {
     render(<GuardSafetyEducationPage />);
 
+    expect(await screen.findByRole("button", { name: fireTitle })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: fireTitle }));
     const iframe = await screen.findByTitle(fireTitle);
     expect(playerInstances).toHaveLength(0);
 
@@ -228,6 +231,7 @@ describe("guard safety education page", () => {
     await vi.waitFor(() => {
       expect(screen.getByRole("button", { name: fireTitle })).toBeInTheDocument();
     });
+    fireEvent.click(screen.getByRole("button", { name: fireTitle }));
     fireEvent.load(screen.getByTitle(fireTitle));
     await vi.waitFor(() => expect(playerInstances).toHaveLength(1));
 
@@ -260,6 +264,7 @@ describe("guard safety education page", () => {
     await vi.waitFor(() => {
       expect(screen.getByRole("button", { name: fireTitle })).toBeInTheDocument();
     });
+    fireEvent.click(screen.getByRole("button", { name: fireTitle }));
     fireEvent.load(screen.getByTitle(fireTitle));
     await vi.waitFor(() => expect(playerInstances).toHaveLength(1));
 
@@ -272,9 +277,10 @@ describe("guard safety education page", () => {
     playerInstances[0].options.events?.onStateChange?.({ data: 0 });
 
     await vi.waitFor(() => {
-      expect(screen.queryByRole("button", { name: fireTitle })).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name: fireTitle })).toHaveAttribute("data-completed", "true");
     });
     expect(screen.getByRole("button", { name: patrolTitle })).toBeInTheDocument();
+    expect(screen.getByText("1/2 완료 (50%)")).toBeInTheDocument();
     await vi.waitFor(() => {
       expect(completionPosts()).toHaveLength(1);
     });

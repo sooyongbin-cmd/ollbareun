@@ -1,11 +1,10 @@
 "use client";
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import LoadingBoard from "@/components/loading-board";
 import { readStoredGuardSession } from "../../guard-session-storage";
+import styles from "./page.module.css";
 
 type EducationResourceRow = {
   id: string;
@@ -290,13 +289,14 @@ export default function GuardSafetyEducationPage() {
 
   const sortedResources = useMemo(
     () =>
-      resources
-        .filter((resource) => !completedResourceIds.includes(resource.id))
-        .sort((left, right) => {
-          return left.title.localeCompare(right.title, "ko-KR");
-        }),
-    [completedResourceIds, resources],
+      [...resources].sort((left, right) => {
+        return left.title.localeCompare(right.title, "ko-KR");
+      }),
+    [resources],
   );
+  const completedResourceIdSet = useMemo(() => new Set(completedResourceIds), [completedResourceIds]);
+  const completedResourceCount = resources.filter((resource) => completedResourceIdSet.has(resource.id)).length;
+  const completionPercentage = resources.length ? Math.round((completedResourceCount / resources.length) * 100) : 0;
   const selectedEmbedUrl = selectedResource
     ? getYoutubeEmbedUrl(selectedResource.youtube_link, typeof window !== "undefined" ? window.location.origin : "")
     : "";
@@ -413,70 +413,74 @@ export default function GuardSafetyEducationPage() {
   }, [loadedIframeResourceId, markEducationCompletion, playerReady, selectedResource]);
 
   return (
-    <div className="mx-auto max-w-[61.25rem] w-full px-5 py-[3.5rem]">
-      <section className="space-y-[1.5rem]">
-        <header>
-          <h1 className="text-[2.5rem] font-semibold leading-[1.1]">안전교육</h1>
-          <p className="text-[1.3125rem] font-normal text-muted-foreground mt-2 max-w-[40rem]">
-            등록된 안전교육 자료의 제목과 유튜브 링크를 확인합니다.
+    <main className={styles.safetyPage}>
+      <section aria-label="안전교육 목록" className={styles.safetyCard}>
+        <div className={styles.headingRow}>
+          <h1 className={styles.heading}>안전교육</h1>
+          <p className={styles.progress}>
+            {completedResourceCount}/{resources.length} 완료 ({completionPercentage}%)
           </p>
-        </header>
+        </div>
 
-        <section
-          aria-label="안전교육 목록"
-          className="bg-muted/40 rounded-xl p-[1rem] border border-border/50"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-3 text-[0.875rem] text-muted-foreground">
-            <span>전체 안전교육 {sortedResources.length}</span>
+        <div className={styles.description}>
+          <p className={styles.descriptionText}>
+            필수 안전교육 영상을 시청하고 이수를 완료해 주세요.
+            <br />
+            리스트의 각 제목을 터치하면 시청하실 수 있습니다.
+          </p>
+        </div>
+
+        {loading ? (
+          <div className={styles.educationList}>
+            <LoadingBoard className={styles.loading} label="안전교육 목록을 불러오는 중입니다." />
           </div>
+        ) : listError ? (
+          <p className={styles.error} role="alert">{listError}</p>
+        ) : sortedResources.length === 0 ? (
+          <div className={`${styles.educationList} ${styles.emptyState}`}>
+            <p>등록된 안전교육 자료가 없습니다.</p>
+          </div>
+        ) : (
+          <div aria-label="안전교육 자료" className={styles.educationList}>
+            {sortedResources.map((resource) => {
+              const completed = completedResourceIdSet.has(resource.id);
+              const titleId = `education-title-${resource.id}`;
+              const statusId = `education-status-${resource.id}`;
 
-          {loading ? (
-            <LoadingBoard className="mt-6" />
-          ) : listError ? (
-            <p className="mt-6 text-[1rem] text-destructive">{listError}</p>
-          ) : (
-            <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
-              <Table className="w-full" data-responsive-single-column>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-left">제목</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sortedResources.length === 0 ? (
-                    <TableRow>
-                      <TableCell data-responsive-empty colSpan={1} className="p-8 text-center text-muted-foreground italic">
-                        이수하지 않은 안전교육 자료가 없습니다.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    sortedResources.map((resource) => (
-                      <TableRow key={resource.id} className="hover:bg-muted/40 transition-colors">
-                        <TableCell data-label="제목" className="font-semibold">
-                          <Button
-                            className="h-auto justify-start whitespace-normal p-0 text-left"
-                            type="button"
-                            variant="link"
-                            onClick={() => {
-                              setLoadedIframeResourceId(null);
-                              setSelectedResource(resource);
-                              setMessage("");
-                              setCompletionError("");
-                            }}
-                          >
-                            {resource.title}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </section>
+              return (
+                <button
+                  aria-describedby={statusId}
+                  aria-labelledby={titleId}
+                  className={styles.educationItem}
+                  data-completed={completed}
+                  key={resource.id}
+                  onClick={() => {
+                    setLoadedIframeResourceId(null);
+                    setSelectedResource(resource);
+                    setMessage("");
+                    setCompletionError("");
+                  }}
+                  type="button"
+                >
+                  <span className={styles.educationTitle} id={titleId}>{resource.title}</span>
+                  <span className={`${styles.educationStatus} ${completed ? styles.completedStatus : styles.incompleteStatus}`} id={statusId}>
+                    {completed ? (
+                      <>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img alt="" className={styles.checkIcon} height="16" src="/guard-assets/check-square.svg" width="16" />
+                        이수 완료
+                      </>
+                    ) : "미이수"}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </section>
 
-        {message ? <p role="status" className="text-[1rem] text-primary">{message}</p> : null}
+      {message ? <p role="status" className={styles.message}>{message}</p> : null}
+      {completionError && !selectedResource ? <p role="alert" className={styles.error}>{completionError}</p> : null}
         <Dialog
           open={selectedResource !== null}
           onOpenChange={(open) => {
@@ -511,7 +515,6 @@ export default function GuardSafetyEducationPage() {
             </section>
           </DialogContent>
         </Dialog>
-      </section>
-    </div>
+    </main>
   );
 }

@@ -1,0 +1,179 @@
+.safetyPage {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 20px 20px 58px;
+}
+
+.safetyCard {
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 22px;
+  padding: 20px;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 0 4px rgb(0 0 0 / 25%);
+}
+
+.headingRow {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  line-height: normal;
+}
+
+.heading,
+.progress,
+.descriptionText,
+.educationTitle,
+.educationStatus,
+.message,
+.error,
+.emptyState p {
+  margin: 0;
+  word-break: keep-all;
+}
+
+.heading {
+  color: #141414;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: normal;
+}
+
+.progress {
+  color: #005bac;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: normal;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.description {
+  display: flex;
+  width: 100%;
+  height: 32px;
+  align-items: center;
+}
+
+.descriptionText {
+  color: #141414;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 18px;
+}
+
+.educationList {
+  display: flex;
+  width: 100%;
+  min-height: 284px;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.educationItem {
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  min-height: 62px;
+  flex: 0 0 62px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  border: 1px solid #ccd5de;
+  border-radius: 10px;
+  background: #f1f4f8;
+  color: #1e1e1e;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.educationItem:hover {
+  border-color: #a9b9c8;
+  background: #eaf0f5;
+}
+
+.educationItem:focus-visible {
+  outline: 3px solid rgb(0 151 224 / 35%);
+  outline-offset: 2px;
+}
+
+.educationTitle {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  color: #1e1e1e;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 25px;
+  letter-spacing: -0.45px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.educationStatus {
+  display: inline-flex;
+  min-height: 25px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 25px;
+  white-space: nowrap;
+}
+
+.completedStatus {
+  color: #0097e0;
+}
+
+.incompleteStatus {
+  color: #ff7b00;
+}
+
+.checkIcon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+}
+
+.loading {
+  align-self: center;
+  min-height: 284px;
+}
+
+.emptyState {
+  align-items: center;
+  justify-content: center;
+  color: #898989;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.message,
+.error {
+  margin-top: 12px;
+  font-size: 14px;
+  line-height: 18px;
+}
+
+.message {
+  color: #005bac;
+}
+
+.error {
+  color: #d92d20;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .educationItem {
+    transition: none;
+  }
+}

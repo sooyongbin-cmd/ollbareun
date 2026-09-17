@@ -269,4 +269,31 @@ describe("guard profile data", () => {
       endDate: "2026-06-04",
     });
   });
+
+  it("includes absence-only months and excludes records after today", () => {
+    expect(
+      buildGuardProfile({
+        employeeId: "emp-1",
+        today: "2026-06-04",
+        schedules,
+        worksites,
+        attendance: [],
+        scheduledAttendance: [
+          { work_assignment_id: "assign-2", work_date: "2026-05-10", intime: "09:00", outtime: "18:00" },
+          { work_assignment_id: "assign-2", work_date: "2026-06-05", intime: "09:00", outtime: "18:00" },
+        ],
+        daysOff: [
+          { work_assignment_id: "assign-2", day_off_date: "2026-05-11" },
+          { work_assignment_id: "assign-other", day_off_date: "2026-05-12" },
+          { work_assignment_id: "assign-2", day_off_date: "2026-06-05" },
+        ],
+      }),
+    ).toMatchObject({
+      monthlyAttendance: [{ yearMonth: "2026-05", attendanceDays: 0, workHoursTotal: "0분" }],
+      absenceDetails: [
+        { workDate: "2026-05-10", reason: "결근" },
+        { workDate: "2026-05-11", reason: "휴무" },
+      ],
+    });
+  });
 });

@@ -157,6 +157,22 @@ function getWeekStart(dateKey: string) {
   return addDays(dateKey, day === 0 ? -6 : 1 - day);
 }
 
+function getMonthlyOptions(profile: GuardProfilePayload | null, currentMonth: string) {
+  const monthKeys = new Set<string>([currentMonth]);
+  for (const row of profile?.monthlyAttendance ?? []) {
+    if (/^\d{4}-\d{2}$/.test(row.yearMonth) && row.yearMonth <= currentMonth) {
+      monthKeys.add(row.yearMonth);
+    }
+  }
+  for (const detail of [...(profile?.attendanceDetails ?? []), ...(profile?.absenceDetails ?? [])]) {
+    const monthKey = detail.workDate.slice(0, 7);
+    if (/^\d{4}-\d{2}$/.test(monthKey) && monthKey <= currentMonth) {
+      monthKeys.add(monthKey);
+    }
+  }
+  return [...monthKeys].sort((left, right) => right.localeCompare(left));
+}
+
 function getWeekNumber(dateKey: string) {
   const monthStart = `${dateKey.slice(0, 7)}-01`;
   const monthStartDay = dateKeyToUtcDate(monthStart).getUTCDay();
@@ -486,6 +502,7 @@ export default function GuardProfilePage() {
   const [error, setError] = useState("");
   const [activeModal, setActiveModal] = useState<ModalKind | null>(null);
   const [selectedScheduleWeek, setSelectedScheduleWeek] = useState("");
+  const [selectedMonthKey, setSelectedMonthKey] = useState("");
   const displayedError = error || (!employeeId ? "경비원 정보를 찾을 수 없습니다. 다시 로그인하세요." : "");
 
   useEffect(() => {
@@ -627,11 +644,14 @@ export default function GuardProfilePage() {
 
   const today = getSeoulTodayDate();
   const currentMonth = today.slice(0, 7);
-  const selectedMonth = profile?.monthlyAttendance.find((row) => row.yearMonth === currentMonth)
-    ?? profile?.monthlyAttendance.at(-1)
-    ?? { yearMonth: currentMonth, attendanceDays: 0, workHoursTotal: "0분" };
-  const attendanceDetails = (profile?.attendanceDetails ?? []).filter((detail) => detail.workDate.startsWith(selectedMonth.yearMonth));
-  const absenceDetails = (profile?.absenceDetails ?? []).filter((detail) => detail.workDate.startsWith(selectedMonth.yearMonth));
+  const monthlyOptions = getMonthlyOptions(profile, currentMonth);
+  const selectedMonthValue = monthlyOptions.includes(selectedMonthKey)
+    ? selectedMonthKey
+    : monthlyOptions[0] ?? currentMonth;
+  const attendanceDetails = (profile?.attendanceDetails ?? []).filter((detail) => detail.workDate.startsWith(selectedMonthValue));
+  const absenceDetails = (profile?.absenceDetails ?? []).filter((detail) => detail.workDate.startsWith(selectedMonthValue));
+  const selectedMonth = profile?.monthlyAttendance.find((row) => row.yearMonth === selectedMonthValue)
+    ?? { yearMonth: selectedMonthValue, attendanceDays: attendanceDetails.length, workHoursTotal: "0분" };
   const scheduleWeekOptions = getScheduleWeekOptions(profile, today);
   const selectedScheduleWeekValue = selectedScheduleWeek || scheduleWeekOptions[0]?.startDate || "";
   const selectedScheduleWeekOption = scheduleWeekOptions.find(
@@ -726,10 +746,21 @@ export default function GuardProfilePage() {
           <section aria-label="월별 출근 현황" className={`${styles.section} ${styles.monthlySection}`}>
             <div className={styles.sectionHeading}>
               <h2>월별 출근 현황</h2>
-              <button aria-label="월별 출근 현황 선택" className={styles.selectButton} type="button">
-                {`${formatMonth(selectedMonth.yearMonth)}${selectedMonth.yearMonth === currentMonth ? " (이번 달)" : ""}`}
+              <div className={styles.monthlySelect}>
+                <select
+                  aria-label="월별 출근 현황 선택"
+                  className={styles.selectButton}
+                  onChange={(event) => setSelectedMonthKey(event.target.value)}
+                  value={selectedMonthValue}
+                >
+                  {monthlyOptions.map((monthKey) => (
+                    <option key={monthKey} value={monthKey}>
+                      {`${formatMonth(monthKey)}${monthKey === currentMonth ? " (이번 달)" : ""}`}
+                    </option>
+                  ))}
+                </select>
                 <img alt="" src="/guard-assets/profile-chevron-down.svg" />
-              </button>
+              </div>
             </div>
             <div className={styles.monthlyCards}>
               <button

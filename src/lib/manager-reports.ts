@@ -455,15 +455,14 @@ export async function loadAttendanceReport(input: { employeeName: string; year: 
 
 export async function loadAttendanceStatus(input: { date: string }) {
   assertDate(input.date);
-  const supabase = getSupabase();
-  const supabaseAdmin = getSupabaseAdmin();
+  const supabase = getSupabaseAdmin();
   const [dailyAttendanceResult, assignmentsResult, employeesResult, worksitesResult, attendanceResult] = await Promise.all([
-    supabaseAdmin
+    supabase
       .from("work_assignment_daily_attendance")
       .select("work_assignment_id,work_date,intime")
       .eq("work_date", input.date)
       .not("intime", "is", null),
-    supabaseAdmin.from("work_assignments").select("id,employee_id,worksite_id"),
+    supabase.from("work_assignments").select("id,employee_id,worksite_id"),
     supabase.from("employees").select("id,name,role,is_retired"),
     supabase.from("worksites").select("id,name"),
     supabase

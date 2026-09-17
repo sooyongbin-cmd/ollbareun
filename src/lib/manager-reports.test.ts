@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildAttendanceReport, buildAttendanceStatus, buildEducationReport, createAttendanceRecord, updateAttendanceRecord } from "./manager-reports";
+import { buildAttendanceReport, buildAttendanceStatus, buildEducationReport, createAttendanceRecord, loadAttendanceStatus, updateAttendanceRecord } from "./manager-reports";
+import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
+
+vi.mock("./supabase", () => ({
+  getSupabase: vi.fn(),
+}));
 
 vi.mock("./supabase-admin", () => ({
   getSupabaseAdmin: vi.fn(),
@@ -186,6 +191,41 @@ describe("manager reports", () => {
       clockInTime: null,
       status: "대기",
     });
+  });
+
+  it("loads attendance status through the admin client so RLS does not hide manager data", async () => {
+    const dailyAttendanceQuery = { select: vi.fn(), eq: vi.fn(), not: vi.fn() };
+    dailyAttendanceQuery.select.mockReturnValue(dailyAttendanceQuery);
+    dailyAttendanceQuery.eq.mockReturnValue(dailyAttendanceQuery);
+    dailyAttendanceQuery.not.mockResolvedValue({
+      data: [{ work_assignment_id: "assignment-1", work_date: "2026-09-17", intime: "2026-09-17T00:00:00.000Z" }],
+      error: null,
+    });
+
+    const attendanceQuery = { select: vi.fn(), eq: vi.fn() };
+    attendanceQuery.select.mockReturnValue(attendanceQuery);
+    attendanceQuery.eq.mockResolvedValue({
+      data: [{ id: "attendance-1", employee_id: "emp-1", worksite_id: "site-1", work_date: "2026-09-17", clock_in_at: "2026-09-17T00:00:00.000Z", clock_out_at: null }],
+      error: null,
+    });
+
+    const from = vi.fn((table: string) => {
+      if (table === "work_assignment_daily_attendance") return dailyAttendanceQuery;
+      if (table === "work_assignments") return { select: vi.fn().mockResolvedValue({ data: [{ id: "assignment-1", employee_id: "emp-1", worksite_id: "site-1" }], error: null }) };
+      if (table === "employees") return { select: vi.fn().mockResolvedValue({ data: [{ id: "emp-1", name: "김철수", role: "경비원", is_retired: false }], error: null }) };
+      if (table === "worksites") return { select: vi.fn().mockResolvedValue({ data: [{ id: "site-1", name: "본사" }], error: null }) };
+      return attendanceQuery;
+    });
+
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from } as never);
+    vi.mocked(getSupabase).mockReturnValue({ from: vi.fn() } as never);
+
+    await expect(loadAttendanceStatus({ date: "2026-09-17" })).resolves.toEqual([
+      expect.objectContaining({ employeeName: "김철수", status: "출근" }),
+    ]);
+    expect(getSupabase).not.toHaveBeenCalled();
+    expect(from).toHaveBeenCalledWith("employees");
+    expect(from).toHaveBeenCalledWith("attendance_records");
   });
 
   it("computes education completion count per active employee", () => {

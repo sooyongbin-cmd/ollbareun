@@ -1,10 +1,15 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { importHolidays } from "./public-holidays";
+import { holidayName, importHolidays } from "./public-holidays";
 
 describe("public holidays import errors", () => {
   afterEach(() => {
     vi.restoreAllMocks();
     vi.unstubAllEnvs();
+  });
+
+  it("requires and trims a manually entered holiday name", () => {
+    expect(holidayName("  개천절  ")).toBe("개천절");
+    expect(() => holidayName("  ")).toThrow("휴일명을 입력해주세요.");
   });
 
   it("shows the HTTP status and public data API error details", async () => {

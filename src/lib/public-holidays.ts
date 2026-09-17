@@ -14,6 +14,10 @@ export function holidayDate(value: unknown) {
   if (!Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== date) throw new Error("올바른 날짜를 입력해주세요.");
   return date;
 }
+export function holidayName(value: unknown) {
+  if (typeof value !== "string" || !value.trim()) throw new Error("휴일명을 입력해주세요.");
+  return value.trim();
+}
 export async function insertHolidays(rows: { holiday_date: string; name: string | null; selected: string }[]) {
   if (!rows.length) return 0;
   const { data, error } = await getSupabaseAdmin().from("public_holidays")

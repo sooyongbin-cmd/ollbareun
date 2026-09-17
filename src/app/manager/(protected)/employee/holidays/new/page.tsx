@@ -8,6 +8,7 @@ import { SaveIcon } from "@/components/icons/save-icon";
 export default function HolidayNewPage() {
   const router = useRouter();
   const [date, setDate] = useState("");
+  const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   async function save(event: FormEvent<HTMLFormElement>) {
@@ -15,7 +16,7 @@ export default function HolidayNewPage() {
     if (busy) return;
     setBusy(true); setError("");
     try {
-      const response = await fetch("/api/manager/holidays", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ holiday_date: date }) });
+      const response = await fetch("/api/manager/holidays", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ holiday_date: date, name: name.trim() }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       router.push("/manager/employee/holidays");
@@ -26,13 +27,18 @@ export default function HolidayNewPage() {
       <header>
         <h1 className="text-[1.75rem] leading-[1.2]">휴일추가</h1>
         <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground mt-2 max-w-[37.5rem]">
-          날짜를 입력해 휴일을 등록합니다.
+          날짜와 휴일명을 입력해 휴일을 등록합니다.
         </p>
       </header>
 
       <section className="rounded-xl border border-border/50 bg-muted/40 p-[1.5rem] md:p-[2rem]">
         <form onSubmit={save} className="space-y-6">
-          <div className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <label htmlFor="holiday-name" className="text-[0.875rem] font-semibold text-muted-foreground ml-1">휴일명</label>
+              <Input className="w-full" id="holiday-name" type="text" maxLength={100} required value={name} disabled={busy} onChange={e => setName(e.target.value)} aria-describedby="holiday-name-help" placeholder="휴일명을 입력하세요." />
+              <p id="holiday-name-help" className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground">테이블에 표시할 휴일명을 입력하세요.</p>
+            </div>
             <div className="space-y-2">
               <label htmlFor="holiday-date" className="text-[0.875rem] font-semibold text-muted-foreground ml-1">날짜</label>
               <Input className="w-full" id="holiday-date" type="date" min="1900-01-01" max="9998-12-31" required value={date} disabled={busy} onChange={e => setDate(e.target.value)} aria-describedby="holiday-date-help" />

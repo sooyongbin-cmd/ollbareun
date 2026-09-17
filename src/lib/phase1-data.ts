@@ -285,13 +285,12 @@ export async function createWorksite(input: {
   address: unknown;
   gpsInfo: unknown;
   radiusMeters: unknown;
-}) {
+}, supabase: SupabaseClient = getSupabase()) {
   const name = requireString(input.name, "근무지명");
   const address = requireString(input.address, "근무지주소");
   const gps_info = requireGpsInfo(input.gpsInfo);
   const radius_meters = Math.max(1, Math.round(requireNumber(input.radiusMeters, "반경")));
 
-  const supabase = getSupabase();
   const { data, error } = await supabase
     .from("worksites")
     .insert({ name, address, gps_info, radius_meters })

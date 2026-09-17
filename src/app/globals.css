@@ -8,6 +8,10 @@
   color: var(--muted-foreground);
 }
 
+button:not(:disabled):hover {
+  cursor: pointer;
+}
+
 @font-face {
   font-family: "Pretendard Variable";
   font-style: normal;

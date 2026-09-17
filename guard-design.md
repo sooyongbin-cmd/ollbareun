@@ -38,6 +38,12 @@
 | 메뉴 버튼 텍스트 | 안전교육/순찰/특이사항 보고/근무 정보 | Pretendard | Medium | 17px | 23px | `#141414` |
 | Footer 텍스트 | 홈/출퇴근/안전교육/점검/특이사항/내 정보 | Pretendard | Medium | 12px | 12px | 선택 `#0097E0`, 미선택 `#898989` |
 
+## 버튼 인터랙션
+
+- 활성화된 모든 `button`은 mouse over 시 `cursor: pointer`를 표시한다.
+- `disabled` 버튼은 pointer를 적용하지 않아 비활성 상태를 유지한다.
+- 공통 규칙은 `src/app/globals.css`의 `button:not(:disabled):hover`에 적용한다.
+
 ## 근무 카드
 
 - 제목 행(Frame 9)은 flex와 `justify-content: space-between`을 사용한다.

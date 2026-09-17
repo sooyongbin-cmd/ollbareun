@@ -65,6 +65,7 @@ type AbsenceDetail = {
 };
 
 type GuardProfilePayload = {
+  workStyle?: string | null;
   schedules: ScheduleRow[];
   plannedAttendance?: PlannedAttendanceRow[];
   plannedDaysOff?: PlannedDayOffRow[];
@@ -94,6 +95,12 @@ type PasskeyRequest = {
 type ModalKind = "work" | "absence";
 
 const WEEKDAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"];
+
+function getWorkStyleLabel(workStyle: unknown) {
+  if (workStyle === "0") return "일반근무";
+  if (workStyle === "2") return "야간근무";
+  return "24시간근무";
+}
 
 function parseGuardSession(snapshot: string | null) {
   if (!snapshot) {
@@ -498,6 +505,7 @@ export default function GuardProfilePage() {
 
         if (!ignore) {
           setProfile({
+            workStyle: typeof payload.workStyle === "string" ? payload.workStyle : null,
             schedules: payload.schedules ?? [],
             plannedAttendance: payload.plannedAttendance ?? [],
             plannedDaysOff: payload.plannedDaysOff ?? [],
@@ -638,7 +646,7 @@ export default function GuardProfilePage() {
         .map((planned) => planned.workDate),
     );
   }, [profile]);
-  const workStyleLabel = session?.workStyle === "2" ? "주간" : "격일";
+  const workStyleLabel = getWorkStyleLabel(profile?.workStyle ?? session?.workStyle ?? "1");
   const worksiteName = session?.worksiteName || profile?.schedules[0]?.worksiteName || "근무 현장 미등록";
 
   return (

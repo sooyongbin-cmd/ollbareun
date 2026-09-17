@@ -72,6 +72,7 @@ export type GuardProfileAbsenceDetail = {
 };
 
 export type GuardProfile = {
+  workStyle: string | null;
   schedules: GuardProfileScheduleRow[];
   plannedAttendance: GuardProfilePlannedAttendanceRow[];
   plannedDaysOff: GuardProfilePlannedDayOffRow[];
@@ -184,6 +185,7 @@ function getScheduleForDate(schedules: GuardProfileScheduleInput[], workDate: st
 
 export function buildGuardProfile(input: {
   employeeId: string;
+  workStyle?: string | null;
   today?: string;
   schedules: GuardProfileScheduleInput[];
   worksites: GuardProfileWorksiteInput[];
@@ -271,6 +273,7 @@ export function buildGuardProfile(input: {
   );
 
   return {
+    workStyle: input.workStyle ?? null,
     schedules: employeeSchedules
       .sort((left, right) => left.start_date.localeCompare(right.start_date) || left.end_date.localeCompare(right.end_date))
       .map((schedule) => ({
@@ -327,8 +330,14 @@ export async function loadGuardProfile(employeeIdInput: unknown) {
   const employeeId = requireEmployeeId(employeeIdInput);
   const { startDate, endDate } = getRecentOneYearDateRange();
   const supabase = getSupabase();
+  const supabaseAdmin = getSupabaseAdmin();
 
-  const [schedulesResult, worksitesResult, attendanceResult] = await Promise.all([
+  const [employeeResult, schedulesResult, worksitesResult, attendanceResult] = await Promise.all([
+    supabaseAdmin
+      .from("employees")
+      .select("work_style")
+      .eq("id", employeeId)
+      .maybeSingle(),
     supabase
       .from("work_assignments")
       .select("id,employee_id,worksite_id,start_date,end_date,in_time,out_time")
@@ -344,13 +353,18 @@ export async function loadGuardProfile(employeeIdInput: unknown) {
       .order("work_date", { ascending: true }),
   ]);
 
+  throwIfError(employeeResult.error);
   throwIfError(schedulesResult.error);
   throwIfError(worksitesResult.error);
   throwIfError(attendanceResult.error);
 
+  if (!employeeResult.data) {
+    throw new Error("등록된 직원 정보를 찾을 수 없습니다.");
+  }
+
   const scheduleInputs = (schedulesResult.data ?? []) as GuardProfileScheduleInput[];
   const assignmentIds = scheduleInputs.map((schedule) => schedule.id);
-  const scheduleDataClient = getSupabaseAdmin();
+  const scheduleDataClient = supabaseAdmin;
   const [scheduledAttendanceResult, daysOffResult] = assignmentIds.length
     ? await Promise.all([
         scheduleDataClient
@@ -379,6 +393,7 @@ export async function loadGuardProfile(employeeIdInput: unknown) {
 
   return buildGuardProfile({
     employeeId,
+    workStyle: typeof employeeResult.data.work_style === "string" ? employeeResult.data.work_style : null,
     schedules: scheduleInputs,
     worksites: (worksitesResult.data ?? []) as GuardProfileWorksiteInput[],
     attendance: (attendanceResult.data ?? []) as GuardProfileAttendanceInput[],

@@ -90,6 +90,33 @@ describe("guard profile page", () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
   });
 
+  it("renders the employee work style returned by the profile API", async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.startsWith("/api/guard/passkey-requests/me")) {
+        return Response.json({ request: null });
+      }
+      if (url.startsWith("/api/guard/profile")) {
+        return Response.json({
+          workStyle: "2",
+          schedules: [],
+          monthlyAttendance: [],
+        });
+      }
+      return Response.json({}, { status: 404 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    window.sessionStorage.setItem(
+      "ollbareun.guard.session",
+      JSON.stringify({ employee: { id: "emp-1", name: "홍길동", role: "파견", work_style: "1" } }),
+    );
+
+    render(<GuardProfilePage />);
+
+    expect(await screen.findByText("파견 (야간근무)")).toBeInTheDocument();
+    expect(screen.queryByText("파견 (24시간근무)")).not.toBeInTheDocument();
+  });
+
   it("groups planned attendance into future weeks and renders Monday through Sunday from the selected week", async () => {
     const today = dateKeyInSeoul();
     const currentWeekStart = mondayOf(today);

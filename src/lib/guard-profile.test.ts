@@ -39,6 +39,18 @@ const worksites: GuardProfileWorksiteInput[] = [
 ];
 
 describe("guard profile data", () => {
+  it("includes the employee work style returned by the profile lookup", () => {
+    expect(
+      buildGuardProfile({
+        employeeId: "emp-1",
+        workStyle: "2",
+        schedules: [],
+        worksites: [],
+        attendance: [],
+      }).workStyle,
+    ).toBe("2");
+  });
+
   it("sorts the guard work schedule by period", () => {
     expect(
       buildGuardProfile({

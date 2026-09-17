@@ -1,4 +1,3 @@
-import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
 
 type EmployeeInput = {
@@ -290,8 +289,10 @@ function throwIfError(error: { message?: string } | null | undefined) {
 }
 
 export async function loadManagerDashboardData() {
-  const supabase = getSupabase();
-  const supabaseAdmin = getSupabaseAdmin();
+  // The manager dashboard is loaded through a Route Handler. The publishable
+  // client does not inherit the browser's auth cookies there, so use the
+  // server-side client after the route has verified manager access.
+  const supabase = getSupabaseAdmin();
   const today = toKstDate(new Date());
   const startDate = addDays(today, -29);
 
@@ -301,14 +302,14 @@ export async function loadManagerDashboardData() {
       supabase.from("worksites").select("id,name"),
       supabase.from("work_assignments").select("id,employee_id,worksite_id,start_date,end_date").lte("start_date", today).gte("end_date", startDate),
       supabase.from("attendance_records").select("employee_id,worksite_id,work_date,clock_in_at,clock_out_at").gte("work_date", startDate).lte("work_date", today),
-      supabaseAdmin
+      supabase
         .from("work_assignment_daily_attendance")
         .select("work_assignment_id,work_date,intime")
         .eq("work_date", today)
         .not("intime", "is", null),
       supabase.from("education_resources").select("id"),
       supabase.from("education_completions").select("employee_id,resource_id,is_completed,completed_at"),
-      supabaseAdmin
+      supabase
         .from("work_assignment_days_off")
         .select("work_assignment_id,day_off_date")
         .eq("day_off_date", today),

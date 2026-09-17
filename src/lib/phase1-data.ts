@@ -120,7 +120,10 @@ function throwIfAssignmentWriteError(error: { message: string; code?: string } |
 }
 
 export async function loadBootstrap() {
-  const supabase = getSupabase();
+  // This endpoint is manager-only. Use the server-side privileged client after
+  // the route has verified the manager session, because the legacy data client
+  // does not carry the Supabase auth cookies in a Route Handler.
+  const supabase = getSupabaseAdmin();
   const [employeesResult, worksitesResult, assignmentsResult, attendanceResult] =
     await Promise.all([
       supabase.from("employees").select("*").order("created_at", { ascending: false }),

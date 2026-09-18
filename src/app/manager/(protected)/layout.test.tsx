@@ -201,6 +201,7 @@ describe("manager layout", () => {
       "근무지관리",
       "근무지배정",
       "공휴일관리",
+      "휴가관리",
     ]);
     const attendanceLinks = screen
       .getByRole("link", { name: "근태관리" })

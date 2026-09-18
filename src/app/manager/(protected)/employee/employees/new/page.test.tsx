@@ -21,6 +21,9 @@ describe("employee new page", () => {
     expect(screen.getByRole("heading", { name: "직원등록" })).toBeInTheDocument();
     expect(screen.getByLabelText("직원이름")).toBeInTheDocument();
     expect(screen.getByLabelText("연락처")).toBeInTheDocument();
+
+    const workStyleSelect = screen.getByLabelText("근무형태") as HTMLSelectElement;
+    expect(Array.from(workStyleSelect.options).map((opt) => opt.textContent)).toEqual(["일반근무", "격일근무", "야간근무"]);
     
     const roleSelect = screen.getByLabelText("직군") as HTMLSelectElement;
     expect(roleSelect).toBeInTheDocument();

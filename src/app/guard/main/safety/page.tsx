@@ -28,6 +28,8 @@ type GuardSession = {
   };
 };
 
+type DurationRefreshStatus = "idle" | "loading" | "ready" | "unavailable";
+
 const youtubeApiScriptId = "youtube-iframe-api";
 const youtubePlayerReadyState = 0;
 const requiredPlaybackRate = 1;
@@ -110,6 +112,8 @@ export default function GuardSafetyEducationPage() {
   const [listError, setListError] = useState("");
   const [completionError, setCompletionError] = useState("");
   const [message, setMessage] = useState("");
+  const [selectedDurationSeconds, setSelectedDurationSeconds] = useState<number | null>(null);
+  const [selectedDurationStatus, setSelectedDurationStatus] = useState<DurationRefreshStatus>("idle");
   const [playerReady, setPlayerReady] = useState(() => typeof window !== "undefined" && Boolean(window.YT?.Player));
   const [loadedIframeResourceId, setLoadedIframeResourceId] = useState<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
@@ -275,6 +279,29 @@ export default function GuardSafetyEducationPage() {
     clearWatchProgressInterval();
     resetWatchProgress();
     playerRef.current?.destroy();
+
+    let durationTimer: ReturnType<typeof setTimeout> | null = null;
+    const refreshDuration = (player: YoutubePlayer, attempt = 0) => {
+      try {
+        const duration = player.getDuration();
+        if (duration > 0 && Number.isFinite(duration)) {
+          setSelectedDurationSeconds(Math.floor(duration));
+          setSelectedDurationStatus("ready");
+          return;
+        }
+      } catch {
+        setSelectedDurationStatus("unavailable");
+        return;
+      }
+
+      if (attempt < 20) {
+        durationTimer = setTimeout(() => refreshDuration(player, attempt + 1), 250);
+        return;
+      }
+
+      setSelectedDurationStatus("unavailable");
+    };
+
     playerRef.current = new window.YT.Player(iframeRef.current, {
       videoId: getYoutubeVideoId(selectedResource.youtube_link),
       playerVars: {
@@ -289,6 +316,7 @@ export default function GuardSafetyEducationPage() {
       events: {
         onReady: (event) => {
           event.target.setPlaybackRate(requiredPlaybackRate);
+          refreshDuration(event.target);
         },
         onPlaybackRateChange: (event) => {
           if (event.data !== requiredPlaybackRate) {
@@ -352,6 +380,9 @@ export default function GuardSafetyEducationPage() {
     return () => {
       clearWatchProgressInterval();
       resetWatchProgress();
+      if (durationTimer !== null) {
+        clearTimeout(durationTimer);
+      }
       playerRef.current?.destroy();
       playerRef.current = null;
     };
@@ -402,6 +433,8 @@ export default function GuardSafetyEducationPage() {
                   onClick={() => {
                     setLoadedIframeResourceId(null);
                     setSelectedResource(resource);
+                    setSelectedDurationSeconds(resource.duration_seconds ?? null);
+                    setSelectedDurationStatus("loading");
                     setMessage("");
                     setCompletionError("");
                   }}
@@ -432,6 +465,8 @@ export default function GuardSafetyEducationPage() {
             if (!open) {
               setSelectedResource(null);
               setLoadedIframeResourceId(null);
+              setSelectedDurationSeconds(null);
+              setSelectedDurationStatus("idle");
               setCompletionError("");
             }
           }}
@@ -455,7 +490,9 @@ export default function GuardSafetyEducationPage() {
                     allowFullScreen
                   />
                   <p className="text-sm text-muted-foreground">
-                    동영상 길이: {formatYoutubeDuration(selectedResource.duration_seconds)}
+                    동영상 길이: {selectedDurationSeconds === null && selectedDurationStatus === "loading"
+                      ? "확인 중..."
+                      : formatYoutubeDuration(selectedDurationSeconds)}
                   </p>
                 </>
               ) : (

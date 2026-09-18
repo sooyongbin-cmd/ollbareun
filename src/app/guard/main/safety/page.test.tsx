@@ -217,6 +217,19 @@ describe("guard safety education page", () => {
     });
   });
 
+  it("refreshes the displayed duration from the YouTube player when the modal opens", async () => {
+    render(<GuardSafetyEducationPage />);
+
+    expect(await screen.findByRole("button", { name: fireTitle })).toBeInTheDocument();
+    await loadInitialYoutubeIframe();
+    expect(screen.getByText("동영상 길이: 2:05")).toBeInTheDocument();
+
+    playerInstances[0].duration = 180;
+    playerInstances[0].options.events?.onReady?.({ target: playerInstances[0] });
+
+    expect(await screen.findByText("동영상 길이: 3:00")).toBeInTheDocument();
+  });
+
   it("forces playback speed back to 1x when the user changes it", async () => {
     render(<GuardSafetyEducationPage />);
 

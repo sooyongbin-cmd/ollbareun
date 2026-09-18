@@ -39,7 +39,7 @@ const bootstrap = {
       end_date: "2026-05-24",
     },
   ],
-  attendance: [],
+  attendance: [{ employee_id: "emp-1", intime_status: "2" }],
   summary: { totalEmployees: 2, currentlyClockedIn: 0 },
 };
 
@@ -78,7 +78,8 @@ describe("employee roster page", () => {
     );
     expect(screen.getByText("본사")).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "배정기간" })).toBeInTheDocument();
-    expect(screen.queryByRole("columnheader", { name: "상태" })).not.toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "출근" })).toBeInTheDocument();
+    expect(within(screen.getByRole("link", { name: "Alice" }).closest("tr") as HTMLElement).getByText("정상출근")).toBeInTheDocument();
     expect(screen.getByText("2026-05-01~2026-05-24")).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Bob" })).not.toBeInTheDocument();
 
@@ -90,6 +91,7 @@ describe("employee roster page", () => {
     const bobCells = within(bobRow as HTMLElement).getAllByRole("cell");
     expect(bobCells[4]).toHaveTextContent("");
     expect(bobCells[5]).toHaveTextContent("");
+    expect(bobCells[6]).toHaveTextContent("-");
     expect(screen.queryByRole("link", { name: "Alice" })).not.toBeInTheDocument();
   });
 

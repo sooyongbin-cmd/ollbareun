@@ -20,6 +20,11 @@ type EmployeeRow = {
   role: "경비원" | "미화원" | "파견";
 };
 
+type AttendanceRow = {
+  employee_id: string;
+  intime_status: "0" | "1" | "2" | "3";
+};
+
 type Bootstrap = {
   employees: EmployeeRow[];
   worksites: {
@@ -32,6 +37,7 @@ type Bootstrap = {
     start_date: string;
     end_date: string;
   }[];
+  attendance: AttendanceRow[];
   summary: {
     totalEmployees: number;
     currentlyClockedIn: number;
@@ -42,6 +48,7 @@ const emptyBootstrap: Bootstrap = {
   employees: [],
   worksites: [],
   assignments: [],
+  attendance: [],
   summary: {
     totalEmployees: 0,
     currentlyClockedIn: 0,
@@ -75,6 +82,7 @@ export default function EmployeeRosterPage() {
             employees: payload.employees ?? [],
             worksites: payload.worksites ?? [],
             assignments: payload.assignments ?? [],
+            attendance: payload.attendance ?? [],
             summary: payload.summary ?? emptyBootstrap.summary,
           });
         }
@@ -95,8 +103,6 @@ export default function EmployeeRosterPage() {
       ignore = true;
     };
   }, []);
-
-
 
   const availableEmployees = useMemo(() => {
     return data.employees.filter((e) => e.is_retired === showRetired);
@@ -131,6 +137,19 @@ export default function EmployeeRosterPage() {
   const assignmentByEmployeeId = useMemo(() => {
     return new Map(data.assignments.map((assignment) => [assignment.employee_id, assignment]));
   }, [data.assignments]);
+
+  const attendanceStatusByEmployeeId = useMemo(() => {
+    const statusLabels: Record<AttendanceRow["intime_status"], string> = {
+      "0": "결근",
+      "1": "지각",
+      "2": "정상출근",
+      "3": "정상근무",
+    };
+
+    return new Map(
+      data.attendance.map((attendance) => [attendance.employee_id, statusLabels[attendance.intime_status]]),
+    );
+  }, [data.attendance]);
 
   const sortedEmployees = useMemo(() => {
     return [...filteredEmployees].sort((left, right) => {
@@ -298,12 +317,13 @@ export default function EmployeeRosterPage() {
                     근무지
                   </SortableHeader>
                   <TableHead>배정기간</TableHead>
+                  <TableHead>출근</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {sortedEmployees.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={6} className="p-8 text-center text-muted-foreground italic">
+                    <TableCell data-responsive-empty colSpan={7} className="p-8 text-center text-muted-foreground italic">
                       조회 결과에 해당하는 직원이 없습니다.
                     </TableCell>
                   </TableRow>
@@ -328,6 +348,9 @@ export default function EmployeeRosterPage() {
                         {assignmentByEmployeeId.has(employee.id)
                           ? `${assignmentByEmployeeId.get(employee.id)?.start_date}~${assignmentByEmployeeId.get(employee.id)?.end_date}`
                           : ""}
+                      </TableCell>
+                      <TableCell data-label="출근" className="whitespace-nowrap text-muted-foreground">
+                        {attendanceStatusByEmployeeId.get(employee.id) ?? "-"}
                       </TableCell>
                     </TableRow>
                   ))

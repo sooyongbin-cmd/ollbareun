@@ -43,7 +43,7 @@ function formatPeriod(assignment: AssignmentRow) {
 
 function formatWorkStyle(workStyle: AssignmentRow["employee_work_style"]) {
   if (workStyle === "0") return "일반근무";
-  if (workStyle === "1") return "24시간근무";
+  if (workStyle === "1") return "격일근무";
   if (workStyle === "2") return "야간근무";
   return "근무형태 없음";
 }

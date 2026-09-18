@@ -96,7 +96,7 @@ system_configs 1 ── N system_configs (parent_system_code)
 ### 주요 타입 및 상태 값
 
 - GPS는 `jsonb` 객체 `{ "latitude": number, "longitude": number }` 구조를 사용한다.
-- `employees.work_style`은 `0` 일반근무, `1` 24시간근무, `2` 야간근무이며, `role`은 `경비원`, `미화원`, `파견` 중 하나다.
+- `employees.work_style`은 `0` 일반근무, `1` 격일근무, `2` 야간근무이며, `role`은 `경비원`, `미화원`, `파견` 중 하나다.
 - `public_holidays.selected`와 `inspection_special_reports.processing_status`는 `Y/N`이다.
 - 이메일 상태는 `pending`, `sent`, `failed`, `not_requested`, 알림 실행 상태는 `processing`, `sent`, `failed`, `skipped`다.
 - Passkey 요청 상태는 `pending`, `approved`, `rejected`, `registered`, `revoked`다.

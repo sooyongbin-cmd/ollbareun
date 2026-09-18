@@ -320,7 +320,7 @@ export default function EmployeeRosterPage() {
                       </TableCell>
                       <TableCell data-label="연락처" className="text-muted-foreground">{employee.phone}</TableCell>
                       <TableCell data-label="직군" className="text-muted-foreground">{employee.role}</TableCell>
-                      <TableCell data-label="근무형태" className="whitespace-nowrap text-muted-foreground">{employee.work_style === "0" ? "일반근무" : employee.work_style === "2" ? "야간근무" : "24시간근무"}</TableCell>
+                      <TableCell data-label="근무형태" className="whitespace-nowrap text-muted-foreground">{employee.work_style === "0" ? "일반근무" : employee.work_style === "2" ? "야간근무" : "격일근무"}</TableCell>
                       <TableCell data-label="근무지" className="text-muted-foreground">
                         {worksiteById.get(assignmentByEmployeeId.get(employee.id)?.worksite_id ?? "") ?? ""}
                       </TableCell>

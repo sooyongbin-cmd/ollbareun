@@ -97,12 +97,14 @@ describe("guard safety education page", () => {
                 id: "resource-1",
                 title: fireTitle,
                 youtube_link: "https://www.youtube.com/watch?v=fireSafety",
+                duration_seconds: 125,
                 created_at: "2026-05-27T00:00:00.000Z",
               },
               {
                 id: "resource-2",
                 title: patrolTitle,
                 youtube_link: "https://youtu.be/patrolSafety",
+                duration_seconds: 245,
                 created_at: "2026-05-27T00:00:00.000Z",
               },
             ],
@@ -158,8 +160,11 @@ describe("guard safety education page", () => {
       expect(iframeUrl.searchParams.get("enablejsapi")).toBe("1");
       expect(iframeUrl.searchParams.get("origin")).toBe(window.location.origin);
     });
+    expect(screen.getByRole("dialog")).toHaveClass("w-screen", "max-w-[100vw]");
+    expect(screen.getByTitle(fireTitle)).toHaveClass("w-full");
     const videoSection = screen.getByRole("region", { name: "안전교육 영상" });
     expect(within(videoSection).queryByText(fireTitle)).not.toBeInTheDocument();
+    expect(within(videoSection).getByText("동영상 길이: 2:05")).toBeInTheDocument();
   });
 
   it("changes the iframe when a safety education item is selected", async () => {

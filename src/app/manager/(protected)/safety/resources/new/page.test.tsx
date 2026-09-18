@@ -1,9 +1,21 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import EducationResourceNewPage from "./page";
 
 const push = vi.fn();
+
+class MockYoutubeDurationPlayer {
+  destroy = vi.fn();
+  getDuration = vi.fn(() => 125);
+
+  constructor(
+    _element: HTMLIFrameElement,
+    options: { events?: { onReady?: (event: { target: MockYoutubeDurationPlayer }) => void } },
+  ) {
+    queueMicrotask(() => options.events?.onReady?.({ target: this }));
+  }
+}
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push }),
@@ -12,7 +24,9 @@ vi.mock("next/navigation", () => ({
 describe("education resource new page", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
     push.mockReset();
+    vi.stubGlobal("YT", { Player: MockYoutubeDurationPlayer });
   });
 
   it("saves a YouTube education resource and returns to resource management", async () => {
@@ -24,6 +38,7 @@ describe("education resource new page", () => {
       const formData = init?.body as FormData;
       expect(formData.get("title")).toBe("화재 안전 교육");
       expect(formData.get("youtubeLink")).toBe("https://www.youtube.com/watch?v=fireSafety");
+      expect(formData.get("durationSeconds")).toBe("125");
 
       return Response.json({
         resource: {
@@ -39,6 +54,8 @@ describe("education resource new page", () => {
 
     await user.type(screen.getByLabelText("제목"), "화재 안전 교육");
     await user.type(screen.getByLabelText("유튜브 링크"), "https://www.youtube.com/watch?v=fireSafety");
+    fireEvent.load(await screen.findByTitle("유튜브 동영상 길이 확인"));
+    expect(await screen.findByText("동영상 길이: 2:05")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "저장" }));
 
     expect(await screen.findByText("자료를 저장하였습니다.")).toBeInTheDocument();
@@ -63,6 +80,8 @@ describe("education resource new page", () => {
 
     await user.type(screen.getByLabelText("제목"), "화재 안전 교육");
     await user.type(screen.getByLabelText("유튜브 링크"), "https://www.youtube.com/watch?v=fireSafety");
+    fireEvent.load(await screen.findByTitle("유튜브 동영상 길이 확인"));
+    expect(await screen.findByText("동영상 길이: 2:05")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "저장" }));
 
     expect(screen.getByRole("button", { name: "저장" })).toBeDisabled();

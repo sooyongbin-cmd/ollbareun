@@ -4,12 +4,15 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import LoadingBoard from "@/components/loading-board";
 import { readStoredGuardSession } from "../../guard-session-storage";
+import { formatYoutubeDuration, getYoutubeVideoId } from "@/lib/youtube";
+import type { YoutubePlayer } from "@/lib/youtube-iframe-types";
 import styles from "./page.module.css";
 
 type EducationResourceRow = {
   id: string;
   title: string;
   youtube_link: string;
+  duration_seconds: number | null;
   created_at: string;
 };
 
@@ -24,38 +27,6 @@ type GuardSession = {
     id?: unknown;
   };
 };
-
-type YoutubePlayer = {
-  destroy: () => void;
-  getCurrentTime: () => number;
-  getDuration: () => number;
-  getPlaybackRate: () => number;
-  setPlaybackRate: (suggestedRate: number) => void;
-  seekTo: (seconds: number, allowSeekAhead: boolean) => void;
-  playVideo: () => void;
-};
-
-type YoutubeApi = {
-  Player: new (
-    element: HTMLIFrameElement,
-    options: {
-      videoId?: string;
-      playerVars?: Record<string, string | number>;
-      events?: {
-        onReady?: (event: { target: YoutubePlayer }) => void;
-        onPlaybackRateChange?: (event: { data: number; target: YoutubePlayer }) => void;
-        onStateChange?: (event: { data: number }) => void;
-      };
-    },
-  ) => YoutubePlayer;
-};
-
-declare global {
-  interface Window {
-    YT?: YoutubeApi;
-    onYouTubeIframeAPIReady?: () => void;
-  }
-}
 
 const youtubeApiScriptId = "youtube-iframe-api";
 const youtubePlayerReadyState = 0;
@@ -122,32 +93,6 @@ function getYoutubeEmbedUrl(youtubeLink: string, origin?: string) {
       }
       if (section === "shorts" && videoId) {
         return createEmbedUrl(videoId);
-      }
-    }
-  } catch {
-    return "";
-  }
-
-  return "";
-}
-
-function getYoutubeVideoId(youtubeLink: string) {
-  try {
-    const url = new URL(youtubeLink);
-    const hostname = url.hostname.toLowerCase();
-
-    if (hostname === "youtu.be") {
-      return url.pathname.split("/").filter(Boolean)[0] ?? "";
-    }
-
-    if (["youtube.com", "www.youtube.com", "m.youtube.com"].includes(hostname)) {
-      if (url.pathname === "/watch") {
-        return url.searchParams.get("v") ?? "";
-      }
-
-      const [section, videoId] = url.pathname.split("/").filter(Boolean);
-      if (section === "embed" || section === "shorts") {
-        return videoId ?? "";
       }
     }
   } catch {
@@ -491,23 +436,28 @@ export default function GuardSafetyEducationPage() {
             }
           }}
         >
-          <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-4xl">
-            <DialogHeader>
+          <DialogContent className="w-screen max-w-[100vw] max-h-[90dvh] overflow-x-hidden overflow-y-auto p-0 sm:w-[calc(100%-2rem)] sm:max-w-4xl sm:p-6">
+            <DialogHeader className="px-4 pt-4 sm:px-0 sm:pt-0">
               <DialogTitle className="pr-6">{selectedResource?.title ?? "안전교육 영상"}</DialogTitle>
               <DialogDescription>영상을 끝까지 시청하면 교육이수가 처리됩니다.</DialogDescription>
             </DialogHeader>
-            <section aria-label="안전교육 영상" className="space-y-4">
+            <section aria-label="안전교육 영상" className="w-full space-y-4">
               {selectedResource && selectedEmbedUrl ? (
-                <iframe
-                  key={selectedResource.id}
-                  ref={iframeRef}
-                  className="aspect-video w-full rounded-[0.75rem] border border-border bg-black"
-                  src={selectedEmbedUrl}
-                  title={selectedResource.title}
-                  onLoad={() => setLoadedIframeResourceId(selectedResource.id)}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                />
+                <>
+                  <iframe
+                    key={selectedResource.id}
+                    ref={iframeRef}
+                    className="aspect-video w-full rounded-[0.75rem] border border-border bg-black"
+                    src={selectedEmbedUrl}
+                    title={selectedResource.title}
+                    onLoad={() => setLoadedIframeResourceId(selectedResource.id)}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    동영상 길이: {formatYoutubeDuration(selectedResource.duration_seconds)}
+                  </p>
+                </>
               ) : (
                 <p className="p-8 text-center text-muted-foreground">재생할 수 없는 안전교육 링크입니다.</p>
               )}

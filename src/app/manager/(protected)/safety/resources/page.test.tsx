@@ -17,12 +17,14 @@ describe("education resources page", () => {
                 id: "resource-1",
                 title: "화재 안전 교육",
                 youtube_link: "https://www.youtube.com/watch?v=fireSafety",
+                duration_seconds: 125,
                 created_at: "2026-05-27T00:00:00.000Z",
               },
               {
                 id: "resource-2",
                 title: "감전 예방 교육",
                 youtube_link: "https://www.youtube.com/watch?v=electricSafety",
+                duration_seconds: 245,
                 created_at: "2026-05-28T00:00:00.000Z",
               },
             ],
@@ -98,7 +100,10 @@ describe("education resources page", () => {
     );
     expect(screen.getByRole("columnheader", { name: "제목" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "유튜브 링크" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "시간" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "이수현황" })).toBeInTheDocument();
+    expect(within(screen.getAllByRole("row")[1]).getByText("4:05")).toBeInTheDocument();
+    expect(within(screen.getAllByRole("row")[2]).getByText("2:05")).toBeInTheDocument();
     
     expect(screen.getByRole("link", { name: "화재 안전 교육" })).toHaveAttribute(
       "href",

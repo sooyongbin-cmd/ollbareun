@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { SaveIcon } from "@/components/icons/save-icon";
 import AlertModal from "@/components/modals/alert-modal";
+import { useYoutubeDuration } from "@/lib/youtube-duration";
+import { formatYoutubeDuration } from "@/lib/youtube";
 
 const SAVE_TIMEOUT_MS = 70_000;
 
@@ -32,6 +34,16 @@ export default function EducationResourceNewPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const router = useRouter();
+  const [youtubeLink, setYoutubeLink] = useState("");
+  const {
+    durationSeconds,
+    iframeSrc,
+    onIframeLoad,
+    setIframeRef,
+    status: youtubeDurationStatus,
+    videoId,
+  } = useYoutubeDuration(youtubeLink);
+  const hasYoutubeDuration = youtubeDurationStatus === "ready" && durationSeconds !== null;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -69,9 +81,15 @@ export default function EducationResourceNewPage() {
       return;
     }
 
+    if (!hasYoutubeDuration) {
+      setError("유튜브 동영상 길이를 확인한 뒤 저장하세요.");
+      return;
+    }
+
     const formData = new FormData();
     formData.set("title", title);
     formData.set("youtubeLink", youtubeLink);
+    formData.set("durationSeconds", String(durationSeconds));
 
     try {
       setIsSubmitting(true);
@@ -124,15 +142,30 @@ export default function EducationResourceNewPage() {
                 placeholder="https://www.youtube.com/watch?v=..."
                 required
                 type="url"
+                value={youtubeLink}
+                onChange={(event) => {
+                  setYoutubeLink(event.target.value);
+                  setError("");
+                }}
               />
             </div>
           </div>
+
+          {youtubeLink.trim() ? (
+            <p aria-live="polite" className="text-sm text-muted-foreground">
+              {youtubeDurationStatus === "loading"
+                ? "유튜브 동영상 길이를 확인 중입니다."
+                : youtubeDurationStatus === "ready"
+                  ? `동영상 길이: ${formatYoutubeDuration(durationSeconds)}`
+                  : "유튜브 동영상 길이를 확인하지 못했습니다. 링크를 확인해 주세요."}
+            </p>
+          ) : null}
 
           <Button
             aria-label="저장"
             className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto disabled:opacity-50"
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !hasYoutubeDuration}
           >
             <SaveIcon size={20} />
           </Button>
@@ -141,6 +174,18 @@ export default function EducationResourceNewPage() {
         {isSubmitting ? <p className="rounded-md border border-border bg-muted px-4 py-3 text-sm text-foreground mt-6 text-center">유튜브 링크를 저장 중입니다.</p> : null}
         {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mt-6 text-center">{error}</p> : null}
       </section>
+
+      {videoId ? (
+        <iframe
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-[9999px] h-px w-px opacity-0"
+          ref={setIframeRef}
+          src={iframeSrc}
+          tabIndex={-1}
+          title="유튜브 동영상 길이 확인"
+          onLoad={onIframeLoad}
+        />
+      ) : null}
 
       <AlertModal
         isOpen={Boolean(alertMessage)}

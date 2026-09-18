@@ -30,6 +30,7 @@ describe("education resource detail route", () => {
       id: "resource-1",
       title: "화재 안전 교육",
       youtube_link: "https://www.youtube.com/watch?v=fireSafety",
+      duration_seconds: 125,
       created_at: "2026-05-27T00:00:00.000Z",
     });
 
@@ -42,6 +43,7 @@ describe("education resource detail route", () => {
         id: "resource-1",
         title: "화재 안전 교육",
         youtube_link: "https://www.youtube.com/watch?v=fireSafety",
+        duration_seconds: 125,
         created_at: "2026-05-27T00:00:00.000Z",
       },
     });
@@ -52,6 +54,7 @@ describe("education resource detail route", () => {
       id: "resource-1",
       title: "순찰 안전 교육",
       youtube_link: "https://youtu.be/patrolSafety",
+      duration_seconds: 245,
       created_at: "2026-05-27T00:00:00.000Z",
     });
 
@@ -61,6 +64,7 @@ describe("education resource detail route", () => {
         body: JSON.stringify({
           title: "순찰 안전 교육",
           youtubeLink: "https://youtu.be/patrolSafety",
+          durationSeconds: 245,
         }),
       }),
       { params: Promise.resolve({ id: "resource-1" }) },
@@ -72,6 +76,7 @@ describe("education resource detail route", () => {
         id: "resource-1",
         title: "순찰 안전 교육",
         youtubeLink: "https://youtu.be/patrolSafety",
+        durationSeconds: 245,
       },
       {},
     );
@@ -80,6 +85,7 @@ describe("education resource detail route", () => {
         id: "resource-1",
         title: "순찰 안전 교육",
         youtube_link: "https://youtu.be/patrolSafety",
+        duration_seconds: 245,
         created_at: "2026-05-27T00:00:00.000Z",
       },
     });

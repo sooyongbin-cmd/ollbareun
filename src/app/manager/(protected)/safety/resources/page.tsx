@@ -7,11 +7,13 @@ import { useEffect, useMemo, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
 import { SortableHeader } from "@/components/sortable-header";
+import { formatYoutubeDuration } from "@/lib/youtube";
 
 type EducationResourceRow = {
   id: string;
   title: string;
   youtube_link: string;
+  duration_seconds: number | null;
   created_at: string;
 };
 
@@ -206,6 +208,7 @@ export default function EducationResourcesPage() {
                     제목
                   </SortableHeader>
                   <TableHead className="text-left">유튜브 링크</TableHead>
+                  <TableHead className="text-left">시간</TableHead>
                   <SortableHeader
                     sortKey="completions"
                     currentSortKey={sortKey}
@@ -220,7 +223,7 @@ export default function EducationResourcesPage() {
               <TableBody>
                 {sortedResources.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={3} className="p-8 text-center text-muted-foreground italic">
+                    <TableCell data-responsive-empty colSpan={4} className="p-8 text-center text-muted-foreground italic">
                       조회 결과에 해당하는 교육자료가 없습니다.
                     </TableCell>
                   </TableRow>
@@ -244,6 +247,9 @@ export default function EducationResourcesPage() {
                         >
                           {resource.youtube_link}
                         </a>
+                      </TableCell>
+                      <TableCell data-label="시간" className="whitespace-nowrap text-muted-foreground">
+                        {formatYoutubeDuration(resource.duration_seconds)}
                       </TableCell>
                       <TableCell data-label="이수현황" className="font-semibold text-foreground/80">
                         <Link

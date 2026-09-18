@@ -23,13 +23,23 @@ describe("leave new page", () => {
     }));
   });
 
+  it("defaults the leave period to today", async () => {
+    render(<LeaveNewPage />);
+
+    const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
+    expect(await screen.findByLabelText("시작일")).toHaveValue(today);
+    expect(screen.getByLabelText("종료일")).toHaveValue(today);
+  });
+
   it("submits an employee leave application", async () => {
     const user = userEvent.setup();
     render(<LeaveNewPage />);
 
     await user.type(await screen.findByLabelText("이름"), "홍길동");
     await user.selectOptions(screen.getByLabelText("휴가종류"), "1");
+    await user.clear(screen.getByLabelText("시작일"));
     await user.type(screen.getByLabelText("시작일"), "2026-06-01");
+    await user.clear(screen.getByLabelText("종료일"));
     await user.type(screen.getByLabelText("종료일"), "2026-06-03");
     await user.click(screen.getByRole("button", { name: "저장" }));
 

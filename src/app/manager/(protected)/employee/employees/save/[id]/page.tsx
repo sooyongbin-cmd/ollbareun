@@ -312,9 +312,6 @@ export default function EmployeeSavePage() {
         >
           <div className="space-y-3">
             <h2 className="text-[1.25rem] font-semibold">근무지배정 정보</h2>
-            <p className="text-[0.875rem] leading-relaxed text-muted-foreground">
-              해당 직원에게 등록된 근무지와 근무기간입니다.
-            </p>
           </div>
           <div className="mt-6 space-y-3">
             {assignments.map((assignment) => (

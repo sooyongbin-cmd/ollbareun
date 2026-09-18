@@ -1,4 +1,4 @@
-import { act, fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import GuardPushRegister from "./guard-push-register";
 
@@ -143,6 +143,38 @@ describe("GuardPushRegister", () => {
       }),
     );
     expect(subscribeMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not render the push status section", () => {
+    render(<GuardPushRegister />);
+
+    expect(screen.queryByText("Push 알림")).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "푸시 알림 연결 준비 중" })).not.toBeInTheDocument();
+  });
+
+  it("shows a confirmation modal when notification permission is blocked", async () => {
+    writeGuardSession("employee-1");
+    vi.stubGlobal("Notification", {
+      permission: "denied",
+      requestPermission: vi.fn(),
+    });
+
+    render(<GuardPushRegister />);
+
+    await act(async () => {
+      vi.advanceTimersByTime(1500);
+    });
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(screen.getByRole("heading", { name: "알림 권한 차단됨" })).toBeInTheDocument();
+    expect(screen.getByText("브라우저 설정에서 알림 권한을 다시 허용해야 교육알림 Push를 받을 수 있습니다.")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "확인" }));
+
+    expect(screen.queryByRole("heading", { name: "알림 권한 차단됨" })).not.toBeInTheDocument();
   });
 
   it("skips the server save when the current employee and endpoint were already saved", async () => {

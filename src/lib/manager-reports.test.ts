@@ -330,6 +330,7 @@ describe("manager reports", () => {
     expect(getSupabase).not.toHaveBeenCalled();
     expect(from).toHaveBeenCalledWith("employees");
     expect(from).toHaveBeenCalledWith("work_record");
+    expect(workRecordQuery.eq).toHaveBeenCalledWith("work_date", "2026-09-17");
   });
 
   it("computes education completion count per active employee", () => {

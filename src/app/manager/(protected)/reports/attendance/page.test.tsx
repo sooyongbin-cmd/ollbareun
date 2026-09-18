@@ -35,6 +35,7 @@ describe("attendance report page", () => {
             clockOutDateTime: "2026-06-04 18:00",
             workDuration: "9시간",
             intimeStatus: "1",
+            status: "지각",
             isLate: true,
           },
         ],
@@ -89,6 +90,7 @@ describe("attendance report page", () => {
             clockOutDateTime: null,
             workDuration: "-",
             intimeStatus: "0",
+            status: "결근",
           },
         ],
       });

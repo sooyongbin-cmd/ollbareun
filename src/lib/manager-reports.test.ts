@@ -106,6 +106,7 @@ describe("manager reports", () => {
         clockOutDateTime: "2026-03-02 18:30",
         workDuration: "9시간 30분",
         intimeStatus: "3",
+        status: "정상근무",
         isLate: false,
       },
     ]);
@@ -155,6 +156,7 @@ describe("manager reports", () => {
       workDate: "2026-09-17",
       employees: [{ id: "emp-1", name: "김철수", work_style: "2" }],
       worksites: [{ id: "site-1", name: "본사" }],
+      now: new Date("2026-09-16T12:00:00.000Z"),
       attendance: [{
         id: "absence-1",
         employee_id: "emp-1",
@@ -176,6 +178,7 @@ describe("manager reports", () => {
       clockInDateTime: "-",
       clockOutDateTime: null,
       intimeStatus: "0",
+      status: "대기",
       isLate: false,
     })]);
   });

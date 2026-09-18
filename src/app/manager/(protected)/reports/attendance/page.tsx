@@ -20,19 +20,13 @@ type AttendanceReportRow = {
   clockOutDateTime: string | null;
   workDuration: string;
   intimeStatus: "0" | "1" | "2" | "3";
+  status: "결근" | "지각" | "정상출근" | "정상근무" | "대기";
   isLate: boolean;
 };
 
 function currentDate() {
   return new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
-
-const intimeStatusLabels: Record<AttendanceReportRow["intimeStatus"], string> = {
-  "0": "결근",
-  "1": "지각",
-  "2": "정상출근",
-  "3": "정상근무",
-};
 
 export default function AttendanceReportPage() {
   const [employeeName, setEmployeeName] = useState("");
@@ -128,8 +122,8 @@ export default function AttendanceReportPage() {
       headers,
       rows: rows.map((row) =>
         showEmployeeColumn
-          ? [row.employeeName, row.workStyle, row.worksiteName, row.scheduledClockIn, row.scheduledClockOut, row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration, intimeStatusLabels[row.intimeStatus]]
-          : [row.workStyle, row.worksiteName, row.scheduledClockIn, row.scheduledClockOut, row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration, intimeStatusLabels[row.intimeStatus]],
+          ? [row.employeeName, row.workStyle, row.worksiteName, row.scheduledClockIn, row.scheduledClockOut, row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration, row.status]
+          : [row.workStyle, row.worksiteName, row.scheduledClockIn, row.scheduledClockOut, row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration, row.status],
       ),
     });
   }
@@ -229,7 +223,7 @@ export default function AttendanceReportPage() {
                       <TableCell data-label="퇴근일시">{row.clockOutDateTime ?? "-"}</TableCell>
                       <TableCell data-label="근무시간">{row.workDuration}</TableCell>
                       <TableCell data-label="상태">
-                        {intimeStatusLabels[row.intimeStatus]}
+                        {row.status}
                       </TableCell>
                     </TableRow>
                   ))

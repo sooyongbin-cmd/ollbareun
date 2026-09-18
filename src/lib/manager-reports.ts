@@ -11,6 +11,14 @@ type EmployeeInput = {
 };
 
 type IntimeStatus = "0" | "1" | "2" | "3";
+type AttendanceReportStatus = "결근" | "지각" | "정상출근" | "정상근무" | "대기";
+
+const intimeStatusLabels: Record<IntimeStatus, Exclude<AttendanceReportStatus, "대기">> = {
+  "0": "결근",
+  "1": "지각",
+  "2": "정상출근",
+  "3": "정상근무",
+};
 
 type AttendanceInput = {
   id: string;
@@ -65,6 +73,7 @@ export type AttendanceReportRow = {
   clockOutDateTime: string | null;
   workDuration: string;
   intimeStatus: IntimeStatus;
+  status: AttendanceReportStatus;
   isLate: boolean;
 };
 
@@ -139,8 +148,10 @@ export function buildAttendanceReport(input: {
   worksites?: { id: string; name: string }[];
   assignments?: AssignmentInput[];
   dailyAttendance?: DailyAttendanceInput[];
+  now?: Date;
 }): AttendanceReportRow[] {
   assertDate(input.workDate);
+  const nowTimestamp = (input.now ?? new Date()).getTime();
   const query = input.employeeName.trim().toLowerCase();
   const employeeIds = new Set(
     input.employees
@@ -167,18 +178,26 @@ export function buildAttendanceReport(input: {
         `${record.employee_id}:${record.worksite_id ?? ""}:${record.work_date}`,
       );
       const intimeStatus = record.intime_status ?? "0";
+      const scheduledClockInAt = scheduledTime?.intime ?? record.intime ?? null;
+      const scheduledClockInTimestamp = scheduledClockInAt ? new Date(scheduledClockInAt).getTime() : Number.NaN;
+      const status: AttendanceReportStatus = intimeStatus === "0"
+        && Number.isFinite(scheduledClockInTimestamp)
+        && scheduledClockInTimestamp > nowTimestamp
+        ? "대기"
+        : intimeStatusLabels[intimeStatus];
 
       return {
         id: record.id,
         worksiteName: worksiteNamesById.get(record.worksite_id ?? "") ?? "-",
         employeeName: employeeNamesById.get(record.employee_id) ?? "-",
         workStyle: workStylesByEmployeeId.get(record.employee_id) ?? "-",
-        scheduledClockIn: toKstDateTime(scheduledTime?.intime ?? record.intime ?? null)?.time ?? "-",
+        scheduledClockIn: toKstDateTime(scheduledClockInAt)?.time ?? "-",
         scheduledClockOut: toKstDateTime(scheduledTime?.outtime ?? record.outtime ?? null)?.time ?? "-",
         clockInDateTime: toKstDateTime(record.work_intime)?.dateTime ?? "-",
         clockOutDateTime: toKstDateTime(record.work_outtime)?.dateTime ?? null,
         workDuration: durationLabel(record.work_intime, record.work_outtime),
         intimeStatus,
+        status,
         isLate: intimeStatus === "1",
       };
     });
@@ -511,6 +530,7 @@ export async function loadAttendanceReport(input: { employeeName: string; workDa
     worksites: worksitesResult.data ?? [],
     assignments: assignmentsResult.data ?? [],
     dailyAttendance: workRecords,
+    now: new Date(),
   });
 }
 

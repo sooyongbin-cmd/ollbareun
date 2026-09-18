@@ -12,7 +12,6 @@ type EducationResourceRow = {
   id: string;
   title: string;
   youtube_link: string;
-  duration_seconds: number | null;
   created_at: string;
 };
 
@@ -433,7 +432,6 @@ export default function GuardSafetyEducationPage() {
                   onClick={() => {
                     setLoadedIframeResourceId(null);
                     setSelectedResource(resource);
-                    setSelectedDurationSeconds(resource.duration_seconds ?? null);
                     setSelectedDurationStatus("loading");
                     setMessage("");
                     setCompletionError("");

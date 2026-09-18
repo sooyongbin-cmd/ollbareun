@@ -31,7 +31,6 @@ describe("education resources route", () => {
         id: "resource-1",
         title: "화재 안전 교육",
         youtube_link: "https://www.youtube.com/watch?v=fireSafety",
-        duration_seconds: 125,
         created_at: "2026-05-27T00:00:00.000Z",
       },
     ]);
@@ -44,7 +43,6 @@ describe("education resources route", () => {
           id: "resource-1",
           title: "화재 안전 교육",
           youtube_link: "https://www.youtube.com/watch?v=fireSafety",
-          duration_seconds: 125,
           created_at: "2026-05-27T00:00:00.000Z",
         },
       ],
@@ -67,13 +65,11 @@ describe("education resources route", () => {
       id: "resource-1",
       title: "화재 안전 교육",
       youtube_link: "https://www.youtube.com/watch?v=fireSafety",
-      duration_seconds: 125,
       created_at: "2026-05-27T00:00:00.000Z",
     });
     const body = new FormData();
     body.set("title", "화재 안전 교육");
     body.set("youtubeLink", "https://www.youtube.com/watch?v=fireSafety");
-    body.set("durationSeconds", "125");
 
     const response = await POST({ formData: async () => body } as Request);
 
@@ -82,7 +78,6 @@ describe("education resources route", () => {
       {
         title: "화재 안전 교육",
         youtubeLink: "https://www.youtube.com/watch?v=fireSafety",
-        durationSeconds: "125",
       },
       {},
     );
@@ -91,7 +86,6 @@ describe("education resources route", () => {
         id: "resource-1",
         title: "화재 안전 교육",
         youtube_link: "https://www.youtube.com/watch?v=fireSafety",
-        duration_seconds: 125,
         created_at: "2026-05-27T00:00:00.000Z",
       },
     });

@@ -64,6 +64,35 @@ system_configs 1 ── N system_configs (parent_system_code)
 | `system_configs` | `system_code`, `parent_system_code`, `content`, `description`, `created_at`, `updated_at` | 메일 주소·기능 플래그 등 운영 설정 및 계층형 코드 |
 | `admin_users` | `id`, `user_id`, `email`, `role`, `created_by`, `first_login_at`, `created_at`, `updated_at` | Supabase Auth 사용자와 관리자 권한 연결 |
 
+### `work_record` 통합 근무기록 상세
+
+`work_record`는 기존의 근무예정 자료와 실제 출근 자료를 직원·근무일 단위의 한 행으로 통합한 테이블이다. 따라서 한 직원은 같은 `work_date`에 하나의 근무기록만 가질 수 있다.
+
+| 컬럼 | 타입 | NULL | 설명 |
+| --- | --- | --- | --- |
+| `id` | `uuid` | 불가 | 기본키. `gen_random_uuid()` 기본값 |
+| `employee_id` | `uuid` | 불가 | `employees.id` 외래키 |
+| `worksite_id` | `uuid` | 불가 | `worksites.id` 외래키 |
+| `work_date` | `date` | 불가 | 근무일. `employee_id`와 복합 UNIQUE |
+| `intime` | `timestamptz` | 가능 | 출근 예정일시 |
+| `outtime` | `timestamptz` | 가능 | 퇴근 예정일시 |
+| `work_intime` | `timestamptz` | 가능 | 실제 출근일시 |
+| `work_outtime` | `timestamptz` | 가능 | 실제 퇴근일시 |
+| `intime_status` | `text` | 불가 | `0` 결근, `1` 지각, `2` 정상출근, `3` 정상근무 |
+| `outtime_status` | `text` | 가능 | `4` 조기퇴근 |
+| `created_at`, `updated_at` | `timestamptz` | 불가 | 생성·수정 시각 |
+| `clock_in_latitude`, `clock_in_longitude` | `double precision` | 가능 | 출근 처리 GPS 좌표 보존용 |
+| `clock_out_latitude`, `clock_out_longitude` | `double precision` | 가능 | 퇴근 처리 GPS 좌표 보존용 |
+
+상태는 다음 순서로 기록한다.
+
+1. 예정 행은 `intime_status = '0'`으로 생성한다.
+2. 출근 처리 시 `work_intime`이 `intime`보다 늦으면 `'1'`(지각), 그렇지 않으면 `'2'`(정상출근)을 저장한다.
+3. 예정 퇴근시각 이후 정상 퇴근하면 `intime_status = '3'`(정상근무)으로 변경한다.
+4. 예정 퇴근시각보다 일찍 퇴근하면 `outtime_status = '4'`(조기퇴근)를 저장하고 출근 상태는 유지한다.
+
+`work_outtime`은 `work_intime` 없이는 저장할 수 없으며, 일반 클라이언트에는 테이블 권한을 부여하지 않고 서버 `service_role`을 통해서만 접근한다.
+
 ### 주요 타입 및 상태 값
 
 - GPS는 `jsonb` 객체 `{ "latitude": number, "longitude": number }` 구조를 사용한다.
@@ -176,3 +205,10 @@ system_configs 1 ── N system_configs (parent_system_code)
 3. 데이터 변환이 필요한 경우 기존 데이터 보정 후 `NOT NULL`과 제약조건을 적용한다.
 4. 새 외래키나 인덱스를 추가할 때 기존 데이터 정합성과 실행계획을 먼저 확인한다.
 5. 적용 순서와 결과를 배포 기록에 남긴다.
+
+### 근무예정·출근 자료 통합 이력
+
+- `20260918103734_work_record_attendance.sql`에서 기존 `work_assignment_daily_attendance`의 예정 시각과 `attendance_records`의 실제 출퇴근 자료를 `employee_id + work_date` 기준으로 통합한다.
+- 통합 시 예정 시각은 `intime`, `outtime`, 실제 시각은 `work_intime`, `work_outtime`으로 옮기고, 기존 GPS 좌표와 생성·수정 시각도 보존한다.
+- 데이터 통합과 정합성 확인 후 두 기존 테이블은 `DROP TABLE ... CASCADE`로 제거한다. 이후 배정 저장·수정 시 일별 근무예정 행은 `work_record`에 생성·갱신한다.
+- 과거 테이블명을 사용하는 애플리케이션 조회·등록·수정·삭제 로직은 모두 `work_record`로 전환했으며, 과거 마이그레이션 파일은 당시 적용 이력을 보존하기 위해 수정하지 않는다.

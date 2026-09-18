@@ -10,7 +10,7 @@ describe("attendance report page", () => {
 
   it("loads employee names into an editable input and searches when the conditions change", async () => {
     const user = userEvent.setup();
-    const year = new Date().getFullYear();
+    const workDate = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
       if (url.endsWith("/api/bootstrap")) {
@@ -27,9 +27,14 @@ describe("attendance report page", () => {
           {
             id: "attendance-1",
             employeeName: "김철수",
+            workStyle: "일반근무",
+            worksiteName: "본사",
+            scheduledClockIn: "09:00",
+            scheduledClockOut: "18:00",
             clockInDateTime: "2026-06-04 09:00",
             clockOutDateTime: "2026-06-04 18:00",
             workDuration: "9시간",
+            intimeStatus: "1",
             isLate: true,
           },
         ],
@@ -40,7 +45,7 @@ describe("attendance report page", () => {
     render(<AttendanceReportPage />);
 
     expect(screen.getByRole("heading", { name: "근태관리" })).toBeInTheDocument();
-    expect(screen.getByLabelText("연도")).toHaveValue(year);
+    expect(screen.getByLabelText("출근날짜")).toHaveValue(workDate);
     expect(screen.getByRole("button", { name: "엑셀" })).toBeDisabled();
     await waitFor(() => expect(document.querySelector('datalist option[value="김철수"]')).toBeInTheDocument());
     expect(document.querySelector('datalist option[value="홍길동"]')).toBeInTheDocument();
@@ -50,13 +55,13 @@ describe("attendance report page", () => {
 
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith(
-        `/api/manager/reports/attendance?employeeName=%EA%B9%80%EC%B2%A0%EC%88%98&year=${year}`,
+        `/api/manager/reports/attendance?employeeName=%EA%B9%80%EC%B2%A0%EC%88%98&workDate=${workDate}`,
       ),
     );
     expect(await screen.findByText("2026-06-04 09:00")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "엑셀" })).toBeEnabled();
     expect(screen.getByText("지각")).toBeInTheDocument();
-    expect(screen.queryByRole("columnheader", { name: "직원이름" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "이름" })).not.toBeInTheDocument();
     expect(screen.queryByRole("columnheader", { name: "수정" })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: /2026-06-04 09:00 근태 기록 수정/ })).toHaveAttribute(
       "href",
@@ -76,9 +81,14 @@ describe("attendance report page", () => {
           {
             id: "attendance-1",
             employeeName: "김철수",
+            workStyle: "일반근무",
+            worksiteName: "본사",
+            scheduledClockIn: "09:00",
+            scheduledClockOut: "18:00",
             clockInDateTime: "2026-06-04 09:00",
             clockOutDateTime: null,
             workDuration: "-",
+            intimeStatus: "0",
           },
         ],
       });

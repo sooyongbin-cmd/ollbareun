@@ -12,22 +12,33 @@ import { saveRowsAsXls } from "../export-xls";
 type AttendanceReportRow = {
   id: string;
   employeeName: string;
+  workStyle: string;
   worksiteName: string;
+  scheduledClockIn: string;
+  scheduledClockOut: string;
   clockInDateTime: string;
   clockOutDateTime: string | null;
   workDuration: string;
+  intimeStatus: "0" | "1" | "2" | "3";
   isLate: boolean;
 };
 
-function currentYear() {
-  return new Date().getFullYear();
+function currentDate() {
+  return new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
+
+const intimeStatusLabels: Record<AttendanceReportRow["intimeStatus"], string> = {
+  "0": "결근",
+  "1": "지각",
+  "2": "정상출근",
+  "3": "정상근무",
+};
 
 export default function AttendanceReportPage() {
   const [employeeName, setEmployeeName] = useState("");
   const [employeeNames, setEmployeeNames] = useState<string[]>([]);
   const [employeeNamesLoading, setEmployeeNamesLoading] = useState(true);
-  const [year, setYear] = useState(currentYear());
+  const [workDate, setWorkDate] = useState(currentDate());
   const [rows, setRows] = useState<AttendanceReportRow[]>([]);
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -78,7 +89,7 @@ export default function AttendanceReportPage() {
     try {
       const params = new URLSearchParams({
         employeeName: employeeName.trim(),
-        year: String(year),
+        workDate,
       });
       const response = await fetch(`/api/manager/reports/attendance?${params.toString()}`);
       const payload = await response.json();
@@ -96,7 +107,7 @@ export default function AttendanceReportPage() {
         setLoading(false);
       }
     }
-  }, [employeeName, year]);
+  }, [employeeName, workDate]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -110,15 +121,15 @@ export default function AttendanceReportPage() {
 
   async function handleExport() {
     const headers = showEmployeeColumn
-      ? ["직원이름", "근무지", "출근일시", "퇴근일시", "근무시간", "상태"]
-      : ["근무지", "출근일시", "퇴근일시", "근무시간", "상태"];
+      ? ["이름", "근무형태", "근무지", "출근예정", "퇴근예정", "출근일시", "퇴근일시", "근무시간", "상태"]
+      : ["근무형태", "근무지", "출근예정", "퇴근예정", "출근일시", "퇴근일시", "근무시간", "상태"];
     await saveRowsAsXls({
-      fileName: `올바름_근태_${employeeName.trim() || "전체"}_${year}`,
+      fileName: `올바름_근태_${employeeName.trim() || "전체"}_${workDate}`,
       headers,
       rows: rows.map((row) =>
         showEmployeeColumn
-          ? [row.employeeName, row.worksiteName, row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration, row.isLate ? "지각" : "-"]
-          : [row.worksiteName, row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration, row.isLate ? "지각" : "-"],
+          ? [row.employeeName, row.workStyle, row.worksiteName, row.scheduledClockIn, row.scheduledClockOut, row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration, intimeStatusLabels[row.intimeStatus]]
+          : [row.workStyle, row.worksiteName, row.scheduledClockIn, row.scheduledClockOut, row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration, intimeStatusLabels[row.intimeStatus]],
       ),
     });
   }
@@ -130,7 +141,7 @@ export default function AttendanceReportPage() {
       </header>
 
       <section aria-label="근태내역 조회" className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
-        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_10rem_auto_auto] md:items-end">
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_12rem_auto_auto] md:items-end">
           <div className="space-y-2">
             <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="attendance-employee-name">
               직원이름
@@ -150,17 +161,15 @@ export default function AttendanceReportPage() {
             </datalist>
           </div>
           <div className="space-y-2">
-            <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="attendance-year">
-              연도
+            <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="attendance-work-date">
+              출근날짜
             </label>
             <Input
               className="w-full"
-              id="attendance-year"
-              min="2000"
-              max="2100"
-              type="number"
-              value={year}
-              onChange={(event) => setYear(Number(event.target.value))}
+              id="attendance-work-date"
+              type="date"
+              value={workDate}
+              onChange={(event) => setWorkDate(event.target.value)}
             />
           </div>
           <Link href="/manager/reports/attendance/new" className="inline-flex h-[3rem] items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"><span>출근등록</span><ArrowRightIcon size={18} /></Link>
@@ -180,8 +189,11 @@ export default function AttendanceReportPage() {
             <Table className="w-full">
               <TableHeader>
                 <TableRow>
-                  {showEmployeeColumn ? <TableHead className="text-left">직원이름</TableHead> : null}
+                  {showEmployeeColumn ? <TableHead className="text-left">이름</TableHead> : null}
+                  <TableHead className="text-left">근무형태</TableHead>
                   <TableHead className="text-left">근무지</TableHead>
+                  <TableHead className="text-left">출근예정</TableHead>
+                  <TableHead className="text-left">퇴근예정</TableHead>
                   <TableHead className="text-left">출근일시</TableHead>
                   <TableHead className="text-left">퇴근일시</TableHead>
                   <TableHead className="text-left">근무시간</TableHead>
@@ -191,28 +203,33 @@ export default function AttendanceReportPage() {
               <TableBody>
                 {rows.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={showEmployeeColumn ? 6 : 5} className="p-8 text-center text-muted-foreground italic">
+                    <TableCell data-responsive-empty colSpan={showEmployeeColumn ? 9 : 8} className="p-8 text-center text-muted-foreground italic">
                       {searched ? "조회 결과가 없습니다." : "조회 조건을 입력하세요."}
                     </TableCell>
                   </TableRow>
                 ) : (
                   rows.map((row) => (
                     <TableRow key={row.id}>
-                      {showEmployeeColumn ? <TableCell data-label="직원이름">{row.employeeName}</TableCell> : null}
+                      {showEmployeeColumn ? <TableCell data-label="이름">{row.employeeName}</TableCell> : null}
+                      <TableCell data-label="근무형태">{row.workStyle}</TableCell>
                       <TableCell data-label="근무지">{row.worksiteName ?? "-"}</TableCell>
+                      <TableCell data-label="출근예정">{row.scheduledClockIn}</TableCell>
+                      <TableCell data-label="퇴근예정">{row.scheduledClockOut}</TableCell>
                       <TableCell data-label="출근일시">
-                        <Link
-                          href={`/manager/reports/attendance/save/${row.id}`}
-                          className="text-left text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"
-                          aria-label={`${row.clockInDateTime} 근태 기록 수정`}
-                        >
-                          {row.clockInDateTime}
-                        </Link>
+                        {row.clockInDateTime === "-" ? row.clockInDateTime : (
+                          <Link
+                            href={`/manager/reports/attendance/save/${row.id}`}
+                            className="text-left text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"
+                            aria-label={`${row.clockInDateTime} 근태 기록 수정`}
+                          >
+                            {row.clockInDateTime}
+                          </Link>
+                        )}
                       </TableCell>
                       <TableCell data-label="퇴근일시">{row.clockOutDateTime ?? "-"}</TableCell>
                       <TableCell data-label="근무시간">{row.workDuration}</TableCell>
                       <TableCell data-label="상태">
-                        {row.isLate ? <span className="font-semibold text-destructive">지각</span> : "-"}
+                        {intimeStatusLabels[row.intimeStatus]}
                       </TableCell>
                     </TableRow>
                   ))

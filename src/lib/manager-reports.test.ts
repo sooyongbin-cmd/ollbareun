@@ -54,13 +54,13 @@ describe("manager reports", () => {
     expect(update.mock.calls[0][0]).not.toHaveProperty("work_outtime");
   });
 
-  it("filters attendance by employee name and year and formats duration", () => {
+  it("filters attendance by employee name and work date and formats duration", () => {
     const rows = buildAttendanceReport({
       employeeName: "김철수",
-      year: "2026",
+      workDate: "2026-03-02",
       worksites: [{ id: "site-1", name: "본사" }],
       employees: [
-        { id: "emp-1", name: "김철수" },
+        { id: "emp-1", name: "김철수", work_style: "0" },
         { id: "emp-2", name: "이영희" },
       ],
       attendance: [
@@ -69,8 +69,11 @@ describe("manager reports", () => {
           worksite_id: "site-1",
           employee_id: "emp-1",
           work_date: "2026-03-02",
+          intime: "2026-03-02T00:00:00.000Z",
+          outtime: "2026-03-02T09:00:00.000Z",
           work_intime: "2026-03-02T00:00:00.000Z",
           work_outtime: "2026-03-02T09:30:00.000Z",
+          intime_status: "3",
         },
         {
           id: "attendance-2",
@@ -88,17 +91,21 @@ describe("manager reports", () => {
         },
       ],
       assignments: [{ id: "assignment-1", employee_id: "emp-1", worksite_id: "site-1" }],
-      dailyAttendance: [{ id: "attendance-1", employee_id: "emp-1", worksite_id: "site-1", work_date: "2026-03-02", intime: "2026-03-02T00:00:00.000Z" }],
+      dailyAttendance: [{ id: "attendance-1", employee_id: "emp-1", worksite_id: "site-1", work_date: "2026-03-02", intime: "2026-03-02T00:00:00.000Z", outtime: "2026-03-02T09:00:00.000Z" }],
     });
 
     expect(rows).toEqual([
       {
         id: "attendance-1",
         employeeName: "김철수",
+        workStyle: "일반근무",
         worksiteName: "본사",
+        scheduledClockIn: "09:00",
+        scheduledClockOut: "18:00",
         clockInDateTime: "2026-03-02 09:00",
         clockOutDateTime: "2026-03-02 18:30",
         workDuration: "9시간 30분",
+        intimeStatus: "3",
         isLate: false,
       },
     ]);
@@ -107,7 +114,7 @@ describe("manager reports", () => {
   it("marks attendance as late when clock-in is after the assigned daily start time", () => {
     const rows = buildAttendanceReport({
       employeeName: "김철수",
-      year: "2026",
+      workDate: "2026-03-02",
       employees: [{ id: "emp-1", name: "김철수" }],
       worksites: [{ id: "site-1", name: "본사" }],
       assignments: [{ id: "assignment-1", employee_id: "emp-1", worksite_id: "site-1" }],
@@ -123,6 +130,7 @@ describe("manager reports", () => {
           work_date: "2026-03-02",
           work_intime: "2026-03-02T00:01:00.000Z",
           work_outtime: null,
+          intime_status: "1",
         },
         {
           id: "on-time-attendance",
@@ -131,14 +139,45 @@ describe("manager reports", () => {
           work_date: "2026-03-03",
           work_intime: "2026-03-03T00:00:00.000Z",
           work_outtime: null,
+          intime_status: "2",
         },
       ],
     });
 
-    expect(rows.map((row) => ({ id: row.id, isLate: row.isLate }))).toEqual([
-      { id: "late-attendance", isLate: true },
-      { id: "on-time-attendance", isLate: false },
+    expect(rows.map((row) => ({ id: row.id, isLate: row.isLate, intimeStatus: row.intimeStatus }))).toEqual([
+      { id: "late-attendance", isLate: true, intimeStatus: "1" },
     ]);
+  });
+
+  it("includes scheduled times and absence status for the selected work date", () => {
+    const rows = buildAttendanceReport({
+      employeeName: "",
+      workDate: "2026-09-17",
+      employees: [{ id: "emp-1", name: "김철수", work_style: "2" }],
+      worksites: [{ id: "site-1", name: "본사" }],
+      attendance: [{
+        id: "absence-1",
+        employee_id: "emp-1",
+        worksite_id: "site-1",
+        work_date: "2026-09-17",
+        intime: "2026-09-16T13:00:00.000Z",
+        outtime: "2026-09-17T21:00:00.000Z",
+        work_intime: null,
+        work_outtime: null,
+        intime_status: "0",
+      }],
+    });
+
+    expect(rows).toEqual([expect.objectContaining({
+      employeeName: "김철수",
+      workStyle: "야간근무",
+      scheduledClockIn: "22:00",
+      scheduledClockOut: "06:00",
+      clockInDateTime: "-",
+      clockOutDateTime: null,
+      intimeStatus: "0",
+      isLate: false,
+    })]);
   });
 
   it("builds today's expected attendance status and excludes retired employees", () => {
@@ -200,10 +239,9 @@ describe("manager reports", () => {
     employeesQuery.select.mockReturnValue(employeesQuery);
     employeesQuery.ilike.mockResolvedValue({ data: [{ id: "emp-1", name: "김철수" }], error: null });
 
-    const attendanceQuery = { select: vi.fn(), gte: vi.fn(), lte: vi.fn(), order: vi.fn() };
+    const attendanceQuery = { select: vi.fn(), eq: vi.fn(), order: vi.fn() };
     attendanceQuery.select.mockReturnValue(attendanceQuery);
-    attendanceQuery.gte.mockReturnValue(attendanceQuery);
-    attendanceQuery.lte.mockReturnValue(attendanceQuery);
+    attendanceQuery.eq.mockReturnValue(attendanceQuery);
     attendanceQuery.order.mockResolvedValue({
       data: [{
         id: "attendance-1",
@@ -231,12 +269,13 @@ describe("manager reports", () => {
     vi.mocked(getSupabaseAdmin).mockReturnValue({ from } as never);
     vi.mocked(getSupabase).mockClear();
 
-    await expect(loadAttendanceReport({ employeeName: "", year: "2026" })).resolves.toEqual([
+    await expect(loadAttendanceReport({ employeeName: "", workDate: "2026-09-17" })).resolves.toEqual([
       expect.objectContaining({ id: "attendance-1", employeeName: "김철수", worksiteName: "본사" }),
     ]);
     expect(getSupabase).not.toHaveBeenCalled();
     expect(from).toHaveBeenCalledWith("employees");
     expect(from).toHaveBeenCalledWith("work_record");
+    expect(attendanceQuery.eq).toHaveBeenCalledWith("work_date", "2026-09-17");
   });
 
   it("shows an employee as waiting before the scheduled clock-in time", () => {

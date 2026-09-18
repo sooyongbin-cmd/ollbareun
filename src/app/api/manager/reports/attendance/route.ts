@@ -23,9 +23,9 @@ export async function GET(request: Request) {
 
     const url = new URL(request.url);
     const employeeName = url.searchParams.get("employeeName") ?? "";
-    const year = url.searchParams.get("year") ?? String(new Date().getFullYear());
+    const workDate = url.searchParams.get("workDate") ?? "";
 
-    return Response.json({ rows: await loadAttendanceReport({ employeeName, year }) });
+    return Response.json({ rows: await loadAttendanceReport({ employeeName, workDate }) });
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "근태내역을 불러오지 못했습니다." },

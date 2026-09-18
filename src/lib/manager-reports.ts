@@ -6,8 +6,11 @@ import { getSupabaseAdmin } from "./supabase-admin";
 type EmployeeInput = {
   id: string;
   name: string;
+  work_style?: "0" | "1" | "2" | null;
   is_retired?: boolean;
 };
+
+type IntimeStatus = "0" | "1" | "2" | "3";
 
 type AttendanceInput = {
   id: string;
@@ -16,6 +19,7 @@ type AttendanceInput = {
   work_date: string;
   intime?: string | null;
   outtime?: string | null;
+  intime_status?: IntimeStatus | null;
   work_intime: string | null;
   work_outtime: string | null;
 };
@@ -54,9 +58,13 @@ export type AttendanceReportRow = {
   id: string;
   worksiteName: string;
   employeeName: string;
+  workStyle: string;
+  scheduledClockIn: string;
+  scheduledClockOut: string;
   clockInDateTime: string;
   clockOutDateTime: string | null;
   workDuration: string;
+  intimeStatus: IntimeStatus;
   isLate: boolean;
 };
 
@@ -119,16 +127,20 @@ function assertYear(year: string) {
   }
 }
 
+function workStyleLabel(workStyle: EmployeeInput["work_style"]) {
+  return workStyle === "0" ? "일반근무" : workStyle === "1" ? "격일근무" : workStyle === "2" ? "야간근무" : "-";
+}
+
 export function buildAttendanceReport(input: {
   employeeName: string;
-  year: string;
+  workDate: string;
   employees: EmployeeInput[];
   attendance: AttendanceInput[];
   worksites?: { id: string; name: string }[];
   assignments?: AssignmentInput[];
   dailyAttendance?: DailyAttendanceInput[];
 }): AttendanceReportRow[] {
-  assertYear(input.year);
+  assertDate(input.workDate);
   const query = input.employeeName.trim().toLowerCase();
   const employeeIds = new Set(
     input.employees
@@ -136,39 +148,38 @@ export function buildAttendanceReport(input: {
       .map((employee) => employee.id),
   );
   const employeeNamesById = new Map(input.employees.map((employee) => [employee.id, employee.name]));
+  const workStylesByEmployeeId = new Map(input.employees.map((employee) => [employee.id, workStyleLabel(employee.work_style)]));
   const worksiteNamesById = new Map((input.worksites ?? []).map((worksite) => [worksite.id, worksite.name]));
-  const scheduledClockIns = new Map<string, string>();
+  const scheduledTimes = new Map<string, { intime: string | null; outtime: string | null }>();
 
   (input.dailyAttendance ?? []).forEach((dailyAttendance) => {
-    if (!dailyAttendance.intime) {
-      return;
-    }
-
-    scheduledClockIns.set(
+    scheduledTimes.set(
       `${dailyAttendance.employee_id}:${dailyAttendance.worksite_id}:${dailyAttendance.work_date}`,
-      dailyAttendance.intime,
+      { intime: dailyAttendance.intime, outtime: dailyAttendance.outtime ?? null },
     );
   });
 
   return input.attendance
-    .filter((record) => record.work_date.startsWith(`${input.year}-`) && employeeIds.has(record.employee_id) && record.work_intime)
+    .filter((record) => record.work_date === input.workDate && employeeIds.has(record.employee_id))
     .sort((left, right) => left.work_date.localeCompare(right.work_date))
     .map((record) => {
-      const clockInTimestamp = record.work_intime ? new Date(record.work_intime).getTime() : Number.NaN;
-      const scheduledClockIn = scheduledClockIns.get(
+      const scheduledTime = scheduledTimes.get(
         `${record.employee_id}:${record.worksite_id ?? ""}:${record.work_date}`,
       );
-      const scheduledClockInTimestamp = scheduledClockIn ? new Date(scheduledClockIn).getTime() : Number.NaN;
+      const intimeStatus = record.intime_status ?? "0";
 
       return {
         id: record.id,
         worksiteName: worksiteNamesById.get(record.worksite_id ?? "") ?? "-",
         employeeName: employeeNamesById.get(record.employee_id) ?? "-",
+        workStyle: workStylesByEmployeeId.get(record.employee_id) ?? "-",
+        scheduledClockIn: toKstDateTime(scheduledTime?.intime ?? record.intime ?? null)?.time ?? "-",
+        scheduledClockOut: toKstDateTime(scheduledTime?.outtime ?? record.outtime ?? null)?.time ?? "-",
         clockInDateTime: toKstDateTime(record.work_intime)?.dateTime ?? "-",
         clockOutDateTime: toKstDateTime(record.work_outtime)?.dateTime ?? null,
         workDuration: durationLabel(record.work_intime, record.work_outtime),
-        isLate: Number.isFinite(clockInTimestamp) && Number.isFinite(scheduledClockInTimestamp)
-          && clockInTimestamp > scheduledClockInTimestamp,
+        intimeStatus,
+        isLate: intimeStatus === "1",
       };
     });
 }
@@ -471,16 +482,15 @@ export function buildEducationReport(input: {
     }));
 }
 
-export async function loadAttendanceReport(input: { employeeName: string; year: string }) {
-  assertYear(input.year);
+export async function loadAttendanceReport(input: { employeeName: string; workDate: string }) {
+  assertDate(input.workDate);
   const supabase = getSupabaseAdmin();
   const [employeesResult, workRecordResult, worksitesResult, assignmentsResult] = await Promise.all([
-    supabase.from("employees").select("id,name").ilike("name", `%${input.employeeName.trim()}%`),
+    supabase.from("employees").select("id,name,work_style").ilike("name", `%${input.employeeName.trim()}%`),
     supabase
       .from("work_record")
-      .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime")
-      .gte("work_date", `${input.year}-01-01`)
-      .lte("work_date", `${input.year}-12-31`)
+      .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime,intime_status")
+      .eq("work_date", input.workDate)
       .order("work_date", { ascending: true }),
     supabase.from("worksites").select("id,name"),
     supabase.from("work_assignments").select("id,employee_id,worksite_id"),
@@ -495,7 +505,7 @@ export async function loadAttendanceReport(input: { employeeName: string; year: 
 
   return buildAttendanceReport({
     employeeName: input.employeeName,
-    year: input.year,
+    workDate: input.workDate,
     employees: employeesResult.data ?? [],
     attendance: workRecords,
     worksites: worksitesResult.data ?? [],

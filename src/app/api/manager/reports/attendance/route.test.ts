@@ -21,16 +21,16 @@ describe("/api/manager/reports/attendance", () => {
   it("loads attendance rows", async () => {
     vi.mocked(loadAttendanceReport).mockResolvedValue([{ id: "attendance-1" }] as never);
 
-    const response = await GET(new Request("http://localhost/api/manager/reports/attendance?employeeName=&year=2026"));
+    const response = await GET(new Request("http://localhost/api/manager/reports/attendance?employeeName=&workDate=2026-09-17"));
 
     expect(response.status).toBe(200);
-    expect(loadAttendanceReport).toHaveBeenCalledWith({ employeeName: "", year: "2026" });
+    expect(loadAttendanceReport).toHaveBeenCalledWith({ employeeName: "", workDate: "2026-09-17" });
   });
 
   it("denies attendance report access without a manager session", async () => {
     vi.mocked(getManagerUser).mockResolvedValue(null);
 
-    const response = await GET(new Request("http://localhost/api/manager/reports/attendance?employeeName=&year=2026"));
+    const response = await GET(new Request("http://localhost/api/manager/reports/attendance?employeeName=&workDate=2026-09-17"));
 
     expect(response.status).toBe(401);
     expect(loadAttendanceReport).not.toHaveBeenCalled();

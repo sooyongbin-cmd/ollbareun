@@ -188,9 +188,9 @@ describe("manager reports", () => {
       date: "2026-09-11",
       now: new Date("2026-09-11T01:00:00.000Z"),
       employees: [
-        { id: "emp-1", name: "김철수", role: "경비원", is_retired: false },
-        { id: "emp-2", name: "이영희", role: "미화원", is_retired: false },
-        { id: "emp-3", name: "퇴직자", role: "파견", is_retired: true },
+        { id: "emp-1", name: "김철수", role: "경비원", work_style: "0", is_retired: false },
+        { id: "emp-2", name: "이영희", role: "미화원", work_style: "2", is_retired: false },
+        { id: "emp-3", name: "퇴직자", role: "파견", work_style: "1", is_retired: true },
       ],
       assignments: [
         { id: "assignment-1", employee_id: "emp-1", worksite_id: "site-1" },
@@ -199,8 +199,8 @@ describe("manager reports", () => {
       ],
       worksites: [{ id: "site-1", name: "본사" }],
       dailyAttendance: [
-        { id: "attendance-1", employee_id: "emp-1", worksite_id: "site-1", work_date: "2026-09-11", intime: "2026-09-10T21:00:00.000Z" },
-        { id: "record-2", employee_id: "emp-2", worksite_id: "site-1", work_date: "2026-09-11", intime: "2026-09-10T22:00:00.000Z" },
+        { id: "attendance-1", employee_id: "emp-1", worksite_id: "site-1", work_date: "2026-09-11", intime: "2026-09-10T21:00:00.000Z", outtime: "2026-09-11T09:00:00.000Z" },
+        { id: "record-2", employee_id: "emp-2", worksite_id: "site-1", work_date: "2026-09-11", intime: "2026-09-10T22:00:00.000Z", outtime: "2026-09-11T10:00:00.000Z" },
         { id: "record-3", employee_id: "emp-3", worksite_id: "site-1", work_date: "2026-09-11", intime: "2026-09-10T21:00:00.000Z" },
       ],
       attendance: [
@@ -210,7 +210,7 @@ describe("manager reports", () => {
           worksite_id: "site-1",
           work_date: "2026-09-11",
           work_intime: "2026-09-10T21:05:00.000Z",
-          work_outtime: null,
+          work_outtime: "2026-09-11T09:05:00.000Z",
         },
       ],
     });
@@ -219,19 +219,25 @@ describe("manager reports", () => {
       {
         id: "attendance-1",
         employeeName: "김철수",
-        role: "경비원",
+        workStyle: "일반근무",
         worksiteName: "본사",
         scheduledClockIn: "06:00",
-        clockInTime: "06:05",
+        scheduledClockOut: "18:00",
+        clockInDateTime: "2026-09-11 06:05",
+        clockOutDateTime: "2026-09-11 18:05",
+        workDuration: "12시간",
         status: "지각",
       },
       {
         id: "record-2",
         employeeName: "이영희",
-        role: "미화원",
+        workStyle: "야간근무",
         worksiteName: "본사",
         scheduledClockIn: "07:00",
-        clockInTime: null,
+        scheduledClockOut: "19:00",
+        clockInDateTime: null,
+        clockOutDateTime: null,
+        workDuration: "-",
         status: "결근",
       },
     ]);
@@ -285,7 +291,7 @@ describe("manager reports", () => {
     const rows = buildAttendanceStatus({
       date: "2026-09-11",
       now: new Date("2026-09-11T00:30:00.000Z"),
-      employees: [{ id: "emp-1", name: "김철수", role: "경비원", is_retired: false }],
+      employees: [{ id: "emp-1", name: "김철수", role: "경비원", work_style: "0", is_retired: false }],
       assignments: [{ id: "assignment-1", employee_id: "emp-1", worksite_id: "site-1" }],
       worksites: [{ id: "site-1", name: "본사" }],
       dailyAttendance: [{ id: "record-1", employee_id: "emp-1", worksite_id: "site-1", work_date: "2026-09-11", intime: "2026-09-11T01:00:00.000Z" }],
@@ -294,7 +300,7 @@ describe("manager reports", () => {
 
     expect(rows[0]).toMatchObject({
       employeeName: "김철수",
-      clockInTime: null,
+      clockInDateTime: null,
       status: "대기",
     });
   });

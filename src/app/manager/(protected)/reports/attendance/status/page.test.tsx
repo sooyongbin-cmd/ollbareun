@@ -8,19 +8,25 @@ const statusPayload = {
     {
       id: "assignment-1",
       employeeName: "김철수",
-      role: "경비원",
+      workStyle: "일반근무",
       worksiteName: "본사",
       scheduledClockIn: "06:00",
-      clockInTime: "06:05",
+      scheduledClockOut: "18:00",
+      clockInDateTime: "2026-09-11 06:05",
+      clockOutDateTime: "2026-09-11 18:00",
+      workDuration: "11시간 55분",
       status: "지각",
     },
     {
       id: "assignment-2",
       employeeName: "이영희",
-      role: "미화원",
+      workStyle: "야간근무",
       worksiteName: "센텀현장",
       scheduledClockIn: "07:00",
-      clockInTime: null,
+      scheduledClockOut: "16:00",
+      clockInDateTime: null,
+      clockOutDateTime: null,
+      workDuration: "-",
       status: "대기",
     },
   ],
@@ -39,11 +45,17 @@ describe("attendance status page", () => {
     const search = screen.getByRole("region", { name: "출근현황 조회" });
     const list = screen.getByRole("region", { name: "출근현황 목록" });
     expect(within(search).getByLabelText("날짜")).toHaveAttribute("type", "date");
+    expect(within(list).getByRole("columnheader", { name: "근무형태" })).toBeInTheDocument();
     expect(within(list).getByRole("columnheader", { name: "출근예정" })).toBeInTheDocument();
-    expect(within(list).getByRole("columnheader", { name: "출근시각" })).toBeInTheDocument();
+    expect(within(list).getByRole("columnheader", { name: "퇴근예정" })).toBeInTheDocument();
+    expect(within(list).getByRole("columnheader", { name: "출근일시" })).toBeInTheDocument();
+    expect(within(list).getByRole("columnheader", { name: "퇴근일시" })).toBeInTheDocument();
+    expect(within(list).getByRole("columnheader", { name: "근무시간" })).toBeInTheDocument();
     expect(within(list).getByRole("columnheader", { name: "상태" })).toBeInTheDocument();
     expect(within(list).getByText("김철수")).toBeInTheDocument();
-    expect(within(list).getByText("06:05")).toBeInTheDocument();
+    expect(within(list).getByText("일반근무")).toBeInTheDocument();
+    expect(within(list).getByText("2026-09-11 06:05")).toBeInTheDocument();
+    expect(within(list).getByText("11시간 55분")).toBeInTheDocument();
     expect(within(list).getByText("지각")).toBeInTheDocument();
     expect(within(list).getByText("대기")).toBeInTheDocument();
 

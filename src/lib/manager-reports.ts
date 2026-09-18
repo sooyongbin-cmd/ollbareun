@@ -80,10 +80,13 @@ export type AttendanceReportRow = {
 export type AttendanceStatusRow = {
   id: string;
   employeeName: string;
-  role: string;
+  workStyle: string;
   worksiteName: string;
   scheduledClockIn: string;
-  clockInTime: string | null;
+  scheduledClockOut: string;
+  clockInDateTime: string | null;
+  clockOutDateTime: string | null;
+  workDuration: string;
   status: "출근" | "지각" | "대기" | "결근";
 };
 
@@ -261,10 +264,13 @@ export function buildAttendanceStatus(input: {
       return [{
         id: dailyAttendance.id ?? `${dailyAttendance.employee_id}:${dailyAttendance.work_date}`,
         employeeName: employee.name,
-        role: employee.role ?? "-",
+        workStyle: workStyleLabel(employee.work_style),
         worksiteName: worksitesById.get(dailyAttendance.worksite_id) ?? "-",
         scheduledClockIn: toKstDateTime(dailyAttendance.intime)?.time ?? "-",
-        clockInTime: clockIn?.time ?? null,
+        scheduledClockOut: toKstDateTime(dailyAttendance.outtime ?? null)?.time ?? "-",
+        clockInDateTime: clockIn?.dateTime ?? null,
+        clockOutDateTime: toKstDateTime(attendance?.work_outtime ?? null)?.dateTime ?? null,
+        workDuration: durationLabel(attendance?.work_intime ?? null, attendance?.work_outtime ?? null),
         status,
       }];
     })
@@ -543,7 +549,7 @@ export async function loadAttendanceStatus(input: { date: string }) {
       .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime")
       .eq("work_date", input.date),
     supabase.from("work_assignments").select("id,employee_id,worksite_id"),
-    supabase.from("employees").select("id,name,role,is_retired"),
+    supabase.from("employees").select("id,name,role,work_style,is_retired"),
     supabase.from("worksites").select("id,name"),
   ]);
 

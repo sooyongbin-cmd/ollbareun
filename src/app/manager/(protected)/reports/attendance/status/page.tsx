@@ -9,10 +9,13 @@ import ManagerLoadingMessage from "../../../manager-loading-message";
 type AttendanceStatusRow = {
   id: string;
   employeeName: string;
-  role: string;
+  workStyle: string;
   worksiteName: string;
   scheduledClockIn: string;
-  clockInTime: string | null;
+  scheduledClockOut: string;
+  clockInDateTime: string | null;
+  clockOutDateTime: string | null;
+  workDuration: string;
   status: "출근" | "지각" | "대기" | "결근";
 };
 
@@ -108,21 +111,24 @@ export default function AttendanceStatusPage() {
           </p>
         ) : (
           <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
-            <Table className="w-full min-w-[46rem]">
+            <Table className="w-full min-w-[68rem]">
               <TableHeader>
                 <TableRow>
                   <TableHead>이름</TableHead>
-                  <TableHead>직군</TableHead>
+                  <TableHead>근무형태</TableHead>
                   <TableHead>근무지</TableHead>
                   <TableHead>출근예정</TableHead>
-                  <TableHead>출근시각</TableHead>
+                  <TableHead>퇴근예정</TableHead>
+                  <TableHead>출근일시</TableHead>
+                  <TableHead>퇴근일시</TableHead>
+                  <TableHead>근무시간</TableHead>
                   <TableHead>상태</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {rows.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={6} className="p-8 text-center text-muted-foreground italic">
+                    <TableCell data-responsive-empty colSpan={9} className="p-8 text-center text-muted-foreground italic">
                       출근 예정 직원이 없습니다.
                     </TableCell>
                   </TableRow>
@@ -130,10 +136,13 @@ export default function AttendanceStatusPage() {
                   rows.map((row) => (
                     <TableRow key={row.id}>
                       <TableCell data-label="이름" className="font-semibold">{row.employeeName}</TableCell>
-                      <TableCell data-label="직군" className="text-muted-foreground">{row.role}</TableCell>
+                      <TableCell data-label="근무형태" className="text-muted-foreground">{row.workStyle}</TableCell>
                       <TableCell data-label="근무지" className="text-muted-foreground">{row.worksiteName}</TableCell>
                       <TableCell data-label="출근예정">{row.scheduledClockIn}</TableCell>
-                      <TableCell data-label="출근시각">{row.clockInTime ?? "-"}</TableCell>
+                      <TableCell data-label="퇴근예정">{row.scheduledClockOut}</TableCell>
+                      <TableCell data-label="출근일시">{row.clockInDateTime ?? "-"}</TableCell>
+                      <TableCell data-label="퇴근일시">{row.clockOutDateTime ?? "-"}</TableCell>
+                      <TableCell data-label="근무시간">{row.workDuration}</TableCell>
                       <TableCell data-label="상태">
                         <Badge
                           variant={row.status === "지각" ? "destructive" : row.status === "출근" ? "default" : "secondary"}

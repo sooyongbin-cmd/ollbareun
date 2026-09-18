@@ -201,6 +201,12 @@ describe("manager layout", () => {
       "근무지관리",
       "근무지배정",
       "공휴일관리",
+    ]);
+    const attendanceLinks = screen
+      .getByRole("link", { name: "근태관리" })
+      .closest("[data-sidebar=group]")
+      ?.querySelectorAll("a");
+    expect(Array.from(attendanceLinks ?? []).map((link) => link.textContent?.trim())).toEqual([
       "근태관리",
       "출근현황",
     ]);

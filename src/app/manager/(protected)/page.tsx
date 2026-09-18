@@ -378,7 +378,7 @@ export default function ManagerPage() {
           <span>대기 {data.summary.waitingEmployeesToday}</span>
         </span>
       ),
-      description: "오늘 출근 예정 직원 기준",
+      description: "오늘 근태기록의 출근상태 기준",
       ariaLabel: `출근현황 출근 ${data.summary.onTimeEmployeesToday} 지각 ${data.summary.lateEmployeesToday} 결근${data.summary.absentEmployeesToday} 대기 ${data.summary.waitingEmployeesToday}`,
       icon: Users,
       href: "/manager/reports/attendance/status",

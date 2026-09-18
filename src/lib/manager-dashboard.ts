@@ -32,10 +32,13 @@ type DailyAttendanceInput = {
   intime: string | null;
 };
 
+type IntimeStatus = "0" | "1" | "2" | "3";
+
 type AttendanceInput = {
   employee_id: string;
   worksite_id: string;
   work_date: string;
+  intime_status: IntimeStatus;
   work_intime: string | null;
   work_outtime: string | null;
 };
@@ -141,9 +144,10 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
   const activeEmployeeIds = new Set(activeEmployees.map((employee) => employee.id));
   const employeeById = new Map(input.employees.map((employee) => [employee.id, employee]));
   const worksiteById = new Map(input.worksites.map((worksite) => [worksite.id, worksite]));
-  const todayAttendance = input.attendance.filter(
-    (record) => record.work_date === today && activeEmployeeIds.has(record.employee_id) && record.work_intime,
+  const todayWorkRecords = input.attendance.filter(
+    (record) => record.work_date === today && activeEmployeeIds.has(record.employee_id),
   );
+  const todayAttendance = todayWorkRecords.filter((record) => record.work_intime);
   const allResourceIds = input.educationResources.map((resource) => resource.id);
   const completedByEmployee = completedResourceIdsByEmployee(input.educationCompletions);
   const todayDaysOff = new Set(
@@ -152,7 +156,6 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       .map((dayOff) => dayOff.work_assignment_id),
   );
   const scheduledEmployeeIdsToday = new Set<string>();
-  const scheduledClockInsByEmployeeId = new Map<string, number>();
   input.dailyAttendance.forEach((dailyAttendance) => {
     if (dailyAttendance.work_date !== today || !dailyAttendance.intime) {
       return;
@@ -160,38 +163,24 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
 
     if (activeEmployeeIds.has(dailyAttendance.employee_id)) {
       scheduledEmployeeIdsToday.add(dailyAttendance.employee_id);
-      const scheduledTimestamp = new Date(dailyAttendance.intime).getTime();
-      if (
-        Number.isFinite(scheduledTimestamp)
-        && (!scheduledClockInsByEmployeeId.has(dailyAttendance.employee_id)
-          || scheduledTimestamp < scheduledClockInsByEmployeeId.get(dailyAttendance.employee_id)!)
-      ) {
-        scheduledClockInsByEmployeeId.set(dailyAttendance.employee_id, scheduledTimestamp);
-      }
     }
   });
-  const todayAttendanceByEmployeeId = new Map(todayAttendance.map((record) => [record.employee_id, record]));
-  const nowTimestamp = (input.now ?? new Date()).getTime();
   let onTimeEmployeesToday = 0;
-  let waitingEmployeesToday = 0;
+  const waitingEmployeesToday = 0;
   let absentEmployeesToday = 0;
   let lateEmployeesToday = 0;
-  scheduledClockInsByEmployeeId.forEach((scheduledTimestamp, employeeId) => {
-    const attendance = todayAttendanceByEmployeeId.get(employeeId);
-    const clockInTimestamp = attendance?.work_intime ? new Date(attendance.work_intime).getTime() : Number.NaN;
-    if (!Number.isFinite(clockInTimestamp)) {
-      if (nowTimestamp > scheduledTimestamp) {
+  todayWorkRecords.forEach((record) => {
+    switch (record.intime_status) {
+      case "0":
         absentEmployeesToday += 1;
-      } else {
-        waitingEmployeesToday += 1;
-      }
-      return;
-    }
-
-    if (clockInTimestamp > scheduledTimestamp) {
-      lateEmployeesToday += 1;
-    } else {
-      onTimeEmployeesToday += 1;
+        break;
+      case "1":
+        lateEmployeesToday += 1;
+        break;
+      case "2":
+      case "3":
+        onTimeEmployeesToday += 1;
+        break;
     }
   });
   const currentAssignmentCounts = input.assignments
@@ -296,7 +285,7 @@ export async function loadManagerDashboardData() {
       supabase.from("employees").select("id,name,is_retired"),
       supabase.from("worksites").select("id,name"),
       supabase.from("work_assignments").select("id,employee_id,worksite_id,start_date,end_date").lte("start_date", today).gte("end_date", startDate),
-      supabase.from("work_record").select("id,employee_id,worksite_id,work_date,intime,work_intime,work_outtime").gte("work_date", startDate).lte("work_date", today),
+      supabase.from("work_record").select("id,employee_id,worksite_id,work_date,intime,work_intime,work_outtime,intime_status").gte("work_date", startDate).lte("work_date", today),
       supabase.from("education_resources").select("id"),
       supabase.from("education_completions").select("employee_id,resource_id,is_completed,completed_at"),
       supabase

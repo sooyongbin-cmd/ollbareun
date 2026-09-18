@@ -483,14 +483,24 @@ export async function deleteAssignment(id: unknown, supabase: SupabaseClient = g
     throw new Error("배정 정보를 찾을 수 없습니다.");
   }
 
+  const { data: workRecords, error: recordCheckError } = await supabase
+    .from("work_record")
+    .select("id,work_intime,work_outtime")
+    .eq("employee_id", assignment.employee_id)
+    .gte("work_date", assignment.start_date)
+    .lte("work_date", assignment.end_date);
+  throwIfError(recordCheckError);
+
+  if ((workRecords ?? []).some((record) => record.work_intime || record.work_outtime)) {
+    throw new Error("해당 기간에 출퇴근 자료가 있어서 삭제할 수 없습니다.");
+  }
+
   const { error: recordError } = await supabase
     .from("work_record")
     .delete()
     .eq("employee_id", assignment.employee_id)
     .gte("work_date", assignment.start_date)
-    .lte("work_date", assignment.end_date)
-    .is("work_intime", null)
-    .is("work_outtime", null);
+    .lte("work_date", assignment.end_date);
   throwIfError(recordError);
 
   const { error } = await supabase.from("work_assignments").delete().eq("id", assignmentId);

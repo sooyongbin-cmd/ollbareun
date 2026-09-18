@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { authenticateGuard, clockIn, clockOut, createAssignment, listAssignments, listAssignmentsForEmployee } from "./phase1-data";
+import { authenticateGuard, clockIn, clockOut, createAssignment, deleteAssignment, listAssignments, listAssignmentsForEmployee } from "./phase1-data";
 import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
 import { getAssignmentDayOffCounts, isAssignmentDayOff } from "./assignment-days-off";
@@ -488,5 +488,69 @@ describe("guard authentication data rules", () => {
     ]);
     expect(assignmentsQuery.eq).toHaveBeenCalledWith("employee_id", "emp-1");
     expect(assignmentsQuery.order).toHaveBeenCalledWith("start_date", { ascending: false });
+  });
+
+  it("deletes empty work records before deleting an assignment", async () => {
+    const assignmentReadQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({
+        data: { employee_id: "emp-1", start_date: "2026-05-21", end_date: "2026-05-23" },
+        error: null,
+      }),
+    };
+    const workRecordCheckQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockResolvedValue({ data: [{ id: "record-1", work_intime: null, work_outtime: null }], error: null }),
+    };
+    const workRecordDeleteQuery = {
+      delete: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockResolvedValue({ error: null }),
+    };
+    const assignmentDeleteQuery = {
+      delete: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ error: null }),
+    };
+    const supabase = {
+      from: vi.fn()
+        .mockReturnValueOnce(assignmentReadQuery)
+        .mockReturnValueOnce(workRecordCheckQuery)
+        .mockReturnValueOnce(workRecordDeleteQuery)
+        .mockReturnValueOnce(assignmentDeleteQuery),
+    };
+
+    await expect(deleteAssignment("assign-1", supabase as never)).resolves.toBeUndefined();
+    expect(workRecordCheckQuery.select).toHaveBeenCalledWith("id,work_intime,work_outtime");
+    expect(workRecordDeleteQuery.delete).toHaveBeenCalled();
+    expect(assignmentDeleteQuery.delete).toHaveBeenCalled();
+  });
+
+  it("blocks assignment deletion when a work record has clock-in or clock-out data", async () => {
+    const assignmentReadQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({
+        data: { employee_id: "emp-1", start_date: "2026-05-21", end_date: "2026-05-23" },
+        error: null,
+      }),
+    };
+    const workRecordCheckQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockResolvedValue({ data: [{ id: "record-1", work_intime: "2026-05-21T00:00:00.000Z", work_outtime: null }], error: null }),
+    };
+    const supabase = {
+      from: vi.fn().mockReturnValueOnce(assignmentReadQuery).mockReturnValueOnce(workRecordCheckQuery),
+    };
+
+    await expect(deleteAssignment("assign-1", supabase as never)).rejects.toThrow(
+      "해당 기간에 출퇴근 자료가 있어서 삭제할 수 없습니다.",
+    );
+    expect(supabase.from).toHaveBeenCalledTimes(2);
   });
 });

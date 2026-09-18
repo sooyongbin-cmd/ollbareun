@@ -309,9 +309,9 @@ export default function AssignmentManagementClient() {
                       tabIndex={0}
                     >
                       <TableCell data-label="이름" className="text-muted-foreground">{assignment.employee_name}</TableCell>
-                      <TableCell data-label="근무지">{assignment.worksite_name}</TableCell>
-                      <TableCell data-label="날짜" className="font-semibold">{formatPeriod(assignment)}</TableCell>
-                      <TableCell data-label="휴무">{`${assignment.days_off_count ?? 0}일`}</TableCell>
+                      <TableCell data-label="근무지" className="text-muted-foreground">{assignment.worksite_name}</TableCell>
+                      <TableCell data-label="날짜" className="font-semibold text-muted-foreground">{formatPeriod(assignment)}</TableCell>
+                      <TableCell data-label="휴무" className="text-muted-foreground">{`${assignment.days_off_count ?? 0}일`}</TableCell>
                     </TableRow>
                   ))
                 )}

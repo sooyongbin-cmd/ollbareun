@@ -35,6 +35,8 @@ const bootstrap = {
     {
       employee_id: "emp-1",
       worksite_id: "work-1",
+      start_date: "2026-05-01",
+      end_date: "2026-05-24",
     },
   ],
   attendance: [],
@@ -75,13 +77,19 @@ describe("employee roster page", () => {
       "/manager/employee/employees/save/emp-1",
     );
     expect(screen.getByText("본사")).toBeInTheDocument();
-    expect(screen.getByText("현직")).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "배정기간" })).toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "상태" })).not.toBeInTheDocument();
+    expect(screen.getByText("2026-05-01~2026-05-24")).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Bob" })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("checkbox", { name: "퇴직" }));
     await user.type(screen.getByLabelText("이름"), "ob");
     expect(await screen.findByRole("link", { name: "Bob" })).toBeInTheDocument();
-    expect(within(screen.getByRole("table")).getByText("퇴직")).toBeInTheDocument();
+    const bobRow = screen.getByRole("link", { name: "Bob" }).closest("tr");
+    expect(bobRow).not.toBeNull();
+    const bobCells = within(bobRow as HTMLElement).getAllByRole("cell");
+    expect(bobCells[4]).toHaveTextContent("");
+    expect(bobCells[5]).toHaveTextContent("");
     expect(screen.queryByRole("link", { name: "Alice" })).not.toBeInTheDocument();
   });
 

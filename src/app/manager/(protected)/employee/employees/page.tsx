@@ -29,6 +29,8 @@ type Bootstrap = {
   assignments: {
     employee_id: string;
     worksite_id: string;
+    start_date: string;
+    end_date: string;
   }[];
   summary: {
     totalEmployees: number;
@@ -51,7 +53,7 @@ export default function EmployeeRosterPage() {
   const [nameQuery, setNameQuery] = useState("");
   const [roleQuery, setRoleQuery] = useState("");
   const [showRetired, setShowRetired] = useState(false);
-  const [sortKey, setSortKey] = useState<"name" | "phone" | "role" | "worksite" | "status">("name");
+  const [sortKey, setSortKey] = useState<"name" | "phone" | "role" | "worksite">("name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -126,8 +128,8 @@ export default function EmployeeRosterPage() {
     return new Map(data.worksites.map((worksite) => [worksite.id, worksite.name]));
   }, [data.worksites]);
 
-  const worksiteByEmployeeId = useMemo(() => {
-    return new Map(data.assignments.map((assignment) => [assignment.employee_id, assignment.worksite_id]));
+  const assignmentByEmployeeId = useMemo(() => {
+    return new Map(data.assignments.map((assignment) => [assignment.employee_id, assignment]));
   }, [data.assignments]);
 
   const sortedEmployees = useMemo(() => {
@@ -145,26 +147,20 @@ export default function EmployeeRosterPage() {
           ? left.role.localeCompare(right.role, "ko-KR")
           : right.role.localeCompare(left.role, "ko-KR");
       } else if (sortKey === "worksite") {
-        const leftWorksite = worksiteById.get(worksiteByEmployeeId.get(left.id) ?? "") ?? "";
-        const rightWorksite = worksiteById.get(worksiteByEmployeeId.get(right.id) ?? "") ?? "";
+        const leftWorksite = worksiteById.get(assignmentByEmployeeId.get(left.id)?.worksite_id ?? "") ?? "";
+        const rightWorksite = worksiteById.get(assignmentByEmployeeId.get(right.id)?.worksite_id ?? "") ?? "";
         if (leftWorksite === rightWorksite) {
           return left.name.localeCompare(right.name, "ko-KR");
         }
         return sortDirection === "asc"
           ? leftWorksite.localeCompare(rightWorksite, "ko-KR")
           : rightWorksite.localeCompare(leftWorksite, "ko-KR");
-      } else {
-        const leftVal = left.is_retired ? 1 : 0;
-        const rightVal = right.is_retired ? 1 : 0;
-        if (leftVal === rightVal) {
-          return left.name.localeCompare(right.name, "ko-KR");
-        }
-        return sortDirection === "asc" ? leftVal - rightVal : rightVal - leftVal;
       }
+      return left.name.localeCompare(right.name, "ko-KR");
     });
-  }, [filteredEmployees, sortKey, sortDirection, worksiteById, worksiteByEmployeeId]);
+  }, [assignmentByEmployeeId, filteredEmployees, sortKey, sortDirection, worksiteById]);
 
-  const handleSort = (key: "name" | "phone" | "role" | "worksite" | "status") => {
+  const handleSort = (key: "name" | "phone" | "role" | "worksite") => {
     if (sortKey === key) {
       setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
     } else {
@@ -301,15 +297,7 @@ export default function EmployeeRosterPage() {
                   >
                     근무지
                   </SortableHeader>
-                  <SortableHeader
-                    sortKey="status"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                    className="text-right"
-                  >
-                    상태
-                  </SortableHeader>
+                  <TableHead>배정기간</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -334,18 +322,12 @@ export default function EmployeeRosterPage() {
                       <TableCell data-label="직군" className="text-muted-foreground">{employee.role}</TableCell>
                       <TableCell data-label="근무형태" className="whitespace-nowrap text-muted-foreground">{employee.work_style === "0" ? "일반근무" : employee.work_style === "2" ? "야간근무" : "24시간근무"}</TableCell>
                       <TableCell data-label="근무지" className="text-muted-foreground">
-                        {worksiteById.get(worksiteByEmployeeId.get(employee.id) ?? "") ?? "-"}
+                        {worksiteById.get(assignmentByEmployeeId.get(employee.id)?.worksite_id ?? "") ?? ""}
                       </TableCell>
-                      <TableCell data-label="상태" className="text-right">
-                        <span
-                          className={`inline-flex rounded-full px-3 py-1 text-[0.75rem] font-semibold ${
-                            employee.is_retired
-                              ? "bg-foreground/10 text-muted-foreground"
-                              : "bg-primary/10 text-primary"
-                          }`}
-                        >
-                          {employee.is_retired ? "퇴직" : "현직"}
-                        </span>
+                      <TableCell data-label="배정기간" className="whitespace-nowrap text-muted-foreground">
+                        {assignmentByEmployeeId.has(employee.id)
+                          ? `${assignmentByEmployeeId.get(employee.id)?.start_date}~${assignmentByEmployeeId.get(employee.id)?.end_date}`
+                          : ""}
                       </TableCell>
                     </TableRow>
                   ))

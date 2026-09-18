@@ -46,8 +46,8 @@ type AttendanceRow = {
   employee_id: string;
   worksite_id: string;
   work_date: string;
-  clock_in_at: string | null;
-  clock_out_at: string | null;
+  work_intime: string | null;
+  work_outtime: string | null;
 };
 
 type GuardSession = {

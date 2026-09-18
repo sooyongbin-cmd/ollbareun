@@ -13,25 +13,45 @@ vi.mock("./supabase-admin", () => ({
 
 describe("manager reports", () => {
   it("inserts a new attendance record in KST with optional clock-out", async () => {
+    const existingQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+    };
     const single = vi.fn().mockResolvedValue({ data: { id: "new-1" }, error: null });
     const insert = vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ single }) });
-    vi.mocked(getSupabaseAdmin).mockReturnValue({ from: vi.fn().mockReturnValue({ insert }) } as never);
+    const from = vi.fn().mockReturnValue(existingQuery).mockReturnValueOnce(existingQuery).mockReturnValueOnce({ insert });
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from } as never);
     await createAttendanceRecord({ employeeId: "emp-1", worksiteId: "site-1", clockInDateTime: "2026-09-09T09:00", clockOutDateTime: "" });
-    expect(insert).toHaveBeenCalledWith({ employee_id: "emp-1", worksite_id: "site-1", work_date: "2026-09-09", clock_in_at: "2026-09-09T00:00:00.000Z", clock_out_at: null });
-    single.mockResolvedValue({ data: null, error: { code: "23505" } } as never);
+    expect(insert).toHaveBeenCalledWith({
+      employee_id: "emp-1",
+      worksite_id: "site-1",
+      work_date: "2026-09-09",
+      work_intime: "2026-09-09T00:00:00.000Z",
+      work_outtime: null,
+      intime_status: "2",
+      outtime_status: null,
+      updated_at: expect.any(String),
+    });
+    existingQuery.maybeSingle.mockResolvedValue({ data: { id: "existing", work_intime: "2026-09-09T00:00:00.000Z" }, error: null });
     await expect(createAttendanceRecord({ employeeId: "emp-1", worksiteId: "site-1", clockInDateTime: "2026-09-09T09:00", clockOutDateTime: "" })).rejects.toThrow("이미 있습니다");
     await expect(createAttendanceRecord({ employeeId: "emp-1", worksiteId: "site-1", clockInDateTime: "2026-09-09T09:00", clockOutDateTime: "2026-09-09T08:00" })).rejects.toThrow("이후여야");
   });
 
   it("does not update clock-out when it is omitted", async () => {
+    const existingQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { id: "attendance-1", intime: null, outtime: null, work_intime: "2026-09-09T00:00:00.000Z", work_outtime: null }, error: null }),
+    };
     const update = vi.fn().mockReturnValue({
       eq: vi.fn().mockReturnValue({
         select: vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: {}, error: null }) }),
       }),
     });
-    vi.mocked(getSupabaseAdmin).mockReturnValue({ from: vi.fn().mockReturnValue({ update }) } as never);
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from: vi.fn().mockReturnValueOnce(existingQuery).mockReturnValueOnce({ update }) } as never);
     await updateAttendanceRecord({ recordId: "attendance-1", clockInDateTime: "2026-09-09T09:00", clockOutDateTime: undefined });
-    expect(update.mock.calls[0][0]).not.toHaveProperty("clock_out_at");
+    expect(update.mock.calls[0][0]).not.toHaveProperty("work_outtime");
   });
 
   it("filters attendance by employee name and year and formats duration", () => {
@@ -49,26 +69,26 @@ describe("manager reports", () => {
           worksite_id: "site-1",
           employee_id: "emp-1",
           work_date: "2026-03-02",
-          clock_in_at: "2026-03-02T00:00:00.000Z",
-          clock_out_at: "2026-03-02T09:30:00.000Z",
+          work_intime: "2026-03-02T00:00:00.000Z",
+          work_outtime: "2026-03-02T09:30:00.000Z",
         },
         {
           id: "attendance-2",
           employee_id: "emp-2",
           work_date: "2026-03-02",
-          clock_in_at: "2026-03-02T00:00:00.000Z",
-          clock_out_at: null,
+          work_intime: "2026-03-02T00:00:00.000Z",
+          work_outtime: null,
         },
         {
           id: "attendance-3",
           employee_id: "emp-1",
           work_date: "2025-03-02",
-          clock_in_at: "2025-03-02T00:00:00.000Z",
-          clock_out_at: null,
+          work_intime: "2025-03-02T00:00:00.000Z",
+          work_outtime: null,
         },
       ],
       assignments: [{ id: "assignment-1", employee_id: "emp-1", worksite_id: "site-1" }],
-      dailyAttendance: [{ work_assignment_id: "assignment-1", work_date: "2026-03-02", intime: "2026-03-02T00:00:00.000Z" }],
+      dailyAttendance: [{ id: "attendance-1", employee_id: "emp-1", worksite_id: "site-1", work_date: "2026-03-02", intime: "2026-03-02T00:00:00.000Z" }],
     });
 
     expect(rows).toEqual([
@@ -92,8 +112,8 @@ describe("manager reports", () => {
       worksites: [{ id: "site-1", name: "본사" }],
       assignments: [{ id: "assignment-1", employee_id: "emp-1", worksite_id: "site-1" }],
       dailyAttendance: [
-        { work_assignment_id: "assignment-1", work_date: "2026-03-02", intime: "2026-03-02T00:00:00.000Z" },
-        { work_assignment_id: "assignment-1", work_date: "2026-03-03", intime: "2026-03-03T00:00:00.000Z" },
+        { id: "late-attendance", employee_id: "emp-1", worksite_id: "site-1", work_date: "2026-03-02", intime: "2026-03-02T00:00:00.000Z" },
+        { id: "on-time-attendance", employee_id: "emp-1", worksite_id: "site-1", work_date: "2026-03-03", intime: "2026-03-03T00:00:00.000Z" },
       ],
       attendance: [
         {
@@ -101,16 +121,16 @@ describe("manager reports", () => {
           worksite_id: "site-1",
           employee_id: "emp-1",
           work_date: "2026-03-02",
-          clock_in_at: "2026-03-02T00:01:00.000Z",
-          clock_out_at: null,
+          work_intime: "2026-03-02T00:01:00.000Z",
+          work_outtime: null,
         },
         {
           id: "on-time-attendance",
           worksite_id: "site-1",
           employee_id: "emp-1",
           work_date: "2026-03-03",
-          clock_in_at: "2026-03-03T00:00:00.000Z",
-          clock_out_at: null,
+          work_intime: "2026-03-03T00:00:00.000Z",
+          work_outtime: null,
         },
       ],
     });
@@ -137,9 +157,9 @@ describe("manager reports", () => {
       ],
       worksites: [{ id: "site-1", name: "본사" }],
       dailyAttendance: [
-        { work_assignment_id: "assignment-1", work_date: "2026-09-11", intime: "2026-09-10T21:00:00.000Z" },
-        { work_assignment_id: "assignment-2", work_date: "2026-09-11", intime: "2026-09-10T22:00:00.000Z" },
-        { work_assignment_id: "assignment-3", work_date: "2026-09-11", intime: "2026-09-10T21:00:00.000Z" },
+        { id: "attendance-1", employee_id: "emp-1", worksite_id: "site-1", work_date: "2026-09-11", intime: "2026-09-10T21:00:00.000Z" },
+        { id: "record-2", employee_id: "emp-2", worksite_id: "site-1", work_date: "2026-09-11", intime: "2026-09-10T22:00:00.000Z" },
+        { id: "record-3", employee_id: "emp-3", worksite_id: "site-1", work_date: "2026-09-11", intime: "2026-09-10T21:00:00.000Z" },
       ],
       attendance: [
         {
@@ -147,15 +167,15 @@ describe("manager reports", () => {
           employee_id: "emp-1",
           worksite_id: "site-1",
           work_date: "2026-09-11",
-          clock_in_at: "2026-09-10T21:05:00.000Z",
-          clock_out_at: null,
+          work_intime: "2026-09-10T21:05:00.000Z",
+          work_outtime: null,
         },
       ],
     });
 
     expect(rows).toEqual([
       {
-        id: "assignment-1",
+        id: "attendance-1",
         employeeName: "김철수",
         role: "경비원",
         worksiteName: "본사",
@@ -164,7 +184,7 @@ describe("manager reports", () => {
         status: "지각",
       },
       {
-        id: "assignment-2",
+        id: "record-2",
         employeeName: "이영희",
         role: "미화원",
         worksiteName: "본사",
@@ -190,8 +210,8 @@ describe("manager reports", () => {
         employee_id: "emp-1",
         worksite_id: "site-1",
         work_date: "2026-09-17",
-        clock_in_at: "2026-09-17T00:00:00.000Z",
-        clock_out_at: null,
+        work_intime: "2026-09-17T00:00:00.000Z",
+        work_outtime: null,
       }],
       error: null,
     });
@@ -202,17 +222,11 @@ describe("manager reports", () => {
     const assignmentsQuery = { select: vi.fn() };
     assignmentsQuery.select.mockResolvedValue({ data: [{ id: "assignment-1", employee_id: "emp-1", worksite_id: "site-1" }], error: null });
 
-    const dailyAttendanceQuery = { select: vi.fn(), gte: vi.fn(), lte: vi.fn() };
-    dailyAttendanceQuery.select.mockReturnValue(dailyAttendanceQuery);
-    dailyAttendanceQuery.gte.mockReturnValue(dailyAttendanceQuery);
-    dailyAttendanceQuery.lte.mockResolvedValue({ data: [], error: null });
-
     const from = vi.fn((table: string) => ({
       employees: employeesQuery,
-      attendance_records: attendanceQuery,
+      work_record: attendanceQuery,
       worksites: worksitesQuery,
       work_assignments: assignmentsQuery,
-      work_assignment_daily_attendance: dailyAttendanceQuery,
     })[table]);
     vi.mocked(getSupabaseAdmin).mockReturnValue({ from } as never);
     vi.mocked(getSupabase).mockClear();
@@ -222,7 +236,7 @@ describe("manager reports", () => {
     ]);
     expect(getSupabase).not.toHaveBeenCalled();
     expect(from).toHaveBeenCalledWith("employees");
-    expect(from).toHaveBeenCalledWith("attendance_records");
+    expect(from).toHaveBeenCalledWith("work_record");
   });
 
   it("shows an employee as waiting before the scheduled clock-in time", () => {
@@ -232,7 +246,7 @@ describe("manager reports", () => {
       employees: [{ id: "emp-1", name: "김철수", role: "경비원", is_retired: false }],
       assignments: [{ id: "assignment-1", employee_id: "emp-1", worksite_id: "site-1" }],
       worksites: [{ id: "site-1", name: "본사" }],
-      dailyAttendance: [{ work_assignment_id: "assignment-1", work_date: "2026-09-11", intime: "2026-09-11T01:00:00.000Z" }],
+      dailyAttendance: [{ id: "record-1", employee_id: "emp-1", worksite_id: "site-1", work_date: "2026-09-11", intime: "2026-09-11T01:00:00.000Z" }],
       attendance: [],
     });
 
@@ -244,27 +258,19 @@ describe("manager reports", () => {
   });
 
   it("loads attendance status through the admin client so RLS does not hide manager data", async () => {
-    const dailyAttendanceQuery = { select: vi.fn(), eq: vi.fn(), not: vi.fn() };
-    dailyAttendanceQuery.select.mockReturnValue(dailyAttendanceQuery);
-    dailyAttendanceQuery.eq.mockReturnValue(dailyAttendanceQuery);
-    dailyAttendanceQuery.not.mockResolvedValue({
-      data: [{ work_assignment_id: "assignment-1", work_date: "2026-09-17", intime: "2026-09-17T00:00:00.000Z" }],
-      error: null,
-    });
-
-    const attendanceQuery = { select: vi.fn(), eq: vi.fn() };
-    attendanceQuery.select.mockReturnValue(attendanceQuery);
-    attendanceQuery.eq.mockResolvedValue({
-      data: [{ id: "attendance-1", employee_id: "emp-1", worksite_id: "site-1", work_date: "2026-09-17", clock_in_at: "2026-09-17T00:00:00.000Z", clock_out_at: null }],
+    const workRecordQuery = { select: vi.fn(), eq: vi.fn() };
+    workRecordQuery.select.mockReturnValue(workRecordQuery);
+    workRecordQuery.eq.mockResolvedValue({
+      data: [{ id: "attendance-1", employee_id: "emp-1", worksite_id: "site-1", work_date: "2026-09-17", intime: "2026-09-17T00:00:00.000Z", work_intime: "2026-09-17T00:00:00.000Z", work_outtime: null }],
       error: null,
     });
 
     const from = vi.fn((table: string) => {
-      if (table === "work_assignment_daily_attendance") return dailyAttendanceQuery;
+      if (table === "work_record") return workRecordQuery;
       if (table === "work_assignments") return { select: vi.fn().mockResolvedValue({ data: [{ id: "assignment-1", employee_id: "emp-1", worksite_id: "site-1" }], error: null }) };
       if (table === "employees") return { select: vi.fn().mockResolvedValue({ data: [{ id: "emp-1", name: "김철수", role: "경비원", is_retired: false }], error: null }) };
       if (table === "worksites") return { select: vi.fn().mockResolvedValue({ data: [{ id: "site-1", name: "본사" }], error: null }) };
-      return attendanceQuery;
+      return workRecordQuery;
     });
 
     vi.mocked(getSupabaseAdmin).mockReturnValue({ from } as never);
@@ -275,7 +281,7 @@ describe("manager reports", () => {
     ]);
     expect(getSupabase).not.toHaveBeenCalled();
     expect(from).toHaveBeenCalledWith("employees");
-    expect(from).toHaveBeenCalledWith("attendance_records");
+    expect(from).toHaveBeenCalledWith("work_record");
   });
 
   it("computes education completion count per active employee", () => {
@@ -301,12 +307,17 @@ describe("manager reports", () => {
   });
 
   it("stores manager-entered KST clock-in and clock-out date-time values", async () => {
+    const existingQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { id: "attendance-1", intime: null, outtime: null, work_intime: null, work_outtime: null }, error: null }),
+    };
     const updateSingle = vi.fn().mockResolvedValue({
       data: {
         id: "attendance-1",
         work_date: "2026-06-04",
-        clock_in_at: "2026-06-03T23:30:00.000Z",
-        clock_out_at: "2026-06-04T10:00:00.000Z",
+        work_intime: "2026-06-03T23:30:00.000Z",
+        work_outtime: "2026-06-04T10:00:00.000Z",
       },
       error: null,
     });
@@ -315,7 +326,7 @@ describe("manager reports", () => {
         select: vi.fn().mockReturnValue({ single: updateSingle }),
       }),
     });
-    const from = vi.fn().mockReturnValue({ update });
+    const from = vi.fn().mockReturnValueOnce(existingQuery).mockReturnValueOnce({ update });
     vi.mocked(getSupabaseAdmin).mockReturnValue({ from } as never);
 
     await expect(
@@ -327,25 +338,32 @@ describe("manager reports", () => {
     ).resolves.toEqual({
       id: "attendance-1",
       work_date: "2026-06-04",
-      clock_in_at: "2026-06-03T23:30:00.000Z",
-      clock_out_at: "2026-06-04T10:00:00.000Z",
+      work_intime: "2026-06-03T23:30:00.000Z",
+      work_outtime: "2026-06-04T10:00:00.000Z",
     });
 
     expect(update).toHaveBeenCalledWith({
       work_date: "2026-06-04",
-      clock_in_at: "2026-06-03T23:30:00.000Z",
-      clock_out_at: "2026-06-04T10:00:00.000Z",
+      work_intime: "2026-06-03T23:30:00.000Z",
+      work_outtime: "2026-06-04T10:00:00.000Z",
+      intime_status: "3",
+      outtime_status: null,
       updated_at: expect.any(String),
     });
   });
 
   it("allows clearing the clock-out date-time", async () => {
+    const existingQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { id: "attendance-1", intime: null, outtime: null, work_intime: "2026-06-04T00:00:00.000Z", work_outtime: "2026-06-04T10:00:00.000Z" }, error: null }),
+    };
     const updateSingle = vi.fn().mockResolvedValue({
       data: {
         id: "attendance-1",
         work_date: "2026-06-04",
-        clock_in_at: "2026-06-04T00:00:00.000Z",
-        clock_out_at: null,
+        work_intime: "2026-06-04T00:00:00.000Z",
+        work_outtime: null,
       },
       error: null,
     });
@@ -354,7 +372,7 @@ describe("manager reports", () => {
         select: vi.fn().mockReturnValue({ single: updateSingle }),
       }),
     });
-    vi.mocked(getSupabaseAdmin).mockReturnValue({ from: vi.fn().mockReturnValue({ update }) } as never);
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from: vi.fn().mockReturnValueOnce(existingQuery).mockReturnValueOnce({ update }) } as never);
 
     await updateAttendanceRecord({
       recordId: "attendance-1",
@@ -364,8 +382,10 @@ describe("manager reports", () => {
 
     expect(update).toHaveBeenCalledWith({
       work_date: "2026-06-04",
-      clock_in_at: "2026-06-04T00:00:00.000Z",
-      clock_out_at: null,
+      work_intime: "2026-06-04T00:00:00.000Z",
+      work_outtime: null,
+      intime_status: "2",
+      outtime_status: null,
       updated_at: expect.any(String),
     });
   });

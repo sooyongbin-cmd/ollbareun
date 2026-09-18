@@ -57,8 +57,8 @@ describe("/api/manager/reports/attendance", () => {
   it("saves the manager-entered clock-in and clock-out date-time values", async () => {
     vi.mocked(updateAttendanceRecord).mockResolvedValue({
       id: "attendance-1",
-      clock_in_at: "2026-06-03T23:30:00.000Z",
-      clock_out_at: "2026-06-04T10:00:00.000Z",
+      work_intime: "2026-06-03T23:30:00.000Z",
+      work_outtime: "2026-06-04T10:00:00.000Z",
     } as never);
 
     const response = await PATCH(

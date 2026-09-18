@@ -21,8 +21,8 @@ type AttendanceRow = {
   id: string;
   employee_id: string;
   worksite_id: string;
-  clock_in_at: string | null;
-  clock_out_at: string | null;
+  work_intime: string | null;
+  work_outtime: string | null;
 };
 
 type WorksiteRow = {
@@ -155,8 +155,8 @@ export default function GuardAttendanceSection() {
       id: attendance.id,
       employeeId: attendance.employee_id,
       worksiteId: attendance.worksite_id,
-      clockInAt: attendance.clock_in_at!,
-      clockOutAt: attendance.clock_out_at,
+      clockInAt: attendance.work_intime!,
+      clockOutAt: attendance.work_outtime,
     };
 
     const decision = canClockOut(record);
@@ -184,8 +184,8 @@ export default function GuardAttendanceSection() {
     }
   }
 
-  const isClockedIn = !!attendance?.clock_in_at;
-  const isClockedOut = !!attendance?.clock_out_at;
+  const isClockedIn = !!attendance?.work_intime;
+  const isClockedOut = !!attendance?.work_outtime;
 
   return (
     <section className="mb-6 bg-background rounded-xl p-6 border border-border shadow-sm space-y-5">
@@ -194,11 +194,11 @@ export default function GuardAttendanceSection() {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
           <p className="text-[0.75rem] text-muted-foreground">출근 시각</p>
-          <p className="text-[1.25rem] font-bold text-foreground">{formatTime(attendance?.clock_in_at)}</p>
+          <p className="text-[1.25rem] font-bold text-foreground">{formatTime(attendance?.work_intime)}</p>
         </div>
         <div className="space-y-1">
           <p className="text-[0.75rem] text-muted-foreground">퇴근 시각</p>
-          <p className="text-[1.25rem] font-bold text-foreground">{formatTime(attendance?.clock_out_at)}</p>
+          <p className="text-[1.25rem] font-bold text-foreground">{formatTime(attendance?.work_outtime)}</p>
         </div>
       </div>
 

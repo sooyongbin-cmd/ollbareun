@@ -1,6 +1,6 @@
 export type AttendanceTimes = {
-  clock_in_at?: string | null;
-  clock_out_at?: string | null;
+  work_intime?: string | null;
+  work_outtime?: string | null;
 };
 
 function seoulDate(value: string | Date) {
@@ -10,8 +10,8 @@ function seoulDate(value: string | Date) {
 
 export function getAttendanceStatus(attendance?: AttendanceTimes | null) {
   const today = seoulDate(new Date());
-  const clockIn = attendance?.clock_in_at;
-  const clockOut = attendance?.clock_out_at;
+  const clockIn = attendance?.work_intime;
+  const clockOut = attendance?.work_outtime;
   const isOpen = Boolean(clockIn && !clockOut);
   const clockedInToday = Boolean(clockIn && seoulDate(clockIn) === today);
   const clockedOutToday = Boolean(clockOut && seoulDate(clockOut) === today);

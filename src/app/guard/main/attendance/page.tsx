@@ -41,8 +41,8 @@ type AttendanceRow = {
   employee_id: string;
   worksite_id: string;
   work_date: string;
-  clock_in_at: string | null;
-  clock_out_at: string | null;
+  work_intime: string | null;
+  work_outtime: string | null;
 };
 
 type GuardSession = {
@@ -75,7 +75,7 @@ function asWorksite(row: WorksiteRow): Worksite {
 }
 
 function asAttendance(row: AttendanceRow | null): AttendanceRecord | null {
-  if (!row?.clock_in_at) {
+  if (!row?.work_intime) {
     return null;
   }
 
@@ -83,8 +83,8 @@ function asAttendance(row: AttendanceRow | null): AttendanceRecord | null {
     id: row.id,
     employeeId: row.employee_id,
     worksiteId: row.worksite_id,
-    clockInAt: row.clock_in_at,
-    clockOutAt: row.clock_out_at,
+    clockInAt: row.work_intime,
+    clockOutAt: row.work_outtime,
   };
 }
 
@@ -406,10 +406,10 @@ export default function GuardAttendancePage() {
     );
   }
 
-  const clockInTime = guard.attendance?.clock_in_at
-    ? formatAttendanceTime(guard.attendance.clock_in_at)
+  const clockInTime = guard.attendance?.work_intime
+    ? formatAttendanceTime(guard.attendance.work_intime)
     : "미등록 (출근 전)";
-  const clockOutTime = formatAttendanceTime(guard.attendance?.clock_out_at);
+  const clockOutTime = formatAttendanceTime(guard.attendance?.work_outtime);
   const worksiteName = guard.worksite?.name ?? "근무지 미배정";
 
   return (

@@ -1,4 +1,3 @@
-import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
 
 export type GuardProfileScheduleInput = {
@@ -19,8 +18,8 @@ export type GuardProfileWorksiteInput = {
 export type GuardProfileAttendanceInput = {
   employee_id: string;
   work_date: string;
-  clock_in_at: string | null;
-  clock_out_at: string | null;
+  work_intime: string | null;
+  work_outtime: string | null;
 };
 
 export type GuardProfileScheduledAttendanceInput = {
@@ -214,7 +213,7 @@ export function buildGuardProfile(input: {
         record.employee_id === input.employeeId &&
         record.work_date >= startDate &&
         record.work_date <= endDate &&
-        Boolean(record.clock_in_at),
+        Boolean(record.work_intime),
     )
     .sort((left, right) => left.work_date.localeCompare(right.work_date));
 
@@ -222,24 +221,24 @@ export function buildGuardProfile(input: {
       const yearMonth = record.work_date.slice(0, 7);
       const monthlyRow = monthlyRows.get(yearMonth) ?? { attendanceDates: new Set<string>(), workMinutes: 0 };
       monthlyRow.attendanceDates.add(record.work_date);
-      monthlyRow.workMinutes += durationMinutes(record.clock_in_at, record.clock_out_at);
+      monthlyRow.workMinutes += durationMinutes(record.work_intime, record.work_outtime);
       monthlyRows.set(yearMonth, monthlyRow);
   });
 
   const attendanceDetails = attendanceForEmployee.map((record) => {
     const schedule = getScheduleForDate(input.schedules, record.work_date);
     const expectedInTime = schedule?.in_time;
-    const actualInTimestamp = record.clock_in_at ? new Date(record.clock_in_at).getTime() : Number.NaN;
+    const actualInTimestamp = record.work_intime ? new Date(record.work_intime).getTime() : Number.NaN;
     const expectedInTimestamp = expectedInTime ? seoulTimestamp(record.work_date, expectedInTime) : Number.NaN;
     const isLate = Number.isFinite(actualInTimestamp) && Number.isFinite(expectedInTimestamp)
       ? actualInTimestamp > expectedInTimestamp
       : false;
-    const clockIn = formatSeoulTime(record.clock_in_at);
-    const clockOut = record.clock_out_at ? formatSeoulTime(record.clock_out_at) : "진행 중";
+    const clockIn = formatSeoulTime(record.work_intime);
+    const clockOut = record.work_outtime ? formatSeoulTime(record.work_outtime) : "진행 중";
 
     return {
       workDate: record.work_date,
-      status: record.clock_out_at ? (isLate ? "지각 출근" : "정상 출근") : "출근 중",
+      status: record.work_outtime ? (isLate ? "지각 출근" : "정상 출근") : "출근 중",
       timeRange: `(${clockIn}~${clockOut})`,
     } as GuardProfileAttendanceDetail;
   });
@@ -336,7 +335,7 @@ export function buildGuardProfile(input: {
 export async function loadGuardProfile(employeeIdInput: unknown) {
   const employeeId = requireEmployeeId(employeeIdInput);
   const { startDate, endDate } = getRecentOneYearDateRange();
-  const supabase = getSupabase();
+  const supabase = getSupabaseAdmin();
 
   const [schedulesResult, worksitesResult, attendanceResult] = await Promise.all([
     supabase
@@ -346,8 +345,8 @@ export async function loadGuardProfile(employeeIdInput: unknown) {
       .order("start_date", { ascending: true }),
     supabase.from("worksites").select("id,name"),
     supabase
-      .from("attendance_records")
-      .select("employee_id,work_date,clock_in_at,clock_out_at")
+      .from("work_record")
+      .select("employee_id,work_date,work_intime,work_outtime")
       .eq("employee_id", employeeId)
       .gte("work_date", startDate)
       .lte("work_date", endDate)
@@ -364,9 +363,11 @@ export async function loadGuardProfile(employeeIdInput: unknown) {
   const [scheduledAttendanceResult, daysOffResult] = assignmentIds.length
     ? await Promise.all([
         scheduleDataClient
-          .from("work_assignment_daily_attendance")
-          .select("work_assignment_id,work_date,intime,outtime")
-          .in("work_assignment_id", assignmentIds)
+          .from("work_record")
+          .select("employee_id,worksite_id,work_date,intime,outtime")
+          .eq("employee_id", employeeId)
+          .gte("work_date", startDate)
+          .lte("work_date", endDate)
           .order("work_date", { ascending: true }),
         scheduleDataClient
           .from("work_assignment_days_off")
@@ -384,7 +385,22 @@ export async function loadGuardProfile(employeeIdInput: unknown) {
   // not been backfilled yet.
   const scheduledAttendance = scheduledAttendanceResult.error
     ? []
-    : (scheduledAttendanceResult.data ?? []) as GuardProfileScheduledAttendanceInput[];
+    : (scheduledAttendanceResult.data ?? [])
+      .map((record) => {
+        const assignment = scheduleInputs.find(
+          (candidate) => candidate.employee_id === record.employee_id
+            && candidate.worksite_id === record.worksite_id
+            && candidate.start_date <= record.work_date
+            && candidate.end_date >= record.work_date,
+        );
+        return assignment ? {
+          work_assignment_id: assignment.id,
+          work_date: record.work_date,
+          intime: record.intime,
+          outtime: record.outtime,
+        } : null;
+      })
+      .filter((record): record is GuardProfileScheduledAttendanceInput => Boolean(record));
   const daysOff = daysOffResult.error ? [] : (daysOffResult.data ?? []) as GuardProfileDayOffInput[];
 
   return buildGuardProfile({

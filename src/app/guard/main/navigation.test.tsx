@@ -388,8 +388,8 @@ describe("guard main navigation", () => {
         employee_id: "employee-1",
         worksite_id: "worksite-1",
         work_date: today,
-        clock_in_at: `${today}T08:00:00+09:00`,
-        clock_out_at: `${today}T17:00:00+09:00`,
+        work_intime: `${today}T08:00:00+09:00`,
+        work_outtime: `${today}T17:00:00+09:00`,
       },
     };
     window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(sessionWithAttendance));
@@ -679,8 +679,8 @@ describe("guard main navigation", () => {
           employee_id: "employee-1",
           worksite_id: "worksite-1",
           work_date: "2026-05-24",
-          clock_in_at: "2026-05-24T08:00:00Z",
-          clock_out_at: null,
+          work_intime: "2026-05-24T08:00:00Z",
+          work_outtime: null,
         },
       }),
     );

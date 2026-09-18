@@ -246,7 +246,7 @@ header와 contents는 각각 좌우 padding 20px를 한 번만 적용한다. 첫
 | 기준 날짜 | `attendance.work_date`, 서울 기준 오늘 날짜 | 미종료 근무가 있으면 근무 기록 날짜 우선 |
 | 배정기간 | `assignment.start_date`, `end_date` | 하루 근무시간과 구분, 상세 정보에 사용 |
 | 예정 근무 시작·종료 시각 | 확인한 `AssignmentRow`, `WorksiteRow`, 세션 타입에 없음 | 데이터 공급 방식이 결정되기 전에는 `근무시간 미등록` 등의 명시적 대체 문구 제안 |
-| 실제 출퇴근 시각 | `attendance.clock_in_at`, `clock_out_at` | 예정 시간으로 오인하여 대체하지 않음 |
+| 실제 출퇴근 시각 | `attendance.work_intime`, `work_outtime` | 예정 시간으로 오인하여 대체하지 않음 |
 | 휴무 여부 | `session.isDayOff` | 상태 표현에 반영 |
 | 출퇴근 상태 | `getAttendanceStatus()` | 기존 열린 근무·당일 완료 판정 재사용 |
 

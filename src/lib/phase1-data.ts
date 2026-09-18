@@ -38,7 +38,8 @@ export type AssignmentRow = {
 
 export type ScheduledAttendanceRow = {
   id: string;
-  work_assignment_id: string;
+  employee_id: string;
+  worksite_id: string;
   work_date: string;
   intime: string | null;
   outtime: string | null;
@@ -61,10 +62,14 @@ export type AttendanceRow = {
   employee_id: string;
   worksite_id: string;
   work_date: string;
-  clock_in_at: string | null;
+  intime: string | null;
+  outtime: string | null;
+  work_intime: string | null;
+  work_outtime: string | null;
+  intime_status: "0" | "1" | "2" | "3";
+  outtime_status: "4" | null;
   clock_in_latitude: number | null;
   clock_in_longitude: number | null;
-  clock_out_at: string | null;
   clock_out_latitude: number | null;
   clock_out_longitude: number | null;
   created_at: string;
@@ -149,7 +154,7 @@ export async function loadBootstrap() {
         .gte("end_date", todayDate())
         .order("created_at", { ascending: false }),
       supabase
-        .from("attendance_records")
+        .from("work_record")
         .select("*")
         .eq("work_date", todayDate())
         .order("created_at", { ascending: false }),
@@ -171,7 +176,7 @@ export async function loadBootstrap() {
     summary: {
       totalEmployees: employees.length,
       currentlyClockedIn: attendance.filter(
-        (record) => record.clock_in_at && !record.clock_out_at,
+        (record) => record.work_intime && !record.work_outtime,
       ).length,
     },
   };
@@ -459,11 +464,35 @@ export async function updateAssignment(input: {
     .single();
 
   throwIfAssignmentWriteError(error);
+  const { error: scheduleError } = await supabase.rpc("generate_assignment_daily_attendance", {
+    p_assignment_id: id,
+  });
+  throwIfError(scheduleError);
   return data as AssignmentRow;
 }
 
 export async function deleteAssignment(id: unknown, supabase: SupabaseClient = getSupabase()) {
   const assignmentId = requireString(id, "배정");
+  const { data: assignment, error: assignmentError } = await supabase
+    .from("work_assignments")
+    .select("employee_id,start_date,end_date")
+    .eq("id", assignmentId)
+    .single();
+  throwIfError(assignmentError);
+  if (!assignment) {
+    throw new Error("배정 정보를 찾을 수 없습니다.");
+  }
+
+  const { error: recordError } = await supabase
+    .from("work_record")
+    .delete()
+    .eq("employee_id", assignment.employee_id)
+    .gte("work_date", assignment.start_date)
+    .lte("work_date", assignment.end_date)
+    .is("work_intime", null)
+    .is("work_outtime", null);
+  throwIfError(recordError);
+
   const { error } = await supabase.from("work_assignments").delete().eq("id", assignmentId);
 
   throwIfError(error);
@@ -522,9 +551,10 @@ async function loadGuardSessionByEmployee(employee: EmployeeRow) {
   let scheduledAttendances: ScheduledAttendanceRow[] = [];
   if (assignment) {
     const scheduledAttendanceResult = await supabase
-      .from("work_assignment_daily_attendance")
-      .select("id,work_assignment_id,work_date,intime,outtime")
-      .eq("work_assignment_id", assignment.id)
+      .from("work_record")
+      .select("id,employee_id,worksite_id,work_date,intime,outtime")
+      .eq("employee_id", assignment.employee_id)
+      .eq("worksite_id", assignment.worksite_id)
       .eq("work_date", todayDate())
       .order("intime", { ascending: false });
 
@@ -544,11 +574,12 @@ async function loadGuardSessionByEmployee(employee: EmployeeRow) {
 
 async function findLatestOpenAttendance(supabase: SupabaseClient, employeeId: string) {
   const { data, error } = await supabase
-    .from("attendance_records")
+    .from("work_record")
     .select("*")
     .eq("employee_id", employeeId)
-    .is("clock_out_at", null)
-    .order("clock_in_at", { ascending: false })
+    .not("work_intime", "is", null)
+    .is("work_outtime", null)
+    .order("work_intime", { ascending: false })
     .limit(1)
     .maybeSingle();
 
@@ -558,7 +589,7 @@ async function findLatestOpenAttendance(supabase: SupabaseClient, employeeId: st
 
 async function findTodayAttendance(supabase: SupabaseClient, employeeId: string) {
   const { data, error } = await supabase
-    .from("attendance_records")
+    .from("work_record")
     .select("*")
     .eq("employee_id", employeeId)
     .eq("work_date", todayDate())
@@ -649,25 +680,42 @@ export async function clockIn(input: {
     throw new Error(decision.reason);
   }
 
-  const { data, error } = await supabase
-    .from("attendance_records")
-    .upsert(
-      {
-        employee_id,
-        worksite_id,
-        work_date: todayDate(),
-        clock_in_at: new Date().toISOString(),
-        clock_in_latitude: latitude,
-        clock_in_longitude: longitude,
-        clock_out_at: null,
-        clock_out_latitude: null,
-        clock_out_longitude: null,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "employee_id,work_date" },
-    )
-    .select("*")
-    .single();
+  const { data: existingRecord, error: existingRecordError } = await supabase
+    .from("work_record")
+    .select("id,intime,outtime,work_intime,work_outtime")
+    .eq("employee_id", employee_id)
+    .eq("work_date", todayDate())
+    .maybeSingle();
+
+  throwIfError(existingRecordError);
+  if (existingRecord?.work_intime) {
+    throw new Error("이미 출근 처리되었습니다.");
+  }
+
+  const work_intime = new Date().toISOString();
+  const intime_status = existingRecord?.intime && work_intime > existingRecord.intime ? "1" : "2";
+  const recordValues = {
+    employee_id,
+    worksite_id,
+    work_date: todayDate(),
+    work_intime,
+    intime_status,
+    clock_in_latitude: latitude,
+    clock_in_longitude: longitude,
+    updated_at: new Date().toISOString(),
+  };
+  const { data, error } = existingRecord
+    ? await supabase
+      .from("work_record")
+      .update(recordValues)
+      .eq("id", existingRecord.id)
+      .select("*")
+      .single()
+    : await supabase
+      .from("work_record")
+      .insert(recordValues)
+      .select("*")
+      .single();
 
   throwIfError(error);
   return data as AttendanceRow;
@@ -687,13 +735,13 @@ export async function clockOut(input: {
 
   const attendance = await findLatestOpenAttendance(supabase, employee_id);
 
-  const attendanceRecord = attendance?.clock_in_at
+  const attendanceRecord = attendance?.work_intime
     ? {
         id: attendance.id,
         employeeId: attendance.employee_id,
         worksiteId: attendance.worksite_id,
-        clockInAt: attendance.clock_in_at,
-        clockOutAt: attendance.clock_out_at,
+        clockInAt: attendance.work_intime,
+        clockOutAt: attendance.work_outtime,
       }
     : null;
   const decision = canClockOut(attendanceRecord);
@@ -731,10 +779,14 @@ export async function clockOut(input: {
     throw new Error(locationDecision.reason);
   }
 
+  const work_outtime = new Date().toISOString();
+  const isEarlyDeparture = Boolean(attendance.outtime && work_outtime < attendance.outtime);
   const { data, error } = await supabase
-    .from("attendance_records")
+    .from("work_record")
     .update({
-      clock_out_at: new Date().toISOString(),
+      work_outtime,
+      intime_status: isEarlyDeparture ? attendance.intime_status : "3",
+      outtime_status: isEarlyDeparture ? "4" : null,
       clock_out_latitude: latitude,
       clock_out_longitude: longitude,
       updated_at: new Date().toISOString(),

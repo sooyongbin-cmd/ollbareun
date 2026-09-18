@@ -14,8 +14,10 @@ type AttendanceInput = {
   worksite_id?: string | null;
   employee_id: string;
   work_date: string;
-  clock_in_at: string | null;
-  clock_out_at: string | null;
+  intime?: string | null;
+  outtime?: string | null;
+  work_intime: string | null;
+  work_outtime: string | null;
 };
 
 type AssignmentInput = {
@@ -25,9 +27,12 @@ type AssignmentInput = {
 };
 
 type DailyAttendanceInput = {
-  work_assignment_id: string;
+  id?: string;
+  employee_id: string;
+  worksite_id: string;
   work_date: string;
   intime: string | null;
+  outtime?: string | null;
 };
 
 type AttendanceStatusEmployeeInput = EmployeeInput & {
@@ -132,7 +137,6 @@ export function buildAttendanceReport(input: {
   );
   const employeeNamesById = new Map(input.employees.map((employee) => [employee.id, employee.name]));
   const worksiteNamesById = new Map((input.worksites ?? []).map((worksite) => [worksite.id, worksite.name]));
-  const assignmentsById = new Map((input.assignments ?? []).map((assignment) => [assignment.id, assignment]));
   const scheduledClockIns = new Map<string, string>();
 
   (input.dailyAttendance ?? []).forEach((dailyAttendance) => {
@@ -140,22 +144,17 @@ export function buildAttendanceReport(input: {
       return;
     }
 
-    const assignment = assignmentsById.get(dailyAttendance.work_assignment_id);
-    if (!assignment) {
-      return;
-    }
-
     scheduledClockIns.set(
-      `${assignment.employee_id}:${assignment.worksite_id}:${dailyAttendance.work_date}`,
+      `${dailyAttendance.employee_id}:${dailyAttendance.worksite_id}:${dailyAttendance.work_date}`,
       dailyAttendance.intime,
     );
   });
 
   return input.attendance
-    .filter((record) => record.work_date.startsWith(`${input.year}-`) && employeeIds.has(record.employee_id))
+    .filter((record) => record.work_date.startsWith(`${input.year}-`) && employeeIds.has(record.employee_id) && record.work_intime)
     .sort((left, right) => left.work_date.localeCompare(right.work_date))
     .map((record) => {
-      const clockInTimestamp = record.clock_in_at ? new Date(record.clock_in_at).getTime() : Number.NaN;
+      const clockInTimestamp = record.work_intime ? new Date(record.work_intime).getTime() : Number.NaN;
       const scheduledClockIn = scheduledClockIns.get(
         `${record.employee_id}:${record.worksite_id ?? ""}:${record.work_date}`,
       );
@@ -165,9 +164,9 @@ export function buildAttendanceReport(input: {
         id: record.id,
         worksiteName: worksiteNamesById.get(record.worksite_id ?? "") ?? "-",
         employeeName: employeeNamesById.get(record.employee_id) ?? "-",
-        clockInDateTime: toKstDateTime(record.clock_in_at)?.dateTime ?? "-",
-        clockOutDateTime: toKstDateTime(record.clock_out_at)?.dateTime ?? null,
-        workDuration: durationLabel(record.clock_in_at, record.clock_out_at),
+        clockInDateTime: toKstDateTime(record.work_intime)?.dateTime ?? "-",
+        clockOutDateTime: toKstDateTime(record.work_outtime)?.dateTime ?? null,
+        workDuration: durationLabel(record.work_intime, record.work_outtime),
         isLate: Number.isFinite(clockInTimestamp) && Number.isFinite(scheduledClockInTimestamp)
           && clockInTimestamp > scheduledClockInTimestamp,
       };
@@ -202,7 +201,6 @@ export function buildAttendanceStatus(input: {
   assertDate(input.date);
   const nowTimestamp = (input.now ?? new Date()).getTime();
 
-  const assignmentsById = new Map(input.assignments.map((assignment) => [assignment.id, assignment]));
   const employeesById = new Map(input.employees.map((employee) => [employee.id, employee]));
   const worksitesById = new Map(input.worksites.map((worksite) => [worksite.id, worksite.name]));
   const attendanceByEmployeeAndWorksite = new Map(
@@ -213,18 +211,17 @@ export function buildAttendanceStatus(input: {
   return input.dailyAttendance
     .filter((dailyAttendance) => dailyAttendance.work_date === input.date && dailyAttendance.intime)
     .flatMap((dailyAttendance) => {
-      const assignment = assignmentsById.get(dailyAttendance.work_assignment_id);
-      const employee = assignment ? employeesById.get(assignment.employee_id) : undefined;
-      if (!assignment || !employee || employee.is_retired) {
+      const employee = employeesById.get(dailyAttendance.employee_id);
+      if (!employee || employee.is_retired) {
         return [];
       }
 
       const attendance =
-        attendanceByEmployeeAndWorksite.get(`${assignment.employee_id}:${assignment.worksite_id}`)
-        ?? attendanceByEmployee.get(assignment.employee_id);
-      const clockIn = attendance?.clock_in_at ? toKstDateTime(attendance.clock_in_at) : null;
+        attendanceByEmployeeAndWorksite.get(`${dailyAttendance.employee_id}:${dailyAttendance.worksite_id}`)
+        ?? attendanceByEmployee.get(dailyAttendance.employee_id);
+      const clockIn = attendance?.work_intime ? toKstDateTime(attendance.work_intime) : null;
       const scheduledTimestamp = new Date(dailyAttendance.intime as string).getTime();
-      const clockInTimestamp = attendance?.clock_in_at ? new Date(attendance.clock_in_at).getTime() : Number.NaN;
+      const clockInTimestamp = attendance?.work_intime ? new Date(attendance.work_intime).getTime() : Number.NaN;
       const status: AttendanceStatusRow["status"] = !Number.isFinite(clockInTimestamp)
         ? Number.isFinite(scheduledTimestamp) && scheduledTimestamp >= nowTimestamp ? "대기" : "결근"
         : Number.isFinite(scheduledTimestamp) && clockInTimestamp > scheduledTimestamp
@@ -232,10 +229,10 @@ export function buildAttendanceStatus(input: {
           : "출근";
 
       return [{
-        id: dailyAttendance.work_assignment_id,
+        id: dailyAttendance.id ?? `${dailyAttendance.employee_id}:${dailyAttendance.work_date}`,
         employeeName: employee.name,
         role: employee.role ?? "-",
-        worksiteName: worksitesById.get(assignment.worksite_id) ?? "-",
+        worksiteName: worksitesById.get(dailyAttendance.worksite_id) ?? "-",
         scheduledClockIn: toKstDateTime(dailyAttendance.intime)?.time ?? "-",
         clockInTime: clockIn?.time ?? null,
         status,
@@ -266,6 +263,23 @@ function kstDateTimeLocalToIso(value: unknown, label: string) {
   return date.toISOString();
 }
 
+function getAttendanceStatuses(input: {
+  scheduledIn: string | null | undefined;
+  scheduledOut: string | null | undefined;
+  workIn: string;
+  workOut: string | null;
+}) {
+  const isLate = Boolean(input.scheduledIn && new Date(input.workIn).getTime() > new Date(input.scheduledIn).getTime());
+  const isEarlyDeparture = Boolean(
+    input.workOut && input.scheduledOut && new Date(input.workOut).getTime() < new Date(input.scheduledOut).getTime(),
+  );
+
+  return {
+    intime_status: input.workOut && !isEarlyDeparture ? "3" : isLate ? "1" : "2",
+    outtime_status: isEarlyDeparture ? "4" : null,
+  } as const;
+}
+
 export async function updateAttendanceRecord(input: {
   recordId: unknown;
   clockInDateTime: unknown;
@@ -285,16 +299,34 @@ export async function updateAttendanceRecord(input: {
   }
 
   const supabase = getSupabaseAdmin();
+  const { data: existing, error: existingError } = await supabase
+    .from("work_record")
+    .select("id,intime,outtime,work_intime,work_outtime")
+    .eq("id", input.recordId)
+    .single();
+  throwIfError(existingError);
+  if (!existing) {
+    throw new Error("근태 기록을 확인할 수 없습니다.");
+  }
+
+  const nextWorkOuttime = input.clockOutDateTime !== undefined ? clockOutAt : existing.work_outtime;
+  const statuses = getAttendanceStatuses({
+    scheduledIn: existing.intime,
+    scheduledOut: existing.outtime,
+    workIn: clockInAt,
+    workOut: nextWorkOuttime,
+  });
   const { data, error } = await supabase
-    .from("attendance_records")
+    .from("work_record")
     .update({
       work_date: String(input.clockInDateTime).slice(0, 10),
-      clock_in_at: clockInAt,
-      ...(input.clockOutDateTime !== undefined ? { clock_out_at: clockOutAt } : {}),
+      work_intime: clockInAt,
+      ...(input.clockOutDateTime !== undefined ? { work_outtime: clockOutAt } : {}),
+      ...statuses,
       updated_at: new Date().toISOString(),
     })
     .eq("id", input.recordId)
-    .select("id,work_date,clock_in_at,clock_out_at")
+    .select("id,work_date,work_intime,work_outtime")
     .single();
 
   throwIfError(error);
@@ -315,13 +347,37 @@ export async function createAttendanceRecord(input: {
   if (clockOutAt && new Date(clockOutAt).getTime() < new Date(clockInAt).getTime()) {
     throw new Error("퇴근일시는 출근일시 이후여야 합니다.");
   }
-  const { data, error } = await getSupabaseAdmin().from("attendance_records").insert({
+  const supabase = getSupabaseAdmin();
+  const workDate = String(input.clockInDateTime).slice(0, 10);
+  const { data: existing, error: existingError } = await supabase
+    .from("work_record")
+    .select("id,intime,outtime,work_intime")
+    .eq("employee_id", input.employeeId)
+    .eq("work_date", workDate)
+    .maybeSingle();
+  throwIfError(existingError);
+  if (existing?.work_intime) {
+    throw new Error("해당 직원의 같은 날짜 출근 기록이 이미 있습니다.");
+  }
+
+  const statuses = getAttendanceStatuses({
+    scheduledIn: existing?.intime,
+    scheduledOut: existing?.outtime,
+    workIn: clockInAt,
+    workOut: clockOutAt,
+  });
+  const recordValues = {
     employee_id: input.employeeId,
     worksite_id: input.worksiteId,
-    work_date: String(input.clockInDateTime).slice(0, 10),
-    clock_in_at: clockInAt,
-    clock_out_at: clockOutAt,
-  }).select("id").single();
+    work_date: workDate,
+    work_intime: clockInAt,
+    work_outtime: clockOutAt,
+    ...statuses,
+    updated_at: new Date().toISOString(),
+  };
+  const { data, error } = existing
+    ? await supabase.from("work_record").update(recordValues).eq("id", existing.id).select("id").single()
+    : await supabase.from("work_record").insert(recordValues).select("id").single();
   if (error?.code === "23505") throw new Error("해당 직원의 같은 날짜 출근 기록이 이미 있습니다.");
   throwIfError(error);
   return data;
@@ -336,8 +392,8 @@ export async function loadAttendanceRecord(
   }
 
   const { data: attendance, error: attendanceError } = await supabase
-    .from("attendance_records")
-    .select("id,employee_id,worksite_id,clock_in_at,clock_out_at,clock_in_latitude,clock_in_longitude,clock_out_latitude,clock_out_longitude")
+    .from("work_record")
+    .select("id,employee_id,worksite_id,work_intime,work_outtime,clock_in_latitude,clock_in_longitude,clock_out_latitude,clock_out_longitude")
     .eq("id", recordId)
     .single();
 
@@ -367,8 +423,8 @@ export async function loadAttendanceRecord(
     clockOutLatitude: attendance.clock_out_latitude ?? null,
     clockOutLongitude: attendance.clock_out_longitude ?? null,
     employeeName: employee?.name ?? "-",
-    clockInDateTime: toKstDateTime(attendance.clock_in_at)?.dateTime ?? "-",
-    clockOutDateTime: toKstDateTime(attendance.clock_out_at)?.dateTime ?? null,
+    clockInDateTime: toKstDateTime(attendance.work_intime)?.dateTime ?? "-",
+    clockOutDateTime: toKstDateTime(attendance.work_outtime)?.dateTime ?? null,
   };
 }
 
@@ -378,7 +434,7 @@ export async function deleteAttendanceRecord(recordId: string) {
   }
 
   const supabase = getSupabaseAdmin();
-  const { error } = await supabase.from("attendance_records").delete().eq("id", recordId);
+  const { error } = await supabase.from("work_record").delete().eq("id", recordId);
 
   throwIfError(error);
 }
@@ -418,63 +474,54 @@ export function buildEducationReport(input: {
 export async function loadAttendanceReport(input: { employeeName: string; year: string }) {
   assertYear(input.year);
   const supabase = getSupabaseAdmin();
-  const [employeesResult, attendanceResult, worksitesResult, assignmentsResult, dailyAttendanceResult] = await Promise.all([
+  const [employeesResult, workRecordResult, worksitesResult, assignmentsResult] = await Promise.all([
     supabase.from("employees").select("id,name").ilike("name", `%${input.employeeName.trim()}%`),
     supabase
-      .from("attendance_records")
-      .select("id,employee_id,worksite_id,work_date,clock_in_at,clock_out_at")
+      .from("work_record")
+      .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime")
       .gte("work_date", `${input.year}-01-01`)
       .lte("work_date", `${input.year}-12-31`)
       .order("work_date", { ascending: true }),
     supabase.from("worksites").select("id,name"),
     supabase.from("work_assignments").select("id,employee_id,worksite_id"),
-    supabase
-      .from("work_assignment_daily_attendance")
-      .select("work_assignment_id,work_date,intime")
-      .gte("work_date", `${input.year}-01-01`)
-      .lte("work_date", `${input.year}-12-31`),
   ]);
 
   throwIfError(employeesResult.error);
-  throwIfError(attendanceResult.error);
+  throwIfError(workRecordResult.error);
   throwIfError(worksitesResult.error);
   throwIfError(assignmentsResult.error);
-  throwIfError(dailyAttendanceResult.error);
+
+  const workRecords = workRecordResult.data ?? [];
 
   return buildAttendanceReport({
     employeeName: input.employeeName,
     year: input.year,
     employees: employeesResult.data ?? [],
-    attendance: attendanceResult.data ?? [],
+    attendance: workRecords,
     worksites: worksitesResult.data ?? [],
     assignments: assignmentsResult.data ?? [],
-    dailyAttendance: dailyAttendanceResult.data ?? [],
+    dailyAttendance: workRecords,
   });
 }
 
 export async function loadAttendanceStatus(input: { date: string }) {
   assertDate(input.date);
   const supabase = getSupabaseAdmin();
-  const [dailyAttendanceResult, assignmentsResult, employeesResult, worksitesResult, attendanceResult] = await Promise.all([
+  const [workRecordResult, assignmentsResult, employeesResult, worksitesResult] = await Promise.all([
     supabase
-      .from("work_assignment_daily_attendance")
-      .select("work_assignment_id,work_date,intime")
-      .eq("work_date", input.date)
-      .not("intime", "is", null),
+      .from("work_record")
+      .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime")
+      .eq("work_date", input.date),
     supabase.from("work_assignments").select("id,employee_id,worksite_id"),
     supabase.from("employees").select("id,name,role,is_retired"),
     supabase.from("worksites").select("id,name"),
-    supabase
-      .from("attendance_records")
-      .select("id,employee_id,worksite_id,work_date,clock_in_at,clock_out_at")
-      .eq("work_date", input.date),
   ]);
 
-  throwIfError(dailyAttendanceResult.error);
+  throwIfError(workRecordResult.error);
   throwIfError(assignmentsResult.error);
   throwIfError(employeesResult.error);
   throwIfError(worksitesResult.error);
-  throwIfError(attendanceResult.error);
+  const workRecords = workRecordResult.data ?? [];
 
   return buildAttendanceStatus({
     date: input.date,
@@ -482,8 +529,8 @@ export async function loadAttendanceStatus(input: { date: string }) {
     employees: employeesResult.data ?? [],
     assignments: assignmentsResult.data ?? [],
     worksites: worksitesResult.data ?? [],
-    dailyAttendance: dailyAttendanceResult.data ?? [],
-    attendance: attendanceResult.data ?? [],
+    dailyAttendance: workRecords,
+    attendance: workRecords,
   });
 }
 

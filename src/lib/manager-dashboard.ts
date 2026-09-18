@@ -25,7 +25,9 @@ type AssignmentDayOffInput = {
 };
 
 type DailyAttendanceInput = {
-  work_assignment_id: string;
+  id?: string;
+  employee_id: string;
+  worksite_id: string;
   work_date: string;
   intime: string | null;
 };
@@ -34,8 +36,8 @@ type AttendanceInput = {
   employee_id: string;
   worksite_id: string;
   work_date: string;
-  clock_in_at: string | null;
-  clock_out_at: string | null;
+  work_intime: string | null;
+  work_outtime: string | null;
 };
 
 type EducationResourceInput = {
@@ -140,7 +142,7 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
   const employeeById = new Map(input.employees.map((employee) => [employee.id, employee]));
   const worksiteById = new Map(input.worksites.map((worksite) => [worksite.id, worksite]));
   const todayAttendance = input.attendance.filter(
-    (record) => record.work_date === today && activeEmployeeIds.has(record.employee_id) && record.clock_in_at,
+    (record) => record.work_date === today && activeEmployeeIds.has(record.employee_id) && record.work_intime,
   );
   const allResourceIds = input.educationResources.map((resource) => resource.id);
   const completedByEmployee = completedResourceIdsByEmployee(input.educationCompletions);
@@ -149,12 +151,6 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       .filter((dayOff) => dayOff.day_off_date === today)
       .map((dayOff) => dayOff.work_assignment_id),
   );
-  const assignmentsById = new Map<string, AssignmentInput>();
-  input.assignments.forEach((assignment) => {
-    if (assignment.id) {
-      assignmentsById.set(assignment.id, assignment);
-    }
-  });
   const scheduledEmployeeIdsToday = new Set<string>();
   const scheduledClockInsByEmployeeId = new Map<string, number>();
   input.dailyAttendance.forEach((dailyAttendance) => {
@@ -162,16 +158,15 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       return;
     }
 
-    const assignment = assignmentsById.get(dailyAttendance.work_assignment_id);
-    if (assignment && activeEmployeeIds.has(assignment.employee_id)) {
-      scheduledEmployeeIdsToday.add(assignment.employee_id);
+    if (activeEmployeeIds.has(dailyAttendance.employee_id)) {
+      scheduledEmployeeIdsToday.add(dailyAttendance.employee_id);
       const scheduledTimestamp = new Date(dailyAttendance.intime).getTime();
       if (
         Number.isFinite(scheduledTimestamp)
-        && (!scheduledClockInsByEmployeeId.has(assignment.employee_id)
-          || scheduledTimestamp < scheduledClockInsByEmployeeId.get(assignment.employee_id)!)
+        && (!scheduledClockInsByEmployeeId.has(dailyAttendance.employee_id)
+          || scheduledTimestamp < scheduledClockInsByEmployeeId.get(dailyAttendance.employee_id)!)
       ) {
-        scheduledClockInsByEmployeeId.set(assignment.employee_id, scheduledTimestamp);
+        scheduledClockInsByEmployeeId.set(dailyAttendance.employee_id, scheduledTimestamp);
       }
     }
   });
@@ -183,7 +178,7 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
   let lateEmployeesToday = 0;
   scheduledClockInsByEmployeeId.forEach((scheduledTimestamp, employeeId) => {
     const attendance = todayAttendanceByEmployeeId.get(employeeId);
-    const clockInTimestamp = attendance?.clock_in_at ? new Date(attendance.clock_in_at).getTime() : Number.NaN;
+    const clockInTimestamp = attendance?.work_intime ? new Date(attendance.work_intime).getTime() : Number.NaN;
     if (!Number.isFinite(clockInTimestamp)) {
       if (nowTimestamp > scheduledTimestamp) {
         absentEmployeesToday += 1;
@@ -222,7 +217,7 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
     const date = addDays(today, index - 29);
     const attendanceEmployeeIds = new Set(
       input.attendance
-        .filter((record) => record.work_date === date && record.clock_in_at && activeEmployeeIds.has(record.employee_id))
+        .filter((record) => record.work_date === date && record.work_intime && activeEmployeeIds.has(record.employee_id))
         .map((record) => record.employee_id),
     );
     const completedByDate = completedResourceIdsByEmployee(input.educationCompletions, date);
@@ -243,7 +238,7 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
 
   const liveAttendance = todayAttendance
     .slice()
-    .sort((left, right) => String(right.clock_in_at).localeCompare(String(left.clock_in_at)))
+    .sort((left, right) => String(right.work_intime).localeCompare(String(left.work_intime)))
     .map((record) => {
       const employee = employeeById.get(record.employee_id);
       const assignedWorksiteId =
@@ -256,16 +251,16 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       return {
         employeeName: employee?.name ?? "직원 없음",
         worksiteName: worksiteById.get(assignedWorksiteId)?.name ?? "현장 없음",
-        clockInAt: record.clock_in_at,
+        clockInAt: record.work_intime,
         educationStatus: (isCompleted ? "완료" : "미이수") as "완료" | "미이수",
-        attendanceStatus: (record.clock_out_at ? "퇴근" : "출근") as "출근" | "퇴근",
+        attendanceStatus: (record.work_outtime ? "퇴근" : "출근") as "출근" | "퇴근",
       };
     });
 
   return {
     summary: {
       scheduledEmployeesToday: scheduledEmployeeIdsToday.size,
-      currentlyClockedIn: todayAttendance.filter((record) => !record.clock_out_at).length,
+      currentlyClockedIn: todayAttendance.filter((record) => !record.work_outtime).length,
       onTimeEmployeesToday,
       waitingEmployeesToday,
       absentEmployeesToday,
@@ -296,17 +291,12 @@ export async function loadManagerDashboardData() {
   const today = toKstDate(new Date());
   const startDate = addDays(today, -29);
 
-  const [employeesResult, worksitesResult, assignmentsResult, attendanceResult, dailyAttendanceResult, resourcesResult, completionsResult, daysOffResult] =
+  const [employeesResult, worksitesResult, assignmentsResult, workRecordResult, resourcesResult, completionsResult, daysOffResult] =
     await Promise.all([
       supabase.from("employees").select("id,name,is_retired"),
       supabase.from("worksites").select("id,name"),
       supabase.from("work_assignments").select("id,employee_id,worksite_id,start_date,end_date").lte("start_date", today).gte("end_date", startDate),
-      supabase.from("attendance_records").select("employee_id,worksite_id,work_date,clock_in_at,clock_out_at").gte("work_date", startDate).lte("work_date", today),
-      supabase
-        .from("work_assignment_daily_attendance")
-        .select("work_assignment_id,work_date,intime")
-        .eq("work_date", today)
-        .not("intime", "is", null),
+      supabase.from("work_record").select("id,employee_id,worksite_id,work_date,intime,work_intime,work_outtime").gte("work_date", startDate).lte("work_date", today),
       supabase.from("education_resources").select("id"),
       supabase.from("education_completions").select("employee_id,resource_id,is_completed,completed_at"),
       supabase
@@ -318,8 +308,7 @@ export async function loadManagerDashboardData() {
   throwIfError(employeesResult.error);
   throwIfError(worksitesResult.error);
   throwIfError(assignmentsResult.error);
-  throwIfError(attendanceResult.error);
-  throwIfError(dailyAttendanceResult.error);
+  throwIfError(workRecordResult.error);
   throwIfError(resourcesResult.error);
   throwIfError(completionsResult.error);
   throwIfError(daysOffResult.error);
@@ -328,8 +317,8 @@ export async function loadManagerDashboardData() {
     employees: employeesResult.data ?? [],
     worksites: worksitesResult.data ?? [],
     assignments: assignmentsResult.data ?? [],
-    attendance: attendanceResult.data ?? [],
-    dailyAttendance: dailyAttendanceResult.data ?? [],
+    attendance: workRecordResult.data ?? [],
+    dailyAttendance: (workRecordResult.data ?? []).filter((record) => record.work_date === today && record.intime),
     educationResources: resourcesResult.data ?? [],
     educationCompletions: completionsResult.data ?? [],
     daysOff: daysOffResult.data ?? [],

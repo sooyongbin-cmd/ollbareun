@@ -110,6 +110,7 @@ describe("guard authentication data rules", () => {
     const openAttendanceQuery = {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
+      not: vi.fn().mockReturnThis(),
       is: vi.fn().mockReturnThis(),
       order: vi.fn().mockReturnThis(),
       limit: vi.fn().mockReturnThis(),
@@ -198,6 +199,7 @@ describe("guard authentication data rules", () => {
     const attendanceQuery = {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
+      not: vi.fn().mockReturnThis(),
       is: vi.fn().mockReturnThis(),
       order: vi.fn().mockReturnThis(),
       limit: vi.fn().mockReturnThis(),
@@ -207,8 +209,8 @@ describe("guard authentication data rules", () => {
           employee_id: "emp-1",
           worksite_id: "work-1",
           work_date: "2026-05-25",
-          clock_in_at: "2026-05-25T23:00:00.000Z",
-          clock_out_at: null,
+          work_intime: "2026-05-25T23:00:00.000Z",
+          work_outtime: null,
         },
         error: null,
       }),
@@ -233,12 +235,12 @@ describe("guard authentication data rules", () => {
       attendance: {
         id: "attendance-1",
         work_date: "2026-05-25",
-        clock_out_at: null,
+        work_outtime: null,
       },
     });
     expect(attendanceQuery.eq).toHaveBeenCalledWith("employee_id", "emp-1");
-    expect(attendanceQuery.is).toHaveBeenCalledWith("clock_out_at", null);
-    expect(attendanceQuery.order).toHaveBeenCalledWith("clock_in_at", { ascending: false });
+    expect(attendanceQuery.is).toHaveBeenCalledWith("work_outtime", null);
+    expect(attendanceQuery.order).toHaveBeenCalledWith("work_intime", { ascending: false });
   });
 
   it("rejects overlapping assignment periods for the same employee", async () => {
@@ -272,6 +274,7 @@ describe("guard authentication data rules", () => {
     const attendanceQuery = {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
+      not: vi.fn().mockReturnThis(),
       is: vi.fn().mockReturnThis(),
       order: vi.fn().mockReturnThis(),
       limit: vi.fn().mockReturnThis(),
@@ -281,8 +284,8 @@ describe("guard authentication data rules", () => {
           employee_id: "emp-1",
           worksite_id: "work-1",
           work_date: "2026-05-25",
-          clock_in_at: "2026-05-25T23:00:00.000Z",
-          clock_out_at: null,
+          work_intime: "2026-05-25T23:00:00.000Z",
+          work_outtime: null,
         },
         error: null,
       }),
@@ -297,8 +300,8 @@ describe("guard authentication data rules", () => {
           employee_id: "emp-1",
           worksite_id: "work-1",
           work_date: "2026-05-25",
-          clock_in_at: "2026-05-25T23:00:00.000Z",
-          clock_out_at: "2026-05-26T00:00:00.000Z",
+          work_intime: "2026-05-25T23:00:00.000Z",
+          work_outtime: "2026-05-26T00:00:00.000Z",
         },
         error: null,
       }),
@@ -327,11 +330,11 @@ describe("guard authentication data rules", () => {
     await expect(clockOut({ employeeId: "emp-1", latitude: 37.5, longitude: 127 })).resolves.toMatchObject({
       id: "attendance-1",
       work_date: "2026-05-25",
-      clock_out_at: "2026-05-26T00:00:00.000Z",
+      work_outtime: "2026-05-26T00:00:00.000Z",
     });
     expect(attendanceQuery.eq).toHaveBeenCalledWith("employee_id", "emp-1");
-    expect(attendanceQuery.is).toHaveBeenCalledWith("clock_out_at", null);
-    expect(attendanceQuery.order).toHaveBeenCalledWith("clock_in_at", { ascending: false });
+    expect(attendanceQuery.is).toHaveBeenCalledWith("work_outtime", null);
+    expect(attendanceQuery.order).toHaveBeenCalledWith("work_intime", { ascending: false });
     expect(worksiteQuery.eq).toHaveBeenCalledWith("id", "work-1");
     expect(updateQuery.eq).toHaveBeenCalledWith("id", "attendance-1");
   });

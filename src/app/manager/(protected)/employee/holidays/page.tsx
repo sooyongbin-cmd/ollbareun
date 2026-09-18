@@ -131,7 +131,7 @@ export default function HolidaysPage() {
                   </TableRow>
                 ) : rows.map(row => (
                   <TableRow key={row.id} className="hover:bg-muted/40 transition-colors">
-                    <TableCell data-label="공휴일 날짜" className="font-semibold whitespace-nowrap">{row.holiday_date}</TableCell>
+                    <TableCell data-label="공휴일 날짜" className="font-semibold whitespace-nowrap text-muted-foreground">{row.holiday_date}</TableCell>
                     <TableCell data-label="휴일명" className="text-muted-foreground">{row.name || "-"}</TableCell>
                     <TableCell data-label="선택" className="text-right">
                       <Checkbox aria-label={row.holiday_date + " 휴일 선택"} checked={row.selected === "Y"} disabled={busy || !!saving} onCheckedChange={checked => void toggle(row, checked === true)} />

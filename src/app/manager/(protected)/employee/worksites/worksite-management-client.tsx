@@ -290,7 +290,7 @@ export default function WorksiteManagementClient() {
                             ? addresses[`${worksite.gps_info.latitude},${worksite.gps_info.longitude}`] ?? "주소 조회 중…"
                             : "-"}
                         </TableCell>
-                        <TableCell data-label="허용반경" className="text-right">{worksite.radius_meters}m</TableCell>
+                        <TableCell data-label="허용반경" className="text-right text-muted-foreground">{worksite.radius_meters}m</TableCell>
                       </TableRow>
                     );
                   })

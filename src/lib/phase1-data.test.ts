@@ -386,8 +386,8 @@ describe("guard authentication data rules", () => {
     const employeesQuery = {
       select: vi.fn().mockResolvedValue({
         data: [
-          { id: "emp-1", name: "홍길동" },
-          { id: "emp-2", name: "김철수" },
+          { id: "emp-1", name: "홍길동", role: "경비원", work_style: "0" },
+          { id: "emp-2", name: "김철수", role: "미화원", work_style: "2" },
         ],
         error: null,
       }),
@@ -425,6 +425,8 @@ describe("guard authentication data rules", () => {
         start_date: "2026-05-21",
         end_date: "2026-05-23",
         employee_name: "홍길동",
+        employee_role: "경비원",
+        employee_work_style: "0",
         worksite_name: "본사",
         days_off_count: 2,
       },
@@ -435,6 +437,8 @@ describe("guard authentication data rules", () => {
         start_date: "2026-05-24",
         end_date: "2026-05-25",
         employee_name: "김철수",
+        employee_role: "미화원",
+        employee_work_style: "2",
         worksite_name: "서울지점",
         days_off_count: 0,
       },

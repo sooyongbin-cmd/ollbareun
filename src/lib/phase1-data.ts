@@ -12,6 +12,7 @@ export type EmployeeRow = {
   phone_normalized: string;
   is_retired: boolean;
   role: "경비원" | "미화원" | "파견";
+  work_style: "0" | "1" | "2";
   created_at: string;
 };
 
@@ -45,6 +46,8 @@ export type ScheduledAttendanceRow = {
 
 export type AssignmentListRow = AssignmentRow & {
   employee_name: string;
+  employee_role: EmployeeRow["role"] | null;
+  employee_work_style: EmployeeRow["work_style"] | null;
   worksite_name: string;
   days_off_count: number;
 };
@@ -383,7 +386,7 @@ export async function listAssignments() {
   const supabase = getSupabaseAdmin();
   const [assignmentsResult, employeesResult, worksitesResult, daysOffCountByAssignmentId] = await Promise.all([
     supabase.from("work_assignments").select("*").order("start_date", { ascending: false }).order("created_at", { ascending: false }),
-    supabase.from("employees").select("id,name"),
+    supabase.from("employees").select("id,name,role,work_style"),
     supabase.from("worksites").select("id,name"),
     getAssignmentDayOffCounts(),
   ]);
@@ -392,15 +395,21 @@ export async function listAssignments() {
   throwIfError(employeesResult.error);
   throwIfError(worksitesResult.error);
 
-  const employeesById = new Map((employeesResult.data ?? []).map((employee) => [employee.id, employee.name]));
+  const employeesById = new Map((employeesResult.data ?? []).map((employee) => [employee.id, employee]));
   const worksitesById = new Map((worksitesResult.data ?? []).map((worksite) => [worksite.id, worksite.name]));
 
-  return (assignmentsResult.data ?? []).map((assignment) => ({
-    ...assignment,
-    employee_name: employeesById.get(assignment.employee_id) ?? "직원 없음",
-    worksite_name: worksitesById.get(assignment.worksite_id) ?? "근무지 없음",
-    days_off_count: daysOffCountByAssignmentId.get(assignment.id) ?? 0,
-  })) as AssignmentListRow[];
+  return (assignmentsResult.data ?? []).map((assignment) => {
+    const employee = employeesById.get(assignment.employee_id);
+
+    return {
+      ...assignment,
+      employee_name: employee?.name ?? "직원 없음",
+      employee_role: employee?.role ?? null,
+      employee_work_style: employee?.work_style ?? null,
+      worksite_name: worksitesById.get(assignment.worksite_id) ?? "근무지 없음",
+      days_off_count: daysOffCountByAssignmentId.get(assignment.id) ?? 0,
+    };
+  }) as AssignmentListRow[];
 }
 
 export async function getAssignmentById(id: unknown, supabase: SupabaseClient = getSupabase()) {

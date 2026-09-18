@@ -1,7 +1,7 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -14,6 +14,8 @@ type AssignmentRow = {
   start_date: string;
   end_date: string;
   employee_name: string;
+  employee_role: "경비원" | "미화원" | "파견" | null;
+  employee_work_style: "0" | "1" | "2" | null;
   worksite_name: string;
   days_off_count?: number;
 };
@@ -37,6 +39,13 @@ function formatPeriod(assignment: AssignmentRow) {
   return assignment.start_date === assignment.end_date
     ? assignment.start_date
     : `${assignment.start_date} ~ ${assignment.end_date}`;
+}
+
+function formatWorkStyle(workStyle: AssignmentRow["employee_work_style"]) {
+  if (workStyle === "0") return "일반근무";
+  if (workStyle === "1") return "24시간근무";
+  if (workStyle === "2") return "야간근무";
+  return "근무형태 없음";
 }
 
 export default function AssignmentManagementClient() {
@@ -256,6 +265,8 @@ export default function AssignmentManagementClient() {
                   >
                     이름
                   </SortableHeader>
+                  <TableHead>직군</TableHead>
+                  <TableHead>근무형태</TableHead>
                   <SortableHeader
                     sortKey="worksite"
                     currentSortKey={sortKey}
@@ -309,6 +320,10 @@ export default function AssignmentManagementClient() {
                       tabIndex={0}
                     >
                       <TableCell data-label="이름" className="text-muted-foreground">{assignment.employee_name}</TableCell>
+                      <TableCell data-label="직군" className="text-muted-foreground">{assignment.employee_role ?? "직군 없음"}</TableCell>
+                      <TableCell data-label="근무형태" className="whitespace-nowrap text-muted-foreground">
+                        {formatWorkStyle(assignment.employee_work_style)}
+                      </TableCell>
                       <TableCell data-label="근무지" className="text-muted-foreground">{assignment.worksite_name}</TableCell>
                       <TableCell data-label="날짜" className="font-semibold text-muted-foreground">{formatPeriod(assignment)}</TableCell>
                       <TableCell data-label="휴무" className="text-muted-foreground">{`${assignment.days_off_count ?? 0}일`}</TableCell>

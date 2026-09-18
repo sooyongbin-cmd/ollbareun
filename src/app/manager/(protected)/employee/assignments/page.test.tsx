@@ -34,6 +34,8 @@ describe("assignment management page", () => {
                 start_date: "2026-05-21",
                 end_date: "2026-05-23",
                 employee_name: "홍길동",
+                employee_role: "경비원",
+                employee_work_style: "0",
                 worksite_name: "본사",
                 days_off_count: 2,
               },
@@ -42,6 +44,8 @@ describe("assignment management page", () => {
                 start_date: "2026-05-24",
                 end_date: "2026-05-25",
                 employee_name: "김철수",
+                employee_role: "미화원",
+                employee_work_style: "2",
                 worksite_name: "서울지점",
                 days_off_count: 0,
               },
@@ -64,9 +68,19 @@ describe("assignment management page", () => {
       "/manager/employee/assignments/new",
     );
     expect(screen.getByRole("columnheader", { name: "휴무" })).toBeInTheDocument();
+    expect(screen.getAllByRole("columnheader").map((header) => header.textContent?.trim())).toEqual([
+      "이름",
+      "직군",
+      "근무형태",
+      "근무지",
+      "날짜",
+      "휴무",
+    ]);
 
     const row = await screen.findByRole("link", { name: "홍길동" });
     expect(within(row).getByText("2026-05-21 ~ 2026-05-23")).toBeInTheDocument();
+    expect(within(row).getByText("경비원")).toBeInTheDocument();
+    expect(within(row).getByText("일반근무")).toBeInTheDocument();
     expect(within(row).getByText("본사")).toBeInTheDocument();
     expect(within(row).getByText("2일")).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "이름" })).toHaveValue("");

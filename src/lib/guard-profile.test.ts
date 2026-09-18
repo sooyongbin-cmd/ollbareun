@@ -3,7 +3,9 @@ import {
   buildGuardProfile,
   getRecentOneYearDateRange,
   type GuardProfileAttendanceInput,
+  type GuardProfileDayOffInput,
   type GuardProfileScheduleInput,
+  type GuardProfileScheduledAttendanceInput,
   type GuardProfileWorksiteInput,
 } from "./guard-profile";
 
@@ -49,6 +51,60 @@ describe("guard profile data", () => {
     ).toEqual([
       { id: "assign-1", period: "2026-05-01 ~ 2026-05-31", worksiteName: "본사" },
       { id: "assign-2", period: "2026-06-01 ~ 2026-06-30", worksiteName: "문현동현장" },
+    ]);
+  });
+
+  it("returns the employee's planned attendance and future days off for weekly schedule rendering", () => {
+    const scheduledAttendance: GuardProfileScheduledAttendanceInput[] = [
+      { work_assignment_id: "assign-1", work_date: "2026-09-14", intime: "2026-09-14T21:00:00.000Z", outtime: null },
+      { work_assignment_id: "assign-1", work_date: "2026-09-18", intime: "2026-09-18T21:00:00.000Z", outtime: null },
+      { work_assignment_id: "assign-1", work_date: "2026-09-21", intime: null, outtime: "2026-09-21T21:00:00.000Z" },
+      { work_assignment_id: "assign-other", work_date: "2026-09-18", intime: "2026-09-18T21:00:00.000Z", outtime: null },
+    ];
+    const daysOff: GuardProfileDayOffInput[] = [
+      { work_assignment_id: "assign-1", day_off_date: "2026-09-19" },
+      { work_assignment_id: "assign-1", day_off_date: "2026-09-13" },
+      { work_assignment_id: "assign-other", day_off_date: "2026-09-19" },
+    ];
+
+    const profile = buildGuardProfile({
+      employeeId: "emp-1",
+      today: "2026-09-18",
+      schedules: [
+        { ...schedules[1], start_date: "2026-09-14", end_date: "2026-09-22" },
+        schedules[2],
+      ],
+      worksites,
+      attendance: [],
+      scheduledAttendance,
+      daysOff,
+    });
+
+    expect(profile.plannedAttendance).toEqual([
+      {
+        assignmentId: "assign-1",
+        workDate: "2026-09-14",
+        inTime: "2026-09-14T21:00:00.000Z",
+        outTime: null,
+        isDayOff: false,
+      },
+      {
+        assignmentId: "assign-1",
+        workDate: "2026-09-18",
+        inTime: "2026-09-18T21:00:00.000Z",
+        outTime: null,
+        isDayOff: false,
+      },
+      {
+        assignmentId: "assign-1",
+        workDate: "2026-09-21",
+        inTime: null,
+        outTime: "2026-09-21T21:00:00.000Z",
+        isDayOff: false,
+      },
+    ]);
+    expect(profile.plannedDaysOff).toEqual([
+      { assignmentId: "assign-1", workDate: "2026-09-19" },
     ]);
   });
 
@@ -129,11 +185,21 @@ describe("guard profile data", () => {
         worksites,
         attendance: [],
         scheduledAttendance: [
-          { work_assignment_id: "assign-2", work_date: "2026-05-10", intime: "09:00", outtime: "18:00" },
-          { work_assignment_id: "assign-2", work_date: "2026-06-05", intime: "09:00", outtime: "18:00" },
+          {
+            work_assignment_id: "assign-1",
+            work_date: "2026-05-10",
+            intime: "2026-05-10T00:00:00.000Z",
+            outtime: "2026-05-10T09:00:00.000Z",
+          },
+          {
+            work_assignment_id: "assign-2",
+            work_date: "2026-06-05",
+            intime: "2026-06-05T00:00:00.000Z",
+            outtime: "2026-06-05T09:00:00.000Z",
+          },
         ],
         daysOff: [
-          { work_assignment_id: "assign-2", day_off_date: "2026-05-11" },
+          { work_assignment_id: "assign-1", day_off_date: "2026-05-11" },
           { work_assignment_id: "assign-other", day_off_date: "2026-05-12" },
           { work_assignment_id: "assign-2", day_off_date: "2026-06-05" },
         ],

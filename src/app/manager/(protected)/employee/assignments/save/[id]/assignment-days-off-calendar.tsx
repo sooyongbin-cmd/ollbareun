@@ -75,7 +75,7 @@ export default function AssignmentDaysOffCalendar({
           휴무일 지정
         </h2>
         <p className="text-sm text-muted-foreground">
-          날짜별 출퇴근 예정시각은 한국 시간 기준입니다. 근무기간 안의 날짜를 선택하면 즉시 휴무일로 저장됩니다.
+          근무기간 안의 날짜를 선택하면 즉시 휴무일로 저장됩니다.
         </p>
         {disabled ? (
           <p className="text-sm font-medium text-destructive" role="status">

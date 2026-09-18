@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
+import { NativeSelectOption } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getSupabasePasskeyClient } from "@/lib/supabase-passkey-client";
 import { usePasskeyFeatureEnabled } from "@/components/passkey-feature-provider";
@@ -65,9 +66,24 @@ type AbsenceDetail = {
 
 type GuardProfilePayload = {
   schedules: ScheduleRow[];
+  plannedAttendance?: PlannedAttendanceRow[];
+  plannedDaysOff?: PlannedDayOffRow[];
   monthlyAttendance: MonthlyAttendanceRow[];
   attendanceDetails?: AttendanceDetail[];
   absenceDetails?: AbsenceDetail[];
+};
+
+type PlannedAttendanceRow = {
+  assignmentId: string;
+  workDate: string;
+  inTime?: string | null;
+  outTime?: string | null;
+  isDayOff?: boolean;
+};
+
+type PlannedDayOffRow = {
+  assignmentId: string;
+  workDate: string;
 };
 
 type PasskeyRequest = {
@@ -129,30 +145,74 @@ function addDays(dateKey: string, amount: number) {
   return date.toISOString().slice(0, 10);
 }
 
-function getCurrentWeekDates(today: string) {
-  const day = dateKeyToUtcDate(today).getUTCDay();
-  const monday = addDays(today, day === 0 ? -6 : 1 - day);
-  return WEEKDAY_LABELS.map((label, index) => ({ label, date: addDays(monday, index) }));
+function getWeekStart(dateKey: string) {
+  const day = dateKeyToUtcDate(dateKey).getUTCDay();
+  return addDays(dateKey, day === 0 ? -6 : 1 - day);
+}
+
+function getWeekNumber(dateKey: string) {
+  const monthStart = `${dateKey.slice(0, 7)}-01`;
+  const monthStartDay = dateKeyToUtcDate(monthStart).getUTCDay();
+  const mondayOffset = monthStartDay === 0 ? 6 : monthStartDay - 1;
+  return Math.floor((Number(dateKey.slice(8, 10)) - 1 + mondayOffset) / 7) + 1;
+}
+
+function getWeekDates(weekStart: string) {
+  return WEEKDAY_LABELS.map((label, index) => ({ label, date: addDays(weekStart, index) }));
+}
+
+type ScheduleWeekOption = {
+  startDate: string;
+  endDate: string;
+  label: string;
+};
+
+function getScheduleWeekOptions(profile: GuardProfilePayload | null, today: string): ScheduleWeekOption[] {
+  const plannedDates = new Set([
+    ...(profile?.plannedAttendance ?? []).map((planned) => planned.workDate),
+    ...(profile?.plannedDaysOff ?? []).map((dayOff) => dayOff.workDate),
+  ]);
+  const weekStarts = new Set(
+    [...plannedDates]
+      .filter((date) => date >= today)
+      .map((date) => getWeekStart(date)),
+  );
+
+  return [...weekStarts]
+    .sort((left, right) => left.localeCompare(right))
+    .map((startDate) => {
+      const endDate = addDays(startDate, 6);
+      const isCurrentWeek = startDate <= today && today <= endDate;
+      return {
+        startDate,
+        endDate,
+        label: `${formatMonth(startDate.slice(0, 7))} ${getWeekNumber(startDate)}주차${isCurrentWeek ? " (현재)" : ""}`,
+      };
+    });
 }
 
 function getMonthlyOptions(profile: GuardProfilePayload | null, currentMonth: string) {
   const monthKeys = new Set<string>([currentMonth]);
+
   for (const row of profile?.monthlyAttendance ?? []) {
     if (/^\d{4}-\d{2}$/.test(row.yearMonth) && row.yearMonth <= currentMonth) {
       monthKeys.add(row.yearMonth);
     }
   }
-  for (const detail of [...(profile?.attendanceDetails ?? []), ...(profile?.absenceDetails ?? [])]) {
+  for (const detail of profile?.attendanceDetails ?? []) {
     const monthKey = detail.workDate.slice(0, 7);
     if (/^\d{4}-\d{2}$/.test(monthKey) && monthKey <= currentMonth) {
       monthKeys.add(monthKey);
     }
   }
-  return [...monthKeys].sort((left, right) => right.localeCompare(left));
-}
+  for (const detail of profile?.absenceDetails ?? []) {
+    const monthKey = detail.workDate.slice(0, 7);
+    if (/^\d{4}-\d{2}$/.test(monthKey) && monthKey <= currentMonth) {
+      monthKeys.add(monthKey);
+    }
+  }
 
-function getWeekNumber(dateKey: string) {
-  return Math.ceil(Number(dateKey.slice(8, 10)) / 7);
+  return [...monthKeys].sort((left, right) => right.localeCompare(left));
 }
 
 function formatMonth(monthKey: string) {
@@ -166,43 +226,8 @@ function formatDateForModal(dateKey: string) {
   return Number.isFinite(month) && Number.isFinite(day) ? `${month}월 ${day}일` : dateKey;
 }
 
-function getScheduleRange(session: ReturnType<typeof parseGuardSession>, profile: GuardProfilePayload | null) {
-  const assignmentStart = typeof session?.assignment?.start_date === "string" ? session.assignment.start_date : "";
-  const assignmentEnd = typeof session?.assignment?.end_date === "string" ? session.assignment.end_date : "";
-  if (assignmentStart && assignmentEnd) {
-    return { start: assignmentStart, end: assignmentEnd };
-  }
-
-  const period = profile?.schedules[0]?.period ?? "";
-  const [start = "", end = ""] = period.split(" ~ ");
-  return { start, end };
-}
-
-function isScheduledWorkday(
-  dateKey: string,
-  session: ReturnType<typeof parseGuardSession>,
-  profile: GuardProfilePayload | null,
-  index: number,
-) {
-  const range = getScheduleRange(session, profile);
-  if (range.start && range.end && (dateKey < range.start || dateKey > range.end)) {
-    return false;
-  }
-
-  const style = session?.workStyle ?? "1";
-  const dayOfWeek = dateKeyToUtcDate(dateKey).getUTCDay();
-  if (style === "2") {
-    return dayOfWeek !== 0 && dayOfWeek !== 6;
-  }
-
-  if (range.start) {
-    const difference = Math.round(
-      (dateKeyToUtcDate(dateKey).getTime() - dateKeyToUtcDate(range.start).getTime()) / 86_400_000,
-    );
-    return difference >= 0 && difference % 2 === 0;
-  }
-
-  return index % 2 === 0;
+function formatWeekdayDate(dateKey: string) {
+  return `${Number(dateKey.slice(5, 7))}/${Number(dateKey.slice(8, 10))}`;
 }
 
 function ProfileTableShell({ children }: { children: React.ReactNode }) {
@@ -478,6 +503,7 @@ export default function GuardProfilePage() {
   const [error, setError] = useState("");
   const [activeModal, setActiveModal] = useState<ModalKind | null>(null);
   const [selectedMonthKey, setSelectedMonthKey] = useState("");
+  const [selectedScheduleWeek, setSelectedScheduleWeek] = useState("");
   const displayedError = error || (!employeeId ? "경비원 정보를 찾을 수 없습니다. 다시 로그인하세요." : "");
 
   useEffect(() => {
@@ -498,6 +524,8 @@ export default function GuardProfilePage() {
         if (!ignore) {
           setProfile({
             schedules: payload.schedules ?? [],
+            plannedAttendance: payload.plannedAttendance ?? [],
+            plannedDaysOff: payload.plannedDaysOff ?? [],
             monthlyAttendance: payload.monthlyAttendance ?? [],
             attendanceDetails: payload.attendanceDetails ?? [],
             absenceDetails: payload.absenceDetails ?? [],
@@ -624,7 +652,20 @@ export default function GuardProfilePage() {
   const absenceDetails = (profile?.absenceDetails ?? []).filter((detail) => detail.workDate.startsWith(selectedMonthValue));
   const selectedMonth = profile?.monthlyAttendance.find((row) => row.yearMonth === selectedMonthValue)
     ?? { yearMonth: selectedMonthValue, attendanceDays: attendanceDetails.length, workHoursTotal: "0분" };
-  const weekDates = getCurrentWeekDates(today);
+  const scheduleWeekOptions = getScheduleWeekOptions(profile, today);
+  const selectedScheduleWeekValue = selectedScheduleWeek || scheduleWeekOptions[0]?.startDate || "";
+  const selectedScheduleWeekOption = scheduleWeekOptions.find(
+    (option) => option.startDate === selectedScheduleWeekValue,
+  ) ?? null;
+  const weekDates = selectedScheduleWeekOption ? getWeekDates(selectedScheduleWeekOption.startDate) : [];
+  const plannedWorkDates = useMemo(() => {
+    const plannedDaysOff = new Set((profile?.plannedDaysOff ?? []).map((dayOff) => `${dayOff.assignmentId}:${dayOff.workDate}`));
+    return new Set(
+      (profile?.plannedAttendance ?? [])
+        .filter((planned) => !planned.isDayOff && !plannedDaysOff.has(`${planned.assignmentId}:${planned.workDate}`))
+        .map((planned) => planned.workDate),
+    );
+  }, [profile]);
   const workStyleLabel = session?.workStyle === "2" ? "주간" : "격일";
   const worksiteName = session?.worksiteName || profile?.schedules[0]?.worksiteName || "근무 현장 미등록";
 
@@ -657,24 +698,49 @@ export default function GuardProfilePage() {
           <section aria-label="근무 스케줄" className={`${styles.section} ${styles.scheduleSection}`}>
             <div className={styles.sectionHeading}>
               <h2>근무 스케줄</h2>
-              <button aria-label="근무 스케줄 선택" className={styles.selectButton} type="button">
-                {`${formatMonth(currentMonth)} ${getWeekNumber(today)}주차 (현재)`}
+              <div className={styles.scheduleSelect}>
+                <select
+                  aria-label="근무 스케줄 선택"
+                  className={styles.selectButton}
+                  disabled={scheduleWeekOptions.length === 0}
+                  onChange={(event) => setSelectedScheduleWeek(event.target.value)}
+                  value={selectedScheduleWeekValue}
+                >
+                  {scheduleWeekOptions.length > 0 ? (
+                    scheduleWeekOptions.map((option) => (
+                      <NativeSelectOption key={option.startDate} value={option.startDate}>
+                        {option.label}
+                      </NativeSelectOption>
+                    ))
+                  ) : (
+                    <NativeSelectOption value="">근무예정 정보 없음</NativeSelectOption>
+                  )}
+                </select>
                 <img alt="" src="/guard-assets/profile-chevron-down.svg" />
-              </button>
+              </div>
             </div>
-            <div className={styles.weekdayGrid}>
-              {weekDates.map((weekday, index) => {
-                const isWorkday = isScheduledWorkday(weekday.date, session, profile, index);
-                return (
-                  <div className={styles.weekday} key={weekday.date}>
-                    <span>{weekday.label}</span>
-                    <span className={`${styles.weekdayStatus} ${isWorkday ? styles.isWork : styles.isOff}`}>
-                      {isWorkday ? "근무" : "휴무"}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
+            {selectedScheduleWeekOption ? (
+              <div className={styles.weekdayGrid}>
+                {weekDates.map((weekday) => {
+                  const isWorkday = plannedWorkDates.has(weekday.date);
+                  return (
+                    <div
+                      aria-label={`${weekday.date} ${isWorkday ? "근무" : "휴무"}`}
+                      className={styles.weekday}
+                      key={weekday.date}
+                    >
+                      <span>{weekday.label}</span>
+                      <span className={styles.weekdayDate}>{formatWeekdayDate(weekday.date)}</span>
+                      <span className={`${styles.weekdayStatus} ${isWorkday ? styles.isWork : styles.isOff}`}>
+                        {isWorkday ? "근무" : "휴무"}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className={styles.emptySchedule}>오늘 이후의 근무예정 정보가 없습니다.</p>
+            )}
           </section>
 
           <section aria-label="월별 출근 현황" className={`${styles.section} ${styles.monthlySection}`}>

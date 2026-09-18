@@ -35,6 +35,19 @@ export type GuardProfileDayOffInput = {
   day_off_date: string;
 };
 
+export type GuardProfilePlannedAttendanceRow = {
+  assignmentId: string;
+  workDate: string;
+  inTime: string | null;
+  outTime: string | null;
+  isDayOff: boolean;
+};
+
+export type GuardProfilePlannedDayOffRow = {
+  assignmentId: string;
+  workDate: string;
+};
+
 export type GuardProfileScheduleRow = {
   id: string;
   period: string;
@@ -60,6 +73,8 @@ export type GuardProfileAbsenceDetail = {
 
 export type GuardProfile = {
   schedules: GuardProfileScheduleRow[];
+  plannedAttendance: GuardProfilePlannedAttendanceRow[];
+  plannedDaysOff: GuardProfilePlannedDayOffRow[];
   monthlyAttendance: GuardProfileMonthlyAttendanceRow[];
   attendanceDetails: GuardProfileAttendanceDetail[];
   absenceDetails: GuardProfileAbsenceDetail[];
@@ -80,7 +95,19 @@ function requireEmployeeId(value: unknown) {
 }
 
 function todayDate() {
-  return new Date().toISOString().slice(0, 10);
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+
+function startOfCurrentWeek(dateKey: string) {
+  const date = new Date(`${dateKey}T00:00:00.000Z`);
+  const day = date.getUTCDay();
+  date.setUTCDate(date.getUTCDate() + (day === 0 ? -6 : 1 - day));
+  return date.toISOString().slice(0, 10);
 }
 
 function addUtcYears(dateText: string, years: number) {
@@ -165,9 +192,20 @@ export function buildGuardProfile(input: {
   daysOff?: GuardProfileDayOffInput[];
 }): GuardProfile {
   const { startDate, endDate } = getRecentOneYearDateRange(input.today);
+  // Include the Monday-to-Sunday range containing today so the current week's
+  // earlier days can be rendered accurately as well.
+  const plannedFromDate = startOfCurrentWeek(input.today ?? todayDate());
   const employeeSchedules = input.schedules.filter((schedule) => schedule.employee_id === input.employeeId);
   const employeeAssignmentIds = new Set(employeeSchedules.map((schedule) => schedule.id));
-  const employeeDaysOff = (input.daysOff ?? []).filter((dayOff) => employeeAssignmentIds.has(dayOff.work_assignment_id));
+  const plannedDayOffKeys = new Set(
+    (input.daysOff ?? [])
+      .filter(
+        (dayOff) =>
+          employeeAssignmentIds.has(dayOff.work_assignment_id) &&
+          dayOff.day_off_date >= plannedFromDate,
+      )
+      .map((dayOff) => `${dayOff.work_assignment_id}:${dayOff.day_off_date}`),
+  );
   const worksiteById = new Map(input.worksites.map((worksite) => [worksite.id, worksite.name]));
   const monthlyRows = new Map<string, { attendanceDates: Set<string>; workMinutes: number }>();
   const attendanceForEmployee = input.attendance
@@ -207,6 +245,7 @@ export function buildGuardProfile(input: {
   });
 
   const actualAttendanceDates = new Set(attendanceForEmployee.map((record) => record.work_date));
+  const employeeDaysOff = (input.daysOff ?? []).filter((dayOff) => employeeAssignmentIds.has(dayOff.work_assignment_id));
   const dayOffDates = new Set(
     employeeDaysOff
       .filter((dayOff) => dayOff.day_off_date >= startDate && dayOff.day_off_date <= endDate)
@@ -232,6 +271,9 @@ export function buildGuardProfile(input: {
   const uniqueAbsenceDetails = absenceDetails.filter(
     (detail, index, details) => index === details.findIndex((candidate) => candidate.workDate === detail.workDate),
   );
+
+  // A month with only a scheduled absence still needs to be selectable so the
+  // profile can show its absence total instead of hiding that month entirely.
   uniqueAbsenceDetails.forEach((detail) => {
     if (!monthlyRows.has(detail.workDate.slice(0, 7))) {
       monthlyRows.set(detail.workDate.slice(0, 7), { attendanceDates: new Set<string>(), workMinutes: 0 });
@@ -245,6 +287,39 @@ export function buildGuardProfile(input: {
         id: schedule.id,
         period: `${schedule.start_date} ~ ${schedule.end_date}`,
         worksiteName: worksiteById.get(schedule.worksite_id) ?? "근무지 없음",
+      })),
+    plannedAttendance: (input.scheduledAttendance ?? [])
+      .filter(
+        (scheduled) =>
+          employeeAssignmentIds.has(scheduled.work_assignment_id) &&
+          scheduled.work_date >= plannedFromDate,
+      )
+      .sort(
+        (left, right) =>
+          left.work_date.localeCompare(right.work_date) ||
+          left.work_assignment_id.localeCompare(right.work_assignment_id),
+      )
+      .map((scheduled) => ({
+        assignmentId: scheduled.work_assignment_id,
+        workDate: scheduled.work_date,
+        inTime: scheduled.intime,
+        outTime: scheduled.outtime,
+        isDayOff: plannedDayOffKeys.has(`${scheduled.work_assignment_id}:${scheduled.work_date}`),
+      })),
+    plannedDaysOff: (input.daysOff ?? [])
+      .filter(
+        (dayOff) =>
+          employeeAssignmentIds.has(dayOff.work_assignment_id) &&
+          dayOff.day_off_date >= plannedFromDate,
+      )
+      .sort(
+        (left, right) =>
+          left.day_off_date.localeCompare(right.day_off_date) ||
+          left.work_assignment_id.localeCompare(right.work_assignment_id),
+      )
+      .map((dayOff) => ({
+        assignmentId: dayOff.work_assignment_id,
+        workDate: dayOff.day_off_date,
       })),
     monthlyAttendance: [...monthlyRows.entries()]
       .sort(([left], [right]) => left.localeCompare(right))

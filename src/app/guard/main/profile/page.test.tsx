@@ -11,6 +11,23 @@ const signInWithPassword = vi.fn();
 const registerPasskey = vi.fn();
 const signOut = vi.fn();
 
+function dateKeyInSeoul() {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
+}
+
+function addDateDays(dateKey: string, amount: number) {
+  const date = new Date(`${dateKey}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + amount);
+  return date.toISOString().slice(0, 10);
+}
+
+function mondayOf(dateKey: string) {
+  const date = new Date(`${dateKey}T00:00:00Z`);
+  const day = date.getUTCDay();
+  date.setUTCDate(date.getUTCDate() + (day === 0 ? -6 : 1 - day));
+  return date.toISOString().slice(0, 10);
+}
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push }),
 }));
@@ -73,6 +90,50 @@ describe("guard profile page", () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
   });
 
+  it("groups planned attendance into future weeks and renders Monday through Sunday from the selected week", async () => {
+    const today = dateKeyInSeoul();
+    const currentWeekStart = mondayOf(today);
+    const nextWeekStart = addDateDays(currentWeekStart, 7);
+    const currentWeekDayOff = addDateDays(currentWeekStart, 1);
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.startsWith("/api/guard/passkey-requests/me")) {
+        return Response.json({ request: null });
+      }
+      if (url.startsWith("/api/guard/profile")) {
+        return Response.json({
+          schedules: [{ id: "assign-1", period: `${currentWeekStart} ~ ${addDateDays(nextWeekStart, 2)}`, worksiteName: "본사" }],
+          plannedAttendance: [
+            { assignmentId: "assign-1", workDate: today, inTime: "2026-09-18T21:00:00.000Z", outTime: null, isDayOff: false },
+            { assignmentId: "assign-1", workDate: nextWeekStart, inTime: "2026-09-25T21:00:00.000Z", outTime: null, isDayOff: false },
+          ],
+          plannedDaysOff: [{ assignmentId: "assign-1", workDate: currentWeekDayOff }],
+          monthlyAttendance: [],
+        });
+      }
+      return Response.json({}, { status: 404 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    window.sessionStorage.setItem(
+      "ollbareun.guard.session",
+      JSON.stringify({ employee: { id: "emp-1", name: "홍길동" } }),
+    );
+
+    render(<GuardProfilePage />);
+
+    const scheduleSelect = await screen.findByRole("combobox", { name: "근무 스케줄 선택" });
+    await waitFor(() => expect(scheduleSelect).toHaveValue(currentWeekStart));
+    expect(scheduleSelect.querySelectorAll("option")).toHaveLength(2);
+    expect(screen.getByLabelText(`${today} 근무`)).toBeInTheDocument();
+    expect(screen.getByLabelText(`${currentWeekDayOff} 휴무`)).toBeInTheDocument();
+
+    fireEvent.change(scheduleSelect, { target: { value: nextWeekStart } });
+
+    expect(scheduleSelect).toHaveValue(nextWeekStart);
+    expect(screen.getByLabelText(`${nextWeekStart} 근무`)).toBeInTheDocument();
+    expect(screen.getByLabelText(`${addDateDays(nextWeekStart, 1)} 휴무`)).toBeInTheDocument();
+  });
+
   it("opens the work and absence detail modals from the monthly cards", async () => {
     const today = new Date();
     const monthKey = new Intl.DateTimeFormat("en-CA", {
@@ -130,20 +191,19 @@ describe("guard profile page", () => {
   });
 
   it("lists available months newest first and updates both monthly cards when selected", async () => {
-    const today = new Date();
     const currentMonth = new Intl.DateTimeFormat("en-CA", {
       timeZone: "Asia/Seoul",
       year: "numeric",
       month: "2-digit",
-    }).format(today);
-    const getMonthKey = (offset: number) => {
-      const date = new Date(`${currentMonth}-01T00:00:00Z`);
-      date.setUTCMonth(date.getUTCMonth() + offset);
+    }).format(new Date());
+    const shiftMonth = (monthKey: string, amount: number) => {
+      const date = new Date(`${monthKey}-01T00:00:00Z`);
+      date.setUTCMonth(date.getUTCMonth() + amount);
       return date.toISOString().slice(0, 7);
     };
-    const previousMonth = getMonthKey(-1);
-    const twoMonthsAgo = getMonthKey(-2);
-    const futureMonth = getMonthKey(1);
+    const previousMonth = shiftMonth(currentMonth, -1);
+    const twoMonthsAgo = shiftMonth(currentMonth, -2);
+    const futureMonth = shiftMonth(currentMonth, 1);
     const monthLabel = (monthKey: string) => `${Number(monthKey.slice(5, 7))}월`;
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
@@ -154,20 +214,16 @@ describe("guard profile page", () => {
         return Response.json({
           schedules: [],
           monthlyAttendance: [
-            { yearMonth: futureMonth, attendanceDays: 9, workHoursTotal: "72시간" },
-            { yearMonth: twoMonthsAgo, attendanceDays: 1, workHoursTotal: "8시간" },
-            { yearMonth: currentMonth, attendanceDays: 2, workHoursTotal: "16시간" },
+            { yearMonth: futureMonth, attendanceDays: 99, workHoursTotal: "999시간" },
             { yearMonth: previousMonth, attendanceDays: 4, workHoursTotal: "32시간" },
+            { yearMonth: currentMonth, attendanceDays: 2, workHoursTotal: "16시간" },
+            { yearMonth: twoMonthsAgo, attendanceDays: 1, workHoursTotal: "8시간" },
           ],
           attendanceDetails: [
             { workDate: `${currentMonth}-01`, status: "정상 출근", timeRange: "(09:00~18:00)" },
-            { workDate: `${currentMonth}-02`, status: "정상 출근", timeRange: "(09:00~18:00)" },
             { workDate: `${previousMonth}-01`, status: "정상 출근", timeRange: "(09:00~18:00)" },
-            { workDate: `${previousMonth}-02`, status: "정상 출근", timeRange: "(09:00~18:00)" },
-            { workDate: `${previousMonth}-03`, status: "정상 출근", timeRange: "(09:00~18:00)" },
-            { workDate: `${previousMonth}-04`, status: "정상 출근", timeRange: "(09:00~18:00)" },
           ],
-          absenceDetails: [{ workDate: `${previousMonth}-05`, reason: "결근" }],
+          absenceDetails: [{ workDate: `${previousMonth}-02`, reason: "결근" }],
         });
       }
       return Response.json({}, { status: 404 });
@@ -180,20 +236,26 @@ describe("guard profile page", () => {
 
     render(<GuardProfilePage />);
 
-    const monthSelect = await screen.findByRole("combobox", { name: "월별 출근 현황 선택" });
-    expect(within(monthSelect).getAllByRole("option").map((option) => option.textContent)).toEqual([
+    const monthlySelect = await screen.findByRole("combobox", { name: "월별 출근 현황 선택" });
+    expect(monthlySelect).toHaveValue(currentMonth);
+    expect(Array.from(monthlySelect.querySelectorAll("option")).map((option) => option.textContent)).toEqual([
       `${monthLabel(currentMonth)} (이번 달)`,
       monthLabel(previousMonth),
       monthLabel(twoMonthsAgo),
     ]);
-    expect(within(monthSelect).queryByRole("option", { name: monthLabel(futureMonth) })).not.toBeInTheDocument();
+    expect(monthlySelect.querySelector(`option[value="${futureMonth}"]`)).not.toBeInTheDocument();
 
-    fireEvent.change(monthSelect, { target: { value: previousMonth } });
+    fireEvent.change(monthlySelect, { target: { value: previousMonth } });
 
-    expect(screen.getByRole("button", { name: `${monthLabel(previousMonth)} 근무 내역 보기` })).toHaveTextContent("4일");
-    expect(screen.getByRole("button", { name: `${monthLabel(previousMonth)} 결근/휴가 내역 보기` })).toHaveTextContent("1일");
-    fireEvent.click(screen.getByRole("button", { name: `${monthLabel(previousMonth)} 근무 내역 보기` }));
+    const workCard = screen.getByRole("button", { name: `${monthLabel(previousMonth)} 근무 내역 보기` });
+    const absenceCard = screen.getByRole("button", { name: `${monthLabel(previousMonth)} 결근/휴가 내역 보기` });
+    expect(monthlySelect).toHaveValue(previousMonth);
+    expect(within(workCard).getByText("4일")).toBeInTheDocument();
+    expect(within(absenceCard).getByText("1일")).toBeInTheDocument();
+
+    fireEvent.click(workCard);
     expect(await screen.findByRole("dialog", { name: `${monthLabel(previousMonth)} 근무 내역` })).toBeInTheDocument();
+    expect(screen.getByText("정상 출근 (09:00~18:00)")).toBeInTheDocument();
   });
 
   it("hides the passkey registration section when the feature is disabled", async () => {

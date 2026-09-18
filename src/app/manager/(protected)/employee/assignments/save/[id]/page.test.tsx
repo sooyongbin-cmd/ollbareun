@@ -146,6 +146,8 @@ describe("assignment save page", () => {
     render(<AssignmentSavePage />);
 
     expect(await screen.findByRole("heading", { name: "휴무일 지정" })).toBeInTheDocument();
+    expect(screen.queryByText("날짜별 출퇴근 예정시각은 한국 시간 기준입니다.")).not.toBeInTheDocument();
+    expect(screen.getByText("근무기간 안의 날짜를 선택하면 즉시 휴무일로 저장됩니다.")).toBeInTheDocument();
     expect(screen.getByText("일")).toBeInTheDocument();
     expect(screen.getByText("토")).toBeInTheDocument();
 

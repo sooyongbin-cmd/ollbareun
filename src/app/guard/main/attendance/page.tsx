@@ -221,7 +221,6 @@ export default function GuardAttendancePage() {
     status: "processing" | "success" | "error";
     error: string;
   } | null>(null);
-  const [encouragement, setEncouragement] = useState("");
   const isProcessing = process?.status === "processing";
   const [error, setError] = useState("");
   const [guard, setGuard] = useState<GuardSession | null>(readStoredGuardSession);
@@ -278,19 +277,6 @@ export default function GuardAttendancePage() {
     activeDecisionAllowed: activeDecision.allowed,
   });
   const actionDisabled = isProcessing || statusCopy.state === "unavailable" || statusCopy.state === "pending" || statusCopy.isOutside;
-
-  useEffect(() => {
-    const controller = new AbortController();
-    fetch("/api/system/configs/system_0001", { cache: "no-store", signal: controller.signal })
-      .then((response) => response.ok ? response.json() : null)
-      .then((data) => {
-        if (!controller.signal.aborted && typeof data?.config?.content === "string") {
-          setEncouragement(data.config.content.trim());
-        }
-      })
-      .catch(() => {});
-    return () => controller.abort();
-  }, []);
 
   useEffect(() => {
     const geolocation = navigator.geolocation;
@@ -510,13 +496,13 @@ export default function GuardAttendancePage() {
         >
           <DialogHeader className="guard-attendance-dialog-header">
             <DialogTitle className="guard-attendance-dialog-title">
-              {process?.status === "success" && process.action === "출근" ? "출근 완료" : `${process?.action ?? "출퇴근"} 처리`}
+              {process?.status === "success" ? `${process.action} 완료` : `${process?.action ?? "출퇴근"} 처리`}
             </DialogTitle>
           </DialogHeader>
           <DialogDescription aria-live="polite" className="guard-attendance-dialog-copy">
             {process?.status === "success" ? (
               <>
-                <span>{process.action === "출근" ? (encouragement || "오늘도 안전한 근무되세요") : "오늘도 안전한 근무되세요"}</span>
+                <span>{process.action === "출근" ? "오늘도 안전한 근무되세요" : "오늘 하루도 수고하셨습니다."}</span>
                 <span>{process.action} 처리가 완료 되었습니다</span>
               </>
             ) : process?.status === "error" ? (

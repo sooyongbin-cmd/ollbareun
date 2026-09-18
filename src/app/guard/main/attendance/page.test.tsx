@@ -174,6 +174,10 @@ describe("guard attendance page", () => {
     render(<GuardAttendancePage />);
 
     await user.click(await screen.findByTestId(action));
+    expect(await screen.findByRole("heading", { name: action === "clock-in" ? "출근 완료" : "퇴근 완료" })).toBeInTheDocument();
+    expect(
+      screen.getByText(action === "clock-in" ? "오늘도 안전한 근무되세요" : "오늘 하루도 수고하셨습니다."),
+    ).toBeInTheDocument();
     expect(await screen.findByText(`${action === "clock-in" ? "출근" : "퇴근"} 처리가 완료 되었습니다`)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "확인" }));
 

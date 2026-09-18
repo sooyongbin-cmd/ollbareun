@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SaveIcon } from "@/components/icons/save-icon";
 import { CancelIcon } from "@/components/icons/cancel-icon";
 import AlertModal from "@/components/modals/alert-modal";
@@ -15,6 +16,14 @@ type Employee = {
   id: string;
   name: string;
   is_retired?: boolean;
+  role?: string | null;
+  work_style?: "0" | "1" | "2" | null;
+};
+
+type ScheduledWork = {
+  workDate: string;
+  intime: string | null;
+  outtime: string | null;
 };
 
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
@@ -30,6 +39,28 @@ function todayDate() {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
 }
 
+function workStyleLabel(workStyle: Employee["work_style"]) {
+  return workStyle === "0" ? "일반근무" : workStyle === "1" ? "격일근무" : workStyle === "2" ? "야간근무" : "-";
+}
+
+function formatScheduledTime(value: string | null) {
+  if (!value) {
+    return "-";
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return date.toLocaleTimeString("ko-KR", {
+    timeZone: "Asia/Seoul",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
 export default function LeaveNewPage() {
   const router = useRouter();
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -42,6 +73,12 @@ export default function LeaveNewPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [scheduledWork, setScheduledWork] = useState<ScheduledWork[]>([]);
+  const [scheduleLoading, setScheduleLoading] = useState(false);
+  const [scheduleError, setScheduleError] = useState("");
+  const scheduleRequestRef = useRef(0);
+
+  const selectedEmployee = employees.find((employee) => employee.id === employeeId) ?? null;
 
   useEffect(() => {
     let ignore = false;
@@ -68,9 +105,44 @@ export default function LeaveNewPage() {
     };
   }, []);
 
+  useEffect(() => {
+    const requestId = ++scheduleRequestRef.current;
+
+    async function loadScheduledWork() {
+      if (!employeeId || startDate > endDate) {
+        return;
+      }
+
+      setScheduleLoading(true);
+      setScheduleError("");
+      try {
+        const params = new URLSearchParams({ employeeId, startDate, endDate });
+        const payload = await fetchJson<{ workRecords: ScheduledWork[] }>(`/api/leave/schedule?${params.toString()}`);
+        if (requestId !== scheduleRequestRef.current) {
+          return;
+        }
+        setScheduledWork(payload.workRecords ?? []);
+      } catch (loadError) {
+        if (requestId !== scheduleRequestRef.current) {
+          return;
+        }
+        setScheduledWork([]);
+        setScheduleError(loadError instanceof Error ? loadError.message : "근무예정을 불러오지 못했습니다.");
+      } finally {
+        if (requestId === scheduleRequestRef.current) {
+          setScheduleLoading(false);
+        }
+      }
+    }
+
+    void loadScheduledWork();
+  }, [employeeId, endDate, startDate]);
+
   function handleEmployeeNameChange(nextName: string) {
     setEmployeeName(nextName);
     setEmployeeId(employees.find((employee) => employee.name === nextName)?.id ?? "");
+    setScheduledWork([]);
+    setScheduleError("");
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -139,13 +211,33 @@ export default function LeaveNewPage() {
                 <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="leave-start-date">
                   시작일
                 </label>
-                <Input id="leave-start-date" type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} required />
+                <Input
+                  id="leave-start-date"
+                  type="date"
+                  value={startDate}
+                  onChange={(event) => {
+                    setStartDate(event.target.value);
+                    setScheduledWork([]);
+                    setScheduleError("");
+                  }}
+                  required
+                />
               </div>
               <div className="space-y-2">
                 <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="leave-end-date">
                   종료일
                 </label>
-                <Input id="leave-end-date" type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} required />
+                <Input
+                  id="leave-end-date"
+                  type="date"
+                  value={endDate}
+                  onChange={(event) => {
+                    setEndDate(event.target.value);
+                    setScheduledWork([]);
+                    setScheduleError("");
+                  }}
+                  required
+                />
               </div>
             </div>
 
@@ -161,6 +253,80 @@ export default function LeaveNewPage() {
           </form>
         )}
         {error ? <p role="alert" className="mt-6 text-[1rem] text-destructive">{error}</p> : null}
+
+        {!loading ? (
+          <>
+            <section aria-label="사원정보" className="mt-8 space-y-4 border-t border-border/70 pt-6">
+              <div>
+                <h2 className="text-lg font-semibold">사원정보</h2>
+                <p className="text-sm text-muted-foreground">이름을 입력하면 해당 사원의 정보가 표시됩니다.</p>
+              </div>
+              {selectedEmployee ? (
+                <dl className="grid gap-4 rounded-lg border border-border bg-background p-4 sm:grid-cols-2">
+                  <div>
+                    <dt className="text-sm text-muted-foreground">직군</dt>
+                    <dd className="mt-1 font-medium">{selectedEmployee.role ?? "-"}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-sm text-muted-foreground">근무형태</dt>
+                    <dd className="mt-1 font-medium">{workStyleLabel(selectedEmployee.work_style)}</dd>
+                  </div>
+                </dl>
+              ) : (
+                <p className="rounded-lg border border-dashed border-border bg-background p-4 text-sm text-muted-foreground">
+                  사원을 선택하면 직군과 근무형태가 표시됩니다.
+                </p>
+              )}
+            </section>
+
+            <section aria-label="근무예정" className="mt-8 space-y-4 border-t border-border/70 pt-6">
+              <div>
+                <h2 className="text-lg font-semibold">근무예정</h2>
+                <p className="text-sm text-muted-foreground">휴가신청 기간에 등록된 근무예정입니다.</p>
+              </div>
+              {!selectedEmployee ? (
+                <p className="rounded-lg border border-dashed border-border bg-background p-4 text-sm text-muted-foreground">
+                  사원을 선택하면 근무예정이 표시됩니다.
+                </p>
+              ) : startDate > endDate ? (
+                <p role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+                  종료일은 시작일보다 빠를 수 없습니다.
+                </p>
+              ) : scheduleLoading ? (
+                <ManagerLoadingMessage />
+              ) : scheduleError ? (
+                <p role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+                  {scheduleError}
+                </p>
+              ) : (
+                <div className="overflow-hidden rounded-lg border border-border bg-background">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>근무일</TableHead>
+                        <TableHead>출근예정</TableHead>
+                        <TableHead>퇴근예정</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {scheduledWork.length > 0 ? scheduledWork.map((work) => (
+                        <TableRow key={work.workDate}>
+                          <TableCell data-label="근무일">{work.workDate}</TableCell>
+                          <TableCell data-label="출근예정">{formatScheduledTime(work.intime)}</TableCell>
+                          <TableCell data-label="퇴근예정">{formatScheduledTime(work.outtime)}</TableCell>
+                        </TableRow>
+                      )) : (
+                        <TableRow>
+                          <TableCell colSpan={3} className="p-8 text-center text-muted-foreground">근무예정이 없습니다.</TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </section>
+          </>
+        ) : null}
       </section>
 
       <AlertModal

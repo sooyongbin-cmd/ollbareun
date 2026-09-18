@@ -21,6 +21,12 @@ export type LeaveRecord = {
   endDate: string;
 };
 
+export type LeaveScheduledWork = {
+  workDate: string;
+  intime: string | null;
+  outtime: string | null;
+};
+
 export const leaveTypeLabels: Record<LeaveType, string> = {
   "1": "월차",
   "2": "연차",
@@ -120,6 +126,34 @@ export async function listLeaves(
   return (leaveResult.data ?? [])
     .map((row) => toLeaveListRow(row, employeeNamesById))
     .filter((row) => !employeeNameQuery || row.employeeName.toLowerCase().includes(employeeNameQuery));
+}
+
+export async function listLeaveScheduledWork(
+  input: { employeeId: unknown; startDate: unknown; endDate: unknown },
+  supabase: SupabaseClient = getSupabaseAdmin(),
+): Promise<LeaveScheduledWork[]> {
+  const employeeId = requireString(input.employeeId, "직원");
+  const startDate = requireDate(input.startDate, "시작일");
+  const endDate = requireDate(input.endDate, "종료일");
+
+  if (startDate > endDate) {
+    throw new Error("종료일은 시작일보다 빠를 수 없습니다.");
+  }
+
+  const { data, error } = await supabase
+    .from("work_record")
+    .select("work_date,intime,outtime")
+    .eq("employee_id", employeeId)
+    .gte("work_date", startDate)
+    .lte("work_date", endDate)
+    .order("work_date", { ascending: true });
+
+  throwIfError(error);
+  return (data ?? []).map((row) => ({
+    workDate: row.work_date,
+    intime: row.intime,
+    outtime: row.outtime,
+  }));
 }
 
 export async function getLeave(id: unknown, supabase: SupabaseClient = getSupabaseAdmin()): Promise<LeaveRecord> {

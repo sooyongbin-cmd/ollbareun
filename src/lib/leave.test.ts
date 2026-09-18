@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createLeave, deleteLeave, getLeave, listLeaves, updateLeave } from "./leave";
+import { createLeave, deleteLeave, getLeave, listLeaveScheduledWork, listLeaves, updateLeave } from "./leave";
 
 describe("leave data", () => {
   beforeEach(() => {
@@ -45,6 +45,29 @@ describe("leave data", () => {
 
     await expect(updateLeave({ id: "leave-1", employeeId: "emp-1", leaveType: "2", startDate: "2026-06-02", endDate: "2026-06-03" }, supabase as never)).resolves.toEqual({ id: "leave-1" });
     expect(updateQuery.eq).toHaveBeenCalledWith("id", "leave-1");
+  });
+
+  it("lists scheduled work within the leave period for an employee", async () => {
+    const workRecordQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({
+        data: [
+          { work_date: "2026-06-01", intime: "2026-06-01T00:00:00.000Z", outtime: "2026-06-01T09:00:00.000Z" },
+        ],
+        error: null,
+      }),
+    };
+    const supabase = { from: vi.fn().mockReturnValue(workRecordQuery) };
+
+    await expect(listLeaveScheduledWork({ employeeId: "emp-1", startDate: "2026-06-01", endDate: "2026-06-03" }, supabase as never)).resolves.toEqual([
+      { workDate: "2026-06-01", intime: "2026-06-01T00:00:00.000Z", outtime: "2026-06-01T09:00:00.000Z" },
+    ]);
+    expect(workRecordQuery.eq).toHaveBeenCalledWith("employee_id", "emp-1");
+    expect(workRecordQuery.gte).toHaveBeenCalledWith("work_date", "2026-06-01");
+    expect(workRecordQuery.lte).toHaveBeenCalledWith("work_date", "2026-06-03");
   });
 
   it("loads a leave detail and deletes it", async () => {

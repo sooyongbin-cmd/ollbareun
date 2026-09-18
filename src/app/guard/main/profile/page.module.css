@@ -141,6 +141,7 @@
 .selectButton {
   display: inline-flex;
   height: 22px;
+  appearance: none;
   align-items: center;
   justify-content: center;
   gap: 10px;

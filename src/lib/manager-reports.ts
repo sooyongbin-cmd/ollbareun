@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { durationLabel } from "./work-duration";
 import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
+import { getManagerAttendanceStatus, type ManagerAttendanceStatus } from "./manager-attendance-status";
 
 type EmployeeInput = {
   id: string;
@@ -87,7 +88,7 @@ export type AttendanceStatusRow = {
   clockInDateTime: string | null;
   clockOutDateTime: string | null;
   workDuration: string;
-  status: "출근" | "지각" | "대기" | "결근";
+  status: ManagerAttendanceStatus;
 };
 
 export type AttendanceRecord = {
@@ -143,6 +144,19 @@ function workStyleLabel(workStyle: EmployeeInput["work_style"]) {
   return workStyle === "0" ? "일반근무" : workStyle === "1" ? "격일근무" : workStyle === "2" ? "야간근무" : "-";
 }
 
+function getAttendanceReportStatus(input: {
+  intimeStatus: IntimeStatus;
+  scheduledClockIn: string | null;
+  now: Date;
+}): AttendanceReportStatus {
+  const attendanceStatus = getManagerAttendanceStatus(input);
+  if (attendanceStatus === "대기") {
+    return "대기";
+  }
+
+  return intimeStatusLabels[input.intimeStatus];
+}
+
 export function buildAttendanceReport(input: {
   employeeName: string;
   workDate: string;
@@ -182,12 +196,11 @@ export function buildAttendanceReport(input: {
       );
       const intimeStatus = record.intime_status ?? "0";
       const scheduledClockInAt = scheduledTime?.intime ?? record.intime ?? null;
-      const scheduledClockInTimestamp = scheduledClockInAt ? new Date(scheduledClockInAt).getTime() : Number.NaN;
-      const status: AttendanceReportStatus = intimeStatus === "0"
-        && Number.isFinite(scheduledClockInTimestamp)
-        && scheduledClockInTimestamp > nowTimestamp
-        ? "대기"
-        : intimeStatusLabels[intimeStatus];
+      const status = getAttendanceReportStatus({
+        intimeStatus,
+        scheduledClockIn: scheduledClockInAt,
+        now: input.now ?? new Date(nowTimestamp),
+      });
 
       return {
         id: record.id,
@@ -236,41 +249,43 @@ export function buildAttendanceStatus(input: {
 
   const employeesById = new Map(input.employees.map((employee) => [employee.id, employee]));
   const worksitesById = new Map(input.worksites.map((worksite) => [worksite.id, worksite.name]));
-  const attendanceByEmployeeAndWorksite = new Map(
-    input.attendance.map((record) => [`${record.employee_id}:${record.worksite_id ?? ""}`, record]),
-  );
-  const attendanceByEmployee = new Map(input.attendance.map((record) => [record.employee_id, record]));
+  const scheduledTimes = new Map<string, { intime: string | null; outtime: string | null }>();
 
-  return input.dailyAttendance
-    .filter((dailyAttendance) => dailyAttendance.work_date === input.date && dailyAttendance.intime)
-    .flatMap((dailyAttendance) => {
-      const employee = employeesById.get(dailyAttendance.employee_id);
+  input.dailyAttendance.forEach((dailyAttendance) => {
+    scheduledTimes.set(
+      `${dailyAttendance.employee_id}:${dailyAttendance.worksite_id}:${dailyAttendance.work_date}`,
+      { intime: dailyAttendance.intime, outtime: dailyAttendance.outtime ?? null },
+    );
+  });
+
+  return input.attendance
+    .filter((record) => record.work_date === input.date)
+    .flatMap((record) => {
+      const employee = employeesById.get(record.employee_id);
       if (!employee || employee.is_retired) {
         return [];
       }
 
-      const attendance =
-        attendanceByEmployeeAndWorksite.get(`${dailyAttendance.employee_id}:${dailyAttendance.worksite_id}`)
-        ?? attendanceByEmployee.get(dailyAttendance.employee_id);
-      const clockIn = attendance?.work_intime ? toKstDateTime(attendance.work_intime) : null;
-      const scheduledTimestamp = new Date(dailyAttendance.intime as string).getTime();
-      const clockInTimestamp = attendance?.work_intime ? new Date(attendance.work_intime).getTime() : Number.NaN;
-      const status: AttendanceStatusRow["status"] = !Number.isFinite(clockInTimestamp)
-        ? Number.isFinite(scheduledTimestamp) && scheduledTimestamp >= nowTimestamp ? "대기" : "결근"
-        : Number.isFinite(scheduledTimestamp) && clockInTimestamp > scheduledTimestamp
-          ? "지각"
-          : "출근";
+      const scheduledTime = scheduledTimes.get(
+        `${record.employee_id}:${record.worksite_id ?? ""}:${record.work_date}`,
+      );
+      const scheduledClockInAt = scheduledTime?.intime ?? record.intime ?? null;
+      const status = getManagerAttendanceStatus({
+        intimeStatus: record.intime_status,
+        scheduledClockIn: scheduledClockInAt,
+        now: input.now ?? new Date(nowTimestamp),
+      });
 
       return [{
-        id: dailyAttendance.id ?? `${dailyAttendance.employee_id}:${dailyAttendance.work_date}`,
+        id: record.id,
         employeeName: employee.name,
         workStyle: workStyleLabel(employee.work_style),
-        worksiteName: worksitesById.get(dailyAttendance.worksite_id) ?? "-",
-        scheduledClockIn: toKstDateTime(dailyAttendance.intime)?.time ?? "-",
-        scheduledClockOut: toKstDateTime(dailyAttendance.outtime ?? null)?.time ?? "-",
-        clockInDateTime: clockIn?.dateTime ?? null,
-        clockOutDateTime: toKstDateTime(attendance?.work_outtime ?? null)?.dateTime ?? null,
-        workDuration: durationLabel(attendance?.work_intime ?? null, attendance?.work_outtime ?? null),
+        worksiteName: worksitesById.get(record.worksite_id ?? "") ?? "-",
+        scheduledClockIn: toKstDateTime(scheduledClockInAt)?.time ?? "-",
+        scheduledClockOut: toKstDateTime(scheduledTime?.outtime ?? record.outtime ?? null)?.time ?? "-",
+        clockInDateTime: toKstDateTime(record.work_intime)?.dateTime ?? null,
+        clockOutDateTime: toKstDateTime(record.work_outtime)?.dateTime ?? null,
+        workDuration: durationLabel(record.work_intime, record.work_outtime),
         status,
       }];
     })
@@ -546,7 +561,7 @@ export async function loadAttendanceStatus(input: { date: string }) {
   const [workRecordResult, assignmentsResult, employeesResult, worksitesResult] = await Promise.all([
     supabase
       .from("work_record")
-      .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime")
+      .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime,intime_status")
       .eq("work_date", input.date),
     supabase.from("work_assignments").select("id,employee_id,worksite_id"),
     supabase.from("employees").select("id,name,role,work_style,is_retired"),

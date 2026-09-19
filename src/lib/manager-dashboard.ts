@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from "./supabase-admin";
+import { getManagerAttendanceStatus } from "./manager-attendance-status";
 
 type EmployeeInput = {
   id: string;
@@ -38,6 +39,7 @@ type AttendanceInput = {
   employee_id: string;
   worksite_id: string;
   work_date: string;
+  intime: string | null;
   intime_status: IntimeStatus;
   work_intime: string | null;
   work_outtime: string | null;
@@ -165,20 +167,34 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       scheduledEmployeeIdsToday.add(dailyAttendance.employee_id);
     }
   });
+  const scheduledTimes = new Map<string, string | null>();
+  input.dailyAttendance.forEach((dailyAttendance) => {
+    scheduledTimes.set(
+      `${dailyAttendance.employee_id}:${dailyAttendance.worksite_id}:${dailyAttendance.work_date}`,
+      dailyAttendance.intime,
+    );
+  });
   let onTimeEmployeesToday = 0;
-  const waitingEmployeesToday = 0;
+  let waitingEmployeesToday = 0;
   let absentEmployeesToday = 0;
   let lateEmployeesToday = 0;
   todayWorkRecords.forEach((record) => {
-    switch (record.intime_status) {
-      case "0":
+    const status = getManagerAttendanceStatus({
+      intimeStatus: record.intime_status,
+      scheduledClockIn: scheduledTimes.get(`${record.employee_id}:${record.worksite_id}:${record.work_date}`) ?? record.intime,
+      now: input.now ?? new Date(),
+    });
+    switch (status) {
+      case "대기":
+        waitingEmployeesToday += 1;
+        break;
+      case "결근":
         absentEmployeesToday += 1;
         break;
-      case "1":
+      case "지각":
         lateEmployeesToday += 1;
         break;
-      case "2":
-      case "3":
+      case "출근":
         onTimeEmployeesToday += 1;
         break;
     }

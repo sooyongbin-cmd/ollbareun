@@ -162,6 +162,39 @@ describe("manager dashboard data", () => {
     });
   });
 
+  it("counts waiting records using the same status rule as the attendance status report", () => {
+    const data = buildManagerDashboardData({
+      now: new Date("2026-06-04T00:30:00.000Z"),
+      employees: [{ id: "emp-1", name: "김철수", is_retired: false }],
+      worksites: [{ id: "work-1", name: "문현동현장" }],
+      assignments: [],
+      attendance: [{
+        employee_id: "emp-1",
+        worksite_id: "work-1",
+        work_date: "2026-06-04",
+        intime: "2026-06-04T01:00:00.000Z",
+        intime_status: "0",
+        work_intime: null,
+        work_outtime: null,
+      }],
+      dailyAttendance: [{
+        employee_id: "emp-1",
+        worksite_id: "work-1",
+        work_date: "2026-06-04",
+        intime: "2026-06-04T01:00:00.000Z",
+      }],
+      educationResources: [],
+      educationCompletions: [],
+    });
+
+    expect(data.summary).toMatchObject({
+      onTimeEmployeesToday: 0,
+      waitingEmployeesToday: 1,
+      absentEmployeesToday: 0,
+      lateEmployeesToday: 0,
+    });
+  });
+
   it("counts current assignment totals by worksite and includes empty worksites", () => {
     const data = buildManagerDashboardData({
       now: new Date("2026-06-04T03:00:00.000Z"),

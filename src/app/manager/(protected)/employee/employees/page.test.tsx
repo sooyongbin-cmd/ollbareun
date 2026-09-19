@@ -33,6 +33,7 @@ const bootstrap = {
   ],
   assignments: [
     {
+      id: "assign-1",
       employee_id: "emp-1",
       worksite_id: "work-1",
       start_date: "2026-05-01",
@@ -80,7 +81,8 @@ describe("employee roster page", () => {
     expect(screen.getByRole("columnheader", { name: "배정기간" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "출근" })).toBeInTheDocument();
     expect(within(screen.getByRole("link", { name: "Alice" }).closest("tr") as HTMLElement).getByText("정상출근")).toBeInTheDocument();
-    expect(screen.getByText("2026-05-01~2026-05-24")).toBeInTheDocument();
+    const assignmentPeriodLink = screen.getByRole("link", { name: "2026-05-01~2026-05-24" });
+    expect(assignmentPeriodLink).toHaveAttribute("href", "/manager/employee/assignments/save/assign-1");
     expect(screen.queryByRole("link", { name: "Bob" })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("checkbox", { name: "퇴직" }));

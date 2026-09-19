@@ -32,6 +32,7 @@ type Bootstrap = {
     name: string;
   }[];
   assignments: {
+    id: string;
     employee_id: string;
     worksite_id: string;
     start_date: string;
@@ -345,9 +346,14 @@ export default function EmployeeRosterPage() {
                         {worksiteById.get(assignmentByEmployeeId.get(employee.id)?.worksite_id ?? "") ?? ""}
                       </TableCell>
                       <TableCell data-label="배정기간" className="whitespace-nowrap text-muted-foreground">
-                        {assignmentByEmployeeId.has(employee.id)
-                          ? `${assignmentByEmployeeId.get(employee.id)?.start_date}~${assignmentByEmployeeId.get(employee.id)?.end_date}`
-                          : ""}
+                        {assignmentByEmployeeId.has(employee.id) ? (
+                          <Link
+                            className="text-primary hover:underline"
+                            href={`/manager/employee/assignments/save/${assignmentByEmployeeId.get(employee.id)?.id}`}
+                          >
+                            {`${assignmentByEmployeeId.get(employee.id)?.start_date}~${assignmentByEmployeeId.get(employee.id)?.end_date}`}
+                          </Link>
+                        ) : ""}
                       </TableCell>
                       <TableCell data-label="출근" className="whitespace-nowrap text-muted-foreground">
                         {attendanceStatusByEmployeeId.get(employee.id) ?? "-"}

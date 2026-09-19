@@ -258,8 +258,8 @@ export default function LeaveNewPage() {
             {error ? <p role="alert" className="mt-6 text-[1rem] text-destructive">{error}</p> : null}
           </section>
 
-          <section aria-label="사원정보" className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
-            <h2 className="mb-6 text-lg font-semibold">사원정보</h2>
+          <section aria-label="사원정보 및 근무예정" className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
+            <div>
               {selectedEmployee ? (
                 <dl className="grid gap-4 rounded-lg border border-border bg-background p-4 sm:grid-cols-2">
                   <div>
@@ -276,10 +276,9 @@ export default function LeaveNewPage() {
                   사원을 선택하면 직군과 근무형태가 표시됩니다.
                 </p>
               )}
-          </section>
+            </div>
 
-          <section aria-label="근무예정" className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
-            <h2 className="mb-6 text-lg font-semibold">근무예정</h2>
+            <div className="mt-6">
               {!selectedEmployee ? (
                 <p className="rounded-lg border border-dashed border-border bg-background p-4 text-sm text-muted-foreground">
                   사원을 선택하면 근무예정이 표시됩니다.
@@ -320,6 +319,7 @@ export default function LeaveNewPage() {
                   </Table>
                 </div>
               )}
+            </div>
           </section>
         </>
       )}

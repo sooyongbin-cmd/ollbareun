@@ -57,9 +57,12 @@ describe("leave new page", () => {
 
     await user.type(await screen.findByLabelText("이름"), "홍길동");
 
-    expect(await screen.findByRole("region", { name: "사원정보" })).toHaveTextContent("경비원");
-    expect(screen.getByRole("region", { name: "사원정보" })).toHaveTextContent("일반근무");
-    expect(await screen.findByRole("region", { name: "근무예정" })).toHaveTextContent("2026-06-01");
-    expect(screen.getByRole("region", { name: "근무예정" })).toHaveTextContent("09:00");
+    const employeeAndSchedule = await screen.findByRole("region", { name: "사원정보 및 근무예정" });
+    expect(employeeAndSchedule).toHaveTextContent("경비원");
+    expect(employeeAndSchedule).toHaveTextContent("일반근무");
+    expect(employeeAndSchedule).toHaveTextContent("2026-06-01");
+    expect(employeeAndSchedule).toHaveTextContent("09:00");
+    expect(screen.queryByRole("heading", { name: "사원정보" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "근무예정" })).not.toBeInTheDocument();
   });
 });

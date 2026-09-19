@@ -176,11 +176,15 @@ export default function LeaveNewPage() {
         </div>
       </header>
 
-      <section className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
-        {loading ? (
+      {loading ? (
+        <section className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
           <ManagerLoadingMessage />
-        ) : (
-          <form className="space-y-6" onSubmit={handleSubmit}>
+        </section>
+      ) : (
+        <>
+          <section aria-label="입력" className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
+            <h2 className="mb-6 text-lg font-semibold">입력</h2>
+            <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="leave-employee">
@@ -250,17 +254,12 @@ export default function LeaveNewPage() {
                 <span>목록</span>
               </Link>
             </div>
-          </form>
-        )}
-        {error ? <p role="alert" className="mt-6 text-[1rem] text-destructive">{error}</p> : null}
+            </form>
+            {error ? <p role="alert" className="mt-6 text-[1rem] text-destructive">{error}</p> : null}
+          </section>
 
-        {!loading ? (
-          <>
-            <section aria-label="사원정보" className="mt-8 space-y-4 border-t border-border/70 pt-6">
-              <div>
-                <h2 className="text-lg font-semibold">사원정보</h2>
-                <p className="text-sm text-muted-foreground">이름을 입력하면 해당 사원의 정보가 표시됩니다.</p>
-              </div>
+          <section aria-label="사원정보" className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
+            <h2 className="mb-6 text-lg font-semibold">사원정보</h2>
               {selectedEmployee ? (
                 <dl className="grid gap-4 rounded-lg border border-border bg-background p-4 sm:grid-cols-2">
                   <div>
@@ -277,13 +276,10 @@ export default function LeaveNewPage() {
                   사원을 선택하면 직군과 근무형태가 표시됩니다.
                 </p>
               )}
-            </section>
+          </section>
 
-            <section aria-label="근무예정" className="mt-8 space-y-4 border-t border-border/70 pt-6">
-              <div>
-                <h2 className="text-lg font-semibold">근무예정</h2>
-                <p className="text-sm text-muted-foreground">휴가신청 기간에 등록된 근무예정입니다.</p>
-              </div>
+          <section aria-label="근무예정" className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
+            <h2 className="mb-6 text-lg font-semibold">근무예정</h2>
               {!selectedEmployee ? (
                 <p className="rounded-lg border border-dashed border-border bg-background p-4 text-sm text-muted-foreground">
                   사원을 선택하면 근무예정이 표시됩니다.
@@ -324,10 +320,9 @@ export default function LeaveNewPage() {
                   </Table>
                 </div>
               )}
-            </section>
-          </>
-        ) : null}
-      </section>
+          </section>
+        </>
+      )}
 
       <AlertModal
         isOpen={Boolean(successMessage)}

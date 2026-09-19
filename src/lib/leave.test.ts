@@ -16,19 +16,35 @@ describe("leave data", () => {
       error: null,
     });
     const employeesQuery = {
-      select: vi.fn().mockResolvedValue({ data: [{ id: "emp-1", name: "홍길동" }], error: null }),
+      select: vi.fn().mockResolvedValue({ data: [{ id: "emp-1", name: "홍길동", role: "경비원", work_style: "0" }], error: null }),
+    };
+    const assignmentsQuery = {
+      select: vi.fn().mockResolvedValue({ data: [{ employee_id: "emp-1", worksite_id: "work-1", start_date: "2026-05-01", end_date: "2026-06-30" }], error: null }),
+    };
+    const worksitesQuery = {
+      select: vi.fn().mockResolvedValue({ data: [{ id: "work-1", name: "본사" }], error: null }),
     };
     const supabase = {
-      from: vi.fn((table: string) => table === "leave" ? leaveQuery : employeesQuery),
+      from: vi.fn((table: string) => ({
+        leave: leaveQuery,
+        employees: employeesQuery,
+        work_assignments: assignmentsQuery,
+        worksites: worksitesQuery,
+      })[table]),
     };
 
     await expect(listLeaves({ employeeName: "홍" }, supabase as never)).resolves.toEqual([{
       id: "leave-1",
       employeeId: "emp-1",
       employeeName: "홍길동",
+      employeeRole: "경비원",
+      workStyle: "일반근무",
       leaveType: "2",
       startDate: "2026-06-01",
       endDate: "2026-06-03",
+      worksiteName: "본사",
+      assignmentStartDate: "2026-05-01",
+      assignmentEndDate: "2026-06-30",
     }]);
     expect(leaveQuery.order).toHaveBeenCalledWith("created_at", { ascending: false });
   });

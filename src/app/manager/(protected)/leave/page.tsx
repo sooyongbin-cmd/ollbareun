@@ -10,9 +10,14 @@ import ManagerLoadingMessage from "../manager-loading-message";
 type LeaveRow = {
   id: string;
   employeeName: string;
+  employeeRole: string;
+  workStyle: string;
   leaveType: "1" | "2";
   startDate: string;
   endDate: string;
+  worksiteName: string;
+  assignmentStartDate: string | null;
+  assignmentEndDate: string | null;
 };
 
 type Employee = {
@@ -25,6 +30,14 @@ const leaveTypeLabels: Record<LeaveRow["leaveType"], string> = {
   "1": "월차",
   "2": "연차",
 };
+
+function formatPeriod(startDate: string | null, endDate: string | null) {
+  if (!startDate || !endDate) {
+    return "-";
+  }
+
+  return startDate === endDate ? startDate : `${startDate} ~ ${endDate}`;
+}
 
 async function fetchJson<T>(url: string): Promise<T> {
   const response = await fetch(url);
@@ -137,14 +150,18 @@ export default function LeavePage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-left">이름</TableHead>
+                  <TableHead className="text-left">직군</TableHead>
+                  <TableHead className="text-left">근무형태</TableHead>
                   <TableHead className="text-left">휴가종류</TableHead>
                   <TableHead className="text-left">휴가기간</TableHead>
+                  <TableHead className="text-left">근무지</TableHead>
+                  <TableHead className="text-left">배정기간</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredRows.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={3} className="p-8 text-center text-muted-foreground italic">
+                    <TableCell data-responsive-empty colSpan={7} className="p-8 text-center text-muted-foreground italic">
                       조회 결과에 해당하는 휴가가 없습니다.
                     </TableCell>
                   </TableRow>
@@ -156,11 +173,17 @@ export default function LeavePage() {
                           {row.employeeName}
                         </Link>
                       </TableCell>
+                      <TableCell data-label="직군" className="text-muted-foreground">{row.employeeRole}</TableCell>
+                      <TableCell data-label="근무형태" className="text-muted-foreground">{row.workStyle}</TableCell>
                       <TableCell data-label="휴가종류" className="text-muted-foreground">
                         {leaveTypeLabels[row.leaveType]}
                       </TableCell>
                       <TableCell data-label="휴가기간" className="whitespace-nowrap text-muted-foreground">
                         {row.startDate === row.endDate ? row.startDate : `${row.startDate} ~ ${row.endDate}`}
+                      </TableCell>
+                      <TableCell data-label="근무지" className="text-muted-foreground">{row.worksiteName}</TableCell>
+                      <TableCell data-label="배정기간" className="whitespace-nowrap text-muted-foreground">
+                        {formatPeriod(row.assignmentStartDate, row.assignmentEndDate)}
                       </TableCell>
                     </TableRow>
                   ))

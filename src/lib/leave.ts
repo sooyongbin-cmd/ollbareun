@@ -7,9 +7,14 @@ export type LeaveListRow = {
   id: string;
   employeeId: string;
   employeeName: string;
+  employeeRole: string;
+  workStyle: string;
   leaveType: LeaveType;
   startDate: string;
   endDate: string;
+  worksiteName: string;
+  assignmentStartDate: string | null;
+  assignmentEndDate: string | null;
 };
 
 export type LeaveRecord = {
@@ -73,6 +78,10 @@ function requireLeaveType(value: unknown) {
   return value as LeaveType;
 }
 
+function workStyleLabel(workStyle: "0" | "1" | "2" | null | undefined) {
+  return workStyle === "0" ? "일반근무" : workStyle === "1" ? "격일근무" : workStyle === "2" ? "야간근무" : "-";
+}
+
 function parseLeaveInput(input: {
   employeeId: unknown;
   leaveType: unknown;
@@ -93,12 +102,41 @@ function parseLeaveInput(input: {
 
 function toLeaveListRow(
   row: { id: string; employee_id: string; leave_type: LeaveType; start_date: string; end_date: string },
-  employeeNamesById: Map<string, string>,
+  employeesById: Map<string, { name: string; role?: string | null; work_style?: "0" | "1" | "2" | null }>,
+  worksitesById: Map<string, string>,
+  assignments: { employee_id: string; worksite_id: string; start_date: string; end_date: string }[],
 ): LeaveListRow {
+  const employee = employeesById.get(row.employee_id);
+  const employeeAssignments = assignments
+    .filter((candidate) => candidate.employee_id === row.employee_id)
+    .sort((left, right) => right.start_date.localeCompare(left.start_date));
+  const assignment = employeeAssignments.find(
+    (candidate) => candidate.start_date <= row.end_date && row.start_date <= candidate.end_date,
+  );
+
   return {
     id: row.id,
     employeeId: row.employee_id,
-    employeeName: employeeNamesById.get(row.employee_id) ?? "-",
+    employeeName: employee?.name ?? "-",
+    employeeRole: employee?.role ?? "-",
+    workStyle: workStyleLabel(employee?.work_style),
+    leaveType: row.leave_type,
+    startDate: row.start_date,
+    endDate: row.end_date,
+    worksiteName: assignment ? worksitesById.get(assignment.worksite_id) ?? "-" : "-",
+    assignmentStartDate: assignment?.start_date ?? null,
+    assignmentEndDate: assignment?.end_date ?? null,
+  };
+}
+
+function toLeaveRecord(
+  row: { id: string; employee_id: string; leave_type: LeaveType; start_date: string; end_date: string },
+  employeeName: string,
+): LeaveRecord {
+  return {
+    id: row.id,
+    employeeId: row.employee_id,
+    employeeName,
     leaveType: row.leave_type,
     startDate: row.start_date,
     endDate: row.end_date,
@@ -110,21 +148,26 @@ export async function listLeaves(
   supabase: SupabaseClient = getSupabaseAdmin(),
 ) {
   const employeeNameQuery = typeof input.employeeName === "string" ? input.employeeName.trim().toLowerCase() : "";
-  const [leaveResult, employeesResult] = await Promise.all([
+  const [leaveResult, employeesResult, assignmentsResult, worksitesResult] = await Promise.all([
     supabase
       .from("leave")
       .select("id,employee_id,leave_type,start_date,end_date")
       .order("start_date", { ascending: false })
       .order("created_at", { ascending: false }),
-    supabase.from("employees").select("id,name"),
+    supabase.from("employees").select("id,name,role,work_style"),
+    supabase.from("work_assignments").select("employee_id,worksite_id,start_date,end_date"),
+    supabase.from("worksites").select("id,name"),
   ]);
 
   throwIfError(leaveResult.error);
   throwIfError(employeesResult.error);
+  throwIfError(assignmentsResult.error);
+  throwIfError(worksitesResult.error);
 
-  const employeeNamesById = new Map((employeesResult.data ?? []).map((employee) => [employee.id, employee.name]));
+  const employeesById = new Map((employeesResult.data ?? []).map((employee) => [employee.id, employee]));
+  const worksitesById = new Map((worksitesResult.data ?? []).map((worksite) => [worksite.id, worksite.name]));
   return (leaveResult.data ?? [])
-    .map((row) => toLeaveListRow(row, employeeNamesById))
+    .map((row) => toLeaveListRow(row, employeesById, worksitesById, assignmentsResult.data ?? []))
     .filter((row) => !employeeNameQuery || row.employeeName.toLowerCase().includes(employeeNameQuery));
 }
 
@@ -176,7 +219,7 @@ export async function getLeave(id: unknown, supabase: SupabaseClient = getSupaba
     .maybeSingle();
   throwIfError(employeeError);
 
-  return toLeaveListRow(leave, new Map([[leave.employee_id, employee?.name ?? "-"]]));
+  return toLeaveRecord(leave, employee?.name ?? "-");
 }
 
 export async function createLeave(

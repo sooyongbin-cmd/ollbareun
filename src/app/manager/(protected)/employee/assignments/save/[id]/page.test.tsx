@@ -5,6 +5,7 @@ import AssignmentSavePage from "./page";
 
 const push = vi.fn();
 const useParams = vi.fn();
+let failNormalDelete = false;
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push }),
@@ -15,6 +16,7 @@ describe("assignment save page", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     push.mockReset();
+    failNormalDelete = false;
     useParams.mockReturnValue({ id: "assign-1" });
     vi.stubGlobal(
       "fetch",
@@ -91,6 +93,13 @@ describe("assignment save page", () => {
         }
 
         if (init?.method === "DELETE" && url.endsWith("/api/assignments/assign-1")) {
+          if (failNormalDelete) {
+            return Response.json({ error: "해당 기간에 출퇴근 자료가 있어서 삭제할 수 없습니다." }, { status: 400 });
+          }
+          return new Response(null, { status: 204 });
+        }
+
+        if (init?.method === "DELETE" && url.endsWith("/api/assignments/assign-1?includeAttendance=true")) {
           return new Response(null, { status: 204 });
         }
 
@@ -138,6 +147,37 @@ describe("assignment save page", () => {
     expect(await screen.findByText("자료가 삭제되었습니다.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "확인" }));
     expect(push).toHaveBeenCalledWith("/manager/employee/assignments");
+  });
+
+  it("confirms and deletes the assignment with attendance records", async () => {
+    const user = userEvent.setup();
+
+    render(<AssignmentSavePage />);
+
+    expect(await screen.findByRole("heading", { name: "근무지배정 상세" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "근태자료포함삭제" }));
+    expect(screen.getByText("현재 발생한 근태자료를 포함하여 모두 삭제할까요?")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "예" }));
+
+    expect(await screen.findByText("자료가 삭제되었습니다.")).toBeInTheDocument();
+    expect(vi.mocked(fetch)).toHaveBeenCalledWith(
+      "/api/assignments/assign-1?includeAttendance=true",
+      { method: "DELETE" },
+    );
+  });
+
+  it("shows a modal when normal deletion is blocked by attendance records", async () => {
+    const user = userEvent.setup();
+    failNormalDelete = true;
+
+    render(<AssignmentSavePage />);
+
+    expect(await screen.findByRole("heading", { name: "근무지배정 상세" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "삭제" }));
+    await user.click(screen.getByRole("button", { name: "예" }));
+
+    expect(await screen.findByText("해당 기간에 출퇴근 자료가 있어서 삭제할 수 없습니다.")).toBeInTheDocument();
+    expect(screen.getByText("삭제 오류")).toBeInTheDocument();
   });
 
   it("shows the assignment calendar and immediately toggles days off", async () => {

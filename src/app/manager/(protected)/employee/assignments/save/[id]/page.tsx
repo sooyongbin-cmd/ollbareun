@@ -83,6 +83,8 @@ export default function AssignmentSavePage() {
   const [loading, setLoading] = useState(Boolean(assignmentId));
   const [error, setError] = useState("");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteWithAttendanceConfirmOpen, setDeleteWithAttendanceConfirmOpen] = useState(false);
+  const [errorAlertMessage, setErrorAlertMessage] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -165,15 +167,32 @@ export default function AssignmentSavePage() {
   async function handleDelete() {
     setDeleting(true);
     setError("");
+    setErrorAlertMessage("");
 
     try {
       await deleteRequest(`/api/assignments/${assignmentId}`);
       setAlertMessage("자료가 삭제되었습니다.");
     } catch (deleteError) {
-      setError(deleteError instanceof Error ? deleteError.message : "자료를 삭제하지 못했습니다.");
+      setErrorAlertMessage(deleteError instanceof Error ? deleteError.message : "자료를 삭제하지 못했습니다.");
     } finally {
       setDeleting(false);
       setDeleteConfirmOpen(false);
+    }
+  }
+
+  async function handleDeleteIncludingAttendance() {
+    setDeleting(true);
+    setError("");
+    setErrorAlertMessage("");
+
+    try {
+      await deleteRequest(`/api/assignments/${assignmentId}?includeAttendance=true`);
+      setAlertMessage("자료가 삭제되었습니다.");
+    } catch (deleteError) {
+      setErrorAlertMessage(deleteError instanceof Error ? deleteError.message : "자료를 삭제하지 못했습니다.");
+    } finally {
+      setDeleting(false);
+      setDeleteWithAttendanceConfirmOpen(false);
     }
   }
 
@@ -312,6 +331,17 @@ export default function AssignmentSavePage() {
               >
                 <DeleteIcon size={20} />
               </Button>
+              <Button
+                aria-label="근태자료포함삭제"
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-destructive/50 bg-background px-4 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto"
+                type="button"
+                disabled={saving || deleting}
+                onClick={() => setDeleteWithAttendanceConfirmOpen(true)}
+                variant="outline"
+              >
+                <DeleteIcon size={20} />
+                <span>근태자료포함삭제</span>
+              </Button>
             </div>
           </form>
         )}
@@ -343,6 +373,16 @@ export default function AssignmentSavePage() {
         loadingLabel="삭제처리중입니다..."
       />
 
+      <ConfirmModal
+        isOpen={deleteWithAttendanceConfirmOpen}
+        onClose={() => setDeleteWithAttendanceConfirmOpen(false)}
+        onConfirm={handleDeleteIncludingAttendance}
+        title="현재 발생한 근태자료를 포함하여 모두 삭제할까요?"
+        description="삭제한 자료는 복구할 수 없습니다."
+        loading={deleting}
+        loadingLabel="삭제처리중입니다..."
+      />
+
       <ProcessingModal isOpen={saving} message="저장처리중입니다..." />
 
       <AlertModal
@@ -353,6 +393,13 @@ export default function AssignmentSavePage() {
         }}
         title="알림"
         description={alertMessage}
+      />
+
+      <AlertModal
+        isOpen={Boolean(errorAlertMessage)}
+        onClose={() => setErrorAlertMessage("")}
+        title="삭제 오류"
+        description={errorAlertMessage}
       />
     </section>
   );

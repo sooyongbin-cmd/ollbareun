@@ -1,4 +1,4 @@
-import { deleteAssignment, getAssignmentById, updateAssignment } from "@/lib/phase1-data";
+import { deleteAssignment, deleteAssignmentIncludingAttendance, getAssignmentById, updateAssignment } from "@/lib/phase1-data";
 import { getManagerUser } from "@/lib/manager-auth";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
@@ -48,14 +48,20 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   }
 }
 
-export async function DELETE(_: Request, { params }: RouteContext) {
+export async function DELETE(request: Request, { params }: RouteContext) {
   try {
     if (!(await getManagerUser())) {
       return Response.json({ error: "관리자 인증이 필요합니다." }, { status: 401 });
     }
 
     const { id } = await params;
-    await deleteAssignment(id, getSupabaseAdmin());
+    const includeAttendance = new URL(request.url).searchParams.get("includeAttendance") === "true";
+    const supabase = getSupabaseAdmin();
+    if (includeAttendance) {
+      await deleteAssignmentIncludingAttendance(id, supabase);
+    } else {
+      await deleteAssignment(id, supabase);
+    }
     return new Response(null, { status: 204 });
   } catch (error) {
     return Response.json(

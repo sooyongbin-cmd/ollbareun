@@ -508,6 +508,15 @@ export async function deleteAssignment(id: unknown, supabase: SupabaseClient = g
   throwIfError(error);
 }
 
+export async function deleteAssignmentIncludingAttendance(id: unknown, supabase: SupabaseClient = getSupabase()) {
+  const assignmentId = requireString(id, "배정");
+  const { error } = await supabase.rpc("delete_assignment_with_attendance", {
+    p_assignment_id: assignmentId,
+  });
+
+  throwIfError(error);
+}
+
 export async function authenticateGuard(input: { name: unknown; phone: unknown }) {
   const name = requireString(input.name, "이름");
   const phone = requireString(input.phone, "연락처");

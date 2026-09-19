@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { authenticateGuard, clockIn, clockOut, createAssignment, deleteAssignment, listAssignments, listAssignmentsForEmployee } from "./phase1-data";
+import { authenticateGuard, clockIn, clockOut, createAssignment, deleteAssignment, deleteAssignmentIncludingAttendance, listAssignments, listAssignmentsForEmployee } from "./phase1-data";
 import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
 import { getAssignmentDayOffCounts, isAssignmentDayOff } from "./assignment-days-off";
@@ -552,5 +552,15 @@ describe("guard authentication data rules", () => {
       "해당 기간에 출퇴근 자료가 있어서 삭제할 수 없습니다.",
     );
     expect(supabase.from).toHaveBeenCalledTimes(2);
+  });
+
+  it("deletes an assignment and its attendance records through the dedicated RPC", async () => {
+    const rpc = vi.fn().mockResolvedValue({ data: null, error: null });
+    const supabase = { rpc };
+
+    await expect(deleteAssignmentIncludingAttendance("assign-1", supabase as never)).resolves.toBeUndefined();
+    expect(rpc).toHaveBeenCalledWith("delete_assignment_with_attendance", {
+      p_assignment_id: "assign-1",
+    });
   });
 });

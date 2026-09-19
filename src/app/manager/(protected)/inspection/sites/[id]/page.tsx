@@ -12,6 +12,8 @@ import type { GpsInfo } from "@/lib/gps";
 import WorksiteGpsPicker from "../../../employee/worksites/worksite-gps-picker";
 import ManagerLoadingMessage from "../../../manager-loading-message";
 import AlertModal from "@/components/modals/alert-modal";
+import ProcessingModal from "@/components/modals/processing-modal";
+import ConfirmModal from "@/components/modals/confirm-modal";
 import { SaveIcon } from "@/components/icons/save-icon";
 import { saveInspectionQrImage } from "../../save-inspection-qr";
 
@@ -91,6 +93,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [printing, setPrinting] = useState(false);
   const [error, setError] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
@@ -202,7 +205,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
   }
 
   async function handleDelete() {
-    if (!siteId || !window.confirm("현장을 삭제하시겠습니까?")) {
+    if (!siteId || deleting) {
       return;
     }
 
@@ -218,6 +221,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
       setError(deleteError instanceof Error ? deleteError.message : "현장을 삭제하지 못했습니다.");
     } finally {
       setDeleting(false);
+      setDeleteConfirmOpen(false);
     }
   }
 
@@ -416,8 +420,8 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
               </Button>
               <Button
                 className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center md:w-auto"
-                disabled={deleting}
-                onClick={handleDelete}
+                disabled={saving || deleting}
+                onClick={() => setDeleteConfirmOpen(true)}
                 type="button"
                 variant="outline"
               >
@@ -429,6 +433,17 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
 
         {error && savedSite ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mt-6 text-center">{error}</p> : null}
       </section>
+
+      <ConfirmModal
+        isOpen={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        onConfirm={handleDelete}
+        title="현장을 삭제하시겠습니까?"
+        description="삭제하면 현재 현장 자료가 완전히 제거됩니다."
+        loading={deleting}
+        loadingLabel="삭제처리중입니다..."
+      />
+      <ProcessingModal isOpen={saving} message="저장처리중입니다..." />
 
       <AlertModal
         isOpen={Boolean(alertMessage)}

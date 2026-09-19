@@ -227,11 +227,12 @@ describe("inspection site detail page", () => {
 
   it("shows a success message before returning to the list after deleting a site", async () => {
     const user = userEvent.setup();
-    vi.spyOn(window, "confirm").mockReturnValue(true);
     render(<InspectionSiteDetailPage params={Promise.resolve({ id: "site-1" })} />);
 
     expect(await screen.findByDisplayValue("Gate")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "삭제" }));
+    expect(screen.getByText("현장을 삭제하시겠습니까?")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "예" }));
 
     expect(await screen.findByText("현장이 삭제되었습니다.")).toBeInTheDocument();
     expect(push).not.toHaveBeenCalled();

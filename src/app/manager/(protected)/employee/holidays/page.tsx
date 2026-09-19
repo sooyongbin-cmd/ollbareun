@@ -148,6 +148,7 @@ export default function HolidaysPage() {
         onClose={() => { if (!busy) setConfirmYear(null); }}
         onConfirm={() => void importYear()}
         loading={busy}
+        loadingLabel="공휴일 정보를 가져오는 중입니다..."
         title={(confirmYear ?? year) + " 년도의 공공데이터포털의 한국천문연구원 특일정보를 가져올까요?"}
         description="이미 등록된 날짜는 건너뛰며 기존 선택값은 유지됩니다."
       />

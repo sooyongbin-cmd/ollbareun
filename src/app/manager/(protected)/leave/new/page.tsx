@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { SaveIcon } from "@/components/icons/save-icon";
 import { CancelIcon } from "@/components/icons/cancel-icon";
 import AlertModal from "@/components/modals/alert-modal";
+import ProcessingModal from "@/components/modals/processing-modal";
 import ManagerLoadingMessage from "../../manager-loading-message";
 
 type Employee = {
@@ -323,6 +324,8 @@ export default function LeaveNewPage() {
           </section>
         </>
       )}
+
+      <ProcessingModal isOpen={saving} message="저장처리중입니다..." />
 
       <AlertModal
         isOpen={Boolean(successMessage)}

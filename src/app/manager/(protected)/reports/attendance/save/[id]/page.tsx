@@ -318,6 +318,7 @@ export default function AttendanceSavePage() {
         onConfirm={handleSave}
         title="변경사항을 저장할까요?"
         loading={saving}
+        loadingLabel="저장처리중입니다..."
       />
 
       <ConfirmModal
@@ -329,6 +330,7 @@ export default function AttendanceSavePage() {
         title="현재 근태기록을 삭제할까요?"
         description="삭제한 근태기록은 복구할 수 없습니다."
         loading={deleting}
+        loadingLabel="삭제처리중입니다..."
       />
 
       <AlertModal

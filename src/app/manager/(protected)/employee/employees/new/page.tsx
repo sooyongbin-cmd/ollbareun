@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { SaveIcon } from "@/components/icons/save-icon";
 import AlertModal from "@/components/modals/alert-modal";
+import ProcessingModal from "@/components/modals/processing-modal";
 
 type EmployeeResponse = {
   employee: {
@@ -37,11 +38,14 @@ export default function EmployeeNewPage() {
   const [inTime, setInTime] = useState("06:00");
   const [outTime, setOutTime] = useState("06:00");
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (saving) return;
+    setSaving(true);
     setError("");
 
     const form = event.currentTarget;
@@ -60,6 +64,8 @@ export default function EmployeeNewPage() {
       setSuccessMessage(`직원이름(${result.employee.name}) 연락처(${result.employee.phone}) 직군(${result.employee.role}) 등록완료`);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "요청을 처리하지 못했습니다.");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -127,6 +133,7 @@ export default function EmployeeNewPage() {
             aria-label="저장"
             className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto"
             data-testid="employee-submit"
+            disabled={saving}
             type="submit"
           >
             <SaveIcon size={20} />
@@ -135,6 +142,8 @@ export default function EmployeeNewPage() {
 
         {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mt-6 text-center">{error}</p> : null}
       </section>
+
+      <ProcessingModal isOpen={saving} message="저장처리중입니다..." />
 
       <AlertModal
         isOpen={Boolean(successMessage)}

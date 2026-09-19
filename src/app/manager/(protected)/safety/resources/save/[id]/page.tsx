@@ -9,6 +9,7 @@ import { SaveIcon } from "@/components/icons/save-icon";
 import { DeleteIcon } from "@/components/icons/delete-icon";
 import ConfirmModal from "@/components/modals/confirm-modal";
 import AlertModal from "@/components/modals/alert-modal";
+import ProcessingModal from "@/components/modals/processing-modal";
 
 type EducationResource = {
   id: string;
@@ -69,6 +70,7 @@ export default function EducationResourceSavePage() {
   const [error, setError] = useState("");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const routeError = resourceId ? error : "교육자료 정보를 불러오지 못했습니다.";
 
@@ -108,6 +110,8 @@ export default function EducationResourceSavePage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (saving) return;
+    setSaving(true);
     setError("");
 
     const nextTitle = title.trim();
@@ -134,6 +138,8 @@ export default function EducationResourceSavePage() {
       setAlertMessage("수정이 완료되었습니다.");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "교육자료 정보를 저장하지 못했습니다.");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -146,8 +152,9 @@ export default function EducationResourceSavePage() {
       setAlertMessage("자료가 삭제되었습니다.");
     } catch (deleteError) {
       setError(deleteError instanceof Error ? deleteError.message : "교육자료를 삭제하지 못했습니다.");
-      setDeleteConfirmOpen(false);
+    } finally {
       setDeleting(false);
+      setDeleteConfirmOpen(false);
     }
   }
 
@@ -200,13 +207,14 @@ export default function EducationResourceSavePage() {
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <Button aria-label="저장" className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto" type="submit">
+              <Button aria-label="저장" className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto" disabled={saving || deleting} type="submit">
                 <SaveIcon size={20} />
               </Button>
               <Button
                 aria-label="삭제"
                 className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto"
                 type="button"
+                disabled={saving || deleting}
                 onClick={() => setDeleteConfirmOpen(true)}
                 variant="outline"
               >
@@ -226,7 +234,10 @@ export default function EducationResourceSavePage() {
         title="자료를 삭제하시겠습니까?"
         description="삭제하면 해당 교육자료가 시스템에서 완전히 제거됩니다."
         loading={deleting}
+        loadingLabel="삭제처리중입니다..."
       />
+
+      <ProcessingModal isOpen={saving} message="저장처리중입니다..." />
 
       <AlertModal
         isOpen={Boolean(alertMessage)}

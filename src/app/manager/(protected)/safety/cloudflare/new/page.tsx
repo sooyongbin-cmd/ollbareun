@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { SaveIcon } from "@/components/icons/save-icon";
+import ProcessingModal from "@/components/modals/processing-modal";
 
 const MAX_CLOUDFLARE_UPLOAD_BYTES = 200 * 1024 * 1024;
 const UPLOAD_TIMEOUT_MS = 120_000;
@@ -163,6 +164,8 @@ export default function CloudflareVideoNewPage() {
           </div>
         ) : null}
       </section>
+
+      <ProcessingModal isOpen={isUploading} message="업로드처리중입니다..." />
     </section>
   );
 }

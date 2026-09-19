@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SaveIcon } from "@/components/icons/save-icon";
+import ProcessingModal from "@/components/modals/processing-modal";
 export default function HolidayNewPage() {
   const router = useRouter();
   const [date, setDate] = useState("");
@@ -59,6 +60,7 @@ export default function HolidayNewPage() {
             </Button>
           </div>
         </form>
+        <ProcessingModal isOpen={busy} message="저장처리중입니다..." />
         {error && <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mt-6 text-center">{error}</p>}
       </section>
     </section>

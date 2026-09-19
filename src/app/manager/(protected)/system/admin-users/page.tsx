@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useEffect, useState, useCallback, type FormEvent } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import ManagerLoadingMessage from "../../manager-loading-message";
+import ConfirmModal from "@/components/modals/confirm-modal";
 
 type AdminUser = {
   id: string;
@@ -31,6 +32,7 @@ export default function AdminUsersPage() {
   const [currentAdmin, setCurrentAdmin] = useState<AdminUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState("");
+  const [deleteConfirmId, setDeleteConfirmId] = useState("");
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -140,7 +142,7 @@ export default function AdminUsersPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("정말로 이 관리자를 삭제하시겠습니까?")) return;
+    if (actionLoadingId) return;
 
     setError("");
     setSuccessMessage("");
@@ -163,6 +165,7 @@ export default function AdminUsersPage() {
       setError(err instanceof Error ? err.message : "관리자 삭제를 처리하지 못했습니다.");
     } finally {
       setActionLoadingId("");
+      setDeleteConfirmId("");
     }
   }
 
@@ -295,8 +298,8 @@ export default function AdminUsersPage() {
                           <Button
                             aria-label="삭제"
                             className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto text-destructive hover:text-destructive/80"
-                            disabled={actionLoadingId === admin.id}
-                            onClick={() => void handleDelete(admin.id)}
+                            disabled={Boolean(actionLoadingId)}
+                            onClick={() => setDeleteConfirmId(admin.id)}
                             type="button"
                             variant="outline"
                           >
@@ -329,6 +332,16 @@ export default function AdminUsersPage() {
           </div>
         )}
       </section>
+
+      <ConfirmModal
+        isOpen={Boolean(deleteConfirmId)}
+        onClose={() => setDeleteConfirmId("")}
+        onConfirm={() => void handleDelete(deleteConfirmId)}
+        title="관리자를 삭제하시겠습니까?"
+        description="삭제하면 해당 관리자 계정의 사전 등록 정보가 제거됩니다."
+        loading={Boolean(deleteConfirmId && actionLoadingId === deleteConfirmId)}
+        loadingLabel="삭제처리중입니다..."
+      />
     </section>
   );
 }

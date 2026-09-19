@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ManagerLoadingMessage from "../../../manager-loading-message";
+import ConfirmModal from "@/components/modals/confirm-modal";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -58,6 +59,7 @@ export default function SpecialRemarkDetailPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [error, setError] = useState("");
   const [address, setAddress] = useState("");
   const [loadingAddress, setLoadingAddress] = useState(false);
@@ -150,7 +152,7 @@ export default function SpecialRemarkDetailPage({ params }: PageProps) {
   }
 
   async function handleDelete() {
-    if (!reportId || !window.confirm("특이사항 보고를 삭제하시겠습니까?")) {
+    if (!reportId || deleting) {
       return;
     }
 
@@ -172,6 +174,7 @@ export default function SpecialRemarkDetailPage({ params }: PageProps) {
       setError(deleteError instanceof Error ? deleteError.message : "특이사항을 삭제하지 못했습니다.");
     } finally {
       setDeleting(false);
+      setDeleteConfirmOpen(false);
     }
   }
 
@@ -245,13 +248,23 @@ export default function SpecialRemarkDetailPage({ params }: PageProps) {
               <Button hidden={report.processing_status === "Y"} disabled={completing || deleting} onClick={handleComplete} type="button">
                 {completing ? "처리 중..." : "처리완료"}
               </Button>
-              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" disabled={deleting || completing} onClick={handleDelete} type="button" variant="outline">
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" disabled={deleting || completing} onClick={() => setDeleteConfirmOpen(true)} type="button" variant="outline">
                 삭제
               </Button>
             </div>
           </div>
         ) : null}
       </section>
+
+      <ConfirmModal
+        isOpen={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        onConfirm={handleDelete}
+        title="특이사항 보고를 삭제하시겠습니까?"
+        description="삭제하면 특이사항 보고와 연결된 사진이 함께 제거됩니다."
+        loading={deleting}
+        loadingLabel="삭제처리중입니다..."
+      />
     </section>
   );
 }

@@ -8,6 +8,7 @@ import type { GpsInfo } from "@/lib/gps";
 import WorksiteGpsPicker from "../worksite-gps-picker";
 import { SaveIcon } from "@/components/icons/save-icon";
 import AlertModal from "@/components/modals/alert-modal";
+import ProcessingModal from "@/components/modals/processing-modal";
 
 declare global {
   interface Window {
@@ -47,6 +48,7 @@ export default function WorksiteNewPage() {
   const [error, setError] = useState("");
   const [address, setAddress] = useState("");
   const [gpsInfo, setGpsInfo] = useState<GpsInfo | null>(null);
+  const [saving, setSaving] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const router = useRouter();
 
@@ -73,6 +75,7 @@ export default function WorksiteNewPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (saving) return;
     setError("");
 
     if (!gpsInfo) {
@@ -82,6 +85,7 @@ export default function WorksiteNewPage() {
 
     const form = event.currentTarget;
     const data = new FormData(form);
+    setSaving(true);
 
     try {
       await postJson<WorksiteResponse>("/api/worksites", {
@@ -94,6 +98,8 @@ export default function WorksiteNewPage() {
       setAlertMessage("자료를 저장하였습니다.");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "요청을 처리하지 못했습니다.");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -147,6 +153,7 @@ export default function WorksiteNewPage() {
             aria-label="저장"
             className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto"
             data-testid="worksite-submit"
+            disabled={saving}
             type="submit"
           >
             <SaveIcon size={20} />
@@ -155,6 +162,8 @@ export default function WorksiteNewPage() {
 
         {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mt-6 text-center">{error}</p> : null}
       </section>
+
+      <ProcessingModal isOpen={saving} message="저장처리중입니다..." />
 
       <AlertModal
         isOpen={Boolean(alertMessage)}

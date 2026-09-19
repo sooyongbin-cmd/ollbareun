@@ -61,7 +61,8 @@ describe("manager special remark detail page", () => {
 
     await user.click(screen.getByRole("button", { name: "삭제" }));
 
-    expect(confirm).toHaveBeenCalledWith("특이사항 보고를 삭제하시겠습니까?");
+    expect(screen.getByText("특이사항 보고를 삭제하시겠습니까?")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "예" }));
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith("/api/inspection/special-remarks/report-1", { method: "DELETE" });
     });

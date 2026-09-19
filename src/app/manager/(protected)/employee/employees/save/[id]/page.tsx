@@ -339,6 +339,7 @@ export default function EmployeeSavePage() {
         onConfirm={handleSave}
         title="변경사항을 저장하시겠습니까?"
         loading={saving}
+        loadingLabel="저장처리중입니다..."
       />
 
       <ConfirmModal
@@ -348,6 +349,7 @@ export default function EmployeeSavePage() {
         title="현재자료를 삭제할까요?"
         description="삭제하면 해당 직원의 자료와 연결된 근무 배정, 출퇴근 기록도 함께 삭제됩니다."
         loading={deleting}
+        loadingLabel="삭제처리중입니다..."
       />
 
       <AlertModal

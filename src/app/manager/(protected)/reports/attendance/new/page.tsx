@@ -182,7 +182,14 @@ export default function AttendanceNewPage() {
         )}
         {error && <p role="alert" className="mt-6 text-destructive">{error}</p>}
       </section>
-      <ConfirmModal isOpen={confirmOpen} onClose={() => setConfirmOpen(false)} onConfirm={handleSave} title="출근 기록을 등록하시겠습니까?" loading={saving} />
+      <ConfirmModal
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleSave}
+        title="출근 기록을 등록하시겠습니까?"
+        loading={saving}
+        loadingLabel="저장처리중입니다..."
+      />
       <AlertModal isOpen={successOpen} onClose={() => router.push("/manager/reports/attendance")} title="알림" description="등록이 완료되었습니다." />
     </section>
   );

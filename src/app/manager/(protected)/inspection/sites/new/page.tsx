@@ -9,6 +9,7 @@ import type { GpsInfo } from "@/lib/gps";
 import WorksiteGpsPicker from "../../../employee/worksites/worksite-gps-picker";
 import { SaveIcon } from "@/components/icons/save-icon";
 import AlertModal from "@/components/modals/alert-modal";
+import ProcessingModal from "@/components/modals/processing-modal";
 
 declare global {
   interface Window {
@@ -228,6 +229,8 @@ export default function InspectionSiteNewPage() {
 
         {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mt-6 text-center">{error}</p> : null}
       </section>
+
+      <ProcessingModal isOpen={saving} message="저장처리중입니다..." />
 
       <AlertModal
         isOpen={Boolean(alertMessage)}

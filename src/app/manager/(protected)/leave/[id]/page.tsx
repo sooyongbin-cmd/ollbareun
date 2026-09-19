@@ -11,6 +11,7 @@ import { DeleteIcon } from "@/components/icons/delete-icon";
 import { CancelIcon } from "@/components/icons/cancel-icon";
 import AlertModal from "@/components/modals/alert-modal";
 import ConfirmModal from "@/components/modals/confirm-modal";
+import ProcessingModal from "@/components/modals/processing-modal";
 import ManagerLoadingMessage from "../../manager-loading-message";
 
 type LeaveRecord = {
@@ -179,10 +180,10 @@ export default function LeaveDetailPage() {
             </div>
 
             <div className="flex gap-3">
-              <Button aria-label="저장" type="submit" disabled={saving}>
+              <Button aria-label="저장" type="submit" disabled={saving || deleting}>
                 <SaveIcon size={20} />
               </Button>
-              <Button aria-label="삭제" type="button" variant="outline" onClick={() => setDeleteConfirmOpen(true)} disabled={deleting}>
+              <Button aria-label="삭제" type="button" variant="outline" onClick={() => setDeleteConfirmOpen(true)} disabled={saving || deleting}>
                 <DeleteIcon size={20} />
               </Button>
               <Link aria-label="목록" href="/manager/leave" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50">
@@ -202,7 +203,9 @@ export default function LeaveDetailPage() {
         title="휴가를 삭제하시겠습니까?"
         description="삭제하면 현재 휴가 자료가 완전히 제거됩니다."
         loading={deleting}
+        loadingLabel="삭제처리중입니다..."
       />
+      <ProcessingModal isOpen={saving} message="저장처리중입니다..." />
       <AlertModal
         isOpen={Boolean(successMessage)}
         onClose={() => {

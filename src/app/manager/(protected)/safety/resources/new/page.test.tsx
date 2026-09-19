@@ -65,7 +65,7 @@ describe("education resource new page", () => {
     await user.type(screen.getByLabelText("유튜브 링크"), "https://www.youtube.com/watch?v=fireSafety");
     await user.click(screen.getByRole("button", { name: "저장" }));
 
-    expect(screen.getByRole("button", { name: "저장" })).toBeDisabled();
+    expect(screen.getByRole("button", { hidden: true, name: "저장" })).toBeDisabled();
     expect(screen.getByText("유튜브 링크를 저장 중입니다.")).toBeInTheDocument();
 
     resolveFetch(

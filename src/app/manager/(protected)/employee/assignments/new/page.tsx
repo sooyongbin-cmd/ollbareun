@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import ManagerLoadingMessage from "../../../manager-loading-message";
 import { SaveIcon } from "@/components/icons/save-icon";
 import AlertModal from "@/components/modals/alert-modal";
+import ProcessingModal from "@/components/modals/processing-modal";
 
 type Bootstrap = {
   employees: { id: string; name: string; work_style: "0" | "1" | "2"; in_time: string; out_time: string }[];
@@ -57,6 +58,7 @@ export default function AssignmentNewPage() {
   const [alertMessage, setAlertMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const router = useRouter();
   const selectedEmployee = data.employees.find((employee) => employee.id === employeeId);
   const sortedEmployees = [...data.employees].sort((left, right) =>
@@ -101,6 +103,8 @@ export default function AssignmentNewPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (saving) return;
+    setSaving(true);
     setError("");
 
     const form = event.currentTarget;
@@ -119,6 +123,8 @@ export default function AssignmentNewPage() {
       setAlertMessage("자료를 저장하였습니다.");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "배정을 처리하지 못했습니다.");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -218,6 +224,7 @@ export default function AssignmentNewPage() {
               aria-label="저장"
               className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto"
               data-testid="assignment-submit"
+              disabled={saving}
               type="submit"
             >
               <SaveIcon size={20} />
@@ -227,6 +234,8 @@ export default function AssignmentNewPage() {
 
         {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mt-6 text-center">{error}</p> : null}
       </section>
+
+      <ProcessingModal isOpen={saving} message="저장처리중입니다..." />
 
       <AlertModal
         isOpen={Boolean(alertMessage)}

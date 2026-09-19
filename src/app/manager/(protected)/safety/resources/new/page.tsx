@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { SaveIcon } from "@/components/icons/save-icon";
 import AlertModal from "@/components/modals/alert-modal";
+import ProcessingModal from "@/components/modals/processing-modal";
 
 const SAVE_TIMEOUT_MS = 70_000;
 
@@ -141,6 +142,8 @@ export default function EducationResourceNewPage() {
         {isSubmitting ? <p className="rounded-md border border-border bg-muted px-4 py-3 text-sm text-foreground mt-6 text-center">유튜브 링크를 저장 중입니다.</p> : null}
         {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mt-6 text-center">{error}</p> : null}
       </section>
+
+      <ProcessingModal isOpen={isSubmitting} message="저장처리중입니다..." />
 
       <AlertModal
         isOpen={Boolean(alertMessage)}

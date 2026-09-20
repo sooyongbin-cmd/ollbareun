@@ -41,6 +41,6 @@ jobs:
           printf '%s\n' "SUPABASE_DB_URL=postgresql://${SUPABASE_DB_USER}:${db_password}@${SUPABASE_DB_HOST}:5432/postgres?sslmode=require" >> "$GITHUB_ENV"
 
       - name: Apply database migrations
-        run: supabase db push --db-url "$SUPABASE_DB_URL" --yes
+        run: supabase db push --db-url "$SUPABASE_DB_URL" --include-all --yes
 
       - run: supabase functions deploy education-reminders --project-ref "$SUPABASE_PROJECT_ID"

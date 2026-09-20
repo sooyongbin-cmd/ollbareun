@@ -514,7 +514,41 @@ export async function deleteAssignmentIncludingAttendance(id: unknown, supabase:
     p_assignment_id: assignmentId,
   });
 
-  throwIfError(error);
+  if (!error) {
+    return;
+  }
+
+  // Keep the feature usable while a newly-added RPC is waiting for the
+  // remote migration/schema cache to catch up. Other RPC errors must still
+  // surface instead of silently switching to a multi-statement fallback.
+  if (error.code !== "PGRST202") {
+    throwIfError(error);
+  }
+
+  const { data: assignment, error: assignmentError } = await supabase
+    .from("work_assignments")
+    .select("employee_id,worksite_id,start_date,end_date")
+    .eq("id", assignmentId)
+    .maybeSingle();
+  throwIfError(assignmentError);
+  if (!assignment) {
+    throw new Error("배정 정보를 찾을 수 없습니다.");
+  }
+
+  const { error: recordError } = await supabase
+    .from("work_record")
+    .delete()
+    .eq("employee_id", assignment.employee_id)
+    .eq("worksite_id", assignment.worksite_id)
+    .gte("work_date", assignment.start_date)
+    .lte("work_date", assignment.end_date);
+  throwIfError(recordError);
+
+  const { error: assignmentDeleteError } = await supabase
+    .from("work_assignments")
+    .delete()
+    .eq("id", assignmentId);
+  throwIfError(assignmentDeleteError);
 }
 
 export async function authenticateGuard(input: { name: unknown; phone: unknown }) {

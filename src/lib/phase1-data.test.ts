@@ -563,4 +563,46 @@ describe("guard authentication data rules", () => {
       p_assignment_id: "assign-1",
     });
   });
+
+  it("falls back to direct deletes when the attendance deletion RPC is not in the schema cache", async () => {
+    const rpc = vi.fn().mockResolvedValue({
+      data: null,
+      error: { code: "PGRST202", message: "Could not find the function in the schema cache" },
+    });
+    const assignmentQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({
+        data: {
+          employee_id: "emp-1",
+          worksite_id: "site-1",
+          start_date: "2026-05-21",
+          end_date: "2026-05-23",
+        },
+        error: null,
+      }),
+    };
+    const recordDeleteQuery = {
+      delete: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockResolvedValue({ error: null }),
+    };
+    const assignmentDeleteQuery = {
+      delete: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ error: null }),
+    };
+    const supabase = {
+      rpc,
+      from: vi
+        .fn()
+        .mockReturnValueOnce(assignmentQuery)
+        .mockReturnValueOnce(recordDeleteQuery)
+        .mockReturnValueOnce(assignmentDeleteQuery),
+    };
+
+    await expect(deleteAssignmentIncludingAttendance("assign-1", supabase as never)).resolves.toBeUndefined();
+    expect(recordDeleteQuery.eq).toHaveBeenCalledWith("worksite_id", "site-1");
+    expect(assignmentDeleteQuery.eq).toHaveBeenCalledWith("id", "assign-1");
+  });
 });

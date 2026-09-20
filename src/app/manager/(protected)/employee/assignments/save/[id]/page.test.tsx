@@ -103,6 +103,10 @@ describe("assignment save page", () => {
           return new Response(null, { status: 204 });
         }
 
+        if (init?.method === "DELETE" && url.endsWith("/api/assignments/assign-1?afterToday=true")) {
+          return new Response(null, { status: 204 });
+        }
+
         return Response.json({}, { status: 404 });
       }),
     );
@@ -149,13 +153,30 @@ describe("assignment save page", () => {
     expect(push).toHaveBeenCalledWith("/manager/employee/assignments");
   });
 
-  it("confirms and deletes the assignment with attendance records", async () => {
+  it("confirms and deletes the assignment after today", async () => {
     const user = userEvent.setup();
 
     render(<AssignmentSavePage />);
 
     expect(await screen.findByRole("heading", { name: "근무지배정 상세" })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "근태자료포함삭제" }));
+    await user.click(screen.getByRole("button", { name: "오늘이후삭제" }));
+    expect(screen.getByText("오늘 이후 자료를 포함하여 배정을 삭제할까요?")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "예" }));
+
+    expect(await screen.findByText("오늘 이후 자료가 삭제되었습니다.")).toBeInTheDocument();
+    expect(vi.mocked(fetch)).toHaveBeenCalledWith(
+      "/api/assignments/assign-1?afterToday=true",
+      { method: "DELETE" },
+    );
+  });
+
+  it("confirms and deletes the assignment with all attendance records", async () => {
+    const user = userEvent.setup();
+
+    render(<AssignmentSavePage />);
+
+    expect(await screen.findByRole("heading", { name: "근무지배정 상세" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "전체자료삭제" }));
     expect(screen.getByText("현재 발생한 근태자료를 포함하여 모두 삭제할까요?")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "예" }));
 

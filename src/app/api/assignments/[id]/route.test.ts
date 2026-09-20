@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getManagerUser } from "@/lib/manager-auth";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
-import { deleteAssignment, deleteAssignmentIncludingAttendance } from "@/lib/phase1-data";
+import { deleteAssignment, deleteAssignmentAfterToday, deleteAssignmentIncludingAttendance } from "@/lib/phase1-data";
 import { DELETE } from "./route";
 
 vi.mock("@/lib/manager-auth", () => ({
@@ -14,6 +14,7 @@ vi.mock("@/lib/supabase-admin", () => ({
 
 vi.mock("@/lib/phase1-data", () => ({
   deleteAssignment: vi.fn(),
+  deleteAssignmentAfterToday: vi.fn(),
   deleteAssignmentIncludingAttendance: vi.fn(),
 }));
 
@@ -46,5 +47,17 @@ describe("DELETE /api/assignments/[id]", () => {
     expect(response.status).toBe(204);
     expect(deleteAssignmentIncludingAttendance).toHaveBeenCalledWith("assign-1", supabase);
     expect(deleteAssignment).not.toHaveBeenCalled();
+  });
+
+  it("uses the after-today delete flow when requested", async () => {
+    const response = await DELETE(
+      new Request("http://localhost/api/assignments/assign-1?afterToday=true"),
+      { params: Promise.resolve({ id: "assign-1" }) },
+    );
+
+    expect(response.status).toBe(204);
+    expect(deleteAssignmentAfterToday).toHaveBeenCalledWith("assign-1", supabase);
+    expect(deleteAssignment).not.toHaveBeenCalled();
+    expect(deleteAssignmentIncludingAttendance).not.toHaveBeenCalled();
   });
 });

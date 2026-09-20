@@ -1,4 +1,4 @@
-import { deleteAssignment, deleteAssignmentIncludingAttendance, getAssignmentById, updateAssignment } from "@/lib/phase1-data";
+import { deleteAssignment, deleteAssignmentAfterToday, deleteAssignmentIncludingAttendance, getAssignmentById, updateAssignment } from "@/lib/phase1-data";
 import { getManagerUser } from "@/lib/manager-auth";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
@@ -55,9 +55,13 @@ export async function DELETE(request: Request, { params }: RouteContext) {
     }
 
     const { id } = await params;
-    const includeAttendance = new URL(request.url).searchParams.get("includeAttendance") === "true";
+    const searchParams = new URL(request.url).searchParams;
+    const includeAttendance = searchParams.get("includeAttendance") === "true";
+    const afterToday = searchParams.get("afterToday") === "true";
     const supabase = getSupabaseAdmin();
-    if (includeAttendance) {
+    if (afterToday) {
+      await deleteAssignmentAfterToday(id, supabase);
+    } else if (includeAttendance) {
       await deleteAssignmentIncludingAttendance(id, supabase);
     } else {
       await deleteAssignment(id, supabase);

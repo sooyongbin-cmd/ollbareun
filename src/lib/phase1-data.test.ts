@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { authenticateGuard, clockIn, clockOut, createAssignment, deleteAssignment, deleteAssignmentIncludingAttendance, listAssignments, listAssignmentsForEmployee } from "./phase1-data";
+import { authenticateGuard, clockIn, clockOut, createAssignment, deleteAssignment, deleteAssignmentAfterToday, deleteAssignmentIncludingAttendance, listAssignments, listAssignmentsForEmployee } from "./phase1-data";
 import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
 import { getAssignmentDayOffCounts, isAssignmentDayOff } from "./assignment-days-off";
@@ -562,6 +562,71 @@ describe("guard authentication data rules", () => {
     expect(rpc).toHaveBeenCalledWith("delete_assignment_with_attendance", {
       p_assignment_id: "assign-1",
     });
+  });
+
+  it("deletes an assignment and only records after today through the dedicated RPC", async () => {
+    const rpc = vi.fn().mockResolvedValue({ data: null, error: null });
+    const supabase = { rpc };
+
+    await expect(deleteAssignmentAfterToday("assign-1", supabase as never)).resolves.toBeUndefined();
+    expect(rpc).toHaveBeenCalledWith("delete_assignment_after_today", {
+      p_assignment_id: "assign-1",
+    });
+  });
+
+  it("preserves today's clocked-in record in the after-today fallback", async () => {
+    const rpc = vi.fn().mockResolvedValue({
+      data: null,
+      error: { code: "PGRST202", message: "Could not find the function in the schema cache" },
+    });
+    const assignmentQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({
+        data: {
+          employee_id: "emp-1",
+          worksite_id: "site-1",
+          start_date: "2026-05-25",
+          end_date: "2026-05-27",
+        },
+        error: null,
+      }),
+    };
+    const recordReadQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockResolvedValue({
+        data: [
+          { id: "record-past", work_date: "2026-05-25", work_intime: null },
+          { id: "record-today-clocked", work_date: "2026-05-26", work_intime: "2026-05-26T00:00:00.000Z" },
+          { id: "record-today-unclocked", work_date: "2026-05-26", work_intime: null },
+          { id: "record-future", work_date: "2026-05-27", work_intime: null },
+        ],
+        error: null,
+      }),
+    };
+    const recordDeleteQuery = {
+      delete: vi.fn().mockReturnThis(),
+      in: vi.fn().mockResolvedValue({ error: null }),
+    };
+    const assignmentDeleteQuery = {
+      delete: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ error: null }),
+    };
+    const supabase = {
+      rpc,
+      from: vi
+        .fn()
+        .mockReturnValueOnce(assignmentQuery)
+        .mockReturnValueOnce(recordReadQuery)
+        .mockReturnValueOnce(recordDeleteQuery)
+        .mockReturnValueOnce(assignmentDeleteQuery),
+    };
+
+    await expect(deleteAssignmentAfterToday("assign-1", supabase as never)).resolves.toBeUndefined();
+    expect(recordDeleteQuery.in).toHaveBeenCalledWith("id", ["record-today-unclocked", "record-future"]);
+    expect(assignmentDeleteQuery.eq).toHaveBeenCalledWith("id", "assign-1");
   });
 
   it("falls back to direct deletes when the attendance deletion RPC is not in the schema cache", async () => {

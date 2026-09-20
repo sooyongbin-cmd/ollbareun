@@ -83,6 +83,7 @@ export default function AssignmentSavePage() {
   const [loading, setLoading] = useState(Boolean(assignmentId));
   const [error, setError] = useState("");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteAfterTodayConfirmOpen, setDeleteAfterTodayConfirmOpen] = useState(false);
   const [deleteWithAttendanceConfirmOpen, setDeleteWithAttendanceConfirmOpen] = useState(false);
   const [errorAlertMessage, setErrorAlertMessage] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
@@ -193,6 +194,22 @@ export default function AssignmentSavePage() {
     } finally {
       setDeleting(false);
       setDeleteWithAttendanceConfirmOpen(false);
+    }
+  }
+
+  async function handleDeleteAfterToday() {
+    setDeleting(true);
+    setError("");
+    setErrorAlertMessage("");
+
+    try {
+      await deleteRequest(`/api/assignments/${assignmentId}?afterToday=true`);
+      setAlertMessage("오늘 이후 자료가 삭제되었습니다.");
+    } catch (deleteError) {
+      setErrorAlertMessage(deleteError instanceof Error ? deleteError.message : "자료를 삭제하지 못했습니다.");
+    } finally {
+      setDeleting(false);
+      setDeleteAfterTodayConfirmOpen(false);
     }
   }
 
@@ -332,7 +349,18 @@ export default function AssignmentSavePage() {
                 <DeleteIcon size={20} />
               </Button>
               <Button
-                aria-label="근태자료포함삭제"
+                aria-label="오늘이후삭제"
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-destructive/50 bg-background px-4 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto"
+                type="button"
+                disabled={saving || deleting}
+                onClick={() => setDeleteAfterTodayConfirmOpen(true)}
+                variant="outline"
+              >
+                <DeleteIcon size={20} />
+                <span>오늘이후삭제</span>
+              </Button>
+              <Button
+                aria-label="전체자료삭제"
                 className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-destructive/50 bg-background px-4 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto"
                 type="button"
                 disabled={saving || deleting}
@@ -340,7 +368,7 @@ export default function AssignmentSavePage() {
                 variant="outline"
               >
                 <DeleteIcon size={20} />
-                <span>근태자료포함삭제</span>
+                <span>전체자료삭제</span>
               </Button>
             </div>
           </form>
@@ -369,6 +397,16 @@ export default function AssignmentSavePage() {
         onConfirm={handleDelete}
         title="자료를 삭제하시겠습니까?"
         description="삭제하면 현재 배정 자료가 완전히 제거됩니다."
+        loading={deleting}
+        loadingLabel="삭제처리중입니다..."
+      />
+
+      <ConfirmModal
+        isOpen={deleteAfterTodayConfirmOpen}
+        onClose={() => setDeleteAfterTodayConfirmOpen(false)}
+        onConfirm={handleDeleteAfterToday}
+        title="오늘 이후 자료를 포함하여 배정을 삭제할까요?"
+        description="오늘 출근한 자료는 보존하고, 오늘 이후의 자료를 삭제합니다. 삭제한 자료는 복구할 수 없습니다."
         loading={deleting}
         loadingLabel="삭제처리중입니다..."
       />

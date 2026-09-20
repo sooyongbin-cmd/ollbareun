@@ -1,4 +1,4 @@
-create table public.leave (
+create table if not exists public.leave (
   id uuid primary key default gen_random_uuid(),
   employee_id uuid not null references public.employees(id) on delete cascade,
   leave_type text not null,
@@ -13,8 +13,8 @@ create table public.leave (
 comment on table public.leave is '직원별 휴가 신청 및 기간 정보';
 comment on column public.leave.leave_type is '휴가종류: 1 월차, 2 연차';
 
-create index leave_employee_id_idx on public.leave (employee_id);
-create index leave_period_idx on public.leave (start_date, end_date);
+create index if not exists leave_employee_id_idx on public.leave (employee_id);
+create index if not exists leave_period_idx on public.leave (start_date, end_date);
 
 alter table public.leave enable row level security;
 revoke all on public.leave from public, anon, authenticated;

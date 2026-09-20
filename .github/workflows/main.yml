@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "supabase/functions/education-reminders/**"
+      - "supabase/migrations/**"
       - "supabase/config.toml"
   workflow_dispatch:
 
@@ -26,5 +27,7 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: latest
+
+      - run: supabase db push --linked --yes
 
       - run: supabase functions deploy education-reminders --project-ref "$SUPABASE_PROJECT_ID"

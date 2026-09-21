@@ -68,9 +68,8 @@
 
 .worksiteGuidance {
   display: flex;
-  width: 280px;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
 }
 
 .worksiteLabel {

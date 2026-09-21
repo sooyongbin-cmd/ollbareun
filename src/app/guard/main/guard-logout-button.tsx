@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { PowerIcon } from "@/components/icons/power-icon";
-import { LogoutIcon } from "@/components/icons/logout-icon";
 import { clearStoredGuardSession, readStoredGuardSession } from "../guard-session-storage";
 import { getSupabasePasskeyClient } from "@/lib/supabase-passkey-client";
 
@@ -178,7 +177,19 @@ export default function GuardLogoutButton({
     >
       {showIcon ? (
         icon === "logout"
-          ? <LogoutIcon size={iconSize} className="lucide lucide-log-out" />
+          ? (
+            <span
+              aria-hidden="true"
+              className="guard-profile-logout-icon"
+              style={{ flexBasis: iconSize, height: iconSize, width: iconSize }}
+            >
+              {/* Figma frame 6 exports this composed icon as two exact SVG layers. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img alt="" className="guard-profile-logout-icon-bg" height="13.2" src="/guard-assets/profile-logout-bg.svg" width="14.4" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img alt="" className="guard-profile-logout-icon-arrow" height="13.2" src="/guard-assets/profile-logout-arrow.svg" width="8.4" />
+            </span>
+          )
           : <PowerIcon size={iconSize} className="lucide lucide-power" />
       ) : null}
       <span>{label}</span>

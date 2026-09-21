@@ -52,7 +52,8 @@ describe("guard work page", () => {
     expect(screen.getByText("1/3완료 (33%)")).toBeInTheDocument();
     expect(screen.getByText("근무지")).toBeInTheDocument();
     expect(screen.getByText("본사")).toBeInTheDocument();
-    expect(screen.getByText("✓ 휴대폰 케이스에 교통카드나 다른 카드가 있으면 인식이 안 될 수 있습니다.")).toBeInTheDocument();
+    expect(screen.getByText(/✓ 휴대폰 케이스에 교통카드나 다른 카드가/)).toBeInTheDocument();
+    expect(screen.getByText(/있으면 인식이 안 될 수 있습니다\./)).toBeInTheDocument();
     expect(screen.getByText("✓ 화면이 켜진 상태에서 태그에 가까이 대주세요.")).toBeInTheDocument();
 
     const completedCard = await screen.findByRole("article", { name: "정문 체크 완료" });

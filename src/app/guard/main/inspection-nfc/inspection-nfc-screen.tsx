@@ -390,7 +390,7 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
               </p>
             </div>
             <div className={styles.worksiteNotice}>
-              <p>✓ 휴대폰 케이스에 교통카드나 다른 카드가 있으면 인식이 안 될 수 있습니다.</p>
+              <p>✓ 휴대폰 케이스에 교통카드나 다른 카드가<br /> 있으면 인식이 안 될 수 있습니다.</p>
               <p>✓ 화면이 켜진 상태에서 태그에 가까이 대주세요.</p>
             </div>
           </div>

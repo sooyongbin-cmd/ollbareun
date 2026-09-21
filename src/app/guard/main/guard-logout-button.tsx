@@ -183,11 +183,8 @@ export default function GuardLogoutButton({
               className="guard-profile-logout-icon"
               style={{ flexBasis: iconSize, height: iconSize, width: iconSize }}
             >
-              {/* Figma frame 6 exports this composed icon as two exact SVG layers. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img alt="" className="guard-profile-logout-icon-bg" height="13.2" src="/guard-assets/profile-logout-bg.svg" width="14.4" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img alt="" className="guard-profile-logout-icon-arrow" height="13.2" src="/guard-assets/profile-logout-arrow.svg" width="8.4" />
+              <img alt="" height={iconSize} src="/guard-assets/profile-logout.svg" width={iconSize} />
             </span>
           )
           : <PowerIcon size={iconSize} className="lucide lucide-power" />

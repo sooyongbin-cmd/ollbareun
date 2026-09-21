@@ -643,28 +643,6 @@ html[data-manager-theme="dark"] {
   flex-shrink: 0;
 }
 
-.guard-profile-logout-icon img {
-  position: absolute;
-  display: block;
-  max-width: none;
-  pointer-events: none;
-  transform: rotate(-90deg);
-}
-
-.guard-profile-logout-icon-bg {
-  top: 15.625%;
-  left: 28.125%;
-  width: 75%;
-  height: 68.75%;
-}
-
-.guard-profile-logout-icon-arrow {
-  top: 28.125%;
-  left: 0;
-  width: 43.75%;
-  height: 68.75%;
-}
-
 .guard-general-button:focus-visible,
 .guard-menu-button:focus-visible,
 .guard-header-logo:focus-visible,

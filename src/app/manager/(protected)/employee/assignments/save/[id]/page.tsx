@@ -244,6 +244,7 @@ export default function AssignmentSavePage() {
   }
 
   const periodChanged = startDate !== savedStartDate || endDate !== savedEndDate;
+  const employeeName = employees.find((employee) => employee.id === employeeId)?.name ?? "";
 
   return (
     <section className="space-y-[1.5rem]">
@@ -269,20 +270,14 @@ export default function AssignmentSavePage() {
                 <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-employee">
                   직원
                 </label>
-                <NativeSelect
+                <Input
                   className="w-full appearance-none"
                   id="assignment-employee"
-                  value={employeeId}
-                  onChange={(event) => setEmployeeId(event.target.value)}
+                  readOnly
                   required
-                >
-                  <NativeSelectOption value="">선택</NativeSelectOption>
-                  {employees.map((employee) => (
-                    <NativeSelectOption key={employee.id} value={employee.id}>
-                      {employee.name}
-                    </NativeSelectOption>
-                  ))}
-                </NativeSelect>
+                  aria-label="직원"
+                  value={employeeName}
+                />
               </div>
               <div className="space-y-2">
                 <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-worksite">
@@ -369,6 +364,16 @@ export default function AssignmentSavePage() {
               >
                 <DeleteIcon size={20} />
                 <span>전체자료삭제</span>
+              </Button>
+              <Button
+                aria-label="목록"
+                className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:ml-auto w-full md:w-auto"
+                type="button"
+                disabled={saving || deleting}
+                onClick={() => router.push("/manager/employee/assignments")}
+                variant="outline"
+              >
+                목록
               </Button>
             </div>
           </form>

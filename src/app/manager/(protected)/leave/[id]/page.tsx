@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { SaveIcon } from "@/components/icons/save-icon";
 import { DeleteIcon } from "@/components/icons/delete-icon";
-import { CancelIcon } from "@/components/icons/cancel-icon";
 import AlertModal from "@/components/modals/alert-modal";
 import ConfirmModal from "@/components/modals/confirm-modal";
 import ProcessingModal from "@/components/modals/processing-modal";
@@ -186,10 +184,9 @@ export default function LeaveDetailPage() {
               <Button aria-label="삭제" type="button" variant="outline" onClick={() => setDeleteConfirmOpen(true)} disabled={saving || deleting}>
                 <DeleteIcon size={20} />
               </Button>
-              <Link aria-label="목록" href="/manager/leave" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50">
-                <CancelIcon size={20} />
-                <span>목록</span>
-              </Link>
+              <Button aria-label="목록" type="button" variant="outline" onClick={() => router.push("/manager/leave")} disabled={saving || deleting} className="md:ml-auto">
+                목록
+              </Button>
             </div>
           </form>
         )}

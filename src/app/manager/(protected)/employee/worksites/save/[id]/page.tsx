@@ -211,6 +211,16 @@ export default function WorksiteSavePage() {
               >
                 <DeleteIcon size={20} />
               </Button>
+              <Button
+                aria-label="목록"
+                className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:ml-auto w-full md:w-auto"
+                type="button"
+                disabled={saving || deleting}
+                onClick={() => router.push("/manager/employee/worksites")}
+                variant="outline"
+              >
+                목록
+              </Button>
             </div>
           </form>
         )}

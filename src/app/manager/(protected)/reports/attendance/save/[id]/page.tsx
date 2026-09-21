@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,6 @@ import AlertModal from "@/components/modals/alert-modal";
 import ConfirmModal from "@/components/modals/confirm-modal";
 import { DeleteIcon } from "@/components/icons/delete-icon";
 import { SaveIcon } from "@/components/icons/save-icon";
-import { CancelIcon } from "@/components/icons/cancel-icon";
 import ManagerLoadingMessage from "../../../../manager-loading-message";
 import type { AttendanceRecord } from "@/lib/manager-reports";
 import { durationLabel } from "@/lib/work-duration";
@@ -295,14 +293,16 @@ export default function AttendanceSavePage() {
                   퇴근처리
                 </Button>
               )}
-              <Link
-                aria-label="취소"
-                title="취소"
-                className="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:w-auto"
-                href="/manager/reports/attendance"
+              <Button
+                aria-label="목록"
+                className="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:ml-auto md:w-auto"
+                disabled={saving || deleting}
+                onClick={() => router.push("/manager/reports/attendance")}
+                type="button"
+                variant="outline"
               >
-                <CancelIcon size={20} />
-              </Link>
+                목록
+              </Button>
             </div>
           </form>
         )}

@@ -251,6 +251,14 @@ export default function SpecialRemarkDetailPage({ params }: PageProps) {
               <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" disabled={deleting || completing} onClick={() => setDeleteConfirmOpen(true)} type="button" variant="outline">
                 삭제
               </Button>
+              <Button
+                className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:ml-auto"
+                onClick={() => router.push("/manager/inspection/special-remarks")}
+                type="button"
+                variant="outline"
+              >
+                목록
+              </Button>
             </div>
           </div>
         ) : null}

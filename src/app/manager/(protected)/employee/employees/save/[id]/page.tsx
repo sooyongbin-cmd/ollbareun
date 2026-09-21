@@ -9,7 +9,6 @@ import { useEffect, useState, type FormEvent } from "react";
 import ManagerLoadingMessage from "../../../../manager-loading-message";
 import { SaveIcon } from "@/components/icons/save-icon";
 import { DeleteIcon } from "@/components/icons/delete-icon";
-import { CancelIcon } from "@/components/icons/cancel-icon";
 import ConfirmModal from "@/components/modals/confirm-modal";
 import AlertModal from "@/components/modals/alert-modal";
 
@@ -289,14 +288,13 @@ export default function EmployeeSavePage() {
                 <DeleteIcon size={20} />
               </Button>
               <Button
-                aria-label="취소"
-                title="취소"
-                className="min-h-10 px-4 py-2"
+                aria-label="목록"
+                className="min-h-10 px-4 py-2 md:ml-auto"
                 type="button"
                 variant="outline"
                 onClick={() => router.push("/manager/employee/employees")}
               >
-                <CancelIcon size={20} />
+                목록
               </Button>
             </div>
           </form>

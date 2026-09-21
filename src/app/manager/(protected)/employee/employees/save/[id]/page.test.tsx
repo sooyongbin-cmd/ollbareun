@@ -129,11 +129,11 @@ describe("employee save page", () => {
     expect(screen.queryByRole("region", { name: "근무지배정 정보" })).not.toBeInTheDocument();
   });
 
-  it("returns to the list without saving when cancelled", async () => {
+  it("returns to the list without saving", async () => {
     const user = userEvent.setup();
     render(<EmployeeSavePage />);
     await screen.findByDisplayValue("Alice");
-    await user.click(screen.getByRole("button", { name: "취소" }));
+    await user.click(screen.getByRole("button", { name: "목록" }));
     expect(push).toHaveBeenCalledWith("/manager/employee/employees");
     expect(fetch).toHaveBeenCalledTimes(1);
   });

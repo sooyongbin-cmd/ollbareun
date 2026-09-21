@@ -76,7 +76,7 @@ describe("assignment save page", () => {
 
         if (init?.method === "PATCH" && url.endsWith("/api/assignments/assign-1")) {
           expect(JSON.parse(String(init.body))).toEqual({
-            employeeId: "emp-2",
+            employeeId: "emp-1",
             worksiteId: "work-2",
             startDate: "2026-05-22",
             endDate: "2026-05-24",
@@ -118,10 +118,11 @@ describe("assignment save page", () => {
     render(<AssignmentSavePage />);
 
     expect(await screen.findByRole("heading", { name: "근무지배정 상세" })).toBeInTheDocument();
+    expect(screen.getByLabelText("직원")).toHaveAttribute("readonly");
+    expect(screen.getByLabelText("직원")).toHaveValue("홍길동");
     expect(await screen.findByDisplayValue("2026-05-21")).toBeInTheDocument();
     expect(await screen.findByDisplayValue("2026-05-23")).toBeInTheDocument();
 
-    await user.selectOptions(screen.getByLabelText("직원"), "emp-2");
     await user.selectOptions(screen.getByLabelText("근무지"), "work-2");
     await user.clear(screen.getByLabelText("시작일"));
     await user.type(screen.getByLabelText("시작일"), "2026-05-22");

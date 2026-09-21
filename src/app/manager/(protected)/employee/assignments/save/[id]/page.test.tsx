@@ -159,7 +159,7 @@ describe("assignment save page", () => {
     render(<AssignmentSavePage />);
 
     expect(await screen.findByRole("heading", { name: "근무지배정 상세" })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "오늘이후삭제" }));
+    await user.click(screen.getByRole("button", { name: "오늘이후 근무예정 자료삭제" }));
     expect(screen.getByText("오늘 이후 자료를 포함하여 배정을 삭제할까요?")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "예" }));
 

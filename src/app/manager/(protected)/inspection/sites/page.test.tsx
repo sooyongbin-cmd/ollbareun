@@ -19,6 +19,11 @@ describe("inspection sites page", () => {
                 worksite_name: "Worksite",
                 name: "Gate",
                 address: "Seoul",
+                today_inspection: {
+                  inspected_at: "2026-06-04T00:00:00+00:00",
+                  employee_name: "Alice",
+                  employee_role: "경비원",
+                },
                 gps_info: { latitude: 37.5, longitude: 127 },
               },
             ],
@@ -46,7 +51,7 @@ describe("inspection sites page", () => {
     expect(await screen.findByText("Gate")).toBeInTheDocument();
     const dataRow = screen.getAllByRole("row")[1];
     const cells = within(dataRow).getAllByRole("cell");
-    expect(cells.map((cell) => cell.textContent)).toEqual(["Worksite", "Gate", "Seoul"]);
+    expect(cells.map((cell) => cell.textContent)).toEqual(["Worksite", "Gate", "Seoul", "09:00", "Alice", "경비원"]);
     expect(screen.getByRole("link", { name: "Gate" })).toHaveAttribute(
       "href",
       "/manager/inspection/sites/site-1",
@@ -90,5 +95,29 @@ describe("inspection sites page", () => {
       "홍대타워 - 정문",
       "홍대타워 - 후문",
     ]);
+  });
+
+  it("leaves today's inspection columns blank when a site has no inspection", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        if (String(input).startsWith("/api/inspection/sites")) {
+          return Response.json({
+            sites: [{ id: "site-1", worksite_name: "Worksite", name: "Gate", address: "Seoul" }],
+          });
+        }
+        return Response.json({}, { status: 404 });
+      }),
+    );
+    render(<InspectionSitesPage />);
+
+    expect(await screen.findByText("Gate")).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "점검시각" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "점검자" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "직군" })).toBeInTheDocument();
+    const dataRow = screen.getAllByRole("row")[1];
+    const cells = within(dataRow).getAllByRole("cell");
+
+    expect(cells.map((cell) => cell.textContent)).toEqual(["Worksite", "Gate", "Seoul", "", "", ""]);
   });
 });

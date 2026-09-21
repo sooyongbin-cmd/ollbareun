@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   INSPECTION_QR_TYPE,
   buildInspectionQrPayload,
@@ -24,6 +24,10 @@ vi.mock("./supabase-admin", () => ({
 describe("inspection data helpers", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("builds and validates the inspection QR payload", () => {
@@ -187,8 +191,14 @@ describe("inspection data helpers", () => {
         error: null,
       }),
     };
+    const todayLogsQuery = {
+      select: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lt: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({ data: [], error: null }),
+    };
     const supabase = {
-      from: vi.fn().mockReturnValueOnce(sitesQuery).mockReturnValueOnce(worksitesQuery),
+      from: vi.fn().mockReturnValueOnce(sitesQuery).mockReturnValueOnce(worksitesQuery).mockReturnValueOnce(todayLogsQuery),
     };
     vi.mocked(getSupabase).mockReturnValue(supabase as never);
 
@@ -220,8 +230,14 @@ describe("inspection data helpers", () => {
         error: null,
       }),
     };
+    const todayLogsQuery = {
+      select: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lt: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({ data: [], error: null }),
+    };
     const supabase = {
-      from: vi.fn().mockReturnValueOnce(sitesQuery).mockReturnValueOnce(worksitesQuery),
+      from: vi.fn().mockReturnValueOnce(sitesQuery).mockReturnValueOnce(worksitesQuery).mockReturnValueOnce(todayLogsQuery),
     };
     vi.mocked(getSupabase).mockReturnValue(supabase as never);
 
@@ -232,6 +248,72 @@ describe("inspection data helpers", () => {
       "강남빌딩 - 102동",
       "강남빌딩 - 101동",
     ]);
+  });
+
+  it("attaches the latest inspection from the current Seoul day", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-06-04T01:00:00.000Z"));
+
+    const sitesQuery = {
+      select: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({
+        data: [
+          { id: "site-1", worksite_id: "work-1", name: "정문", address: "서울시", gps_info: { latitude: 37.5, longitude: 127 } },
+        ],
+        error: null,
+      }),
+    };
+    const worksitesQuery = {
+      select: vi.fn().mockResolvedValue({ data: [{ id: "work-1", name: "본사" }], error: null }),
+    };
+    const todayLogsQuery = {
+      select: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lt: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({
+        data: [
+          {
+            inspection_site_id: "site-1",
+            inspected_at: "2026-06-04T00:30:00.000Z",
+            employee_id: "emp-1",
+            employee_name: "홍길동",
+          },
+          {
+            inspection_site_id: "site-1",
+            inspected_at: "2026-06-03T23:30:00.000Z",
+            employee_id: "emp-2",
+            employee_name: "김철수",
+          },
+        ],
+        error: null,
+      }),
+    };
+    const employeesQuery = {
+      select: vi.fn().mockReturnThis(),
+      in: vi.fn().mockResolvedValue({ data: [{ id: "emp-1", role: "경비원" }, { id: "emp-2", role: "미화원" }], error: null }),
+    };
+    const supabase = {
+      from: vi.fn()
+        .mockReturnValueOnce(sitesQuery)
+        .mockReturnValueOnce(worksitesQuery)
+        .mockReturnValueOnce(todayLogsQuery)
+        .mockReturnValueOnce(employeesQuery),
+    };
+    vi.mocked(getSupabase).mockReturnValue(supabase as never);
+
+    await expect(listInspectionSites()).resolves.toMatchObject([
+      {
+        id: "site-1",
+        today_inspection: {
+          inspected_at: "2026-06-04T00:30:00.000Z",
+          employee_name: "홍길동",
+          employee_role: "경비원",
+        },
+      },
+    ]);
+    expect(todayLogsQuery.gte).toHaveBeenCalledWith("inspected_at", "2026-06-03T15:00:00.000Z");
+    expect(todayLogsQuery.lt).toHaveBeenCalledWith("inspected_at", "2026-06-04T15:00:00.000Z");
+
   });
 
   it("saves an inspection log with canonical site and worksite data", async () => {

@@ -12,6 +12,11 @@ export type InspectionSiteRow = {
   name: string;
   address: string;
   gps_info: GpsInfo;
+  today_inspection?: {
+    inspected_at: string;
+    employee_name: string;
+    employee_role: string;
+  } | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -42,6 +47,8 @@ export type InspectionQrPayload = {
 };
 
 type RawInspectionSite = Omit<InspectionSiteRow, "worksite_name">;
+
+type TodayInspectionLog = Pick<InspectionLogRow, "inspection_site_id" | "inspected_at" | "employee_id" | "employee_name">;
 
 function requireString(value: unknown, label: string) {
   if (typeof value !== "string" || value.trim() === "") {
@@ -83,6 +90,68 @@ function attachWorksiteNames(sites: RawInspectionSite[], worksites: Array<{ id: 
     ...site,
     worksite_name: worksitesById.get(site.worksite_id) ?? "근무지 없음",
   })) as InspectionSiteRow[];
+}
+
+function getSeoulTodayRange(now = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  const start = new Date(`${values.year}-${values.month}-${values.day}T00:00:00+09:00`);
+
+  return {
+    start: start.toISOString(),
+    end: new Date(start.getTime() + 24 * 60 * 60 * 1000).toISOString(),
+  };
+}
+
+async function attachTodayInspections(sites: InspectionSiteRow[], supabase: SupabaseClient) {
+  const { start, end } = getSeoulTodayRange();
+  const { data, error } = await supabase
+    .from("inspection_logs")
+    .select("inspection_site_id, inspected_at, employee_id, employee_name")
+    .gte("inspected_at", start)
+    .lt("inspected_at", end)
+    .order("inspected_at", { ascending: false });
+
+  throwIfError(error);
+
+  const logs = (data ?? []) as TodayInspectionLog[];
+  const employeeIds = Array.from(new Set(logs.map((log) => log.employee_id).filter((id): id is string => Boolean(id))));
+  const rolesByEmployeeId = new Map<string, string>();
+
+  if (employeeIds.length > 0) {
+    const { data: employees, error: employeeError } = await supabase
+      .from("employees")
+      .select("id,role")
+      .in("id", employeeIds);
+    throwIfError(employeeError);
+
+    for (const employee of employees ?? []) {
+      rolesByEmployeeId.set(employee.id, employee.role);
+    }
+  }
+
+  const latestInspectionBySiteId = new Map<string, InspectionSiteRow["today_inspection"]>();
+  for (const log of logs) {
+    if (!log.inspection_site_id || latestInspectionBySiteId.has(log.inspection_site_id)) {
+      continue;
+    }
+
+    latestInspectionBySiteId.set(log.inspection_site_id, {
+      inspected_at: log.inspected_at,
+      employee_name: log.employee_name,
+      employee_role: log.employee_id ? rolesByEmployeeId.get(log.employee_id) ?? "직군 없음" : "직군 없음",
+    });
+  }
+
+  return sites.map((site) => ({
+    ...site,
+    today_inspection: latestInspectionBySiteId.get(site.id) ?? null,
+  }));
 }
 
 export function buildInspectionQrPayload(site: Pick<InspectionSiteRow, "id" | "worksite_id" | "worksite_name" | "name" | "gps_info">): InspectionQrPayload {
@@ -146,7 +215,9 @@ export async function listInspectionSites(
 
   const sites = attachWorksiteNames((sitesResult.data ?? []) as RawInspectionSite[], worksitesResult.data ?? []);
 
-  return sites.sort(compareInspectionSites);
+  const sitesWithTodayInspections = await attachTodayInspections(sites, supabase);
+
+  return sitesWithTodayInspections.sort(compareInspectionSites);
 }
 
 export async function createInspectionSite(input: {

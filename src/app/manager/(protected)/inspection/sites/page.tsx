@@ -11,6 +11,7 @@ import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
 type InspectionSite = {
   id: string;
   worksite_name: string;
+  sort_order: number;
   name: string;
   address: string;
   today_inspection?: {
@@ -38,6 +39,12 @@ function sortInspectionSites(sites: InspectionSite[]) {
     if (worksiteComparison !== 0) {
       return worksiteComparison;
     }
+
+    const orderComparison = (left.sort_order ?? Number.MAX_SAFE_INTEGER) - (right.sort_order ?? Number.MAX_SAFE_INTEGER);
+    if (orderComparison !== 0) {
+      return orderComparison;
+    }
+
     return (left.name ?? "").localeCompare(right.name ?? "", "ko-KR");
   });
 }
@@ -168,6 +175,7 @@ export default function InspectionSitesPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-left">근무지</TableHead>
+                  <TableHead className="text-left">점검순서</TableHead>
                   <TableHead className="text-left">현장이름</TableHead>
                   <TableHead className="text-left">현장주소</TableHead>
                   <TableHead className="text-left">점검시각</TableHead>
@@ -178,7 +186,7 @@ export default function InspectionSitesPage() {
               <TableBody>
                 {sites.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={6} className="p-8 text-center text-muted-foreground italic">
+                    <TableCell data-responsive-empty colSpan={7} className="p-8 text-center text-muted-foreground italic">
                       조회 결과에 해당하는 현장이 없습니다.
                     </TableCell>
                   </TableRow>
@@ -186,6 +194,7 @@ export default function InspectionSitesPage() {
                   sites.map((site) => (
                     <TableRow key={site.id} className="hover:bg-muted/40 transition-colors">
                       <TableCell data-label="근무지">{site.worksite_name}</TableCell>
+                      <TableCell data-label="점검순서">{site.sort_order ?? ""}</TableCell>
                       <TableCell data-label="현장이름" className="font-semibold">
                         <Link className="text-primary hover:underline" href={`/manager/inspection/sites/${site.id}`}>
                           {site.name}

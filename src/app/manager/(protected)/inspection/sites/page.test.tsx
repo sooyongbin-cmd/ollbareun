@@ -17,6 +17,7 @@ describe("inspection sites page", () => {
                 id: "site-1",
                 worksite_id: "work-1",
                 worksite_name: "Worksite",
+                sort_order: 1,
                 name: "Gate",
                 address: "Seoul",
                 today_inspection: {
@@ -51,7 +52,7 @@ describe("inspection sites page", () => {
     expect(await screen.findByText("Gate")).toBeInTheDocument();
     const dataRow = screen.getAllByRole("row")[1];
     const cells = within(dataRow).getAllByRole("cell");
-    expect(cells.map((cell) => cell.textContent)).toEqual(["Worksite", "Gate", "Seoul", "09:00", "Alice", "경비원"]);
+    expect(cells.map((cell) => cell.textContent)).toEqual(["Worksite", "1", "Gate", "Seoul", "09:00", "Alice", "경비원"]);
     expect(screen.getByRole("link", { name: "Gate" })).toHaveAttribute(
       "href",
       "/manager/inspection/sites/site-1",
@@ -61,7 +62,7 @@ describe("inspection sites page", () => {
     });
   });
 
-  it("sorts sites by worksite (ascending) then site name (ascending)", async () => {
+  it("sorts sites by worksite (ascending) then sort order (ascending)", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: RequestInfo | URL) => {
@@ -69,10 +70,10 @@ describe("inspection sites page", () => {
         if (url.startsWith("/api/inspection/sites")) {
           return Response.json({
             sites: [
-              { id: "s-1", worksite_name: "강남빌딩", name: "101동", address: "A" },
-              { id: "s-2", worksite_name: "홍대타워", name: "정문", address: "B" },
-              { id: "s-3", worksite_name: "강남빌딩", name: "102동", address: "C" },
-              { id: "s-4", worksite_name: "홍대타워", name: "후문", address: "D" },
+              { id: "s-1", worksite_name: "강남빌딩", sort_order: 2, name: "101동", address: "A" },
+              { id: "s-2", worksite_name: "홍대타워", sort_order: 1, name: "정문", address: "B" },
+              { id: "s-3", worksite_name: "강남빌딩", sort_order: 1, name: "102동", address: "C" },
+              { id: "s-4", worksite_name: "홍대타워", sort_order: 2, name: "후문", address: "D" },
             ],
           });
         }
@@ -86,12 +87,12 @@ describe("inspection sites page", () => {
     const rows = screen.getAllByRole("row").slice(1);
     const renderedNames = rows.map((row) => {
       const cells = within(row).getAllByRole("cell");
-      return `${cells[0].textContent} - ${cells[1].textContent}`;
+      return `${cells[0].textContent} - ${cells[2].textContent}`;
     });
 
     expect(renderedNames).toEqual([
-      "강남빌딩 - 101동",
       "강남빌딩 - 102동",
+      "강남빌딩 - 101동",
       "홍대타워 - 정문",
       "홍대타워 - 후문",
     ]);
@@ -118,6 +119,6 @@ describe("inspection sites page", () => {
     const dataRow = screen.getAllByRole("row")[1];
     const cells = within(dataRow).getAllByRole("cell");
 
-    expect(cells.map((cell) => cell.textContent)).toEqual(["Worksite", "Gate", "Seoul", "", "", ""]);
+    expect(cells.map((cell) => cell.textContent)).toEqual(["Worksite", "", "Gate", "Seoul", "", "", ""]);
   });
 });

@@ -47,6 +47,7 @@ export default function InspectionSiteNewPage() {
   const router = useRouter();
   const [worksites, setWorksites] = useState<Worksite[]>([]);
   const [worksiteId, setWorksiteId] = useState("");
+  const [sortOrder, setSortOrder] = useState("1");
   const [siteName, setSiteName] = useState("");
   const [address, setAddress] = useState("");
   const [gpsInfo, setGpsInfo] = useState<GpsInfo | null>(null);
@@ -128,6 +129,7 @@ export default function InspectionSiteNewPage() {
     try {
       await postJson("/api/inspection/sites", {
         worksiteId,
+        sortOrder: Number(sortOrder),
         name: siteName,
         address,
         gpsInfo,
@@ -189,6 +191,24 @@ export default function InspectionSiteNewPage() {
                 value={siteName}
                 onChange={(event) => setSiteName(event.target.value)}
                 placeholder="현장 이름을 입력하세요."
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="inspection-sort-order">
+                점검순서
+              </label>
+              <Input
+                className="w-full"
+                id="inspection-sort-order"
+                name="sortOrder"
+                type="number"
+                min={1}
+                step={1}
+                value={sortOrder}
+                onChange={(event) => setSortOrder(event.target.value)}
+                placeholder="1"
                 required
               />
             </div>

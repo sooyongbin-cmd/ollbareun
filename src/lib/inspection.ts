@@ -9,6 +9,7 @@ export type InspectionSiteRow = {
   id: string;
   worksite_id: string;
   worksite_name: string;
+  sort_order: number;
   name: string;
   address: string;
   gps_info: GpsInfo;
@@ -56,6 +57,15 @@ function requireString(value: unknown, label: string) {
   }
 
   return value.trim();
+}
+
+function requirePositiveInteger(value: unknown, label: string) {
+  const numberValue = typeof value === "number" ? value : typeof value === "string" ? Number(value.trim()) : NaN;
+  if (!Number.isInteger(numberValue) || numberValue <= 0) {
+    throw new Error(`${label}는 1 이상의 정수로 입력하세요.`);
+  }
+
+  return numberValue;
 }
 
 function throwIfError(error: { message: string } | null) {
@@ -184,7 +194,7 @@ export function parseInspectionQrPayload(value: unknown): InspectionQrPayload {
   };
 }
 
-export function compareInspectionSites<T extends { worksite_name?: string | null; name?: string | null }>(
+export function compareInspectionSites<T extends { worksite_name?: string | null; sort_order?: number | null; name?: string | null }>(
   left: T,
   right: T,
 ) {
@@ -192,6 +202,13 @@ export function compareInspectionSites<T extends { worksite_name?: string | null
   if (worksiteComparison !== 0) {
     return worksiteComparison;
   }
+
+  const leftOrder = left.sort_order ?? Number.MAX_SAFE_INTEGER;
+  const rightOrder = right.sort_order ?? Number.MAX_SAFE_INTEGER;
+  if (leftOrder !== rightOrder) {
+    return leftOrder - rightOrder;
+  }
+
   return (right.name ?? "").localeCompare(left.name ?? "", "ko-KR");
 }
 
@@ -222,17 +239,19 @@ export async function listInspectionSites(
 
 export async function createInspectionSite(input: {
   worksiteId: unknown;
+  sortOrder: unknown;
   name: unknown;
   address: unknown;
   gpsInfo: unknown;
 }, supabase: SupabaseClient = getSupabase()) {
   const worksite_id = requireString(input.worksiteId, "근무지");
+  const sort_order = requirePositiveInteger(input.sortOrder, "점검순서");
   const name = requireString(input.name, "현장명");
   const address = requireString(input.address, "현장주소");
   const gps_info = requireGpsInfo(input.gpsInfo);
   const { data, error } = await supabase
     .from("inspection_sites")
-    .insert({ worksite_id, name, address, gps_info })
+    .insert({ worksite_id, sort_order, name, address, gps_info })
     .select("*")
     .single();
 
@@ -273,18 +292,20 @@ export async function getInspectionSiteById(id: unknown, supabase: SupabaseClien
 export async function updateInspectionSite(input: {
   id: unknown;
   worksiteId: unknown;
+  sortOrder: unknown;
   name: unknown;
   address: unknown;
   gpsInfo: unknown;
 }, supabase: SupabaseClient = getSupabaseAdmin()) {
   const siteId = requireString(input.id, "현장");
   const worksite_id = requireString(input.worksiteId, "근무지");
+  const sort_order = requirePositiveInteger(input.sortOrder, "점검순서");
   const name = requireString(input.name, "현장명");
   const address = requireString(input.address, "현장주소");
   const gps_info = requireGpsInfo(input.gpsInfo);
   const { data, error } = await supabase
     .from("inspection_sites")
-    .update({ worksite_id, name, address, gps_info })
+    .update({ worksite_id, sort_order, name, address, gps_info })
     .eq("id", siteId)
     .select("*")
     .single();

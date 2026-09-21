@@ -53,7 +53,7 @@ system_configs 1 ── N system_configs (parent_system_code)
 | `public_holidays` | `id`, `holiday_date`, `name`, `selected`, `created_at` | 공휴일 및 관리자가 추가한 휴일. `selected = 'Y'`인 날짜만 야간근무 자동 휴무에 사용 |
 | `education_resources` | `id`, `title`, `youtube_link`, `created_at` | 안전교육 자료 |
 | `education_completions` | `employee_id`, `resource_id`, `is_completed`, `completed_at` | 직원별 교육 이수 상태. 직원·자료 복합 PK |
-| `inspection_sites` | `id`, `worksite_id`, `name`, `address`, `gps_info`, 특이사항 표시·내용·사진 URL, `created_at`, `updated_at` | 근무지에 속한 점검 대상 현장 |
+| `inspection_sites` | `id`, `worksite_id`, `sort_order`, `name`, `address`, `gps_info`, 특이사항 표시·내용·사진 URL, `created_at`, `updated_at` | 근무지에 속한 점검 대상 현장. `sort_order`는 근무지별 점검 순서 |
 | `inspection_logs` | `id`, `inspection_site_id`, `worksite_id`, `employee_id`, 스냅샷 명칭, `site_gps_info`, `qr_payload`, `inspected_at`, `created_at` | QR/NFC 점검 이력. 이력 당시 직원·근무지·현장명을 스냅샷으로 보존 |
 | `inspection_special_reports` | `id`, `worksite_id`, `employee_id`, 스냅샷 명칭, `content`, `photo_url`, `gps_info`, 이메일 상태·처리 상태, `reported_at`, `created_at`, `updated_at` | 특이사항 보고와 사진·GPS·메일 처리 결과 |
 | `push_subscriptions` | `id`, `employee_id`, `endpoint`, `p256dh`, `auth`, `created_at`, `updated_at` | 근무자 브라우저 푸시 구독 |
@@ -154,7 +154,7 @@ system_configs 1 ── N system_configs (parent_system_code)
 | `work_record` | `work_record_employee_date_key` `(employee_id, work_date)` UNIQUE로 일별 중복 방지, `work_record_work_date_idx` 날짜별 조회, `work_record_worksite_id_idx` 근무지별 조회 |
 | `public_holidays` | `holiday_date` UNIQUE 공휴일 upsert·날짜 조회 |
 | `education_completions` | `education_completions_employee_id_idx`, `education_completions_resource_id_idx`, `education_completions_is_completed_idx`, 복합 PK로 직원·자료별 교육 상태 조회 |
-| `inspection_sites` | `inspection_sites_worksite_id_idx` 근무지별 현장 조회, `inspection_sites_name_idx` 현장명 정렬·검색 |
+| `inspection_sites` | `inspection_sites_worksite_id_idx` 근무지별 현장 조회, `inspection_sites_worksite_sort_order_idx` 근무지별 점검 순서 조회, `inspection_sites_name_idx` 현장명 정렬·검색 |
 | `inspection_logs` | `inspection_logs_worksite_id_idx` 근무지별 필터, `inspection_logs_inspected_at_idx` `inspected_at DESC` 최신 점검순 조회 |
 | `inspection_special_reports` | `inspection_special_reports_worksite_id_idx`, `inspection_special_reports_employee_id_idx` 필터, `inspection_special_reports_reported_at_idx` 최신 보고순, `inspection_special_reports_email_status_idx` 처리 상태 필터 |
 | `push_subscriptions` | `push_subscriptions_employee_id_idx` 푸시 발송 대상 조회와 `push_subscriptions_employee_endpoint_key` `(employee_id, endpoint)` UNIQUE 중복 방지 |

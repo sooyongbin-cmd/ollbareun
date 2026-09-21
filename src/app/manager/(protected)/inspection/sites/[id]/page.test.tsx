@@ -22,6 +22,7 @@ const site = {
   id: "site-1",
   worksite_id: "work-1",
   worksite_name: "Worksite",
+  sort_order: 1,
   name: "Gate",
   address: "Seoul",
   gps_info: { latitude: 37.5, longitude: 127 },
@@ -67,6 +68,7 @@ describe("inspection site detail page", () => {
         if (url.endsWith("/api/inspection/sites/site-1") && init?.method === "PATCH") {
           expect(JSON.parse(String(init.body))).toMatchObject({
             worksiteId: "work-1",
+            sortOrder: 1,
             name: "Gate",
             address: "Seoul",
             gpsInfo: { latitude: 37.5, longitude: 127 },

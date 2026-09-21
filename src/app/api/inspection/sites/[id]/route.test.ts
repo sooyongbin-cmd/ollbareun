@@ -32,6 +32,7 @@ describe("/api/inspection/sites/[id]", () => {
       id: "site-1",
       worksite_id: "work-1",
       worksite_name: "Worksite",
+      sort_order: 1,
       name: "Gate",
       address: "Seoul",
       gps_info: { latitude: 37.5, longitude: 127 },
@@ -50,6 +51,7 @@ describe("/api/inspection/sites/[id]", () => {
       id: "site-1",
       worksite_id: "work-1",
       worksite_name: "Worksite",
+      sort_order: 1,
       name: "Gate",
       address: "Seoul",
       gps_info: { latitude: 37.5, longitude: 127 },
@@ -57,6 +59,7 @@ describe("/api/inspection/sites/[id]", () => {
 
     const body = {
       worksiteId: "work-1",
+      sortOrder: 1,
       name: "Gate",
       address: "Seoul",
       gpsInfo: { latitude: 37.5, longitude: 127 },

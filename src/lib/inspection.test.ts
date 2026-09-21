@@ -89,6 +89,7 @@ describe("inspection data helpers", () => {
     await expect(
       createInspectionSite({
         worksiteId: "work-1",
+        sortOrder: 1,
         name: "정문",
         address: "서울시 중구 세종대로 1",
         gpsInfo: { latitude: 37.5, longitude: 127 },
@@ -99,6 +100,7 @@ describe("inspection data helpers", () => {
     });
     expect(insertQuery.insert).toHaveBeenCalledWith({
       worksite_id: "work-1",
+      sort_order: 1,
       name: "정문",
       address: "서울시 중구 세종대로 1",
       gps_info: { latitude: 37.5, longitude: 127 },
@@ -138,6 +140,7 @@ describe("inspection data helpers", () => {
       updateInspectionSite({
         id: "site-1",
         worksiteId: "work-1",
+        sortOrder: 2,
         name: "Gate",
         address: "Seoul",
         gpsInfo: { latitude: 37.5, longitude: 127 },
@@ -145,6 +148,7 @@ describe("inspection data helpers", () => {
     ).resolves.toMatchObject({ id: "site-1", worksite_name: "Worksite" });
     expect(updateQuery.update).toHaveBeenCalledWith({
       worksite_id: "work-1",
+      sort_order: 2,
       name: "Gate",
       address: "Seoul",
       gps_info: { latitude: 37.5, longitude: 127 },

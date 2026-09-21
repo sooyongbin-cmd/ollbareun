@@ -29,6 +29,7 @@ describe("inspection site new page", () => {
         if (url.endsWith("/api/inspection/sites")) {
           expect(JSON.parse(String(init?.body))).toMatchObject({
             worksiteId: "work-1",
+            sortOrder: 1,
             name: "Gate",
             address: "Seoul",
             gpsInfo: { latitude: 37.5, longitude: 127 },

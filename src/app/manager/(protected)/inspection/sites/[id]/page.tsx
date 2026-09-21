@@ -85,6 +85,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
   const [siteId, setSiteId] = useState("");
   const [worksites, setWorksites] = useState<Worksite[]>([]);
   const [worksiteId, setWorksiteId] = useState("");
+  const [sortOrder, setSortOrder] = useState("1");
   const [siteName, setSiteName] = useState("");
   const [address, setAddress] = useState("");
   const [gpsInfo, setGpsInfo] = useState<GpsInfo | null>(null);
@@ -131,6 +132,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
           setSavedSite(nextSite);
           setWorksites(bootstrapPayload.worksites ?? []);
           setWorksiteId(nextSite.worksite_id);
+          setSortOrder(String(nextSite.sort_order ?? 1));
           setSiteName(nextSite.name);
           setAddress(nextSite.address);
           setGpsInfo(nextSite.gps_info);
@@ -191,7 +193,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ worksiteId, name: siteName, address, gpsInfo }),
+          body: JSON.stringify({ worksiteId, sortOrder: Number(sortOrder), name: siteName, address, gpsInfo }),
         },
       );
       setSavedSite(payload.site);
@@ -380,6 +382,23 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
                   name="name"
                   value={siteName}
                   onChange={(event) => setSiteName(event.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="inspection-sort-order">
+                  점검순서
+                </label>
+                <Input
+                  className="w-full"
+                  id="inspection-sort-order"
+                  name="sortOrder"
+                  type="number"
+                  min={1}
+                  step={1}
+                  value={sortOrder}
+                  onChange={(event) => setSortOrder(event.target.value)}
                   required
                 />
               </div>

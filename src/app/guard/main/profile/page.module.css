@@ -199,13 +199,18 @@
 
 .selectItem {
   min-height: 22px;
-  padding: 4px 8px;
+  padding: 4px 8px 4px 32px;
   border-radius: 4px;
   color: #675d5d;
   font-size: 15px;
   font-weight: 700;
   line-height: 13px;
   white-space: nowrap;
+}
+
+.selectItem > [data-slot="select-item-indicator"] {
+  right: auto;
+  left: 8px;
 }
 
 .selectItem[data-highlighted],

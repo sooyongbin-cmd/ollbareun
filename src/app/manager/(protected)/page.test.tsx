@@ -111,7 +111,8 @@ describe("manager dashboard page", () => {
     const assignmentRows = within(assignmentSection).getAllByRole("row");
     expect(within(assignmentRows[1]).getByText("경비원")).toBeInTheDocument();
     expect(within(assignmentRows[1]).getByText("문현동현장")).toBeInTheDocument();
-    expect(within(assignmentRows[1]).getAllByText("1/2")).toHaveLength(2);
+    expect(within(assignmentRows[1]).getByText("1/2")).toBeInTheDocument();
+    expect(within(assignmentRows[1]).getByText("50%")).toBeInTheDocument();
     expect(within(assignmentRows[2]).getByText("미화원")).toBeInTheDocument();
 
     const liveSection = screen.getByRole("region", { name: "실시간출근현황 리스트" });

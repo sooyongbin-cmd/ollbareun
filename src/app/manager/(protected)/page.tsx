@@ -99,6 +99,14 @@ function formatTime(value: string | null) {
   }).format(new Date(value));
 }
 
+function formatInspectionProgress(inspectedSiteCount: number, inspectionSiteCount: number) {
+  if (inspectionSiteCount <= 0) {
+    return "0%";
+  }
+
+  return `${Math.round((inspectedSiteCount / inspectionSiteCount) * 100)}%`;
+}
+
 function DashboardSkeleton() {
   return (
     <div role="status" aria-label="대시보드를 불러오는 중입니다." className="space-y-6">
@@ -335,7 +343,7 @@ export default function ManagerPage() {
                           {worksite.attendanceCount}/{worksite.assignedCount}
                         </TableCell>
                         <TableCell data-label="진행률" className="text-right font-mono tabular-nums">
-                          {worksite.inspectedSiteCount}/{worksite.inspectionSiteCount}
+                          {formatInspectionProgress(worksite.inspectedSiteCount, worksite.inspectionSiteCount)}
                         </TableCell>
                       </TableRow>
                     ))

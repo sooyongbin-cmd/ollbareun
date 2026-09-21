@@ -586,7 +586,7 @@ html[data-manager-theme="dark"] {
 
 .guard-attendance-status {
   display: inline-flex;
-  min-width: 62px;
+  width: 76px;
   height: 23px;
   flex-shrink: 0;
   align-items: center;
@@ -594,7 +594,7 @@ html[data-manager-theme="dark"] {
   border-radius: 5px;
   background: #00b9ef;
   color: #ffffff;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 400;
   line-height: 13px;
   white-space: nowrap;
@@ -625,7 +625,7 @@ html[data-manager-theme="dark"] {
 }
 
 .guard-menu-button {
-  height: 50px;
+  height: 58px;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   background: #ffffff;
@@ -1091,9 +1091,10 @@ html[data-manager-theme="dark"] {
 .guard-special-remarks-photo-instruction {
   margin: 0;
   color: #141414;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 400;
   line-height: 18px;
+  text-align: center;
 }
 
 .guard-special-remarks-input-card,
@@ -1121,10 +1122,10 @@ html[data-manager-theme="dark"] {
   resize: none;
   border: 1px solid #ccd5de;
   border-radius: 10px;
-  padding: 20px 12px;
+  padding: 40px 12px;
   color: #141414;
   font-family: var(--font-pretendard);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 400;
   line-height: 20px;
   text-align: center;

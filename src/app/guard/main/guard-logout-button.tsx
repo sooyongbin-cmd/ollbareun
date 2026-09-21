@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { PowerIcon } from "@/components/icons/power-icon";
+import { LogoutIcon } from "@/components/icons/logout-icon";
 import { clearStoredGuardSession, readStoredGuardSession } from "../guard-session-storage";
 import { getSupabasePasskeyClient } from "@/lib/supabase-passkey-client";
 
@@ -84,6 +85,8 @@ async function recordLogoutResult(sessionLogId: string | null, result: LogoutPus
 type GuardLogoutButtonProps = {
   ariaLabel?: string;
   className?: string;
+  icon?: "logout" | "power";
+  iconSize?: number | string;
   label?: string;
   showIcon?: boolean;
   variant?: "default" | "outline";
@@ -92,6 +95,8 @@ type GuardLogoutButtonProps = {
 export default function GuardLogoutButton({
   ariaLabel,
   className,
+  icon = "power",
+  iconSize = 24,
   label = "로그아웃",
   showIcon = true,
   variant = "outline",
@@ -171,7 +176,11 @@ export default function GuardLogoutButton({
       onClick={handleLogout}
       variant={variant}
     >
-      {showIcon ? <PowerIcon size={24} className="lucide lucide-power" /> : null}
+      {showIcon ? (
+        icon === "logout"
+          ? <LogoutIcon size={iconSize} className="lucide lucide-log-out" />
+          : <PowerIcon size={iconSize} className="lucide lucide-power" />
+      ) : null}
       <span>{label}</span>
     </Button>
   );

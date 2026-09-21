@@ -793,8 +793,10 @@ export default function GuardProfilePage() {
           <GuardLogoutButton
             ariaLabel="내 정보 확인"
             className={styles.confirmButton}
-            label="확인"
-            showIcon={false}
+            icon="logout"
+            iconSize={19.2}
+            label="로그아웃"
+            showIcon
             variant="default"
           />
         </article>

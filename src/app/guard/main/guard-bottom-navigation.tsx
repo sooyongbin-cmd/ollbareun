@@ -11,7 +11,7 @@ const items = [
   { href: "/guard/main/safety", label: "안전교육", icon: "/guard-assets/safety.svg" },
   { href: "/guard/main/work", label: "점검", icon: "/guard-assets/inspection.svg" },
   { href: "/guard/main/special-remarks", label: "특이사항", icon: "/guard-assets/remarks.svg" },
-  { href: "/guard/main/profile", label: "내 정보", icon: "/guard-assets/profile.svg" },
+  { href: "/guard/main/profile", label: "근무정보", icon: "/guard-assets/profile.svg" },
 ];
 
 export default function GuardBottomNavigation() {
@@ -37,7 +37,7 @@ export default function GuardBottomNavigation() {
               key={item.href}
             >
               <span className="guard-footer-icon-frame" aria-hidden="true">
-                <img alt="" className="guard-footer-icon" height={item.label === "내 정보" ? 13 : 16} src={item.icon} width={item.label === "내 정보" ? 13 : 16} />
+                <img alt="" className="guard-footer-icon" height={item.label === "근무정보" ? 13 : 16} src={item.icon} width={item.label === "근무정보" ? 13 : 16} />
               </span>
               {item.label}
             </Link>

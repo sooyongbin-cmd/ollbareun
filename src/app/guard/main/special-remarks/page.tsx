@@ -449,7 +449,7 @@ export default function GuardSpecialRemarksPage() {
             type="button"
           >
             <MicIcon aria-hidden="true" size={16} />
-            음성 입력
+            {listening ? "음성 입력중" : "음성 입력"}
           </Button>
         </div>
       </section>

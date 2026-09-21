@@ -60,9 +60,59 @@
 
 .descriptionText {
   color: #141414;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 19px;
+  text-align: center;
+}
+
+.worksiteGuidance {
+  display: flex;
+  width: 280px;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.worksiteLabel {
+  display: flex;
+  width: 100%;
+  height: 39px;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border-radius: 5px;
+  background: #eef0f2;
+}
+
+.worksiteLabel p {
+  margin: 0;
+  color: #1e1e1e;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 15px;
+  text-align: center;
+}
+
+.worksiteLabel strong {
+  color: #005bac;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.worksiteNotice {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 10px;
+  color: #ff0404;
+  font-size: 15px;
   font-weight: 400;
   line-height: 18px;
+  text-align: center;
+}
+
+.worksiteNotice p {
+  margin: 0;
 }
 
 .checkpointList {
@@ -76,21 +126,21 @@
   box-sizing: border-box;
   display: flex;
   width: 100%;
-  min-height: 102px;
+  min-height: 88px;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
   justify-content: center;
   padding: 15px;
   border: 1px solid #ccd5de;
   border-radius: 10px;
-  background: #ffffff;
+  background: rgb(0 185 239 / 10%);
   color: #1e1e1e;
 }
 
 .checkpointCard[data-completed="true"] {
-  border-color: #00b9ef;
-  background: rgb(0 185 239 / 10%);
+  border-color: #ccd5de;
+  background: rgb(241 244 248 / 70%);
 }
 
 .checkpointDetails {
@@ -108,12 +158,16 @@
   max-width: 100%;
   overflow: hidden;
   color: #1e1e1e;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   line-height: 15px;
   letter-spacing: -0.45px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.checkpointCard[data-completed="true"] .checkpointTitle {
+  color: #979797;
 }
 
 .checkpointTime {
@@ -126,16 +180,15 @@
 
 .checkpointActions {
   display: flex;
-  width: 256px;
+  width: auto;
   height: 25px;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
 }
 
-.siteLabel,
 .status {
   display: flex;
-  width: 125px;
+  min-width: 33px;
   height: 25px;
   align-items: center;
   justify-content: center;
@@ -147,25 +200,24 @@
   white-space: nowrap;
 }
 
-.siteLabel {
-  border: 1px solid #ccd5de;
-  background: #ffffff;
-  color: #585a5c;
-}
-
-.checkpointCard[data-completed="true"] .siteLabel {
-  border-color: #00b9ef;
-  color: #005bac;
-}
-
 .completedStatus {
-  background: rgb(0 151 224 / 15%);
-  color: #005bac;
+  gap: 4px;
+  color: #5bc1df;
+  font-size: 13px;
+  line-height: 13px;
 }
 
 .incompleteStatus {
-  background: rgb(255 172 7 / 19%);
-  color: #ff7b00;
+  color: #ff0a0a;
+  font-size: 13px;
+  line-height: 13px;
+}
+
+.checkIcon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
 }
 
 .message,

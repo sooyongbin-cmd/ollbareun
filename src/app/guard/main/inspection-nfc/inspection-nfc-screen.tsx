@@ -18,7 +18,7 @@ type GuardSession = {
     name?: string;
     role?: string;
   };
-  worksite?: { id?: string };
+  worksite?: { id?: string; name?: string };
 };
 
 type NfcRecord = {
@@ -187,6 +187,7 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
   try { session = storedSession ? JSON.parse(storedSession) as GuardSession : null; } catch { /* Invalid session. */ }
   const employeeId = session?.employee?.id;
   const worksiteId = session?.worksite?.id;
+  const worksiteName = session?.worksite?.name ?? "근무지 미등록";
   const title = presentation === "work"
     ? session?.employee?.role === "미화원" ? "청소구역(NFC 태깅)" : "순찰(NFC 태깅)"
     : session?.employee?.role === "미화원" ? "청소구역(NFC태그)" : "순찰(NFC태그)";
@@ -381,6 +382,19 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
             </p>
           </div>
 
+          <div className={styles.worksiteGuidance}>
+            <div className={styles.worksiteLabel}>
+              <p>
+                <span>근무지</span>{" "}
+                <strong>{worksiteName}</strong>
+              </p>
+            </div>
+            <div className={styles.worksiteNotice}>
+              <p>✓ 휴대폰 케이스에 교통카드나 다른 카드가 있으면 인식이 안 될 수 있습니다.</p>
+              <p>✓ 화면이 켜진 상태에서 태그에 가까이 대주세요.</p>
+            </div>
+          </div>
+
           <div aria-live="polite" className={error ? styles.error : styles.visuallyHidden} role={error ? "alert" : undefined}>
             {error || (saving ? "저장 중..." : status)}
           </div>
@@ -407,8 +421,12 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
                       <p className={styles.checkpointTime}>{completionTime}</p>
                     </div>
                     <div className={styles.checkpointActions}>
-                      <span className={styles.siteLabel}>samhan-1</span>
                       <span className={`${styles.status} ${completed ? styles.completedStatus : styles.incompleteStatus}`}>
+                        {completed ? (
+                          // Runtime-served local SVG keeps the inspection status icon stable.
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img alt="" className={styles.checkIcon} height="16" src="/guard-assets/check-square-complete.svg" width="16" />
+                        ) : null}
                         {completed ? "체크 완료" : "미완료"}
                       </span>
                     </div>

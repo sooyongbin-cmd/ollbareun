@@ -399,9 +399,7 @@ export default function GuardSafetyEducationPage() {
 
         <div className={styles.description}>
           <p className={styles.descriptionText}>
-            필수 안전교육 영상을 시청하고 이수를 완료해 주세요.
-            <br />
-            리스트의 각 제목을 터치하면 시청하실 수 있습니다.
+            필수 안전교육 영상을 시청하고 이수를 완료해 주세요. 리스트의 각 제목을 터치하면 시청하실 수 있습니다.
           </p>
         </div>
 
@@ -443,7 +441,7 @@ export default function GuardSafetyEducationPage() {
                     {completed ? (
                       <>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img alt="" className={styles.checkIcon} height="16" src="/guard-assets/check-square.svg" width="16" />
+                        <img alt="" className={styles.checkIcon} height="16" src="/guard-assets/check-square-complete.svg" width="16" />
                         이수 완료
                       </>
                     ) : "미이수"}

@@ -55,15 +55,17 @@
 .description {
   display: flex;
   width: 100%;
-  height: 32px;
+  min-height: 57px;
   align-items: center;
+  justify-content: center;
 }
 
 .descriptionText {
   color: #141414;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 400;
-  line-height: 18px;
+  line-height: 19px;
+  text-align: center;
 }
 
 .educationList {
@@ -87,7 +89,7 @@
   padding: 0 8px;
   border: 1px solid #ccd5de;
   border-radius: 10px;
-  background: #f1f4f8;
+  background: rgb(241 244 248 / 70%);
   color: #1e1e1e;
   cursor: pointer;
   font-family: inherit;
@@ -97,6 +99,11 @@
 .educationItem:hover {
   border-color: #a9b9c8;
   background: #eaf0f5;
+}
+
+.educationItem[data-completed="false"] {
+  border-color: #00b9ef;
+  background: rgb(0 185 239 / 10%);
 }
 
 .educationItem:focus-visible {
@@ -109,13 +116,17 @@
   width: 100%;
   overflow: hidden;
   color: #1e1e1e;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   line-height: 25px;
   letter-spacing: -0.45px;
   text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.educationItem[data-completed="true"] .educationTitle {
+  color: #979797;
 }
 
 .educationStatus {
@@ -131,11 +142,12 @@
 }
 
 .completedStatus {
-  color: #0097e0;
+  color: #5bc1df;
 }
 
 .incompleteStatus {
-  color: #ff7b00;
+  color: #ff0a0a;
+  line-height: 13px;
 }
 
 .checkIcon {

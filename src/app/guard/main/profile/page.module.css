@@ -70,7 +70,7 @@
   border-top: 1px solid #ccd5e1;
   border-bottom: 1px solid #ccd5e1;
   color: #000000;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 17px;
 }
 
@@ -152,7 +152,7 @@
   background: rgb(241 244 248 / 10%);
   color: #675d5d;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   line-height: 13px;
   letter-spacing: -0.39px;
@@ -206,6 +206,11 @@
   display: block;
   width: 16px;
   height: 16px;
+}
+
+.selectButton option:checked {
+  background: #00b9ef;
+  color: #ffffff;
 }
 
 .weekdayGrid {
@@ -305,7 +310,7 @@
   align-items: center;
   gap: 5px;
   color: #675d5d;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   line-height: normal;
   text-align: center;
@@ -313,7 +318,7 @@
 
 .summaryCardContent strong {
   color: #005bac;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   line-height: 19px;
 }

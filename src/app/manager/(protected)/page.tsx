@@ -4,17 +4,9 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-} from "recharts";
-import {
   CircleAlert,
   GraduationCap,
   MapPinned,
-  TrendingUp,
   UserRoundCheck,
   Users,
 } from "lucide-react";
@@ -28,14 +20,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -63,11 +47,6 @@ type DashboardPayload = {
     };
     unprocessedSpecialRemarks: number;
   };
-  dailyRates: {
-    date: string;
-    attendanceRate: number;
-    educationRate: number;
-  }[];
   liveAttendance: {
     employeeName: string;
     worksiteName: string;
@@ -75,10 +54,14 @@ type DashboardPayload = {
     educationStatus: "완료" | "미이수";
     attendanceStatus: "출근" | "퇴근";
   }[];
-  worksiteAssignments: {
+  worksiteMonitoring: {
     worksiteId: string;
+    employeeRole: "경비원" | "미화원" | "파견";
     worksiteName: string;
+    attendanceCount: number;
     assignedCount: number;
+    inspectedSiteCount: number;
+    inspectionSiteCount: number;
   }[];
 };
 
@@ -99,21 +82,9 @@ const emptyDashboard: DashboardPayload = {
     },
     unprocessedSpecialRemarks: 0,
   },
-  dailyRates: [],
   liveAttendance: [],
-  worksiteAssignments: [],
+  worksiteMonitoring: [],
 };
-
-const chartConfig = {
-  attendanceRate: {
-    label: "출근율",
-    color: "var(--chart-1)",
-  },
-  educationRate: {
-    label: "교육 이수율",
-    color: "var(--chart-2)",
-  },
-} satisfies ChartConfig;
 
 function formatTime(value: string | null) {
   if (!value) {
@@ -126,25 +97,6 @@ function formatTime(value: string | null) {
     hour12: false,
     timeZone: "Asia/Seoul",
   }).format(new Date(value));
-}
-
-function formatShortDate(value: string) {
-  const [, month = "", day = ""] = value.split("-");
-  return `${Number(month)}/${Number(day)}`;
-}
-
-function formatLongDate(value: string) {
-  const date = new Date(`${value}T00:00:00+09:00`);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return new Intl.DateTimeFormat("ko-KR", {
-    month: "long",
-    day: "numeric",
-    weekday: "short",
-    timeZone: "Asia/Seoul",
-  }).format(date);
 }
 
 function DashboardSkeleton() {
@@ -161,15 +113,6 @@ function DashboardSkeleton() {
           </Card>
         ))}
       </div>
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-5 w-40" />
-          <Skeleton className="h-4 w-64 max-w-full" />
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-[18.75rem] w-full" />
-        </CardContent>
-      </Card>
       <div className="grid gap-6 xl:grid-cols-2">
         {Array.from({ length: 2 }, (_, index) => (
           <Card key={index}>
@@ -183,103 +126,6 @@ function DashboardSkeleton() {
         ))}
       </div>
     </div>
-  );
-}
-
-function DashboardTrendChart({ data }: { data: DashboardPayload["dailyRates"] }) {
-  return (
-    <Card>
-      <CardHeader className="border-b">
-        <CardTitle>
-          <h2 className="text-base">최근 30일 운영 추이</h2>
-        </CardTitle>
-        <CardDescription>출근율과 안전교육 이수율을 날짜별로 비교합니다.</CardDescription>
-        <CardAction>
-          <Badge variant="outline" className="gap-1 text-muted-foreground">
-            <TrendingUp aria-hidden="true" className="size-3" />
-            30일
-          </Badge>
-        </CardAction>
-      </CardHeader>
-      <CardContent className="pt-6">
-        {data.length === 0 ? (
-          <div className="flex h-[18.75rem] items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
-            표시할 추이 데이터가 없습니다.
-          </div>
-        ) : (
-          <ChartContainer
-            config={chartConfig}
-            className="h-[18.75rem] w-full aspect-auto"
-            role="img"
-            aria-label="최근 30일 출근율과 안전교육 이수율 비교 차트"
-            data-testid="dashboard-trend-chart"
-          >
-            <AreaChart accessibilityLayer data={data} margin={{ left: 0, right: 12, top: 8 }}>
-              <defs>
-                <linearGradient id="attendance-fill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--color-attendanceRate)" stopOpacity={0.25} />
-                  <stop offset="95%" stopColor="var(--color-attendanceRate)" stopOpacity={0.02} />
-                </linearGradient>
-                <linearGradient id="education-fill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--color-educationRate)" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="var(--color-educationRate)" stopOpacity={0.02} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid vertical={false} />
-              <XAxis
-                axisLine={false}
-                dataKey="date"
-                minTickGap={28}
-                tickFormatter={formatShortDate}
-                tickLine={false}
-              />
-              <YAxis
-                axisLine={false}
-                domain={[0, 100]}
-                tickCount={6}
-                tickFormatter={(value) => `${value}%`}
-                tickLine={false}
-                width={42}
-              />
-              <ChartTooltip
-                cursor={false}
-                content={
-                  <ChartTooltipContent
-                    indicator="line"
-                    labelFormatter={(_, payload) =>
-                      formatLongDate(String(payload[0]?.payload?.date ?? ""))
-                    }
-                    formatter={(value, name) => (
-                      <div className="flex w-full min-w-32 items-center justify-between gap-4">
-                        <span className="text-muted-foreground">
-                          {chartConfig[name as keyof typeof chartConfig]?.label ?? name}
-                        </span>
-                        <span className="font-mono font-medium tabular-nums">{Number(value)}%</span>
-                      </div>
-                    )}
-                  />
-                }
-              />
-              <ChartLegend content={<ChartLegendContent />} />
-              <Area
-                dataKey="attendanceRate"
-                fill="url(#attendance-fill)"
-                stroke="var(--color-attendanceRate)"
-                strokeWidth={2}
-                type="monotone"
-              />
-              <Area
-                dataKey="educationRate"
-                fill="url(#education-fill)"
-                stroke="var(--color-educationRate)"
-                strokeWidth={2}
-                type="monotone"
-              />
-            </AreaChart>
-          </ChartContainer>
-        )}
-      </CardContent>
-    </Card>
   );
 }
 
@@ -350,9 +196,8 @@ export default function ManagerPage() {
                 ...(payload.summary?.employeeRoleCounts ?? {}),
               },
             },
-            dailyRates: payload.dailyRates ?? [],
             liveAttendance: payload.liveAttendance ?? [],
-            worksiteAssignments: payload.worksiteAssignments ?? [],
+            worksiteMonitoring: payload.worksiteMonitoring ?? [],
           });
         }
       } catch (loadError) {
@@ -452,50 +297,45 @@ export default function ManagerPage() {
         ))}
       </section>
 
-      <DashboardTrendChart data={data.dailyRates} />
-
       <div className="grid min-w-0 gap-6 xl:grid-cols-2">
-        <Card role="region" aria-label="현장별 인원 배치" className="min-w-0">
+        <Card role="region" aria-label="직군별 현장 실시간 관제" className="min-w-0">
           <CardHeader className="border-b">
             <CardTitle>
               <h2 className="flex items-center gap-2 text-base">
                 <MapPinned aria-hidden="true" className="size-4 text-primary" />
-                현장별 인원 배치
+                직군별 현장 실시간 관제
               </h2>
             </CardTitle>
-            <CardDescription>현재 배정 기간에 포함된 인원을 집계합니다.</CardDescription>
+            <CardDescription>오늘 직군별 출근 인원과 현장점검 진행 현황을 표시합니다.</CardDescription>
           </CardHeader>
           <CardContent className="min-w-0 px-0">
             <div className="min-w-0 overflow-x-auto">
-              <Table className="min-w-[26.25rem]">
+              <Table className="min-w-[42.5rem]">
                 <TableHeader>
                   <TableRow>
+                    <TableHead>직군</TableHead>
                     <TableHead>근무지명</TableHead>
-                    <TableHead className="text-right">배정인원수</TableHead>
+                    <TableHead className="text-right">출근인원</TableHead>
+                    <TableHead className="text-right">진행률</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data.worksiteAssignments.length === 0 ? (
+                  {data.worksiteMonitoring.length === 0 ? (
                     <TableRow>
-                      <TableCell data-responsive-empty colSpan={2} className="h-28 text-center text-muted-foreground">
-                        등록된 근무지가 없습니다.
+                      <TableCell data-responsive-empty colSpan={4} className="h-28 text-center text-muted-foreground">
+                        등록된 인원 배정이 없습니다.
                       </TableCell>
                     </TableRow>
                   ) : (
-                    data.worksiteAssignments.map((worksite) => (
-                      <TableRow key={worksite.worksiteId}>
-                        <TableCell data-label="근무지명" className="font-medium">{worksite.worksiteName}</TableCell>
-                        <TableCell data-label="배정인원수" className="text-right">
-                          {worksite.assignedCount > 0 ? (
-                            <Link
-                              className="font-semibold text-primary hover:underline"
-                              href={`/manager/employee/assignments?worksite=${encodeURIComponent(worksite.worksiteName)}`}
-                            >
-                              {worksite.assignedCount}
-                            </Link>
-                          ) : (
-                            <span className="text-muted-foreground">{worksite.assignedCount}</span>
-                          )}
+                    data.worksiteMonitoring.map((worksite) => (
+                      <TableRow key={`${worksite.worksiteId}-${worksite.employeeRole}`}>
+                        <TableCell data-label="직군" className="font-medium">{worksite.employeeRole}</TableCell>
+                        <TableCell data-label="근무지명">{worksite.worksiteName}</TableCell>
+                        <TableCell data-label="출근인원" className="text-right font-mono tabular-nums">
+                          {worksite.attendanceCount}/{worksite.assignedCount}
+                        </TableCell>
+                        <TableCell data-label="진행률" className="text-right font-mono tabular-nums">
+                          {worksite.inspectedSiteCount}/{worksite.inspectionSiteCount}
                         </TableCell>
                       </TableRow>
                     ))

@@ -43,6 +43,14 @@ describe("manager dashboard data", () => {
         { employee_id: "emp-1", resource_id: "res-2", is_completed: true, completed_at: "2026-06-02T00:00:00.000Z" },
         { employee_id: "emp-2", resource_id: "res-1", is_completed: true, completed_at: "2026-06-03T00:00:00.000Z" },
       ],
+      inspectionSites: [
+        { id: "site-1", worksite_id: "work-1" },
+        { id: "site-2", worksite_id: "work-1" },
+      ],
+      inspectionLogs: [
+        { inspection_site_id: "site-1", worksite_id: "work-1" },
+        { inspection_site_id: "site-1", worksite_id: "work-1" },
+      ],
       specialRemarkReports: [
         { processing_status: "N" },
         { processing_status: "Y" },
@@ -80,6 +88,26 @@ describe("manager dashboard data", () => {
       educationStatus: "미이수",
       attendanceStatus: "퇴근",
     });
+    expect(data.worksiteMonitoring).toEqual([
+      {
+        worksiteId: "work-1",
+        employeeRole: "경비원",
+        worksiteName: "문현동현장",
+        attendanceCount: 1,
+        assignedCount: 1,
+        inspectedSiteCount: 1,
+        inspectionSiteCount: 2,
+      },
+      {
+        worksiteId: "work-1",
+        employeeRole: "미화원",
+        worksiteName: "문현동현장",
+        attendanceCount: 1,
+        assignedCount: 1,
+        inspectedSiteCount: 1,
+        inspectionSiteCount: 2,
+      },
+    ]);
   });
 
   it("counts waiting, absent, and late employees separately", () => {
@@ -152,27 +180,6 @@ describe("manager dashboard data", () => {
     });
   });
 
-  it("returns recent 30 day chart rates with zero-safe division", () => {
-    const data = buildManagerDashboardData({
-      now: new Date("2026-06-04T03:00:00.000Z"),
-      employees: [],
-      worksites: [],
-      assignments: [],
-      attendance: [{ employee_id: "emp-1", worksite_id: "work-1", work_date: "2026-06-04", intime_status: "2", work_intime: "x", work_outtime: null }],
-      dailyAttendance: [],
-      educationResources: [{ id: "res-1" }],
-      educationCompletions: [{ employee_id: "emp-1", resource_id: "res-1", is_completed: true, completed_at: "2026-06-04T00:00:00.000Z" }],
-    });
-
-    expect(data.dailyRates).toHaveLength(30);
-    expect(data.dailyRates[0].date).toBe("2026-05-06");
-    expect(data.dailyRates[29]).toEqual({
-      date: "2026-06-04",
-      attendanceRate: 0,
-      educationRate: 0,
-    });
-  });
-
   it("counts waiting records using the same status rule as the attendance status report", () => {
     const data = buildManagerDashboardData({
       now: new Date("2026-06-04T00:30:00.000Z"),
@@ -206,13 +213,13 @@ describe("manager dashboard data", () => {
     });
   });
 
-  it("counts current assignment totals by worksite and includes empty worksites", () => {
+  it("groups current assignments by role and worksite", () => {
     const data = buildManagerDashboardData({
       now: new Date("2026-06-04T03:00:00.000Z"),
       employees: [
-        { id: "emp-1", name: "김철수", is_retired: false },
-        { id: "emp-2", name: "이영희", is_retired: false },
-        { id: "emp-3", name: "박민수", is_retired: false },
+        { id: "emp-1", name: "김철수", role: "경비원", is_retired: false },
+        { id: "emp-2", name: "이영희", role: "미화원", is_retired: false },
+        { id: "emp-3", name: "박민수", role: "파견", is_retired: false },
       ],
       worksites: [
         { id: "work-1", name: "문현동현장" },
@@ -225,16 +232,58 @@ describe("manager dashboard data", () => {
         { employee_id: "emp-3", worksite_id: "work-2", start_date: "2026-01-01", end_date: "2026-12-31" },
         { employee_id: "emp-3", worksite_id: "work-1", start_date: "2026-05-01", end_date: "2026-05-31" },
       ],
-      attendance: [],
+      attendance: [{
+        employee_id: "emp-1",
+        worksite_id: "work-1",
+        work_date: "2026-06-04",
+        intime: null,
+        intime_status: "2",
+        work_intime: "2026-06-04T00:00:00.000Z",
+        work_outtime: null,
+      }],
       dailyAttendance: [],
       educationResources: [],
       educationCompletions: [],
+      inspectionSites: [
+        { id: "site-1", worksite_id: "work-1" },
+        { id: "site-2", worksite_id: "work-1" },
+        { id: "site-3", worksite_id: "work-2" },
+      ],
+      inspectionLogs: [
+        { inspection_site_id: "site-1", worksite_id: "work-1" },
+        { inspection_site_id: "site-1", worksite_id: "work-1" },
+        { inspection_site_id: "site-3", worksite_id: "work-2" },
+      ],
     });
 
-    expect(data.worksiteAssignments).toEqual([
-      { worksiteId: "work-1", worksiteName: "문현동현장", assignedCount: 2 },
-      { worksiteId: "work-2", worksiteName: "센텀현장", assignedCount: 1 },
-      { worksiteId: "work-3", worksiteName: "배정없음", assignedCount: 0 },
+    expect(data.worksiteMonitoring).toEqual([
+      {
+        worksiteId: "work-1",
+        employeeRole: "경비원",
+        worksiteName: "문현동현장",
+        attendanceCount: 1,
+        assignedCount: 1,
+        inspectedSiteCount: 1,
+        inspectionSiteCount: 2,
+      },
+      {
+        worksiteId: "work-1",
+        employeeRole: "미화원",
+        worksiteName: "문현동현장",
+        attendanceCount: 0,
+        assignedCount: 1,
+        inspectedSiteCount: 1,
+        inspectionSiteCount: 2,
+      },
+      {
+        worksiteId: "work-2",
+        employeeRole: "파견",
+        worksiteName: "센텀현장",
+        attendanceCount: 0,
+        assignedCount: 1,
+        inspectedSiteCount: 1,
+        inspectionSiteCount: 1,
+      },
     ]);
   });
 
@@ -242,8 +291,8 @@ describe("manager dashboard data", () => {
     const data = buildManagerDashboardData({
       now: new Date("2026-06-04T03:00:00.000Z"),
       employees: [
-        { id: "emp-1", name: "김철수", is_retired: false },
-        { id: "emp-2", name: "이영희", is_retired: false },
+        { id: "emp-1", name: "김철수", role: "경비원", is_retired: false },
+        { id: "emp-2", name: "이영희", role: "미화원", is_retired: false },
       ],
       worksites: [{ id: "work-1", name: "문현동현장" }],
       assignments: [
@@ -257,8 +306,16 @@ describe("manager dashboard data", () => {
       daysOff: [{ work_assignment_id: "assign-2", day_off_date: "2026-06-04" }],
     });
 
-    expect(data.worksiteAssignments).toEqual([
-      { worksiteId: "work-1", worksiteName: "문현동현장", assignedCount: 1 },
+    expect(data.worksiteMonitoring).toEqual([
+      {
+        worksiteId: "work-1",
+        employeeRole: "경비원",
+        worksiteName: "문현동현장",
+        attendanceCount: 0,
+        assignedCount: 1,
+        inspectedSiteCount: 0,
+        inspectionSiteCount: 0,
+      },
     ]);
   });
 });

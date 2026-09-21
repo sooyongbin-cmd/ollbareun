@@ -40,7 +40,7 @@ type AttendanceInput = {
   employee_id: string;
   worksite_id: string;
   work_date: string;
-  intime: string | null;
+  intime?: string | null;
   intime_status: IntimeStatus;
   work_intime: string | null;
   work_outtime: string | null;
@@ -61,6 +61,16 @@ type SpecialRemarkInput = {
   processing_status?: "Y" | "N";
 };
 
+type InspectionSiteInput = {
+  id: string;
+  worksite_id: string;
+};
+
+type InspectionLogInput = {
+  inspection_site_id: string | null;
+  worksite_id: string | null;
+};
+
 export type ManagerDashboardData = {
   summary: {
     scheduledEmployeesToday: number;
@@ -78,11 +88,6 @@ export type ManagerDashboardData = {
     };
     unprocessedSpecialRemarks: number;
   };
-  dailyRates: {
-    date: string;
-    attendanceRate: number;
-    educationRate: number;
-  }[];
   liveAttendance: {
     employeeName: string;
     worksiteName: string;
@@ -90,10 +95,14 @@ export type ManagerDashboardData = {
     educationStatus: "완료" | "미이수";
     attendanceStatus: "출근" | "퇴근";
   }[];
-  worksiteAssignments: {
+  worksiteMonitoring: {
     worksiteId: string;
+    employeeRole: "경비원" | "미화원" | "파견";
     worksiteName: string;
+    attendanceCount: number;
     assignedCount: number;
+    inspectedSiteCount: number;
+    inspectionSiteCount: number;
   }[];
 };
 
@@ -108,6 +117,8 @@ type BuildManagerDashboardInput = {
   educationCompletions: EducationCompletionInput[];
   daysOff?: AssignmentDayOffInput[];
   specialRemarkReports?: SpecialRemarkInput[];
+  inspectionSites?: InspectionSiteInput[];
+  inspectionLogs?: InspectionLogInput[];
 };
 
 function toKstDate(value: Date) {
@@ -133,15 +144,11 @@ function percent(numerator: number, denominator: number) {
   return Math.round((numerator / denominator) * 100);
 }
 
-function completedResourceIdsByEmployee(completions: EducationCompletionInput[], date?: string) {
+function completedResourceIdsByEmployee(completions: EducationCompletionInput[]) {
   const completedByEmployee = new Map<string, Set<string>>();
 
   completions.forEach((completion) => {
     if (!completion.is_completed) {
-      return;
-    }
-
-    if (date && (!completion.completed_at || toKstDate(new Date(completion.completed_at)) > date)) {
       return;
     }
 
@@ -227,16 +234,13 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
         break;
     }
   });
-  const currentAssignmentCounts = input.assignments
+  const currentAssignments = input.assignments
     .filter(
       (assignment) =>
         inDateRange(today, assignment.start_date, assignment.end_date) &&
+        activeEmployeeIds.has(assignment.employee_id) &&
         (!assignment.id || !todayDaysOff.has(assignment.id)),
-    )
-    .reduce<Record<string, number>>((counts, assignment) => {
-      counts[assignment.worksite_id] = (counts[assignment.worksite_id] ?? 0) + 1;
-      return counts;
-    }, {});
+    );
 
   const educationUncompleted =
     allResourceIds.length === 0
@@ -256,31 +260,86 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
           activeEmployees.length,
         );
 
-  const dailyRates = Array.from({ length: 30 }, (_, index) => {
-    const date = addDays(today, index - 29);
-    const attendanceEmployeeIds = new Set(
-      input.attendance
-        .filter((record) => record.work_date === date && record.work_intime && activeEmployeeIds.has(record.employee_id))
-        .map((record) => record.employee_id),
-    );
-    const completedByDate = completedResourceIdsByEmployee(input.educationCompletions, date);
-    const fullyCompletedCount =
-      allResourceIds.length === 0
-        ? 0
-        : activeEmployees.filter((employee) => {
-            const completed = completedByDate.get(employee.id);
-            return allResourceIds.every((resourceId) => completed?.has(resourceId));
-          }).length;
-
-    return {
-      date,
-      attendanceRate: percent(attendanceEmployeeIds.size, activeEmployees.length),
-      educationRate: percent(fullyCompletedCount, activeEmployees.length),
-    };
-  });
   const unprocessedSpecialRemarks = (input.specialRemarkReports ?? []).filter(
     (report) => report.processing_status !== "Y",
   ).length;
+
+  const monitoringByRoleAndWorksite = new Map<
+    string,
+    {
+      worksiteId: string;
+      employeeRole: "경비원" | "미화원" | "파견";
+      assignedCount: number;
+      attendanceCount: number;
+    }
+  >();
+  currentAssignments.forEach((assignment) => {
+    const employeeRole = employeeById.get(assignment.employee_id)?.role;
+    if (!employeeRole) {
+      return;
+    }
+
+    const key = `${employeeRole}:${assignment.worksite_id}`;
+    const current = monitoringByRoleAndWorksite.get(key) ?? {
+      worksiteId: assignment.worksite_id,
+      employeeRole,
+      assignedCount: 0,
+      attendanceCount: 0,
+    };
+    current.assignedCount += 1;
+    monitoringByRoleAndWorksite.set(key, current);
+  });
+
+  const countedAttendance = new Set<string>();
+  todayAttendance.forEach((record) => {
+    const employeeRole = employeeById.get(record.employee_id)?.role;
+    if (!employeeRole) {
+      return;
+    }
+
+    const key = `${employeeRole}:${record.worksite_id}`;
+    const attendanceKey = `${key}:${record.employee_id}`;
+    const current = monitoringByRoleAndWorksite.get(key);
+    if (!current || countedAttendance.has(attendanceKey)) {
+      return;
+    }
+
+    current.attendanceCount += 1;
+    countedAttendance.add(attendanceKey);
+  });
+
+  const inspectionSiteWorksiteById = new Map(
+    (input.inspectionSites ?? []).map((site) => [site.id, site.worksite_id]),
+  );
+  const inspectionSiteCountByWorksite = new Map<string, number>();
+  (input.inspectionSites ?? []).forEach((site) => {
+    inspectionSiteCountByWorksite.set(
+      site.worksite_id,
+      (inspectionSiteCountByWorksite.get(site.worksite_id) ?? 0) + 1,
+    );
+  });
+  const inspectedSiteIdsByWorksite = new Map<string, Set<string>>();
+  (input.inspectionLogs ?? []).forEach((log) => {
+    if (!log.inspection_site_id) {
+      return;
+    }
+
+    const worksiteId = inspectionSiteWorksiteById.get(log.inspection_site_id) ?? log.worksite_id;
+    if (!worksiteId) {
+      return;
+    }
+
+    const inspectedSiteIds = inspectedSiteIdsByWorksite.get(worksiteId) ?? new Set<string>();
+    inspectedSiteIds.add(log.inspection_site_id);
+    inspectedSiteIdsByWorksite.set(worksiteId, inspectedSiteIds);
+  });
+
+  const worksiteMonitoring = Array.from(monitoringByRoleAndWorksite.values()).map((row) => ({
+    ...row,
+    worksiteName: worksiteById.get(row.worksiteId)?.name ?? "현장 없음",
+    inspectedSiteCount: inspectedSiteIdsByWorksite.get(row.worksiteId)?.size ?? 0,
+    inspectionSiteCount: inspectionSiteCountByWorksite.get(row.worksiteId) ?? 0,
+  }));
 
   const liveAttendance = todayAttendance
     .slice()
@@ -316,13 +375,15 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       employeeRoleCounts,
       unprocessedSpecialRemarks,
     },
-    dailyRates,
     liveAttendance,
-    worksiteAssignments: input.worksites.map((worksite) => ({
-      worksiteId: worksite.id,
-      worksiteName: worksite.name,
-      assignedCount: currentAssignmentCounts[worksite.id] ?? 0,
-    })),
+    worksiteMonitoring: worksiteMonitoring.sort((left, right) => {
+      const worksiteComparison = left.worksiteName.localeCompare(right.worksiteName, "ko-KR");
+      if (worksiteComparison !== 0) {
+        return worksiteComparison;
+      }
+
+      return ["경비원", "미화원", "파견"].indexOf(left.employeeRole) - ["경비원", "미화원", "파견"].indexOf(right.employeeRole);
+    }),
   };
 }
 
@@ -338,14 +399,16 @@ export async function loadManagerDashboardData() {
   // server-side client after the route has verified manager access.
   const supabase = getSupabaseAdmin();
   const today = toKstDate(new Date());
-  const startDate = addDays(today, -29);
+  const tomorrow = addDays(today, 1);
+  const todayStart = `${today}T00:00:00+09:00`;
+  const tomorrowStart = `${tomorrow}T00:00:00+09:00`;
 
-  const [employeesResult, worksitesResult, assignmentsResult, workRecordResult, resourcesResult, completionsResult, daysOffResult, specialRemarksResult] =
+  const [employeesResult, worksitesResult, assignmentsResult, workRecordResult, resourcesResult, completionsResult, daysOffResult, specialRemarksResult, inspectionSitesResult, inspectionLogsResult] =
     await Promise.all([
       supabase.from("employees").select("id,name,role,is_retired"),
       supabase.from("worksites").select("id,name"),
-      supabase.from("work_assignments").select("id,employee_id,worksite_id,start_date,end_date").lte("start_date", today).gte("end_date", startDate),
-      supabase.from("work_record").select("id,employee_id,worksite_id,work_date,intime,work_intime,work_outtime,intime_status").gte("work_date", startDate).lte("work_date", today),
+      supabase.from("work_assignments").select("id,employee_id,worksite_id,start_date,end_date").lte("start_date", today).gte("end_date", today),
+      supabase.from("work_record").select("id,employee_id,worksite_id,work_date,intime,work_intime,work_outtime,intime_status").eq("work_date", today),
       supabase.from("education_resources").select("id"),
       supabase.from("education_completions").select("employee_id,resource_id,is_completed,completed_at"),
       supabase
@@ -353,6 +416,12 @@ export async function loadManagerDashboardData() {
         .select("work_assignment_id,day_off_date")
         .eq("day_off_date", today),
       supabase.from("inspection_special_reports").select("processing_status"),
+      supabase.from("inspection_sites").select("id,worksite_id"),
+      supabase
+        .from("inspection_logs")
+        .select("inspection_site_id,worksite_id")
+        .gte("inspected_at", todayStart)
+        .lt("inspected_at", tomorrowStart),
     ]);
 
   throwIfError(employeesResult.error);
@@ -363,6 +432,8 @@ export async function loadManagerDashboardData() {
   throwIfError(completionsResult.error);
   throwIfError(daysOffResult.error);
   throwIfError(specialRemarksResult.error);
+  throwIfError(inspectionSitesResult.error);
+  throwIfError(inspectionLogsResult.error);
 
   return buildManagerDashboardData({
     employees: employeesResult.data ?? [],
@@ -374,5 +445,7 @@ export async function loadManagerDashboardData() {
     educationCompletions: completionsResult.data ?? [],
     daysOff: daysOffResult.data ?? [],
     specialRemarkReports: specialRemarksResult.data ?? [],
+    inspectionSites: inspectionSitesResult.data ?? [],
+    inspectionLogs: inspectionLogsResult.data ?? [],
   });
 }

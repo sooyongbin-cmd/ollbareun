@@ -6,9 +6,9 @@ describe("manager dashboard data", () => {
     const data = buildManagerDashboardData({
       now: new Date("2026-06-04T03:00:00.000Z"),
       employees: [
-        { id: "emp-1", name: "김철수", is_retired: false },
-        { id: "emp-2", name: "이영희", is_retired: false },
-        { id: "emp-3", name: "퇴직자", is_retired: true },
+        { id: "emp-1", name: "김철수", role: "경비원", is_retired: false },
+        { id: "emp-2", name: "이영희", role: "미화원", is_retired: false },
+        { id: "emp-3", name: "퇴직자", role: "파견", is_retired: true },
       ],
       worksites: [{ id: "work-1", name: "문현동현장" }],
       assignments: [
@@ -43,6 +43,10 @@ describe("manager dashboard data", () => {
         { employee_id: "emp-1", resource_id: "res-2", is_completed: true, completed_at: "2026-06-02T00:00:00.000Z" },
         { employee_id: "emp-2", resource_id: "res-1", is_completed: true, completed_at: "2026-06-03T00:00:00.000Z" },
       ],
+      specialRemarkReports: [
+        { processing_status: "N" },
+        { processing_status: "Y" },
+      ],
     });
 
     expect(data.summary).toEqual({
@@ -53,6 +57,13 @@ describe("manager dashboard data", () => {
       absentEmployeesToday: 0,
       lateEmployeesToday: 0,
       educationUncompleted: 1,
+      educationRate: 50,
+      employeeRoleCounts: {
+        guard: 1,
+        cleaner: 1,
+        dispatched: 0,
+      },
+      unprocessedSpecialRemarks: 1,
     });
     expect(data.liveAttendance).toHaveLength(2);
     expect(data.liveAttendance).toContainEqual({

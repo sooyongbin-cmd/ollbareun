@@ -55,6 +55,13 @@ type DashboardPayload = {
     absentEmployeesToday: number;
     lateEmployeesToday: number;
     educationUncompleted: number;
+    educationRate: number;
+    employeeRoleCounts: {
+      guard: number;
+      cleaner: number;
+      dispatched: number;
+    };
+    unprocessedSpecialRemarks: number;
   };
   dailyRates: {
     date: string;
@@ -84,6 +91,13 @@ const emptyDashboard: DashboardPayload = {
     absentEmployeesToday: 0,
     lateEmployeesToday: 0,
     educationUncompleted: 0,
+    educationRate: 0,
+    employeeRoleCounts: {
+      guard: 0,
+      cleaner: 0,
+      dispatched: 0,
+    },
+    unprocessedSpecialRemarks: 0,
   },
   dailyRates: [],
   liveAttendance: [],
@@ -328,7 +342,14 @@ export default function ManagerPage() {
 
         if (!ignore) {
           setData({
-            summary: payload.summary ?? emptyDashboard.summary,
+            summary: {
+              ...emptyDashboard.summary,
+              ...(payload.summary ?? {}),
+              employeeRoleCounts: {
+                ...emptyDashboard.summary.employeeRoleCounts,
+                ...(payload.summary?.employeeRoleCounts ?? {}),
+              },
+            },
             dailyRates: payload.dailyRates ?? [],
             liveAttendance: payload.liveAttendance ?? [],
             worksiteAssignments: payload.worksiteAssignments ?? [],
@@ -366,7 +387,6 @@ export default function ManagerPage() {
     );
   }
 
-  const todayAttendanceRate = data.dailyRates.at(-1)?.attendanceRate ?? 0;
   const summaryCards: SummaryCard[] = [
     {
       label: "출근현황",
@@ -384,22 +404,36 @@ export default function ManagerPage() {
       href: "/manager/reports/attendance/status",
     },
     {
-      label: "현재 출근",
-      value: `${data.summary.currentlyClockedIn}명`,
-      description: "오늘 출근 후 근무 중",
-      icon: UserRoundCheck,
+      label: "직군별 인원배정",
+      value: (
+        <span className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[1.15rem] md:text-[1.3rem]">
+          <span>경비원 {data.summary.employeeRoleCounts.guard}명</span>
+          <span aria-hidden="true" className="text-muted-foreground">/</span>
+          <span>미화원 {data.summary.employeeRoleCounts.cleaner}명</span>
+          <span aria-hidden="true" className="text-muted-foreground">/</span>
+          <span>파견 {data.summary.employeeRoleCounts.dispatched}명</span>
+        </span>
+      ),
+      description: "재직 직원 직군별 인원",
+      ariaLabel: `직군별 인원배정 경비원 ${data.summary.employeeRoleCounts.guard}명 미화원 ${data.summary.employeeRoleCounts.cleaner}명 파견 ${data.summary.employeeRoleCounts.dispatched}명`,
+      icon: Users,
+      href: "/manager/employee/employees",
     },
     {
-      label: "교육 미이수",
-      value: `${data.summary.educationUncompleted}명`,
-      description: "필수 안전교육 확인 필요",
+      label: "안전교육 이수율",
+      value: `${data.summary.educationRate}%`,
+      description: `안전교육 미이수 ${data.summary.educationUncompleted}명`,
+      ariaLabel: `안전교육 이수율 ${data.summary.educationRate}% 안전교육 미이수 ${data.summary.educationUncompleted}명`,
       icon: GraduationCap,
+      href: "/manager/safety/completions",
     },
     {
-      label: "오늘 출근율",
-      value: `${todayAttendanceRate}%`,
-      description: "전체 재직 직원 기준",
-      icon: TrendingUp,
+      label: "특이사항",
+      value: `${data.summary.unprocessedSpecialRemarks}건`,
+      description: "긴급 조치 요구됨",
+      ariaLabel: `특이사항 ${data.summary.unprocessedSpecialRemarks}건 긴급 조치 요구됨`,
+      icon: CircleAlert,
+      href: "/manager/inspection/special-remarks",
     },
   ];
 

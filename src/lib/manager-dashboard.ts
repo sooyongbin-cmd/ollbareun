@@ -4,6 +4,7 @@ import { getManagerAttendanceStatus } from "./manager-attendance-status";
 type EmployeeInput = {
   id: string;
   name: string;
+  role?: "경비원" | "미화원" | "파견";
   is_retired?: boolean;
 };
 
@@ -56,6 +57,10 @@ type EducationCompletionInput = {
   completed_at: string | null;
 };
 
+type SpecialRemarkInput = {
+  processing_status?: "Y" | "N";
+};
+
 export type ManagerDashboardData = {
   summary: {
     scheduledEmployeesToday: number;
@@ -65,6 +70,13 @@ export type ManagerDashboardData = {
     absentEmployeesToday: number;
     lateEmployeesToday: number;
     educationUncompleted: number;
+    educationRate: number;
+    employeeRoleCounts: {
+      guard: number;
+      cleaner: number;
+      dispatched: number;
+    };
+    unprocessedSpecialRemarks: number;
   };
   dailyRates: {
     date: string;
@@ -95,6 +107,7 @@ type BuildManagerDashboardInput = {
   educationResources: EducationResourceInput[];
   educationCompletions: EducationCompletionInput[];
   daysOff?: AssignmentDayOffInput[];
+  specialRemarkReports?: SpecialRemarkInput[];
 };
 
 function toKstDate(value: Date) {
@@ -146,6 +159,21 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
   const activeEmployeeIds = new Set(activeEmployees.map((employee) => employee.id));
   const employeeById = new Map(input.employees.map((employee) => [employee.id, employee]));
   const worksiteById = new Map(input.worksites.map((worksite) => [worksite.id, worksite]));
+  const employeeRoleCounts = {
+    guard: 0,
+    cleaner: 0,
+    dispatched: 0,
+  };
+
+  activeEmployees.forEach((employee) => {
+    if (employee.role === "경비원") {
+      employeeRoleCounts.guard += 1;
+    } else if (employee.role === "미화원") {
+      employeeRoleCounts.cleaner += 1;
+    } else if (employee.role === "파견") {
+      employeeRoleCounts.dispatched += 1;
+    }
+  });
   const todayWorkRecords = input.attendance.filter(
     (record) => record.work_date === today && activeEmployeeIds.has(record.employee_id),
   );
@@ -217,6 +245,16 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
           const completed = completedByEmployee.get(employee.id);
           return allResourceIds.some((resourceId) => !completed?.has(resourceId));
         }).length;
+  const educationRate =
+    allResourceIds.length === 0
+      ? 0
+      : percent(
+          activeEmployees.filter((employee) => {
+            const completed = completedByEmployee.get(employee.id);
+            return allResourceIds.every((resourceId) => completed?.has(resourceId));
+          }).length,
+          activeEmployees.length,
+        );
 
   const dailyRates = Array.from({ length: 30 }, (_, index) => {
     const date = addDays(today, index - 29);
@@ -240,6 +278,9 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       educationRate: percent(fullyCompletedCount, activeEmployees.length),
     };
   });
+  const unprocessedSpecialRemarks = (input.specialRemarkReports ?? []).filter(
+    (report) => report.processing_status !== "Y",
+  ).length;
 
   const liveAttendance = todayAttendance
     .slice()
@@ -271,6 +312,9 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       absentEmployeesToday,
       lateEmployeesToday,
       educationUncompleted,
+      educationRate,
+      employeeRoleCounts,
+      unprocessedSpecialRemarks,
     },
     dailyRates,
     liveAttendance,
@@ -296,9 +340,9 @@ export async function loadManagerDashboardData() {
   const today = toKstDate(new Date());
   const startDate = addDays(today, -29);
 
-  const [employeesResult, worksitesResult, assignmentsResult, workRecordResult, resourcesResult, completionsResult, daysOffResult] =
+  const [employeesResult, worksitesResult, assignmentsResult, workRecordResult, resourcesResult, completionsResult, daysOffResult, specialRemarksResult] =
     await Promise.all([
-      supabase.from("employees").select("id,name,is_retired"),
+      supabase.from("employees").select("id,name,role,is_retired"),
       supabase.from("worksites").select("id,name"),
       supabase.from("work_assignments").select("id,employee_id,worksite_id,start_date,end_date").lte("start_date", today).gte("end_date", startDate),
       supabase.from("work_record").select("id,employee_id,worksite_id,work_date,intime,work_intime,work_outtime,intime_status").gte("work_date", startDate).lte("work_date", today),
@@ -308,6 +352,7 @@ export async function loadManagerDashboardData() {
         .from("work_assignment_days_off")
         .select("work_assignment_id,day_off_date")
         .eq("day_off_date", today),
+      supabase.from("inspection_special_reports").select("processing_status"),
     ]);
 
   throwIfError(employeesResult.error);
@@ -317,6 +362,7 @@ export async function loadManagerDashboardData() {
   throwIfError(resourcesResult.error);
   throwIfError(completionsResult.error);
   throwIfError(daysOffResult.error);
+  throwIfError(specialRemarksResult.error);
 
   return buildManagerDashboardData({
     employees: employeesResult.data ?? [],
@@ -327,5 +373,6 @@ export async function loadManagerDashboardData() {
     educationResources: resourcesResult.data ?? [],
     educationCompletions: completionsResult.data ?? [],
     daysOff: daysOffResult.data ?? [],
+    specialRemarkReports: specialRemarksResult.data ?? [],
   });
 }

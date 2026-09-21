@@ -11,6 +11,13 @@ const dashboardPayload = {
     absentEmployeesToday: 2,
     lateEmployeesToday: 1,
     educationUncompleted: 3,
+    educationRate: 80,
+    employeeRoleCounts: {
+      guard: 2,
+      cleaner: 1,
+      dispatched: 1,
+    },
+    unprocessedSpecialRemarks: 4,
   },
   dailyRates: [
     { date: "2026-06-03", attendanceRate: 50, educationRate: 70 },
@@ -58,11 +65,29 @@ describe("manager dashboard page", () => {
     expect(within(attendanceCard).getByText("대기 1")).toBeInTheDocument();
     expect(within(attendanceCard).getByText("결근2")).toHaveClass("text-red-600");
     expect(within(attendanceCard).getByText("지각 1")).toHaveClass("text-pink-600");
-    expect(within(summary).getByText("현재 출근")).toBeInTheDocument();
-    expect(within(summary).getAllByText("3명")).toHaveLength(2);
-    expect(within(summary).getByText("교육 미이수")).toBeInTheDocument();
-    expect(within(summary).getByText("오늘 출근율")).toBeInTheDocument();
-    expect(within(summary).getByText("60%")).toBeInTheDocument();
+    const roleCard = within(summary).getByRole("link", {
+      name: "직군별 인원배정 경비원 2명 미화원 1명 파견 1명",
+    });
+    expect(roleCard).toHaveAttribute("href", "/manager/employee/employees");
+    expect(within(roleCard).getByText("경비원 2명")).toBeInTheDocument();
+    expect(within(roleCard).getByText("미화원 1명")).toBeInTheDocument();
+    expect(within(roleCard).getByText("파견 1명")).toBeInTheDocument();
+
+    const educationCard = within(summary).getByRole("link", {
+      name: "안전교육 이수율 80% 안전교육 미이수 3명",
+    });
+    expect(educationCard).toHaveAttribute("href", "/manager/safety/completions");
+    expect(within(educationCard).getByText("안전교육 이수율")).toBeInTheDocument();
+    expect(within(educationCard).getByText("80%")).toBeInTheDocument();
+    expect(within(educationCard).getByText("안전교육 미이수 3명")).toBeInTheDocument();
+
+    const remarksCard = within(summary).getByRole("link", {
+      name: "특이사항 4건 긴급 조치 요구됨",
+    });
+    expect(remarksCard).toHaveAttribute("href", "/manager/inspection/special-remarks");
+    expect(within(remarksCard).getByText("특이사항")).toBeInTheDocument();
+    expect(within(remarksCard).getByText("4건")).toBeInTheDocument();
+    expect(within(remarksCard).getByText("긴급 조치 요구됨")).toBeInTheDocument();
 
     expect(screen.getByRole("heading", { name: "최근 30일 운영 추이" })).toBeInTheDocument();
     expect(
@@ -129,7 +154,7 @@ describe("manager dashboard page", () => {
       "fetch",
       vi.fn(async () =>
         Response.json({
-          summary: dashboardPayload.summary,
+          summary: { ...dashboardPayload.summary, educationRate: 0 },
           liveAttendance: [],
           worksiteAssignments: [],
         }),
@@ -138,7 +163,7 @@ describe("manager dashboard page", () => {
 
     render(<ManagerPage />);
 
-    expect(await screen.findByText("오늘 출근율")).toBeInTheDocument();
+    expect(await screen.findByText("안전교육 이수율")).toBeInTheDocument();
     expect(within(screen.getByRole("region", { name: "운영 요약" })).getByText("0%")).toBeInTheDocument();
     expect(screen.getByText("표시할 추이 데이터가 없습니다.")).toBeInTheDocument();
     expect(screen.getByText("등록된 근무지가 없습니다.")).toBeInTheDocument();

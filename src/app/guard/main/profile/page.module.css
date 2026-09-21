@@ -199,7 +199,7 @@
 
 .selectItem {
   min-height: 22px;
-  padding: 4px 8px 4px 32px;
+  padding: 4px 0 4px 32px;
   border-radius: 4px;
   color: #675d5d;
   font-size: 15px;
@@ -211,6 +211,7 @@
 .selectItem > [data-slot="select-item-indicator"] {
   right: auto;
   left: 8px;
+  color: #ffffff;
 }
 
 .selectItem[data-highlighted],

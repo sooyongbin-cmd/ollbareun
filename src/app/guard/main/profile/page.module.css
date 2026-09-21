@@ -175,13 +175,6 @@
   cursor: not-allowed;
 }
 
-.scheduleSelect img {
-  position: absolute;
-  top: 3px;
-  right: 8px;
-  pointer-events: none;
-}
-
 .monthlySelect {
   position: relative;
   display: inline-flex;
@@ -191,24 +184,33 @@
 .monthlySelect .selectButton {
   max-width: 170px;
   padding-right: 29px;
-  appearance: none;
   cursor: pointer;
 }
 
-.monthlySelect img {
-  position: absolute;
-  top: 3px;
-  right: 8px;
-  pointer-events: none;
+.selectContent {
+  width: 170px;
+  max-width: calc(100vw - 40px);
+  padding: 4px;
+  border-color: #ccd5de;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #675d5d;
+  font-family: inherit;
 }
 
-.selectButton img {
-  display: block;
-  width: 16px;
-  height: 16px;
+.selectItem {
+  min-height: 22px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #675d5d;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 13px;
+  white-space: nowrap;
 }
 
-.selectButton option:checked {
+.selectItem[data-highlighted],
+.selectItem[data-state="checked"] {
   background: #00b9ef;
   color: #ffffff;
 }

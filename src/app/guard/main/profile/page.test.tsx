@@ -122,14 +122,16 @@ describe("guard profile page", () => {
     render(<GuardProfilePage />);
 
     const scheduleSelect = await screen.findByRole("combobox", { name: "근무 스케줄 선택" });
-    await waitFor(() => expect(scheduleSelect).toHaveValue(currentWeekStart));
-    expect(scheduleSelect.querySelectorAll("option")).toHaveLength(2);
+    await waitFor(() => expect(scheduleSelect).toHaveTextContent(/주차/));
     expect(screen.getByLabelText(`${today} 근무`)).toBeInTheDocument();
     expect(screen.getByLabelText(`${currentWeekDayOff} 휴무`)).toBeInTheDocument();
 
-    fireEvent.change(scheduleSelect, { target: { value: nextWeekStart } });
+    fireEvent.keyDown(scheduleSelect, { key: "ArrowDown" });
+    const scheduleOptions = screen.getAllByRole("option");
+    expect(scheduleOptions).toHaveLength(2);
+    fireEvent.click(scheduleOptions[1]);
 
-    expect(scheduleSelect).toHaveValue(nextWeekStart);
+    expect(scheduleSelect).toHaveTextContent(/주차/);
     expect(screen.getByLabelText(`${nextWeekStart} 근무`)).toBeInTheDocument();
     expect(screen.getByLabelText(`${addDateDays(nextWeekStart, 1)} 휴무`)).toBeInTheDocument();
   });
@@ -237,19 +239,24 @@ describe("guard profile page", () => {
     render(<GuardProfilePage />);
 
     const monthlySelect = await screen.findByRole("combobox", { name: "월별 출근 현황 선택" });
-    expect(monthlySelect).toHaveValue(currentMonth);
-    expect(Array.from(monthlySelect.querySelectorAll("option")).map((option) => option.textContent)).toEqual([
+    expect(monthlySelect).toHaveTextContent(`${monthLabel(currentMonth)} (이번 달)`);
+
+    fireEvent.keyDown(monthlySelect, { key: "ArrowDown" });
+    const monthlyOptions = screen.getAllByRole("option");
+    expect(monthlyOptions.map((option) => option.textContent)).toEqual([
       `${monthLabel(currentMonth)} (이번 달)`,
       monthLabel(previousMonth),
       monthLabel(twoMonthsAgo),
     ]);
-    expect(monthlySelect.querySelector(`option[value="${futureMonth}"]`)).not.toBeInTheDocument();
+    expect(monthlyOptions.some((option) => option.textContent === futureMonth)).toBe(false);
 
-    fireEvent.change(monthlySelect, { target: { value: previousMonth } });
+    const previousMonthOption = monthlyOptions.find((option) => option.textContent === monthLabel(previousMonth));
+    expect(previousMonthOption).toBeDefined();
+    fireEvent.click(previousMonthOption!);
 
     const workCard = screen.getByRole("button", { name: `${monthLabel(previousMonth)} 근무 내역 보기` });
     const absenceCard = screen.getByRole("button", { name: `${monthLabel(previousMonth)} 결근/휴가 내역 보기` });
-    expect(monthlySelect).toHaveValue(previousMonth);
+    expect(monthlySelect).toHaveTextContent(monthLabel(previousMonth));
     expect(within(workCard).getByText("4일")).toBeInTheDocument();
     expect(within(absenceCard).getByText("1일")).toBeInTheDocument();
 

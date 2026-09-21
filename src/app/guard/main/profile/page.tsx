@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
-import { NativeSelectOption } from "@/components/ui/native-select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getSupabasePasskeyClient } from "@/lib/supabase-passkey-client";
 import { usePasskeyFeatureEnabled } from "@/components/passkey-feature-provider";
@@ -699,24 +699,22 @@ export default function GuardProfilePage() {
             <div className={styles.sectionHeading}>
               <h2>근무 스케줄</h2>
               <div className={styles.scheduleSelect}>
-                <select
-                  aria-label="근무 스케줄 선택"
-                  className={styles.selectButton}
+                <Select
                   disabled={scheduleWeekOptions.length === 0}
-                  onChange={(event) => setSelectedScheduleWeek(event.target.value)}
+                  onValueChange={setSelectedScheduleWeek}
                   value={selectedScheduleWeekValue}
                 >
-                  {scheduleWeekOptions.length > 0 ? (
-                    scheduleWeekOptions.map((option) => (
-                      <NativeSelectOption key={option.startDate} value={option.startDate}>
+                  <SelectTrigger aria-label="근무 스케줄 선택" className={styles.selectButton}>
+                    <SelectValue placeholder="근무예정 정보 없음" />
+                  </SelectTrigger>
+                  <SelectContent align="end" className={styles.selectContent} position="popper">
+                    {scheduleWeekOptions.map((option) => (
+                      <SelectItem className={styles.selectItem} key={option.startDate} value={option.startDate}>
                         {option.label}
-                      </NativeSelectOption>
-                    ))
-                  ) : (
-                    <NativeSelectOption value="">근무예정 정보 없음</NativeSelectOption>
-                  )}
-                </select>
-                <img alt="" src="/guard-assets/profile-chevron-down.svg" />
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             {selectedScheduleWeekOption ? (
@@ -747,19 +745,21 @@ export default function GuardProfilePage() {
             <div className={styles.sectionHeading}>
               <h2>월별 출근 현황</h2>
               <div className={styles.monthlySelect}>
-                <select
-                  aria-label="월별 출근 현황 선택"
-                  className={styles.selectButton}
-                  onChange={(event) => setSelectedMonthKey(event.target.value)}
+                <Select
+                  onValueChange={setSelectedMonthKey}
                   value={selectedMonthValue}
                 >
-                  {monthlyOptions.map((monthKey) => (
-                    <option key={monthKey} value={monthKey}>
-                      {`${formatMonth(monthKey)}${monthKey === currentMonth ? " (이번 달)" : ""}`}
-                    </option>
-                  ))}
-                </select>
-                <img alt="" src="/guard-assets/profile-chevron-down.svg" />
+                  <SelectTrigger aria-label="월별 출근 현황 선택" className={styles.selectButton}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent align="end" className={styles.selectContent} position="popper">
+                    {monthlyOptions.map((monthKey) => (
+                      <SelectItem className={styles.selectItem} key={monthKey} value={monthKey}>
+                        {`${formatMonth(monthKey)}${monthKey === currentMonth ? " (이번 달)" : ""}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className={styles.monthlyCards}>

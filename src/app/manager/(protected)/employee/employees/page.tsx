@@ -267,7 +267,7 @@ export default function EmployeeRosterPage() {
         className="rounded-xl border border-border/50 bg-muted/40 p-[1.5rem] md:p-[2rem]"
       >
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-[0.75rem] font-normal text-muted-foreground">
-          <span>전체 직원 {data.employees.length}</span>
+          <span>전체 직원 {filteredEmployees.length}</span>
           <span>검색 결과 {filteredEmployees.length}</span>
         </div>
 

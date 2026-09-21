@@ -268,9 +268,8 @@ export default function EducationCompletionsPage() {
         aria-label="교육이수 목록"
         className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
       >
-        <div className="flex flex-wrap items-center justify-between gap-3 text-[0.875rem] text-muted-foreground">
-          <span>전체 직원 {employees.filter((e) => !e.is_retired).length}</span>
-          <span>검색 결과 {filteredEmployees.length}</span>
+        <div className="flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
+          <span>조회 결과 {filteredEmployees.length}</span>
         </div>
 
         {loading ? (

@@ -174,6 +174,10 @@ export default function AttendanceReportPage() {
       </section>
 
       <section aria-label="근태내역 목록" className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
+        <div className="mb-4 flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
+          <span>조회 결과 {rows.length}</span>
+        </div>
+
         {loading ? (
           <ManagerLoadingMessage />
         ) : error ? (

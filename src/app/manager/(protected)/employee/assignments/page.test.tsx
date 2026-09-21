@@ -120,7 +120,7 @@ describe("assignment management page", () => {
     expect(searchSection).toContainElement(screen.getByLabelText("근무지"));
     expect(searchSection).toContainElement(screen.getByLabelText("이름"));
     expect(searchSection).toContainElement(screen.getByRole("link", { name: "배정등록" }));
-    expect(listSection).toContainElement(screen.getByText("전체 배정 2"));
+    expect(within(listSection).queryByText("전체 배정 2")).not.toBeInTheDocument();
     expect(listSection).toContainElement(screen.getByText("조회 결과 2"));
     expect(listSection).toContainElement(screen.getByRole("table"));
   });

@@ -136,6 +136,10 @@ export default function ManagerPasskeyRequestsPage() {
       {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p> : null}
 
       <section className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
+        <div className="mb-4 flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
+          <span>조회 결과 {requests.length}</span>
+        </div>
+
         {loading ? (
           <ManagerLoadingMessage />
         ) : (

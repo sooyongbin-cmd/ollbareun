@@ -71,6 +71,10 @@ export default function SystemConfigsPage() {
       </section>
 
       <section aria-label="시스템설정 목록" className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
+        <div className="mb-4 flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
+          <span>조회 결과 {configs.length}</span>
+        </div>
+
         {loading ? (
           <ManagerLoadingMessage />
         ) : error ? (

@@ -116,6 +116,10 @@ export default function EducationReportPage() {
       </section>
 
       <section aria-label="교육이수자료 목록" className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
+        <div className="mb-4 flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
+          <span>조회 결과 {rows.length}</span>
+        </div>
+
         {loading ? (
           <ManagerLoadingMessage />
         ) : error ? (

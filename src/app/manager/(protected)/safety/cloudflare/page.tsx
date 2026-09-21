@@ -148,8 +148,7 @@ export default function CloudflareVideosPage() {
         aria-label="교육자료 cloudflare 목록"
         className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
       >
-        <div className="flex flex-wrap items-center justify-between gap-3 text-[0.875rem] text-muted-foreground">
-          <span>전체 동영상 {videos.length}</span>
+        <div className="flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
           <span>조회 결과 {filteredVideos.length}</span>
         </div>
 

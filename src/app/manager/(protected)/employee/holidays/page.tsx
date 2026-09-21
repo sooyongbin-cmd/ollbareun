@@ -106,9 +106,8 @@ export default function HolidaysPage() {
       </section>
 
       <section aria-label="공휴일 목록" className="rounded-xl border border-border/50 bg-muted/40 p-[1.5rem] md:p-[2rem]">
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-[0.75rem] font-normal text-muted-foreground">
-          <span>{valid ? year + "년 공휴일" : "공휴일 목록"}</span>
-          <span>검색 결과 {rows.length}</span>
+        <div className="mt-4 flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
+          <span>조회 결과 {rows.length}</span>
         </div>
         {loading ? (
           <ManagerLoadingMessage className="mt-6" />

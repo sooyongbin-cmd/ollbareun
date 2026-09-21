@@ -113,8 +113,8 @@ describe("employee roster page", () => {
     expect(screen.getByRole("checkbox", { name: "퇴직" })).not.toBeChecked();
     expect(searchSection).toContainElement(screen.getByRole("link", { name: "직원 등록" }));
     expect(within(listSection).queryByRole("heading", { name: "직원 목록" })).not.toBeInTheDocument();
-    expect(listSection).toContainElement(screen.getByText("전체 직원 1"));
-    expect(listSection).toContainElement(screen.getByText("검색 결과 1"));
+    expect(within(listSection).queryByText("전체 직원 1")).not.toBeInTheDocument();
+    expect(listSection).toContainElement(screen.getByText("조회 결과 1"));
     expect(listSection).toContainElement(screen.getByRole("table"));
   });
 

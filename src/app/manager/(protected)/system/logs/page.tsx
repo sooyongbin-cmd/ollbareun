@@ -228,9 +228,8 @@ export default function ManagerSystemLogsPage() {
       </section>
 
       <section aria-label="로그 목록" className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
-        <div className="flex flex-wrap items-center justify-between gap-3 text-[0.875rem] text-muted-foreground">
-          <span>최근 로그 {logs.length}건</span>
-          <span>최신 로그인 순</span>
+        <div className="flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
+          <span>조회 결과 {logs.length}</span>
         </div>
 
         {loading ? (

@@ -163,9 +163,8 @@ export default function ManagerSafetyNotificationsPage() {
       </section>
 
       <section aria-label="자동알림 목록" className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
-        <div className="flex flex-wrap items-center justify-between gap-3 text-[0.875rem] text-muted-foreground">
-          <span>조회 결과 {runs.length}건</span>
-          <span>최근 100건</span>
+        <div className="flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
+          <span>조회 결과 {runs.length}</span>
         </div>
 
         {loading ? (

@@ -100,8 +100,8 @@ describe("worksite management page", () => {
 
     expect(searchSection).toContainElement(screen.getByLabelText("근무지"));
     expect(searchSection).toContainElement(screen.getByRole("link", { name: "근무지 등록" }));
-    expect(listSection).toContainElement(screen.getByText("전체 근무지 2"));
-    expect(listSection).toContainElement(screen.getByText("검색 결과 2"));
+    expect(within(listSection).queryByText("전체 근무지 2")).not.toBeInTheDocument();
+    expect(listSection).toContainElement(screen.getByText("조회 결과 2"));
     expect(listSection).toContainElement(screen.getByRole("table"));
   });
 

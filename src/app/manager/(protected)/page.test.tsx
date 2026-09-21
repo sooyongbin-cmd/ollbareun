@@ -19,13 +19,20 @@ const dashboardPayload = {
     },
     unprocessedSpecialRemarks: 4,
   },
-  liveAttendance: [
+  specialRemarkFeed: [
     {
-      employeeName: "김철수",
+      id: "remark-1",
+      category: "청소",
       worksiteName: "문현동현장",
-      clockInAt: "2026-06-04T00:00:00.000Z",
-      educationStatus: "완료",
-      attendanceStatus: "출근",
+      reportedAt: "2026-06-04T01:42:00.000Z",
+      content: "세면대 배수구 막힘 및 누수 발생",
+    },
+    {
+      id: "remark-2",
+      category: "시설",
+      worksiteName: "센텀현장",
+      reportedAt: "2026-06-04T01:15:00.000Z",
+      content: "변압기 저주파 소음 발생 확인",
     },
   ],
   worksiteMonitoring: [
@@ -115,15 +122,15 @@ describe("manager dashboard page", () => {
     expect(within(assignmentRows[1]).getByText("50%")).toBeInTheDocument();
     expect(within(assignmentRows[2]).getByText("미화원")).toBeInTheDocument();
 
-    const liveSection = screen.getByRole("region", { name: "실시간출근현황 리스트" });
-    expect(within(liveSection).getByRole("columnheader", { name: "성명" })).toBeInTheDocument();
-    expect(within(liveSection).getByRole("columnheader", { name: "현장명" })).toBeInTheDocument();
-    expect(within(liveSection).getByRole("columnheader", { name: "출근시간" })).toBeInTheDocument();
-    expect(within(liveSection).getByRole("columnheader", { name: "교육여부" })).toBeInTheDocument();
-    expect(within(liveSection).getByRole("columnheader", { name: "출근상태" })).toBeInTheDocument();
-    expect(within(liveSection).getByText("김철수")).toBeInTheDocument();
-    expect(within(liveSection).getByText("완료")).toBeInTheDocument();
-    expect(within(liveSection).getByText("출근")).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "실시간출근현황 리스트" })).not.toBeInTheDocument();
+    const feedSection = screen.getByRole("region", { name: "실시간 특이사항 및 긴급피드" });
+    expect(within(feedSection).getByRole("heading", { name: "실시간 특이사항 및 긴급피드" })).toBeInTheDocument();
+    const feedItems = within(feedSection).getAllByRole("link");
+    expect(feedItems).toHaveLength(2);
+    expect(feedItems[0]).toHaveAttribute("href", "/manager/inspection/special-remarks/remark-1");
+    expect(feedItems[0]).toHaveTextContent("[청소 | 문현동현장] 10:42");
+    expect(feedItems[0]).toHaveTextContent('"세면대 배수구 막힘 및 누수 발생"');
+    expect(feedItems[1]).toHaveTextContent("[시설 | 센텀현장] 10:15");
   });
 
   it("shows a dashboard-shaped loading state", () => {
@@ -155,7 +162,7 @@ describe("manager dashboard page", () => {
       vi.fn(async () =>
         Response.json({
           summary: { ...dashboardPayload.summary, educationRate: 0 },
-          liveAttendance: [],
+          specialRemarkFeed: [],
           worksiteMonitoring: [],
         }),
       ),
@@ -167,6 +174,6 @@ describe("manager dashboard page", () => {
     expect(within(screen.getByRole("region", { name: "운영 요약" })).getByText("0%")).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "최근 30일 운영 추이" })).not.toBeInTheDocument();
     expect(screen.getByText("등록된 인원 배정이 없습니다.")).toBeInTheDocument();
-    expect(screen.getByText("현재 출근 기록이 없습니다.")).toBeInTheDocument();
+    expect(screen.getByText("현재 미처리 특이사항이 없습니다.")).toBeInTheDocument();
   });
 });

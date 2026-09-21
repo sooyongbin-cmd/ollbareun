@@ -58,6 +58,11 @@ type EducationCompletionInput = {
 };
 
 type SpecialRemarkInput = {
+  id?: string;
+  employee_id?: string | null;
+  worksite_name?: string;
+  content?: string;
+  reported_at?: string;
   processing_status?: "Y" | "N";
 };
 
@@ -88,12 +93,12 @@ export type ManagerDashboardData = {
     };
     unprocessedSpecialRemarks: number;
   };
-  liveAttendance: {
-    employeeName: string;
+  specialRemarkFeed: {
+    id: string;
+    category: "청소" | "시설" | "파견";
     worksiteName: string;
-    clockInAt: string | null;
-    educationStatus: "완료" | "미이수";
-    attendanceStatus: "출근" | "퇴근";
+    reportedAt: string;
+    content: string;
   }[];
   worksiteMonitoring: {
     worksiteId: string;
@@ -263,6 +268,24 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
   const unprocessedSpecialRemarks = (input.specialRemarkReports ?? []).filter(
     (report) => report.processing_status !== "Y",
   ).length;
+  const specialRemarkFeed = (input.specialRemarkReports ?? [])
+    .filter(
+      (report): report is SpecialRemarkInput & Required<Pick<SpecialRemarkInput, "id" | "worksite_name" | "content" | "reported_at">> =>
+        report.processing_status !== "Y" &&
+        Boolean(report.id && report.worksite_name && report.content && report.reported_at),
+    )
+    .sort((left, right) => String(right.reported_at).localeCompare(String(left.reported_at)))
+    .slice(0, 5)
+    .map((report) => {
+      const role = report.employee_id ? employeeById.get(report.employee_id)?.role : undefined;
+      return {
+        id: report.id,
+        category: (role === "미화원" ? "청소" : role === "파견" ? "파견" : "시설") as "청소" | "시설" | "파견",
+        worksiteName: report.worksite_name,
+        reportedAt: report.reported_at,
+        content: report.content,
+      };
+    });
 
   const monitoringByRoleAndWorksite = new Map<
     string,
@@ -341,27 +364,6 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
     inspectionSiteCount: inspectionSiteCountByWorksite.get(row.worksiteId) ?? 0,
   }));
 
-  const liveAttendance = todayAttendance
-    .slice()
-    .sort((left, right) => String(right.work_intime).localeCompare(String(left.work_intime)))
-    .map((record) => {
-      const employee = employeeById.get(record.employee_id);
-      const assignedWorksiteId =
-        input.assignments.find((assignment) => assignment.employee_id === record.employee_id && inDateRange(today, assignment.start_date, assignment.end_date))
-          ?.worksite_id ?? record.worksite_id;
-      const completed = completedByEmployee.get(record.employee_id);
-      const isCompleted =
-        allResourceIds.length === 0 || allResourceIds.every((resourceId) => completed?.has(resourceId));
-
-      return {
-        employeeName: employee?.name ?? "직원 없음",
-        worksiteName: worksiteById.get(assignedWorksiteId)?.name ?? "현장 없음",
-        clockInAt: record.work_intime,
-        educationStatus: (isCompleted ? "완료" : "미이수") as "완료" | "미이수",
-        attendanceStatus: (record.work_outtime ? "퇴근" : "출근") as "출근" | "퇴근",
-      };
-    });
-
   return {
     summary: {
       scheduledEmployeesToday: scheduledEmployeeIdsToday.size,
@@ -375,7 +377,7 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       employeeRoleCounts,
       unprocessedSpecialRemarks,
     },
-    liveAttendance,
+    specialRemarkFeed,
     worksiteMonitoring: worksiteMonitoring.sort((left, right) => {
       const worksiteComparison = left.worksiteName.localeCompare(right.worksiteName, "ko-KR");
       if (worksiteComparison !== 0) {
@@ -415,7 +417,10 @@ export async function loadManagerDashboardData() {
         .from("work_assignment_days_off")
         .select("work_assignment_id,day_off_date")
         .eq("day_off_date", today),
-      supabase.from("inspection_special_reports").select("processing_status"),
+      supabase
+        .from("inspection_special_reports")
+        .select("id,employee_id,employee_name,worksite_name,content,reported_at,processing_status")
+        .order("reported_at", { ascending: false }),
       supabase.from("inspection_sites").select("id,worksite_id"),
       supabase
         .from("inspection_logs")

@@ -52,7 +52,14 @@ describe("manager dashboard data", () => {
         { inspection_site_id: "site-1", worksite_id: "work-1" },
       ],
       specialRemarkReports: [
-        { processing_status: "N" },
+        {
+          id: "remark-1",
+          employee_id: "emp-1",
+          worksite_name: "문현동현장",
+          content: "세면대 배수구 막힘",
+          reported_at: "2026-06-04T01:42:00.000Z",
+          processing_status: "N",
+        },
         { processing_status: "Y" },
       ],
     });
@@ -73,21 +80,15 @@ describe("manager dashboard data", () => {
       },
       unprocessedSpecialRemarks: 1,
     });
-    expect(data.liveAttendance).toHaveLength(2);
-    expect(data.liveAttendance).toContainEqual({
-      employeeName: "김철수",
-      worksiteName: "문현동현장",
-      clockInAt: "2026-06-04T00:00:00.000Z",
-      educationStatus: "완료",
-      attendanceStatus: "출근",
-    });
-    expect(data.liveAttendance).toContainEqual({
-      employeeName: "이영희",
-      worksiteName: "문현동현장",
-      clockInAt: "2026-06-04T01:00:00.000Z",
-      educationStatus: "미이수",
-      attendanceStatus: "퇴근",
-    });
+    expect(data.specialRemarkFeed).toEqual([
+      {
+        id: "remark-1",
+        category: "시설",
+        worksiteName: "문현동현장",
+        reportedAt: "2026-06-04T01:42:00.000Z",
+        content: "세면대 배수구 막힘",
+      },
+    ]);
     expect(data.worksiteMonitoring).toEqual([
       {
         worksiteId: "work-1",

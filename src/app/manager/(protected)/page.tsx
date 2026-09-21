@@ -7,11 +7,9 @@ import {
   CircleAlert,
   GraduationCap,
   MapPinned,
-  UserRoundCheck,
   Users,
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardAction,
@@ -47,12 +45,12 @@ type DashboardPayload = {
     };
     unprocessedSpecialRemarks: number;
   };
-  liveAttendance: {
-    employeeName: string;
+  specialRemarkFeed: {
+    id: string;
+    category: "청소" | "시설" | "파견";
     worksiteName: string;
-    clockInAt: string | null;
-    educationStatus: "완료" | "미이수";
-    attendanceStatus: "출근" | "퇴근";
+    reportedAt: string;
+    content: string;
   }[];
   worksiteMonitoring: {
     worksiteId: string;
@@ -82,7 +80,7 @@ const emptyDashboard: DashboardPayload = {
     },
     unprocessedSpecialRemarks: 0,
   },
-  liveAttendance: [],
+  specialRemarkFeed: [],
   worksiteMonitoring: [],
 };
 
@@ -105,6 +103,18 @@ function formatInspectionProgress(inspectedSiteCount: number, inspectionSiteCoun
   }
 
   return `${Math.round((inspectedSiteCount / inspectionSiteCount) * 100)}%`;
+}
+
+function getSpecialRemarkTone(category: DashboardPayload["specialRemarkFeed"][number]["category"]) {
+  if (category === "청소") {
+    return "border-l-red-500 bg-red-50/80 dark:bg-red-950/20";
+  }
+
+  if (category === "시설") {
+    return "border-l-amber-500 bg-amber-50/80 dark:bg-amber-950/20";
+  }
+
+  return "border-l-sky-500 bg-sky-50/80 dark:bg-sky-950/20";
 }
 
 function DashboardSkeleton() {
@@ -204,7 +214,7 @@ export default function ManagerPage() {
                 ...(payload.summary?.employeeRoleCounts ?? {}),
               },
             },
-            liveAttendance: payload.liveAttendance ?? [],
+            specialRemarkFeed: payload.specialRemarkFeed ?? [],
             worksiteMonitoring: payload.worksiteMonitoring ?? [],
           });
         }
@@ -354,66 +364,35 @@ export default function ManagerPage() {
           </CardContent>
         </Card>
 
-        <Card role="region" aria-label="실시간출근현황 리스트" className="min-w-0">
+        <Card role="region" aria-label="실시간 특이사항 및 긴급피드" className="min-w-0">
           <CardHeader className="border-b">
             <CardTitle>
               <h2 className="flex items-center gap-2 text-base">
-                <UserRoundCheck aria-hidden="true" className="size-4 text-primary" />
-                실시간 출근 현황
+                <CircleAlert aria-hidden="true" className="size-4 text-primary" />
+                실시간 특이사항 및 긴급피드
               </h2>
             </CardTitle>
-            <CardDescription>오늘 출근 기록을 최근 시간순으로 표시합니다.</CardDescription>
+            <CardDescription>미처리 특이사항을 최근 신고 순으로 표시합니다.</CardDescription>
           </CardHeader>
-          <CardContent className="min-w-0 px-0">
-            <div className="min-w-0 overflow-x-auto">
-              <Table className="min-w-[42.5rem]">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>성명</TableHead>
-                    <TableHead>현장명</TableHead>
-                    <TableHead>출근시간</TableHead>
-                    <TableHead>교육여부</TableHead>
-                    <TableHead>출근상태</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {data.liveAttendance.length === 0 ? (
-                    <TableRow>
-                      <TableCell data-responsive-empty colSpan={5} className="h-28 text-center text-muted-foreground">
-                        현재 출근 기록이 없습니다.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    data.liveAttendance.map((row, index) => (
-                      <TableRow key={`${row.employeeName}-${row.clockInAt ?? index}`}>
-                        <TableCell data-label="성명" className="font-medium">{row.employeeName}</TableCell>
-                        <TableCell data-label="현장명">{row.worksiteName}</TableCell>
-                        <TableCell data-label="출근시간" className="font-mono text-xs">{formatTime(row.clockInAt)}</TableCell>
-                        <TableCell data-label="교육여부">
-                          <Badge
-                            variant="outline"
-                            className={
-                              row.educationStatus === "완료"
-                                ? "border-primary/20 bg-primary/10 text-primary"
-                                : "border-destructive/20 bg-destructive/10 text-destructive"
-                            }
-                          >
-                            {row.educationStatus}
-                          </Badge>
-                        </TableCell>
-                        <TableCell data-label="출근상태">
-                          <Badge
-                            variant={row.attendanceStatus === "출근" ? "default" : "secondary"}
-                          >
-                            {row.attendanceStatus}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+          <CardContent className="space-y-3">
+            {data.specialRemarkFeed.length === 0 ? (
+              <div className="flex min-h-28 items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
+                현재 미처리 특이사항이 없습니다.
+              </div>
+            ) : (
+              data.specialRemarkFeed.map((remark) => (
+                <Link
+                  key={remark.id}
+                  className={`block rounded-md border border-border/40 border-l-4 px-3 py-2.5 transition-colors hover:brightness-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${getSpecialRemarkTone(remark.category)}`}
+                  href={`/manager/inspection/special-remarks/${encodeURIComponent(remark.id)}`}
+                >
+                  <p className="text-sm font-semibold leading-5 text-foreground">
+                    [{remark.category} | {remark.worksiteName}] {formatTime(remark.reportedAt)}
+                  </p>
+                  <p className="mt-0.5 whitespace-pre-wrap text-sm leading-5 text-foreground/90">&quot;{remark.content}&quot;</p>
+                </Link>
+              ))
+            )}
           </CardContent>
         </Card>
       </div>

@@ -129,14 +129,25 @@ export default function EducationResourceNewPage() {
             </div>
           </div>
 
-          <Button
-            aria-label="저장"
-            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto disabled:opacity-50"
-            type="submit"
-            disabled={isSubmitting}
-          >
-            <SaveIcon size={20} />
-          </Button>
+          <div className="flex flex-wrap gap-3">
+            <Button
+              aria-label="저장"
+              className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto disabled:opacity-50"
+              type="submit"
+              disabled={isSubmitting}
+            >
+              <SaveIcon size={20} />
+            </Button>
+            <Button
+              aria-label="목록"
+              className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:ml-auto w-full md:w-auto"
+              type="button"
+              onClick={() => router.push("/manager/safety/resources")}
+              variant="outline"
+            >
+              목록
+            </Button>
+          </div>
         </form>
 
         {isSubmitting ? <p className="rounded-md border border-border bg-muted px-4 py-3 text-sm text-foreground mt-6 text-center">유튜브 링크를 저장 중입니다.</p> : null}

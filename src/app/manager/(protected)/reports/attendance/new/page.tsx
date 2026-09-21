@@ -1,12 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SaveIcon } from "@/components/icons/save-icon";
-import { CancelIcon } from "@/components/icons/cancel-icon";
 import ConfirmModal from "@/components/modals/confirm-modal";
 import AlertModal from "@/components/modals/alert-modal";
 import ManagerLoadingMessage from "../../../manager-loading-message";
@@ -176,7 +174,9 @@ export default function AttendanceNewPage() {
             </div>
             <div className="flex gap-3">
               <Button aria-label="저장" title="저장" type="submit" disabled={saving || successOpen}><SaveIcon size={20} /></Button>
-              <Link aria-label="취소" title="취소" href="/manager/reports/attendance" className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 hover:bg-accent focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"><CancelIcon size={20} /></Link>
+              <Button aria-label="목록" title="목록" type="button" variant="outline" onClick={() => router.push("/manager/reports/attendance")} className="md:ml-auto">
+                목록
+              </Button>
             </div>
           </form>
         )}

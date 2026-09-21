@@ -1,5 +1,4 @@
 "use client";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
@@ -55,8 +54,8 @@ export default function HolidayNewPage() {
             >
               <SaveIcon size={20} />
             </Button>
-            <Button asChild variant="outline" className="min-h-10 w-full md:w-auto">
-              <Link href="/manager/employee/holidays">목록</Link>
+            <Button aria-label="목록" type="button" variant="outline" onClick={() => router.push("/manager/employee/holidays")} className="min-h-10 w-full md:ml-auto md:w-auto">
+              목록
             </Button>
           </div>
         </form>

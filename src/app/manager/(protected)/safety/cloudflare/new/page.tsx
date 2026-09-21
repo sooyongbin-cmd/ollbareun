@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { SaveIcon } from "@/components/icons/save-icon";
 import ProcessingModal from "@/components/modals/processing-modal";
@@ -69,6 +70,7 @@ async function uploadToCloudflare(file: File, uploadURL: string) {
 }
 
 export default function CloudflareVideoNewPage() {
+  const router = useRouter();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState("");
   const [isUploading, setIsUploading] = useState(false);
@@ -129,14 +131,25 @@ export default function CloudflareVideoNewPage() {
             <p className="text-[0.8125rem] text-muted-foreground">200MB 이하 동영상 파일을 업로드할 수 있습니다.</p>
           </div>
 
-          <Button
-            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto disabled:opacity-50 gap-2"
-            type="submit"
-            disabled={isUploading}
-          >
-            <SaveIcon size={20} />
-            <span>업로드</span>
-          </Button>
+          <div className="flex flex-wrap gap-3">
+            <Button
+              className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto disabled:opacity-50 gap-2"
+              type="submit"
+              disabled={isUploading}
+            >
+              <SaveIcon size={20} />
+              <span>업로드</span>
+            </Button>
+            <Button
+              aria-label="목록"
+              className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:ml-auto w-full md:w-auto"
+              type="button"
+              onClick={() => router.push("/manager/safety/cloudflare")}
+              variant="outline"
+            >
+              목록
+            </Button>
+          </div>
         </form>
 
         {isUploading ? <p className="rounded-md border border-border bg-muted px-4 py-3 text-sm text-foreground mt-6 text-center">Cloudflare로 업로드 중입니다.</p> : null}

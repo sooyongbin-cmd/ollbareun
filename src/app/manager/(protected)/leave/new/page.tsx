@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SaveIcon } from "@/components/icons/save-icon";
-import { CancelIcon } from "@/components/icons/cancel-icon";
 import AlertModal from "@/components/modals/alert-modal";
 import ProcessingModal from "@/components/modals/processing-modal";
 import ManagerLoadingMessage from "../../manager-loading-message";
@@ -250,10 +248,9 @@ export default function LeaveNewPage() {
               <Button aria-label="저장" type="submit" disabled={saving}>
                 <SaveIcon size={20} />
               </Button>
-              <Link aria-label="목록" href="/manager/leave" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50">
-                <CancelIcon size={20} />
-                <span>목록</span>
-              </Link>
+              <Button aria-label="목록" type="button" variant="outline" onClick={() => router.push("/manager/leave")} className="md:ml-auto">
+                목록
+              </Button>
             </div>
             </form>
             {error ? <p role="alert" className="mt-6 text-[1rem] text-destructive">{error}</p> : null}

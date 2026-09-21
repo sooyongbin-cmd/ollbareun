@@ -105,6 +105,25 @@ function formatInspectionProgress(inspectedSiteCount: number, inspectionSiteCoun
   return `${Math.round((inspectedSiteCount / inspectionSiteCount) * 100)}%`;
 }
 
+function aggregateWorksiteMonitoring(worksites: DashboardPayload["worksiteMonitoring"]) {
+  const monitoringByWorksite = new Map<string, DashboardPayload["worksiteMonitoring"][number]>();
+
+  for (const worksite of worksites) {
+    const current = monitoringByWorksite.get(worksite.worksiteId);
+    if (!current) {
+      monitoringByWorksite.set(worksite.worksiteId, { ...worksite });
+      continue;
+    }
+
+    current.attendanceCount += worksite.attendanceCount;
+    current.assignedCount += worksite.assignedCount;
+    current.inspectedSiteCount = Math.max(current.inspectedSiteCount, worksite.inspectedSiteCount);
+    current.inspectionSiteCount = Math.max(current.inspectionSiteCount, worksite.inspectionSiteCount);
+  }
+
+  return Array.from(monitoringByWorksite.values());
+}
+
 function getSpecialRemarkTone(category: DashboardPayload["specialRemarkFeed"][number]["category"]) {
   if (category === "청소") {
     return "border-l-red-500 bg-red-50/80 dark:bg-red-950/20";
@@ -300,6 +319,8 @@ export default function ManagerPage() {
     },
   ];
 
+  const worksiteMonitoring = aggregateWorksiteMonitoring(data.worksiteMonitoring);
+
   return (
     <div className="space-y-6">
       <div>
@@ -316,22 +337,21 @@ export default function ManagerPage() {
       </section>
 
       <div className="grid min-w-0 gap-6 xl:grid-cols-2">
-        <Card role="region" aria-label="직군별 현장 실시간 관제" className="min-w-0">
+        <Card role="region" aria-label="현장 실시간 관제" className="min-w-0">
           <CardHeader className="border-b">
             <CardTitle>
               <h2 className="flex items-center gap-2 text-base">
                 <MapPinned aria-hidden="true" className="size-4 text-primary" />
-                직군별 현장 실시간 관제
+                현장 실시간 관제
               </h2>
             </CardTitle>
-            <CardDescription>오늘 직군별 출근 인원과 현장점검 진행 현황을 표시합니다.</CardDescription>
+            <CardDescription>오늘 근무지별 출근 인원과 현장점검 진행 현황을 표시합니다.</CardDescription>
           </CardHeader>
           <CardContent className="min-w-0 px-0">
             <div className="min-w-0 overflow-x-auto">
-              <Table className="min-w-[42.5rem]">
+              <Table className="min-w-[32.5rem]">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>직군</TableHead>
                     <TableHead>근무지명</TableHead>
                     <TableHead className="text-right">출근인원</TableHead>
                     <TableHead className="text-right">진행률</TableHead>
@@ -340,15 +360,18 @@ export default function ManagerPage() {
                 <TableBody>
                   {data.worksiteMonitoring.length === 0 ? (
                     <TableRow>
-                      <TableCell data-responsive-empty colSpan={4} className="h-28 text-center text-muted-foreground">
+                      <TableCell data-responsive-empty colSpan={3} className="h-28 text-center text-muted-foreground">
                         등록된 인원 배정이 없습니다.
                       </TableCell>
                     </TableRow>
                   ) : (
-                    data.worksiteMonitoring.map((worksite) => (
-                      <TableRow key={`${worksite.worksiteId}-${worksite.employeeRole}`}>
-                        <TableCell data-label="직군" className="font-medium">{worksite.employeeRole}</TableCell>
-                        <TableCell data-label="근무지명">{worksite.worksiteName}</TableCell>
+                    worksiteMonitoring.map((worksite) => (
+                      <TableRow key={worksite.worksiteId}>
+                        <TableCell data-label="근무지명">
+                          <Link className="font-medium text-primary hover:underline" href="/manager/inspection/sites">
+                            {worksite.worksiteName}
+                          </Link>
+                        </TableCell>
                         <TableCell data-label="출근인원" className="text-right font-mono tabular-nums">
                           {worksite.attendanceCount}/{worksite.assignedCount}
                         </TableCell>

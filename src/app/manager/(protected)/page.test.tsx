@@ -110,17 +110,19 @@ describe("manager dashboard page", () => {
 
     expect(screen.queryByRole("heading", { name: "최근 30일 운영 추이" })).not.toBeInTheDocument();
 
-    const assignmentSection = screen.getByRole("region", { name: "직군별 현장 실시간 관제" });
-    expect(within(assignmentSection).getByRole("columnheader", { name: "직군" })).toBeInTheDocument();
+    const assignmentSection = screen.getByRole("region", { name: "현장 실시간 관제" });
+    expect(within(assignmentSection).queryByRole("columnheader", { name: "직군" })).not.toBeInTheDocument();
     expect(within(assignmentSection).getByRole("columnheader", { name: "근무지명" })).toBeInTheDocument();
     expect(within(assignmentSection).getByRole("columnheader", { name: "출근인원" })).toBeInTheDocument();
     expect(within(assignmentSection).getByRole("columnheader", { name: "진행률" })).toBeInTheDocument();
     const assignmentRows = within(assignmentSection).getAllByRole("row");
-    expect(within(assignmentRows[1]).getByText("경비원")).toBeInTheDocument();
-    expect(within(assignmentRows[1]).getByText("문현동현장")).toBeInTheDocument();
-    expect(within(assignmentRows[1]).getByText("1/2")).toBeInTheDocument();
+    expect(assignmentRows).toHaveLength(2);
+    const worksiteLink = within(assignmentRows[1]).getByRole("link", { name: "문현동현장" });
+    expect(worksiteLink).toHaveAttribute("href", "/manager/inspection/sites");
+    expect(within(assignmentRows[1]).queryByText("경비원")).not.toBeInTheDocument();
+    expect(within(assignmentRows[1]).queryByText("미화원")).not.toBeInTheDocument();
+    expect(within(assignmentRows[1]).getByText("1/3")).toBeInTheDocument();
     expect(within(assignmentRows[1]).getByText("50%")).toBeInTheDocument();
-    expect(within(assignmentRows[2]).getByText("미화원")).toBeInTheDocument();
 
     expect(screen.queryByRole("region", { name: "실시간출근현황 리스트" })).not.toBeInTheDocument();
     const feedSection = screen.getByRole("region", { name: "실시간 특이사항 및 긴급피드" });

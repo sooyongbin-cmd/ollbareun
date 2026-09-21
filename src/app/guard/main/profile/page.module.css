@@ -214,6 +214,11 @@
   color: #ffffff;
 }
 
+.selectItem > [data-slot="select-item-indicator"] svg {
+  color: #ffffff;
+  stroke: #ffffff;
+}
+
 .selectItem[data-highlighted],
 .selectItem[data-state="checked"] {
   background: #00b9ef;

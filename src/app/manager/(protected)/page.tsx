@@ -66,6 +66,7 @@ type DashboardPayload = {
   attendanceToday: {
     id: string;
     worksiteName: string;
+    employeeName: string;
     scheduledClockIn: string;
     clockInDateTime: string;
     status: "결근" | "지각" | "정상출근" | "정상근무" | "대기";
@@ -378,7 +379,7 @@ export default function ManagerPage() {
               근태현황
             </h2>
           </CardTitle>
-          <CardDescription>오늘 근태관리 목록을 근무지 이름 순서로 표시합니다.</CardDescription>
+          <CardDescription>오늘 근태관리 목록을 근무지 순서로 표시합니다.</CardDescription>
           <CardAction>
             <Link className="text-sm font-medium text-primary hover:underline" href="/manager/reports/attendance">
               전체보기
@@ -387,10 +388,11 @@ export default function ManagerPage() {
         </CardHeader>
         <CardContent className="min-w-0 px-0">
           <div className="min-w-0 overflow-x-auto">
-            <Table className="min-w-[36rem]">
+            <Table className="min-w-[42rem]">
               <TableHeader>
                 <TableRow>
-                  <TableHead>근무지 이름</TableHead>
+                  <TableHead>근무지</TableHead>
+                  <TableHead>근무자</TableHead>
                   <TableHead>출근예정</TableHead>
                   <TableHead>출근일시</TableHead>
                   <TableHead>상태</TableHead>
@@ -399,18 +401,19 @@ export default function ManagerPage() {
               <TableBody>
                 {data.attendanceToday.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={4} className="h-28 text-center text-muted-foreground">
+                    <TableCell data-responsive-empty colSpan={5} className="h-28 text-center text-muted-foreground">
                       오늘 근태 기록이 없습니다.
                     </TableCell>
                   </TableRow>
                 ) : (
                   data.attendanceToday.map((row) => (
                     <TableRow key={row.id}>
-                      <TableCell data-label="근무지 이름">
+                      <TableCell data-label="근무지">
                         <Link className="font-medium text-primary hover:underline" href="/manager/reports/attendance">
                           {row.worksiteName}
                         </Link>
                       </TableCell>
+                      <TableCell data-label="근무자">{row.employeeName}</TableCell>
                       <TableCell data-label="출근예정" className="whitespace-nowrap">{row.scheduledClockIn}</TableCell>
                       <TableCell data-label="출근일시" className="whitespace-nowrap">{row.clockInDateTime}</TableCell>
                       <TableCell data-label="상태">{row.status}</TableCell>

@@ -60,6 +60,7 @@ const dashboardPayload = {
     {
       id: "attendance-1",
       worksiteName: "문현동현장",
+      employeeName: "김철수",
       scheduledClockIn: "09:00",
       clockInDateTime: "2026-06-04 09:01",
       status: "지각",
@@ -136,7 +137,8 @@ describe("manager dashboard page", () => {
     expect(screen.queryByRole("heading", { name: "최근 30일 운영 추이" })).not.toBeInTheDocument();
 
     const attendanceSection = screen.getByRole("region", { name: "근태현황" });
-    expect(within(attendanceSection).getByRole("columnheader", { name: "근무지 이름" })).toBeInTheDocument();
+    expect(within(attendanceSection).getByRole("columnheader", { name: "근무지" })).toBeInTheDocument();
+    expect(within(attendanceSection).getByRole("columnheader", { name: "근무자" })).toBeInTheDocument();
     expect(within(attendanceSection).getByRole("columnheader", { name: "출근예정" })).toBeInTheDocument();
     expect(within(attendanceSection).getByRole("columnheader", { name: "출근일시" })).toBeInTheDocument();
     expect(within(attendanceSection).getByRole("columnheader", { name: "상태" })).toBeInTheDocument();
@@ -144,6 +146,7 @@ describe("manager dashboard page", () => {
       "href",
       "/manager/reports/attendance",
     );
+    expect(within(attendanceSection).getByText("김철수")).toBeInTheDocument();
     expect(within(attendanceSection).getByText("09:00")).toBeInTheDocument();
     expect(within(attendanceSection).getByText("2026-06-04 09:01")).toBeInTheDocument();
     expect(within(attendanceSection).getByText("지각")).toBeInTheDocument();

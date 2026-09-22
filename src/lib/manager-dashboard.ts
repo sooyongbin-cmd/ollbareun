@@ -124,6 +124,7 @@ export type ManagerDashboardData = {
   attendanceToday: {
     id: string;
     worksiteName: string;
+    employeeName: string;
     scheduledClockIn: string;
     clockInDateTime: string;
     status: "결근" | "지각" | "정상출근" | "정상근무" | "대기";
@@ -450,6 +451,7 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       return {
         id: record.id ?? `${record.employee_id}:${record.work_date}:${record.worksite_id}`,
         worksiteName: worksiteById.get(record.worksite_id)?.name ?? "-",
+        employeeName: employeeById.get(record.employee_id)?.name ?? "-",
         scheduledClockIn: toKstTime(scheduledClockIn) ?? "-",
         clockInDateTime: toKstDateTime(record.work_intime) ?? "-",
         status: managerStatus === "출근" ? attendanceStatusLabels[record.intime_status] : managerStatus,

@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
+  CalendarDays,
   CircleAlert,
   GraduationCap,
   MapPinned,
@@ -36,6 +37,7 @@ type DashboardPayload = {
     waitingEmployeesToday: number;
     absentEmployeesToday: number;
     lateEmployeesToday: number;
+    attendanceRate: number;
     educationUncompleted: number;
     educationRate: number;
     employeeRoleCounts: {
@@ -61,6 +63,25 @@ type DashboardPayload = {
     inspectedSiteCount: number;
     inspectionSiteCount: number;
   }[];
+  attendanceToday: {
+    id: string;
+    worksiteName: string;
+    scheduledClockIn: string;
+    clockInDateTime: string;
+    status: "결근" | "지각" | "정상출근" | "정상근무" | "대기";
+  }[];
+  weeklyLeaveStatus: {
+    id: string;
+    employeeName: string;
+    employeeRole: string;
+    workStyle: string;
+    leaveType: "1" | "2";
+    startDate: string;
+    endDate: string;
+    worksiteName: string;
+    assignmentStartDate: string | null;
+    assignmentEndDate: string | null;
+  }[];
 };
 
 const emptyDashboard: DashboardPayload = {
@@ -71,6 +92,7 @@ const emptyDashboard: DashboardPayload = {
     waitingEmployeesToday: 0,
     absentEmployeesToday: 0,
     lateEmployeesToday: 0,
+    attendanceRate: 0,
     educationUncompleted: 0,
     educationRate: 0,
     employeeRoleCounts: {
@@ -82,6 +104,8 @@ const emptyDashboard: DashboardPayload = {
   },
   specialRemarkFeed: [],
   worksiteMonitoring: [],
+  attendanceToday: [],
+  weeklyLeaveStatus: [],
 };
 
 function formatTime(value: string | null) {
@@ -103,6 +127,14 @@ function formatInspectionProgress(inspectedSiteCount: number, inspectionSiteCoun
   }
 
   return `${Math.round((inspectedSiteCount / inspectionSiteCount) * 100)}%`;
+}
+
+function formatPeriod(startDate: string | null, endDate: string | null) {
+  if (!startDate || !endDate) {
+    return "-";
+  }
+
+  return startDate === endDate ? startDate : `${startDate} ~ ${endDate}`;
 }
 
 function aggregateWorksiteMonitoring(worksites: DashboardPayload["worksiteMonitoring"]) {
@@ -235,6 +267,8 @@ export default function ManagerPage() {
             },
             specialRemarkFeed: payload.specialRemarkFeed ?? [],
             worksiteMonitoring: payload.worksiteMonitoring ?? [],
+            attendanceToday: payload.attendanceToday ?? [],
+            weeklyLeaveStatus: payload.weeklyLeaveStatus ?? [],
           });
         }
       } catch (loadError) {
@@ -280,8 +314,8 @@ export default function ManagerPage() {
           <span>대기 {data.summary.waitingEmployeesToday}</span>
         </span>
       ),
-      description: "오늘 근태기록의 출근상태 기준",
-      ariaLabel: `출근현황 출근 ${data.summary.onTimeEmployeesToday} 지각 ${data.summary.lateEmployeesToday} 결근${data.summary.absentEmployeesToday} 대기 ${data.summary.waitingEmployeesToday}`,
+      description: `출근율 ${data.summary.attendanceRate}%`,
+      ariaLabel: `출근현황 출근 ${data.summary.onTimeEmployeesToday} 지각 ${data.summary.lateEmployeesToday} 결근${data.summary.absentEmployeesToday} 대기 ${data.summary.waitingEmployeesToday} 출근율 ${data.summary.attendanceRate}%`,
       icon: Users,
       href: "/manager/reports/attendance/status",
     },
@@ -310,10 +344,10 @@ export default function ManagerPage() {
       href: "/manager/safety/completions",
     },
     {
-      label: "특이사항",
+      label: "미처리 특이사항",
       value: `${data.summary.unprocessedSpecialRemarks}건`,
       description: "긴급 조치 요구됨",
-      ariaLabel: `특이사항 ${data.summary.unprocessedSpecialRemarks}건 긴급 조치 요구됨`,
+      ariaLabel: `미처리 특이사항 ${data.summary.unprocessedSpecialRemarks}건 긴급 조치 요구됨`,
       icon: CircleAlert,
       href: "/manager/inspection/special-remarks",
     },
@@ -335,6 +369,120 @@ export default function ManagerPage() {
           <DashboardSummaryCard key={card.label} card={card} />
         ))}
       </section>
+
+      <Card role="region" aria-label="근태현황" className="min-w-0">
+        <CardHeader className="border-b">
+          <CardTitle>
+            <h2 className="flex items-center gap-2 text-base">
+              <CalendarDays aria-hidden="true" className="size-4 text-primary" />
+              근태현황
+            </h2>
+          </CardTitle>
+          <CardDescription>오늘 근태관리 목록을 근무지 이름 순서로 표시합니다.</CardDescription>
+          <CardAction>
+            <Link className="text-sm font-medium text-primary hover:underline" href="/manager/reports/attendance">
+              전체보기
+            </Link>
+          </CardAction>
+        </CardHeader>
+        <CardContent className="min-w-0 px-0">
+          <div className="min-w-0 overflow-x-auto">
+            <Table className="min-w-[36rem]">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>근무지 이름</TableHead>
+                  <TableHead>출근예정</TableHead>
+                  <TableHead>출근일시</TableHead>
+                  <TableHead>상태</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data.attendanceToday.length === 0 ? (
+                  <TableRow>
+                    <TableCell data-responsive-empty colSpan={4} className="h-28 text-center text-muted-foreground">
+                      오늘 근태 기록이 없습니다.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  data.attendanceToday.map((row) => (
+                    <TableRow key={row.id}>
+                      <TableCell data-label="근무지 이름">
+                        <Link className="font-medium text-primary hover:underline" href="/manager/reports/attendance">
+                          {row.worksiteName}
+                        </Link>
+                      </TableCell>
+                      <TableCell data-label="출근예정" className="whitespace-nowrap">{row.scheduledClockIn}</TableCell>
+                      <TableCell data-label="출근일시" className="whitespace-nowrap">{row.clockInDateTime}</TableCell>
+                      <TableCell data-label="상태">{row.status}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card role="region" aria-label="금주 휴가현황" className="min-w-0">
+        <CardHeader className="border-b">
+          <CardTitle>
+            <h2 className="flex items-center gap-2 text-base">
+              <CalendarDays aria-hidden="true" className="size-4 text-primary" />
+              금주 휴가현황
+            </h2>
+          </CardTitle>
+          <CardDescription>이번 주에 휴가 기간이 포함된 목록을 표시합니다.</CardDescription>
+          <CardAction>
+            <Link className="text-sm font-medium text-primary hover:underline" href="/manager/leave">
+              전체보기
+            </Link>
+          </CardAction>
+        </CardHeader>
+        <CardContent className="min-w-0 px-0">
+          <div className="min-w-0 overflow-x-auto">
+            <Table className="min-w-[58rem]">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>이름</TableHead>
+                  <TableHead>직군</TableHead>
+                  <TableHead>근무형태</TableHead>
+                  <TableHead>휴가종류</TableHead>
+                  <TableHead>휴가기간</TableHead>
+                  <TableHead>근무지</TableHead>
+                  <TableHead>배정기간</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data.weeklyLeaveStatus.length === 0 ? (
+                  <TableRow>
+                    <TableCell data-responsive-empty colSpan={7} className="h-28 text-center text-muted-foreground">
+                      이번 주 휴가 일정이 없습니다.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  data.weeklyLeaveStatus.map((row) => (
+                    <TableRow key={row.id}>
+                      <TableCell data-label="이름" className="font-semibold">
+                        <Link className="text-primary hover:underline" href="/manager/leave">
+                          {row.employeeName}
+                        </Link>
+                      </TableCell>
+                      <TableCell data-label="직군">{row.employeeRole}</TableCell>
+                      <TableCell data-label="근무형태">{row.workStyle}</TableCell>
+                      <TableCell data-label="휴가종류">{row.leaveType === "1" ? "월차" : "연차"}</TableCell>
+                      <TableCell data-label="휴가기간" className="whitespace-nowrap">{formatPeriod(row.startDate, row.endDate)}</TableCell>
+                      <TableCell data-label="근무지">{row.worksiteName}</TableCell>
+                      <TableCell data-label="배정기간" className="whitespace-nowrap">
+                        {formatPeriod(row.assignmentStartDate, row.assignmentEndDate)}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid min-w-0 gap-6 xl:grid-cols-2">
         <Card role="region" aria-label="현장 실시간 관제" className="min-w-0">

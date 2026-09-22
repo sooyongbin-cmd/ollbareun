@@ -10,6 +10,7 @@ const dashboardPayload = {
     waitingEmployeesToday: 1,
     absentEmployeesToday: 2,
     lateEmployeesToday: 1,
+    attendanceRate: 40,
     educationUncompleted: 3,
     educationRate: 80,
     employeeRoleCounts: {
@@ -55,6 +56,29 @@ const dashboardPayload = {
       inspectionSiteCount: 2,
     },
   ],
+  attendanceToday: [
+    {
+      id: "attendance-1",
+      worksiteName: "문현동현장",
+      scheduledClockIn: "09:00",
+      clockInDateTime: "2026-06-04 09:01",
+      status: "지각",
+    },
+  ],
+  weeklyLeaveStatus: [
+    {
+      id: "leave-1",
+      employeeName: "김철수",
+      employeeRole: "경비원",
+      workStyle: "일반근무",
+      leaveType: "2",
+      startDate: "2026-06-01",
+      endDate: "2026-06-02",
+      worksiteName: "문현동현장",
+      assignmentStartDate: "2026-01-01",
+      assignmentEndDate: "2026-12-31",
+    },
+  ],
 };
 
 describe("manager dashboard page", () => {
@@ -77,11 +101,12 @@ describe("manager dashboard page", () => {
     expect(await screen.findByRole("heading", { name: "대시보드" })).toBeInTheDocument();
 
     const summary = screen.getByRole("region", { name: "운영 요약" });
-    const attendanceCard = within(summary).getByRole("link", { name: "출근현황 출근 1 지각 1 결근2 대기 1" });
+    const attendanceCard = within(summary).getByRole("link", { name: "출근현황 출근 1 지각 1 결근2 대기 1 출근율 40%" });
     expect(attendanceCard).toHaveAttribute("href", "/manager/reports/attendance/status");
     expect(within(attendanceCard).getByText("출근현황")).toBeInTheDocument();
     expect(within(attendanceCard).getByText("출근 1")).toBeInTheDocument();
     expect(within(attendanceCard).getByText("대기 1")).toBeInTheDocument();
+    expect(within(attendanceCard).getByText("출근율 40%")).toBeInTheDocument();
     expect(within(attendanceCard).getByText("결근2")).toHaveClass("text-red-600");
     expect(within(attendanceCard).getByText("지각 1")).toHaveClass("text-pink-600");
     const roleCard = within(summary).getByRole("link", {
@@ -101,14 +126,40 @@ describe("manager dashboard page", () => {
     expect(within(educationCard).getByText("안전교육 미이수 3명")).toBeInTheDocument();
 
     const remarksCard = within(summary).getByRole("link", {
-      name: "특이사항 4건 긴급 조치 요구됨",
+      name: "미처리 특이사항 4건 긴급 조치 요구됨",
     });
     expect(remarksCard).toHaveAttribute("href", "/manager/inspection/special-remarks");
-    expect(within(remarksCard).getByText("특이사항")).toBeInTheDocument();
+    expect(within(remarksCard).getByText("미처리 특이사항")).toBeInTheDocument();
     expect(within(remarksCard).getByText("4건")).toBeInTheDocument();
     expect(within(remarksCard).getByText("긴급 조치 요구됨")).toBeInTheDocument();
 
     expect(screen.queryByRole("heading", { name: "최근 30일 운영 추이" })).not.toBeInTheDocument();
+
+    const attendanceSection = screen.getByRole("region", { name: "근태현황" });
+    expect(within(attendanceSection).getByRole("columnheader", { name: "근무지 이름" })).toBeInTheDocument();
+    expect(within(attendanceSection).getByRole("columnheader", { name: "출근예정" })).toBeInTheDocument();
+    expect(within(attendanceSection).getByRole("columnheader", { name: "출근일시" })).toBeInTheDocument();
+    expect(within(attendanceSection).getByRole("columnheader", { name: "상태" })).toBeInTheDocument();
+    expect(within(attendanceSection).getByRole("link", { name: "문현동현장" })).toHaveAttribute(
+      "href",
+      "/manager/reports/attendance",
+    );
+    expect(within(attendanceSection).getByText("09:00")).toBeInTheDocument();
+    expect(within(attendanceSection).getByText("2026-06-04 09:01")).toBeInTheDocument();
+    expect(within(attendanceSection).getByText("지각")).toBeInTheDocument();
+
+    const leaveSection = screen.getByRole("region", { name: "금주 휴가현황" });
+    expect(within(leaveSection).getByRole("columnheader", { name: "이름" })).toBeInTheDocument();
+    expect(within(leaveSection).getByRole("columnheader", { name: "직군" })).toBeInTheDocument();
+    expect(within(leaveSection).getByRole("columnheader", { name: "근무형태" })).toBeInTheDocument();
+    expect(within(leaveSection).getByRole("columnheader", { name: "휴가종류" })).toBeInTheDocument();
+    expect(within(leaveSection).getByRole("columnheader", { name: "휴가기간" })).toBeInTheDocument();
+    expect(within(leaveSection).getByRole("columnheader", { name: "근무지" })).toBeInTheDocument();
+    expect(within(leaveSection).getByRole("columnheader", { name: "배정기간" })).toBeInTheDocument();
+    expect(within(leaveSection).getByRole("link", { name: "김철수" })).toHaveAttribute("href", "/manager/leave");
+    expect(within(leaveSection).getByText("연차")).toBeInTheDocument();
+    expect(within(leaveSection).getByText("2026-06-01 ~ 2026-06-02")).toBeInTheDocument();
+    expect(within(leaveSection).getByText("2026-01-01 ~ 2026-12-31")).toBeInTheDocument();
 
     const assignmentSection = screen.getByRole("region", { name: "현장 실시간 관제" });
     expect(within(assignmentSection).queryByRole("columnheader", { name: "직군" })).not.toBeInTheDocument();

@@ -5,6 +5,7 @@ type EmployeeInput = {
   id: string;
   name: string;
   role?: "경비원" | "미화원" | "파견";
+  work_style?: "0" | "1" | "2" | null;
   is_retired?: boolean;
 };
 
@@ -37,13 +38,23 @@ type DailyAttendanceInput = {
 type IntimeStatus = "0" | "1" | "2" | "3";
 
 type AttendanceInput = {
+  id?: string;
   employee_id: string;
   worksite_id: string;
   work_date: string;
   intime?: string | null;
+  outtime?: string | null;
   intime_status: IntimeStatus;
   work_intime: string | null;
   work_outtime: string | null;
+};
+
+type LeaveInput = {
+  id: string;
+  employee_id: string;
+  leave_type: "1" | "2";
+  start_date: string;
+  end_date: string;
 };
 
 type EducationResourceInput = {
@@ -84,6 +95,7 @@ export type ManagerDashboardData = {
     waitingEmployeesToday: number;
     absentEmployeesToday: number;
     lateEmployeesToday: number;
+    attendanceRate: number;
     educationUncompleted: number;
     educationRate: number;
     employeeRoleCounts: {
@@ -109,6 +121,25 @@ export type ManagerDashboardData = {
     inspectedSiteCount: number;
     inspectionSiteCount: number;
   }[];
+  attendanceToday: {
+    id: string;
+    worksiteName: string;
+    scheduledClockIn: string;
+    clockInDateTime: string;
+    status: "결근" | "지각" | "정상출근" | "정상근무" | "대기";
+  }[];
+  weeklyLeaveStatus: {
+    id: string;
+    employeeName: string;
+    employeeRole: string;
+    workStyle: string;
+    leaveType: "1" | "2";
+    startDate: string;
+    endDate: string;
+    worksiteName: string;
+    assignmentStartDate: string | null;
+    assignmentEndDate: string | null;
+  }[];
 };
 
 type BuildManagerDashboardInput = {
@@ -118,6 +149,8 @@ type BuildManagerDashboardInput = {
   assignments: AssignmentInput[];
   attendance: AttendanceInput[];
   dailyAttendance: DailyAttendanceInput[];
+  weeklyLeaves?: LeaveInput[];
+  weeklyLeaveAssignments?: AssignmentInput[];
   educationResources: EducationResourceInput[];
   educationCompletions: EducationCompletionInput[];
   daysOff?: AssignmentDayOffInput[];
@@ -135,6 +168,32 @@ function addDays(date: string, days: number) {
   const next = new Date(`${date}T00:00:00.000Z`);
   next.setUTCDate(next.getUTCDate() + days);
   return next.toISOString().slice(0, 10);
+}
+
+function getWeekRange(date: string) {
+  const parsed = new Date(`${date}T00:00:00.000Z`);
+  const dayOfWeek = parsed.getUTCDay();
+  const daysFromMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  const weekStart = addDays(date, daysFromMonday);
+  return { weekStart, weekEnd: addDays(weekStart, 6) };
+}
+
+function toKstDateTime(value: string | null | undefined) {
+  if (!value) {
+    return null;
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  const kst = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  return `${kst.toISOString().slice(0, 10)} ${kst.toISOString().slice(11, 16)}`;
+}
+
+function toKstTime(value: string | null | undefined) {
+  return toKstDateTime(value)?.slice(11, 16) ?? null;
 }
 
 function inDateRange(date: string, startDate: string, endDate: string) {
@@ -239,6 +298,13 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
         break;
     }
   });
+  const attendanceRate = percent(
+    onTimeEmployeesToday + lateEmployeesToday,
+    Math.max(
+      scheduledEmployeeIdsToday.size,
+      onTimeEmployeesToday + waitingEmployeesToday + absentEmployeesToday + lateEmployeesToday,
+    ),
+  );
   const currentAssignments = input.assignments
     .filter(
       (assignment) =>
@@ -364,6 +430,69 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
     inspectionSiteCount: inspectionSiteCountByWorksite.get(row.worksiteId) ?? 0,
   }));
 
+  const attendanceStatusLabels: Record<IntimeStatus, "결근" | "지각" | "정상출근" | "정상근무"> = {
+    "0": "결근",
+    "1": "지각",
+    "2": "정상출근",
+    "3": "정상근무",
+  };
+  const attendanceToday = todayWorkRecords
+    .map((record) => {
+      const scheduledClockIn = scheduledTimes.get(
+        `${record.employee_id}:${record.worksite_id}:${record.work_date}`,
+      ) ?? record.intime ?? null;
+      const managerStatus = getManagerAttendanceStatus({
+        intimeStatus: record.intime_status,
+        scheduledClockIn,
+        now: input.now ?? new Date(),
+      });
+
+      return {
+        id: record.id ?? `${record.employee_id}:${record.work_date}:${record.worksite_id}`,
+        worksiteName: worksiteById.get(record.worksite_id)?.name ?? "-",
+        scheduledClockIn: toKstTime(scheduledClockIn) ?? "-",
+        clockInDateTime: toKstDateTime(record.work_intime) ?? "-",
+        status: managerStatus === "출근" ? attendanceStatusLabels[record.intime_status] : managerStatus,
+      };
+    })
+    .sort((left, right) => (
+      left.worksiteName.localeCompare(right.worksiteName, "ko-KR") ||
+      left.scheduledClockIn.localeCompare(right.scheduledClockIn) ||
+      left.clockInDateTime.localeCompare(right.clockInDateTime)
+    ));
+
+  const workStyleLabels: Record<NonNullable<EmployeeInput["work_style"]>, string> = {
+    "0": "일반근무",
+    "1": "격일근무",
+    "2": "야간근무",
+  };
+  const weeklyLeaveStatus = (input.weeklyLeaves ?? [])
+    .map((leave) => {
+      const employee = employeeById.get(leave.employee_id);
+      const assignment = (input.weeklyLeaveAssignments ?? [])
+        .filter((candidate) => candidate.employee_id === leave.employee_id)
+        .filter((candidate) => candidate.start_date <= leave.end_date && leave.start_date <= candidate.end_date)
+        .sort((left, right) => right.start_date.localeCompare(left.start_date))[0];
+
+      return {
+        id: leave.id,
+        employeeName: employee?.name ?? "-",
+        employeeRole: employee?.role ?? "-",
+        workStyle: employee?.work_style ? workStyleLabels[employee.work_style] : "-",
+        leaveType: leave.leave_type,
+        startDate: leave.start_date,
+        endDate: leave.end_date,
+        worksiteName: assignment ? worksiteById.get(assignment.worksite_id)?.name ?? "-" : "-",
+        assignmentStartDate: assignment?.start_date ?? null,
+        assignmentEndDate: assignment?.end_date ?? null,
+      };
+    })
+    .sort((left, right) => (
+      left.worksiteName.localeCompare(right.worksiteName, "ko-KR") ||
+      left.startDate.localeCompare(right.startDate) ||
+      left.employeeName.localeCompare(right.employeeName, "ko-KR")
+    ));
+
   return {
     summary: {
       scheduledEmployeesToday: scheduledEmployeeIdsToday.size,
@@ -372,6 +501,7 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       waitingEmployeesToday,
       absentEmployeesToday,
       lateEmployeesToday,
+      attendanceRate,
       educationUncompleted,
       educationRate,
       employeeRoleCounts,
@@ -386,6 +516,8 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
 
       return ["경비원", "미화원", "파견"].indexOf(left.employeeRole) - ["경비원", "미화원", "파견"].indexOf(right.employeeRole);
     }),
+    attendanceToday,
+    weeklyLeaveStatus,
   };
 }
 
@@ -404,12 +536,14 @@ export async function loadManagerDashboardData() {
   const tomorrow = addDays(today, 1);
   const todayStart = `${today}T00:00:00+09:00`;
   const tomorrowStart = `${tomorrow}T00:00:00+09:00`;
+  const { weekStart, weekEnd } = getWeekRange(today);
 
-  const [employeesResult, worksitesResult, assignmentsResult, workRecordResult, resourcesResult, completionsResult, daysOffResult, specialRemarksResult, inspectionSitesResult, inspectionLogsResult] =
+  const [employeesResult, worksitesResult, assignmentsResult, weeklyLeaveAssignmentsResult, workRecordResult, resourcesResult, completionsResult, daysOffResult, specialRemarksResult, inspectionSitesResult, inspectionLogsResult, weeklyLeavesResult] =
     await Promise.all([
-      supabase.from("employees").select("id,name,role,is_retired"),
+      supabase.from("employees").select("id,name,role,work_style,is_retired"),
       supabase.from("worksites").select("id,name"),
       supabase.from("work_assignments").select("id,employee_id,worksite_id,start_date,end_date").lte("start_date", today).gte("end_date", today),
+      supabase.from("work_assignments").select("id,employee_id,worksite_id,start_date,end_date").lte("start_date", weekEnd).gte("end_date", weekStart),
       supabase.from("work_record").select("id,employee_id,worksite_id,work_date,intime,work_intime,work_outtime,intime_status").eq("work_date", today),
       supabase.from("education_resources").select("id"),
       supabase.from("education_completions").select("employee_id,resource_id,is_completed,completed_at"),
@@ -427,11 +561,17 @@ export async function loadManagerDashboardData() {
         .select("inspection_site_id,worksite_id")
         .gte("inspected_at", todayStart)
         .lt("inspected_at", tomorrowStart),
+      supabase
+        .from("leave")
+        .select("id,employee_id,leave_type,start_date,end_date")
+        .lte("start_date", weekEnd)
+        .gte("end_date", weekStart),
     ]);
 
   throwIfError(employeesResult.error);
   throwIfError(worksitesResult.error);
   throwIfError(assignmentsResult.error);
+  throwIfError(weeklyLeaveAssignmentsResult.error);
   throwIfError(workRecordResult.error);
   throwIfError(resourcesResult.error);
   throwIfError(completionsResult.error);
@@ -439,6 +579,7 @@ export async function loadManagerDashboardData() {
   throwIfError(specialRemarksResult.error);
   throwIfError(inspectionSitesResult.error);
   throwIfError(inspectionLogsResult.error);
+  throwIfError(weeklyLeavesResult.error);
 
   return buildManagerDashboardData({
     employees: employeesResult.data ?? [],
@@ -446,6 +587,8 @@ export async function loadManagerDashboardData() {
     assignments: assignmentsResult.data ?? [],
     attendance: workRecordResult.data ?? [],
     dailyAttendance: (workRecordResult.data ?? []).filter((record) => record.work_date === today && record.intime),
+    weeklyLeaves: weeklyLeavesResult.data ?? [],
+    weeklyLeaveAssignments: weeklyLeaveAssignmentsResult.data ?? [],
     educationResources: resourcesResult.data ?? [],
     educationCompletions: completionsResult.data ?? [],
     daysOff: daysOffResult.data ?? [],

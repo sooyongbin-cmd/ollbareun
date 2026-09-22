@@ -371,7 +371,8 @@ export default function ManagerPage() {
         ))}
       </section>
 
-      <Card role="region" aria-label="근태현황" className="min-w-0">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-2">
+        <Card role="region" aria-label="근태현황" className="min-w-0">
         <CardHeader className="border-b">
           <CardTitle>
             <h2 className="flex items-center gap-2 text-base">
@@ -424,9 +425,9 @@ export default function ManagerPage() {
             </Table>
           </div>
         </CardContent>
-      </Card>
+        </Card>
 
-      <Card role="region" aria-label="금주 휴가현황" className="min-w-0">
+        <Card role="region" aria-label="금주 휴가현황" className="min-w-0">
         <CardHeader className="border-b">
           <CardTitle>
             <h2 className="flex items-center gap-2 text-base">
@@ -485,7 +486,8 @@ export default function ManagerPage() {
             </Table>
           </div>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
 
       <div className="grid min-w-0 gap-6 xl:grid-cols-2">
         <Card role="region" aria-label="현장 실시간 관제" className="min-w-0">

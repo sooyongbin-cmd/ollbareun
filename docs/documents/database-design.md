@@ -34,7 +34,6 @@ auth.users 1 ── 0..1 employees ── N work_assignments N ── 1 worksite
 worksites 1 ── N inspection_sites 1 ── 0..N inspection_logs
 auth.users 1 ── 0..1 admin_users
 auth.users 1 ── N manager_push_subscriptions
-system_configs 1 ── N system_configs (parent_system_code)
 ```
 
 - `inspection_logs`와 `inspection_special_reports`의 직원·근무지·현장 참조는 이력 보존을 위해 일부 `set null`로 동작한다.
@@ -61,7 +60,7 @@ system_configs 1 ── N system_configs (parent_system_code)
 | `push_notification_runs` | `id`, `notification_code`, `scheduled_date`, `scheduled_time`, `status`, `sent_at`, `error_message`, `result`, `created_at`, `updated_at` | 교육 알림 실행·중복 방지·결과 이력 |
 | `guard_session_logs` | `id`, `employee_id`, `guard_name`, 로그인·메인 푸시·로그아웃 상태와 시각, 결과 JSON, `created_at`, `updated_at` | 근무자 로그인 세션과 알림 처리 로그 |
 | `guard_passkey_requests` | `id`, `employee_id`, `status`, `requested_at`, `reviewed_at`, `reviewed_by`, `registered_at`, `revoked_at`, `created_at`, `updated_at` | 관리자 승인 기반 Passkey 신청·승인·등록·폐기 이력 |
-| `system_configs` | `system_code`, `parent_system_code`, `content`, `description`, `created_at`, `updated_at` | 메일 주소·기능 플래그 등 운영 설정 및 계층형 코드 |
+| `system_configs` | `system_code`, `parent_system_code`, `content`, `description`, `created_at`, `updated_at` | 메일 주소·기능 플래그 등 운영 설정 및 자유 입력 분류값 |
 | `admin_users` | `id`, `user_id`, `email`, `role`, `created_by`, `first_login_at`, `created_at`, `updated_at` | Supabase Auth 사용자와 관리자 권한 연결 |
 
 ### `work_record` 통합 근무기록 상세
@@ -115,7 +114,6 @@ system_configs 1 ── N system_configs (parent_system_code)
   - 교육 이수의 직원·자료 참조와 Passkey 요청의 직원 참조: `ON DELETE CASCADE`
   - `inspection_sites.worksite_id`: `ON DELETE CASCADE`
   - `inspection_logs`의 현장·근무지·직원 참조와 특이사항 보고의 근무지·직원 참조: `ON DELETE SET NULL`
-  - `system_configs.parent_system_code → system_configs.system_code`: `ON DELETE SET NULL`
   - `admin_users.user_id → auth.users.id`: `ON DELETE CASCADE`, `admin_users.created_by → auth.users.id`: `ON DELETE SET NULL`
   - `manager_push_subscriptions.user_id → auth.users.id`: `ON DELETE CASCADE`
 - 현재 운영 스키마에서 `work_assignments.worksite_id`에는 외래키가 없고 조회용 인덱스만 있다. 관계도상 참조는 맞지만, 근무지 삭제 시 배정 데이터의 처리 규칙을 정한 뒤 FK를 추가할지 별도 마이그레이션으로 결정해야 한다.
@@ -139,7 +137,7 @@ system_configs 1 ── N system_configs (parent_system_code)
 - 세션 로그의 로그인 상태는 `success/failed`, 메인 푸시 상태는 `success/warning/error/skipped`만 허용한다.
 - Passkey 요청은 정의된 5개 상태만 허용하며 `approved/rejected`는 `reviewed_at`, `registered`는 `registered_at`, `revoked`는 `revoked_at`이 반드시 있어야 한다. 직원별 `pending/approved` 진행 중 요청은 하나만 허용한다.
 - 관리자 역할은 `admin/super_admin`만 허용한다. `user_id`가 있는 관리자 계정은 하나만 연결되고, 이메일은 공백 제거·소문자 기준으로 중복되지 않는다.
-- 시스템 설정의 `system_code`와 `content`는 공백이 아니어야 하며, `parent_system_code`는 자기 테이블의 유효한 코드 또는 NULL이다.
+- 시스템 설정의 `system_code`와 `content`는 공백이 아니어야 하며, `parent_system_code`는 관리자 화면의 자유 입력 분류값 또는 NULL이다.
 
 ## 5. 인덱스 및 조회 기준
 
@@ -162,7 +160,7 @@ system_configs 1 ── N system_configs (parent_system_code)
 | `push_notification_runs` | `push_notification_runs_created_at_idx` 최신 실행순, `push_notification_runs_schedule_idx` 스케줄 확인, `push_notification_runs_unique_schedule` 동일 스케줄 UNIQUE |
 | `guard_session_logs` | `guard_session_logs_login_at_idx` 최신 세션순, `guard_session_logs_employee_id_idx`, `guard_session_logs_login_status_idx`, `guard_session_logs_guard_name_idx` 조건 조회 |
 | `guard_passkey_requests` | `guard_passkey_requests_employee_id_idx`, `guard_passkey_requests_status_idx`, `guard_passkey_requests_requested_at_idx` 승인 목록 조회, `guard_passkey_requests_one_open_request_per_employee_idx` 진행 중 요청 부분 UNIQUE |
-| `system_configs` | `system_configs_parent_system_code_idx` 계층 설정 조회 |
+| `system_configs` | `system_configs_parent_system_code_idx` 분류값 조회 |
 | `admin_users` | `admin_users_role_idx`, `admin_users_created_at_idx`, `admin_users_created_by_idx`, `admin_users_first_login_at_idx`, `admin_users_user_id_unique_idx` NULL이 아닌 `user_id` 부분 UNIQUE, `admin_users_email_unique_idx` `lower(btrim(email))` UNIQUE 및 기존 `email` UNIQUE |
 
 ### 화면·API별 조회 기준

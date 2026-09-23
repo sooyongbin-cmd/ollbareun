@@ -1,6 +1,9 @@
+import { listSystemConfigs } from "@/lib/system-configs";
 import SystemConfigForm from "../system-config-form";
 
-export default function NewSystemConfigPage() {
+export default async function NewSystemConfigPage() {
+  const configs = await listSystemConfigs();
+
   return (
     <section className="space-y-[1.5rem]">
       <header>
@@ -10,7 +13,7 @@ export default function NewSystemConfigPage() {
         </p>
       </header>
 
-      <SystemConfigForm mode="create" />
+      <SystemConfigForm mode="create" parentSystemCodes={configs.map((config) => config.system_code)} />
     </section>
   );
 }

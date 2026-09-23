@@ -30,8 +30,12 @@ function optionalString(value: unknown) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
-function throwIfError(error: { message?: string; hint?: string; code?: string } | null) {
+function throwIfError(error: { message?: string; hint?: string; code?: string; constraint?: string } | null) {
   if (error) {
+    if (error.code === "23503" && error.constraint === "system_configs_parent_system_code_fkey") {
+      throw new Error("등록되지 않은 상위시스템코드입니다. 등록된 시스템 코드 중에서 선택하세요.");
+    }
+
     throw new Error(error.message?.trim() || error.hint?.trim() || error.code?.trim() || "Supabase 요청에 실패했습니다.");
   }
 }

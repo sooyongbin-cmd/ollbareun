@@ -10,7 +10,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("system config form", () => {
-  it("shows fields in description, content, system code, parent system code order", () => {
+  it("shows fields in description, content, system code, and category order", () => {
     render(<SystemConfigForm mode="create" />);
 
     const fields = screen.getAllByRole("textbox");
@@ -19,14 +19,8 @@ describe("system config form", () => {
       screen.getByLabelText("설명"),
       screen.getByLabelText("내용"),
       screen.getByLabelText("시스템코드"),
+      screen.getByLabelText("분류"),
     ]);
-    expect(screen.getByLabelText("상위시스템코드")).toHaveValue("");
-  });
-
-  it("offers only registered system codes as parent options", () => {
-    render(<SystemConfigForm mode="create" parentSystemCodes={["system_0001", "system_0002"]} />);
-
-    expect(screen.getByLabelText("상위시스템코드")).toHaveTextContent("system_0001");
-    expect(screen.getByLabelText("상위시스템코드")).toHaveTextContent("system_0002");
+    expect(screen.getByLabelText("분류")).toHaveValue("");
   });
 });

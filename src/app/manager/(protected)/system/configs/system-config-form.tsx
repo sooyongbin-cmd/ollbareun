@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
@@ -12,7 +11,6 @@ import ProcessingModal from "@/components/modals/processing-modal";
 
 type SystemConfigFormProps = {
   mode: "create" | "edit";
-  parentSystemCodes?: string[];
   initialConfig?: {
     system_code: string;
     parent_system_code: string | null;
@@ -21,7 +19,7 @@ type SystemConfigFormProps = {
   };
 };
 
-export default function SystemConfigForm({ mode, parentSystemCodes = [], initialConfig }: SystemConfigFormProps) {
+export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFormProps) {
   const router = useRouter();
   const [systemCode, setSystemCode] = useState(initialConfig?.system_code ?? "");
   const [parentSystemCode, setParentSystemCode] = useState(initialConfig?.parent_system_code ?? "");
@@ -140,21 +138,14 @@ export default function SystemConfigForm({ mode, parentSystemCodes = [], initial
 
       <div className="space-y-2">
         <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="parent-system-code">
-          상위시스템코드
+          분류
         </label>
-        <NativeSelect
+        <Input
           className="w-full"
           id="parent-system-code"
           onChange={(event) => setParentSystemCode(event.target.value)}
           value={parentSystemCode}
-        >
-          <NativeSelectOption value="">없음</NativeSelectOption>
-          {parentSystemCodes.map((systemCode) => (
-            <NativeSelectOption key={systemCode} value={systemCode}>
-              {systemCode}
-            </NativeSelectOption>
-          ))}
-        </NativeSelect>
+        />
       </div>
 
       {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p> : null}

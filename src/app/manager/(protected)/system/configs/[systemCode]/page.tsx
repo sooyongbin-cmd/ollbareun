@@ -1,4 +1,4 @@
-import { getSystemConfig, listSystemConfigs } from "@/lib/system-configs";
+import { getSystemConfig } from "@/lib/system-configs";
 import SystemConfigForm from "../system-config-form";
 
 type PageProps = {
@@ -8,10 +8,7 @@ type PageProps = {
 export default async function EditSystemConfigPage({ params }: PageProps) {
   const { systemCode } = await params;
   const decodedSystemCode = decodeURIComponent(systemCode);
-  const [config, configs] = await Promise.all([getSystemConfig(decodedSystemCode), listSystemConfigs()]);
-  const parentSystemCodes = configs
-    .map((candidate) => candidate.system_code)
-    .filter((candidate) => candidate !== config.system_code);
+  const config = await getSystemConfig(decodedSystemCode);
 
   return (
     <section className="space-y-[1.5rem]">
@@ -22,7 +19,7 @@ export default async function EditSystemConfigPage({ params }: PageProps) {
         </p>
       </header>
 
-      <SystemConfigForm mode="edit" initialConfig={config} parentSystemCodes={parentSystemCodes} />
+      <SystemConfigForm mode="edit" initialConfig={config} />
     </section>
   );
 }

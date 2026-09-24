@@ -44,6 +44,17 @@ const bootstrap = {
   summary: { totalEmployees: 2, currentlyClockedIn: 0 },
 };
 
+const educationResources = [
+  { id: "resource-1" },
+  { id: "resource-2" },
+];
+
+const educationCompletions = [
+  { employee_id: "emp-1", resource_id: "resource-1", is_completed: true },
+  { employee_id: "emp-1", resource_id: "resource-2", is_completed: true },
+  { employee_id: "emp-2", resource_id: "resource-1", is_completed: true },
+];
+
 function renderWithManagerLayout(ui: ReactElement) {
   return render(<ManagerLayout>{ui}</ManagerLayout>);
 }
@@ -57,6 +68,12 @@ describe("employee roster page", () => {
         const url = String(input);
         if (url.endsWith("/api/bootstrap")) {
           return Response.json(bootstrap);
+        }
+        if (url.endsWith("/api/education/resources")) {
+          return Response.json({ resources: educationResources });
+        }
+        if (url.endsWith("/api/education/completions")) {
+          return Response.json({ completions: educationCompletions });
         }
         return Response.json({}, { status: 404 });
       }),
@@ -80,7 +97,14 @@ describe("employee roster page", () => {
     expect(screen.getByText("본사")).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "배정기간" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "출근" })).toBeInTheDocument();
-    expect(within(screen.getByRole("link", { name: "Alice" }).closest("tr") as HTMLElement).getByText("정상출근")).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "교육" })).toBeInTheDocument();
+    const aliceRow = screen.getByRole("link", { name: "Alice" }).closest("tr") as HTMLElement;
+    expect(within(aliceRow).getByText("정상출근")).toBeInTheDocument();
+    const completedEducationLink = within(aliceRow).getByRole("link", { name: "완료" });
+    expect(completedEducationLink).toHaveAttribute(
+      "href",
+      "/manager/safety/completions/detail?name=Alice",
+    );
     const assignmentPeriodLink = screen.getByRole("link", { name: "2026-05-01~2026-05-24" });
     expect(assignmentPeriodLink).toHaveAttribute("href", "/manager/employee/assignments/save/assign-1");
     expect(screen.queryByRole("link", { name: "Bob" })).not.toBeInTheDocument();
@@ -94,6 +118,7 @@ describe("employee roster page", () => {
     expect(bobCells[4]).toHaveTextContent("");
     expect(bobCells[5]).toHaveTextContent("");
     expect(bobCells[6]).toHaveTextContent("-");
+    expect(bobCells[7]).toHaveTextContent("1/2");
     expect(screen.queryByRole("link", { name: "Alice" })).not.toBeInTheDocument();
   });
 
@@ -156,8 +181,15 @@ describe("employee roster page", () => {
       ]
     };
     vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
-      if (String(input).endsWith("/api/bootstrap")) {
+      const url = String(input);
+      if (url.endsWith("/api/bootstrap")) {
         return Response.json(extendedBootstrap);
+      }
+      if (url.endsWith("/api/education/resources")) {
+        return Response.json({ resources: educationResources });
+      }
+      if (url.endsWith("/api/education/completions")) {
+        return Response.json({ completions: educationCompletions });
       }
       return Response.json({}, { status: 404 });
     }));

@@ -12,6 +12,55 @@ const assignment = {
   end_date: "2026-05-23",
 };
 let employeeAssignments = [assignment];
+let employeeDetails = {
+  educationCompletions: [
+    {
+      resource_id: "resource-1",
+      resource_title: "화재 안전 교육",
+      is_completed: true,
+      completed_at: "2026-05-27T09:10:00.000Z",
+    },
+    {
+      resource_id: "resource-2",
+      resource_title: "순찰 안전 교육",
+      is_completed: false,
+      completed_at: null,
+    },
+  ],
+  attendance: [
+    {
+      id: "record-1",
+      work_date: "2026-05-27",
+      worksite_name: "본사",
+      work_intime: "2026-05-27T00:10:00.000Z",
+      work_outtime: "2026-05-27T09:10:00.000Z",
+    },
+  ],
+  leaves: [
+    {
+      id: "leave-1",
+      leave_type: "2",
+      start_date: "2026-06-01",
+      end_date: "2026-06-02",
+    },
+  ],
+  inspectionLogs: [
+    {
+      id: "inspection-1",
+      inspected_at: "2026-05-27T10:10:00.000Z",
+      site_name: "정문",
+      worksite_name: "본사",
+    },
+  ],
+  specialRemarks: [
+    {
+      id: "remark-1",
+      reported_at: "2026-05-27T11:10:00.000Z",
+      content: "엘리베이터 이상\n상세 내용",
+    },
+  ],
+};
+const defaultEmployeeDetails = employeeDetails;
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push }),
@@ -24,6 +73,13 @@ describe("employee save page", () => {
     push.mockReset();
     useParams.mockReturnValue({ id: "emp-1" });
     employeeAssignments = [assignment];
+    employeeDetails = {
+      educationCompletions: [...defaultEmployeeDetails.educationCompletions],
+      attendance: [...defaultEmployeeDetails.attendance],
+      leaves: [...defaultEmployeeDetails.leaves],
+      inspectionLogs: [...defaultEmployeeDetails.inspectionLogs],
+      specialRemarks: [...defaultEmployeeDetails.specialRemarks],
+    };
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -42,6 +98,7 @@ describe("employee save page", () => {
               is_retired: false,
             },
             assignments: employeeAssignments,
+            ...employeeDetails,
           });
         }
 
@@ -99,6 +156,23 @@ describe("employee save page", () => {
     const assignmentSection = await screen.findByRole("region", { name: "근무지배정 정보" });
     expect(within(assignmentSection).getByText("본사")).toBeInTheDocument();
     expect(within(assignmentSection).getByText("2026-05-21 ~ 2026-05-23")).toBeInTheDocument();
+    const educationSection = screen.getByRole("region", { name: "교육이수" });
+    expect(within(educationSection).getByRole("columnheader", { name: "제목" })).toBeInTheDocument();
+    expect(within(educationSection).getByText("화재 안전 교육")).toBeInTheDocument();
+    expect(within(educationSection).getByText("완료")).toBeInTheDocument();
+    expect(within(educationSection).getByText("미완료")).toBeInTheDocument();
+    const attendanceSection = screen.getByRole("region", { name: "출근현황" });
+    expect(within(attendanceSection).getByText("본사")).toBeInTheDocument();
+    expect(within(attendanceSection).getByRole("columnheader", { name: "출근일시" })).toBeInTheDocument();
+    expect(within(attendanceSection).getByRole("columnheader", { name: "퇴근일시" })).toBeInTheDocument();
+    const leaveSection = screen.getByRole("region", { name: "휴가정보" });
+    expect(within(leaveSection).getByText("연차")).toBeInTheDocument();
+    expect(within(leaveSection).getByText("2026-06-01 ~ 2026-06-02")).toBeInTheDocument();
+    const inspectionSection = screen.getByRole("region", { name: "현장점검" });
+    expect(within(inspectionSection).getByText("정문")).toBeInTheDocument();
+    expect(within(inspectionSection).getByText("본사")).toBeInTheDocument();
+    const remarksSection = screen.getByRole("region", { name: "특이사항" });
+    expect(within(remarksSection).getByText("엘리베이터 이상")).toBeInTheDocument();
 
     await user.clear(screen.getByLabelText("직원이름"));
     await user.type(screen.getByLabelText("직원이름"), "Alice Kim");
@@ -127,6 +201,25 @@ describe("employee save page", () => {
 
     expect(await screen.findByRole("heading", { name: "직원 상세" })).toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "근무지배정 정보" })).not.toBeInTheDocument();
+  });
+
+  it("hides history sections that have no records", async () => {
+    employeeDetails = {
+      educationCompletions: [],
+      attendance: [],
+      leaves: [],
+      inspectionLogs: [],
+      specialRemarks: [],
+    };
+
+    render(<EmployeeSavePage />);
+
+    expect(await screen.findByRole("heading", { name: "직원 상세" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "교육이수" })).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "출근현황" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "휴가정보" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "현장점검" })).not.toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "특이사항" })).toBeInTheDocument();
   });
 
   it("returns to the list without saving", async () => {

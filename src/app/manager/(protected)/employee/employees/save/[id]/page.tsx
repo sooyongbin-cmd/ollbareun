@@ -26,6 +26,11 @@ type Employee = {
 type EmployeeResponse = {
   employee: Employee;
   assignments: EmployeeAssignment[];
+  educationCompletions: EducationCompletion[];
+  attendance: EmployeeAttendance[];
+  leaves: EmployeeLeave[];
+  inspectionLogs: EmployeeInspectionLog[];
+  specialRemarks: EmployeeSpecialRemark[];
 };
 
 type EmployeeMutationResponse = {
@@ -37,6 +42,41 @@ type EmployeeAssignment = {
   worksite_name: string;
   start_date: string;
   end_date: string;
+};
+
+type EducationCompletion = {
+  resource_id: string;
+  resource_title: string;
+  is_completed: boolean;
+  completed_at: string | null;
+};
+
+type EmployeeAttendance = {
+  id: string;
+  work_date: string;
+  worksite_name: string;
+  work_intime: string | null;
+  work_outtime: string | null;
+};
+
+type EmployeeLeave = {
+  id: string;
+  leave_type: "1" | "2";
+  start_date: string;
+  end_date: string;
+};
+
+type EmployeeInspectionLog = {
+  id: string;
+  inspected_at: string;
+  site_name: string;
+  worksite_name: string;
+};
+
+type EmployeeSpecialRemark = {
+  id: string;
+  reported_at: string;
+  content: string;
 };
 
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
@@ -65,6 +105,32 @@ function formatAssignmentPeriod(assignment: EmployeeAssignment) {
     : `${assignment.start_date} ~ ${assignment.end_date}`;
 }
 
+function formatDateTime(value: string | null) {
+  if (!value) {
+    return "-";
+  }
+
+  return new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Asia/Seoul",
+  }).format(new Date(value));
+}
+
+function formatLeavePeriod(leave: EmployeeLeave) {
+  return leave.start_date === leave.end_date
+    ? leave.start_date
+    : `${leave.start_date} ~ ${leave.end_date}`;
+}
+
+function summarizeRemark(content: string) {
+  return content.split(/\r?\n/)[0]?.trim() ?? "";
+}
+
 export default function EmployeeSavePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -77,6 +143,11 @@ export default function EmployeeSavePage() {
   const [outTime, setOutTime] = useState("06:00");
   const [isRetired, setIsRetired] = useState(false);
   const [assignments, setAssignments] = useState<EmployeeAssignment[]>([]);
+  const [educationCompletions, setEducationCompletions] = useState<EducationCompletion[]>([]);
+  const [attendance, setAttendance] = useState<EmployeeAttendance[]>([]);
+  const [leaves, setLeaves] = useState<EmployeeLeave[]>([]);
+  const [inspectionLogs, setInspectionLogs] = useState<EmployeeInspectionLog[]>([]);
+  const [specialRemarks, setSpecialRemarks] = useState<EmployeeSpecialRemark[]>([]);
   const [loading, setLoading] = useState(Boolean(employeeId));
   const [loadError, setLoadError] = useState("");
   const [error, setError] = useState("");
@@ -102,6 +173,11 @@ export default function EmployeeSavePage() {
           setOutTime((data.employee.out_time ?? "06:00").slice(0, 5));
           setIsRetired(data.employee.is_retired);
           setAssignments(data.assignments ?? []);
+          setEducationCompletions(data.educationCompletions ?? []);
+          setAttendance(data.attendance ?? []);
+          setLeaves(data.leaves ?? []);
+          setInspectionLogs(data.inspectionLogs ?? []);
+          setSpecialRemarks(data.specialRemarks ?? []);
         }
       } catch (loadFailure) {
         if (!ignore) {
@@ -303,6 +379,41 @@ export default function EmployeeSavePage() {
         {error ? <p role="alert" className="mt-6 text-[1rem] text-destructive">{error}</p> : null}
       </section>
 
+      {!loading && !routeError ? (
+        <section
+          aria-label="교육이수"
+          className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
+        >
+          <h2 className="text-[1.25rem] font-semibold">교육이수</h2>
+          <div className="mt-6 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
+            <table className="w-full min-w-[36rem] text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="px-4 py-3 text-left font-semibold">제목</th>
+                  <th className="px-4 py-3 text-left font-semibold">완료여부</th>
+                  <th className="px-4 py-3 text-left font-semibold">완료일자</th>
+                </tr>
+              </thead>
+              <tbody>
+                {educationCompletions.length === 0 ? (
+                  <tr>
+                    <td className="p-8 text-center text-muted-foreground" colSpan={3}>교육이수 기록이 없습니다.</td>
+                  </tr>
+                ) : (
+                  educationCompletions.map((completion) => (
+                    <tr className="border-b border-border last:border-b-0" key={completion.resource_id}>
+                      <td className="px-4 py-3 font-semibold">{completion.resource_title}</td>
+                      <td className="px-4 py-3">{completion.is_completed ? "완료" : "미완료"}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{formatDateTime(completion.completed_at)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
+
       {!loading && !routeError && assignments.length > 0 ? (
         <section
           aria-label="근무지배정 정보"
@@ -327,6 +438,124 @@ export default function EmployeeSavePage() {
                 </div>
               </dl>
             ))}
+          </div>
+        </section>
+      ) : null}
+
+      {!loading && !routeError && attendance.length > 0 ? (
+        <section
+          aria-label="출근현황"
+          className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
+        >
+          <h2 className="text-[1.25rem] font-semibold">출근현황</h2>
+          <div className="mt-6 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
+            <table className="w-full min-w-[42rem] text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="px-4 py-3 text-left font-semibold">근무지</th>
+                  <th className="px-4 py-3 text-left font-semibold">출근일시</th>
+                  <th className="px-4 py-3 text-left font-semibold">퇴근일시</th>
+                </tr>
+              </thead>
+              <tbody>
+                {attendance.map((record) => (
+                  <tr className="border-b border-border last:border-b-0" key={record.id}>
+                    <td className="px-4 py-3 font-semibold">{record.worksite_name}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{formatDateTime(record.work_intime)}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{formatDateTime(record.work_outtime)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
+
+      {!loading && !routeError && leaves.length > 0 ? (
+        <section
+          aria-label="휴가정보"
+          className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
+        >
+          <h2 className="text-[1.25rem] font-semibold">휴가정보</h2>
+          <div className="mt-6 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
+            <table className="w-full min-w-[32rem] text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="px-4 py-3 text-left font-semibold">휴가종류</th>
+                  <th className="px-4 py-3 text-left font-semibold">휴가기간</th>
+                </tr>
+              </thead>
+              <tbody>
+                {leaves.map((leave) => (
+                  <tr className="border-b border-border last:border-b-0" key={leave.id}>
+                    <td className="px-4 py-3 font-semibold">{leave.leave_type === "1" ? "월차" : "연차"}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{formatLeavePeriod(leave)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
+
+      {!loading && !routeError && inspectionLogs.length > 0 ? (
+        <section
+          aria-label="현장점검"
+          className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
+        >
+          <h2 className="text-[1.25rem] font-semibold">현장점검</h2>
+          <div className="mt-6 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
+            <table className="w-full min-w-[42rem] text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="px-4 py-3 text-left font-semibold">점검일자</th>
+                  <th className="px-4 py-3 text-left font-semibold">현장명</th>
+                  <th className="px-4 py-3 text-left font-semibold">근무지</th>
+                </tr>
+              </thead>
+              <tbody>
+                {inspectionLogs.map((log) => (
+                  <tr className="border-b border-border last:border-b-0" key={log.id}>
+                    <td className="px-4 py-3 text-muted-foreground">{formatDateTime(log.inspected_at)}</td>
+                    <td className="px-4 py-3 font-semibold">{log.site_name}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{log.worksite_name}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
+
+      {!loading && !routeError ? (
+        <section
+          aria-label="특이사항"
+          className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
+        >
+          <h2 className="text-[1.25rem] font-semibold">특이사항</h2>
+          <div className="mt-6 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
+            <table className="w-full min-w-[42rem] text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="px-4 py-3 text-left font-semibold">점검일시</th>
+                  <th className="px-4 py-3 text-left font-semibold">특이사항내용</th>
+                </tr>
+              </thead>
+              <tbody>
+                {specialRemarks.length === 0 ? (
+                  <tr>
+                    <td className="p-8 text-center text-muted-foreground" colSpan={2}>특이사항 기록이 없습니다.</td>
+                  </tr>
+                ) : (
+                  specialRemarks.map((remark) => (
+                    <tr className="border-b border-border last:border-b-0" key={remark.id}>
+                      <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDateTime(remark.reported_at)}</td>
+                      <td className="max-w-[36rem] truncate px-4 py-3" title={remark.content}>{summarizeRemark(remark.content)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </section>
       ) : null}

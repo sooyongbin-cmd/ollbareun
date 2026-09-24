@@ -68,7 +68,7 @@ describe("worksite management page", () => {
     );
     expect(screen.getByLabelText("근무지")).toHaveAttribute("placeholder", "근무지 이름을 입력하세요.");
     expect(screen.getByLabelText("근무지")).toHaveAttribute("list", "worksite-search-options");
-    expect(Array.from(document.querySelectorAll("#worksite-search-options option")).map((option) => option.value)).toEqual(["본사", "서울지점"]);
+    expect(Array.from(document.querySelectorAll<HTMLOptionElement>("#worksite-search-options option")).map((option) => option.value)).toEqual(["본사", "서울지점"]);
 
     const worksiteNameLink = await screen.findByRole("link", { name: "본사" });
     expect(worksiteNameLink).toHaveAttribute("href", "/manager/employee/worksites/save/work-1");

@@ -5,9 +5,9 @@ import { getSupabaseAdmin } from "@/lib/supabase-admin";
 vi.mock("@/lib/supabase-admin", () => ({
   getSupabaseAdmin: vi.fn(),
 }));
-vi.mock("@/lib/active-employee", () => ({
-  requireActiveEmployee: vi.fn().mockResolvedValue({ id: "emp-1" }),
-  getActiveEmployeeErrorStatus: (_error: unknown, fallback: number) => fallback,
+vi.mock("@/lib/guard-auth-session", () => ({
+  requireGuardEmployee: vi.fn().mockResolvedValue({ id: "emp-1", name: "테스트", role: "경비원", is_retired: false }),
+  guardAuthErrorStatus: (_error: unknown, fallback: number) => fallback,
 }));
 
 describe("POST /api/notifications/subscribe", () => {

@@ -216,7 +216,7 @@ export async function createEmployee(
   const { data, error } = await supabase
     .from("employees")
     .upsert(
-      { name, phone, phone_normalized, is_retired: false, role, ...schedule },
+      { name, phone, phone_normalized, is_retired: false, retired_at: null, role, ...schedule },
       { onConflict: "name,phone_normalized" },
     )
     .select("*")
@@ -280,22 +280,60 @@ export async function updateEmployee(input: {
   }
 
   const schedule = validateEmployeeSchedule(input);
+  const { data: currentEmployee, error: currentEmployeeError } = await supabase
+    .from("employees")
+    .select("is_retired,retired_at")
+    .eq("id", id)
+    .maybeSingle();
+  throwIfError(currentEmployeeError);
   const { data, error } = await supabase
     .from("employees")
-    .update({ name, phone, phone_normalized, is_retired, role, ...schedule })
+    .update({
+      name,
+      phone,
+      phone_normalized,
+      is_retired,
+      retired_at: is_retired
+        ? currentEmployee?.is_retired && currentEmployee.retired_at
+          ? currentEmployee.retired_at
+          : new Date().toISOString()
+        : null,
+      role,
+      ...schedule,
+    })
     .eq("id", id)
     .select("*")
     .single();
 
   throwIfError(error);
+  if (is_retired && !currentEmployee?.is_retired) {
+    const admin = getSupabaseAdmin();
+    const [sessionResult, subscriptionResult] = await Promise.all([
+      admin.from("guard_auth_sessions").update({ revoked_at: new Date().toISOString() }).eq("employee_id", id).is("revoked_at", null),
+      admin.from("push_subscriptions").delete().eq("employee_id", id),
+    ]);
+    throwIfError(sessionResult.error);
+    throwIfError(subscriptionResult.error);
+  }
   return data as EmployeeRow;
 }
 
 export async function deleteEmployee(id: unknown, supabase: SupabaseClient = getSupabase()) {
   const employeeId = requireString(id, "직원");
-  const { error } = await supabase.from("employees").delete().eq("id", employeeId);
-
+  const { error } = await supabase
+    .from("employees")
+    .update({ is_retired: true, retired_at: new Date().toISOString() })
+    .eq("id", employeeId)
+    .eq("is_retired", false);
   throwIfError(error);
+
+  const admin = getSupabaseAdmin();
+  const [sessionResult, subscriptionResult] = await Promise.all([
+    admin.from("guard_auth_sessions").update({ revoked_at: new Date().toISOString() }).eq("employee_id", employeeId).is("revoked_at", null),
+    admin.from("push_subscriptions").delete().eq("employee_id", employeeId),
+  ]);
+  throwIfError(sessionResult.error);
+  throwIfError(subscriptionResult.error);
 }
 
 export async function createWorksite(input: {

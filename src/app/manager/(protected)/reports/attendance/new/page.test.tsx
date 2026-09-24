@@ -22,11 +22,11 @@ it("selects employee and worksite, creates attendance and returns to the list", 
   const worksiteInput = screen.getByLabelText("근무지");
   expect(employeeInput).toHaveAttribute("list", "attendance-employee-options");
   expect(worksiteInput).toHaveAttribute("list", "attendance-worksite-options");
-  expect(Array.from(document.querySelectorAll("#attendance-employee-options option")).map((option) => option.value)).toEqual([
+  expect(Array.from(document.querySelectorAll<HTMLOptionElement>("#attendance-employee-options option")).map((option) => option.value)).toEqual([
     "김철수",
     "홍길동",
   ]);
-  expect(Array.from(document.querySelectorAll("#attendance-worksite-options option")).map((option) => option.value)).toEqual([
+  expect(Array.from(document.querySelectorAll<HTMLOptionElement>("#attendance-worksite-options option")).map((option) => option.value)).toEqual([
     "본사",
     "서울지점",
   ]);

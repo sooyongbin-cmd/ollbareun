@@ -5,6 +5,10 @@ import { GET } from "./route";
 vi.mock("@/lib/guard-passkeys", () => ({
   loadGuardPasskeyRequestForEmployee: vi.fn(),
 }));
+vi.mock("@/lib/guard-auth-session", () => ({
+  requireGuardEmployee: vi.fn().mockResolvedValue({ id: "emp-1", name: "홍길동", role: "경비원", is_retired: false }),
+  guardAuthErrorStatus: (_error: unknown, fallback: number) => fallback,
+}));
 
 describe("guard passkey request status route", () => {
   beforeEach(() => {

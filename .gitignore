@@ -51,3 +51,18 @@ next-env.d.ts
 docs/.vitepress/cache
 docs/.vitepress/dist
 
+# Android TWA build artifacts and signing material
+/android/**/.gradle/
+/android/**/.idea/
+/android/**/build/
+/android/**/local.properties
+/android/**/*.apk
+/android/**/*.aab
+/android/**/*.apk.idsig
+*.keystore
+*.jks
+*.p12
+*.pfx
+keystore.properties
+*.dpapi.clixml
+

@@ -1,17 +1,15 @@
-import { InactiveEmployeeError, requireActiveEmployee } from "@/lib/active-employee";
+import { guardAuthErrorStatus, requireGuardEmployee } from "@/lib/guard-auth-session";
 import { loadGuardSessionByEmployeeId } from "@/lib/phase1-data";
 
 export async function GET(request: Request) {
   try {
-    const employeeId = new URL(request.url).searchParams.get("employeeId");
-    await requireActiveEmployee(employeeId);
-    const session = await loadGuardSessionByEmployeeId(employeeId);
+    const employee = await requireGuardEmployee(request);
+    const session = await loadGuardSessionByEmployeeId(employee.id);
     return Response.json({ session });
   } catch (error) {
-    const status = error instanceof InactiveEmployeeError ? 403 : 500;
     return Response.json(
       { error: error instanceof Error ? error.message : "근무자 세션을 확인하지 못했습니다." },
-      { status },
+      { status: guardAuthErrorStatus(error) },
     );
   }
 }

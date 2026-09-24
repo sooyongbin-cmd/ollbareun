@@ -5,9 +5,9 @@ import { POST } from "./route";
 vi.mock("@/lib/special-remark-reports", () => ({
   createSpecialRemarkReport: vi.fn(),
 }));
-vi.mock("@/lib/active-employee", () => ({
-  requireActiveEmployee: vi.fn().mockResolvedValue({ id: "employee-1" }),
-  getActiveEmployeeErrorStatus: (_error: unknown, fallback: number) => fallback,
+vi.mock("@/lib/guard-auth-session", () => ({
+  requireGuardWorksite: vi.fn().mockResolvedValue({ employee: { id: "employee-1", name: "홍길동", role: "경비원" }, worksite: { id: "work-1", name: "본사" } }),
+  guardAuthErrorStatus: (_error: unknown, fallback: number) => fallback,
 }));
 
 describe("POST /api/guard/special-remarks/report/formspree", () => {

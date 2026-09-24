@@ -6,7 +6,7 @@ import ManagerThemeProvider, {
 
 function mockMatchMedia(initialMatches: boolean) {
   let matches = initialMatches;
-  const listeners = new Set<() => void>();
+  const listeners = new Set<EventListenerOrEventListenerObject>();
 
   vi.spyOn(window, "matchMedia").mockImplementation(
     () =>
@@ -16,10 +16,12 @@ function mockMatchMedia(initialMatches: boolean) {
         },
         media: "(prefers-color-scheme: dark)",
         onchange: null,
-        addEventListener: (_event: string, listener: () => void) =>
-          listeners.add(listener),
-        removeEventListener: (_event: string, listener: () => void) =>
-          listeners.delete(listener),
+        addEventListener: (_event: string, listener: EventListenerOrEventListenerObject) => {
+          listeners.add(listener);
+        },
+        removeEventListener: (_event: string, listener: EventListenerOrEventListenerObject) => {
+          listeners.delete(listener);
+        },
         addListener: () => {},
         removeListener: () => {},
         dispatchEvent: () => false,
@@ -29,7 +31,11 @@ function mockMatchMedia(initialMatches: boolean) {
   return {
     setMatches(nextMatches: boolean) {
       matches = nextMatches;
-      listeners.forEach((listener) => listener());
+      const event = new Event("change");
+      listeners.forEach((listener) => {
+        if (typeof listener === "function") listener(event);
+        else listener.handleEvent(event);
+      });
     },
   };
 }

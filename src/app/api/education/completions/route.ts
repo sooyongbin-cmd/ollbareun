@@ -1,13 +1,18 @@
 import { listEducationCompletions, markEducationCompletion } from "@/lib/education-completions";
-import { getActiveEmployeeErrorStatus, requireActiveEmployee } from "@/lib/active-employee";
+import { guardAuthErrorStatus, requireGuardEmployee } from "@/lib/guard-auth-session";
+import { getManagerUser } from "@/lib/manager-auth";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    return Response.json({ completions: await listEducationCompletions() });
+    const manager = await getManagerUser();
+    if (manager) return Response.json({ completions: await listEducationCompletions() });
+    const employee = await requireGuardEmployee(request);
+    const completions = await listEducationCompletions();
+    return Response.json({ completions: completions.filter((completion) => completion.employee_id === employee.id) });
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "교육이수 목록을 불러오지 못했습니다." },
-      { status: 500 },
+      { status: guardAuthErrorStatus(error) },
     );
   }
 }
@@ -15,17 +20,17 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    await requireActiveEmployee(body.employeeId);
+    const employee = await requireGuardEmployee(request, body.employeeId);
     return Response.json({
       completion: await markEducationCompletion({
-        employeeId: body.employeeId,
+        employeeId: employee.id,
         resourceId: body.resourceId,
       }),
     });
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "교육이수 정보를 저장하지 못했습니다." },
-      { status: getActiveEmployeeErrorStatus(error, 400) },
+      { status: guardAuthErrorStatus(error, 400) },
     );
   }
 }

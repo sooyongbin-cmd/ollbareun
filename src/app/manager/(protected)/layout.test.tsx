@@ -24,7 +24,7 @@ vi.mock("@/lib/supabase-browser", () => ({
   }),
 }));
 
-function SuspendedManagerChild() {
+function SuspendedManagerChild(): never {
   throw new Promise(() => undefined);
 }
 

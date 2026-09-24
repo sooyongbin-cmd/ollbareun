@@ -31,6 +31,7 @@ function query(result: unknown = { data: null, error: null }) {
     gte: vi.fn().mockReturnThis(),
     in: vi.fn().mockReturnThis(),
     is: vi.fn().mockReturnThis(),
+    not: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
     limit: vi.fn().mockReturnThis(),
     maybeSingle: vi.fn().mockResolvedValue(result),
@@ -282,7 +283,11 @@ describe("guard passkey data flow", () => {
     vi.mocked(getSupabaseAdmin).mockReturnValue({
       from: vi
         .fn()
-        .mockReturnValueOnce(employeeQuery),
+        .mockReturnValueOnce(employeeQuery)
+        .mockReturnValueOnce(employeeByIdQuery)
+        .mockReturnValueOnce(assignmentQuery)
+        .mockReturnValueOnce(openAttendanceQuery)
+        .mockReturnValueOnce(todayAttendanceQuery),
       auth: {
         getUser: vi.fn().mockResolvedValue({ data: { user: { id: "auth-1" } }, error: null }),
       },

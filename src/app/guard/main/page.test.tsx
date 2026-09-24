@@ -9,6 +9,10 @@ vi.mock("next/navigation", () => ({
 
 describe("guard main shortcuts", () => {
   it("uses the same destinations as the footer inspection links", () => {
+    window.localStorage.clear();
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify({
+      employee: { id: "test-guard", role: "경비원" },
+    }));
     render(<GuardMainPage />);
 
     expect(screen.getByRole("link", { name: "순찰" })).toHaveAttribute(

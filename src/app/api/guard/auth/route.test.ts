@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { authenticateGuard } from "@/lib/phase1-data";
 import { createGuardSessionLog } from "@/lib/guard-session-logs";
+import { createGuardAuthSession } from "@/lib/guard-auth-session";
 import { POST } from "./route";
 
 vi.mock("@/lib/phase1-data", () => ({
@@ -10,6 +11,7 @@ vi.mock("@/lib/phase1-data", () => ({
 vi.mock("@/lib/guard-session-logs", () => ({
   createGuardSessionLog: vi.fn(),
 }));
+vi.mock("@/lib/guard-auth-session", () => ({ createGuardAuthSession: vi.fn().mockResolvedValue({ setCookie: "test-cookie" }) }));
 
 describe("guard auth route", () => {
   beforeEach(() => {

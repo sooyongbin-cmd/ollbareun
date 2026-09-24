@@ -234,6 +234,14 @@ describe("guard login page", () => {
     expect(resultSection).toHaveAttribute("hidden");
   });
 
+  it.each([true, false])("keeps privacy and deletion contact accessible before login (standalone=%s)", async (standalone) => {
+    setUserAgent("Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/140.0.0.0 Mobile Safari/537.36");
+    setStandaloneMode(standalone);
+    render(<GuardPage />);
+    expect(await screen.findByRole("link", { name: "개인정보처리방침" })).toHaveAttribute("href", "/privacy-policy");
+    expect(screen.getByRole("link", { name: "개인정보·계정 삭제 문의" })).toHaveAttribute("href", "mailto:cyberbin@naver.com");
+  });
+
   it("keeps the hidden push cleanup result section when there was no server subscription", async () => {
     setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1");
     setStandaloneMode(true);

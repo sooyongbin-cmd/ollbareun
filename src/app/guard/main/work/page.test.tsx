@@ -7,6 +7,7 @@ describe("guard work page", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
+    window.localStorage.clear();
     window.sessionStorage.clear();
     window.sessionStorage.setItem(
       "ollbareun.guard.session",
@@ -15,6 +16,27 @@ describe("guard work page", () => {
         worksite: { id: "work-1", name: "본사" },
       }),
     );
+  });
+
+  it("shows the cleaner-specific NFC title through the main work route", async () => {
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify({
+      employee: { id: "emp-1", name: "테스트 근무자", role: "미화원" },
+      worksite: { id: "work-1", name: "테스트 근무지" },
+    }));
+    vi.stubGlobal("fetch", vi.fn(async () => Response.json({ sites: [], logs: [] })));
+    render(<GuardWorkPage />);
+    expect(await screen.findByRole("heading", { name: "청소구역(NFC 태깅)" })).toBeInTheDocument();
+  });
+
+  it("shows missing assignment guidance and does not load inspection lists without a worksite", () => {
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify({
+      employee: { id: "emp-1", name: "테스트 근무자", role: "경비원" },
+    }));
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    render(<GuardWorkPage />);
+    expect(screen.getByText("배정된 근무지 정보가 없습니다.")).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("renders the Figma checkpoint layout and standardizes every Frame 60 label", async () => {

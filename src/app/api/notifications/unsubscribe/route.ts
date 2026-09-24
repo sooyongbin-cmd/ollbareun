@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { guardAuthErrorStatus, requireGuardEmployee } from "@/lib/guard-auth-session";
 
 export async function POST(request: Request) {
   try {
@@ -8,11 +9,13 @@ export async function POST(request: Request) {
       return Response.json({ error: "employeeId가 필요합니다." }, { status: 400 });
     }
 
+    const employee = await requireGuardEmployee(request, employeeId);
+
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
       .from("push_subscriptions")
       .delete()
-      .eq("employee_id", employeeId)
+      .eq("employee_id", employee.id)
       .select("id");
 
     if (error) {
@@ -23,7 +26,7 @@ export async function POST(request: Request) {
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "구독 해제 중 오류가 발생했습니다." },
-      { status: 500 },
+      { status: guardAuthErrorStatus(error) },
     );
   }
 }

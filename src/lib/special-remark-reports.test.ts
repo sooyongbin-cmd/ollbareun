@@ -84,32 +84,21 @@ describe("special remark report storage deletion", () => {
     ).toBe("employee-1/photo.jpg");
   });
 
-  it("removes the storage object before deleting the report row", async () => {
-    const calls: string[] = [];
-    remove.mockImplementation(async () => {
-      calls.push("storage");
-      return { error: null };
-    });
-    deleteEq.mockImplementation(() => {
-      calls.push("db");
-      return { error: null };
-    });
-
-    await deleteSpecialRemarkReport("report-1");
-
-    expect(remove).toHaveBeenCalledWith(["employee-1/photo.jpg"]);
-    expect(calls).toEqual(["storage", "db"]);
+  it("blocks early report and photo deletion", async () => {
+    await expect(deleteSpecialRemarkReport("report-1")).rejects.toThrow("퇴사 후 5년");
+    expect(remove).not.toHaveBeenCalled();
+    expect(deleteEq).not.toHaveBeenCalled();
   });
 
   it("does not delete the report row when storage removal fails", async () => {
     remove.mockResolvedValue({ error: { message: "storage failed" } });
 
-    await expect(deleteSpecialRemarkReport("report-1")).rejects.toThrow("storage failed");
+    await expect(deleteSpecialRemarkReport("report-1")).rejects.toThrow("퇴사 후 5년");
 
     expect(deleteEq).not.toHaveBeenCalled();
   });
 
-  it("removes every attached photo before deleting a multi-photo report", async () => {
+  it("blocks deletion of every attached photo in a multi-photo report", async () => {
     single.mockResolvedValue({
       data: {
         id: "report-1",
@@ -122,12 +111,8 @@ describe("special remark report storage deletion", () => {
       error: null,
     });
 
-    await deleteSpecialRemarkReport("report-1");
-
-    expect(remove).toHaveBeenCalledWith([
-      "employee-1/photo-1.jpg",
-      "employee-1/photo-2.jpg",
-    ]);
+    await expect(deleteSpecialRemarkReport("report-1")).rejects.toThrow("퇴사 후 5년");
+    expect(remove).not.toHaveBeenCalled();
   });
 
   it("rejects images larger than 500KB before uploading them", async () => {

@@ -1,5 +1,5 @@
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
-import { getActiveEmployeeErrorStatus, requireActiveEmployee } from "@/lib/active-employee";
+import { guardAuthErrorStatus, requireGuardEmployee } from "@/lib/guard-auth-session";
 
 export async function POST(request: Request) {
   try {
@@ -9,7 +9,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "employeeId가 필요합니다." }, { status: 400 });
     }
 
-    await requireActiveEmployee(employeeId);
+    const employee = await requireGuardEmployee(request, employeeId);
 
     if (
       !subscription ||
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       .from("push_subscriptions")
       .upsert(
         {
-          employee_id: employeeId,
+          employee_id: employee.id,
           endpoint: subscription.endpoint,
           p256dh: subscription.keys.p256dh,
           auth: subscription.keys.auth,
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "구독 설정 저장 중 오류가 발생했습니다." },
-      { status: getActiveEmployeeErrorStatus(error, 500) },
+      { status: guardAuthErrorStatus(error) },
     );
   }
 }

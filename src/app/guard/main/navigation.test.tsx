@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import AttendancePage from "./attendance/page";
 import GuardMainLayout from "./layout";
 import GuardMainPage from "./page";
+import { clearStoredGuardSession, writeStoredGuardSession } from "../guard-session-storage";
 
 const push = vi.fn();
 const replace = vi.fn();
@@ -85,9 +86,9 @@ describe("guard main navigation", () => {
       </GuardMainLayout>,
     );
 
-    expect(await screen.findByText("홍길동")).toBeInTheDocument();
+    expect(await screen.findByText("홍길동(경비원)")).toBeInTheDocument();
     expect(screen.queryByText("010-1234-5678")).not.toBeInTheDocument();
-    expect(screen.getByText("(오늘의 근무지 : 본사)")).toBeInTheDocument();
+    expect(screen.getByText("본사")).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "나가기" })).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "서비스" })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "관리자 대시보드" })).not.toBeInTheDocument();
@@ -101,7 +102,7 @@ describe("guard main navigation", () => {
       </GuardMainLayout>,
     );
 
-    expect(screen.getByRole("link", { name: "경비원" })).toHaveAttribute("href", "/guard/main");
+    expect(screen.getByRole("link", { name: "주식회사 올바름 홈" })).toHaveAttribute("href", "/guard/main");
   });
 
   it("keeps the main page as an entry point to attendance", async () => {
@@ -112,17 +113,16 @@ describe("guard main navigation", () => {
     expect(screen.getAllByRole("button", { name: "출근하기" })[0]).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "출근하기" })[0]).toHaveAttribute(
       "data-variant",
-      "outline",
+      "default",
     );
-    expect(screen.getAllByRole("button", { name: "출근하기" })[0]).not.toHaveClass(
+    expect(screen.getAllByRole("button", { name: "출근하기" })[0]).toHaveClass(
       "text-primary-foreground",
     );
-    expect(screen.getByRole("link", { name: "교육 받기" })).toHaveAttribute("href", "/guard/main/safety");
-    expect(await screen.findByRole("button", { name: "순찰(QR코드)" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "순찰(NFC태그)" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "특이사항" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "안전교육" })).toHaveAttribute("href", "/guard/main/safety");
+    expect(screen.getByRole("link", { name: "순찰" })).toHaveAttribute("href", "/guard/main/work");
+    expect(screen.getByRole("link", { name: "특이사항 보고" })).toHaveAttribute("href", "/guard/main/special-remarks");
     expect(screen.queryByRole("button", { name: "근무지확인" })).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "개인프로필" })).toHaveAttribute("href", "/guard/main/profile");
+    expect(screen.getByRole("link", { name: "근무 정보" })).toHaveAttribute("href", "/guard/main/profile");
     expect(screen.queryByTestId("clock-in")).not.toBeInTheDocument();
   });
 
@@ -169,32 +169,15 @@ describe("guard main navigation", () => {
     expect(query).toHaveBeenCalledWith({ name: "geolocation" });
   });
 
-  it("navigates to QR inspection when location permission is granted", async () => {
-    const user = userEvent.setup();
-    const query = vi.fn(async () => ({ state: "granted" }));
-
-    Object.defineProperty(navigator, "geolocation", {
-      configurable: true,
-      value: { getCurrentPosition: vi.fn() },
-    });
-    Object.defineProperty(navigator, "permissions", {
-      configurable: true,
-      value: { query },
-    });
+  it("does not expose legacy QR or NFC routes in the main menu", () => {
     window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
-
     render(<GuardMainPage />);
-
-    await user.click(await screen.findByRole("button", { name: "순찰(QR코드)" }));
-
-    await waitFor(() => {
-      expect(push).toHaveBeenCalledWith("/guard/main/inspection");
-    });
-    expect(query).toHaveBeenCalledWith({ name: "geolocation" });
+    expect(document.querySelector('a[href="/guard/main/inspection"]')).not.toBeInTheDocument();
+    expect(document.querySelector('a[href="/guard/main/inspection-nfc"]')).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "순찰" })).toHaveAttribute("href", "/guard/main/work");
   });
 
-  it("navigates to NFC inspection when location permission is granted", async () => {
-    const user = userEvent.setup();
+  it("links to the NFC work screen without requesting location on render", () => {
     const query = vi.fn(async () => ({ state: "granted" }));
 
     Object.defineProperty(navigator, "geolocation", {
@@ -209,16 +192,11 @@ describe("guard main navigation", () => {
 
     render(<GuardMainPage />);
 
-    await user.click(screen.getByRole("button", { name: "순찰(NFC태그)" }));
-
-    await waitFor(() => {
-      expect(push).toHaveBeenCalledWith("/guard/main/inspection-nfc");
-    });
-    expect(query).toHaveBeenCalledWith({ name: "geolocation" });
+    expect(screen.getByRole("link", { name: "순찰" })).toHaveAttribute("href", "/guard/main/work");
+    expect(query).not.toHaveBeenCalled();
   });
 
-  it("navigates to special remarks when location permission is granted", async () => {
-    const user = userEvent.setup();
+  it("links to special remarks without requesting location on render", () => {
     const query = vi.fn(async () => ({ state: "granted" }));
 
     Object.defineProperty(navigator, "geolocation", {
@@ -233,12 +211,8 @@ describe("guard main navigation", () => {
 
     render(<GuardMainPage />);
 
-    await user.click(screen.getByRole("button", { name: "특이사항" }));
-
-    await waitFor(() => {
-      expect(push).toHaveBeenCalledWith("/guard/main/special-remarks");
-    });
-    expect(query).toHaveBeenCalledWith({ name: "geolocation" });
+    expect(screen.getByRole("link", { name: "특이사항 보고" })).toHaveAttribute("href", "/guard/main/special-remarks");
+    expect(query).not.toHaveBeenCalled();
   });
 
   it("blocks attendance navigation and shows guidance when location permission is denied", async () => {
@@ -264,7 +238,7 @@ describe("guard main navigation", () => {
     expect(screen.getByText(/설정에서 위치 권한을 허용/)).toBeInTheDocument();
   });
 
-  it("blocks worksite-required navigation when no worksite is assigned", async () => {
+  it("blocks attendance navigation before asking location when no worksite is assigned", async () => {
     const user = userEvent.setup();
     const query = vi.fn(async () => ({ state: "granted" }));
     const sessionWithoutWorksite = {
@@ -285,23 +259,12 @@ describe("guard main navigation", () => {
 
     render(<GuardMainPage />);
 
-    const worksiteRequiredButtons = [
-      screen.getAllByRole("button", { name: "출근하기" })[0],
-      await screen.findByRole("button", { name: "순찰(QR코드)" }),
-      screen.getByRole("button", { name: "순찰(NFC태그)" }),
-      screen.getByRole("button", { name: "특이사항" }),
-    ];
-
-    for (const button of worksiteRequiredButtons) {
-      await user.click(button);
-
-      expect(push).not.toHaveBeenCalled();
-      expect(query).not.toHaveBeenCalled();
-      expect(await screen.findByRole("heading", { name: "배정된 근무지가 없습니다" })).toBeInTheDocument();
-      expect(screen.getByText("관리자에게 근무지 배정을 요청한 뒤 다시 시도해주세요.")).toBeInTheDocument();
-
-      await user.click(screen.getByRole("button", { name: "확인" }));
-    }
+    await user.click(screen.getByRole("button", { name: "출근하기" }));
+    expect(push).not.toHaveBeenCalled();
+    expect(query).not.toHaveBeenCalled();
+    expect(await screen.findByRole("heading", { name: "배정된 근무지가 없습니다" })).toBeInTheDocument();
+    expect(screen.getByText("관리자에게 근무지 배정을 요청한 뒤 다시 시도해주세요.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "확인" }));
   });
 
   it("requests location permission on click and navigates when the user allows it", async () => {
@@ -361,10 +324,10 @@ describe("guard main navigation", () => {
 
     render(<GuardMainPage />);
 
-    await user.click(await screen.findByRole("button", { name: "순찰(QR코드)" }));
+    await user.click(screen.getByRole("button", { name: "출근하기" }));
 
     expect(getCurrentPosition).toHaveBeenCalled();
-    expect(push).not.toHaveBeenCalledWith("/guard/main/inspection");
+    expect(push).not.toHaveBeenCalledWith("/guard/main/attendance");
     expect(await screen.findByRole("heading", { name: "위치 권한이 필요합니다" })).toBeInTheDocument();
   });
 
@@ -373,10 +336,10 @@ describe("guard main navigation", () => {
 
     render(<GuardMainPage />);
 
-    expect(await screen.findByText(/오늘의 근무지/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "오늘 근무" })).toBeInTheDocument();
     expect(screen.getByText("본사")).toBeInTheDocument();
-    expect(screen.getByText(/배정기간/)).toBeInTheDocument();
-    expect(screen.getByText("2026-05-24")).toBeInTheDocument();
+    expect(screen.getByText("근무시간 미등록")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("출근가능");
   });
 
   it("displays attendance status on the main page", async () => {
@@ -461,7 +424,7 @@ describe("guard main navigation", () => {
     expect(document.getElementById("attendance-actions-section")).toBeInTheDocument();
     expect(document.getElementById("attendance-profile-section")).not.toBeInTheDocument();
     expect(document.getElementById("attendance-current-location-section")).not.toBeInTheDocument();
-    expect(document.getElementById("attendance-record-section")).not.toBeInTheDocument();
+    expect(document.getElementById("attendance-record-section")).toBeInTheDocument();
     expect(screen.getByText("근무지 : 본사")).toBeInTheDocument();
     expect(screen.queryByText(/본사 중심/)).not.toBeInTheDocument();
     expect(screen.queryByText(/현장 위치:/)).not.toBeInTheDocument();
@@ -620,9 +583,9 @@ describe("guard main navigation", () => {
 
     render(<AttendancePage />);
 
-    expect(await screen.findByRole("button", { name: "출근" })).toBeDisabled();
+    expect(await screen.findByRole("button", { name: "출근하기" })).toBeDisabled();
 
-    watchSuccess?.({
+    act(() => watchSuccess?.({
       coords: {
         latitude: 37.5665,
         longitude: 126.978,
@@ -633,16 +596,18 @@ describe("guard main navigation", () => {
         speed: null,
       },
       timestamp: Date.now(),
-    } as any);
+    } as any));
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "출근" })).toBeEnabled();
+      expect(screen.getByRole("button", { name: "출근하기" })).toBeEnabled();
     });
   });
 
-  it("remeasures the current position when clocking in and posts the fresh coordinates", async () => {
+  it("posts the latest watched coordinates without remeasuring on clock-in", async () => {
     const user = userEvent.setup();
+    let watchSuccess: PositionCallback | undefined;
     const watchPosition = vi.fn((success: any) => {
+      watchSuccess = success;
       success({
         coords: {
           latitude: 37.5665,
@@ -694,22 +659,28 @@ describe("guard main navigation", () => {
 
     render(<AttendancePage />);
 
-    await user.click(await screen.findByRole("button", { name: "출근" }));
+    await waitFor(() => expect(watchPosition).toHaveBeenCalled());
+    act(() => watchSuccess?.({
+      coords: { latitude: 37.5667, longitude: 126.9782, accuracy: 5, altitude: null, altitudeAccuracy: null, heading: null, speed: null },
+      timestamp: Date.now(),
+    } as GeolocationPosition));
+    await user.click(await screen.findByRole("button", { name: "출근하기" }));
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
         "/api/attendance/clock-in",
         expect.objectContaining({
-          body: expect.stringContaining('"latitude":"37.5666"'),
+          body: expect.stringContaining('"latitude":"37.5667"'),
         }),
       );
     });
     expect(fetch).toHaveBeenCalledWith(
       "/api/attendance/clock-in",
       expect.objectContaining({
-        body: expect.stringContaining('"longitude":"126.9781"'),
+        body: expect.stringContaining('"longitude":"126.9782"'),
       }),
     );
+    expect(getCurrentPosition).not.toHaveBeenCalled();
   });
 
   it("adds the unauthenticated attendance section id", () => {
@@ -718,7 +689,7 @@ describe("guard main navigation", () => {
     expect(document.getElementById("attendance-auth-required-section")).toBeInTheDocument();
   });
 
-  it("shows QR and NFC 청소구역 buttons for role 미화원", async () => {
+  it("shows the NFC work link for role 미화원", () => {
     const cleanerSession = {
       ...guardSession,
       employee: {
@@ -730,14 +701,14 @@ describe("guard main navigation", () => {
 
     render(<GuardMainPage />);
 
-    expect(await screen.findByRole("button", { name: "청소구역(QR코드)" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "청소구역(NFC태그)" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "순찰" })).toHaveAttribute("href", "/guard/main/work");
+    expect(document.querySelector('a[href="/guard/main/inspection"]')).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "순찰(QR코드)" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "순찰(NFC태그)" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "현장점검" })).not.toBeInTheDocument();
   });
 
-  it("hides inspection button for role 파견", () => {
+  it("hides the actual patrol link for role 파견 but keeps other menus", () => {
     const dispatchSession = {
       ...guardSession,
       employee: {
@@ -749,6 +720,11 @@ describe("guard main navigation", () => {
 
     render(<GuardMainPage />);
 
+    expect(screen.queryByRole("link", { name: "순찰" })).not.toBeInTheDocument();
+    expect(document.querySelector('a[href="/guard/main/work"]')).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "안전교육" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "특이사항 보고" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "근무 정보" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "순찰(QR코드)" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "순찰(NFC태그)" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "청소구역(QR코드)" })).not.toBeInTheDocument();
@@ -756,7 +732,7 @@ describe("guard main navigation", () => {
     expect(screen.queryByRole("button", { name: "현장점검" })).not.toBeInTheDocument();
   });
 
-  it("hides QR code patrol button by default when USE_QR_CODE config is not Y", async () => {
+  it("keeps NFC-only navigation when USE_QR_CODE config is N", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: RequestInfo | URL) => {
@@ -772,10 +748,11 @@ describe("guard main navigation", () => {
     render(<GuardMainPage />);
 
     expect(screen.queryByRole("button", { name: "순찰(QR코드)" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "순찰(NFC태그)" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "순찰" })).toHaveAttribute("href", "/guard/main/work");
+    expect(document.querySelector('a[href="/guard/main/inspection"]')).not.toBeInTheDocument();
   });
 
-  it("shows QR code patrol button when USE_QR_CODE config is Y", async () => {
+  it("keeps NFC-only navigation even when USE_QR_CODE config is Y", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: RequestInfo | URL) => {
@@ -790,8 +767,29 @@ describe("guard main navigation", () => {
 
     render(<GuardMainPage />);
 
-    expect(await screen.findByRole("button", { name: "순찰(QR코드)" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "순찰(NFC태그)" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "순찰(QR코드)" })).not.toBeInTheDocument();
+    expect(document.querySelector('a[href="/guard/main/inspection"]')).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "순찰" })).toHaveAttribute("href", "/guard/main/work");
+  });
+
+  it.each([undefined, "", "관리자"])("hides patrol for an absent or unrecognized role (%s)", (role) => {
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify({
+      ...guardSession, employee: { ...guardSession.employee, role },
+    }));
+    render(<GuardMainPage />);
+    expect(screen.queryByRole("link", { name: "순찰" })).not.toBeInTheDocument();
+  });
+
+  it("updates patrol visibility on session changes and logout", () => {
+    writeStoredGuardSession(guardSession);
+    render(<GuardMainPage />);
+    expect(screen.getByRole("link", { name: "순찰" })).toBeInTheDocument();
+    act(() => writeStoredGuardSession({ ...guardSession, employee: { ...guardSession.employee, role: "파견" } }));
+    expect(screen.queryByRole("link", { name: "순찰" })).not.toBeInTheDocument();
+    act(() => writeStoredGuardSession({ ...guardSession, employee: { ...guardSession.employee, role: "미화원" } }));
+    expect(screen.getByRole("link", { name: "순찰" })).toBeInTheDocument();
+    act(() => clearStoredGuardSession());
+    expect(screen.queryByRole("link", { name: "순찰" })).not.toBeInTheDocument();
   });
 });
 

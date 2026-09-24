@@ -5,6 +5,7 @@ import { GET } from "./route";
 vi.mock("@/lib/guard-session-logs", () => ({
   listGuardSessionLogs: vi.fn(),
 }));
+vi.mock("@/lib/manager-auth", () => ({ getManagerUser: vi.fn().mockResolvedValue({ id: "manager-1" }) }));
 
 describe("guard session logs route", () => {
   beforeEach(() => {

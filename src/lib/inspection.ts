@@ -336,6 +336,7 @@ export async function createInspectionLog(input: {
   employeeId: unknown;
   employeeName: unknown;
   qrPayload: unknown;
+  authorizedWorksiteId?: unknown;
 }, supabase: SupabaseClient = getSupabaseAdmin()) {
   const employee_id = requireString(input.employeeId, "점검자");
   const employee_name = requireString(input.employeeName, "점검자명");
@@ -349,6 +350,9 @@ export async function createInspectionLog(input: {
   throwIfError(siteError);
   if (!site) {
     throw new Error("NFC 태그에 연결된 현장 정보를 찾을 수 없습니다.");
+  }
+  if (input.authorizedWorksiteId && site.worksite_id !== input.authorizedWorksiteId) {
+    throw new Error("배정된 근무지의 현장만 점검할 수 있습니다.");
   }
 
   const { data: worksite, error: worksiteError } = await supabase

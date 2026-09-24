@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
+import { useGuardPatrolVisibility } from "./use-guard-patrol-visibility";
 
 const items = [
   { href: "/guard/main", label: "홈", icon: "/guard-assets/home.svg", exact: true },
@@ -16,6 +17,7 @@ const items = [
 
 export default function GuardBottomNavigation() {
   const pathname = usePathname();
+  const showPatrol = useGuardPatrolVisibility();
 
   return (
     <nav
@@ -24,6 +26,7 @@ export default function GuardBottomNavigation() {
     >
       <div className="guard-footer-items">
         {items.map((item) => {
+          if (item.href === "/guard/main/work" && !showPatrol) return null;
           const active = item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
           return (

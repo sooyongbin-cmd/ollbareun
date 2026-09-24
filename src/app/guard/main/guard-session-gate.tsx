@@ -23,16 +23,13 @@ export default function GuardSessionGate() {
     }
 
     const durableSession = storedSession;
-    const employeeId = durableSession.employee.id;
     let active = true;
 
     async function validateStoredSession() {
       try {
-        const response = await fetch(
-          `/api/guard/session?employeeId=${encodeURIComponent(employeeId)}`,
-        );
+        const response = await fetch("/api/guard/session");
 
-        if (response.status === 403 || response.status === 404) {
+        if (response.status === 401 || response.status === 403 || response.status === 404) {
           clearStoredGuardSession();
           router.replace("/guard");
           return;

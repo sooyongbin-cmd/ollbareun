@@ -1,8 +1,24 @@
-[{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "app.vercel.ollbareun.twa",
-        "sha256_cert_fingerprints": ["1C:7D:62:12:E8:9D:6D:E2:12:46:12:D8:5C:AC:E6:B5:C9:C3:DA:2A:FB:97:97:1C:39:05:89:F6:D3:55:CF:F5"]
-      }
-    }]
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.vercel.ollbareun.twa",
+      "sha256_cert_fingerprints": [
+        "1C:7D:62:12:E8:9D:6D:E2:12:46:12:D8:5C:AC:E6:B5:C9:C3:DA:2A:FB:97:97:1C:39:05:89:F6:D3:55:CF:F5"
+      ]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "guard.ollbareun.vercel.app",
+      "sha256_cert_fingerprints": [
+        "B0:3F:4F:B4:C4:A1:39:F5:C6:39:D8:41:7C:B6:5F:B1:03:92:97:C1:90:E5:6E:88:DA:2E:10:27:EE:BE:27:05",
+        "FE:B8:73:C2:85:7F:54:B1:E6:B5:6A:CA:72:C3:15:F0:A7:EE:7A:52:2C:74:69:28:5C:4F:AD:16:80:AA:78:0D",
+        "FB:43:7E:09:E5:2F:46:F2:C6:4E:DA:3F:D6:2F:AD:8E:EB:84:06:81:74:16:C9:95:AF:D9:BF:73:8D:F8:77:19"
+      ]
+    }
+  }
+]

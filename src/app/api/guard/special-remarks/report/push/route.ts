@@ -1,12 +1,13 @@
 import { sendSpecialRemarkManagerNotifications } from "@/lib/manager-push-notifications";
 import { createSpecialRemarkReport, sendSpecialRemarkReportEmail } from "@/lib/special-remark-reports";
-import { getActiveEmployeeErrorStatus, requireActiveEmployee } from "@/lib/active-employee";
+import { guardAuthErrorStatus, requireGuardWorksite } from "@/lib/guard-auth-session";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    await requireActiveEmployee(body.employeeId);
-    let report = await createSpecialRemarkReport(body, { sendEmail: false });
+    const { employee, worksite } = await requireGuardWorksite(request, body.employeeId);
+    const verifiedBody = { ...body, employeeId: employee.id, employeeName: employee.name, worksiteId: worksite.id, worksiteName: worksite.name };
+    let report = await createSpecialRemarkReport(verifiedBody, { sendEmail: false });
     let delivery;
     try {
       delivery = await sendSpecialRemarkManagerNotifications(report);
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "특이사항 보고를 저장하지 못했습니다." },
-      { status: getActiveEmployeeErrorStatus(error, 400) },
+      { status: guardAuthErrorStatus(error, 400) },
     );
   }
 }

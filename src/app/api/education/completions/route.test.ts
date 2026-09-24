@@ -1,24 +1,24 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { listEducationCompletions, markEducationCompletion } from "@/lib/education-completions";
-import { requireActiveEmployee } from "@/lib/active-employee";
+import { requireGuardEmployee } from "@/lib/guard-auth-session";
 import { GET, POST } from "./route";
 
 vi.mock("@/lib/education-completions", () => ({
   listEducationCompletions: vi.fn(),
   markEducationCompletion: vi.fn(),
 }));
-vi.mock("@/lib/active-employee", () => ({
-  requireActiveEmployee: vi.fn(),
-  getActiveEmployeeErrorStatus: (error: Error, fallback: number) =>
-    error.name === "InactiveEmployeeError" ? 403 : fallback,
+vi.mock("@/lib/guard-auth-session", () => ({
+  requireGuardEmployee: vi.fn(),
+  guardAuthErrorStatus: (error: Error & { status?: number }, fallback: number) => error.status ?? fallback,
 }));
+vi.mock("@/lib/manager-auth", () => ({ getManagerUser: vi.fn().mockResolvedValue({ id: "manager-1" }) }));
 
 describe("education completions route", () => {
   beforeEach(() => {
     vi.mocked(listEducationCompletions).mockReset();
     vi.mocked(markEducationCompletion).mockReset();
-    vi.mocked(requireActiveEmployee).mockReset();
-    vi.mocked(requireActiveEmployee).mockResolvedValue({ id: "employee-1" });
+    vi.mocked(requireGuardEmployee).mockReset();
+    vi.mocked(requireGuardEmployee).mockResolvedValue({ id: "employee-1", name: "홍길동", role: "경비원", is_retired: false });
   });
 
   it("lists education completions", async () => {
@@ -34,7 +34,7 @@ describe("education completions route", () => {
       },
     ]);
 
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/education/completions"));
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({
@@ -88,7 +88,8 @@ describe("education completions route", () => {
   it("rejects completion writes after employee access is revoked", async () => {
     const error = new Error("퇴직 처리된 직원은 이용할 수 없습니다.");
     error.name = "InactiveEmployeeError";
-    vi.mocked(requireActiveEmployee).mockRejectedValue(error);
+    Object.assign(error, { status: 403 });
+    vi.mocked(requireGuardEmployee).mockRejectedValue(error);
 
     const response = await POST(
       new Request("http://localhost/api/education/completions", {

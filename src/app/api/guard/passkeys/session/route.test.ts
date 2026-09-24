@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createGuardSessionFromAuthToken } from "@/lib/guard-passkeys";
 import { createGuardSessionLog } from "@/lib/guard-session-logs";
 import { POST } from "./route";
+import { createGuardAuthSession } from "@/lib/guard-auth-session";
 
 vi.mock("@/lib/guard-passkeys", () => ({
   createGuardSessionFromAuthToken: vi.fn(),
@@ -10,6 +11,7 @@ vi.mock("@/lib/guard-passkeys", () => ({
 vi.mock("@/lib/guard-session-logs", () => ({
   createGuardSessionLog: vi.fn(),
 }));
+vi.mock("@/lib/guard-auth-session", () => ({ createGuardAuthSession: vi.fn().mockResolvedValue({ setCookie: "test-cookie" }) }));
 
 describe("guard passkey session route", () => {
   beforeEach(() => {
@@ -33,6 +35,8 @@ describe("guard passkey session route", () => {
     );
 
     expect(response.status).toBe(200);
+    expect(createGuardAuthSession).toHaveBeenCalledWith("emp-1");
+    expect(response.headers.get("set-cookie")).toBe("test-cookie");
     expect(createGuardSessionFromAuthToken).toHaveBeenCalledWith("token-1");
     await expect(response.json()).resolves.toMatchObject({ employee: { id: "emp-1" }, sessionLogId: "log-1" });
   });

@@ -11,6 +11,7 @@ import { getSupabasePasskeyClient } from "@/lib/supabase-passkey-client";
 import { isCurrentInAppBrowser, isStandaloneGuardApp } from "./in-app-browser";
 import InAppBrowserGuide from "./in-app-browser-guide";
 import GuardBrowserGate from "./guard-browser-gate";
+import GuardPrivacyLinks from "./guard-privacy-links";
 import {
   hasActiveStoredGuardSession,
   writeStoredGuardSession,
@@ -417,6 +418,7 @@ export default function GuardPage() {
             </section>
           </>
         )}
+        <GuardPrivacyLinks />
       </div>
 
       {isGuardLoginPending ? (

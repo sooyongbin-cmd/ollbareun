@@ -164,6 +164,14 @@ export default function GuardLogoutButton({
     await recordLogoutResult(sessionLogId, logoutResult);
     writeLogoutPushResult(logoutResult);
 
+    try {
+      const response = await fetch("/api/guard/logout", { method: "POST" });
+      if (!response.ok) session = "failed";
+    } catch (error) {
+      session = "failed";
+      console.error("Failed to revoke guard server session:", error);
+    }
+
     router.push("/guard");
   }
 

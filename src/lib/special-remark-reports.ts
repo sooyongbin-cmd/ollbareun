@@ -582,18 +582,6 @@ async function withSignedPhotoUrls(report: SpecialRemarkReportRow) {
 }
 
 export async function deleteSpecialRemarkReport(idInput: unknown) {
-  const id = requireString(idInput, "특이사항 보고");
-  const supabase = getSupabaseAdmin();
-  const report = await getSpecialRemarkReportRecord(id);
-  const storagePaths = getPhotoUrls(report)
-    .map((photoUrl) => getSpecialRemarkStoragePathFromPublicUrl(photoUrl))
-    .filter((storagePath): storagePath is string => Boolean(storagePath));
-
-  if (storagePaths.length > 0) {
-    const { error: storageError } = await supabase.storage.from(STORAGE_BUCKET).remove(storagePaths);
-    throwIfError(storageError);
-  }
-
-  const { error } = await supabase.from("inspection_special_reports").delete().eq("id", id);
-  throwIfError(error);
+  requireString(idInput, "특이사항 보고");
+  throw new Error("근무·보고 기록과 첨부사진은 퇴사 후 5년의 보관기간이 끝나기 전 삭제할 수 없습니다.");
 }

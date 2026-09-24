@@ -10,9 +10,9 @@ vi.mock("@/lib/manager-push-notifications", () => ({
 vi.mock("@/lib/special-remark-reports", () => ({
   createSpecialRemarkReport: vi.fn(),
 }));
-vi.mock("@/lib/active-employee", () => ({
-  requireActiveEmployee: vi.fn().mockResolvedValue({ id: "employee-1" }),
-  getActiveEmployeeErrorStatus: (_error: unknown, fallback: number) => fallback,
+vi.mock("@/lib/guard-auth-session", () => ({
+  requireGuardWorksite: vi.fn().mockResolvedValue({ employee: { id: "employee-1", name: "홍길동", role: "경비원" }, worksite: { id: "work-1", name: "본사" } }),
+  guardAuthErrorStatus: (_error: unknown, fallback: number) => fallback,
 }));
 
 describe("POST /api/guard/special-remarks/report/push", () => {
@@ -43,7 +43,10 @@ describe("POST /api/guard/special-remarks/report/push", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(createSpecialRemarkReport).toHaveBeenCalledWith(body, { sendEmail: false });
+    expect(createSpecialRemarkReport).toHaveBeenCalledWith(
+      { ...body, employeeName: "홍길동", worksiteId: "work-1", worksiteName: "본사" },
+      { sendEmail: false },
+    );
     expect(sendSpecialRemarkManagerNotifications).toHaveBeenCalledWith(report);
     await expect(response.json()).resolves.toMatchObject({
       report,

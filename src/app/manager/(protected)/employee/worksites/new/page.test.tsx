@@ -5,8 +5,8 @@ import WorksiteNewPage from "./page";
 
 const push = vi.fn();
 const MockGeocoder = vi.fn(function Geocoder() {
-  return {};
-}) as unknown as typeof kakao.maps.services.Geocoder;
+  return { addressSearch: vi.fn() };
+});
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push }),

@@ -131,7 +131,7 @@ export default function PrivacyPolicyPage() {
 
           <section>
             <h2>제9조(개인정보 처리방침 변경)</h2>
-            <p>이 개인정보처리방침은 <time dateTime="2026-09-23">2026년 9월 23일</time>부터 적용됩니다. 내용의 추가·삭제·정정 시 변경 내용과 시행일을 안내합니다.</p>
+            <p>이 개인정보처리방침은 <time dateTime="2026-09-24">2026년 9월 24일</time>부터 적용됩니다. 내용의 추가·삭제·정정 시 변경 내용과 시행일을 안내합니다.</p>
           </section>
         </div>
       </article>

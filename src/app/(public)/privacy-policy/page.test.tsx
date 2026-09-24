@@ -8,7 +8,7 @@ describe("worker privacy policy", () => {
   it("publishes the owner-confirmed date, contact and account administration", () => {
     const { container } = render(<PrivacyPolicyPage />);
     expect(screen.getByRole("heading", { level: 1, name: "개인정보처리방침" })).toBeInTheDocument();
-    expect(container.querySelector('time[datetime="2026-09-23"]')).toHaveTextContent("2026년 9월 23일");
+    expect(container.querySelector('time[datetime="2026-09-24"]')).toHaveTextContent("2026년 9월 24일");
     expect(screen.getByText("성명: 빈수용")).toBeInTheDocument();
     for (const contact of screen.getAllByRole("link", { name: "cyberbin@naver.com" })) {
       expect(contact).toHaveAttribute("href", "mailto:cyberbin@naver.com");

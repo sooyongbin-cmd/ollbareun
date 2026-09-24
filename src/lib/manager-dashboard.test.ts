@@ -65,7 +65,8 @@ describe("manager dashboard data", () => {
     });
 
     expect(data.summary).toEqual({
-      scheduledEmployeesToday: 1,
+      totalEmployees: 2,
+      scheduledEmployeesToday: 2,
       currentlyClockedIn: 1,
       attendanceRate: 100,
       onTimeEmployeesToday: 2,

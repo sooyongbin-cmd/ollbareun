@@ -89,6 +89,7 @@ type InspectionLogInput = {
 
 export type ManagerDashboardData = {
   summary: {
+    totalEmployees: number;
     scheduledEmployeesToday: number;
     currentlyClockedIn: number;
     onTimeEmployeesToday: number;
@@ -257,16 +258,7 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       .filter((dayOff) => dayOff.day_off_date === today)
       .map((dayOff) => dayOff.work_assignment_id),
   );
-  const scheduledEmployeeIdsToday = new Set<string>();
-  input.dailyAttendance.forEach((dailyAttendance) => {
-    if (dailyAttendance.work_date !== today || !dailyAttendance.intime) {
-      return;
-    }
-
-    if (activeEmployeeIds.has(dailyAttendance.employee_id)) {
-      scheduledEmployeeIdsToday.add(dailyAttendance.employee_id);
-    }
-  });
+  const scheduledEmployeeIdsToday = new Set(todayWorkRecords.map((record) => record.employee_id));
   const scheduledTimes = new Map<string, string | null>();
   input.dailyAttendance.forEach((dailyAttendance) => {
     scheduledTimes.set(
@@ -497,6 +489,7 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
 
   return {
     summary: {
+      totalEmployees: activeEmployees.length,
       scheduledEmployeesToday: scheduledEmployeeIdsToday.size,
       currentlyClockedIn: todayAttendance.filter((record) => !record.work_outtime).length,
       onTimeEmployeesToday,

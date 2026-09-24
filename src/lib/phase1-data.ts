@@ -174,7 +174,7 @@ export async function loadBootstrap() {
     assignments: assignmentsResult.data ?? [],
     attendance,
     summary: {
-      totalEmployees: employees.length,
+      totalEmployees: employees.filter((employee) => !employee.is_retired).length,
       currentlyClockedIn: attendance.filter(
         (record) => record.work_intime && !record.work_outtime,
       ).length,

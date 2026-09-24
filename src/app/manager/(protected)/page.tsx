@@ -31,6 +31,7 @@ import {
 
 type DashboardPayload = {
   summary: {
+    totalEmployees: number;
     scheduledEmployeesToday: number;
     currentlyClockedIn: number;
     onTimeEmployeesToday: number;
@@ -87,6 +88,7 @@ type DashboardPayload = {
 
 const emptyDashboard: DashboardPayload = {
   summary: {
+    totalEmployees: 0,
     scheduledEmployeesToday: 0,
     currentlyClockedIn: 0,
     onTimeEmployeesToday: 0,
@@ -315,8 +317,8 @@ export default function ManagerPage() {
           <span>대기 {data.summary.waitingEmployeesToday}</span>
         </span>
       ),
-      description: `출근율 ${data.summary.attendanceRate}%`,
-      ariaLabel: `출근현황 출근 ${data.summary.onTimeEmployeesToday} 지각 ${data.summary.lateEmployeesToday} 결근${data.summary.absentEmployeesToday} 대기 ${data.summary.waitingEmployeesToday} 출근율 ${data.summary.attendanceRate}%`,
+      description: `총인원 ${data.summary.totalEmployees}명 출근예정 ${data.summary.scheduledEmployeesToday}명 출근율 ${data.summary.attendanceRate}%`,
+      ariaLabel: `출근현황 출근 ${data.summary.onTimeEmployeesToday} 지각 ${data.summary.lateEmployeesToday} 결근${data.summary.absentEmployeesToday} 대기 ${data.summary.waitingEmployeesToday} 총인원 ${data.summary.totalEmployees}명 출근예정 ${data.summary.scheduledEmployeesToday}명 출근율 ${data.summary.attendanceRate}%`,
       icon: Users,
       href: "/manager/reports/attendance/status",
     },

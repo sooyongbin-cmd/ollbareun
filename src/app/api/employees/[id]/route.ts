@@ -139,7 +139,18 @@ export async function DELETE(_: Request, { params }: RouteContext) {
     }
 
     const { id } = await params;
-    await deleteEmployee(id, getSupabaseAdmin());
+    const supabase = getSupabaseAdmin();
+    for (const table of [
+      "education_completions",
+      "work_record",
+      "inspection_logs",
+      "inspection_special_reports",
+      "work_assignments",
+    ]) {
+      const { error } = await supabase.from(table).delete().eq("employee_id", id);
+      throwIfQueryError(error);
+    }
+    await deleteEmployee(id, supabase);
     return new Response(null, { status: 204 });
   } catch (error) {
     return Response.json(

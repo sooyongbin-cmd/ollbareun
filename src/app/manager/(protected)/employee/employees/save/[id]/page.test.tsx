@@ -289,20 +289,24 @@ describe("employee save page", () => {
     expect(screen.getByText("현재자료를 삭제할까요?")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "예" }));
+    expect(screen.getByText("교육이수(2건) 출근현황(2건) 현장점검(1건) 특이사항(1건)의 자료가 있습니다. 삭제후에는 복구할 수 없습니다. 해당 자료도 모두 함께 삭제할까요?")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "예" }));
 
     expect(push).toHaveBeenCalledWith("/manager/employee/employees");
   });
 
-  it("blocks employee deletion when assignments exist", async () => {
+  it("asks for confirmation before deleting related employee data", async () => {
     const user = userEvent.setup();
 
     render(<EmployeeSavePage />);
 
     await screen.findByRole("heading", { name: "직원 상세" });
     await user.click(screen.getByRole("button", { name: "삭제" }));
+    await user.click(screen.getByRole("button", { name: "예" }));
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("해당직원의 근무지배정 정보가 있습니다.");
-    expect(screen.queryByText("현재자료를 삭제할까요?")).not.toBeInTheDocument();
+    expect(await screen.findByText(/근무지배정정보\(1건\).*삭제후에는 복구할 수 없습니다/)).toBeInTheDocument();
+    expect(fetch).not.toHaveBeenCalledWith("/api/employees/emp-1", expect.objectContaining({ method: "DELETE" }));
+    await user.click(screen.getByRole("button", { name: "아니오" }));
     expect(fetch).not.toHaveBeenCalledWith("/api/employees/emp-1", expect.objectContaining({ method: "DELETE" }));
   });
 });

@@ -178,6 +178,8 @@ export default function EmployeeSavePage() {
   const [loadError, setLoadError] = useState("");
   const [error, setError] = useState("");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteRelatedConfirmOpen, setDeleteRelatedConfirmOpen] = useState(false);
+  const [deleteConfirmTitle, setDeleteConfirmTitle] = useState("현재자료를 삭제할까요?");
   const [saveConfirmOpen, setSaveConfirmOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveSuccessOpen, setSaveSuccessOpen] = useState(false);
@@ -257,12 +259,6 @@ export default function EmployeeSavePage() {
   }
 
   async function handleDelete() {
-    if (assignments.length > 0) {
-      setError("해당직원의 근무지배정 정보가 있습니다.");
-      setDeleteConfirmOpen(false);
-      return;
-    }
-
     setDeleting(true);
     setError("");
 
@@ -274,15 +270,35 @@ export default function EmployeeSavePage() {
     } finally {
       setDeleting(false);
       setDeleteConfirmOpen(false);
+      setDeleteRelatedConfirmOpen(false);
+    }
+  }
+
+  function handleDeleteConfirm() {
+    const relatedCounts = ([
+      ["교육이수", educationCompletions.length],
+      ["근무지배정정보", assignments.length],
+      ["출근현황", attendance.length],
+      ["현장점검", inspectionLogs.length],
+      ["특이사항", specialRemarks.length],
+    ] as const)
+      .filter(([, count]) => count > 0)
+      .map(([label, count]) => `${label}(${count}건)`);
+    setDeleteConfirmTitle(
+      relatedCounts.length > 0
+        ? `${relatedCounts.join(" ")}의 자료가 있습니다. 삭제후에는 복구할 수 없습니다. 해당 자료도 모두 함께 삭제할까요?`
+        : "현재자료를 삭제할까요?",
+    );
+    if (relatedCounts.length > 0) {
+      setDeleteConfirmOpen(false);
+      setDeleteRelatedConfirmOpen(true);
+    } else {
+      void handleDelete();
     }
   }
 
   function handleDeleteRequest() {
-    if (assignments.length > 0) {
-      setError("해당직원의 근무지배정 정보가 있습니다.");
-      return;
-    }
-
+    setDeleteConfirmTitle("현재자료를 삭제할까요?");
     setDeleteConfirmOpen(true);
   }
 
@@ -590,11 +606,20 @@ export default function EmployeeSavePage() {
       <ConfirmModal
         isOpen={deleteConfirmOpen}
         onClose={() => setDeleteConfirmOpen(false)}
-        onConfirm={handleDelete}
+        onConfirm={handleDeleteConfirm}
         title="현재자료를 삭제할까요?"
         description="삭제하면 해당 직원의 자료와 연결된 근무 배정, 출퇴근 기록도 함께 삭제됩니다."
         loading={deleting}
         loadingLabel="삭제처리중입니다..."
+      />
+
+      <ConfirmModal
+        isOpen={deleteRelatedConfirmOpen}
+        onClose={() => setDeleteRelatedConfirmOpen(false)}
+        onConfirm={handleDelete}
+        title={deleteConfirmTitle}
+        loading={deleting}
+        loadingLabel="관련자료 삭제처리중입니다..."
       />
 
       <AlertModal

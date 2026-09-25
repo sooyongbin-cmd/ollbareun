@@ -177,7 +177,6 @@ export default function InspectionSitesPage() {
                   <TableHead className="text-left">근무지</TableHead>
                   <TableHead className="text-left">점검순서</TableHead>
                   <TableHead className="text-left">현장이름</TableHead>
-                  <TableHead className="text-left">현장주소</TableHead>
                   <TableHead className="text-left">점검시각</TableHead>
                   <TableHead className="text-left">점검자</TableHead>
                   <TableHead className="text-left">직군</TableHead>
@@ -186,7 +185,7 @@ export default function InspectionSitesPage() {
               <TableBody>
                 {sites.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={7} className="p-8 text-center text-muted-foreground italic">
+                    <TableCell data-responsive-empty colSpan={6} className="p-8 text-center text-muted-foreground italic">
                       조회 결과에 해당하는 현장이 없습니다.
                     </TableCell>
                   </TableRow>
@@ -200,7 +199,6 @@ export default function InspectionSitesPage() {
                           {site.name}
                         </Link>
                       </TableCell>
-                      <TableCell data-label="현장주소" className="text-muted-foreground">{site.address}</TableCell>
                       <TableCell data-label="점검시각">{formatInspectionTime(site.today_inspection?.inspected_at)}</TableCell>
                       <TableCell data-label="점검자">{site.today_inspection?.employee_name ?? ""}</TableCell>
                       <TableCell data-label="직군">{site.today_inspection?.employee_role ?? ""}</TableCell>

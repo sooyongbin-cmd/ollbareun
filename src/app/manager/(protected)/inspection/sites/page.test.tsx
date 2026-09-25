@@ -52,7 +52,7 @@ describe("inspection sites page", () => {
     expect(await screen.findByText("Gate")).toBeInTheDocument();
     const dataRow = screen.getAllByRole("row")[1];
     const cells = within(dataRow).getAllByRole("cell");
-    expect(cells.map((cell) => cell.textContent)).toEqual(["Worksite", "1", "Gate", "Seoul", "09:00", "Alice", "경비원"]);
+    expect(cells.map((cell) => cell.textContent)).toEqual(["Worksite", "1", "Gate", "09:00", "Alice", "경비원"]);
     expect(screen.getByRole("link", { name: "Gate" })).toHaveAttribute(
       "href",
       "/manager/inspection/sites/site-1",
@@ -113,12 +113,13 @@ describe("inspection sites page", () => {
     render(<InspectionSitesPage />);
 
     expect(await screen.findByText("Gate")).toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "현장주소" })).not.toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "점검시각" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "점검자" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "직군" })).toBeInTheDocument();
     const dataRow = screen.getAllByRole("row")[1];
     const cells = within(dataRow).getAllByRole("cell");
 
-    expect(cells.map((cell) => cell.textContent)).toEqual(["Worksite", "", "Gate", "Seoul", "", "", ""]);
+    expect(cells.map((cell) => cell.textContent)).toEqual(["Worksite", "", "Gate", "", "", ""]);
   });
 });

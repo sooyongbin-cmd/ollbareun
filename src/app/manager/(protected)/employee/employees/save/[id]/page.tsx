@@ -11,6 +11,7 @@ import { SaveIcon } from "@/components/icons/save-icon";
 import { DeleteIcon } from "@/components/icons/delete-icon";
 import ConfirmModal from "@/components/modals/confirm-modal";
 import AlertModal from "@/components/modals/alert-modal";
+import { getManagerAttendanceStatus, type ManagerIntimeStatus } from "@/lib/manager-attendance-status";
 
 type Employee = {
   id: string;
@@ -55,6 +56,9 @@ type EmployeeAttendance = {
   id: string;
   work_date: string;
   worksite_name: string;
+  intime: string | null;
+  outtime: string | null;
+  intime_status: ManagerIntimeStatus;
   work_intime: string | null;
   work_outtime: string | null;
 };
@@ -119,6 +123,25 @@ function formatDateTime(value: string | null) {
     hour12: false,
     timeZone: "Asia/Seoul",
   }).format(new Date(value));
+}
+
+function formatTime(value: string | null) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return new Intl.DateTimeFormat("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Seoul" }).format(date);
+}
+
+function getRecordStatus(record: EmployeeAttendance) {
+  const status = getManagerAttendanceStatus({
+    intimeStatus: record.intime_status,
+    scheduledClockIn: record.intime,
+    now: new Date(),
+  });
+  if (status === "출근") {
+    return record.intime_status === "3" ? "정상근무" : "정상출근";
+  }
+  return status;
 }
 
 function formatLeavePeriod(leave: EmployeeLeave) {
@@ -449,20 +472,26 @@ export default function EmployeeSavePage() {
         >
           <h2 className="text-[1.25rem] font-semibold">출근현황</h2>
           <div className="mt-6 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
-            <table className="w-full min-w-[42rem] text-sm">
+            <table className="w-full min-w-[58rem] text-sm">
               <thead>
                 <tr className="border-b border-border">
                   <th className="px-4 py-3 text-left font-semibold">근무지</th>
+                  <th className="px-4 py-3 text-left font-semibold">출근예정</th>
+                  <th className="px-4 py-3 text-left font-semibold">퇴근예정</th>
                   <th className="px-4 py-3 text-left font-semibold">출근일시</th>
                   <th className="px-4 py-3 text-left font-semibold">퇴근일시</th>
+                  <th className="px-4 py-3 text-left font-semibold">상태</th>
                 </tr>
               </thead>
               <tbody>
                 {attendance.map((record) => (
                   <tr className="border-b border-border last:border-b-0" key={record.id}>
                     <td className="px-4 py-3 font-semibold">{record.worksite_name}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{formatTime(record.intime)}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{formatTime(record.outtime)}</td>
                     <td className="px-4 py-3 text-muted-foreground">{formatDateTime(record.work_intime)}</td>
                     <td className="px-4 py-3 text-muted-foreground">{formatDateTime(record.work_outtime)}</td>
+                    <td className="px-4 py-3">{getRecordStatus(record)}</td>
                   </tr>
                 ))}
               </tbody>

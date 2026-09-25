@@ -32,6 +32,9 @@ let employeeDetails = {
       id: "record-1",
       work_date: "2026-05-27",
       worksite_name: "본사",
+      intime: "2026-05-27T00:00:00.000Z",
+      outtime: "2026-05-27T09:00:00.000Z",
+      intime_status: "2",
       work_intime: "2026-05-27T00:10:00.000Z",
       work_outtime: "2026-05-27T09:10:00.000Z",
     },
@@ -165,6 +168,10 @@ describe("employee save page", () => {
     expect(within(attendanceSection).getByText("본사")).toBeInTheDocument();
     expect(within(attendanceSection).getByRole("columnheader", { name: "출근일시" })).toBeInTheDocument();
     expect(within(attendanceSection).getByRole("columnheader", { name: "퇴근일시" })).toBeInTheDocument();
+    expect(within(attendanceSection).getByRole("columnheader", { name: "출근예정" })).toBeInTheDocument();
+    expect(within(attendanceSection).getByRole("columnheader", { name: "퇴근예정" })).toBeInTheDocument();
+    expect(within(attendanceSection).getByRole("columnheader", { name: "상태" })).toBeInTheDocument();
+    expect(within(attendanceSection).getByText("정상출근")).toBeInTheDocument();
     const leaveSection = screen.getByRole("region", { name: "휴가정보" });
     expect(within(leaveSection).getByText("연차")).toBeInTheDocument();
     expect(within(leaveSection).getByText("2026-06-01 ~ 2026-06-02")).toBeInTheDocument();

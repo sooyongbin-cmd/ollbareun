@@ -30,7 +30,7 @@ export async function GET(_: Request, { params }: RouteContext) {
       supabase.from("education_resources").select("id,title"),
       supabase
         .from("work_record")
-        .select("id,work_date,worksite_id,work_intime,work_outtime")
+        .select("id,work_date,worksite_id,intime,outtime,intime_status,work_intime,work_outtime")
         .eq("employee_id", id)
         .order("work_date", { ascending: false }),
       supabase
@@ -78,6 +78,9 @@ export async function GET(_: Request, { params }: RouteContext) {
       id: record.id,
       work_date: record.work_date,
       worksite_name: worksiteNameById.get(record.worksite_id) ?? "-",
+      intime: record.intime,
+      outtime: record.outtime,
+      intime_status: record.intime_status,
       work_intime: record.work_intime,
       work_outtime: record.work_outtime,
     }));

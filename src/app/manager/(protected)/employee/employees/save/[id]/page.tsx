@@ -464,6 +464,7 @@ export default function EmployeeSavePage() {
               <thead>
                 <tr className="border-b border-border">
                   <th className="px-4 py-3 text-left font-semibold">근무지</th>
+                  <th className="px-4 py-3 text-left font-semibold">출근일</th>
                   <th className="px-4 py-3 text-left font-semibold">출근예정</th>
                   <th className="px-4 py-3 text-left font-semibold">퇴근예정</th>
                   <th className="px-4 py-3 text-left font-semibold">출근일시</th>
@@ -475,6 +476,7 @@ export default function EmployeeSavePage() {
                 {attendance.map((record) => (
                   <tr className="border-b border-border last:border-b-0" key={record.id}>
                     <td className="px-4 py-3 font-semibold">{record.worksite_name}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{record.work_date}</td>
                     <td className="px-4 py-3 text-muted-foreground">{formatTime(record.intime)}</td>
                     <td className="px-4 py-3 text-muted-foreground">{formatTime(record.outtime)}</td>
                     <td className="px-4 py-3 text-muted-foreground">{formatDateTime(record.work_intime)}</td>

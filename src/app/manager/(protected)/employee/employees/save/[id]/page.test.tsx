@@ -176,6 +176,8 @@ describe("employee save page", () => {
     expect(within(attendanceSection).getByRole("columnheader", { name: "출근일시" })).toBeInTheDocument();
     expect(within(attendanceSection).getByRole("columnheader", { name: "퇴근일시" })).toBeInTheDocument();
     expect(within(attendanceSection).getByRole("columnheader", { name: "출근예정" })).toBeInTheDocument();
+    expect(within(attendanceSection).getByRole("columnheader", { name: "출근일" })).toBeInTheDocument();
+    expect(within(attendanceSection).getByText("2026-05-27")).toBeInTheDocument();
     expect(within(attendanceSection).getByRole("columnheader", { name: "퇴근예정" })).toBeInTheDocument();
     expect(within(attendanceSection).getByRole("columnheader", { name: "상태" })).toBeInTheDocument();
     expect(within(attendanceSection).getByText("정상출근")).toBeInTheDocument();

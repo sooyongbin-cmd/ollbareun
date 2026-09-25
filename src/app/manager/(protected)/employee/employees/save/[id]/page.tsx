@@ -12,6 +12,7 @@ import { DeleteIcon } from "@/components/icons/delete-icon";
 import ConfirmModal from "@/components/modals/confirm-modal";
 import AlertModal from "@/components/modals/alert-modal";
 import { getManagerAttendanceStatus, type ManagerIntimeStatus } from "@/lib/manager-attendance-status";
+import Link from "next/link";
 
 type Employee = {
   id: string;
@@ -408,32 +409,14 @@ export default function EmployeeSavePage() {
           className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
         >
           <h2 className="text-[1.25rem] font-semibold">교육이수</h2>
-          <div className="mt-6 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
-            <table className="w-full min-w-[36rem] text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="px-4 py-3 text-left font-semibold">제목</th>
-                  <th className="px-4 py-3 text-left font-semibold">완료여부</th>
-                  <th className="px-4 py-3 text-left font-semibold">완료일자</th>
-                </tr>
-              </thead>
-              <tbody>
-                {educationCompletions.length === 0 ? (
-                  <tr>
-                    <td className="p-8 text-center text-muted-foreground" colSpan={3}>교육이수 기록이 없습니다.</td>
-                  </tr>
-                ) : (
-                  educationCompletions.map((completion) => (
-                    <tr className="border-b border-border last:border-b-0" key={completion.resource_id}>
-                      <td className="px-4 py-3 font-semibold">{completion.resource_title}</td>
-                      <td className="px-4 py-3">{completion.is_completed ? "완료" : "미완료"}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{formatDateTime(completion.completed_at)}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+          <p className="mt-4 text-sm text-muted-foreground">
+            <Link
+              href={`/manager/safety/completions/detail?name=${encodeURIComponent(name)}`}
+              className="font-semibold text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"
+            >
+              {educationCompletions.filter((completion) => completion.is_completed).length}/{educationCompletions.length}
+            </Link>
+          </p>
         </section>
       ) : null}
 

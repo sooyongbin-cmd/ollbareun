@@ -160,10 +160,11 @@ describe("employee save page", () => {
     expect(within(assignmentSection).getByText("본사")).toBeInTheDocument();
     expect(within(assignmentSection).getByText("2026-05-21 ~ 2026-05-23")).toBeInTheDocument();
     const educationSection = screen.getByRole("region", { name: "교육이수" });
-    expect(within(educationSection).getByRole("columnheader", { name: "제목" })).toBeInTheDocument();
-    expect(within(educationSection).getByText("화재 안전 교육")).toBeInTheDocument();
-    expect(within(educationSection).getByText("완료")).toBeInTheDocument();
-    expect(within(educationSection).getByText("미완료")).toBeInTheDocument();
+    expect(within(educationSection).queryByRole("table")).not.toBeInTheDocument();
+    expect(within(educationSection).getByRole("link", { name: "1/2" })).toHaveAttribute(
+      "href",
+      "/manager/safety/completions/detail?name=Alice",
+    );
     const attendanceSection = screen.getByRole("region", { name: "출근현황" });
     expect(within(attendanceSection).getByText("본사")).toBeInTheDocument();
     expect(within(attendanceSection).getByRole("columnheader", { name: "출근일시" })).toBeInTheDocument();

@@ -476,9 +476,9 @@ export default function EmployeeSavePage() {
           className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
         >
           <h2 className="text-[1.25rem] font-semibold">출근현황</h2>
-          <div className="mt-6 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
+          <div className="mt-6 max-h-[31rem] min-w-0 overflow-auto rounded-lg border border-border bg-background">
             <table className="w-full min-w-[58rem] text-sm">
-              <thead>
+              <thead className="sticky top-0 z-10 bg-background">
                 <tr className="border-b border-border">
                   <th className="px-4 py-3 text-left font-semibold">근무지</th>
                   <th className="px-4 py-3 text-left font-semibold">출근일</th>

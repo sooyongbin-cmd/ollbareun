@@ -182,6 +182,7 @@ describe("employee save page", () => {
       within(employeeEducationSection).getByRole("link", { name: "1/3" }),
     );
     const attendanceSection = screen.getByRole("region", { name: "출근현황" });
+    expect(within(attendanceSection).getByRole("table").parentElement).toHaveClass("max-h-[31rem]", "overflow-auto");
     expect(within(attendanceSection).getByText("본사")).toBeInTheDocument();
     expect(within(attendanceSection).getByRole("columnheader", { name: "출근일시" })).toBeInTheDocument();
     expect(within(attendanceSection).getByRole("columnheader", { name: "퇴근일시" })).toBeInTheDocument();

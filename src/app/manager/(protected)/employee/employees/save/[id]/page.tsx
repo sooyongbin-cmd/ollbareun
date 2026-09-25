@@ -544,7 +544,7 @@ export default function EmployeeSavePage() {
         </section>
       ) : null}
 
-      {!loading && !routeError ? (
+      {!loading && !routeError && specialRemarks.length > 0 ? (
         <section
           aria-label="특이사항"
           className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
@@ -559,18 +559,12 @@ export default function EmployeeSavePage() {
                 </tr>
               </thead>
               <tbody>
-                {specialRemarks.length === 0 ? (
-                  <tr>
-                    <td className="p-8 text-center text-muted-foreground" colSpan={2}>특이사항 기록이 없습니다.</td>
+                {specialRemarks.map((remark) => (
+                  <tr className="border-b border-border last:border-b-0" key={remark.id}>
+                    <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDateTime(remark.reported_at)}</td>
+                    <td className="max-w-[36rem] truncate px-4 py-3" title={remark.content}>{summarizeRemark(remark.content)}</td>
                   </tr>
-                ) : (
-                  specialRemarks.map((remark) => (
-                    <tr className="border-b border-border last:border-b-0" key={remark.id}>
-                      <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDateTime(remark.reported_at)}</td>
-                      <td className="max-w-[36rem] truncate px-4 py-3" title={remark.content}>{summarizeRemark(remark.content)}</td>
-                    </tr>
-                  ))
-                )}
+                ))}
               </tbody>
             </table>
           </div>

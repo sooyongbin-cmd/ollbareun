@@ -234,7 +234,7 @@ describe("employee save page", () => {
     expect(screen.queryByRole("region", { name: "출근현황" })).not.toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "휴가정보" })).not.toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "현장점검" })).not.toBeInTheDocument();
-    expect(screen.getByRole("region", { name: "특이사항" })).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "특이사항" })).not.toBeInTheDocument();
   });
 
   it("returns to the list without saving", async () => {

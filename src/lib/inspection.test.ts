@@ -58,6 +58,13 @@ describe("inspection data helpers", () => {
   });
 
   it("creates an inspection site under a worksite", async () => {
+    const lastSiteQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: { sort_order: 4 }, error: null }),
+    };
     const insertQuery = {
       insert: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
@@ -82,14 +89,13 @@ describe("inspection data helpers", () => {
       }),
     };
     const supabase = {
-      from: vi.fn().mockReturnValueOnce(insertQuery).mockReturnValueOnce(worksiteQuery),
+      from: vi.fn().mockReturnValueOnce(lastSiteQuery).mockReturnValueOnce(insertQuery).mockReturnValueOnce(worksiteQuery),
     };
     vi.mocked(getSupabase).mockReturnValue(supabase as never);
 
     await expect(
       createInspectionSite({
         worksiteId: "work-1",
-        sortOrder: 1,
         name: "정문",
         address: "서울시 중구 세종대로 1",
         gpsInfo: { latitude: 37.5, longitude: 127 },
@@ -98,9 +104,11 @@ describe("inspection data helpers", () => {
       id: "site-1",
       worksite_name: "본사",
     });
+    expect(lastSiteQuery.eq).toHaveBeenCalledWith("worksite_id", "work-1");
+    expect(lastSiteQuery.order).toHaveBeenCalledWith("sort_order", { ascending: false });
     expect(insertQuery.insert).toHaveBeenCalledWith({
       worksite_id: "work-1",
-      sort_order: 1,
+      sort_order: 5,
       name: "정문",
       address: "서울시 중구 세종대로 1",
       gps_info: { latitude: 37.5, longitude: 127 },
@@ -252,6 +260,41 @@ describe("inspection data helpers", () => {
       "강남빌딩 - 102동",
       "강남빌딩 - 101동",
     ]);
+  });
+
+  it("starts inspection site order at one when a worksite has no sites", async () => {
+    const lastSiteQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+    };
+    const insertQuery = {
+      insert: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({
+        data: { id: "site-1", worksite_id: "work-1", name: "정문", address: "서울", gps_info: { latitude: 37.5, longitude: 127 } },
+        error: null,
+      }),
+    };
+    const worksiteQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { id: "work-1", name: "본사" }, error: null }),
+    };
+    const supabase = {
+      from: vi.fn().mockReturnValueOnce(lastSiteQuery).mockReturnValueOnce(insertQuery).mockReturnValueOnce(worksiteQuery),
+    };
+
+    await createInspectionSite({
+      worksiteId: "work-1",
+      name: "정문",
+      address: "서울",
+      gpsInfo: { latitude: 37.5, longitude: 127 },
+    }, supabase as never);
+
+    expect(insertQuery.insert).toHaveBeenCalledWith(expect.objectContaining({ worksite_id: "work-1", sort_order: 1 }));
   });
 
   it("attaches the latest inspection from the current Seoul day", async () => {

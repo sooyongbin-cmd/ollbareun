@@ -28,8 +28,7 @@ describe("inspection site new page", () => {
         }
         if (url.endsWith("/api/inspection/sites")) {
           expect(JSON.parse(String(init?.body))).toMatchObject({
-            worksiteId: "work-1",
-            sortOrder: 1,
+          worksiteId: "work-1",
             name: "Gate",
             address: "Seoul",
             gpsInfo: { latitude: 37.5, longitude: 127 },
@@ -55,6 +54,7 @@ describe("inspection site new page", () => {
     render(<InspectionSiteNewPage />);
 
     expect(await screen.findByRole("option", { name: "Worksite" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("점검순서")).not.toBeInTheDocument();
     expect(screen.getByLabelText("현장주소")).toHaveAttribute("readonly");
     expect(screen.queryByRole("button", { name: "QR인쇄" })).not.toBeInTheDocument();
 

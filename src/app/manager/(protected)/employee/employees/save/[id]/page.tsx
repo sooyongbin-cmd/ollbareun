@@ -406,7 +406,7 @@ export default function EmployeeSavePage() {
         {error ? <p role="alert" className="mt-6 text-[1rem] text-destructive">{error}</p> : null}
       </section>
 
-      {!loading && !routeError ? (
+      {!loading && !routeError && (educationCompletions.some((completion) => completion.is_completed) || assignments.length > 0) ? (
         <section
           aria-label="교육이수 및 근무지배정 정보"
           className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"

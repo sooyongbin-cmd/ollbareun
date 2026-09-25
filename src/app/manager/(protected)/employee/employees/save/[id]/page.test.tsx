@@ -220,6 +220,22 @@ describe("employee save page", () => {
     expect(screen.queryByRole("heading", { name: "근무지배정 정보" })).not.toBeInTheDocument();
   });
 
+  it("hides the education and assignment section when there are no completed courses or assignments", async () => {
+    employeeAssignments = [];
+    employeeDetails = {
+      educationCompletions: [...defaultEmployeeDetails.educationCompletions].map((completion) => ({ ...completion, is_completed: false })),
+      attendance: [...defaultEmployeeDetails.attendance],
+      leaves: [...defaultEmployeeDetails.leaves],
+      inspectionLogs: [...defaultEmployeeDetails.inspectionLogs],
+      specialRemarks: [...defaultEmployeeDetails.specialRemarks],
+    };
+
+    render(<EmployeeSavePage />);
+
+    expect(await screen.findByRole("heading", { name: "직원 상세" })).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "교육이수 및 근무지배정 정보" })).not.toBeInTheDocument();
+  });
+
   it("hides history sections that have no records", async () => {
     employeeDetails = {
       educationCompletions: [],

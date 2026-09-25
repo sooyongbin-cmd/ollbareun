@@ -279,6 +279,7 @@ export default function EmployeeSavePage() {
       ["교육이수", educationCompletions.length],
       ["근무지배정정보", assignments.length],
       ["출근현황", attendance.length],
+      ["휴가정보", leaves.length],
       ["현장점검", inspectionLogs.length],
       ["특이사항", specialRemarks.length],
     ] as const)

@@ -289,7 +289,7 @@ describe("employee save page", () => {
     expect(screen.getByText("현재자료를 삭제할까요?")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "예" }));
-    expect(screen.getByText("교육이수(2건) 출근현황(2건) 현장점검(1건) 특이사항(1건)의 자료가 있습니다. 삭제후에는 복구할 수 없습니다. 해당 자료도 모두 함께 삭제할까요?")).toBeInTheDocument();
+    expect(screen.getByText("교육이수(2건) 출근현황(2건) 휴가정보(1건) 현장점검(1건) 특이사항(1건)의 자료가 있습니다. 삭제후에는 복구할 수 없습니다. 해당 자료도 모두 함께 삭제할까요?")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "예" }));
 
     expect(push).toHaveBeenCalledWith("/manager/employee/employees");

@@ -143,6 +143,7 @@ export async function DELETE(_: Request, { params }: RouteContext) {
     for (const table of [
       "education_completions",
       "work_record",
+      "leave",
       "inspection_logs",
       "inspection_special_reports",
       "work_assignments",

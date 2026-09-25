@@ -37,6 +37,7 @@ describe("DELETE /api/employees/[id]", () => {
     expect(operationOrder).toEqual([
       "education_completions.employee_id=employee-1",
       "work_record.employee_id=employee-1",
+      "leave.employee_id=employee-1",
       "inspection_logs.employee_id=employee-1",
       "inspection_special_reports.employee_id=employee-1",
       "work_assignments.employee_id=employee-1",

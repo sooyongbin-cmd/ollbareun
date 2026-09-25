@@ -473,17 +473,22 @@ export default function EmployeeSavePage() {
                 </tr>
               </thead>
               <tbody>
-                {attendance.map((record) => (
-                  <tr className="border-b border-border last:border-b-0" key={record.id}>
-                    <td className="px-4 py-3 font-semibold">{record.worksite_name}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{record.work_date}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{formatTime(record.intime)}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{formatTime(record.outtime)}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{formatDateTime(record.work_intime)}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{formatDateTime(record.work_outtime)}</td>
-                    <td className="px-4 py-3">{getRecordStatus(record)}</td>
-                  </tr>
-                ))}
+                {[...attendance]
+                  .sort((left, right) =>
+                    left.worksite_name.localeCompare(right.worksite_name, "ko-KR")
+                    || left.work_date.localeCompare(right.work_date),
+                  )
+                  .map((record) => (
+                    <tr className="border-b border-border last:border-b-0" key={record.id}>
+                      <td className="px-4 py-3 font-semibold">{record.worksite_name}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{record.work_date}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{formatTime(record.intime)}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{formatTime(record.outtime)}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{formatDateTime(record.work_intime)}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{formatDateTime(record.work_outtime)}</td>
+                      <td className="px-4 py-3">{getRecordStatus(record)}</td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>

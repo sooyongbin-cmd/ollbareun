@@ -29,6 +29,16 @@ let employeeDetails = {
   ],
   attendance: [
     {
+      id: "record-2",
+      work_date: "2026-05-26",
+      worksite_name: "가산지점",
+      intime: "2026-05-26T00:00:00.000Z",
+      outtime: "2026-05-26T09:00:00.000Z",
+      intime_status: "2",
+      work_intime: "2026-05-26T00:10:00.000Z",
+      work_outtime: "2026-05-26T09:10:00.000Z",
+    },
+    {
       id: "record-1",
       work_date: "2026-05-27",
       worksite_name: "본사",
@@ -180,7 +190,10 @@ describe("employee save page", () => {
     expect(within(attendanceSection).getByText("2026-05-27")).toBeInTheDocument();
     expect(within(attendanceSection).getByRole("columnheader", { name: "퇴근예정" })).toBeInTheDocument();
     expect(within(attendanceSection).getByRole("columnheader", { name: "상태" })).toBeInTheDocument();
-    expect(within(attendanceSection).getByText("정상출근")).toBeInTheDocument();
+    expect(within(attendanceSection).getAllByText("정상출근")).toHaveLength(2);
+    const attendanceRows = within(attendanceSection).getAllByRole("row").slice(1);
+    expect(attendanceRows.map((row) => within(row).getAllByRole("cell")[0].textContent)).toEqual(["가산지점", "본사"]);
+    expect(attendanceRows.map((row) => within(row).getAllByRole("cell")[1].textContent)).toEqual(["2026-05-26", "2026-05-27"]);
     const leaveSection = screen.getByRole("region", { name: "휴가정보" });
     expect(within(leaveSection).getByText("연차")).toBeInTheDocument();
     expect(within(leaveSection).getByText("2026-06-01 ~ 2026-06-02")).toBeInTheDocument();

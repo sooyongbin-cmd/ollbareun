@@ -150,6 +150,7 @@ describe("inspection site detail page", () => {
     render(<InspectionSiteDetailPage params={Promise.resolve({ id: "site-1" })} />);
 
     expect(await screen.findByDisplayValue("Gate")).toBeInTheDocument();
+    expect(screen.queryByLabelText("점검순서")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "QR코드" })).not.toBeInTheDocument();
   });
 

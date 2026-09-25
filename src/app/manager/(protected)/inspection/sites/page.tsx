@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type DragEvent, type FormEvent } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
 
@@ -75,6 +75,8 @@ export default function InspectionSitesPage() {
   const [sites, setSites] = useState<InspectionSite[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [draggedSiteId, setDraggedSiteId] = useState<string | null>(null);
+  const [reordering, setReordering] = useState(false);
 
   async function loadSites(name = query) {
     await Promise.resolve();
@@ -117,6 +119,35 @@ export default function InspectionSitesPage() {
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     void loadSites(query);
+  }
+
+  async function handleDrop(targetSite: InspectionSite) {
+    const source = sites.find((site) => site.id === draggedSiteId);
+    setDraggedSiteId(null);
+    if (!source || source.id === targetSite.id || source.worksite_name !== targetSite.worksite_name) return;
+
+    const previousSites = sites;
+    setSites((currentSites) => sortInspectionSites(currentSites.map((site) => {
+      if (site.id === source.id) return { ...site, sort_order: targetSite.sort_order };
+      if (site.id === targetSite.id) return { ...site, sort_order: source.sort_order };
+      return site;
+    })));
+    setReordering(true);
+    setError("");
+    try {
+      const response = await fetch("/api/inspection/sites/swap-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ draggedSiteId: source.id, targetSiteId: targetSite.id }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error ?? "점검순서를 변경하지 못했습니다.");
+    } catch (reorderError) {
+      setSites(previousSites);
+      setError(reorderError instanceof Error ? reorderError.message : "점검순서를 변경하지 못했습니다.");
+    } finally {
+      setReordering(false);
+    }
   }
 
   return (
@@ -175,7 +206,7 @@ export default function InspectionSitesPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-left">근무지</TableHead>
-                  <TableHead className="text-left">점검순서</TableHead>
+                  <TableHead className="text-left">순서</TableHead>
                   <TableHead className="text-left">현장이름</TableHead>
                   <TableHead className="text-left">점검시각</TableHead>
                   <TableHead className="text-left">점검자</TableHead>
@@ -191,12 +222,36 @@ export default function InspectionSitesPage() {
                   </TableRow>
                 ) : (
                   sites.map((site) => (
-                    <TableRow key={site.id} className="hover:bg-muted/40 transition-colors">
+                    <TableRow
+                      key={site.id}
+                      className={`hover:bg-muted/40 transition-colors ${reordering ? "opacity-60" : ""}`}
+                      onDragOver={(event: DragEvent<HTMLTableRowElement>) => {
+                        if (draggedSiteId && site.worksite_name === sites.find((item) => item.id === draggedSiteId)?.worksite_name) {
+                          event.preventDefault();
+                        }
+                      }}
+                      onDrop={(event: DragEvent<HTMLTableRowElement>) => {
+                        event.preventDefault();
+                        void handleDrop(site);
+                      }}
+                    >
                       <TableCell data-label="근무지">{site.worksite_name}</TableCell>
-                      <TableCell data-label="점검순서">{site.sort_order ?? ""}</TableCell>
-                      <TableCell data-label="현장이름" className="font-semibold">
+                      <TableCell data-label="순서">{site.sort_order ?? ""}</TableCell>
+                      <TableCell data-label="현장이름" className="font-semibold" onDragOver={(event) => event.preventDefault()}>
                         <Link className="text-primary hover:underline" href={`/manager/inspection/sites/${site.id}`}>
-                          {site.name}
+                          <span
+                            draggable={!reordering}
+                            onDragStart={(event) => {
+                              setDraggedSiteId(site.id);
+                              event.dataTransfer.effectAllowed = "move";
+                              event.dataTransfer.setData("text/plain", site.id);
+                            }}
+                            onDragEnd={() => setDraggedSiteId(null)}
+                            className="cursor-grab active:cursor-grabbing"
+                            title="드래그하여 같은 근무지 내 점검순서 변경"
+                          >
+                            {site.name}
+                          </span>
                         </Link>
                       </TableCell>
                       <TableCell data-label="점검시각">{formatInspectionTime(site.today_inspection?.inspected_at)}</TableCell>

@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import InspectionSitesPage from "./page";
@@ -10,6 +10,9 @@ describe("inspection sites page", () => {
       "fetch",
       vi.fn(async (input: RequestInfo | URL) => {
         const url = String(input);
+        if (url === "/api/inspection/sites/swap-order") {
+          return Response.json({ success: true });
+        }
         if (url.startsWith("/api/inspection/sites")) {
           return Response.json({
             sites: [
@@ -98,6 +101,34 @@ describe("inspection sites page", () => {
     ]);
   });
 
+  it("swaps inspection order when a site name is dragged onto another site", async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(input) === "/api/inspection/sites/swap-order" && init?.method === "POST") {
+        return Response.json({ success: true });
+      }
+      return Response.json({
+        sites: [
+          { id: "s-1", worksite_id: "work-1", worksite_name: "Worksite", sort_order: 1, name: "101동", address: "" },
+          { id: "s-2", worksite_id: "work-1", worksite_name: "Worksite", sort_order: 2, name: "102동", address: "" },
+        ],
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<InspectionSitesPage />);
+
+    const sourceName = await screen.findByText("102동");
+    const targetRow = screen.getByText("101동").closest("tr");
+    expect(targetRow).not.toBeNull();
+    fireEvent.dragStart(sourceName, { dataTransfer: { effectAllowed: "move", setData: vi.fn() } });
+    fireEvent.dragOver(targetRow!, { preventDefault: vi.fn() });
+    fireEvent.drop(targetRow!, { preventDefault: vi.fn() });
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(
+      "/api/inspection/sites/swap-order",
+      expect.objectContaining({ method: "POST", body: JSON.stringify({ draggedSiteId: "s-2", targetSiteId: "s-1" }) }),
+    ));
+    expect(screen.getByRole("columnheader", { name: "순서" })).toBeInTheDocument();
+  });
   it("leaves today's inspection columns blank when a site has no inspection", async () => {
     vi.stubGlobal(
       "fetch",

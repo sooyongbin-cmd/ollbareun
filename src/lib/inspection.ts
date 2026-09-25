@@ -326,6 +326,48 @@ export async function updateInspectionSite(input: {
   } as InspectionSiteRow;
 }
 
+export async function swapInspectionSiteSortOrder(input: {
+  draggedSiteId: unknown;
+  targetSiteId: unknown;
+}, supabase: SupabaseClient = getSupabaseAdmin()) {
+  const draggedSiteId = requireString(input.draggedSiteId, "이동할 현장");
+  const targetSiteId = requireString(input.targetSiteId, "대상 현장");
+  if (draggedSiteId === targetSiteId) {
+    throw new Error("서로 다른 현장을 선택하세요.");
+  }
+
+  const { data: sites, error: sitesError } = await supabase
+    .from("inspection_sites")
+    .select("id,worksite_id,sort_order")
+    .in("id", [draggedSiteId, targetSiteId]);
+  throwIfError(sitesError);
+  const draggedSite = sites?.find((site) => site.id === draggedSiteId);
+  const targetSite = sites?.find((site) => site.id === targetSiteId);
+  if (!draggedSite || !targetSite) {
+    throw new Error("현장 정보를 찾을 수 없습니다.");
+  }
+  if (draggedSite.worksite_id !== targetSite.worksite_id) {
+    throw new Error("같은 근무지 안에서만 순서를 변경할 수 있습니다.");
+  }
+
+  const draggedOrder = draggedSite.sort_order;
+  const targetOrder = targetSite.sort_order;
+  const temporaryOrder = Math.max(draggedOrder, targetOrder) + 1;
+  const updates = [
+    { id: draggedSiteId, order: temporaryOrder },
+    { id: targetSiteId, order: draggedOrder },
+    { id: draggedSiteId, order: targetOrder },
+  ];
+
+  for (const update of updates) {
+    const { error } = await supabase
+      .from("inspection_sites")
+      .update({ sort_order: update.order })
+      .eq("id", update.id);
+    throwIfError(error);
+  }
+}
+
 export async function deleteInspectionSite(id: unknown, supabase: SupabaseClient = getSupabaseAdmin()) {
   const siteId = requireString(id, "현장");
   const { error } = await supabase.from("inspection_sites").delete().eq("id", siteId);

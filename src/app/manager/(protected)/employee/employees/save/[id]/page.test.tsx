@@ -101,6 +101,7 @@ describe("employee save page", () => {
               is_retired: false,
             },
             assignments: employeeAssignments,
+            totalEducationCount: 3,
             ...employeeDetails,
           });
         }
@@ -156,18 +157,19 @@ describe("employee save page", () => {
       screen.getByLabelText("직군").closest("div.grid"),
     );
     expect(screen.getByRole("checkbox", { name: "퇴직" })).not.toBeChecked();
-    const assignmentSection = await screen.findByRole("region", { name: "근무지배정 정보" });
-    expect(within(assignmentSection).getByText("본사")).toBeInTheDocument();
-    expect(within(assignmentSection).getByRole("table")).toBeInTheDocument();
-    expect(within(assignmentSection).getByRole("link", { name: "2026-05-21 ~ 2026-05-23" })).toHaveAttribute(
+    const employeeEducationSection = await screen.findByRole("region", { name: "교육이수 및 근무지배정 정보" });
+    expect(within(employeeEducationSection).getByText("본사")).toBeInTheDocument();
+    expect(within(employeeEducationSection).getByRole("table")).toBeInTheDocument();
+    expect(within(employeeEducationSection).getByRole("link", { name: "2026-05-21 ~ 2026-05-23" })).toHaveAttribute(
       "href",
       "/manager/employee/assignments/save/assignment-1",
     );
-    const educationSection = screen.getByRole("region", { name: "교육이수" });
-    expect(within(educationSection).queryByRole("table")).not.toBeInTheDocument();
-    expect(within(educationSection).getByRole("link", { name: "1/2" })).toHaveAttribute(
+    expect(within(employeeEducationSection).getByRole("link", { name: "1/3" })).toHaveAttribute(
       "href",
       "/manager/safety/completions/detail?name=Alice",
+    );
+    expect(within(employeeEducationSection).getByRole("heading", { name: "교육이수" }).parentElement).toContainElement(
+      within(employeeEducationSection).getByRole("link", { name: "1/3" }),
     );
     const attendanceSection = screen.getByRole("region", { name: "출근현황" });
     expect(within(attendanceSection).getByText("본사")).toBeInTheDocument();
@@ -212,7 +214,8 @@ describe("employee save page", () => {
     render(<EmployeeSavePage />);
 
     expect(await screen.findByRole("heading", { name: "직원 상세" })).toBeInTheDocument();
-    expect(screen.queryByRole("region", { name: "근무지배정 정보" })).not.toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "교육이수 및 근무지배정 정보" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "근무지배정 정보" })).not.toBeInTheDocument();
   });
 
   it("hides history sections that have no records", async () => {
@@ -227,7 +230,7 @@ describe("employee save page", () => {
     render(<EmployeeSavePage />);
 
     expect(await screen.findByRole("heading", { name: "직원 상세" })).toBeInTheDocument();
-    expect(screen.getByRole("region", { name: "교육이수" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "교육이수 및 근무지배정 정보" })).toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "출근현황" })).not.toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "휴가정보" })).not.toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "현장점검" })).not.toBeInTheDocument();

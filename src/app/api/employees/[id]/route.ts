@@ -89,6 +89,7 @@ export async function GET(_: Request, { params }: RouteContext) {
       employee,
       assignments,
       educationCompletions,
+      totalEducationCount: educationResourcesResult.data?.length ?? 0,
       attendance,
       leaves: leavesResult.data ?? [],
       inspectionLogs: inspectionLogsResult.data ?? [],

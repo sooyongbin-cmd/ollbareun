@@ -29,6 +29,7 @@ type EmployeeResponse = {
   employee: Employee;
   assignments: EmployeeAssignment[];
   educationCompletions: EducationCompletion[];
+  totalEducationCount: number;
   attendance: EmployeeAttendance[];
   leaves: EmployeeLeave[];
   inspectionLogs: EmployeeInspectionLog[];
@@ -168,6 +169,7 @@ export default function EmployeeSavePage() {
   const [isRetired, setIsRetired] = useState(false);
   const [assignments, setAssignments] = useState<EmployeeAssignment[]>([]);
   const [educationCompletions, setEducationCompletions] = useState<EducationCompletion[]>([]);
+  const [totalEducationCount, setTotalEducationCount] = useState(0);
   const [attendance, setAttendance] = useState<EmployeeAttendance[]>([]);
   const [leaves, setLeaves] = useState<EmployeeLeave[]>([]);
   const [inspectionLogs, setInspectionLogs] = useState<EmployeeInspectionLog[]>([]);
@@ -198,6 +200,7 @@ export default function EmployeeSavePage() {
           setIsRetired(data.employee.is_retired);
           setAssignments(data.assignments ?? []);
           setEducationCompletions(data.educationCompletions ?? []);
+          setTotalEducationCount(data.totalEducationCount ?? 0);
           setAttendance(data.attendance ?? []);
           setLeaves(data.leaves ?? []);
           setInspectionLogs(data.inspectionLogs ?? []);
@@ -405,54 +408,48 @@ export default function EmployeeSavePage() {
 
       {!loading && !routeError ? (
         <section
-          aria-label="교육이수"
+          aria-label="교육이수 및 근무지배정 정보"
           className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
         >
-          <h2 className="text-[1.25rem] font-semibold">교육이수</h2>
-          <p className="mt-4 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-3">
+            <h2 className="text-[1.25rem] font-semibold">교육이수</h2>
             <Link
               href={`/manager/safety/completions/detail?name=${encodeURIComponent(name)}`}
-              className="font-semibold text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"
+              className="whitespace-nowrap text-sm font-semibold text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"
             >
-              {educationCompletions.filter((completion) => completion.is_completed).length}/{educationCompletions.length}
+              {educationCompletions.filter((completion) => completion.is_completed).length}/{totalEducationCount}
             </Link>
-          </p>
-        </section>
-      ) : null}
-
-      {!loading && !routeError && assignments.length > 0 ? (
-        <section
-          aria-label="근무지배정 정보"
-          className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
-        >
-          <div className="space-y-3">
-            <h2 className="text-[1.25rem] font-semibold">근무지배정 정보</h2>
           </div>
-          <div className="mt-6 overflow-x-auto rounded-lg border border-border bg-background">
-            <table className="w-full min-w-[32rem] text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="px-4 py-3 text-left font-semibold">근무지</th>
-                  <th className="px-4 py-3 text-left font-semibold">근무기간</th>
-                </tr>
-              </thead>
-              <tbody>
-                {assignments.map((assignment) => (
-                  <tr className="border-b border-border last:border-b-0" key={assignment.id}>
-                    <td className="px-4 py-3 font-semibold">{assignment.worksite_name}</td>
-                    <td className="px-4 py-3 font-semibold tabular-nums">
-                      <Link
-                        href={`/manager/employee/assignments/save/${assignment.id}`}
-                        className="text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"
-                      >
-                        {formatAssignmentPeriod(assignment)}
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {assignments.length > 0 ? (
+            <div className="mt-8">
+              <h3 className="text-[1.125rem] font-semibold">근무지배정 정보</h3>
+              <div className="mt-4 overflow-x-auto rounded-lg border border-border bg-background">
+                <table className="w-full min-w-[32rem] text-sm">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="px-4 py-3 text-left font-semibold">근무지</th>
+                      <th className="px-4 py-3 text-left font-semibold">근무기간</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {assignments.map((assignment) => (
+                      <tr className="border-b border-border last:border-b-0" key={assignment.id}>
+                        <td className="px-4 py-3 font-semibold">{assignment.worksite_name}</td>
+                        <td className="px-4 py-3 font-semibold tabular-nums">
+                          <Link
+                            href={`/manager/employee/assignments/save/${assignment.id}`}
+                            className="text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"
+                          >
+                            {formatAssignmentPeriod(assignment)}
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : null}
         </section>
       ) : null}
 

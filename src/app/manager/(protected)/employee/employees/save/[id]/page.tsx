@@ -428,22 +428,30 @@ export default function EmployeeSavePage() {
           <div className="space-y-3">
             <h2 className="text-[1.25rem] font-semibold">근무지배정 정보</h2>
           </div>
-          <div className="mt-6 space-y-3">
-            {assignments.map((assignment) => (
-              <dl
-                className="grid gap-4 rounded-lg border border-border bg-background p-4 sm:grid-cols-2"
-                key={assignment.id}
-              >
-                <div>
-                  <dt className="text-[0.8125rem] font-semibold text-muted-foreground">근무지</dt>
-                  <dd className="mt-1 font-semibold">{assignment.worksite_name}</dd>
-                </div>
-                <div>
-                  <dt className="text-[0.8125rem] font-semibold text-muted-foreground">근무기간</dt>
-                  <dd className="mt-1 font-semibold tabular-nums">{formatAssignmentPeriod(assignment)}</dd>
-                </div>
-              </dl>
-            ))}
+          <div className="mt-6 overflow-x-auto rounded-lg border border-border bg-background">
+            <table className="w-full min-w-[32rem] text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="px-4 py-3 text-left font-semibold">근무지</th>
+                  <th className="px-4 py-3 text-left font-semibold">근무기간</th>
+                </tr>
+              </thead>
+              <tbody>
+                {assignments.map((assignment) => (
+                  <tr className="border-b border-border last:border-b-0" key={assignment.id}>
+                    <td className="px-4 py-3 font-semibold">{assignment.worksite_name}</td>
+                    <td className="px-4 py-3 font-semibold tabular-nums">
+                      <Link
+                        href={`/manager/employee/assignments/save/${assignment.id}`}
+                        className="text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"
+                      >
+                        {formatAssignmentPeriod(assignment)}
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </section>
       ) : null}

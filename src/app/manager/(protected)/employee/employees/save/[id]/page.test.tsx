@@ -158,7 +158,11 @@ describe("employee save page", () => {
     expect(screen.getByRole("checkbox", { name: "퇴직" })).not.toBeChecked();
     const assignmentSection = await screen.findByRole("region", { name: "근무지배정 정보" });
     expect(within(assignmentSection).getByText("본사")).toBeInTheDocument();
-    expect(within(assignmentSection).getByText("2026-05-21 ~ 2026-05-23")).toBeInTheDocument();
+    expect(within(assignmentSection).getByRole("table")).toBeInTheDocument();
+    expect(within(assignmentSection).getByRole("link", { name: "2026-05-21 ~ 2026-05-23" })).toHaveAttribute(
+      "href",
+      "/manager/employee/assignments/save/assignment-1",
+    );
     const educationSection = screen.getByRole("region", { name: "교육이수" });
     expect(within(educationSection).queryByRole("table")).not.toBeInTheDocument();
     expect(within(educationSection).getByRole("link", { name: "1/2" })).toHaveAttribute(

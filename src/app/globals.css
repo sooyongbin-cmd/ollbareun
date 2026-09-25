@@ -156,6 +156,10 @@ body {
   letter-spacing: 0;
 }
 
+.dark :is([data-slot="alert-dialog-title"], [data-slot="dialog-title"], [data-slot="sheet-title"]) {
+  color: #f5f5f7;
+}
+
 /* Typography Defaults */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-pretendard);

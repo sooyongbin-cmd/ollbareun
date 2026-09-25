@@ -183,6 +183,7 @@ export default function GuardPage() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [guardLoginProgress, setGuardLoginProgress] = useState("");
   const [isGuardLoginPending, setIsGuardLoginPending] = useState(false);
+  const [sessionCheckComplete, setSessionCheckComplete] = useState(false);
 
   useEffect(() => {
     if (isCurrentInAppBrowser()) {
@@ -231,7 +232,9 @@ export default function GuardPage() {
   useEffect(() => {
     if (hasStoredGuardSession()) {
       router.replace("/guard/main");
+      return;
     }
+    setSessionCheckComplete(true);
   }, [router]);
 
   async function handleGuardAuth(event: React.FormEvent<HTMLFormElement>) {
@@ -305,6 +308,10 @@ export default function GuardPage() {
       setIsGuardLoginPending(false);
       setGuardLoginProgress("");
     }
+  }
+
+  if (!sessionCheckComplete) {
+    return null;
   }
 
   return (

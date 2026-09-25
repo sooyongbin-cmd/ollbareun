@@ -107,6 +107,7 @@ describe("guard login page", () => {
     render(<GuardPage />);
 
     expect(replace).toHaveBeenCalledWith("/guard/main");
+    expect(screen.queryByRole("region", { name: "근무자 로그인" })).not.toBeInTheDocument();
   });
 
   it("shows guard login progress below the login button while authentication is running", async () => {

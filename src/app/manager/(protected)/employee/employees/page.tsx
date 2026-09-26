@@ -58,6 +58,13 @@ type Bootstrap = {
   };
 };
 
+function formatPhone(phone: string) {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length === 11) return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+  if (digits.length === 10) return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+  return phone;
+}
+
 const emptyBootstrap: Bootstrap = {
   employees: [],
   worksites: [],
@@ -397,7 +404,7 @@ export default function EmployeeRosterPage() {
                           {employee.retired_at?.slice(0, 10) ?? ""}
                         </TableCell>
                       ) : null}
-                      <TableCell data-label="연락처" className="text-muted-foreground">{employee.phone}</TableCell>
+                      <TableCell data-label="연락처" className="text-muted-foreground">{formatPhone(employee.phone)}</TableCell>
                       <TableCell data-label="직군" className="text-muted-foreground">{employee.role}</TableCell>
                       <TableCell data-label="근무형태" className="whitespace-nowrap text-muted-foreground">{employee.work_style === "0" ? "일반근무" : employee.work_style === "2" ? "야간근무" : "격일근무"}</TableCell>
                       <TableCell data-label="근무지" className="text-muted-foreground">

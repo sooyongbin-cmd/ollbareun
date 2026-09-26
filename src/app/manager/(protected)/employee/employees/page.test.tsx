@@ -95,6 +95,7 @@ describe("employee roster page", () => {
       "href",
       "/manager/employee/employees/save/emp-1",
     );
+    expect(screen.getByText("010-1234-5678")).toBeInTheDocument();
     expect(screen.getByText("본사")).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "배정기간" })).toBeInTheDocument();
     expect(screen.queryByRole("columnheader", { name: "퇴직일" })).not.toBeInTheDocument();

@@ -34,6 +34,7 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
 }
 
 export default function EmployeeNewPage() {
+  const [phone, setPhone] = useState("");
   const [workStyle, setWorkStyle] = useState("1");
   const [inTime, setInTime] = useState("06:00");
   const [outTime, setOutTime] = useState("06:00");
@@ -54,7 +55,7 @@ export default function EmployeeNewPage() {
     try {
       const result = await postJson<EmployeeResponse>("/api/employees", {
         name: data.get("name"),
-        phone: data.get("phone"),
+        phone: phone.replace(/\D/g, ""),
         role: data.get("role"),
         work_style: workStyle,
         in_time: inTime,
@@ -91,7 +92,23 @@ export default function EmployeeNewPage() {
               <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="employee-phone">
                 연락처
               </label>
-              <Input className="w-full" id="employee-phone" name="phone" placeholder="010-0000-0000" required />
+              <Input
+                className="w-full"
+                id="employee-phone"
+                name="phone"
+                placeholder="010-0000-0000"
+                value={phone}
+                onChange={(event) => {
+                  const digits = event.target.value.replace(/\D/g, "").slice(0, 11);
+                  const formatted = digits.length > 7
+                    ? `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`
+                    : digits.length > 3
+                      ? `${digits.slice(0, 3)}-${digits.slice(3)}`
+                      : digits;
+                  setPhone(formatted);
+                }}
+                required
+              />
             </div>
             <div className="space-y-2">
               <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="employee-role">

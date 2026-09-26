@@ -41,7 +41,7 @@ describe("employee new page", () => {
         const body = JSON.parse(String(init?.body));
         expect(body).toMatchObject({
           name: "홍길동",
-          phone: "010-1234-5678",
+          phone: "01012345678",
           role: "미화원",
         });
         return Response.json({
@@ -60,7 +60,8 @@ describe("employee new page", () => {
     render(<EmployeeNewPage />);
 
     await user.type(screen.getByLabelText("직원이름"), "홍길동");
-    await user.type(screen.getByLabelText("연락처"), "010-1234-5678");
+    await user.type(screen.getByLabelText("연락처"), "01012345678");
+    expect(screen.getByLabelText("연락처")).toHaveValue("010-1234-5678");
     await user.selectOptions(screen.getByLabelText("직군"), "미화원");
     await user.click(screen.getByRole("button", { name: "저장" }));
 

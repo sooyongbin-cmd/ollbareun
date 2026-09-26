@@ -91,15 +91,15 @@ export default function AttendanceDetailPage() {
           </div>)}
         </fieldset>
         <fieldset className="grid gap-4 sm:grid-cols-2" aria-label="출퇴근 일시 입력">
-          <div className="space-y-2"><label className="ml-1 text-sm font-semibold text-muted-foreground" htmlFor="clock-in-date-time">출근일시</label>
-            <Input id="clock-in-date-time" type="datetime-local" value={clockInDateTime} onChange={(event) => setClockInDateTime(event.target.value)} /></div>
-          <div className="space-y-2"><label className="ml-1 text-sm font-semibold text-muted-foreground" htmlFor="clock-out-date-time">퇴근일시</label>
-            <Input id="clock-out-date-time" type="datetime-local" value={clockOutDateTime} onChange={(event) => setClockOutDateTime(event.target.value)} /></div>
+          {record.scheduledClockIn !== "-" ? <div className="space-y-2"><label className="ml-1 text-sm font-semibold text-muted-foreground" htmlFor="clock-in-date-time">출근일시</label>
+            <Input id="clock-in-date-time" type="datetime-local" value={clockInDateTime} onChange={(event) => setClockInDateTime(event.target.value)} /></div> : null}
+          {record.scheduledClockOut !== "-" ? <div className="space-y-2"><label className="ml-1 text-sm font-semibold text-muted-foreground" htmlFor="clock-out-date-time">퇴근일시</label>
+            <Input id="clock-out-date-time" type="datetime-local" value={clockOutDateTime} onChange={(event) => setClockOutDateTime(event.target.value)} /></div> : null}
         </fieldset>
         {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
         <div className="flex gap-3">
           <Button type="submit">저장</Button>
-          <Button type="button" variant="outline" onClick={() => router.push("/manager/reports/attendance")}>목록</Button>
+          <Button className="ml-auto" type="button" variant="outline" onClick={() => router.push("/manager/reports/attendance")}>목록</Button>
         </div>
       </form> : null}
     </section>

@@ -368,6 +368,7 @@ describe("guard profile page", () => {
     render(<GuardProfilePage />);
     fireEvent.click(await screen.findByRole("button", { name: "내 정보 확인" }));
 
+    expect(await screen.findByRole("dialog", { name: "로그아웃 처리중입니다..." })).toBeInTheDocument();
     expect(screen.queryByText("경비원 정보를 찾을 수 없습니다. 다시 로그인하세요.")).not.toBeInTheDocument();
 
     await waitFor(() => expect(push).toHaveBeenCalledWith("/guard"));

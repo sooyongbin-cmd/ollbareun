@@ -199,6 +199,7 @@ describe("guard login page", () => {
     fireEvent.click(await screen.findByRole("button", { name: "패스키로 로그인" }));
 
     expect(await screen.findByText("로그인 진행 중")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveClass("top-1/2", "-translate-y-1/2");
 
     resolveSession(
       Response.json({

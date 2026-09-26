@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import AlertModal from "@/components/modals/alert-modal";
 import { PowerIcon } from "@/components/icons/power-icon";
 import { clearStoredGuardSession, readStoredGuardSession } from "../guard-session-storage";
 import { getSupabasePasskeyClient } from "@/lib/supabase-passkey-client";
@@ -105,10 +106,12 @@ export default function GuardLogoutButton({
 }: GuardLogoutButtonProps) {
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
+  const [logoutStarted, setLogoutStarted] = useState(false);
 
   async function handleLogout() {
     if (loggingOut) return;
     setLoggingOut(true);
+    setLogoutStarted(true);
     onLogoutStart?.();
     const { employeeId, sessionLogId } = readGuardSessionInfo();
     let endpoint: string | null = null;
@@ -183,29 +186,37 @@ export default function GuardLogoutButton({
   }
 
   return (
-    <Button
-      type="button"
-      aria-label={ariaLabel}
-      className={className}
-      disabled={loggingOut}
-      onClick={handleLogout}
-      variant={variant}
-    >
-      {showIcon ? (
-        icon === "logout"
-          ? (
-            <span
-              aria-hidden="true"
-              className="guard-profile-logout-icon"
-              style={{ flexBasis: iconSize, height: iconSize, width: iconSize }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img alt="" height={iconSize} src="/guard-assets/profile-logout.svg" width={iconSize} />
-            </span>
-          )
-          : <PowerIcon size={iconSize} className="lucide lucide-power" />
-      ) : null}
-      <span>{label}</span>
-    </Button>
+    <>
+      <Button
+        type="button"
+        aria-label={ariaLabel}
+        className={className}
+        disabled={loggingOut}
+        onClick={handleLogout}
+        variant={variant}
+      >
+        {showIcon ? (
+          icon === "logout"
+            ? (
+              <span
+                aria-hidden="true"
+                className="guard-profile-logout-icon"
+                style={{ flexBasis: iconSize, height: iconSize, width: iconSize }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img alt="" height={iconSize} src="/guard-assets/profile-logout.svg" width={iconSize} />
+              </span>
+            )
+            : <PowerIcon size={iconSize} className="lucide lucide-power" />
+        ) : null}
+        <span>{label}</span>
+      </Button>
+      <AlertModal
+        isOpen={logoutStarted}
+        onClose={() => {}}
+        title="로그아웃 처리중입니다..."
+        description="잠시만 기다려주세요."
+      />
+    </>
   );
 }

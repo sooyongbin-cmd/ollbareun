@@ -429,7 +429,7 @@ export default function GuardPage() {
       </div>
 
       {isGuardLoginPending ? (
-        <Alert className="fixed bottom-6 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 shadow-lg">
+        <Alert className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 shadow-lg">
           <AlertTitle>로그인 진행 중</AlertTitle>
           <AlertDescription>인증 정보를 확인하고 있습니다. 잠시만 기다려주세요.</AlertDescription>
         </Alert>

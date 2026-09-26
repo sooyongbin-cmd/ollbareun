@@ -157,6 +157,13 @@ function summarizeRemark(content: string) {
   return content.split(/\r?\n/)[0]?.trim() ?? "";
 }
 
+function formatPhoneInput(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length > 7) return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+  if (digits.length > 3) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return digits;
+}
+
 export default function EmployeeSavePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -196,7 +203,7 @@ export default function EmployeeSavePage() {
         const data = await fetchJson<EmployeeResponse>(`/api/employees/${employeeId}`);
         if (!ignore) {
           setName(data.employee.name);
-          setPhone(data.employee.phone);
+          setPhone(formatPhoneInput(data.employee.phone));
           setRole(data.employee.role);
           setWorkStyle(data.employee.work_style ?? "1");
           setInTime((data.employee.in_time ?? "06:00").slice(0, 5));
@@ -249,7 +256,7 @@ export default function EmployeeSavePage() {
       await fetchJson<EmployeeMutationResponse>(`/api/employees/${employeeId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, role, is_retired: isRetired, retired_at: retiredDate, work_style: workStyle, in_time: inTime, out_time: outTime }),
+        body: JSON.stringify({ name, phone: phone.replace(/\D/g, ""), role, is_retired: isRetired, retired_at: retiredDate, work_style: workStyle, in_time: inTime, out_time: outTime }),
       });
 
       setSaveSuccessOpen(true);
@@ -347,7 +354,7 @@ export default function EmployeeSavePage() {
                     className="w-full"
                     id="employee-phone"
                     value={phone}
-                    onChange={(event) => setPhone(event.target.value)}
+                    onChange={(event) => setPhone(formatPhoneInput(event.target.value))}
                     required
                   />
                 </div>

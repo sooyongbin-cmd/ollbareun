@@ -120,7 +120,7 @@ describe("employee save page", () => {
           const body = JSON.parse(String(init.body));
           expect(body).toEqual({
             name: "Alice Kim",
-            phone: "010-9999-8888",
+            phone: "01099998888",
             role: "경비원",
             work_style: "1",
             in_time: "06:00",
@@ -210,7 +210,8 @@ describe("employee save page", () => {
     await user.clear(screen.getByLabelText("직원이름"));
     await user.type(screen.getByLabelText("직원이름"), "Alice Kim");
     await user.clear(screen.getByLabelText("연락처"));
-    await user.type(screen.getByLabelText("연락처"), "010-9999-8888");
+    await user.type(screen.getByLabelText("연락처"), "01099998888");
+    expect(screen.getByLabelText("연락처")).toHaveValue("010-9999-8888");
     await user.click(screen.getByRole("checkbox", { name: "퇴직" }));
     expect(screen.getByLabelText("퇴직일")).toHaveValue("2026-09-26");
     await user.clear(screen.getByLabelText("퇴직일"));

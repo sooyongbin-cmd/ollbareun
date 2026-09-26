@@ -11,7 +11,7 @@ import AlertModal from "@/components/modals/alert-modal";
 import ProcessingModal from "@/components/modals/processing-modal";
 
 type Bootstrap = {
-  employees: { id: string; name: string; work_style: "0" | "1" | "2"; in_time: string; out_time: string }[];
+  employees: { id: string; name: string; is_retired: boolean; work_style: "0" | "1" | "2"; in_time: string; out_time: string }[];
   worksites: { id: string; name: string }[];
 };
 
@@ -61,7 +61,7 @@ export default function AssignmentNewPage() {
   const [saving, setSaving] = useState(false);
   const router = useRouter();
   const selectedEmployee = data.employees.find((employee) => employee.id === employeeId);
-  const sortedEmployees = [...data.employees].sort((left, right) =>
+  const sortedEmployees = data.employees.filter((employee) => !employee.is_retired).sort((left, right) =>
     left.name.localeCompare(right.name, "ko-KR"),
   );
 
@@ -133,7 +133,7 @@ export default function AssignmentNewPage() {
       <header>
         <h1 className="text-[1.75rem] leading-[1.2]">배정등록</h1>
         <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground mt-2 max-w-[37.5rem]">
-          직원에게 근무지를 배정합니다.
+          근무자에게 근무지를 배정합니다.
         </p>
       </header>
 
@@ -145,7 +145,7 @@ export default function AssignmentNewPage() {
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(22.5rem,2fr)]">
               <div className="space-y-2">
                 <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-employee">
-                  직원
+                  근무자
                 </label>
                 <NativeSelect className="w-full appearance-none" id="assignment-employee" name="employeeId" value={employeeId} onChange={(event) => {
                   const id = event.target.value;

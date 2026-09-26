@@ -21,9 +21,10 @@ describe("assignment new page", () => {
         if (!init && url.endsWith("/api/bootstrap")) {
           return Response.json({
             employees: [
-              { id: "emp-1", name: "홍길동", work_style: "0", in_time: "09:00", out_time: "18:00" },
-              { id: "emp-2", name: "김철수", work_style: "0", in_time: "08:00", out_time: "17:00" },
-              { id: "emp-3", name: "가나다", work_style: "0", in_time: "07:00", out_time: "16:00" },
+              { id: "emp-1", name: "홍길동", is_retired: false, work_style: "0", in_time: "09:00", out_time: "18:00" },
+              { id: "emp-2", name: "김철수", is_retired: false, work_style: "0", in_time: "08:00", out_time: "17:00" },
+              { id: "emp-3", name: "가나다", is_retired: false, work_style: "0", in_time: "07:00", out_time: "16:00" },
+              { id: "emp-4", name: "퇴직자", is_retired: true, work_style: "0", in_time: "07:00", out_time: "16:00" },
             ],
             worksites: [{ id: "work-1", name: "본사" }],
           });
@@ -54,18 +55,19 @@ describe("assignment new page", () => {
     expect(await screen.findByRole("heading", { name: "배정등록" })).toBeInTheDocument();
     expect(screen.getByText("근무기간")).toBeInTheDocument();
     expect(screen.getByText("근무기간").closest("div")).toHaveClass("lg:min-w-[22.5rem]");
-    expect([...screen.getByLabelText("직원").querySelectorAll("option")].map((option) => option.textContent)).toEqual([
+    expect([...screen.getByLabelText("근무자").querySelectorAll("option")].map((option) => option.textContent)).toEqual([
       "선택",
       "가나다",
       "김철수",
       "홍길동",
     ]);
+    expect(screen.queryByText("퇴직자")).not.toBeInTheDocument();
     await user.clear(screen.getByLabelText("시작일"));
     await user.type(screen.getByLabelText("시작일"), "2026-05-21");
     await user.clear(screen.getByLabelText("종료일"));
     await user.type(screen.getByLabelText("종료일"), "2026-05-23");
     await user.selectOptions(screen.getByLabelText("근무지"), "work-1");
-    await user.selectOptions(screen.getByLabelText("직원"), "emp-1");
+    await user.selectOptions(screen.getByLabelText("근무자"), "emp-1");
     expect(screen.getByText("09:00")).toBeInTheDocument();
     expect(screen.getByText("18:00")).toBeInTheDocument();
     expect(screen.queryByLabelText("출근")).not.toBeInTheDocument();

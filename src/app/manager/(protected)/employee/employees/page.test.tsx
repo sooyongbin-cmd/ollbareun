@@ -22,6 +22,7 @@ const bootstrap = {
       phone: "010-9999-8888",
       phone_normalized: "01099998888",
       is_retired: true,
+      retired_at: "2020-04-03T00:00:00+09:00",
       role: "미화원",
     },
   ],
@@ -112,6 +113,7 @@ describe("employee roster page", () => {
     await user.click(screen.getByRole("checkbox", { name: "퇴직" }));
     await user.type(screen.getByLabelText("이름"), "ob");
     expect(await screen.findByRole("link", { name: "Bob" })).toBeInTheDocument();
+    expect(screen.getByText("2020-04-03")).toBeInTheDocument();
     const bobRow = screen.getByRole("link", { name: "Bob" }).closest("tr");
     expect(bobRow).not.toBeNull();
     const bobCells = within(bobRow as HTMLElement).getAllByRole("cell");

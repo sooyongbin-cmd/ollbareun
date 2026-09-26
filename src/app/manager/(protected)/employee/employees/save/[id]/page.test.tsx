@@ -126,6 +126,7 @@ describe("employee save page", () => {
             in_time: "06:00",
             out_time: "06:00",
             is_retired: true,
+            retired_at: "2020-04-03",
           });
           return Response.json({
             employee: {
@@ -137,6 +138,7 @@ describe("employee save page", () => {
               in_time: "06:00",
               out_time: "06:00",
               is_retired: true,
+              retired_at: "2020-04-03T00:00:00+09:00",
             },
           });
         }
@@ -167,6 +169,7 @@ describe("employee save page", () => {
       screen.getByLabelText("직군").closest("div.grid"),
     );
     expect(screen.getByRole("checkbox", { name: "퇴직" })).not.toBeChecked();
+    expect(screen.queryByLabelText("퇴직일")).not.toBeInTheDocument();
     const employeeEducationSection = await screen.findByRole("region", { name: "교육이수 및 근무지배정 정보" });
     expect(within(employeeEducationSection).getByText("본사")).toBeInTheDocument();
     expect(within(employeeEducationSection).getByRole("table")).toBeInTheDocument();
@@ -209,6 +212,9 @@ describe("employee save page", () => {
     await user.clear(screen.getByLabelText("연락처"));
     await user.type(screen.getByLabelText("연락처"), "010-9999-8888");
     await user.click(screen.getByRole("checkbox", { name: "퇴직" }));
+    expect(screen.getByLabelText("퇴직일")).toHaveValue("2026-09-26");
+    await user.clear(screen.getByLabelText("퇴직일"));
+    await user.type(screen.getByLabelText("퇴직일"), "2020-04-03");
     await user.click(screen.getByRole("button", { name: "저장" }));
 
     expect(screen.getByText("변경사항을 저장하시겠습니까?")).toBeInTheDocument();

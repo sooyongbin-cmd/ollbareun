@@ -118,6 +118,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
         name: body.name,
         phone: body.phone,
         is_retired: body.is_retired,
+        retired_at: body.retired_at,
         role: body.role,
         work_style: body.work_style,
         in_time: body.in_time,

@@ -263,6 +263,7 @@ export async function updateEmployee(input: {
   name: unknown;
   phone: unknown;
   is_retired: unknown;
+  retired_at?: unknown;
   role?: unknown;
   work_style?: unknown;
   in_time?: unknown;
@@ -274,6 +275,7 @@ export async function updateEmployee(input: {
   const phone_normalized = normalizePhone(phone);
   const is_retired =
     input.is_retired === true || input.is_retired === "true" || input.is_retired === 1;
+  const retired_at = is_retired ? parseRetiredAt(input.retired_at) : null;
   const role = input.role ? requireString(input.role, "직군") : "경비원";
   if (!["경비원", "미화원", "파견"].includes(role)) {
     throw new Error("올바르지 않은 직군입니다.");
@@ -293,11 +295,7 @@ export async function updateEmployee(input: {
       phone,
       phone_normalized,
       is_retired,
-      retired_at: is_retired
-        ? currentEmployee?.is_retired && currentEmployee.retired_at
-          ? currentEmployee.retired_at
-          : new Date().toISOString()
-        : null,
+      retired_at,
       role,
       ...schedule,
     })
@@ -320,20 +318,20 @@ export async function updateEmployee(input: {
 
 export async function deleteEmployee(id: unknown, supabase: SupabaseClient = getSupabase()) {
   const employeeId = requireString(id, "직원");
-  const { error } = await supabase
-    .from("employees")
-    .update({ is_retired: true, retired_at: new Date().toISOString() })
-    .eq("id", employeeId)
-    .eq("is_retired", false);
+  const { error } = await supabase.from("employees").delete().eq("id", employeeId);
   throwIfError(error);
+}
 
-  const admin = getSupabaseAdmin();
-  const [sessionResult, subscriptionResult] = await Promise.all([
-    admin.from("guard_auth_sessions").update({ revoked_at: new Date().toISOString() }).eq("employee_id", employeeId).is("revoked_at", null),
-    admin.from("push_subscriptions").delete().eq("employee_id", employeeId),
-  ]);
-  throwIfError(sessionResult.error);
-  throwIfError(subscriptionResult.error);
+function parseRetiredAt(value: unknown) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    throw new Error("퇴직일을 연월일 형식으로 입력하세요.");
+  }
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) {
+    throw new Error("올바른 퇴직일을 입력하세요.");
+  }
+  return `${value}T00:00:00+09:00`;
 }
 
 export async function createWorksite(input: {

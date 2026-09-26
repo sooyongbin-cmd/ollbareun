@@ -22,6 +22,7 @@ type Employee = {
   in_time: string;
   out_time: string;
   is_retired: boolean;
+  retired_at: string | null;
   role: "경비원" | "미화원" | "파견";
 };
 
@@ -167,6 +168,7 @@ export default function EmployeeSavePage() {
   const [inTime, setInTime] = useState("06:00");
   const [outTime, setOutTime] = useState("06:00");
   const [isRetired, setIsRetired] = useState(false);
+  const [retiredDate, setRetiredDate] = useState(() => new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" }));
   const [assignments, setAssignments] = useState<EmployeeAssignment[]>([]);
   const [educationCompletions, setEducationCompletions] = useState<EducationCompletion[]>([]);
   const [totalEducationCount, setTotalEducationCount] = useState(0);
@@ -200,6 +202,7 @@ export default function EmployeeSavePage() {
           setInTime((data.employee.in_time ?? "06:00").slice(0, 5));
           setOutTime((data.employee.out_time ?? "06:00").slice(0, 5));
           setIsRetired(data.employee.is_retired);
+          setRetiredDate(data.employee.retired_at?.slice(0, 10) ?? new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" }));
           setAssignments(data.assignments ?? []);
           setEducationCompletions(data.educationCompletions ?? []);
           setTotalEducationCount(data.totalEducationCount ?? 0);
@@ -246,7 +249,7 @@ export default function EmployeeSavePage() {
       await fetchJson<EmployeeMutationResponse>(`/api/employees/${employeeId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, role, is_retired: isRetired, work_style: workStyle, in_time: inTime, out_time: outTime }),
+        body: JSON.stringify({ name, phone, role, is_retired: isRetired, retired_at: retiredDate, work_style: workStyle, in_time: inTime, out_time: outTime }),
       });
 
       setSaveSuccessOpen(true);
@@ -388,10 +391,29 @@ export default function EmployeeSavePage() {
               <label className="flex items-center gap-3 text-[0.875rem] font-semibold text-muted-foreground ml-1">
                 <Checkbox
                   checked={isRetired}
-                  onCheckedChange={(checked) => setIsRetired(checked === true)}
+                  onCheckedChange={(checked) => {
+                    const retired = checked === true;
+                    setIsRetired(retired);
+                    if (retired && !retiredDate) setRetiredDate(new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" }));
+                  }}
                 />
                 퇴직
               </label>
+              {isRetired ? (
+                <div className="space-y-2">
+                  <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="employee-retired-date">
+                    퇴직일
+                  </label>
+                  <Input
+                    className="w-full sm:max-w-xs"
+                    id="employee-retired-date"
+                    type="date"
+                    value={retiredDate}
+                    onChange={(event) => setRetiredDate(event.target.value)}
+                    required
+                  />
+                </div>
+              ) : null}
             </div>
 
             <div className="flex gap-3 [&>button]:w-auto">

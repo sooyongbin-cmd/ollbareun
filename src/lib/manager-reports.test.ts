@@ -460,7 +460,7 @@ describe("manager reports", () => {
     });
   });
 
-  it("allows clearing the clock-out date-time", async () => {
+  it("does not clear an existing clock-out when no clock-out value is entered", async () => {
     const existingQuery = {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
@@ -491,11 +491,22 @@ describe("manager reports", () => {
     expect(update).toHaveBeenCalledWith({
       work_date: "2026-06-04",
       work_intime: "2026-06-04T00:00:00.000Z",
-      work_outtime: null,
-      intime_status: "2",
+      intime_status: "3",
       outtime_status: null,
       updated_at: expect.any(String),
     });
+  });
+
+  it("updates only clock-out when clock-in input is empty", async () => {
+    const existingQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { id: "attendance-1", intime: "2026-06-04T00:00:00.000Z", outtime: "2026-06-04T09:00:00.000Z", work_intime: "2026-06-04T00:00:00.000Z", work_outtime: null }, error: null }),
+    };
+    const update = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: {}, error: null }) }) }) });
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from: vi.fn().mockReturnValueOnce(existingQuery).mockReturnValueOnce({ update }) } as never);
+    await updateAttendanceRecord({ recordId: "attendance-1", clockInDateTime: "", clockOutDateTime: "2026-06-04T18:00" });
+    expect(update).toHaveBeenCalledWith({ work_outtime: "2026-06-04T09:00:00.000Z", intime_status: "3", outtime_status: null, updated_at: expect.any(String) });
   });
 
   it("rejects an invalid calendar date for attendance editing", async () => {

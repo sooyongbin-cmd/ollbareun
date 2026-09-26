@@ -227,7 +227,9 @@ export default function AttendanceReportPage() {
                       <TableCell data-label="퇴근일시">{row.clockOutDateTime ?? "-"}</TableCell>
                       <TableCell data-label="근무시간">{row.workDuration}</TableCell>
                       <TableCell data-label="상태">
-                        {row.status}
+                        <Link href={`/manager/reports/attendance/detail/${row.id}`} className="text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" aria-label={`${row.employeeName} 근태 상세 보기`}>
+                          {row.status}
+                        </Link>
                       </TableCell>
                     </TableRow>
                   ))

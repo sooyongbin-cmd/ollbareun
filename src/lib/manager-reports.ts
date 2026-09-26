@@ -3,6 +3,7 @@ import { durationLabel } from "./work-duration";
 import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
 import { getManagerAttendanceStatus, type ManagerAttendanceStatus } from "./manager-attendance-status";
+import { deriveAttendanceStatuses } from "./attendance-status";
 
 type EmployeeInput = {
   id: string;
@@ -94,6 +95,11 @@ export type AttendanceStatusRow = {
 export type AttendanceRecord = {
   id: string;
   worksiteName: string;
+  workDate: string;
+  workStyle: string;
+  scheduledClockIn: string;
+  scheduledClockOut: string;
+  status: string;
   clockInLatitude: number | null;
   clockInLongitude: number | null;
   clockOutLatitude: number | null;
@@ -314,40 +320,20 @@ function kstDateTimeLocalToIso(value: unknown, label: string) {
   return date.toISOString();
 }
 
-function getAttendanceStatuses(input: {
-  scheduledIn: string | null | undefined;
-  scheduledOut: string | null | undefined;
-  workIn: string;
-  workOut: string | null;
-}) {
-  const isLate = Boolean(input.scheduledIn && new Date(input.workIn).getTime() > new Date(input.scheduledIn).getTime());
-  const isEarlyDeparture = Boolean(
-    input.workOut && input.scheduledOut && new Date(input.workOut).getTime() < new Date(input.scheduledOut).getTime(),
-  );
-
-  return {
-    intime_status: input.workOut && !isEarlyDeparture ? "3" : isLate ? "1" : "2",
-    outtime_status: isEarlyDeparture ? "4" : null,
-  } as const;
-}
-
 export async function updateAttendanceRecord(input: {
   recordId: unknown;
   clockInDateTime: unknown;
-  clockOutDateTime: unknown;
+  clockOutDateTime?: unknown;
 }) {
   if (typeof input.recordId !== "string" || !input.recordId.trim()) {
     throw new Error("근태 기록을 확인할 수 없습니다.");
   }
 
-  const clockInAt = kstDateTimeLocalToIso(input.clockInDateTime, "출근일시");
-  const clockOutAt =
-    input.clockOutDateTime === null || input.clockOutDateTime === undefined || input.clockOutDateTime === ""
-      ? null
-      : kstDateTimeLocalToIso(input.clockOutDateTime, "퇴근일시");
-  if (clockOutAt && new Date(clockOutAt).getTime() < new Date(clockInAt).getTime()) {
-    throw new Error("퇴근일시는 출근일시 이후여야 합니다.");
-  }
+  const hasClockIn = typeof input.clockInDateTime === "string" && input.clockInDateTime.trim() !== "";
+  const hasClockOut = typeof input.clockOutDateTime === "string" && input.clockOutDateTime.trim() !== "";
+  if (!hasClockIn && !hasClockOut) throw new Error("출근일시 또는 퇴근일시를 입력하세요.");
+  const clockInAt = hasClockIn ? kstDateTimeLocalToIso(input.clockInDateTime, "출근일시") : undefined;
+  const clockOutAt = hasClockOut ? kstDateTimeLocalToIso(input.clockOutDateTime, "퇴근일시") : undefined;
 
   const supabase = getSupabaseAdmin();
   const { data: existing, error: existingError } = await supabase
@@ -360,19 +346,23 @@ export async function updateAttendanceRecord(input: {
     throw new Error("근태 기록을 확인할 수 없습니다.");
   }
 
-  const nextWorkOuttime = input.clockOutDateTime !== undefined ? clockOutAt : existing.work_outtime;
-  const statuses = getAttendanceStatuses({
+  const nextWorkIn = clockInAt ?? existing.work_intime;
+  const nextWorkOuttime = clockOutAt ?? existing.work_outtime;
+  if (nextWorkOuttime && !nextWorkIn) throw new Error("퇴근일시를 저장하려면 출근일시가 먼저 등록되어야 합니다.");
+  if (nextWorkOuttime && nextWorkIn && new Date(nextWorkOuttime).getTime() < new Date(nextWorkIn).getTime()) {
+    throw new Error("퇴근일시는 출근일시 이후여야 합니다.");
+  }
+  const statuses = deriveAttendanceStatuses({
     scheduledIn: existing.intime,
     scheduledOut: existing.outtime,
-    workIn: clockInAt,
-    workOut: nextWorkOuttime,
+    workIn: nextWorkIn,
+    workOut: clockInAt ? nextWorkOuttime : (hasClockOut ? clockOutAt : null),
   });
   const { data, error } = await supabase
     .from("work_record")
     .update({
-      work_date: String(input.clockInDateTime).slice(0, 10),
-      work_intime: clockInAt,
-      ...(input.clockOutDateTime !== undefined ? { work_outtime: clockOutAt } : {}),
+      ...(clockInAt ? { work_date: String(input.clockInDateTime).slice(0, 10), work_intime: clockInAt } : {}),
+      ...(clockOutAt ? { work_outtime: clockOutAt } : {}),
       ...statuses,
       updated_at: new Date().toISOString(),
     })
@@ -411,7 +401,7 @@ export async function createAttendanceRecord(input: {
     throw new Error("해당 직원의 같은 날짜 출근 기록이 이미 있습니다.");
   }
 
-  const statuses = getAttendanceStatuses({
+  const statuses = deriveAttendanceStatuses({
     scheduledIn: existing?.intime,
     scheduledOut: existing?.outtime,
     workIn: clockInAt,
@@ -444,7 +434,7 @@ export async function loadAttendanceRecord(
 
   const { data: attendance, error: attendanceError } = await supabase
     .from("work_record")
-    .select("id,employee_id,worksite_id,work_intime,work_outtime,clock_in_latitude,clock_in_longitude,clock_out_latitude,clock_out_longitude")
+    .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime,intime_status,outtime_status,clock_in_latitude,clock_in_longitude,clock_out_latitude,clock_out_longitude")
     .eq("id", recordId)
     .single();
 
@@ -455,7 +445,7 @@ export async function loadAttendanceRecord(
 
   const { data: employee, error: employeeError } = await supabase
     .from("employees")
-    .select("name")
+    .select("name,work_style")
     .eq("id", attendance.employee_id)
     .maybeSingle();
 
@@ -466,9 +456,18 @@ export async function loadAttendanceRecord(
     : { data: null, error: null };
   throwIfError(worksiteResult.error);
 
+  const scheduledIn = toKstDateTime(attendance.intime);
+  const scheduledOut = toKstDateTime(attendance.outtime);
+  const status = attendance.outtime_status === "4" ? "조기퇴근" : intimeStatusLabels[(attendance.intime_status ?? "0") as IntimeStatus];
+
   return {
     id: attendance.id,
     worksiteName: worksiteResult.data?.name ?? "-",
+    workDate: attendance.work_date,
+    workStyle: workStyleLabel(employee?.work_style),
+    scheduledClockIn: scheduledIn?.time ?? "-",
+    scheduledClockOut: scheduledOut?.time ?? "-",
+    status: status ?? "결근",
     clockInLatitude: attendance.clock_in_latitude ?? null,
     clockInLongitude: attendance.clock_in_longitude ?? null,
     clockOutLatitude: attendance.clock_out_latitude ?? null,

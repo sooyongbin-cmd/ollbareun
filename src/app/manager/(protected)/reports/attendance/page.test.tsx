@@ -26,6 +26,7 @@ describe("attendance report page", () => {
         rows: [
           {
             id: "attendance-1",
+            workDate: "2026-06-04",
             employeeName: "김철수",
             workStyle: "일반근무",
             worksiteName: "본사",
@@ -81,6 +82,7 @@ describe("attendance report page", () => {
         rows: [
           {
             id: "attendance-1",
+            workDate: "2026-06-04",
             employeeName: "김철수",
             workStyle: "일반근무",
             worksiteName: "본사",

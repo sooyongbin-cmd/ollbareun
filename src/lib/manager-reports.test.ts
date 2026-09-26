@@ -97,11 +97,12 @@ describe("manager reports", () => {
     expect(rows).toEqual([
       {
         id: "attendance-1",
+        workDate: "2026-03-02",
         employeeName: "김철수",
         workStyle: "일반근무",
         worksiteName: "본사",
         scheduledClockIn: "09:00",
-        scheduledClockOut: "18:00",
+        scheduledClockOut: "2026-03-02 18:00",
         clockInDateTime: "2026-03-02 09:00",
         clockOutDateTime: "2026-03-02 18:30",
         workDuration: "9시간 30분",
@@ -174,7 +175,7 @@ describe("manager reports", () => {
       employeeName: "김철수",
       workStyle: "야간근무",
       scheduledClockIn: "22:00",
-      scheduledClockOut: "06:00",
+      scheduledClockOut: "2026-09-18 06:00",
       clockInDateTime: "-",
       clockOutDateTime: null,
       intimeStatus: "0",

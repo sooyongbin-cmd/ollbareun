@@ -66,6 +66,7 @@ type CompletionInput = {
 
 export type AttendanceReportRow = {
   id: string;
+  workDate: string;
   worksiteName: string;
   employeeName: string;
   workStyle: string;
@@ -210,11 +211,12 @@ export function buildAttendanceReport(input: {
 
       return {
         id: record.id,
+        workDate: record.work_date,
         worksiteName: worksiteNamesById.get(record.worksite_id ?? "") ?? "-",
         employeeName: employeeNamesById.get(record.employee_id) ?? "-",
         workStyle: workStylesByEmployeeId.get(record.employee_id) ?? "-",
         scheduledClockIn: toKstDateTime(scheduledClockInAt)?.time ?? "-",
-        scheduledClockOut: toKstDateTime(scheduledTime?.outtime ?? record.outtime ?? null)?.time ?? "-",
+        scheduledClockOut: toKstDateTime(scheduledTime?.outtime ?? record.outtime ?? null)?.dateTime ?? "-",
         clockInDateTime: toKstDateTime(record.work_intime)?.dateTime ?? "-",
         clockOutDateTime: toKstDateTime(record.work_outtime)?.dateTime ?? null,
         workDuration: durationLabel(record.work_intime, record.work_outtime),

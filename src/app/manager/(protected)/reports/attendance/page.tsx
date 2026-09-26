@@ -11,6 +11,7 @@ import { saveRowsAsXls } from "../export-xls";
 
 type AttendanceReportRow = {
   id: string;
+  workDate: string;
   employeeName: string;
   workStyle: string;
   worksiteName: string;
@@ -113,15 +114,15 @@ export default function AttendanceReportPage() {
 
   async function handleExport() {
     const headers = showEmployeeColumn
-      ? ["이름", "근무형태", "근무지", "출근예정", "퇴근예정", "출근일시", "퇴근일시", "근무시간", "상태"]
-      : ["근무형태", "근무지", "출근예정", "퇴근예정", "출근일시", "퇴근일시", "근무시간", "상태"];
+      ? ["이름", "근무형태", "근무지", "출근일", "출근예정", "퇴근예정", "출근일시", "퇴근일시", "근무시간", "상태"]
+      : ["근무형태", "근무지", "출근일", "출근예정", "퇴근예정", "출근일시", "퇴근일시", "근무시간", "상태"];
     await saveRowsAsXls({
       fileName: `올바름_근태_${employeeName.trim() || "전체"}_${workDate || "전체기간"}`,
       headers,
       rows: rows.map((row) =>
         showEmployeeColumn
-          ? [row.employeeName, row.workStyle, row.worksiteName, row.scheduledClockIn, row.scheduledClockOut, row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration, row.status]
-          : [row.workStyle, row.worksiteName, row.scheduledClockIn, row.scheduledClockOut, row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration, row.status],
+          ? [row.employeeName, row.workStyle, row.worksiteName, row.workDate, row.scheduledClockIn, row.scheduledClockOut, row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration, row.status]
+          : [row.workStyle, row.worksiteName, row.workDate, row.scheduledClockIn, row.scheduledClockOut, row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration, row.status],
       ),
     });
   }
@@ -188,6 +189,7 @@ export default function AttendanceReportPage() {
                   {showEmployeeColumn ? <TableHead className="text-left">이름</TableHead> : null}
                   <TableHead className="text-left">근무형태</TableHead>
                   <TableHead className="text-left">근무지</TableHead>
+                  <TableHead className="text-left">출근일</TableHead>
                   <TableHead className="text-left">출근예정</TableHead>
                   <TableHead className="text-left">퇴근예정</TableHead>
                   <TableHead className="text-left">출근일시</TableHead>
@@ -199,7 +201,7 @@ export default function AttendanceReportPage() {
               <TableBody>
                 {rows.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={showEmployeeColumn ? 9 : 8} className="p-8 text-center text-muted-foreground italic">
+                    <TableCell data-responsive-empty colSpan={showEmployeeColumn ? 10 : 9} className="p-8 text-center text-muted-foreground italic">
                       {searched ? "조회 결과가 없습니다." : "조회 조건을 입력하세요."}
                     </TableCell>
                   </TableRow>
@@ -209,6 +211,7 @@ export default function AttendanceReportPage() {
                       {showEmployeeColumn ? <TableCell data-label="이름">{row.employeeName}</TableCell> : null}
                       <TableCell data-label="근무형태">{row.workStyle}</TableCell>
                       <TableCell data-label="근무지">{row.worksiteName ?? "-"}</TableCell>
+                      <TableCell data-label="출근일">{row.workDate}</TableCell>
                       <TableCell data-label="출근예정">{row.scheduledClockIn}</TableCell>
                       <TableCell data-label="퇴근예정">{row.scheduledClockOut}</TableCell>
                       <TableCell data-label="출근일시">

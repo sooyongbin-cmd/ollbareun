@@ -97,7 +97,7 @@ describe("employee roster page", () => {
     );
     expect(screen.getByText("본사")).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "배정기간" })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "퇴직일" })).toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "퇴직일" })).not.toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "출근" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "교육" })).toBeInTheDocument();
     const aliceRow = screen.getByRole("link", { name: "Alice" }).closest("tr") as HTMLElement;
@@ -112,6 +112,7 @@ describe("employee roster page", () => {
     expect(screen.queryByRole("link", { name: "Bob" })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("checkbox", { name: "퇴직" }));
+    expect(screen.getByRole("columnheader", { name: "퇴직일" })).toBeInTheDocument();
     await user.type(screen.getByLabelText("이름"), "ob");
     expect(await screen.findByRole("link", { name: "Bob" })).toBeInTheDocument();
     expect(screen.getByText("2020-04-03")).toBeInTheDocument();
@@ -124,6 +125,8 @@ describe("employee roster page", () => {
     expect(bobCells[7]).toHaveTextContent("-");
     expect(bobCells[8]).toHaveTextContent("1/2");
     expect(screen.queryByRole("link", { name: "Alice" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("checkbox", { name: "퇴직" }));
+    expect(screen.queryByRole("columnheader", { name: "퇴직일" })).not.toBeInTheDocument();
   });
 
   it("separates employee search controls from the employee list section", async () => {

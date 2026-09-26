@@ -81,10 +81,8 @@ export default function AttendanceReportPage() {
     setSearched(true);
 
     try {
-      const params = new URLSearchParams({
-        employeeName: employeeName.trim(),
-        workDate,
-      });
+      const params = new URLSearchParams({ employeeName: employeeName.trim() });
+      if (workDate) params.set("workDate", workDate);
       const response = await fetch(`/api/manager/reports/attendance?${params.toString()}`);
       const payload = await response.json();
       if (!response.ok) {
@@ -118,7 +116,7 @@ export default function AttendanceReportPage() {
       ? ["이름", "근무형태", "근무지", "출근예정", "퇴근예정", "출근일시", "퇴근일시", "근무시간", "상태"]
       : ["근무형태", "근무지", "출근예정", "퇴근예정", "출근일시", "퇴근일시", "근무시간", "상태"];
     await saveRowsAsXls({
-      fileName: `올바름_근태_${employeeName.trim() || "전체"}_${workDate}`,
+      fileName: `올바름_근태_${employeeName.trim() || "전체"}_${workDate || "전체기간"}`,
       headers,
       rows: rows.map((row) =>
         showEmployeeColumn

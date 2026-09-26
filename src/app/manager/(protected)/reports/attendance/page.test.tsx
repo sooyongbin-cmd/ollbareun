@@ -105,4 +105,18 @@ describe("attendance report page", () => {
       "/manager/reports/attendance/save/attendance-1",
     );
   });
+
+  it("searches all dates when the date filter is cleared", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      if (String(input).endsWith("/api/bootstrap")) return Response.json({ employees: [] });
+      return Response.json({ rows: [] });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<AttendanceReportPage />);
+    await user.clear(screen.getByLabelText("출근날짜"));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/manager/reports/attendance?employeeName="));
+  });
 });

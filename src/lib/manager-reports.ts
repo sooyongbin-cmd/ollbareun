@@ -519,15 +519,15 @@ export function buildEducationReport(input: {
 }
 
 export async function loadAttendanceReport(input: { employeeName: string; workDate: string }) {
-  assertDate(input.workDate);
+  if (input.workDate) assertDate(input.workDate);
   const supabase = getSupabaseAdmin();
+  let workRecordQuery = supabase
+    .from("work_record")
+    .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime,intime_status");
+  if (input.workDate) workRecordQuery = workRecordQuery.eq("work_date", input.workDate);
   const [employeesResult, workRecordResult, worksitesResult, assignmentsResult] = await Promise.all([
     supabase.from("employees").select("id,name,work_style").ilike("name", `%${input.employeeName.trim()}%`),
-    supabase
-      .from("work_record")
-      .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime,intime_status")
-      .eq("work_date", input.workDate)
-      .order("work_date", { ascending: true }),
+    workRecordQuery.order("work_date", { ascending: true }),
     supabase.from("worksites").select("id,name"),
     supabase.from("work_assignments").select("id,employee_id,worksite_id"),
   ]);

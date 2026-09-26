@@ -340,6 +340,7 @@ export default function EmployeeRosterPage() {
                   >
                     이름
                   </SortableHeader>
+                  <TableHead>퇴직일</TableHead>
                   <SortableHeader
                     sortKey="phone"
                     currentSortKey={sortKey}
@@ -376,7 +377,7 @@ export default function EmployeeRosterPage() {
               <TableBody>
                 {sortedEmployees.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={8} className="p-8 text-center text-muted-foreground italic">
+                    <TableCell data-responsive-empty colSpan={9} className="p-8 text-center text-muted-foreground italic">
                       조회 결과에 해당하는 직원이 없습니다.
                     </TableCell>
                   </TableRow>
@@ -390,11 +391,9 @@ export default function EmployeeRosterPage() {
                         >
                           {employee.name}
                         </Link>
-                        {employee.is_retired && employee.retired_at ? (
-                          <span className="ml-2 whitespace-nowrap text-sm font-normal text-muted-foreground">
-                            {employee.retired_at.slice(0, 10)}
-                          </span>
-                        ) : null}
+                      </TableCell>
+                      <TableCell data-label="퇴직일" className="whitespace-nowrap text-muted-foreground">
+                        {employee.is_retired && employee.retired_at ? employee.retired_at.slice(0, 10) : ""}
                       </TableCell>
                       <TableCell data-label="연락처" className="text-muted-foreground">{employee.phone}</TableCell>
                       <TableCell data-label="직군" className="text-muted-foreground">{employee.role}</TableCell>

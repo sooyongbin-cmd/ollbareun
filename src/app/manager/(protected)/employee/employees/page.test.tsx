@@ -97,6 +97,7 @@ describe("employee roster page", () => {
     );
     expect(screen.getByText("본사")).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "배정기간" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "퇴직일" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "출근" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "교육" })).toBeInTheDocument();
     const aliceRow = screen.getByRole("link", { name: "Alice" }).closest("tr") as HTMLElement;
@@ -117,10 +118,11 @@ describe("employee roster page", () => {
     const bobRow = screen.getByRole("link", { name: "Bob" }).closest("tr");
     expect(bobRow).not.toBeNull();
     const bobCells = within(bobRow as HTMLElement).getAllByRole("cell");
-    expect(bobCells[4]).toHaveTextContent("");
+    expect(bobCells[1]).toHaveTextContent("2020-04-03");
     expect(bobCells[5]).toHaveTextContent("");
-    expect(bobCells[6]).toHaveTextContent("-");
-    expect(bobCells[7]).toHaveTextContent("1/2");
+    expect(bobCells[6]).toHaveTextContent("");
+    expect(bobCells[7]).toHaveTextContent("-");
+    expect(bobCells[8]).toHaveTextContent("1/2");
     expect(screen.queryByRole("link", { name: "Alice" })).not.toBeInTheDocument();
   });
 

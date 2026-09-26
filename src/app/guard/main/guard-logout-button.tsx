@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PowerIcon } from "@/components/icons/power-icon";
 import { clearStoredGuardSession, readStoredGuardSession } from "../guard-session-storage";
@@ -87,6 +88,7 @@ type GuardLogoutButtonProps = {
   icon?: "logout" | "power";
   iconSize?: number | string;
   label?: string;
+  onLogoutStart?: () => void;
   showIcon?: boolean;
   variant?: "default" | "outline";
 };
@@ -97,12 +99,17 @@ export default function GuardLogoutButton({
   icon = "power",
   iconSize = 24,
   label = "로그아웃",
+  onLogoutStart,
   showIcon = true,
   variant = "outline",
 }: GuardLogoutButtonProps) {
   const router = useRouter();
+  const [loggingOut, setLoggingOut] = useState(false);
 
   async function handleLogout() {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    onLogoutStart?.();
     const { employeeId, sessionLogId } = readGuardSessionInfo();
     let endpoint: string | null = null;
     let browserSubscription: LogoutPushResult["browserSubscription"] = "not-found";
@@ -180,6 +187,7 @@ export default function GuardLogoutButton({
       type="button"
       aria-label={ariaLabel}
       className={className}
+      disabled={loggingOut}
       onClick={handleLogout}
       variant={variant}
     >

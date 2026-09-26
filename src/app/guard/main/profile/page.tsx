@@ -502,10 +502,11 @@ export default function GuardProfilePage() {
   const [passkeyLoading, setPasskeyLoading] = useState(false);
   const [passkeyMessage, setPasskeyMessage] = useState("");
   const [error, setError] = useState("");
+  const [logoutStarted, setLogoutStarted] = useState(false);
   const [activeModal, setActiveModal] = useState<ModalKind | null>(null);
   const [selectedMonthKey, setSelectedMonthKey] = useState("");
   const [selectedScheduleWeek, setSelectedScheduleWeek] = useState("");
-  const displayedError = error || (!employeeId ? "경비원 정보를 찾을 수 없습니다. 다시 로그인하세요." : "");
+  const displayedError = error || (!employeeId && !logoutStarted ? "경비원 정보를 찾을 수 없습니다. 다시 로그인하세요." : "");
 
   useEffect(() => {
     if (!employeeId) return;
@@ -797,6 +798,7 @@ export default function GuardProfilePage() {
             icon="logout"
             iconSize={19.2}
             label="로그아웃"
+            onLogoutStart={() => setLogoutStarted(true)}
             showIcon
             variant="default"
           />

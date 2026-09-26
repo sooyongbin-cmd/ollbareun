@@ -368,6 +368,8 @@ describe("guard profile page", () => {
     render(<GuardProfilePage />);
     fireEvent.click(await screen.findByRole("button", { name: "내 정보 확인" }));
 
+    expect(screen.queryByText("경비원 정보를 찾을 수 없습니다. 다시 로그인하세요.")).not.toBeInTheDocument();
+
     await waitFor(() => expect(push).toHaveBeenCalledWith("/guard"));
     expect(unsubscribe).toHaveBeenCalled();
     expect(fetchMock).toHaveBeenCalledWith("/api/notifications/unsubscribe", {

@@ -76,6 +76,15 @@ export default function AssignmentDaysOffCalendar({
     }
   });
   const formatTime = (value: string) => new Date(value).toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit", hour12: false });
+  const entriesByDate = new Map<string, { type: "출근" | "퇴근"; value: string }[]>();
+  timesByDate.forEach((times, date) => {
+    const entries = [
+      ...times.intime.map((value) => ({ type: "출근" as const, value })),
+      ...times.outtime.map((value) => ({ type: "퇴근" as const, value })),
+    ];
+    entries.sort((left, right) => formatTime(left.value).localeCompare(formatTime(right.value)));
+    entriesByDate.set(date, entries);
+  });
   const startMonth = monthKey(startDate);
   const endMonth = monthKey(endDate);
   const previousMonth = shiftMonth(currentMonth, -1);
@@ -158,11 +167,8 @@ export default function AssignmentDaysOffCalendar({
                 type="button"
               >
                 <span>{Number(date.slice(-2))}</span>
-                {timesByDate.get(date)?.outtime.map((value, timeIndex) => (
-                  <span className="text-[0.625rem] leading-tight sm:text-xs" key={`out-${date}-${timeIndex}`}><span className="block sm:inline">퇴근 </span>{formatTime(value)}</span>
-                ))}
-                {timesByDate.get(date)?.intime.map((value, timeIndex) => (
-                  <span className="text-[0.625rem] leading-tight sm:text-xs" key={`in-${date}-${timeIndex}`}><span className="block sm:inline">출근 </span>{formatTime(value)}</span>
+                {entriesByDate.get(date)?.map((entry, timeIndex) => (
+                  <span className="text-[0.625rem] leading-tight sm:text-xs" key={`${entry.type}-${date}-${timeIndex}`}><span className="block sm:inline">{entry.type} </span>{formatTime(entry.value)}</span>
                 ))}
                 {daysOff.has(date) ? <span className="sr-only"> 휴무일</span> : null}
               </button>

@@ -531,7 +531,7 @@ describe("guard authentication data rules", () => {
     expect(rpc).not.toHaveBeenCalled();
   });
 
-  it("starts night attendance the day after a first-day holiday when that day is not a holiday", async () => {
+  it("allows a night assignment starting on a holiday when the following date is not a holiday", async () => {
     const supabaseAdmin = {
       from: vi.fn().mockReturnValue({
         select: vi.fn().mockReturnThis(),

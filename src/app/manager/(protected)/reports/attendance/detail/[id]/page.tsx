@@ -28,7 +28,12 @@ export default function AttendanceDetailPage() {
     fetch(`/api/manager/reports/attendance/${id}`).then(async (response) => {
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "근태 기록을 불러오지 못했습니다.");
-      if (active) setRecord((payload as ResponsePayload).attendance);
+      if (active) {
+        const attendance = (payload as ResponsePayload).attendance;
+        setRecord(attendance);
+        setClockInDateTime(toDateTimeLocal(attendance.clockInDateTime));
+        setClockOutDateTime(toDateTimeLocal(attendance.clockOutDateTime));
+      }
     }).catch((loadError) => {
       if (active) setError(loadError instanceof Error ? loadError.message : "근태 기록을 불러오지 못했습니다.");
     }).finally(() => { if (active) setLoading(false); });
@@ -106,4 +111,9 @@ export default function AttendanceDetailPage() {
     <ConfirmModal isOpen={confirmOpen} onClose={() => { if (!saving) setConfirmOpen(false); }} onConfirm={save} title="근태 정보를 저장할까요?" loading={saving} loadingLabel="저장 중입니다..." />
     <AlertModal isOpen={successOpen} onClose={() => { setSuccessOpen(false); router.push("/manager/reports/attendance"); }} title="알림" description="근태 정보가 저장되었습니다." />
   </section>;
+}
+
+function toDateTimeLocal(value: string | null) {
+  if (!value) return "";
+  return value.replace(" ", "T");
 }

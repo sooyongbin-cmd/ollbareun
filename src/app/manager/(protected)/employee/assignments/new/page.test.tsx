@@ -47,7 +47,7 @@ describe("assignment new page", () => {
     );
   });
 
-  it("saves an assignment period and returns to assignment management", async () => {
+  it("saves an assignment period and opens the created assignment detail", async () => {
     const user = userEvent.setup();
 
     render(<AssignmentNewPage />);
@@ -76,6 +76,6 @@ describe("assignment new page", () => {
 
     expect(await screen.findByText("자료를 저장하였습니다.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "확인" }));
-    expect(push).toHaveBeenCalledWith("/manager/employee/assignments");
+    expect(push).toHaveBeenCalledWith("/manager/employee/assignments/save/assign-1");
   });
 });

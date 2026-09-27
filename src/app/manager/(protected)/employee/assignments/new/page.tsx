@@ -61,6 +61,7 @@ export default function AssignmentNewPage() {
   const [employeeId, setEmployeeId] = useState("");
   const [data, setData] = useState<Bootstrap>({ employees: [], worksites: [] });
   const [alertMessage, setAlertMessage] = useState("");
+  const [createdAssignmentId, setCreatedAssignmentId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -116,7 +117,7 @@ export default function AssignmentNewPage() {
     const formData = new FormData(form);
 
     try {
-      await postJson<AssignmentResponse>("/api/assignments", {
+      const result = await postJson<AssignmentResponse>("/api/assignments", {
         employeeId: formData.get("employeeId"),
         worksiteId: formData.get("worksiteId"),
         startDate: formData.get("startDate"),
@@ -125,6 +126,7 @@ export default function AssignmentNewPage() {
         out_time: outTime,
       });
 
+      setCreatedAssignmentId(result.assignment.id);
       setAlertMessage("자료를 저장하였습니다.");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "배정을 처리하지 못했습니다.");
@@ -257,7 +259,9 @@ export default function AssignmentNewPage() {
         isOpen={Boolean(alertMessage)}
         onClose={() => {
           setAlertMessage("");
-          router.push("/manager/employee/assignments");
+          router.push(createdAssignmentId
+            ? `/manager/employee/assignments/save/${createdAssignmentId}`
+            : "/manager/employee/assignments");
         }}
         title="알림"
         description={alertMessage}

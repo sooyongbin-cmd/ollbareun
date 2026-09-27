@@ -312,6 +312,29 @@ describe("guard authentication data rules", () => {
     }));
   });
 
+  it("sends an elapsed clock-out value as integer minutes to the assignment RPC", async () => {
+    const supabaseAdmin = {
+      rpc: vi.fn().mockReturnValue({
+        single: vi.fn().mockResolvedValue({ data: { id: "assignment-1" }, error: null }),
+      }),
+    };
+    vi.mocked(getSupabaseAdmin).mockReturnValue(supabaseAdmin as never);
+
+    await createAssignment({
+      employeeId: "emp-1",
+      worksiteId: "work-1",
+      startDate: "2026-09-28",
+      endDate: "2026-09-29",
+      in_time: "08:00",
+      out_time: "18:00",
+    });
+
+    expect(supabaseAdmin.rpc).toHaveBeenCalledWith("create_assignment_with_daily_attendance", expect.objectContaining({
+      p_in_time: "08:00",
+      p_out_time: 1080,
+    }));
+  });
+
   it("clocks out the latest open attendance record from a previous day", async () => {
     const attendanceQuery = {
       select: vi.fn().mockReturnThis(),

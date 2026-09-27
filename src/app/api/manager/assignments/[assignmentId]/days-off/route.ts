@@ -1,5 +1,6 @@
 import { listAssignmentDaysOff } from "@/lib/assignment-days-off";
 import { getManagerUser } from "@/lib/manager-auth";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 type RouteContext = {
   params: Promise<{ assignmentId: string }>;
@@ -13,8 +14,12 @@ export async function GET(_: Request, { params }: RouteContext) {
     }
 
     const { assignmentId } = await params;
-    const daysOff = await listAssignmentDaysOff(assignmentId);
-    return Response.json({ daysOff });
+    const [daysOff, holidaysResult] = await Promise.all([
+      listAssignmentDaysOff(assignmentId),
+      getSupabaseAdmin().from("public_holidays").select("holiday_date").eq("selected", "Y"),
+    ]);
+    if (holidaysResult.error) throw new Error(holidaysResult.error.message || "공휴일을 불러오지 못했습니다.");
+    return Response.json({ daysOff, holidays: (holidaysResult.data ?? []).map((holiday) => holiday.holiday_date) });
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "휴무일을 불러오지 못했습니다." },

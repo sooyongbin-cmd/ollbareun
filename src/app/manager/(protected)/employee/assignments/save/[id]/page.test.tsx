@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import AssignmentSavePage from "./page";
@@ -51,6 +51,7 @@ describe("assignment save page", () => {
         if (!init && url.endsWith("/api/manager/assignments/assign-1/days-off")) {
           return Response.json({
             daysOff: [{ day_off_date: "2026-05-22" }],
+            holidays: ["2026-05-21"],
           });
         }
 
@@ -214,10 +215,12 @@ describe("assignment save page", () => {
     expect(screen.getByText("토")).toBeInTheDocument();
 
     const firstDayCell = screen.getByRole("button", { name: "2026-05-21 휴무일 지정" });
+    expect(firstDayCell).toHaveClass("bg-orange-100/80");
     expect(firstDayCell.textContent).toContain("출근 06:00");
     const nextDayCell = screen.getByRole("button", { name: "2026-05-22 휴무일 해제" });
     expect(nextDayCell.textContent).toMatch(/퇴근 06:00출근 22:00/);
     const regularShiftCell = screen.getByRole("button", { name: "2026-05-23 휴무일 지정" });
+    expect(regularShiftCell).toHaveClass("bg-orange-100/80");
     expect(regularShiftCell.textContent).toMatch(/출근 08:00퇴근 18:00/);
 
     const existingDayOff = screen.getByRole("button", { name: "2026-05-22 휴무일 해제" });

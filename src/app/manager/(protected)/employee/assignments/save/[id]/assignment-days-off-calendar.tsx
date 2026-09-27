@@ -11,6 +11,7 @@ type Props = {
   endDate: string;
   currentMonth: string;
   daysOff: Set<string>;
+  holidays?: Set<string>;
   pendingDate: string | null;
   disabled: boolean;
   onMonthChange: (month: string) => void;
@@ -54,6 +55,7 @@ export default function AssignmentDaysOffCalendar({
   endDate,
   currentMonth,
   daysOff,
+  holidays = new Set<string>(),
   pendingDate,
   disabled,
   onMonthChange,
@@ -149,6 +151,11 @@ export default function AssignmentDaysOffCalendar({
         <div className="mt-2 grid grid-cols-7 gap-1 sm:gap-2">
           {cells.map((date, index) =>
             date ? (
+              (() => {
+                const dateObject = new Date(`${date}T00:00:00.000Z`);
+                const isWeekend = dateObject.getUTCDay() === 0 || dateObject.getUTCDay() === 6;
+                const isWeekendOrHoliday = isWeekend || holidays.has(date);
+                return (
               <button
                 aria-label={`${date} ${daysOff.has(date) ? "휴무일 해제" : "휴무일 지정"}`}
                 aria-pressed={daysOff.has(date)}
@@ -156,7 +163,9 @@ export default function AssignmentDaysOffCalendar({
                   "flex min-w-0 min-h-24 flex-col items-center justify-start gap-1 px-0.5 py-2 rounded-lg border text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50",
                   daysOff.has(date)
                     ? "border-primary bg-primary text-primary-foreground"
-                    : "border-transparent bg-muted/40 hover:border-primary/40 hover:bg-primary/10",
+                    : isWeekendOrHoliday
+                      ? "border-transparent bg-orange-100/80 hover:border-orange-300 hover:bg-orange-100 dark:bg-orange-950/30 dark:hover:bg-orange-950/50"
+                      : "border-transparent bg-muted/40 hover:border-primary/40 hover:bg-primary/10",
                   date < startDate || date > endDate || disabled || pendingDate === date
                     ? "cursor-not-allowed opacity-40"
                     : "",
@@ -172,6 +181,8 @@ export default function AssignmentDaysOffCalendar({
                 ))}
                 {daysOff.has(date) ? <span className="sr-only"> 휴무일</span> : null}
               </button>
+                );
+              })()
             ) : (
               <div aria-hidden="true" key={`empty-${index}`} />
             ),

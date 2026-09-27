@@ -37,6 +37,7 @@ type AssignmentResponse = {
 
 type DaysOffResponse = {
   daysOff: { day_off_date: string }[];
+  holidays?: string[];
 };
 
 type Bootstrap = {
@@ -79,6 +80,7 @@ export default function AssignmentSavePage() {
   const [currentMonth, setCurrentMonth] = useState("");
   const [dailyAttendance, setDailyAttendance] = useState<DailyAttendance[]>([]);
   const [daysOff, setDaysOff] = useState<Set<string>>(new Set());
+  const [holidays, setHolidays] = useState<Set<string>>(new Set());
   const [pendingDayOff, setPendingDayOff] = useState<string | null>(null);
   const [loading, setLoading] = useState(Boolean(assignmentId));
   const [error, setError] = useState("");
@@ -112,6 +114,7 @@ export default function AssignmentSavePage() {
           setSavedEndDate(assignmentPayload.assignment.end_date);
           setCurrentMonth(assignmentPayload.assignment.start_date.slice(0, 7));
           setDaysOff(new Set((daysOffPayload.daysOff ?? []).map((dayOff) => dayOff.day_off_date)));
+          setHolidays(new Set(daysOffPayload.holidays ?? []));
           setEmployees(bootstrapPayload.employees ?? []);
           setWorksites(bootstrapPayload.worksites ?? []);
         }
@@ -386,6 +389,7 @@ export default function AssignmentSavePage() {
             dailyAttendance={dailyAttendance}
             currentMonth={currentMonth}
             daysOff={daysOff}
+            holidays={holidays}
             disabled={periodChanged}
             endDate={savedEndDate}
             onMonthChange={setCurrentMonth}

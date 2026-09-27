@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import AssignmentSavePage from "./page";
@@ -57,8 +57,8 @@ describe("assignment save page", () => {
         if (!init && url.endsWith("/api/manager/assignments/assign-1/daily-attendance")) {
           return Response.json({
             dailyAttendance: [
-              { work_date: "2026-05-21", intime: "2026-05-20T21:00:00.000Z", outtime: null },
-              { work_date: "2026-05-22", intime: null, outtime: "2026-05-22T21:00:00.000Z" },
+              { work_date: "2026-05-21", intime: "2026-05-20T21:00:00.000Z", outtime: "2026-05-21T21:00:00.000Z" },
+              { work_date: "2026-05-22", intime: "2026-05-22T13:00:00.000Z", outtime: "2026-05-22T21:00:00.000Z" },
               { work_date: "2026-05-23", intime: "2026-05-22T21:00:00.000Z", outtime: null },
             ],
           });
@@ -212,6 +212,11 @@ describe("assignment save page", () => {
     expect(screen.getByText("근무기간 안의 날짜를 선택하면 즉시 휴무일로 저장됩니다.")).toBeInTheDocument();
     expect(screen.getByText("일")).toBeInTheDocument();
     expect(screen.getByText("토")).toBeInTheDocument();
+
+    const firstDayCell = screen.getByRole("button", { name: "2026-05-21 휴무일 지정" });
+    expect(firstDayCell.textContent).toContain("출근 06:00");
+    const nextDayCell = screen.getByRole("button", { name: "2026-05-22 휴무일 해제" });
+    expect(nextDayCell.textContent).toMatch(/퇴근 06:00출근 22:00/);
 
     const existingDayOff = screen.getByRole("button", { name: "2026-05-22 휴무일 해제" });
     expect(existingDayOff).toHaveAttribute("aria-pressed", "true");

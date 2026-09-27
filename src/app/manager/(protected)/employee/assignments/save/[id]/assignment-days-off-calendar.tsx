@@ -59,7 +59,22 @@ export default function AssignmentDaysOffCalendar({
   onMonthChange,
   onToggle,
 }: Props) {
-  const timesByDate = new Map(dailyAttendance.map((row) => [row.work_date, row]));
+  const timesByDate = new Map<string, { intime: string[]; outtime: string[] }>();
+  dailyAttendance.forEach((row) => {
+    const workDateTimes = timesByDate.get(row.work_date) ?? { intime: [], outtime: [] };
+    if (row.intime) workDateTimes.intime.push(row.intime);
+    timesByDate.set(row.work_date, workDateTimes);
+
+    if (row.outtime) {
+      const outDate = new Date(row.outtime);
+      const outDateKey = Number.isNaN(outDate.getTime())
+        ? row.work_date
+        : new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(outDate);
+      const outDateTimes = timesByDate.get(outDateKey) ?? { intime: [], outtime: [] };
+      outDateTimes.outtime.push(row.outtime);
+      timesByDate.set(outDateKey, outDateTimes);
+    }
+  });
   const formatTime = (value: string) => new Date(value).toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit", hour12: false });
   const startMonth = monthKey(startDate);
   const endMonth = monthKey(endDate);
@@ -143,12 +158,12 @@ export default function AssignmentDaysOffCalendar({
                 type="button"
               >
                 <span>{Number(date.slice(-2))}</span>
-                {timesByDate.get(date)?.intime ? (
-                  <span className="text-[0.625rem] leading-tight sm:text-xs"><span className="block sm:inline">출근 </span>{formatTime(timesByDate.get(date)!.intime!)}</span>
-                ) : null}
-                {timesByDate.get(date)?.outtime ? (
-                  <span className="text-[0.625rem] leading-tight sm:text-xs"><span className="block sm:inline">퇴근 </span>{formatTime(timesByDate.get(date)!.outtime!)}</span>
-                ) : null}
+                {timesByDate.get(date)?.outtime.map((value, timeIndex) => (
+                  <span className="text-[0.625rem] leading-tight sm:text-xs" key={`out-${date}-${timeIndex}`}><span className="block sm:inline">퇴근 </span>{formatTime(value)}</span>
+                ))}
+                {timesByDate.get(date)?.intime.map((value, timeIndex) => (
+                  <span className="text-[0.625rem] leading-tight sm:text-xs" key={`in-${date}-${timeIndex}`}><span className="block sm:inline">출근 </span>{formatTime(value)}</span>
+                ))}
                 {daysOff.has(date) ? <span className="sr-only"> 휴무일</span> : null}
               </button>
             ) : (

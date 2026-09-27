@@ -158,9 +158,11 @@ function formatScheduledTime(value: string | null, workDate: string) {
   const workDateNextDay = new Date(Date.UTC(year, month - 1, day + 1)).toISOString().slice(0, 10);
   if (datePart === workDateNextDay) {
     const [hours, minutes] = timePart.split(":").map(Number);
-    return `${String(hours + 24).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+    if (hours + 24 < 24) {
+      return `${String(hours + 24).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+    }
   }
-  return timePart;
+  return datePart === workDateNextDay ? `${datePart} ${timePart}` : timePart;
 }
 
 function getRecordStatus(record: EmployeeAttendance) {

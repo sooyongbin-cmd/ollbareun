@@ -35,7 +35,6 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     return Response.json({
       attendance: await updateAttendanceRecord({
         recordId: id,
-        workDate: body.workDate,
         clockInDateTime: body.clockInDateTime,
         clockOutDateTime: body.clockOutDateTime,
       }),

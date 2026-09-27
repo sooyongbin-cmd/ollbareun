@@ -333,7 +333,6 @@ function kstDateTimeLocalToIso(value: unknown, label: string) {
 
 export async function updateAttendanceRecord(input: {
   recordId: unknown;
-  workDate?: unknown;
   clockInDateTime: unknown;
   clockOutDateTime?: unknown;
 }) {
@@ -343,9 +342,7 @@ export async function updateAttendanceRecord(input: {
 
   const hasClockIn = typeof input.clockInDateTime === "string" && input.clockInDateTime.trim() !== "";
   const hasClockOut = typeof input.clockOutDateTime === "string" && input.clockOutDateTime.trim() !== "";
-  const hasWorkDate = typeof input.workDate === "string" && input.workDate.trim() !== "";
-  if (!hasWorkDate && !hasClockIn && !hasClockOut) throw new Error("출근날짜, 출근일시 또는 퇴근일시를 입력하세요.");
-  if (hasWorkDate) assertDate(input.workDate as string);
+  if (!hasClockIn && !hasClockOut) throw new Error("출근일시 또는 퇴근일시를 입력하세요.");
   const clockInAt = hasClockIn ? kstDateTimeLocalToIso(input.clockInDateTime, "출근일시") : undefined;
   const clockOutAt = hasClockOut ? kstDateTimeLocalToIso(input.clockOutDateTime, "퇴근일시") : undefined;
 
@@ -375,8 +372,7 @@ export async function updateAttendanceRecord(input: {
   const { data, error } = await supabase
     .from("work_record")
     .update({
-      ...(hasWorkDate ? { work_date: input.workDate } : {}),
-      ...(clockInAt ? { work_intime: clockInAt } : {}),
+      ...(clockInAt ? { work_date: String(input.clockInDateTime).slice(0, 10), work_intime: clockInAt } : {}),
       ...(clockOutAt ? { work_outtime: clockOutAt } : {}),
       intime_status: statuses.intime_status,
       ...(hasClockOut || clockInAt ? { outtime_status: statuses.outtime_status } : {}),

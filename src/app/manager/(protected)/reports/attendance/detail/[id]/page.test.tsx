@@ -36,15 +36,15 @@ describe("attendance detail page", () => {
 
     await waitFor(() => {
       expect(screen.getByLabelText("출근날짜")).toHaveValue("2026-09-27");
+      expect(screen.getByLabelText("출근날짜")).toHaveAttribute("readonly");
       expect(screen.getByLabelText("출근일시")).toHaveValue("2026-09-27T09:05");
       expect(screen.getByLabelText("퇴근일시")).toHaveValue("2026-09-27T18:10");
     });
-    fireEvent.change(screen.getByLabelText("출근날짜"), { target: { value: "2026-09-28" } });
     fireEvent.click(screen.getByRole("button", { name: "저장" }));
     fireEvent.click(await screen.findByRole("button", { name: "예" }));
     await waitFor(() => expect(fetchMock).toHaveBeenLastCalledWith("/api/manager/reports/attendance/attendance-1", expect.objectContaining({
       method: "PATCH",
-      body: JSON.stringify({ workDate: "2026-09-28", clockInDateTime: "2026-09-27T09:05", clockOutDateTime: "2026-09-27T18:10" }),
+      body: JSON.stringify({ clockInDateTime: "2026-09-27T09:05", clockOutDateTime: "2026-09-27T18:10" }),
     })));
   });
 

@@ -15,7 +15,6 @@ export default function AttendanceDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [record, setRecord] = useState<AttendanceRecord | null>(null);
-  const [workDate, setWorkDate] = useState("");
   const [clockInDateTime, setClockInDateTime] = useState("");
   const [clockOutDateTime, setClockOutDateTime] = useState("");
   const [loading, setLoading] = useState(true);
@@ -32,7 +31,6 @@ export default function AttendanceDetailPage() {
       if (active) {
         const attendance = (payload as ResponsePayload).attendance;
         setRecord(attendance);
-        setWorkDate(attendance.workDate);
         setClockInDateTime(toDateTimeLocal(attendance.clockInDateTime));
         setClockOutDateTime(toDateTimeLocal(attendance.clockOutDateTime));
       }
@@ -44,8 +42,8 @@ export default function AttendanceDetailPage() {
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!workDate && !clockInDateTime && !clockOutDateTime) {
-      setError("저장할 출근날짜, 출근일시 또는 퇴근일시를 입력하세요.");
+    if (!clockInDateTime && !clockOutDateTime) {
+      setError("저장할 출근일시 또는 퇴근일시를 입력하세요.");
       return;
     }
     setError("");
@@ -61,7 +59,6 @@ export default function AttendanceDetailPage() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          workDate,
           ...(clockInDateTime ? { clockInDateTime } : {}),
           ...(clockOutDateTime ? { clockOutDateTime } : {}),
         }),
@@ -93,7 +90,7 @@ export default function AttendanceDetailPage() {
       {loading ? <ManagerLoadingMessage /> : error && !record ? <p role="alert" className="text-destructive">{error}</p> : record ? <form className="space-y-6" onSubmit={submit}>
         <fieldset className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="근태 조회 정보">
           <div className="space-y-2"><label className="ml-1 text-sm font-semibold text-muted-foreground" htmlFor="attendance-work-date">출근날짜</label>
-            <Input className="w-full" id="attendance-work-date" type="date" value={workDate} onChange={(event) => setWorkDate(event.target.value)} /></div>
+            <Input className="w-full bg-muted/50" id="attendance-work-date" value={record.workDate} readOnly /></div>
           {readOnlyFields.map((field) => <div className="space-y-2" key={field.id}>
             <label className="ml-1 text-sm font-semibold text-muted-foreground" htmlFor={field.id}>{field.label}</label>
             <Input className="w-full bg-muted/50" id={field.id} value={field.value || "-"} readOnly />

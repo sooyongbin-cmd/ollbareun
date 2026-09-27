@@ -217,8 +217,21 @@ export async function createEmployee(
   if (!["경비원", "미화원", "파견"].includes(role)) {
     throw new Error("올바르지 않은 직군입니다.");
   }
-
   const schedule = validateEmployeeSchedule(input);
+
+  const { data: existingEmployees, error: existingEmployeesError } = await supabase
+    .from("employees")
+    .select("name, phone_normalized")
+    .eq("is_retired", false);
+  throwIfError(existingEmployeesError);
+
+  if (existingEmployees?.some((employee) => employee.phone_normalized === phone_normalized)) {
+    throw new Error("동일한 연락처의 근무자가 있습니다.");
+  }
+  if (existingEmployees?.some((employee) => employee.name === name)) {
+    throw new Error("동일한 이름의 근무자가 있습니다.");
+  }
+
   const { data, error } = await supabase
     .from("employees")
     .upsert(

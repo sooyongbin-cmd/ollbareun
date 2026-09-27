@@ -31,14 +31,40 @@ describe("guard authentication data rules", () => {
   });
 
   it("accepts next-day elapsed clock-out input for alternate and night shifts and stores time of day", async () => {
+    const existingEmployeesQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+    };
     const single = vi.fn().mockResolvedValue({ data: { id: "emp-1" }, error: null });
     const upsert = vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ single }) });
-    const supabase = { from: vi.fn().mockReturnValue({ upsert }) };
+    const supabase = { from: vi.fn().mockReturnValueOnce(existingEmployeesQuery).mockReturnValue({ upsert }) };
 
     await createEmployee({ name: "홍길동", phone: "01012345678", work_style: "2", in_time: "22:00", out_time: "30:00" }, supabase as never);
 
     expect(upsert).toHaveBeenCalledWith(expect.objectContaining({ work_style: "2", in_time: "22:00", out_time: 1800 }), { onConflict: "name,phone_normalized" });
     expect(upsert.mock.calls[0][0]).toHaveProperty("out_time", 1800);
+  });
+
+  it("rejects an existing active employee phone number", async () => {
+    const existingEmployeesQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ data: [{ name: "김철수", phone_normalized: "01012345678" }], error: null }),
+    };
+    const supabase = { from: vi.fn().mockReturnValue(existingEmployeesQuery) };
+
+    await expect(createEmployee({ name: "홍길동", phone: "010-1234-5678" }, supabase as never))
+      .rejects.toThrow("동일한 연락처의 근무자가 있습니다.");
+  });
+
+  it("rejects an existing active employee name", async () => {
+    const existingEmployeesQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ data: [{ name: "홍길동", phone_normalized: "01099998888" }], error: null }),
+    };
+    const supabase = { from: vi.fn().mockReturnValue(existingEmployeesQuery) };
+
+    await expect(createEmployee({ name: "홍길동", phone: "010-1234-5678" }, supabase as never))
+      .rejects.toThrow("동일한 이름의 근무자가 있습니다.");
   });
 
   it("rejects over-24 clock-out time for regular shifts", async () => {

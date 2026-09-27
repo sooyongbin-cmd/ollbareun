@@ -452,6 +452,33 @@ export async function createAssignment(input: {
       throw new Error(`근무기간의 마지막날(${end_date})에 출근할 수 없습니다. 근무기간 종료일을 조정하세요.`);
     }
   }
+  if (schedule.work_style === "2" && has_weekend) {
+    const supabase = getSupabaseAdmin();
+    const [year, month, day] = start_date.split("-").map(Number);
+    const nextDay = new Date(Date.UTC(year, month - 1, day + 1)).toISOString().slice(0, 10);
+    const isWeekend = (date: string) => {
+      const [dateYear, dateMonth, dateDay] = date.split("-").map(Number);
+      const dayOfWeek = new Date(Date.UTC(dateYear, dateMonth - 1, dateDay)).getUTCDay();
+      return dayOfWeek === 0 || dayOfWeek === 6;
+    };
+    const dates = [...new Set([start_date, nextDay, end_date])];
+    const holidayResults = await Promise.all(dates.map((date) => supabase
+      .from("public_holidays")
+      .select("holiday_date")
+      .eq("holiday_date", date)
+      .eq("selected", "Y")
+      .maybeSingle()));
+    holidayResults.forEach((result) => throwIfError(result.error));
+    const holidaysByDate = new Map(dates.map((date, index) => [date, Boolean(holidayResults[index].data)]));
+    const isDayOff = (date: string) => isWeekend(date) || holidaysByDate.get(date) === true;
+
+    if (isDayOff(start_date) && isDayOff(nextDay)) {
+      throw new Error(`근무기간의 첫날(${start_date})의 다음날이 휴일입니다.`);
+    }
+    if (isDayOff(end_date)) {
+      throw new Error(`근무기간의 마지막날(${end_date})이 휴일입니다.`);
+    }
+  }
   if (schedule.work_style === "0" && has_weekend) {
     const supabase = getSupabaseAdmin();
     const isWeekend = (date: string) => {

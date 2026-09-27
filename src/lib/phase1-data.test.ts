@@ -510,6 +510,80 @@ describe("guard authentication data rules", () => {
     }));
   });
 
+  it("rejects a night assignment when the first and following dates are holidays", async () => {
+    const rpc = vi.fn();
+    const holidayQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+    };
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from: vi.fn().mockReturnValue(holidayQuery), rpc } as never);
+
+    await expect(createAssignment({
+      employeeId: "emp-1",
+      worksiteId: "work-1",
+      startDate: "2026-05-30",
+      endDate: "2026-06-01",
+      work_style: "2",
+      has_weekend: true,
+    })).rejects.toThrow("근무기간의 첫날(2026-05-30)의 다음날이 휴일입니다.");
+
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("starts night attendance the day after a first-day holiday when that day is not a holiday", async () => {
+    const supabaseAdmin = {
+      from: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        maybeSingle: vi.fn()
+          .mockResolvedValueOnce({ data: { holiday_date: "2026-05-25" }, error: null })
+          .mockResolvedValueOnce({ data: null, error: null })
+          .mockResolvedValueOnce({ data: null, error: null }),
+      }),
+      rpc: vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: { id: "assignment-1" }, error: null }) }),
+    };
+    vi.mocked(getSupabaseAdmin).mockReturnValue(supabaseAdmin as never);
+
+    await createAssignment({
+      employeeId: "emp-1",
+      worksiteId: "work-1",
+      startDate: "2026-05-25",
+      endDate: "2026-05-27",
+      work_style: "2",
+      has_weekend: true,
+    });
+
+    expect(supabaseAdmin.rpc).toHaveBeenCalledWith("create_assignment_with_daily_attendance", expect.objectContaining({
+      p_work_style: "2",
+      p_has_weekend: true,
+    }));
+  });
+
+  it("rejects a night assignment ending on a holiday", async () => {
+    const holidayQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn()
+        .mockResolvedValueOnce({ data: null, error: null })
+        .mockResolvedValueOnce({ data: null, error: null })
+        .mockResolvedValueOnce({ data: { holiday_date: "2026-05-29" }, error: null }),
+    };
+    const rpc = vi.fn();
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from: vi.fn().mockReturnValue(holidayQuery), rpc } as never);
+
+    await expect(createAssignment({
+      employeeId: "emp-1",
+      worksiteId: "work-1",
+      startDate: "2026-05-27",
+      endDate: "2026-05-29",
+      work_style: "2",
+      has_weekend: true,
+    })).rejects.toThrow("근무기간의 마지막날(2026-05-29)이 휴일입니다.");
+
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
   it("sends an elapsed clock-out value as integer minutes to the assignment RPC", async () => {
     const supabaseAdmin = {
       rpc: vi.fn().mockReturnValue({

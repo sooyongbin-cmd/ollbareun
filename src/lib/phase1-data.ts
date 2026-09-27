@@ -443,18 +443,25 @@ export async function createAssignment(input: {
 
   const schedule = validateEmployeeSchedule({ work_style: input.work_style, in_time: input.in_time, out_time: input.out_time });
   if (schedule.work_style === "0" && has_weekend) {
-    const [year, month, day] = start_date.split("-").map(Number);
-    const dayOfWeek = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
     const supabase = getSupabaseAdmin();
-    const holidayResult = await supabase
+    const isWeekend = (date: string) => {
+      const [year, month, day] = date.split("-").map(Number);
+      const dayOfWeek = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+      return dayOfWeek === 0 || dayOfWeek === 6;
+    };
+    const [startHolidayResult, endHolidayResult] = await Promise.all([start_date, end_date].map((date) => supabase
       .from("public_holidays")
       .select("holiday_date")
-      .eq("holiday_date", start_date)
+      .eq("holiday_date", date)
       .eq("selected", "Y")
-      .maybeSingle();
-    throwIfError(holidayResult.error);
-    if (dayOfWeek === 0 || dayOfWeek === 6 || holidayResult.data) {
+      .maybeSingle()));
+    throwIfError(startHolidayResult.error);
+    throwIfError(endHolidayResult.error);
+    if (isWeekend(start_date) || startHolidayResult.data) {
       throw new Error(`근무기간의 첫날(${start_date})이 휴일입니다. 근무기간 시작일을 조정하세요.`);
+    }
+    if (isWeekend(end_date) || endHolidayResult.data) {
+      throw new Error(`근무기간의 마지막날(${end_date})이 휴일입니다. 근무기간 종료일을 조정하세요.`);
     }
   }
   const { data, error } = await getSupabaseAdmin().rpc("create_assignment_with_daily_attendance", {

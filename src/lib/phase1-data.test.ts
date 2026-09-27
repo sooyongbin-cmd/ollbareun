@@ -357,6 +357,56 @@ describe("guard authentication data rules", () => {
     expect(rpc).not.toHaveBeenCalled();
   });
 
+  it("rejects a general assignment ending on a weekend or selected holiday", async () => {
+    const holidayQueries: { eq: ReturnType<typeof vi.fn> }[] = [];
+    const from = vi.fn(() => {
+      const query = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+      };
+      holidayQueries.push(query);
+      return query;
+    });
+    const rpc = vi.fn();
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from, rpc } as never);
+
+    await expect(createAssignment({
+      employeeId: "emp-1",
+      worksiteId: "work-1",
+      startDate: "2026-05-25",
+      endDate: "2026-05-30",
+      work_style: "0",
+      has_weekend: true,
+    })).rejects.toThrow("근무기간의 마지막날(2026-05-30)이 휴일입니다. 근무기간 종료일을 조정하세요.");
+
+    expect(holidayQueries).toHaveLength(2);
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("rejects a general assignment ending on a selected public holiday", async () => {
+    const holidayQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn()
+        .mockResolvedValueOnce({ data: null, error: null })
+        .mockResolvedValueOnce({ data: { holiday_date: "2026-05-29" }, error: null }),
+    };
+    const rpc = vi.fn();
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from: vi.fn().mockReturnValue(holidayQuery), rpc } as never);
+
+    await expect(createAssignment({
+      employeeId: "emp-1",
+      worksiteId: "work-1",
+      startDate: "2026-05-25",
+      endDate: "2026-05-29",
+      work_style: "0",
+      has_weekend: true,
+    })).rejects.toThrow("근무기간의 마지막날(2026-05-29)이 휴일입니다. 근무기간 종료일을 조정하세요.");
+
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
   it("allows a general assignment to start on a holiday when the day-off option is disabled", async () => {
     const supabaseAdmin = {
       rpc: vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: { id: "assignment-1" }, error: null }) }),

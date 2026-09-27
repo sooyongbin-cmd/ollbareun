@@ -38,6 +38,7 @@ describe("guard authentication data rules", () => {
     await createEmployee({ name: "홍길동", phone: "01012345678", work_style: "2", in_time: "22:00", out_time: "30:00" }, supabase as never);
 
     expect(upsert).toHaveBeenCalledWith(expect.objectContaining({ work_style: "2", in_time: "22:00", out_time: "06:00" }), { onConflict: "name,phone_normalized" });
+    expect(upsert.mock.calls[0][0]).not.toHaveProperty("out_time", "30:00");
   });
 
   it("rejects over-24 clock-out time for regular shifts", async () => {

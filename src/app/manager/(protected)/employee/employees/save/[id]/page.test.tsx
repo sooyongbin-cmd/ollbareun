@@ -33,7 +33,7 @@ let employeeDetails = {
       work_date: "2026-05-26",
       worksite_name: "가산지점",
       intime: "2026-05-26T00:00:00.000Z",
-      outtime: "2026-05-26T09:00:00.000Z",
+      outtime: "2026-05-26T21:00:00.000Z",
       intime_status: "2",
       work_intime: "2026-05-26T00:10:00.000Z",
       work_outtime: "2026-05-26T09:10:00.000Z",
@@ -107,7 +107,7 @@ describe("employee save page", () => {
               role: "경비원",
               work_style: "1",
               in_time: "06:00",
-              out_time: "06:00",
+      out_time: "06:00",
               is_retired: false,
             },
             assignments: employeeAssignments,
@@ -124,7 +124,7 @@ describe("employee save page", () => {
             role: "경비원",
             work_style: "1",
             in_time: "06:00",
-            out_time: "06:00",
+      out_time: "30:00",
             is_retired: true,
             retired_at: "2020-04-03",
           });
@@ -169,6 +169,7 @@ describe("employee save page", () => {
       screen.getByLabelText("직군").closest("div.grid"),
     );
     expect(screen.getByRole("checkbox", { name: "퇴직" })).not.toBeChecked();
+    expect(screen.getByLabelText("퇴근")).toHaveValue("30:00");
     expect(screen.queryByLabelText("퇴직일")).not.toBeInTheDocument();
     const employeeEducationSection = await screen.findByRole("region", { name: "교육이수 및 근무지배정 정보" });
     expect(within(employeeEducationSection).getByText("본사")).toBeInTheDocument();
@@ -193,6 +194,8 @@ describe("employee save page", () => {
     expect(within(attendanceSection).getByRole("columnheader", { name: "출근일" })).toBeInTheDocument();
     expect(within(attendanceSection).getByText("2026-05-27")).toBeInTheDocument();
     expect(within(attendanceSection).getByRole("columnheader", { name: "퇴근예정" })).toBeInTheDocument();
+    expect(within(attendanceSection).getByText("30:00")).toBeInTheDocument();
+    expect(within(attendanceSection).getByText("18:00")).toBeInTheDocument();
     expect(within(attendanceSection).getByRole("columnheader", { name: "상태" })).toBeInTheDocument();
     expect(within(attendanceSection).getAllByText("정상출근")).toHaveLength(2);
     const attendanceRows = within(attendanceSection).getAllByRole("row").slice(1);
@@ -213,7 +216,7 @@ describe("employee save page", () => {
     await user.type(screen.getByLabelText("연락처"), "01099998888");
     expect(screen.getByLabelText("연락처")).toHaveValue("010-9999-8888");
     await user.click(screen.getByRole("checkbox", { name: "퇴직" }));
-    expect(screen.getByLabelText("퇴직일")).toHaveValue("2026-09-26");
+    expect(screen.getByLabelText("퇴직일")).toHaveValue(new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" }));
     await user.clear(screen.getByLabelText("퇴직일"));
     await user.type(screen.getByLabelText("퇴직일"), "2020-04-03");
     await user.click(screen.getByRole("button", { name: "저장" }));

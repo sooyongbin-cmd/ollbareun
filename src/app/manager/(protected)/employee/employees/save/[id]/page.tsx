@@ -135,6 +135,26 @@ function formatTime(value: string | null) {
   return new Intl.DateTimeFormat("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Seoul" }).format(date);
 }
 
+function addDayToElapsedTime(value: string) {
+  const [hours, minutes] = value.split(":").map(Number);
+  return `${String(hours + 24).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
+function formatScheduledTime(value: string | null, workDate: string) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  const datePart = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
+  const timePart = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit", hour12: false }).format(date);
+  const [year, month, day] = workDate.split("-").map(Number);
+  const workDateNextDay = new Date(Date.UTC(year, month - 1, day + 1)).toISOString().slice(0, 10);
+  if (datePart === workDateNextDay) {
+    const [hours, minutes] = timePart.split(":").map(Number);
+    return `${String(hours + 24).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+  }
+  return timePart;
+}
+
 function getRecordStatus(record: EmployeeAttendance) {
   const status = getManagerAttendanceStatus({
     intimeStatus: record.intime_status,
@@ -207,7 +227,9 @@ export default function EmployeeSavePage() {
           setRole(data.employee.role);
           setWorkStyle(data.employee.work_style ?? "1");
           setInTime((data.employee.in_time ?? "06:00").slice(0, 5));
-          setOutTime((data.employee.out_time ?? "06:00").slice(0, 5));
+          const storedOutTime = (data.employee.out_time ?? "06:00").slice(0, 5);
+          const storedInTime = (data.employee.in_time ?? "06:00").slice(0, 5);
+          setOutTime(data.employee.work_style !== "0" && storedOutTime <= storedInTime ? addDayToElapsedTime(storedOutTime) : storedOutTime);
           setIsRetired(data.employee.is_retired);
           setRetiredDate(data.employee.retired_at?.slice(0, 10) ?? new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" }));
           setAssignments(data.assignments ?? []);
@@ -378,7 +400,7 @@ export default function EmployeeSavePage() {
                 </div>
                 <div className="space-y-2">
                   <label htmlFor="employee-work-style" className="text-sm font-semibold text-muted-foreground">근무형태</label>
-                  <NativeSelect id="employee-work-style" value={workStyle} onChange={(event) => { setWorkStyle(event.target.value); setInTime(event.target.value === "0" ? "08:00" : event.target.value === "2" ? "22:00" : "06:00"); setOutTime(event.target.value === "0" ? "18:00" : "06:00"); }} required>
+                  <NativeSelect id="employee-work-style" value={workStyle} onChange={(event) => { setWorkStyle(event.target.value); setInTime(event.target.value === "0" ? "08:00" : event.target.value === "2" ? "22:00" : "06:00"); setOutTime(event.target.value === "0" ? "18:00" : "30:00"); }} required>
                     <NativeSelectOption value="0">일반근무</NativeSelectOption>
                     <NativeSelectOption value="1">격일근무</NativeSelectOption>
                     <NativeSelectOption value="2">야간근무</NativeSelectOption>
@@ -392,7 +414,10 @@ export default function EmployeeSavePage() {
                 </div>
                 <div className="space-y-2">
                   <label htmlFor="employee-out-time" className="text-sm font-semibold text-muted-foreground">퇴근</label>
-                  <Input id="employee-out-time" type="time" value={outTime} onChange={(event) => setOutTime(event.target.value)} required />
+                  <Input id="employee-out-time" type="text" inputMode="numeric" placeholder={workStyle === "0" ? "18:00" : "30:00"} pattern={workStyle === "0" ? "([01]\\d|2[0-3]):[0-5]\\d" : "([01]\\d|2[0-3]):[0-5]\\d|([2-4]\\d):[0-5]\\d"} value={outTime} onChange={(event) => setOutTime(event.target.value)} required aria-describedby="employee-out-time-help" />
+                  <p id="employee-out-time-help" className="text-xs text-muted-foreground">
+                    {workStyle === "0" ? "퇴근 시각을 입력하세요. 예: 18:00" : "출근일 기준 경과 시간으로 입력합니다. 다음 날 오전 6시는 30:00으로 입력하세요."}
+                  </p>
                 </div>
               </div>
               <label className="flex items-center gap-3 text-[0.875rem] font-semibold text-muted-foreground ml-1">
@@ -529,7 +554,7 @@ export default function EmployeeSavePage() {
                       <td className="px-4 py-3 font-semibold">{record.worksite_name}</td>
                       <td className="px-4 py-3 text-muted-foreground">{record.work_date}</td>
                       <td className="px-4 py-3 text-muted-foreground">{formatTime(record.intime)}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{formatTime(record.outtime)}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{formatScheduledTime(record.outtime, record.work_date)}</td>
                       <td className="px-4 py-3 text-muted-foreground">{formatDateTime(record.work_intime)}</td>
                       <td className="px-4 py-3 text-muted-foreground">{formatDateTime(record.work_outtime)}</td>
                       <td className="px-4 py-3">{getRecordStatus(record)}</td>

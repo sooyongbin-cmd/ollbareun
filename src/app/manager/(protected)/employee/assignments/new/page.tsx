@@ -6,7 +6,6 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import ManagerLoadingMessage from "../../../manager-loading-message";
-import { SaveIcon } from "@/components/icons/save-icon";
 import AlertModal from "@/components/modals/alert-modal";
 import ProcessingModal from "@/components/modals/processing-modal";
 
@@ -58,6 +57,8 @@ export default function AssignmentNewPage() {
   const [endDate, setEndDate] = useState(() => defaultEndDate(startDate));
   const [inTime, setInTime] = useState("06:00");
   const [outTime, setOutTime] = useState("06:00");
+  const [workStyle, setWorkStyle] = useState<"0" | "1" | "2">("0");
+  const [hasWeekend, setHasWeekend] = useState(true);
   const [employeeId, setEmployeeId] = useState("");
   const [data, setData] = useState<Bootstrap>({ employees: [], worksites: [] });
   const [alertMessage, setAlertMessage] = useState("");
@@ -66,7 +67,6 @@ export default function AssignmentNewPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const router = useRouter();
-  const selectedEmployee = data.employees.find((employee) => employee.id === employeeId);
   const sortedEmployees = data.employees.filter((employee) => !employee.is_retired).sort((left, right) =>
     left.name.localeCompare(right.name, "ko-KR"),
   );
@@ -122,6 +122,8 @@ export default function AssignmentNewPage() {
         worksiteId: formData.get("worksiteId"),
         startDate: formData.get("startDate"),
         endDate: formData.get("endDate"),
+        work_style: workStyle,
+        has_weekend: hasWeekend,
         in_time: inTime,
         out_time: outTime,
       });
@@ -149,7 +151,7 @@ export default function AssignmentNewPage() {
           <ManagerLoadingMessage />
         ) : (
           <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(22.5rem,2fr)]">
+            <div className="grid gap-4 lg:grid-cols-[repeat(4,minmax(0,1fr))_minmax(22.5rem,2fr)]">
               <div className="space-y-2">
                 <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-employee">
                   근무자
@@ -158,6 +160,8 @@ export default function AssignmentNewPage() {
                   const id = event.target.value;
                   const employee = data.employees.find((item) => item.id === id);
                   setEmployeeId(id);
+                  setWorkStyle(employee?.work_style ?? "0");
+                  setHasWeekend(employee?.has_weekend ?? true);
                   setInTime((employee?.in_time ?? "06:00").slice(0, 5));
                   setOutTime(minutesToElapsedTime(employee?.out_time));
                 }} required>
@@ -217,26 +221,38 @@ export default function AssignmentNewPage() {
                   />
                 </div>
               </div>
+              <div className="space-y-2">
+                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-work-style">근무형태</label>
+                <NativeSelect className="w-full appearance-none" id="assignment-work-style" value={workStyle} onChange={(event) => setWorkStyle(event.target.value as "0" | "1" | "2")} required>
+                  <NativeSelectOption value="0">일반근무</NativeSelectOption>
+                  <NativeSelectOption value="1">격일근무</NativeSelectOption>
+                  <NativeSelectOption value="2">야간근무</NativeSelectOption>
+                </NativeSelect>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-in-time">출근</label>
+                <Input className="w-full" id="assignment-in-time" aria-label="출근" type="time" value={inTime} onChange={(event) => setInTime(event.target.value)} required />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-out-time">퇴근</label>
+                <Input className="w-full" id="assignment-out-time" aria-label="퇴근" type="text" inputMode="numeric" pattern={workStyle === "0" ? "([01]\\d|2[0-3]):[0-5]\\d" : "([01]\\d|2[0-3]):[0-5]\\d|([2-4]\\d):[0-5]\\d"} value={outTime} onChange={(event) => setOutTime(event.target.value)} required />
+                <p className="text-xs text-muted-foreground">{workStyle === "0" ? "퇴근 시각을 입력하세요. 예: 18:00" : "출근일 기준 경과 시간으로 입력합니다. 다음 날 오전 6시는 30:00으로 입력하세요."}</p>
+              </div>
+              <label className="flex min-h-10 items-center gap-3 self-end text-sm font-semibold text-muted-foreground ml-1">
+                <input aria-label="휴무적용" checked={hasWeekend} className="size-4 accent-primary" type="checkbox" onChange={(event) => setHasWeekend(event.target.checked)} />
+                휴무적용
+              </label>
             </div>
-
-            {selectedEmployee && (
-              <dl className="grid gap-4 rounded-lg border border-border bg-background p-4 sm:grid-cols-4">
-                <div><dt className="text-sm text-muted-foreground">근무형태</dt><dd className="mt-1 font-semibold">{selectedEmployee.work_style === "0" ? "일반근무" : selectedEmployee.work_style === "2" ? "야간근무" : "격일근무"}</dd></div>
-                <div><dt className="text-sm text-muted-foreground">출근</dt><dd className="mt-1 font-semibold">{inTime}</dd></div>
-                <div><dt className="text-sm text-muted-foreground">퇴근</dt><dd className="mt-1 font-semibold">{outTime}</dd></div>
-                <div><dt className="text-sm text-muted-foreground">휴무적용</dt><dd className="mt-1 font-semibold">{selectedEmployee.has_weekend ? "적용" : "미적용"}</dd></div>
-              </dl>
-            )}
 
             <div className="flex flex-wrap gap-3">
               <Button
-                aria-label="저장"
+                aria-label="배정등록"
                 className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto"
                 data-testid="assignment-submit"
                 disabled={saving}
                 type="submit"
               >
-                <SaveIcon size={20} />
+                배정등록
               </Button>
               <Button
                 aria-label="목록"

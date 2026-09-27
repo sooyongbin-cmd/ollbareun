@@ -325,11 +325,15 @@ describe("guard authentication data rules", () => {
       worksiteId: "work-1",
       startDate: "2026-09-28",
       endDate: "2026-09-29",
+      work_style: "2",
+      has_weekend: false,
       in_time: "08:00",
       out_time: "18:00",
     });
 
     expect(supabaseAdmin.rpc).toHaveBeenCalledWith("create_assignment_with_daily_attendance", expect.objectContaining({
+      p_work_style: "2",
+      p_has_weekend: false,
       p_in_time: "08:00",
       p_out_time: 1080,
     }));

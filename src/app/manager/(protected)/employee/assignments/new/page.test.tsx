@@ -36,8 +36,10 @@ describe("assignment new page", () => {
             worksiteId: "work-1",
             startDate: "2026-05-21",
             endDate: "2026-05-23",
-            in_time: "09:00",
-            out_time: "18:00",
+            work_style: "2",
+            has_weekend: false,
+            in_time: "22:00",
+            out_time: "30:00",
           });
           return Response.json({ assignment: { id: "assign-1" } });
         }
@@ -54,7 +56,8 @@ describe("assignment new page", () => {
 
     expect(await screen.findByRole("heading", { name: "배정등록" })).toBeInTheDocument();
     expect(screen.getByText("근무기간")).toBeInTheDocument();
-    expect(screen.getByText("근무기간").closest("div")).toHaveClass("lg:min-w-[22.5rem]");
+    expect(screen.getByLabelText("근무형태")).toBeInTheDocument();
+    expect(screen.getByLabelText("휴무적용")).toBeChecked();
     expect([...screen.getByLabelText("근무자").querySelectorAll("option")].map((option) => option.textContent)).toEqual([
       "선택",
       "가나다",
@@ -68,12 +71,15 @@ describe("assignment new page", () => {
     await user.type(screen.getByLabelText("종료일"), "2026-05-23");
     await user.selectOptions(screen.getByLabelText("근무지"), "work-1");
     await user.selectOptions(screen.getByLabelText("근무자"), "emp-1");
-    expect(screen.getByText("09:00")).toBeInTheDocument();
-    expect(screen.getByText("18:00")).toBeInTheDocument();
-    expect(screen.getByText("휴무적용").parentElement).toHaveTextContent("적용");
-    expect(screen.queryByLabelText("출근")).not.toBeInTheDocument();
-    expect(screen.queryByLabelText("퇴근")).not.toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "저장" }));
+    expect(screen.getByLabelText("출근")).toHaveValue("09:00");
+    expect(screen.getByLabelText("퇴근")).toHaveValue("18:00");
+    await user.selectOptions(screen.getByLabelText("근무형태"), "2");
+    await user.clear(screen.getByLabelText("출근"));
+    await user.type(screen.getByLabelText("출근"), "22:00");
+    await user.clear(screen.getByLabelText("퇴근"));
+    await user.type(screen.getByLabelText("퇴근"), "30:00");
+    await user.click(screen.getByLabelText("휴무적용"));
+    await user.click(screen.getByRole("button", { name: "배정등록" }));
 
     expect(await screen.findByText("자료를 저장하였습니다.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "확인" }));

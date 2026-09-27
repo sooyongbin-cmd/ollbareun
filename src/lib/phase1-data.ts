@@ -431,6 +431,8 @@ export async function createAssignment(input: {
   worksiteId: unknown;
   startDate?: unknown;
   endDate?: unknown;
+  work_style?: unknown;
+  has_weekend?: unknown;
   in_time?: unknown;
   out_time?: unknown;
 }) {
@@ -438,12 +440,15 @@ export async function createAssignment(input: {
   const worksite_id = requireString(input.worksiteId, "근무지");
   const { start_date, end_date } = requireDateRange(input);
 
-  const schedule = validateEmployeeSchedule({ in_time: input.in_time, out_time: input.out_time });
+  const schedule = validateEmployeeSchedule({ work_style: input.work_style, in_time: input.in_time, out_time: input.out_time });
+  const has_weekend = input.has_weekend === true || input.has_weekend === "true" || input.has_weekend === 1;
   const { data, error } = await getSupabaseAdmin().rpc("create_assignment_with_daily_attendance", {
     p_employee_id: employee_id,
     p_worksite_id: worksite_id,
     p_start_date: start_date,
     p_end_date: end_date,
+    p_work_style: schedule.work_style ?? null,
+    p_has_weekend: has_weekend,
     p_in_time: schedule.in_time ?? null,
     p_out_time: schedule.out_time ?? null,
   }).single();

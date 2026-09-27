@@ -55,8 +55,8 @@ function minutesToElapsedTime(value: number | undefined) {
 export default function AssignmentNewPage() {
   const [startDate, setStartDate] = useState(todayDate);
   const [endDate, setEndDate] = useState(() => defaultEndDate(startDate));
-  const [inTime, setInTime] = useState("06:00");
-  const [outTime, setOutTime] = useState("06:00");
+  const [inTime, setInTime] = useState("08:00");
+  const [outTime, setOutTime] = useState("18:00");
   const [workStyle, setWorkStyle] = useState<"0" | "1" | "2">("0");
   const [hasWeekend, setHasWeekend] = useState(true);
   const [employeeId, setEmployeeId] = useState("");
@@ -226,7 +226,23 @@ export default function AssignmentNewPage() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-testid="assignment-schedule-row">
               <div className="space-y-2">
                 <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-work-style">근무형태</label>
-                <NativeSelect className="w-full appearance-none" id="assignment-work-style" value={workStyle} onChange={(event) => setWorkStyle(event.target.value as "0" | "1" | "2")} required>
+                <NativeSelect className="w-full appearance-none" id="assignment-work-style" value={workStyle} onChange={(event) => {
+                  const nextWorkStyle = event.target.value as "0" | "1" | "2";
+                  setWorkStyle(nextWorkStyle);
+                  if (nextWorkStyle === "1") {
+                    setInTime("06:00");
+                    setOutTime("30:00");
+                    setHasWeekend(false);
+                  } else if (nextWorkStyle === "2") {
+                    setInTime("22:00");
+                    setOutTime("30:00");
+                    setHasWeekend(false);
+                  } else {
+                    setInTime("08:00");
+                    setOutTime("18:00");
+                    setHasWeekend(true);
+                  }
+                }} required>
                   <NativeSelectOption value="0">일반근무</NativeSelectOption>
                   <NativeSelectOption value="1">격일근무</NativeSelectOption>
                   <NativeSelectOption value="2">야간근무</NativeSelectOption>

@@ -57,6 +57,8 @@ describe("assignment new page", () => {
     expect(await screen.findByRole("heading", { name: "배정등록" })).toBeInTheDocument();
     expect(screen.getByText("근무기간")).toBeInTheDocument();
     expect(screen.getByLabelText("근무형태")).toBeInTheDocument();
+    expect(screen.getByLabelText("출근")).toHaveValue("08:00");
+    expect(screen.getByLabelText("퇴근")).toHaveValue("18:00");
     expect(screen.getByLabelText("휴무적용")).toHaveValue("true");
     const primaryRow = screen.getByTestId("assignment-primary-row");
     const scheduleRow = screen.getByTestId("assignment-schedule-row");
@@ -83,15 +85,29 @@ describe("assignment new page", () => {
     expect(screen.getByLabelText("출근")).toHaveValue("09:00");
     expect(screen.getByLabelText("퇴근")).toHaveValue("18:00");
     await user.selectOptions(screen.getByLabelText("근무형태"), "2");
-    await user.clear(screen.getByLabelText("출근"));
-    await user.type(screen.getByLabelText("출근"), "22:00");
-    await user.clear(screen.getByLabelText("퇴근"));
-    await user.type(screen.getByLabelText("퇴근"), "30:00");
-    await user.selectOptions(screen.getByLabelText("휴무적용"), "false");
+    expect(screen.getByLabelText("출근")).toHaveValue("22:00");
+    expect(screen.getByLabelText("퇴근")).toHaveValue("30:00");
+    expect(screen.getByLabelText("휴무적용")).toHaveValue("false");
     await user.click(screen.getByRole("button", { name: "배정등록" }));
 
     expect(await screen.findByText("자료를 저장하였습니다.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "확인" }));
     expect(push).toHaveBeenCalledWith("/manager/employee/assignments/save/assign-1");
+  });
+
+  it("sets schedule defaults when work style changes", async () => {
+    const user = userEvent.setup();
+    render(<AssignmentNewPage />);
+
+    await screen.findByRole("heading", { name: "배정등록" });
+    await user.selectOptions(screen.getByLabelText("근무형태"), "1");
+    expect(screen.getByLabelText("출근")).toHaveValue("06:00");
+    expect(screen.getByLabelText("퇴근")).toHaveValue("30:00");
+    expect(screen.getByLabelText("휴무적용")).toHaveValue("false");
+
+    await user.selectOptions(screen.getByLabelText("근무형태"), "0");
+    expect(screen.getByLabelText("출근")).toHaveValue("08:00");
+    expect(screen.getByLabelText("퇴근")).toHaveValue("18:00");
+    expect(screen.getByLabelText("휴무적용")).toHaveValue("true");
   });
 });

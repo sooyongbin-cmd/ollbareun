@@ -227,7 +227,7 @@ export async function createEmployee(
   throwIfError(existingEmployeesError);
 
   if (existingEmployees?.some((employee) => employee.phone_normalized === phone_normalized)) {
-    throw new Error("동일한 연락처의 근무자가 있습니다.");
+    throw new Error("동일한 연락처가 있습니다.");
   }
   if (existingEmployees?.some((employee) => employee.name === name)) {
     throw new Error("동일한 이름의 근무자가 있습니다.");
@@ -305,10 +305,20 @@ export async function updateEmployee(input: {
   const schedule = validateEmployeeSchedule(input);
   const { data: currentEmployee, error: currentEmployeeError } = await supabase
     .from("employees")
-    .select("is_retired,retired_at")
+    .select("id,is_retired,retired_at")
     .eq("id", id)
     .maybeSingle();
   throwIfError(currentEmployeeError);
+
+  const { data: employeesWithPhone, error: employeesWithPhoneError } = await supabase
+    .from("employees")
+    .select("id")
+    .eq("phone_normalized", phone_normalized);
+  throwIfError(employeesWithPhoneError);
+  if (employeesWithPhone?.some((employee) => employee.id !== id)) {
+    throw new Error("동일한 연락처가 있습니다.");
+  }
+
   const { data, error } = await supabase
     .from("employees")
     .update({

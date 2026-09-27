@@ -54,7 +54,7 @@ describe("guard authentication data rules", () => {
     const supabase = { from: vi.fn().mockReturnValue(existingEmployeesQuery) };
 
     await expect(createEmployee({ name: "홍길동", phone: "010-1234-5678" }, supabase as never))
-      .rejects.toThrow("동일한 연락처의 근무자가 있습니다.");
+      .rejects.toThrow("동일한 연락처가 있습니다.");
   });
 
   it("rejects an existing active employee name", async () => {

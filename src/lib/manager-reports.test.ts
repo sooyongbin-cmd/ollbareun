@@ -401,7 +401,7 @@ describe("manager reports", () => {
     const updateSingle = vi.fn().mockResolvedValue({
       data: {
         id: "attendance-1",
-        work_date: "2026-06-04",
+        work_date: "2026-06-05",
         work_intime: "2026-06-03T23:30:00.000Z",
         work_outtime: "2026-06-04T10:00:00.000Z",
       },
@@ -418,18 +418,19 @@ describe("manager reports", () => {
     await expect(
       updateAttendanceRecord({
         recordId: "attendance-1",
+        workDate: "2026-06-05",
         clockInDateTime: "2026-06-04T08:30",
         clockOutDateTime: "2026-06-04T19:00",
       }),
     ).resolves.toEqual({
       id: "attendance-1",
-      work_date: "2026-06-04",
+      work_date: "2026-06-05",
       work_intime: "2026-06-03T23:30:00.000Z",
       work_outtime: "2026-06-04T10:00:00.000Z",
     });
 
     expect(update).toHaveBeenCalledWith({
-      work_date: "2026-06-04",
+      work_date: "2026-06-05",
       work_intime: "2026-06-03T23:30:00.000Z",
       work_outtime: "2026-06-04T10:00:00.000Z",
       intime_status: "2",
@@ -462,6 +463,7 @@ describe("manager reports", () => {
 
     await updateAttendanceRecord({
       recordId: "attendance-1",
+      workDate: "2026-06-04",
       clockInDateTime: "2026-06-04T09:00",
       clockOutDateTime: "",
     });
@@ -483,8 +485,22 @@ describe("manager reports", () => {
     };
     const update = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: {}, error: null }) }) }) });
     vi.mocked(getSupabaseAdmin).mockReturnValue({ from: vi.fn().mockReturnValueOnce(existingQuery).mockReturnValueOnce({ update }) } as never);
-    await updateAttendanceRecord({ recordId: "attendance-1", clockInDateTime: "", clockOutDateTime: "2026-06-04T18:00" });
-    expect(update).toHaveBeenCalledWith({ work_outtime: "2026-06-04T09:00:00.000Z", intime_status: "2", outtime_status: "2", updated_at: expect.any(String) });
+    await updateAttendanceRecord({ recordId: "attendance-1", workDate: "2026-06-04", clockInDateTime: "", clockOutDateTime: "2026-06-04T18:00" });
+    expect(update).toHaveBeenCalledWith({ work_date: "2026-06-04", work_outtime: "2026-06-04T09:00:00.000Z", intime_status: "2", outtime_status: "2", updated_at: expect.any(String) });
+  });
+
+  it("updates only the attendance work date when the date input changes", async () => {
+    const existingQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { id: "attendance-1", intime: null, outtime: null, work_intime: null, work_outtime: null }, error: null }),
+    };
+    const update = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: {}, error: null }) }) }) });
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from: vi.fn().mockReturnValueOnce(existingQuery).mockReturnValueOnce({ update }) } as never);
+
+    await updateAttendanceRecord({ recordId: "attendance-1", workDate: "2026-06-05", clockInDateTime: "", clockOutDateTime: "" });
+
+    expect(update).toHaveBeenCalledWith({ work_date: "2026-06-05", intime_status: "0", updated_at: expect.any(String) });
   });
 
   it("rejects an invalid calendar date for attendance editing", async () => {

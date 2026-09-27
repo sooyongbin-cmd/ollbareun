@@ -441,6 +441,21 @@ export async function createAssignment(input: {
   const { start_date, end_date } = requireDateRange(input);
 
   const schedule = validateEmployeeSchedule({ work_style: input.work_style, in_time: input.in_time, out_time: input.out_time });
+  if (schedule.work_style === "0") {
+    const startDateValue = new Date(`${start_date}T00:00:00+09:00`);
+    const dayOfWeek = startDateValue.getDay();
+    const supabase = getSupabaseAdmin();
+    const holidayResult = await supabase
+      .from("public_holidays")
+      .select("holiday_date")
+      .eq("holiday_date", start_date)
+      .eq("selected", "Y")
+      .maybeSingle();
+    throwIfError(holidayResult.error);
+    if (dayOfWeek === 0 || dayOfWeek === 6 || holidayResult.data) {
+      throw new Error(`근무기간의 첫날(${start_date})이 휴일입니다. 근무기간 시작일을 조정하세요.`);
+    }
+  }
   const has_weekend = input.has_weekend === true || input.has_weekend === "true" || input.has_weekend === 1;
   const { data, error } = await getSupabaseAdmin().rpc("create_assignment_with_daily_attendance", {
     p_employee_id: employee_id,

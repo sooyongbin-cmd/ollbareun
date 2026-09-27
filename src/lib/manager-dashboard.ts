@@ -35,7 +35,7 @@ type DailyAttendanceInput = {
   intime: string | null;
 };
 
-type IntimeStatus = "0" | "1" | "2" | "3";
+type IntimeStatus = "0" | "1" | "2";
 
 type AttendanceInput = {
   id?: string;
@@ -47,6 +47,7 @@ type AttendanceInput = {
   intime_status: IntimeStatus;
   work_intime: string | null;
   work_outtime: string | null;
+  outtime_status?: "0" | "1" | "2" | null;
 };
 
 type LeaveInput = {
@@ -96,6 +97,9 @@ export type ManagerDashboardData = {
     waitingEmployeesToday: number;
     absentEmployeesToday: number;
     lateEmployeesToday: number;
+    clockedOutEmployeesToday: number;
+    earlyLeaveEmployeesToday: number;
+    notClockedOutEmployeesToday: number;
     attendanceRate: number;
     educationUncompleted: number;
     educationRate: number;
@@ -128,7 +132,7 @@ export type ManagerDashboardData = {
     employeeName: string;
     scheduledClockIn: string;
     clockInDateTime: string;
-    status: "결근" | "지각" | "정상출근" | "정상근무" | "대기";
+    status: "결근" | "지각" | "출근" | "대기";
   }[];
   weeklyLeaveStatus: {
     id: string;
@@ -270,6 +274,9 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
   let waitingEmployeesToday = 0;
   let absentEmployeesToday = 0;
   let lateEmployeesToday = 0;
+  let clockedOutEmployeesToday = 0;
+  let earlyLeaveEmployeesToday = 0;
+  let notClockedOutEmployeesToday = 0;
   todayWorkRecords.forEach((record) => {
     const status = getManagerAttendanceStatus({
       intimeStatus: record.intime_status,
@@ -289,6 +296,11 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       case "출근":
         onTimeEmployeesToday += 1;
         break;
+    }
+    if (record.work_intime) {
+      if (!record.work_outtime) notClockedOutEmployeesToday += 1;
+      else if (record.outtime_status === "1") earlyLeaveEmployeesToday += 1;
+      else clockedOutEmployeesToday += 1;
     }
   });
   const attendanceRate = percent(
@@ -423,11 +435,10 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
     inspectionSiteCount: inspectionSiteCountByWorksite.get(row.worksiteId) ?? 0,
   }));
 
-  const attendanceStatusLabels: Record<IntimeStatus, "결근" | "지각" | "정상출근" | "정상근무"> = {
+  const attendanceStatusLabels: Record<IntimeStatus, "결근" | "지각" | "출근"> = {
     "0": "결근",
     "1": "지각",
-    "2": "정상출근",
-    "3": "정상근무",
+    "2": "출근",
   };
   const attendanceToday = todayWorkRecords
     .map((record) => {
@@ -496,6 +507,9 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       waitingEmployeesToday,
       absentEmployeesToday,
       lateEmployeesToday,
+      clockedOutEmployeesToday,
+      earlyLeaveEmployeesToday,
+      notClockedOutEmployeesToday,
       attendanceRate,
       educationUncompleted,
       educationRate,
@@ -539,7 +553,7 @@ export async function loadManagerDashboardData() {
       supabase.from("worksites").select("id,name"),
       supabase.from("work_assignments").select("id,employee_id,worksite_id,start_date,end_date").lte("start_date", today).gte("end_date", today),
       supabase.from("work_assignments").select("id,employee_id,worksite_id,start_date,end_date").lte("start_date", weekEnd).gte("end_date", weekStart),
-      supabase.from("work_record").select("id,employee_id,worksite_id,work_date,intime,work_intime,work_outtime,intime_status").eq("work_date", today),
+      supabase.from("work_record").select("id,employee_id,worksite_id,work_date,intime,work_intime,work_outtime,intime_status,outtime_status").eq("work_date", today),
       supabase.from("education_resources").select("id"),
       supabase.from("education_completions").select("employee_id,resource_id,is_completed,completed_at"),
       supabase

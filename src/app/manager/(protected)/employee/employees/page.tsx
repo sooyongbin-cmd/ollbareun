@@ -23,7 +23,7 @@ type EmployeeRow = {
 
 type AttendanceRow = {
   employee_id: string;
-  intime_status: "0" | "1" | "2" | "3";
+  intime_status: "0" | "1" | "2";
 };
 
 type EducationResourceRow = {
@@ -181,8 +181,7 @@ export default function EmployeeRosterPage() {
     const statusLabels: Record<AttendanceRow["intime_status"], string> = {
       "0": "결근",
       "1": "지각",
-      "2": "정상출근",
-      "3": "정상근무",
+      "2": "출근",
     };
 
     return new Map(

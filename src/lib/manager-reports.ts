@@ -12,14 +12,14 @@ type EmployeeInput = {
   is_retired?: boolean;
 };
 
-type IntimeStatus = "0" | "1" | "2" | "3";
-type AttendanceReportStatus = "결근" | "지각" | "정상출근" | "정상근무" | "대기";
+type IntimeStatus = "0" | "1" | "2";
+type OuttimeStatus = "0" | "1" | "2";
+type AttendanceReportStatus = "결근" | "지각" | "출근" | "대기";
 
 const intimeStatusLabels: Record<IntimeStatus, Exclude<AttendanceReportStatus, "대기">> = {
   "0": "결근",
   "1": "지각",
-  "2": "정상출근",
-  "3": "정상근무",
+  "2": "출근",
 };
 
 type AttendanceInput = {
@@ -30,6 +30,7 @@ type AttendanceInput = {
   intime?: string | null;
   outtime?: string | null;
   intime_status?: IntimeStatus | null;
+  outtime_status?: OuttimeStatus | null;
   work_intime: string | null;
   work_outtime: string | null;
 };
@@ -77,6 +78,8 @@ export type AttendanceReportRow = {
   workDuration: string;
   intimeStatus: IntimeStatus;
   status: AttendanceReportStatus;
+  outtimeStatus: OuttimeStatus;
+  outtimeLabel: "미퇴근" | "조퇴" | "퇴근";
   isLate: boolean;
 };
 
@@ -101,6 +104,9 @@ export type AttendanceRecord = {
   scheduledClockIn: string;
   scheduledClockOut: string;
   status: string;
+  intimeStatus: IntimeStatus;
+  outtimeStatus: OuttimeStatus;
+  outtimeLabel: "미퇴근" | "조퇴" | "퇴근";
   clockInLatitude: number | null;
   clockInLongitude: number | null;
   clockOutLatitude: number | null;
@@ -202,6 +208,7 @@ export function buildAttendanceReport(input: {
         `${record.employee_id}:${record.worksite_id ?? ""}:${record.work_date}`,
       );
       const intimeStatus = record.intime_status ?? "0";
+      const outtimeStatus = record.outtime_status ?? "0";
       const scheduledClockInAt = scheduledTime?.intime ?? record.intime ?? null;
       const status = getAttendanceReportStatus({
         intimeStatus,
@@ -222,6 +229,8 @@ export function buildAttendanceReport(input: {
         workDuration: durationLabel(record.work_intime, record.work_outtime),
         intimeStatus,
         status,
+        outtimeStatus,
+        outtimeLabel: outtimeStatus === "1" ? "조퇴" : outtimeStatus === "2" ? "퇴근" : "미퇴근",
         isLate: intimeStatus === "1",
       };
     });
@@ -340,7 +349,7 @@ export async function updateAttendanceRecord(input: {
   const supabase = getSupabaseAdmin();
   const { data: existing, error: existingError } = await supabase
     .from("work_record")
-    .select("id,intime,outtime,work_intime,work_outtime")
+    .select("id,intime,outtime,work_intime,work_outtime,intime_status,outtime_status")
     .eq("id", input.recordId)
     .single();
   throwIfError(existingError);
@@ -365,7 +374,8 @@ export async function updateAttendanceRecord(input: {
     .update({
       ...(clockInAt ? { work_date: String(input.clockInDateTime).slice(0, 10), work_intime: clockInAt } : {}),
       ...(clockOutAt ? { work_outtime: clockOutAt } : {}),
-      ...statuses,
+      intime_status: statuses.intime_status,
+      ...(hasClockOut || clockInAt ? { outtime_status: statuses.outtime_status } : {}),
       updated_at: new Date().toISOString(),
     })
     .eq("id", input.recordId)
@@ -460,7 +470,13 @@ export async function loadAttendanceRecord(
 
   const scheduledIn = toKstDateTime(attendance.intime);
   const scheduledOut = toKstDateTime(attendance.outtime);
-  const status = attendance.outtime_status === "4" ? "조기퇴근" : intimeStatusLabels[(attendance.intime_status ?? "0") as IntimeStatus];
+  const derivedStatuses = deriveAttendanceStatuses({
+    scheduledIn: attendance.intime,
+    scheduledOut: attendance.outtime,
+    workIn: attendance.work_intime,
+    workOut: attendance.work_outtime,
+  });
+  const status = intimeStatusLabels[(attendance.intime_status ?? derivedStatuses.intime_status) as IntimeStatus];
 
   return {
     id: attendance.id,
@@ -477,6 +493,9 @@ export async function loadAttendanceRecord(
     employeeName: employee?.name ?? "-",
     clockInDateTime: toKstDateTime(attendance.work_intime)?.dateTime ?? "-",
     clockOutDateTime: toKstDateTime(attendance.work_outtime)?.dateTime ?? null,
+    intimeStatus: (attendance.intime_status ?? derivedStatuses.intime_status) as IntimeStatus,
+    outtimeStatus: (attendance.outtime_status ?? derivedStatuses.outtime_status) as OuttimeStatus,
+    outtimeLabel: (attendance.outtime_status ?? derivedStatuses.outtime_status) === "1" ? "조퇴" : (attendance.outtime_status ?? derivedStatuses.outtime_status) === "2" ? "퇴근" : "미퇴근",
   };
 }
 
@@ -525,7 +544,7 @@ export async function loadAttendanceReport(input: { employeeName: string; workDa
   const supabase = getSupabaseAdmin();
   let workRecordQuery = supabase
     .from("work_record")
-    .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime,intime_status");
+    .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime,intime_status,outtime_status");
   if (input.workDate) workRecordQuery = workRecordQuery.eq("work_date", input.workDate);
   const [employeesResult, workRecordResult, worksitesResult, assignmentsResult] = await Promise.all([
     supabase.from("employees").select("id,name,work_style").ilike("name", `%${input.employeeName.trim()}%`),
@@ -559,7 +578,7 @@ export async function loadAttendanceStatus(input: { date: string }) {
   const [workRecordResult, assignmentsResult, employeesResult, worksitesResult] = await Promise.all([
     supabase
       .from("work_record")
-      .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime,intime_status")
+      .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime,intime_status,outtime_status")
       .eq("work_date", input.date),
     supabase.from("work_assignments").select("id,employee_id,worksite_id"),
     supabase.from("employees").select("id,name,role,work_style,is_retired"),

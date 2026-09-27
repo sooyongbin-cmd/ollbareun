@@ -170,7 +170,7 @@ function getRecordStatus(record: EmployeeAttendance) {
     now: new Date(),
   });
   if (status === "출근") {
-    return record.intime_status === "3" ? "정상근무" : "정상출근";
+    return "출근";
   }
   return status;
 }

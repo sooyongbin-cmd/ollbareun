@@ -69,8 +69,8 @@ export type AttendanceRow = {
   outtime: string | null;
   work_intime: string | null;
   work_outtime: string | null;
-  intime_status: "0" | "1" | "2" | "3";
-  outtime_status: "4" | null;
+  intime_status: "0" | "1" | "2";
+  outtime_status: "0" | "1" | "2";
   clock_in_latitude: number | null;
   clock_in_longitude: number | null;
   clock_out_latitude: number | null;
@@ -882,6 +882,7 @@ export async function clockIn(input: {
     work_date: todayDate(),
     work_intime,
     intime_status,
+    outtime_status: "0",
     clock_in_latitude: latitude,
     clock_in_longitude: longitude,
     updated_at: new Date().toISOString(),
@@ -967,8 +968,8 @@ export async function clockOut(input: {
     .from("work_record")
     .update({
       work_outtime,
-      intime_status: isEarlyDeparture ? attendance.intime_status : "3",
-      outtime_status: isEarlyDeparture ? "4" : null,
+      intime_status: attendance.intime_status,
+      outtime_status: isEarlyDeparture ? "1" : "2",
       clock_out_latitude: latitude,
       clock_out_longitude: longitude,
       updated_at: new Date().toISOString(),

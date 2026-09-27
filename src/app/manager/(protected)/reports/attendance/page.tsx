@@ -20,8 +20,10 @@ type AttendanceReportRow = {
   clockInDateTime: string;
   clockOutDateTime: string | null;
   workDuration: string;
-  intimeStatus: "0" | "1" | "2" | "3";
-  status: "결근" | "지각" | "정상출근" | "정상근무" | "대기";
+  intimeStatus: "0" | "1" | "2";
+  status: "결근" | "지각" | "출근" | "대기";
+  outtimeStatus: "0" | "1" | "2";
+  outtimeLabel: "미퇴근" | "조퇴" | "퇴근";
   isLate: boolean;
 };
 
@@ -114,15 +116,15 @@ export default function AttendanceReportPage() {
 
   async function handleExport() {
     const headers = showEmployeeColumn
-      ? ["이름", "근무형태", "근무지", "출근일", "출근예정", "퇴근예정", "출근일시", "퇴근일시", "근무시간", "상태"]
-      : ["근무형태", "근무지", "출근일", "출근예정", "퇴근예정", "출근일시", "퇴근일시", "근무시간", "상태"];
+      ? ["이름", "근무형태", "근무지", "출근일", "출근예정", "퇴근예정", "출근일시", "퇴근일시", "근무시간", "출근", "퇴근"]
+      : ["근무형태", "근무지", "출근일", "출근예정", "퇴근예정", "출근일시", "퇴근일시", "근무시간", "출근", "퇴근"];
     await saveRowsAsXls({
       fileName: `올바름_근태_${employeeName.trim() || "전체"}_${workDate || "전체기간"}`,
       headers,
       rows: rows.map((row) =>
         showEmployeeColumn
-          ? [row.employeeName, row.workStyle, row.worksiteName, row.workDate, row.scheduledClockIn, row.scheduledClockOut, row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration, row.status]
-          : [row.workStyle, row.worksiteName, row.workDate, row.scheduledClockIn, row.scheduledClockOut, row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration, row.status],
+          ? [row.employeeName, row.workStyle, row.worksiteName, row.workDate, row.scheduledClockIn, row.scheduledClockOut, row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration, row.status, row.outtimeLabel]
+          : [row.workStyle, row.worksiteName, row.workDate, row.scheduledClockIn, row.scheduledClockOut, row.clockInDateTime, row.clockOutDateTime ?? "-", row.workDuration, row.status, row.outtimeLabel],
       ),
     });
   }
@@ -195,13 +197,14 @@ export default function AttendanceReportPage() {
                   <TableHead className="text-left">출근일시</TableHead>
                   <TableHead className="text-left">퇴근일시</TableHead>
                   <TableHead className="text-left">근무시간</TableHead>
-                  <TableHead className="text-left">상태</TableHead>
+                  <TableHead className="text-left">출근</TableHead>
+                  <TableHead className="text-left">퇴근</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {rows.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={showEmployeeColumn ? 10 : 9} className="p-8 text-center text-muted-foreground italic">
+                    <TableCell data-responsive-empty colSpan={showEmployeeColumn ? 11 : 10} className="p-8 text-center text-muted-foreground italic">
                       {searched ? "조회 결과가 없습니다." : "조회 조건을 입력하세요."}
                     </TableCell>
                   </TableRow>
@@ -227,11 +230,12 @@ export default function AttendanceReportPage() {
                       </TableCell>
                       <TableCell data-label="퇴근일시">{row.clockOutDateTime ?? "-"}</TableCell>
                       <TableCell data-label="근무시간">{row.workDuration}</TableCell>
-                      <TableCell data-label="상태">
+                      <TableCell data-label="출근">
                         <Link href={`/manager/reports/attendance/detail/${row.id}`} className="text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" aria-label={`${row.employeeName} 근태 상세 보기`}>
                           {row.status}
                         </Link>
                       </TableCell>
+                      <TableCell data-label="퇴근">{row.outtimeLabel}</TableCell>
                     </TableRow>
                   ))
                 )}

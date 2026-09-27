@@ -1,4 +1,4 @@
-export type ManagerIntimeStatus = "0" | "1" | "2" | "3";
+export type ManagerIntimeStatus = "0" | "1" | "2";
 
 export type ManagerAttendanceStatus = "출근" | "지각" | "대기" | "결근";
 
@@ -18,7 +18,6 @@ export function getManagerAttendanceStatus(input: {
     case "1":
       return "지각";
     case "2":
-    case "3":
       return "출근";
     default:
       return "결근";

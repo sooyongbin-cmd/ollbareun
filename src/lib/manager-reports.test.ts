@@ -30,7 +30,7 @@ describe("manager reports", () => {
       work_intime: "2026-09-09T00:00:00.000Z",
       work_outtime: null,
       intime_status: "2",
-      outtime_status: null,
+          outtime_status: "0",
       updated_at: expect.any(String),
     });
     existingQuery.maybeSingle.mockResolvedValue({ data: { id: "existing", work_intime: "2026-09-09T00:00:00.000Z" }, error: null });
@@ -73,7 +73,8 @@ describe("manager reports", () => {
           outtime: "2026-03-02T09:00:00.000Z",
           work_intime: "2026-03-02T00:00:00.000Z",
           work_outtime: "2026-03-02T09:30:00.000Z",
-          intime_status: "3",
+          intime_status: "2",
+          outtime_status: "2",
         },
         {
           id: "attendance-2",
@@ -106,8 +107,10 @@ describe("manager reports", () => {
         clockInDateTime: "2026-03-02 09:00",
         clockOutDateTime: "2026-03-02 18:30",
         workDuration: "9시간 30분",
-        intimeStatus: "3",
-        status: "정상근무",
+        intimeStatus: "2",
+        status: "출근",
+        outtimeStatus: "2",
+        outtimeLabel: "퇴근",
         isLate: false,
       },
     ]);
@@ -455,8 +458,8 @@ describe("manager reports", () => {
       work_date: "2026-06-04",
       work_intime: "2026-06-03T23:30:00.000Z",
       work_outtime: "2026-06-04T10:00:00.000Z",
-      intime_status: "3",
-      outtime_status: null,
+      intime_status: "2",
+      outtime_status: "2",
       updated_at: expect.any(String),
     });
   });
@@ -492,8 +495,8 @@ describe("manager reports", () => {
     expect(update).toHaveBeenCalledWith({
       work_date: "2026-06-04",
       work_intime: "2026-06-04T00:00:00.000Z",
-      intime_status: "3",
-      outtime_status: null,
+      intime_status: "2",
+      outtime_status: "2",
       updated_at: expect.any(String),
     });
   });
@@ -507,7 +510,7 @@ describe("manager reports", () => {
     const update = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: {}, error: null }) }) }) });
     vi.mocked(getSupabaseAdmin).mockReturnValue({ from: vi.fn().mockReturnValueOnce(existingQuery).mockReturnValueOnce({ update }) } as never);
     await updateAttendanceRecord({ recordId: "attendance-1", clockInDateTime: "", clockOutDateTime: "2026-06-04T18:00" });
-    expect(update).toHaveBeenCalledWith({ work_outtime: "2026-06-04T09:00:00.000Z", intime_status: "3", outtime_status: null, updated_at: expect.any(String) });
+    expect(update).toHaveBeenCalledWith({ work_outtime: "2026-06-04T09:00:00.000Z", intime_status: "2", outtime_status: "2", updated_at: expect.any(String) });
   });
 
   it("rejects an invalid calendar date for attendance editing", async () => {

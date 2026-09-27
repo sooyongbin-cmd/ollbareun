@@ -386,56 +386,6 @@ export async function updateAttendanceRecord(input: {
   return data;
 }
 
-export async function createAttendanceRecord(input: {
-  employeeId: unknown;
-  worksiteId: unknown;
-  clockInDateTime: unknown;
-  clockOutDateTime: unknown;
-}) {
-  if (typeof input.employeeId !== "string" || !input.employeeId.trim()) throw new Error("직원을 선택하세요.");
-  if (typeof input.worksiteId !== "string" || !input.worksiteId.trim()) throw new Error("근무지를 선택하세요.");
-  const clockInAt = kstDateTimeLocalToIso(input.clockInDateTime, "출근일시");
-  const clockOutAt = input.clockOutDateTime === "" || input.clockOutDateTime == null
-    ? null : kstDateTimeLocalToIso(input.clockOutDateTime, "퇴근일시");
-  if (clockOutAt && new Date(clockOutAt).getTime() < new Date(clockInAt).getTime()) {
-    throw new Error("퇴근일시는 출근일시 이후여야 합니다.");
-  }
-  const supabase = getSupabaseAdmin();
-  const workDate = String(input.clockInDateTime).slice(0, 10);
-  const { data: existing, error: existingError } = await supabase
-    .from("work_record")
-    .select("id,intime,outtime,work_intime")
-    .eq("employee_id", input.employeeId)
-    .eq("work_date", workDate)
-    .maybeSingle();
-  throwIfError(existingError);
-  if (existing?.work_intime) {
-    throw new Error("해당 직원의 같은 날짜 출근 기록이 이미 있습니다.");
-  }
-
-  const statuses = deriveAttendanceStatuses({
-    scheduledIn: existing?.intime,
-    scheduledOut: existing?.outtime,
-    workIn: clockInAt,
-    workOut: clockOutAt,
-  });
-  const recordValues = {
-    employee_id: input.employeeId,
-    worksite_id: input.worksiteId,
-    work_date: workDate,
-    work_intime: clockInAt,
-    work_outtime: clockOutAt,
-    ...statuses,
-    updated_at: new Date().toISOString(),
-  };
-  const { data, error } = existing
-    ? await supabase.from("work_record").update(recordValues).eq("id", existing.id).select("id").single()
-    : await supabase.from("work_record").insert(recordValues).select("id").single();
-  if (error?.code === "23505") throw new Error("해당 직원의 같은 날짜 출근 기록이 이미 있습니다.");
-  throwIfError(error);
-  return data;
-}
-
 export async function loadAttendanceRecord(
   recordId: string,
   supabase: SupabaseClient = getSupabase(),

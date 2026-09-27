@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -112,7 +111,7 @@ export default function AttendanceReportPage() {
     return () => window.clearTimeout(timeoutId);
   }, [handleSearch]);
 
-  const showEmployeeColumn = employeeName.trim().length === 0;
+  const showEmployeeColumn = true;
 
   async function handleExport() {
     const headers = showEmployeeColumn
@@ -167,7 +166,6 @@ export default function AttendanceReportPage() {
               onChange={(event) => setWorkDate(event.target.value)}
             />
           </div>
-          <Link href="/manager/reports/attendance/new" className="inline-flex h-[3rem] items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"><span>출근등록</span><ArrowRightIcon size={18} /></Link>
           <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 h-[3rem]" type="button" onClick={handleExport} disabled={rows.length === 0}>
             엑셀
           </Button>
@@ -211,29 +209,21 @@ export default function AttendanceReportPage() {
                 ) : (
                   rows.map((row) => (
                     <TableRow key={row.id}>
-                      {showEmployeeColumn ? <TableCell data-label="이름">{row.employeeName}</TableCell> : null}
+                      {showEmployeeColumn ? <TableCell data-label="이름">
+                        <Link href={`/manager/reports/attendance/detail/${row.id}`} className="text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" aria-label={`${row.employeeName} 근태 상세 보기`}>
+                          {row.employeeName}
+                        </Link>
+                      </TableCell> : null}
                       <TableCell data-label="근무형태">{row.workStyle}</TableCell>
                       <TableCell data-label="근무지">{row.worksiteName ?? "-"}</TableCell>
                       <TableCell data-label="출근일">{row.workDate}</TableCell>
                       <TableCell data-label="출근예정">{row.scheduledClockIn}</TableCell>
                       <TableCell data-label="퇴근예정">{row.scheduledClockOut}</TableCell>
-                      <TableCell data-label="출근일시">
-                        {row.clockInDateTime === "-" ? row.clockInDateTime : (
-                          <Link
-                            href={`/manager/reports/attendance/save/${row.id}`}
-                            className="text-left text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"
-                            aria-label={`${row.clockInDateTime} 근태 기록 수정`}
-                          >
-                            {row.clockInDateTime}
-                          </Link>
-                        )}
-                      </TableCell>
+                      <TableCell data-label="출근일시">{row.clockInDateTime}</TableCell>
                       <TableCell data-label="퇴근일시">{row.clockOutDateTime ?? "-"}</TableCell>
                       <TableCell data-label="근무시간">{row.workDuration}</TableCell>
                       <TableCell data-label="출근">
-                        <Link href={`/manager/reports/attendance/detail/${row.id}`} className="text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" aria-label={`${row.employeeName} 근태 상세 보기`}>
-                          {row.status}
-                        </Link>
+                        {row.status}
                       </TableCell>
                       <TableCell data-label="퇴근">{row.outtimeLabel}</TableCell>
                     </TableRow>

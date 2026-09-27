@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildAttendanceReport, buildAttendanceStatus, buildEducationReport, createAttendanceRecord, loadAttendanceReport, loadAttendanceStatus, updateAttendanceRecord } from "./manager-reports";
+import { buildAttendanceReport, buildAttendanceStatus, buildEducationReport, loadAttendanceReport, loadAttendanceStatus, updateAttendanceRecord } from "./manager-reports";
 import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
 
@@ -12,32 +12,6 @@ vi.mock("./supabase-admin", () => ({
 }));
 
 describe("manager reports", () => {
-  it("inserts a new attendance record in KST with optional clock-out", async () => {
-    const existingQuery = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
-    };
-    const single = vi.fn().mockResolvedValue({ data: { id: "new-1" }, error: null });
-    const insert = vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ single }) });
-    const from = vi.fn().mockReturnValue(existingQuery).mockReturnValueOnce(existingQuery).mockReturnValueOnce({ insert });
-    vi.mocked(getSupabaseAdmin).mockReturnValue({ from } as never);
-    await createAttendanceRecord({ employeeId: "emp-1", worksiteId: "site-1", clockInDateTime: "2026-09-09T09:00", clockOutDateTime: "" });
-    expect(insert).toHaveBeenCalledWith({
-      employee_id: "emp-1",
-      worksite_id: "site-1",
-      work_date: "2026-09-09",
-      work_intime: "2026-09-09T00:00:00.000Z",
-      work_outtime: null,
-      intime_status: "2",
-          outtime_status: "0",
-      updated_at: expect.any(String),
-    });
-    existingQuery.maybeSingle.mockResolvedValue({ data: { id: "existing", work_intime: "2026-09-09T00:00:00.000Z" }, error: null });
-    await expect(createAttendanceRecord({ employeeId: "emp-1", worksiteId: "site-1", clockInDateTime: "2026-09-09T09:00", clockOutDateTime: "" })).rejects.toThrow("이미 있습니다");
-    await expect(createAttendanceRecord({ employeeId: "emp-1", worksiteId: "site-1", clockInDateTime: "2026-09-09T09:00", clockOutDateTime: "2026-09-09T08:00" })).rejects.toThrow("이후여야");
-  });
-
   it("does not update clock-out when it is omitted", async () => {
     const existingQuery = {
       select: vi.fn().mockReturnThis(),

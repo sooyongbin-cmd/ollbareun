@@ -68,15 +68,16 @@ describe("attendance report page", () => {
     expect(screen.getByRole("columnheader", { name: "출근" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "퇴근" })).toBeInTheDocument();
     expect(screen.getByText("퇴근", { selector: "td" })).toBeInTheDocument();
-    expect(screen.queryByRole("columnheader", { name: "이름" })).not.toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "이름" })).toBeInTheDocument();
     expect(screen.queryByRole("columnheader", { name: "수정" })).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /2026-06-04 09:00 근태 기록 수정/ })).toHaveAttribute(
-      "href",
-      "/manager/reports/attendance/save/attendance-1",
+    expect(screen.getByRole("link", { name: "김철수 근태 상세 보기" })).toHaveAttribute(
+      "href", "/manager/reports/attendance/detail/attendance-1",
     );
+    expect(screen.getByText("2026-06-04 09:00", { selector: "td" })).not.toHaveAttribute("href");
+    expect(screen.queryByRole("link", { name: /출근등록/ })).not.toBeInTheDocument();
   });
 
-  it("links an attendance row to its edit page", async () => {
+  it("links the employee name to attendance details", async () => {
     const user = userEvent.setup();
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
@@ -109,9 +110,8 @@ describe("attendance report page", () => {
     render(<AttendanceReportPage />);
     await waitFor(() => expect(document.querySelector('datalist option[value="김철수"]')).toBeInTheDocument());
     await user.type(screen.getByLabelText("직원이름"), "김철수");
-    expect(await screen.findByRole("link", { name: /2026-06-04 09:00 근태 기록 수정/ })).toHaveAttribute(
-      "href",
-      "/manager/reports/attendance/save/attendance-1",
+    expect(await screen.findByRole("link", { name: "김철수 근태 상세 보기" })).toHaveAttribute(
+      "href", "/manager/reports/attendance/detail/attendance-1",
     );
   });
 

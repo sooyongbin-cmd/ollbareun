@@ -31,6 +31,8 @@ describe("employee new page", () => {
 
     const options = Array.from(roleSelect.options).map((opt) => opt.value);
     expect(options).toEqual(["경비원", "미화원", "파견"]);
+    expect(screen.getByLabelText("퇴근")).toHaveValue("30:00");
+    expect(screen.getByText(/다음 날 오전 6시는 30:00/)).toBeInTheDocument();
   });
 
   it("submits the registration form with selected role and navigates on success", async () => {
@@ -69,5 +71,22 @@ describe("employee new page", () => {
 
     await user.click(screen.getByRole("button", { name: "확인" }));
     expect(push).toHaveBeenCalledWith("/manager/employee/employees");
+  });
+
+  it("submits a next-day clock-out time as its stored clock value", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      const body = JSON.parse(String(init?.body));
+      expect(body).toMatchObject({ work_style: "1", in_time: "06:00", out_time: "06:00" });
+      return Response.json({ employee: { id: "emp-1", name: "홍길동", phone: "010-1234-5678", role: "경비원" } });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<EmployeeNewPage />);
+    await user.type(screen.getByLabelText("직원이름"), "홍길동");
+    await user.type(screen.getByLabelText("연락처"), "01012345678");
+    await user.click(screen.getByRole("button", { name: "저장" }));
+
+    expect(await screen.findByText(/등록완료/)).toBeInTheDocument();
   });
 });

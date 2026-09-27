@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { authenticateGuard, clockIn, clockOut, createAssignment, deleteAssignment, deleteAssignmentAfterToday, deleteAssignmentIncludingAttendance, listAssignments, listAssignmentsForEmployee } from "./phase1-data";
+import { authenticateGuard, clockIn, clockOut, createAssignment, createEmployee, deleteAssignment, deleteAssignmentAfterToday, deleteAssignmentIncludingAttendance, listAssignments, listAssignmentsForEmployee } from "./phase1-data";
 import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
 import { getAssignmentDayOffCounts, isAssignmentDayOff } from "./assignment-days-off";
@@ -28,6 +28,20 @@ describe("guard authentication data rules", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  it("accepts next-day elapsed clock-out input for alternate and night shifts and stores time of day", async () => {
+    const single = vi.fn().mockResolvedValue({ data: { id: "emp-1" }, error: null });
+    const upsert = vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ single }) });
+    const supabase = { from: vi.fn().mockReturnValue({ upsert }) };
+
+    await createEmployee({ name: "홍길동", phone: "01012345678", work_style: "2", in_time: "22:00", out_time: "30:00" }, supabase as never);
+
+    expect(upsert).toHaveBeenCalledWith(expect.objectContaining({ work_style: "2", in_time: "22:00", out_time: "06:00" }), { onConflict: "name,phone_normalized" });
+  });
+
+  it("rejects over-24 clock-out time for regular shifts", async () => {
+    await expect(createEmployee({ name: "홍길동", phone: "01012345678", work_style: "0", in_time: "08:00", out_time: "30:00" }, {} as never)).rejects.toThrow("퇴근시간을 올바르게 입력하세요.");
   });
 
   it("rejects retired employees before creating a guard session", async () => {

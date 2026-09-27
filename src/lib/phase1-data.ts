@@ -184,17 +184,20 @@ export async function loadBootstrap() {
 
 function validateEmployeeSchedule(input: { work_style?: unknown; in_time?: unknown; out_time?: unknown }) {
   const schedule: { work_style?: string; in_time?: string; out_time?: string } = {};
+  let workStyle = input.work_style;
   if (input.work_style !== undefined) {
     if (input.work_style !== "0" && input.work_style !== "1" && input.work_style !== "2") throw new Error("올바르지 않은 근무형태입니다.");
     schedule.work_style = input.work_style;
+    workStyle = input.work_style;
   }
   for (const key of ["in_time", "out_time"] as const) {
     const value = input[key];
     if (value !== undefined) {
-      if (typeof value !== "string" || !/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/.test(value)) {
+      const isOver24OutTime = key === "out_time" && workStyle !== "0" && typeof value === "string" && /^([2-4]\d):[0-5]\d$/.test(value);
+      if (typeof value !== "string" || (!isOver24OutTime && !/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/.test(value))) {
         throw new Error(key === "in_time" ? "출근시간을 올바르게 입력하세요." : "퇴근시간을 올바르게 입력하세요.");
       }
-      schedule[key] = value;
+      schedule[key] = isOver24OutTime ? `${String(Number(value.slice(0, 2)) - 24).padStart(2, "0")}:${value.slice(3)}` : value;
     }
   }
   return schedule;

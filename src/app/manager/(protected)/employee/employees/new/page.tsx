@@ -37,7 +37,7 @@ export default function EmployeeNewPage() {
   const [phone, setPhone] = useState("");
   const [workStyle, setWorkStyle] = useState("1");
   const [inTime, setInTime] = useState("06:00");
-  const [outTime, setOutTime] = useState("06:00");
+  const [outTime, setOutTime] = useState("30:00");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -128,7 +128,7 @@ export default function EmployeeNewPage() {
             </div>
             <div className="space-y-2">
               <label htmlFor="employee-work-style" className="text-sm font-semibold text-muted-foreground">근무형태</label>
-              <NativeSelect id="employee-work-style" value={workStyle} onChange={(event) => { setWorkStyle(event.target.value); setInTime(event.target.value === "0" ? "08:00" : event.target.value === "2" ? "22:00" : "06:00"); setOutTime(event.target.value === "0" ? "18:00" : "06:00"); }} required>
+              <NativeSelect id="employee-work-style" value={workStyle} onChange={(event) => { setWorkStyle(event.target.value); setInTime(event.target.value === "0" ? "08:00" : event.target.value === "2" ? "22:00" : "06:00"); setOutTime(event.target.value === "0" ? "18:00" : "30:00"); }} required>
                 <NativeSelectOption value="0">일반근무</NativeSelectOption>
                 <NativeSelectOption value="1">격일근무</NativeSelectOption>
                 <NativeSelectOption value="2">야간근무</NativeSelectOption>
@@ -141,7 +141,10 @@ export default function EmployeeNewPage() {
               </div>
               <div className="space-y-2">
                 <label htmlFor="employee-out-time" className="text-sm font-semibold text-muted-foreground">퇴근</label>
-                <Input id="employee-out-time" type="time" value={outTime} onChange={(event) => setOutTime(event.target.value)} required />
+                <Input id="employee-out-time" type="text" inputMode="numeric" placeholder={workStyle === "0" ? "18:00" : "30:00"} pattern={workStyle === "0" ? "([01]\\d|2[0-3]):[0-5]\\d" : "([01]\\d|2[0-3]):[0-5]\\d|([2-4]\\d):[0-5]\\d"} value={outTime} onChange={(event) => setOutTime(event.target.value)} required aria-describedby="employee-out-time-help" />
+                <p id="employee-out-time-help" className="text-xs text-muted-foreground">
+                  {workStyle === "0" ? "퇴근 시각을 입력하세요. 예: 18:00" : "출근일 기준 경과 시간으로 입력합니다. 다음 날 오전 6시는 30:00으로 입력하세요."}
+                </p>
               </div>
             </div>
           </div>

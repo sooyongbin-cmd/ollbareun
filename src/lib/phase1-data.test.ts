@@ -464,6 +464,45 @@ describe("guard authentication data rules", () => {
     }));
   });
 
+  it("rejects a night-shift assignment when the final date has no clock-in", async () => {
+    const rpc = vi.fn();
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ rpc } as never);
+
+    await expect(createAssignment({
+      employeeId: "emp-1",
+      worksiteId: "work-1",
+      startDate: "2026-05-25",
+      endDate: "2026-05-25",
+      work_style: "2",
+      has_weekend: false,
+    })).rejects.toThrow("근무기간의 마지막날(2026-05-25)에 출근할 수 없습니다. 근무기간 종료일을 조정하세요.");
+
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("allows a night-shift assignment when the final date has a generated clock-in", async () => {
+    const supabaseAdmin = {
+      rpc: vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: { id: "assignment-1" }, error: null }) }),
+    };
+    vi.mocked(getSupabaseAdmin).mockReturnValue(supabaseAdmin as never);
+
+    await createAssignment({
+      employeeId: "emp-1",
+      worksiteId: "work-1",
+      startDate: "2026-05-25",
+      endDate: "2026-05-27",
+      work_style: "2",
+      has_weekend: false,
+    });
+
+    expect(supabaseAdmin.rpc).toHaveBeenCalledWith("create_assignment_with_daily_attendance", expect.objectContaining({
+      p_work_style: "2",
+      p_has_weekend: false,
+      p_start_date: "2026-05-25",
+      p_end_date: "2026-05-27",
+    }));
+  });
+
   it("sends an elapsed clock-out value as integer minutes to the assignment RPC", async () => {
     const supabaseAdmin = {
       rpc: vi.fn().mockReturnValue({

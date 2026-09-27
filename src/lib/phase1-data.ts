@@ -442,13 +442,16 @@ export async function createAssignment(input: {
   const has_weekend = input.has_weekend === true || input.has_weekend === "true" || input.has_weekend === 1;
 
   const schedule = validateEmployeeSchedule({ work_style: input.work_style, in_time: input.in_time, out_time: input.out_time });
-  if (schedule.work_style === "1" && !has_weekend) {
+  if ((schedule.work_style === "1" || schedule.work_style === "2") && !has_weekend) {
     const [startYear, startMonth, startDay] = start_date.split("-").map(Number);
     const [endYear, endMonth, endDay] = end_date.split("-").map(Number);
     const startTimestamp = Date.UTC(startYear, startMonth - 1, startDay);
     const endTimestamp = Date.UTC(endYear, endMonth - 1, endDay);
     const dayOffset = (endTimestamp - startTimestamp) / 86_400_000;
-    if (dayOffset % 2 !== 0) {
+    const lastDayHasClockIn = schedule.work_style === "1"
+      ? dayOffset % 2 === 0
+      : dayOffset > 0;
+    if (!lastDayHasClockIn) {
       throw new Error(`근무기간의 마지막날(${end_date})에 출근할 수 없습니다. 근무기간 종료일을 조정하세요.`);
     }
   }

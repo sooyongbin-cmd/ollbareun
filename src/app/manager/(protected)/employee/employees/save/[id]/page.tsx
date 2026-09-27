@@ -288,7 +288,7 @@ export default function EmployeeSavePage() {
       await fetchJson<EmployeeMutationResponse>(`/api/employees/${employeeId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: phone.replace(/\D/g, ""), role, is_retired: isRetired, retired_at: retiredDate, work_style: workStyle, in_time: inTime, out_time: outTime, has_weekend: hasWeekend }),
+        body: JSON.stringify({ name, phone: phone.replace(/\D/g, ""), role, is_retired: isRetired, retired_at: retiredDate, work_style: workStyle, in_time: inTime, out_time: outTime, has_weekend: hasWeekend }),
       });
 
       setSaveSuccessOpen(true);

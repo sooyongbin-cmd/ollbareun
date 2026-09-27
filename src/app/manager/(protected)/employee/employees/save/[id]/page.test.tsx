@@ -120,6 +120,7 @@ describe("employee save page", () => {
         if (init?.method === "PATCH" && url.endsWith("/api/employees/emp-1")) {
           const body = JSON.parse(String(init.body));
           expect(body).toEqual({
+            name: "Alice",
             phone: "01099998888",
             role: "경비원",
             work_style: "1",

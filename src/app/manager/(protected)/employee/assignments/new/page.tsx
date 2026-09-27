@@ -11,7 +11,7 @@ import AlertModal from "@/components/modals/alert-modal";
 import ProcessingModal from "@/components/modals/processing-modal";
 
 type Bootstrap = {
-  employees: { id: string; name: string; is_retired: boolean; work_style: "0" | "1" | "2"; in_time: string; out_time: number }[];
+  employees: { id: string; name: string; is_retired: boolean; work_style: "0" | "1" | "2"; in_time: string; out_time: number; has_weekend?: boolean }[];
   worksites: { id: string; name: string }[];
 };
 
@@ -220,10 +220,11 @@ export default function AssignmentNewPage() {
             </div>
 
             {selectedEmployee && (
-              <dl className="grid gap-4 rounded-lg border border-border bg-background p-4 sm:grid-cols-3">
+              <dl className="grid gap-4 rounded-lg border border-border bg-background p-4 sm:grid-cols-4">
                 <div><dt className="text-sm text-muted-foreground">근무형태</dt><dd className="mt-1 font-semibold">{selectedEmployee.work_style === "0" ? "일반근무" : selectedEmployee.work_style === "2" ? "야간근무" : "격일근무"}</dd></div>
                 <div><dt className="text-sm text-muted-foreground">출근</dt><dd className="mt-1 font-semibold">{inTime}</dd></div>
                 <div><dt className="text-sm text-muted-foreground">퇴근</dt><dd className="mt-1 font-semibold">{outTime}</dd></div>
+                <div><dt className="text-sm text-muted-foreground">휴무적용</dt><dd className="mt-1 font-semibold">{selectedEmployee.has_weekend ? "적용" : "미적용"}</dd></div>
               </dl>
             )}
 

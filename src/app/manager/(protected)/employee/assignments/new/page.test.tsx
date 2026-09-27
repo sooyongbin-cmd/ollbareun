@@ -57,7 +57,16 @@ describe("assignment new page", () => {
     expect(await screen.findByRole("heading", { name: "배정등록" })).toBeInTheDocument();
     expect(screen.getByText("근무기간")).toBeInTheDocument();
     expect(screen.getByLabelText("근무형태")).toBeInTheDocument();
-    expect(screen.getByLabelText("휴무적용")).toBeChecked();
+    expect(screen.getByLabelText("휴무적용")).toHaveValue("true");
+    const primaryRow = screen.getByTestId("assignment-primary-row");
+    const scheduleRow = screen.getByTestId("assignment-schedule-row");
+    expect(primaryRow).toContainElement(screen.getByLabelText("근무자"));
+    expect(primaryRow).toContainElement(screen.getByLabelText("근무지"));
+    expect(primaryRow).toContainElement(screen.getByLabelText("시작일"));
+    expect(scheduleRow).toContainElement(screen.getByLabelText("근무형태"));
+    expect(scheduleRow).toContainElement(screen.getByLabelText("출근"));
+    expect(scheduleRow).toContainElement(screen.getByLabelText("퇴근"));
+    expect(scheduleRow).toContainElement(screen.getByLabelText("휴무적용"));
     expect([...screen.getByLabelText("근무자").querySelectorAll("option")].map((option) => option.textContent)).toEqual([
       "선택",
       "가나다",
@@ -78,7 +87,7 @@ describe("assignment new page", () => {
     await user.type(screen.getByLabelText("출근"), "22:00");
     await user.clear(screen.getByLabelText("퇴근"));
     await user.type(screen.getByLabelText("퇴근"), "30:00");
-    await user.click(screen.getByLabelText("휴무적용"));
+    await user.selectOptions(screen.getByLabelText("휴무적용"), "false");
     await user.click(screen.getByRole("button", { name: "배정등록" }));
 
     expect(await screen.findByText("자료를 저장하였습니다.")).toBeInTheDocument();

@@ -151,7 +151,7 @@ export default function AssignmentNewPage() {
           <ManagerLoadingMessage />
         ) : (
           <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="grid gap-4 lg:grid-cols-[repeat(4,minmax(0,1fr))_minmax(22.5rem,2fr)]">
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(22.5rem,2fr)]" data-testid="assignment-primary-row">
               <div className="space-y-2">
                 <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-employee">
                   근무자
@@ -221,6 +221,9 @@ export default function AssignmentNewPage() {
                   />
                 </div>
               </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-testid="assignment-schedule-row">
               <div className="space-y-2">
                 <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-work-style">근무형태</label>
                 <NativeSelect className="w-full appearance-none" id="assignment-work-style" value={workStyle} onChange={(event) => setWorkStyle(event.target.value as "0" | "1" | "2")} required>
@@ -238,10 +241,13 @@ export default function AssignmentNewPage() {
                 <Input className="w-full" id="assignment-out-time" aria-label="퇴근" type="text" inputMode="numeric" pattern={workStyle === "0" ? "([01]\\d|2[0-3]):[0-5]\\d" : "([01]\\d|2[0-3]):[0-5]\\d|([2-4]\\d):[0-5]\\d"} value={outTime} onChange={(event) => setOutTime(event.target.value)} required />
                 <p className="text-xs text-muted-foreground">{workStyle === "0" ? "퇴근 시각을 입력하세요. 예: 18:00" : "출근일 기준 경과 시간으로 입력합니다. 다음 날 오전 6시는 30:00으로 입력하세요."}</p>
               </div>
-              <label className="flex min-h-10 items-center gap-3 self-end text-sm font-semibold text-muted-foreground ml-1">
-                <input aria-label="휴무적용" checked={hasWeekend} className="size-4 accent-primary" type="checkbox" onChange={(event) => setHasWeekend(event.target.checked)} />
-                휴무적용
-              </label>
+              <div className="space-y-2">
+                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-has-weekend">휴무적용</label>
+                <NativeSelect className="w-full appearance-none" id="assignment-has-weekend" value={hasWeekend ? "true" : "false"} onChange={(event) => setHasWeekend(event.target.value === "true")} required>
+                  <NativeSelectOption value="true">적용</NativeSelectOption>
+                  <NativeSelectOption value="false">미적용</NativeSelectOption>
+                </NativeSelect>
+              </div>
             </div>
 
             <div className="flex flex-wrap gap-3">

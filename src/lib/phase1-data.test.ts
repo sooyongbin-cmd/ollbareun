@@ -39,10 +39,11 @@ describe("guard authentication data rules", () => {
     const upsert = vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ single }) });
     const supabase = { from: vi.fn().mockReturnValueOnce(existingEmployeesQuery).mockReturnValue({ upsert }) };
 
-    await createEmployee({ name: "홍길동", phone: "01012345678", work_style: "2", in_time: "22:00", out_time: "30:00" }, supabase as never);
+    await createEmployee({ name: "홍길동", phone: "01012345678", work_style: "2", in_time: "22:00", out_time: "30:00", has_weekend: true }, supabase as never);
 
     expect(upsert).toHaveBeenCalledWith(expect.objectContaining({ work_style: "2", in_time: "22:00", out_time: 1800 }), { onConflict: "name,phone_normalized" });
     expect(upsert.mock.calls[0][0]).toHaveProperty("out_time", 1800);
+    expect(upsert.mock.calls[0][0]).toHaveProperty("has_weekend", true);
   });
 
   it("rejects an existing active employee phone number", async () => {

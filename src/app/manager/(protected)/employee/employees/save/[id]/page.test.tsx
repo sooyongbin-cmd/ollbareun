@@ -108,6 +108,7 @@ describe("employee save page", () => {
               work_style: "1",
               in_time: "06:00",
       out_time: 1800,
+              has_weekend: true,
               is_retired: false,
             },
             assignments: employeeAssignments,
@@ -124,6 +125,7 @@ describe("employee save page", () => {
             work_style: "1",
             in_time: "06:00",
       out_time: "30:00",
+            has_weekend: false,
             is_retired: true,
             retired_at: "2020-04-03",
           });
@@ -168,6 +170,7 @@ describe("employee save page", () => {
       screen.getByLabelText("직군").closest("div.grid"),
     );
     expect(screen.getByRole("checkbox", { name: "퇴직" })).not.toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "휴무적용" })).toBeChecked();
     expect(screen.getByLabelText("퇴근")).toHaveValue("30:00");
     expect(screen.queryByLabelText("퇴직일")).not.toBeInTheDocument();
     const employeeEducationSection = await screen.findByRole("region", { name: "교육이수 및 근무지배정 정보" });
@@ -215,6 +218,7 @@ describe("employee save page", () => {
     await user.type(screen.getByLabelText("연락처"), "01099998888");
     expect(screen.getByLabelText("연락처")).toHaveValue("010-9999-8888");
     await user.click(screen.getByRole("checkbox", { name: "퇴직" }));
+    await user.click(screen.getByRole("checkbox", { name: "휴무적용" }));
     expect(screen.getByLabelText("퇴직일")).toHaveValue(new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" }));
     await user.clear(screen.getByLabelText("퇴직일"));
     await user.type(screen.getByLabelText("퇴직일"), "2020-04-03");

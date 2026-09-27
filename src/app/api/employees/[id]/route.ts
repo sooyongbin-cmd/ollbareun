@@ -123,6 +123,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
         work_style: body.work_style,
         in_time: body.in_time,
         out_time: body.out_time,
+        has_weekend: body.has_weekend,
       }, supabase),
     });
   } catch (error) {

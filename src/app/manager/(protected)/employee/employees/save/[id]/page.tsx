@@ -21,6 +21,7 @@ type Employee = {
   work_style: "0" | "1" | "2";
   in_time: string;
   out_time: number;
+  has_weekend: boolean;
   is_retired: boolean;
   retired_at: string | null;
   role: "경비원" | "미화원" | "파견";
@@ -201,6 +202,7 @@ export default function EmployeeSavePage() {
   const [workStyle, setWorkStyle] = useState("1");
   const [inTime, setInTime] = useState("06:00");
   const [outTime, setOutTime] = useState("06:00");
+  const [hasWeekend, setHasWeekend] = useState(false);
   const [isRetired, setIsRetired] = useState(false);
   const [retiredDate, setRetiredDate] = useState(() => new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" }));
   const [assignments, setAssignments] = useState<EmployeeAssignment[]>([]);
@@ -237,6 +239,7 @@ export default function EmployeeSavePage() {
           const storedOutTime = minutesToElapsedTime(data.employee.out_time);
           const storedInTime = (data.employee.in_time ?? "06:00").slice(0, 5);
           setOutTime(typeof data.employee.out_time === "number" ? storedOutTime : data.employee.work_style !== "0" && storedOutTime <= storedInTime ? addDayToElapsedTime(storedOutTime) : storedOutTime);
+          setHasWeekend(data.employee.has_weekend ?? false);
           setIsRetired(data.employee.is_retired);
           setRetiredDate(data.employee.retired_at?.slice(0, 10) ?? new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" }));
           setAssignments(data.assignments ?? []);
@@ -285,7 +288,7 @@ export default function EmployeeSavePage() {
       await fetchJson<EmployeeMutationResponse>(`/api/employees/${employeeId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: phone.replace(/\D/g, ""), role, is_retired: isRetired, retired_at: retiredDate, work_style: workStyle, in_time: inTime, out_time: outTime }),
+        body: JSON.stringify({ phone: phone.replace(/\D/g, ""), role, is_retired: isRetired, retired_at: retiredDate, work_style: workStyle, in_time: inTime, out_time: outTime, has_weekend: hasWeekend }),
       });
 
       setSaveSuccessOpen(true);
@@ -428,6 +431,11 @@ export default function EmployeeSavePage() {
                 </div>
               </div>
               <label className="flex items-center gap-3 text-[0.875rem] font-semibold text-muted-foreground ml-1">
+                <Checkbox aria-label="휴무적용" checked={hasWeekend} onCheckedChange={(checked) => setHasWeekend(checked === true)} />
+                휴무적용 (주말·공휴일 제외)
+              </label>
+              <div className="flex flex-wrap items-end gap-4">
+              <label className="flex items-center gap-3 text-[0.875rem] font-semibold text-muted-foreground ml-1">
                 <Checkbox
                   checked={isRetired}
                   onCheckedChange={(checked) => {
@@ -439,7 +447,7 @@ export default function EmployeeSavePage() {
                 퇴직
               </label>
               {isRetired ? (
-                <div className="space-y-2">
+                <div className="space-y-2 w-full sm:w-auto">
                   <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="employee-retired-date">
                     퇴직일
                   </label>
@@ -453,6 +461,7 @@ export default function EmployeeSavePage() {
                   />
                 </div>
               ) : null}
+              </div>
             </div>
 
             <div className="flex gap-3 [&>button]:w-auto">

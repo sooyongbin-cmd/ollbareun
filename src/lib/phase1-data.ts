@@ -15,6 +15,7 @@ export type EmployeeRow = {
   work_style: "0" | "1" | "2";
   in_time: string;
   out_time: number;
+  has_weekend: boolean;
   created_at: string;
 };
 
@@ -207,7 +208,7 @@ function validateEmployeeSchedule(input: { work_style?: unknown; in_time?: unkno
 }
 
 export async function createEmployee(
-  input: { name: unknown; phone: unknown; role?: unknown; work_style?: unknown; in_time?: unknown; out_time?: unknown },
+  input: { name: unknown; phone: unknown; role?: unknown; work_style?: unknown; in_time?: unknown; out_time?: unknown; has_weekend?: unknown },
   supabase: SupabaseClient = getSupabase(),
 ) {
   const name = requireString(input.name, "직원이름");
@@ -235,7 +236,7 @@ export async function createEmployee(
   const { data, error } = await supabase
     .from("employees")
     .upsert(
-      { name, phone, phone_normalized, is_retired: false, retired_at: null, role, ...schedule },
+      { name, phone, phone_normalized, is_retired: false, retired_at: null, role, has_weekend: input.has_weekend !== false, ...schedule },
       { onConflict: "name,phone_normalized" },
     )
     .select("*")
@@ -287,6 +288,7 @@ export async function updateEmployee(input: {
   work_style?: unknown;
   in_time?: unknown;
   out_time?: unknown;
+  has_weekend?: unknown;
 }, supabase: SupabaseClient = getSupabase()) {
   const id = requireString(input.id, "직원");
   const name = requireString(input.name, "직원이름");
@@ -315,6 +317,7 @@ export async function updateEmployee(input: {
       phone_normalized,
       is_retired,
       retired_at,
+      has_weekend: input.has_weekend === true || input.has_weekend === "true" || input.has_weekend === 1,
       role,
       ...schedule,
     })

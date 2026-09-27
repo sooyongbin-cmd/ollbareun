@@ -31,8 +31,10 @@ describe("employee new page", () => {
 
     const options = Array.from(roleSelect.options).map((opt) => opt.value);
     expect(options).toEqual(["경비원", "미화원", "파견"]);
-    expect(screen.getByLabelText("퇴근")).toHaveValue("30:00");
-    expect(screen.getByText(/다음 날 오전 6시는 30:00/)).toBeInTheDocument();
+    expect(workStyleSelect.value).toBe("0");
+    expect(screen.getByLabelText("출근")).toHaveValue("08:00");
+    expect(screen.getByLabelText("퇴근")).toHaveValue("18:00");
+    expect(screen.getByRole("checkbox", { name: "휴무적용" })).toBeChecked();
   });
 
   it("submits the registration form with selected role and navigates on success", async () => {
@@ -45,6 +47,7 @@ describe("employee new page", () => {
           name: "홍길동",
           phone: "01012345678",
           role: "미화원",
+          has_weekend: true,
         });
         return Response.json({
           employee: {
@@ -77,7 +80,7 @@ describe("employee new page", () => {
     const user = userEvent.setup();
     const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
       const body = JSON.parse(String(init?.body));
-      expect(body).toMatchObject({ work_style: "1", in_time: "06:00", out_time: "30:00" });
+      expect(body).toMatchObject({ work_style: "0", in_time: "08:00", out_time: "18:00", has_weekend: true });
       return Response.json({ employee: { id: "emp-1", name: "홍길동", phone: "010-1234-5678", role: "경비원" } });
     });
     vi.stubGlobal("fetch", fetchMock);

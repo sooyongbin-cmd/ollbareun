@@ -77,8 +77,11 @@ describe("assignment management page", () => {
       "휴무",
     ]);
 
-    const row = await screen.findByRole("link", { name: "홍길동" });
-    expect(within(row).getByText("2026-05-21 ~ 2026-05-23")).toBeInTheDocument();
+    const employeeLink = await screen.findByRole("link", { name: "홍길동" });
+    expect(employeeLink).toHaveAttribute("href", "/manager/employee/assignments/save/assign-1");
+    const row = employeeLink.closest("tr");
+    expect(row).not.toBeNull();
+    expect(within(row as HTMLElement).getByText("2026-05-21 ~ 2026-05-23")).toBeInTheDocument();
     expect(within(row).getByText("경비원")).toBeInTheDocument();
     expect(within(row).getByText("일반근무")).toBeInTheDocument();
     expect(within(row).getByText("본사")).toBeInTheDocument();
@@ -106,8 +109,9 @@ describe("assignment management page", () => {
 
     await user.clear(screen.getByLabelText("근무지"));
     await user.type(screen.getByLabelText("이름"), "철수");
-    await user.click(await screen.findByRole("link", { name: "김철수" }));
-    expect(push).toHaveBeenCalledWith("/manager/employee/assignments/save/assign-2");
+    const filteredEmployeeLink = await screen.findByRole("link", { name: "김철수" });
+    expect(filteredEmployeeLink).toHaveAttribute("href", "/manager/employee/assignments/save/assign-2");
+    expect(push).not.toHaveBeenCalled();
   });
 
   it("separates assignment search controls from the assignment list section", async () => {

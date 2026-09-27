@@ -3,7 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
@@ -49,7 +49,6 @@ function formatWorkStyle(workStyle: AssignmentRow["employee_work_style"]) {
 }
 
 export default function AssignmentManagementClient() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const initialWorksite = searchParams?.get("worksite") ?? "";
   const [assignments, setAssignments] = useState<AssignmentRow[]>([]);
@@ -160,10 +159,6 @@ export default function AssignmentManagementClient() {
       setSortDirection("asc");
     }
   };
-
-  function openEditPage(assignmentId: string) {
-    router.push(`/manager/employee/assignments/save/${assignmentId}`);
-  }
 
   return (
     <section className="space-y-[1.5rem]">
@@ -304,21 +299,15 @@ export default function AssignmentManagementClient() {
                   </TableRow>
                 ) : (
                   sortedAssignments.map((assignment) => (
-                    <TableRow
-                      key={assignment.id}
-                      aria-label={assignment.employee_name}
-                      className="cursor-pointer hover:bg-muted/40 transition-colors"
-                      onClick={() => openEditPage(assignment.id)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter" || event.key === " ") {
-                          event.preventDefault();
-                          openEditPage(assignment.id);
-                        }
-                      }}
-                      role="link"
-                      tabIndex={0}
-                    >
-                      <TableCell data-label="이름" className="text-muted-foreground">{assignment.employee_name}</TableCell>
+                    <TableRow key={assignment.id}>
+                      <TableCell data-label="이름" className="text-muted-foreground">
+                        <Link
+                          className="font-semibold text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"
+                          href={`/manager/employee/assignments/save/${assignment.id}`}
+                        >
+                          {assignment.employee_name}
+                        </Link>
+                      </TableCell>
                       <TableCell data-label="직군" className="text-muted-foreground">{assignment.employee_role ?? "직군 없음"}</TableCell>
                       <TableCell data-label="근무형태" className="whitespace-nowrap text-muted-foreground">
                         {formatWorkStyle(assignment.employee_work_style)}

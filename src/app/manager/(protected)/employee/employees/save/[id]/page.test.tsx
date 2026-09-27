@@ -119,7 +119,6 @@ describe("employee save page", () => {
         if (init?.method === "PATCH" && url.endsWith("/api/employees/emp-1")) {
           const body = JSON.parse(String(init.body));
           expect(body).toEqual({
-            name: "Alice Kim",
             phone: "01099998888",
             role: "경비원",
             work_style: "1",
@@ -210,8 +209,8 @@ describe("employee save page", () => {
     const remarksSection = screen.getByRole("region", { name: "특이사항" });
     expect(within(remarksSection).getByText("엘리베이터 이상")).toBeInTheDocument();
 
-    await user.clear(screen.getByLabelText("직원이름"));
-    await user.type(screen.getByLabelText("직원이름"), "Alice Kim");
+    expect(screen.getByLabelText("직원이름")).toHaveAttribute("readonly");
+    expect(screen.getByLabelText("직원이름")).toHaveValue("Alice");
     await user.clear(screen.getByLabelText("연락처"));
     await user.type(screen.getByLabelText("연락처"), "01099998888");
     expect(screen.getByLabelText("연락처")).toHaveValue("010-9999-8888");
@@ -225,7 +224,7 @@ describe("employee save page", () => {
     expect(fetch).toHaveBeenCalledTimes(1);
     await user.click(screen.getByRole("button", { name: "아니오" }));
     expect(fetch).toHaveBeenCalledTimes(1);
-    expect(screen.getByDisplayValue("Alice Kim")).toBeInTheDocument();
+    expect(screen.getByLabelText("직원이름")).toHaveValue("Alice");
     await user.click(screen.getByRole("button", { name: "저장" }));
     await user.click(screen.getByRole("button", { name: "예" }));
 

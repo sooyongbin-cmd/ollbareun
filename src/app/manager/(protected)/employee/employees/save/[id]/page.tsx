@@ -278,7 +278,7 @@ export default function EmployeeSavePage() {
       await fetchJson<EmployeeMutationResponse>(`/api/employees/${employeeId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone: phone.replace(/\D/g, ""), role, is_retired: isRetired, retired_at: retiredDate, work_style: workStyle, in_time: inTime, out_time: outTime }),
+        body: JSON.stringify({ phone: phone.replace(/\D/g, ""), role, is_retired: isRetired, retired_at: retiredDate, work_style: workStyle, in_time: inTime, out_time: outTime }),
       });
 
       setSaveSuccessOpen(true);
@@ -364,7 +364,7 @@ export default function EmployeeSavePage() {
                     className="w-full"
                     id="employee-name"
                     value={name}
-                    onChange={(event) => setName(event.target.value)}
+                    readOnly
                     required
                   />
                 </div>

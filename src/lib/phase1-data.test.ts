@@ -328,6 +328,7 @@ describe("guard authentication data rules", () => {
       startDate: "2026-05-30",
       endDate: "2026-06-30",
       work_style: "0",
+      has_weekend: true,
     })).rejects.toThrow("근무기간의 첫날(2026-05-30)이 휴일입니다. 근무기간 시작일을 조정하세요.");
 
     expect(holidayQuery.eq).toHaveBeenNthCalledWith(1, "holiday_date", "2026-05-30");
@@ -350,9 +351,28 @@ describe("guard authentication data rules", () => {
       startDate: "2026-05-25",
       endDate: "2026-06-30",
       work_style: "0",
+      has_weekend: true,
     })).rejects.toThrow("근무기간의 첫날(2026-05-25)이 휴일입니다. 근무기간 시작일을 조정하세요.");
 
     expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("allows a general assignment to start on a holiday when the day-off option is disabled", async () => {
+    const supabaseAdmin = {
+      rpc: vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: { id: "assignment-1" }, error: null }) }),
+    };
+    vi.mocked(getSupabaseAdmin).mockReturnValue(supabaseAdmin as never);
+
+    await createAssignment({
+      employeeId: "emp-1",
+      worksiteId: "work-1",
+      startDate: "2026-05-30",
+      endDate: "2026-06-30",
+      work_style: "0",
+      has_weekend: false,
+    });
+
+    expect(supabaseAdmin.rpc).toHaveBeenCalledWith("create_assignment_with_daily_attendance", expect.objectContaining({ p_has_weekend: false }));
   });
 
   it("sends an elapsed clock-out value as integer minutes to the assignment RPC", async () => {

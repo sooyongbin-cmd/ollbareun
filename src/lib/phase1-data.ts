@@ -439,11 +439,12 @@ export async function createAssignment(input: {
   const employee_id = requireString(input.employeeId, "직원");
   const worksite_id = requireString(input.worksiteId, "근무지");
   const { start_date, end_date } = requireDateRange(input);
+  const has_weekend = input.has_weekend === true || input.has_weekend === "true" || input.has_weekend === 1;
 
   const schedule = validateEmployeeSchedule({ work_style: input.work_style, in_time: input.in_time, out_time: input.out_time });
-  if (schedule.work_style === "0") {
-    const startDateValue = new Date(`${start_date}T00:00:00+09:00`);
-    const dayOfWeek = startDateValue.getDay();
+  if (schedule.work_style === "0" && has_weekend) {
+    const [year, month, day] = start_date.split("-").map(Number);
+    const dayOfWeek = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
     const supabase = getSupabaseAdmin();
     const holidayResult = await supabase
       .from("public_holidays")
@@ -456,7 +457,6 @@ export async function createAssignment(input: {
       throw new Error(`근무기간의 첫날(${start_date})이 휴일입니다. 근무기간 시작일을 조정하세요.`);
     }
   }
-  const has_weekend = input.has_weekend === true || input.has_weekend === "true" || input.has_weekend === 1;
   const { data, error } = await getSupabaseAdmin().rpc("create_assignment_with_daily_attendance", {
     p_employee_id: employee_id,
     p_worksite_id: worksite_id,

@@ -97,6 +97,9 @@ function formatScheduledTime(value: unknown) {
 }
 
 function formatAssignmentTime(value: unknown) {
+  if (typeof value === "number" && Number.isInteger(value) && value >= 0) {
+    return `${String(Math.floor(value / 60)).padStart(2, "0")}:${String(value % 60).padStart(2, "0")}`;
+  }
   if (typeof value !== "string" || !/^\d{2}:\d{2}/.test(value)) return null;
   const [hours, minutes] = value.split(":").map(Number);
   if (!Number.isInteger(hours) || !Number.isInteger(minutes)) return null;

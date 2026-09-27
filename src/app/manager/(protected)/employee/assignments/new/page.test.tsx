@@ -21,7 +21,7 @@ describe("assignment new page", () => {
         if (!init && url.endsWith("/api/bootstrap")) {
           return Response.json({
             employees: [
-              { id: "emp-1", name: "홍길동", is_retired: false, work_style: "0", in_time: "09:00", out_time: "18:00" },
+              { id: "emp-1", name: "홍길동", is_retired: false, work_style: "0", in_time: "09:00", out_time: 1080 },
               { id: "emp-2", name: "김철수", is_retired: false, work_style: "0", in_time: "08:00", out_time: "17:00" },
               { id: "emp-3", name: "가나다", is_retired: false, work_style: "0", in_time: "07:00", out_time: "16:00" },
               { id: "emp-4", name: "퇴직자", is_retired: true, work_style: "0", in_time: "07:00", out_time: "16:00" },

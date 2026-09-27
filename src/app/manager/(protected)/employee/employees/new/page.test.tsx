@@ -77,7 +77,7 @@ describe("employee new page", () => {
     const user = userEvent.setup();
     const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
       const body = JSON.parse(String(init?.body));
-      expect(body).toMatchObject({ work_style: "1", in_time: "06:00", out_time: "06:00" });
+      expect(body).toMatchObject({ work_style: "1", in_time: "06:00", out_time: "30:00" });
       return Response.json({ employee: { id: "emp-1", name: "홍길동", phone: "010-1234-5678", role: "경비원" } });
     });
     vi.stubGlobal("fetch", fetchMock);

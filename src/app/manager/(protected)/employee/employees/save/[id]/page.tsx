@@ -20,7 +20,7 @@ type Employee = {
   phone: string;
   work_style: "0" | "1" | "2";
   in_time: string;
-  out_time: string;
+  out_time: number;
   is_retired: boolean;
   retired_at: string | null;
   role: "경비원" | "미화원" | "파견";
@@ -140,6 +140,13 @@ function addDayToElapsedTime(value: string) {
   return `${String(hours + 24).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 }
 
+function minutesToElapsedTime(value: number | string | null | undefined) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return `${String(Math.floor(value / 60)).padStart(2, "0")}:${String(value % 60).padStart(2, "0")}`;
+  }
+  return typeof value === "string" ? value.slice(0, 5) : "06:00";
+}
+
 function formatScheduledTime(value: string | null, workDate: string) {
   if (!value) return "-";
   const date = new Date(value);
@@ -227,9 +234,9 @@ export default function EmployeeSavePage() {
           setRole(data.employee.role);
           setWorkStyle(data.employee.work_style ?? "1");
           setInTime((data.employee.in_time ?? "06:00").slice(0, 5));
-          const storedOutTime = (data.employee.out_time ?? "06:00").slice(0, 5);
+          const storedOutTime = minutesToElapsedTime(data.employee.out_time);
           const storedInTime = (data.employee.in_time ?? "06:00").slice(0, 5);
-          setOutTime(data.employee.work_style !== "0" && storedOutTime <= storedInTime ? addDayToElapsedTime(storedOutTime) : storedOutTime);
+          setOutTime(typeof data.employee.out_time === "number" ? storedOutTime : data.employee.work_style !== "0" && storedOutTime <= storedInTime ? addDayToElapsedTime(storedOutTime) : storedOutTime);
           setIsRetired(data.employee.is_retired);
           setRetiredDate(data.employee.retired_at?.slice(0, 10) ?? new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" }));
           setAssignments(data.assignments ?? []);

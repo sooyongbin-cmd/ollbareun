@@ -11,7 +11,7 @@ import AlertModal from "@/components/modals/alert-modal";
 import ProcessingModal from "@/components/modals/processing-modal";
 
 type Bootstrap = {
-  employees: { id: string; name: string; is_retired: boolean; work_style: "0" | "1" | "2"; in_time: string; out_time: string }[];
+  employees: { id: string; name: string; is_retired: boolean; work_style: "0" | "1" | "2"; in_time: string; out_time: number }[];
   worksites: { id: string; name: string }[];
 };
 
@@ -46,6 +46,11 @@ function defaultEndDate(startDate: string) {
   // Date overflow also handles a February 29 start in a leap year.
   const endDate = new Date(Date.UTC(year + 1, month - 1, day - 1));
   return endDate.toISOString().slice(0, 10);
+}
+
+function minutesToElapsedTime(value: number | undefined) {
+  if (value === undefined) return "06:00";
+  return `${String(Math.floor(value / 60)).padStart(2, "0")}:${String(value % 60).padStart(2, "0")}`;
 }
 
 export default function AssignmentNewPage() {
@@ -152,7 +157,7 @@ export default function AssignmentNewPage() {
                   const employee = data.employees.find((item) => item.id === id);
                   setEmployeeId(id);
                   setInTime((employee?.in_time ?? "06:00").slice(0, 5));
-                  setOutTime((employee?.out_time ?? "06:00").slice(0, 5));
+                  setOutTime(minutesToElapsedTime(employee?.out_time));
                 }} required>
                   <NativeSelectOption value="">선택</NativeSelectOption>
                   {sortedEmployees.map((employee) => (

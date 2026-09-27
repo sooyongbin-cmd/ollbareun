@@ -7,7 +7,7 @@ export type GuardProfileScheduleInput = {
   start_date: string;
   end_date: string;
   in_time?: string | null;
-  out_time?: string | null;
+  out_time?: number | null;
 };
 
 export type GuardProfileWorksiteInput = {

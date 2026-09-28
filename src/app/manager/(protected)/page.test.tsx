@@ -103,11 +103,11 @@ describe("manager dashboard page", () => {
     expect(await screen.findByRole("heading", { name: "대시보드" })).toBeInTheDocument();
 
     const summary = screen.getByRole("region", { name: "운영 요약" });
-    const attendanceCard = within(summary).getByRole("link", { name: /출근현황 출근 1 지각 1 결근 2 퇴근/ });
+    const attendanceCard = within(summary).getByRole("link", { name: /출근현황 대기 1 출근 1 지각 1 결근 2 퇴근 \d+ 조퇴 \d+ 미퇴근 \d+/ });
     expect(attendanceCard).toHaveAttribute("href", "/manager/reports/attendance/status");
     expect(within(attendanceCard).getByText("출근현황")).toBeInTheDocument();
     expect(within(attendanceCard).getByText("출근 1")).toBeInTheDocument();
-    expect(within(attendanceCard).queryByText(/대기/)).not.toBeInTheDocument();
+    expect(within(attendanceCard).getByText("대기 1")).toBeInTheDocument();
     expect(within(attendanceCard).getByText("총인원 8명 출근예정 5명 출근율 40%")).toBeInTheDocument();
     expect(within(attendanceCard).getByText("결근 2")).toHaveClass("text-red-600");
     expect(within(attendanceCard).getByText("지각 1")).toHaveClass("text-pink-600");

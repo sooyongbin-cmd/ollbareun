@@ -317,6 +317,7 @@ export default function ManagerPage() {
       label: "출근현황",
       value: (
         <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[1.35rem] md:text-[1.5rem]">
+          <span>대기 {data.summary.waitingEmployeesToday}</span>
           <span>출근 {data.summary.onTimeEmployeesToday}</span>
           <span className="text-pink-600 dark:text-pink-400">지각 {data.summary.lateEmployeesToday}</span>
           <span className="text-red-600 dark:text-red-400">결근 {data.summary.absentEmployeesToday}</span>
@@ -326,7 +327,7 @@ export default function ManagerPage() {
         </span>
       ),
       description: `총인원 ${data.summary.totalEmployees}명 출근예정 ${data.summary.scheduledEmployeesToday}명 출근율 ${data.summary.attendanceRate}%`,
-      ariaLabel: `출근현황 출근 ${data.summary.onTimeEmployeesToday} 지각 ${data.summary.lateEmployeesToday} 결근 ${data.summary.absentEmployeesToday} 퇴근 ${data.summary.clockedOutEmployeesToday} 조퇴 ${data.summary.earlyLeaveEmployeesToday} 미퇴근 ${data.summary.notClockedOutEmployeesToday} 총인원 ${data.summary.totalEmployees}명 출근예정 ${data.summary.scheduledEmployeesToday}명 출근율 ${data.summary.attendanceRate}%`,
+      ariaLabel: `출근현황 대기 ${data.summary.waitingEmployeesToday} 출근 ${data.summary.onTimeEmployeesToday} 지각 ${data.summary.lateEmployeesToday} 결근 ${data.summary.absentEmployeesToday} 퇴근 ${data.summary.clockedOutEmployeesToday} 조퇴 ${data.summary.earlyLeaveEmployeesToday} 미퇴근 ${data.summary.notClockedOutEmployeesToday} 총인원 ${data.summary.totalEmployees}명 출근예정 ${data.summary.scheduledEmployeesToday}명 출근율 ${data.summary.attendanceRate}%`,
       icon: Users,
       href: "/manager/reports/attendance/status",
     },

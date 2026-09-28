@@ -1,7 +1,69 @@
-import { describe, expect, it } from "vitest";
-import { buildManagerDashboardData } from "./manager-dashboard";
+import { describe, expect, it, vi } from "vitest";
+import { createClient } from "@supabase/supabase-js";
+import * as supabaseAdmin from "./supabase-admin";
+import { buildManagerDashboardData, loadManagerDashboardData } from "./manager-dashboard";
 
 describe("manager dashboard data", () => {
+  it.each([
+    { name: "대기는 퇴근상태가 있어도 제외", intime: "2026-06-04T12:01:00+09:00", inStatus: "0", outStatus: "2", counts: [1, 0, 0, 0, 0, 0, 0] },
+    { name: "출근예정 이전은 상태코드와 무관하게 대기", intime: "2026-06-04T12:01:00+09:00", inStatus: "2", outStatus: "1", counts: [1, 0, 0, 0, 0, 0, 0] },
+    { name: "출근예정시각부터 결근이며 퇴근은 제외", intime: "2026-06-04T12:00:00+09:00", inStatus: "0", outStatus: "2", counts: [0, 0, 0, 1, 0, 0, 0] },
+    { name: "결근은 조퇴도 제외", inStatus: "0", outStatus: "1", counts: [0, 0, 0, 1, 0, 0, 0] },
+    { name: "결근은 미퇴근도 제외", inStatus: "0", outStatus: "0", counts: [0, 0, 0, 1, 0, 0, 0] },
+    { name: "퇴근예정 전에는 미퇴근 제외", outtime: "2026-06-04T12:01:00+09:00", inStatus: "2", outStatus: "0", counts: [0, 1, 0, 0, 0, 0, 0] },
+    { name: "퇴근예정시각부터 미퇴근", inStatus: "2", outStatus: "0", counts: [0, 1, 0, 0, 0, 0, 1] },
+    { name: "지각과 조퇴 상태코드 집계", outtime: "2026-06-04T18:00:00+09:00", inStatus: "1", outStatus: "1", counts: [0, 0, 1, 0, 0, 1, 0] },
+    { name: "정상 퇴근 상태코드 집계", inStatus: "2", outStatus: "2", counts: [0, 1, 0, 0, 1, 0, 0] },
+    { name: "전날 근무의 한국시간 오늘 자정 퇴근 포함", workDate: "2026-06-03", outtime: "2026-06-03T15:00:00Z", inStatus: "2", outStatus: "2", counts: [0, 1, 0, 0, 1, 0, 0] },
+    { name: "오늘 자정 이전 퇴근 자료 제외", workDate: "2026-06-03", outtime: "2026-06-03T14:59:59Z", inStatus: "2", outStatus: "2", counts: [0, 0, 0, 0, 0, 0, 0] },
+    { name: "내일 자정 퇴근 자료 제외", workDate: "2026-06-03", outtime: "2026-06-04T15:00:00Z", inStatus: "2", outStatus: "0", counts: [0, 0, 0, 0, 0, 0, 0] },
+    { name: "오늘 근무는 내일 퇴근예정이어도 포함", outtime: "2026-06-04T15:00:00Z", inStatus: "2", outStatus: "0", counts: [0, 1, 0, 0, 0, 0, 0] },
+  ])("$name", ({ intime, outtime, workDate, inStatus, outStatus, counts }) => {
+    const { summary } = buildManagerDashboardData({
+      now: new Date("2026-06-04T12:00:00+09:00"),
+      employees: [{ id: "emp-1", name: "직원" }],
+      worksites: [], assignments: [], dailyAttendance: [], educationResources: [], educationCompletions: [],
+      attendance: [{
+        employee_id: "emp-1", worksite_id: "work-1", work_date: workDate ?? "2026-06-04",
+        intime: intime ?? "2026-06-03T22:00:00+09:00", outtime: outtime ?? "2026-06-04T12:00:00+09:00",
+        intime_status: inStatus as "0" | "1" | "2", outtime_status: outStatus as "0" | "1" | "2",
+        work_intime: null, work_outtime: null,
+      }],
+    });
+    expect([
+      summary.waitingEmployeesToday, summary.onTimeEmployeesToday, summary.lateEmployeesToday,
+      summary.absentEmployeesToday, summary.clockedOutEmployeesToday,
+      summary.earlyLeaveEmployeesToday, summary.notClockedOutEmployeesToday,
+    ]).toEqual(counts);
+  });
+
+  it("queries the union of today's work date and KST clock-out date", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-06-03T15:30:00Z"));
+    const queries: URL[] = [];
+    const client = createClient("https://example.supabase.co", "test-key", {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { fetch: async (url) => {
+        queries.push(new URL(String(url)));
+        return new Response("[]", { headers: { "Content-Type": "application/json" } });
+      } },
+    });
+    const adminSpy = vi.spyOn(supabaseAdmin, "getSupabaseAdmin").mockReturnValue(client);
+    try {
+      await loadManagerDashboardData();
+      const records = queries.filter((url) => url.pathname.endsWith("/work_record"));
+      expect(records).toHaveLength(1);
+      expect(records[0].searchParams.get("select")?.split(",")).toContain("outtime");
+      expect(records[0].searchParams.get("or")).toBe(
+        "(work_date.eq.2026-06-04,and(outtime.gte.2026-06-04T00:00:00+09:00,outtime.lt.2026-06-05T00:00:00+09:00))",
+      );
+      expect(records[0].searchParams.has("work_date")).toBe(false);
+    } finally {
+      adminSpy.mockRestore();
+      vi.useRealTimers();
+    }
+  });
+
   it("counts active employees, current clock-ins, and education-uncompleted employees", () => {
     const data = buildManagerDashboardData({
       now: new Date("2026-06-04T03:00:00.000Z"),
@@ -21,6 +83,8 @@ describe("manager dashboard data", () => {
           worksite_id: "work-1",
           work_date: "2026-06-04",
           intime_status: "2",
+          outtime_status: "0",
+          outtime: "2026-06-04T03:00:00.000Z",
           work_intime: "2026-06-04T00:00:00.000Z",
           work_outtime: null,
         },
@@ -180,8 +244,8 @@ describe("manager dashboard data", () => {
     expect(data.summary).toMatchObject({
       scheduledEmployeesToday: 4,
       currentlyClockedIn: 2,
-      onTimeEmployeesToday: 2,
-      waitingEmployeesToday: 0,
+      onTimeEmployeesToday: 1,
+      waitingEmployeesToday: 1,
       absentEmployeesToday: 1,
       lateEmployeesToday: 1,
     });

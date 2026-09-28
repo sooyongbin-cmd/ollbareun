@@ -231,7 +231,8 @@ function completedResourceIdsByEmployee(completions: EducationCompletionInput[])
 }
 
 export function buildManagerDashboardData(input: BuildManagerDashboardInput): ManagerDashboardData {
-  const today = toKstDate(input.now ?? new Date());
+  const now = input.now ?? new Date();
+  const today = toKstDate(now);
   const activeEmployees = input.employees.filter((employee) => !employee.is_retired);
   const activeEmployeeIds = new Set(activeEmployees.map((employee) => employee.id));
   const employeeById = new Map(input.employees.map((employee) => [employee.id, employee]));
@@ -254,6 +255,11 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
   const todayWorkRecords = input.attendance.filter(
     (record) => record.work_date === today && activeEmployeeIds.has(record.employee_id),
   );
+  const summaryWorkRecords = input.attendance.filter(
+    (record) => activeEmployeeIds.has(record.employee_id) && (
+      record.work_date === today || toKstDateTime(record.outtime)?.slice(0, 10) === today
+    ),
+  );
   const todayAttendance = todayWorkRecords.filter((record) => record.work_intime);
   const allResourceIds = input.educationResources.map((resource) => resource.id);
   const completedByEmployee = completedResourceIdsByEmployee(input.educationCompletions);
@@ -262,7 +268,7 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       .filter((dayOff) => dayOff.day_off_date === today)
       .map((dayOff) => dayOff.work_assignment_id),
   );
-  const scheduledEmployeeIdsToday = new Set(todayWorkRecords.map((record) => record.employee_id));
+  const scheduledEmployeeIdsToday = new Set(summaryWorkRecords.map((record) => record.employee_id));
   const scheduledTimes = new Map<string, string | null>();
   input.dailyAttendance.forEach((dailyAttendance) => {
     scheduledTimes.set(
@@ -277,19 +283,22 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
   let clockedOutEmployeesToday = 0;
   let earlyLeaveEmployeesToday = 0;
   let notClockedOutEmployeesToday = 0;
-  todayWorkRecords.forEach((record) => {
-    const status = getManagerAttendanceStatus({
-      intimeStatus: record.intime_status,
-      scheduledClockIn: scheduledTimes.get(`${record.employee_id}:${record.worksite_id}:${record.work_date}`) ?? record.intime,
-      now: input.now ?? new Date(),
-    });
+  summaryWorkRecords.forEach((record) => {
+    const scheduledClockIn = record.intime ?? scheduledTimes.get(`${record.employee_id}:${record.worksite_id}:${record.work_date}`);
+    const status = scheduledClockIn && new Date(scheduledClockIn).getTime() > now.getTime()
+      ? "대기"
+      : getManagerAttendanceStatus({
+        intimeStatus: record.intime_status,
+        scheduledClockIn,
+        now,
+      });
     switch (status) {
       case "대기":
         waitingEmployeesToday += 1;
-        break;
+        return;
       case "결근":
         absentEmployeesToday += 1;
-        break;
+        return;
       case "지각":
         lateEmployeesToday += 1;
         break;
@@ -297,10 +306,18 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
         onTimeEmployeesToday += 1;
         break;
     }
-    if (record.work_intime) {
-      if (!record.work_outtime) notClockedOutEmployeesToday += 1;
-      else if (record.outtime_status === "1") earlyLeaveEmployeesToday += 1;
-      else clockedOutEmployeesToday += 1;
+    switch (record.outtime_status) {
+      case "0":
+        if (record.outtime && new Date(record.outtime).getTime() <= now.getTime()) {
+          notClockedOutEmployeesToday += 1;
+        }
+        break;
+      case "1":
+        earlyLeaveEmployeesToday += 1;
+        break;
+      case "2":
+        clockedOutEmployeesToday += 1;
+        break;
     }
   });
   const attendanceRate = percent(
@@ -541,7 +558,8 @@ export async function loadManagerDashboardData() {
   // client does not inherit the browser's auth cookies there, so use the
   // server-side client after the route has verified manager access.
   const supabase = getSupabaseAdmin();
-  const today = toKstDate(new Date());
+  const now = new Date();
+  const today = toKstDate(now);
   const tomorrow = addDays(today, 1);
   const todayStart = `${today}T00:00:00+09:00`;
   const tomorrowStart = `${tomorrow}T00:00:00+09:00`;
@@ -553,7 +571,9 @@ export async function loadManagerDashboardData() {
       supabase.from("worksites").select("id,name"),
       supabase.from("work_assignments").select("id,employee_id,worksite_id,start_date,end_date").lte("start_date", today).gte("end_date", today),
       supabase.from("work_assignments").select("id,employee_id,worksite_id,start_date,end_date").lte("start_date", weekEnd).gte("end_date", weekStart),
-      supabase.from("work_record").select("id,employee_id,worksite_id,work_date,intime,work_intime,work_outtime,intime_status,outtime_status").eq("work_date", today),
+      supabase.from("work_record")
+        .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime,intime_status,outtime_status")
+        .or(`work_date.eq.${today},and(outtime.gte.${todayStart},outtime.lt.${tomorrowStart})`),
       supabase.from("education_resources").select("id"),
       supabase.from("education_completions").select("employee_id,resource_id,is_completed,completed_at"),
       supabase
@@ -591,6 +611,7 @@ export async function loadManagerDashboardData() {
   throwIfError(weeklyLeavesResult.error);
 
   return buildManagerDashboardData({
+    now,
     employees: employeesResult.data ?? [],
     worksites: worksitesResult.data ?? [],
     assignments: assignmentsResult.data ?? [],

@@ -122,10 +122,16 @@ describe("guard login page", () => {
     render(<GuardPage />);
 
     fireEvent.change(await screen.findByLabelText("이름"), { target: { value: "홍길동" } });
-    fireEvent.change(screen.getByLabelText("연락처"), { target: { value: "010-0000-0000" } });
+    fireEvent.change(screen.getByLabelText("연락처"), { target: { value: "01000000000" } });
+    expect(screen.getByLabelText("연락처")).toHaveValue("010-0000-0000");
     fireEvent.click(screen.getByRole("button", { name: "로그인" }));
 
     expect(await screen.findByText("로그인 요청을 전송하고 있습니다.")).toBeInTheDocument();
+    expect(fetch).toHaveBeenCalledWith("/api/guard/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "홍길동", phone: "01000000000" }),
+    });
     expect(screen.getByText("로그인 진행 중")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "로그인" })).toBeDisabled();
 

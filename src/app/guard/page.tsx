@@ -177,6 +177,7 @@ export default function GuardPage() {
   const router = useRouter();
   const passkeyEnabled = usePasskeyFeatureEnabled();
   const [savedGuardName, setSavedGuardName] = useState(readStoredGuardName);
+  const [phone, setPhone] = useState("");
   const [logoutPushResult] = useState(readLogoutPushResult);
   const [errorMessage, setErrorMessage] = useState("");
   const [launchState, setLaunchState] = useState<GuardLaunchState>("checking");
@@ -251,7 +252,7 @@ export default function GuardPage() {
       setGuardLoginProgress("로그인 요청을 전송하고 있습니다.");
       const session = await postJson<GuardSession>("/api/guard/auth", {
         name: form.get("name"),
-        phone: form.get("phone"),
+        phone: phone.replace(/\D/g, ""),
       });
 
       setGuardLoginProgress("근무자 정보를 확인했습니다.");
@@ -359,7 +360,23 @@ export default function GuardPage() {
                     <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="guard-phone">
                       연락처
                     </label>
-                    <Input className="w-full" id="guard-phone" name="phone" placeholder="010-0000-0000" required />
+                    <Input
+                      className="w-full"
+                      id="guard-phone"
+                      name="phone"
+                      placeholder="010-0000-0000"
+                      value={phone}
+                      onChange={(event) => {
+                        const digits = event.target.value.replace(/\D/g, "").slice(0, 11);
+                        const formatted = digits.length > 7
+                          ? `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`
+                          : digits.length > 3
+                            ? `${digits.slice(0, 3)}-${digits.slice(3)}`
+                            : digits;
+                        setPhone(formatted);
+                      }}
+                      required
+                    />
                   </div>
                 </div>
                 <Button

@@ -102,7 +102,7 @@ describe("employee roster page", () => {
     expect(screen.getByRole("columnheader", { name: "출근" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "교육" })).toBeInTheDocument();
     const aliceRow = screen.getByRole("link", { name: "Alice" }).closest("tr") as HTMLElement;
-    expect(within(aliceRow).getByText("정상출근")).toBeInTheDocument();
+    expect(within(aliceRow).getByText("출근")).toBeInTheDocument();
     const completedEducationLink = within(aliceRow).getByRole("link", { name: "완료" });
     expect(completedEducationLink).toHaveAttribute(
       "href",
@@ -121,10 +121,11 @@ describe("employee roster page", () => {
     expect(bobRow).not.toBeNull();
     const bobCells = within(bobRow as HTMLElement).getAllByRole("cell");
     expect(bobCells[1]).toHaveTextContent("2020-04-03");
-    expect(bobCells[5]).toHaveTextContent("");
-    expect(bobCells[6]).toHaveTextContent("");
-    expect(bobCells[7]).toHaveTextContent("-");
-    expect(bobCells[8]).toHaveTextContent("1/2");
+    expect(bobCells[5]).toHaveTextContent("평일");
+    expect(bobCells[6]).toBeEmptyDOMElement();
+    expect(bobCells[7]).toBeEmptyDOMElement();
+    expect(bobCells[8]).toHaveTextContent("-");
+    expect(bobCells[9]).toHaveTextContent("1/2");
     expect(screen.queryByRole("link", { name: "Alice" })).not.toBeInTheDocument();
     await user.click(screen.getByRole("checkbox", { name: "퇴직" }));
     expect(screen.queryByRole("columnheader", { name: "퇴직일" })).not.toBeInTheDocument();

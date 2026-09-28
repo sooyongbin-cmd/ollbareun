@@ -1,4 +1,6 @@
 "use client";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +11,7 @@ export default function HolidayNewPage() {
   const router = useRouter();
   const [date, setDate] = useState("");
   const [name, setName] = useState("");
+  const [holidayType, setHolidayType] = useState("custom");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   async function save(event: FormEvent<HTMLFormElement>) {
@@ -16,7 +19,7 @@ export default function HolidayNewPage() {
     if (busy) return;
     setBusy(true); setError("");
     try {
-      const response = await fetch("/api/manager/holidays", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ holiday_date: date, name: name.trim() }) });
+      const response = await fetch("/api/manager/holidays", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ holiday_date: date, name: name.trim(), holiday_type: holidayType }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       router.push("/manager/employee/holidays");
@@ -45,6 +48,12 @@ export default function HolidayNewPage() {
               <p id="holiday-date-help" className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground">추가한 날짜는 휴일로 선택됩니다.</p>
             </div>
           </div>
+          <label className="block space-y-2 text-sm font-medium">휴일 구분
+            <NativeSelect aria-label="휴일 구분" value={holidayType} onChange={event => setHolidayType(event.target.value)} disabled={busy}>
+              <NativeSelectOption value="custom">회사 지정 휴일 (휴무)</NativeSelectOption>
+              <NativeSelectOption value="public">국공휴일 (직원별 공휴일 설정 적용)</NativeSelectOption>
+            </NativeSelect>
+          </label>
           <div className="flex flex-col gap-3 md:flex-row">
             <Button
               aria-label={busy ? "저장중" : "저장"}

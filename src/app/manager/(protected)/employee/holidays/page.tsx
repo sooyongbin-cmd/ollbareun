@@ -1,4 +1,6 @@
 "use client";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRightIcon } from "lucide-react";
@@ -9,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import ConfirmModal from "@/components/modals/confirm-modal";
 import ManagerLoadingMessage from "../../manager-loading-message";
 
-type Holiday = { id: string; holiday_date: string; name: string | null; selected: "Y" | "N" };
+type Holiday = { id: string; holiday_date: string; name: string | null; selected: "Y" | "N"; holiday_type?: "public" | "custom" };
 const actionClass = "inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full gap-2 text-center md:w-auto";
 export default function HolidaysPage() {
   const [year, setYear] = useState(() => new Intl.DateTimeFormat("en", { year: "numeric", timeZone: "Asia/Seoul" }).format(new Date()));
@@ -24,8 +26,6 @@ export default function HolidaysPage() {
   const valid = /^\d{4}$/.test(year) && Number(year) >= 1900 && Number(year) <= 9998;
   useEffect(() => {
     const controller = new AbortController();
-    setRows([]);
-    setLoading(valid);
     if (!valid) return () => controller.abort();
     const timer = setTimeout(async () => {
       try {
@@ -48,6 +48,7 @@ export default function HolidaysPage() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       setMessage(target + "년 공휴일 " + data.inserted + "건을 등록했습니다. 기존 " + data.skipped + "건은 건너뛰었습니다.");
+      setLoading(true);
       setRevision(v => v + 1);
     } catch (e) { setError(e instanceof Error ? e.message : "가져오지 못했습니다."); }
     finally { setBusy(false); setConfirmYear(null); }
@@ -63,13 +64,23 @@ export default function HolidaysPage() {
     } catch (e) { setError(e instanceof Error ? e.message : "저장하지 못했습니다."); }
     finally { setSaving(null); }
   }
+  async function changeType(row: Holiday, holiday_type: string) {
+    setSaving(row.id); setError("");
+    try {
+      const response = await fetch("/api/manager/holidays", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: row.id, holiday_type }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+      setRows(current => current.map(item => item.id === row.id ? { ...item, holiday_type: holiday_type as Holiday["holiday_type"] } : item));
+    } catch (e) { setError(e instanceof Error ? e.message : "저장하지 못했습니다."); }
+    finally { setSaving(null); }
+  }
   return (
     <section className="space-y-[1.5rem]">
       <header>
         <div className="space-y-3">
           <h1 className="text-[1.75rem] leading-[1.2]">공휴일관리</h1>
           <p className="max-w-[40rem] text-[0.875rem] font-normal leading-relaxed text-muted-foreground">
-            연도별 공휴일을 조회하고 휴일을 추가하거나 선택 상태를 변경합니다.
+            국공휴일은 직원별 공휴일 설정을, 회사 지정 휴일은 휴무를 적용합니다. 구분이 없던 기존 휴일은 국공휴일로 표시되므로 필요하면 변경하세요. 변경한 휴일은 새 배정부터 반영됩니다.
           </p>
         </div>
       </header>
@@ -87,7 +98,7 @@ export default function HolidaysPage() {
                 max={9998}
                 value={year}
                 disabled={busy || !!saving}
-                onChange={e => { setYear(e.target.value); setError(""); setMessage(""); }}
+                onChange={e => { const value = e.target.value; setYear(value); setRows([]); setLoading(/^\d{4}$/.test(value) && Number(value) >= 1900 && Number(value) <= 9998); setError(""); setMessage(""); }}
               />
             </div>
           </div>
@@ -117,14 +128,14 @@ export default function HolidaysPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>공휴일 날짜</TableHead>
-                  <TableHead>휴일명</TableHead>
+                  <TableHead>휴일명</TableHead><TableHead>휴일 구분</TableHead>
                   <TableHead className="text-right">선택</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {rows.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={3} className="p-8 text-center text-muted-foreground italic">
+                    <TableCell data-responsive-empty colSpan={4} className="p-8 text-center text-muted-foreground italic">
                       조회 결과에 해당하는 공휴일이 없습니다.
                     </TableCell>
                   </TableRow>
@@ -132,6 +143,9 @@ export default function HolidaysPage() {
                   <TableRow key={row.id} className="hover:bg-muted/40 transition-colors">
                     <TableCell data-label="공휴일 날짜" className="font-semibold whitespace-nowrap text-muted-foreground">{row.holiday_date}</TableCell>
                     <TableCell data-label="휴일명" className="text-muted-foreground">{row.name || "-"}</TableCell>
+                    <TableCell data-label="휴일 구분"><NativeSelect aria-label={row.holiday_date + " 휴일 구분"} value={row.holiday_type ?? "public"} disabled={busy || !!saving} onChange={event => void changeType(row, event.target.value)}>
+                      <NativeSelectOption value="public">국공휴일</NativeSelectOption><NativeSelectOption value="custom">회사 지정 휴일</NativeSelectOption>
+                    </NativeSelect></TableCell>
                     <TableCell data-label="선택" className="text-right">
                       <Checkbox aria-label={row.holiday_date + " 휴일 선택"} checked={row.selected === "Y"} disabled={busy || !!saving} onCheckedChange={checked => void toggle(row, checked === true)} />
                     </TableCell>

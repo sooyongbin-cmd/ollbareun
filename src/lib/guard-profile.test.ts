@@ -39,6 +39,18 @@ const worksites: GuardProfileWorksiteInput[] = [
 ];
 
 describe("guard profile data", () => {
+  it("judges lateness against that day's saved schedule instead of the assignment default", () => {
+    const profile = buildGuardProfile({
+      employeeId: "emp-1", today: "2026-05-31", worksites,
+      schedules: [{ ...schedules[1], in_time: "07:00" }],
+      attendance: [
+        { employee_id: "emp-1", work_date: "2026-05-23", intime: "2026-05-22T23:00:00Z", work_intime: "2026-05-22T23:00:00Z", work_outtime: "2026-05-23T08:00:00Z" },
+        { employee_id: "emp-1", work_date: "2026-05-30", intime: "2026-05-29T23:00:00Z", work_intime: "2026-05-29T23:01:00Z", work_outtime: "2026-05-30T08:00:00Z" },
+      ],
+    });
+    expect(profile.attendanceDetails.map(row => row.status)).toEqual(["정상 출근", "지각 출근"]);
+  });
+
   it("sorts the guard work schedule by period", () => {
     expect(
       buildGuardProfile({

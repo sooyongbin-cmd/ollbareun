@@ -18,10 +18,10 @@ export function holidayName(value: unknown) {
   if (typeof value !== "string" || !value.trim()) throw new Error("휴일명을 입력해주세요.");
   return value.trim();
 }
-export async function insertHolidays(rows: { holiday_date: string; name: string | null; selected: string }[]) {
+export async function insertHolidays(rows: { holiday_date: string; name: string | null; selected: string; holiday_type?: "public" | "custom" }[]) {
   if (!rows.length) return 0;
   const { data, error } = await getSupabaseAdmin().from("public_holidays")
-    .upsert(rows, { onConflict: "holiday_date", ignoreDuplicates: true }).select("id");
+    .upsert(rows.map(row => ({ ...row, holiday_type: row.holiday_type ?? "public" })), { onConflict: "holiday_date", ignoreDuplicates: true }).select("id");
   if (error) throw new Error("휴일을 저장하지 못했습니다.");
   return data?.length ?? 0;
 }

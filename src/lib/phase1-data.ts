@@ -1,3 +1,4 @@
+import { validateScheduleRules, type ScheduleRule } from "./employee-schedule";
 import { canClockIn, canClockOut, canClockOutAtWorksite, normalizePhone } from "./phase1";
 import { requireGpsInfo, type GpsInfo } from "./gps";
 import { type SupabaseClient } from "@supabase/supabase-js";
@@ -16,6 +17,8 @@ export type EmployeeRow = {
   in_time: string;
   out_time: number;
   has_weekend: boolean;
+  schedule_rules_enabled?: boolean;
+  schedule_rules?: ScheduleRule[];
   created_at: string;
 };
 
@@ -148,7 +151,7 @@ export async function loadBootstrap() {
   const supabase = getSupabaseAdmin();
   const [employeesResult, worksitesResult, assignmentsResult, attendanceResult] =
     await Promise.all([
-      supabase.from("employees").select("*").order("created_at", { ascending: false }),
+      supabase.from("employees").select("*,schedule_rules:employee_schedule_rules(day_type,is_working_day,in_time,out_time)").order("created_at", { ascending: false }),
       supabase.from("worksites").select("*").order("created_at", { ascending: false }),
       supabase
         .from("work_assignments")
@@ -208,7 +211,7 @@ function validateEmployeeSchedule(input: { work_style?: unknown; in_time?: unkno
 }
 
 export async function createEmployee(
-  input: { name: unknown; phone: unknown; role?: unknown; work_style?: unknown; in_time?: unknown; out_time?: unknown; has_weekend?: unknown },
+  input: { name: unknown; phone: unknown; role?: unknown; work_style?: unknown; in_time?: unknown; out_time?: unknown; has_weekend?: unknown; schedule_rules?: unknown },
   supabase: SupabaseClient = getSupabase(),
 ) {
   const name = requireString(input.name, "직원이름");
@@ -233,14 +236,16 @@ export async function createEmployee(
     throw new Error("동일한 이름의 근무자가 있습니다.");
   }
 
-  const { data, error } = await supabase
-    .from("employees")
-    .upsert(
+  const rules = input.schedule_rules === undefined ? undefined : validateScheduleRules(input.schedule_rules, input.work_style);
+  const { data, error } = rules !== undefined
+    ? await supabase.rpc("save_employee_with_schedule", {
+      p_employee: { name, phone, phone_normalized, is_retired: false, retired_at: null, role, has_weekend: false, ...schedule },
+      p_rules: rules,
+    })
+    : await supabase.from("employees").upsert(
       { name, phone, phone_normalized, is_retired: false, retired_at: null, role, has_weekend: input.has_weekend !== false, ...schedule },
       { onConflict: "name,phone_normalized" },
-    )
-    .select("*")
-    .single();
+    ).select("*").single();
 
   throwIfError(error);
   return data as EmployeeRow;
@@ -248,7 +253,7 @@ export async function createEmployee(
 
 export async function getEmployeeById(id: unknown, supabase: SupabaseClient = getSupabase()) {
   const employeeId = requireString(id, "직원");
-  const { data, error } = await supabase.from("employees").select("*").eq("id", employeeId).single();
+  const { data, error } = await supabase.from("employees").select("*,schedule_rules:employee_schedule_rules(day_type,is_working_day,in_time,out_time)").eq("id", employeeId).single();
 
   throwIfError(error);
   return data as EmployeeRow;
@@ -289,6 +294,7 @@ export async function updateEmployee(input: {
   in_time?: unknown;
   out_time?: unknown;
   has_weekend?: unknown;
+  schedule_rules?: unknown;
 }, supabase: SupabaseClient = getSupabase()) {
   const id = requireString(input.id, "직원");
   const name = requireString(input.name, "직원이름");
@@ -319,21 +325,13 @@ export async function updateEmployee(input: {
     throw new Error("동일한 연락처가 있습니다.");
   }
 
-  const { data, error } = await supabase
-    .from("employees")
-    .update({
-      name,
-      phone,
-      phone_normalized,
-      is_retired,
-      retired_at,
-      has_weekend: input.has_weekend === true || input.has_weekend === "true" || input.has_weekend === 1,
-      role,
-      ...schedule,
-    })
-    .eq("id", id)
-    .select("*")
-    .single();
+  const rules = input.schedule_rules === undefined ? undefined : validateScheduleRules(input.schedule_rules, input.work_style);
+  const values = { name, phone, phone_normalized, is_retired, retired_at,
+    has_weekend: rules !== undefined ? false : input.has_weekend === true || input.has_weekend === "true" || input.has_weekend === 1,
+    role, ...schedule };
+  const { data, error } = rules !== undefined
+    ? await supabase.rpc("save_employee_with_schedule", { p_employee: { id, ...values }, p_rules: rules })
+    : await supabase.from("employees").update(values).eq("id", id).select("*").single();
 
   throwIfError(error);
   if (is_retired && !currentEmployee?.is_retired) {
@@ -433,6 +431,7 @@ export async function createAssignment(input: {
   endDate?: unknown;
   work_style?: unknown;
   has_weekend?: unknown;
+  schedule_rules?: unknown;
   in_time?: unknown;
   out_time?: unknown;
 }) {
@@ -442,7 +441,8 @@ export async function createAssignment(input: {
   const has_weekend = input.has_weekend === true || input.has_weekend === "true" || input.has_weekend === 1;
 
   const schedule = validateEmployeeSchedule({ work_style: input.work_style, in_time: input.in_time, out_time: input.out_time });
-  if (schedule.work_style === "1" && !has_weekend) {
+  const rules = input.schedule_rules === undefined ? undefined : validateScheduleRules(input.schedule_rules, input.work_style);
+  if (rules === undefined && schedule.work_style === "1" && !has_weekend) {
     const [startYear, startMonth, startDay] = start_date.split("-").map(Number);
     const [endYear, endMonth, endDay] = end_date.split("-").map(Number);
     const startTimestamp = Date.UTC(startYear, startMonth - 1, startDay);
@@ -452,7 +452,7 @@ export async function createAssignment(input: {
       throw new Error(`근무기간의 마지막날(${end_date})에 출근할 수 없습니다. 근무기간 종료일을 조정하세요.`);
     }
   }
-  if (schedule.work_style === "2" && has_weekend) {
+  if (rules === undefined && schedule.work_style === "2" && has_weekend) {
     const supabase = getSupabaseAdmin();
     const [year, month, day] = start_date.split("-").map(Number);
     const nextDay = new Date(Date.UTC(year, month - 1, day + 1)).toISOString().slice(0, 10);
@@ -479,7 +479,7 @@ export async function createAssignment(input: {
       throw new Error(`근무기간의 마지막날(${end_date})이 휴일입니다.`);
     }
   }
-  if (schedule.work_style === "0" && has_weekend) {
+  if (rules === undefined && schedule.work_style === "0" && has_weekend) {
     const supabase = getSupabaseAdmin();
     const isWeekend = (date: string) => {
       const [year, month, day] = date.split("-").map(Number);
@@ -501,7 +501,8 @@ export async function createAssignment(input: {
       throw new Error(`근무기간의 마지막날(${end_date})이 휴일입니다. 근무기간 종료일을 조정하세요.`);
     }
   }
-  const { data, error } = await getSupabaseAdmin().rpc("create_assignment_with_daily_attendance", {
+  const { data, error } = await getSupabaseAdmin().rpc(rules === undefined ? "create_assignment_with_daily_attendance" : "create_assignment_with_schedule_rules", {
+    ...(rules === undefined ? {} : { p_schedule_rules: rules }),
     p_employee_id: employee_id,
     p_worksite_id: worksite_id,
     p_start_date: start_date,
@@ -553,7 +554,7 @@ export async function getAssignmentById(id: unknown, supabase: SupabaseClient = 
   const assignmentId = requireString(id, "배정");
   const { data, error } = await supabase
     .from("work_assignments")
-    .select("*")
+    .select("*,schedule_rules:assignment_schedule_rules(day_type,is_working_day,in_time,out_time)")
     .eq("id", assignmentId)
     .single();
 

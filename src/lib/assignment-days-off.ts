@@ -83,7 +83,7 @@ export async function addAssignmentDayOff(assignmentIdInput: unknown, dateInput:
   const { data, error } = await supabase
     .from("work_assignment_days_off")
     .upsert(
-      { work_assignment_id: assignment.id, day_off_date: dayOffDate },
+      { work_assignment_id: assignment.id, day_off_date: dayOffDate, schedule_generated: false },
       { onConflict: "work_assignment_id,day_off_date", ignoreDuplicates: false },
     )
     .select("*")

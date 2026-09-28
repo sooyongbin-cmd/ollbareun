@@ -21,6 +21,7 @@ describe("holiday new page", () => {
           expect(JSON.parse(String(init?.body))).toEqual({
             holiday_date: "2026-10-03",
             name: "개천절",
+            holiday_type: "public",
           });
           return Response.json({ inserted: 1 }, { status: 201 });
         }
@@ -38,6 +39,7 @@ describe("holiday new page", () => {
     expect(screen.getByLabelText("휴일명")).toHaveAttribute("placeholder", "휴일명을 입력하세요.");
     await user.type(screen.getByLabelText("휴일명"), "개천절");
     await user.type(screen.getByLabelText("날짜"), "2026-10-03");
+    await user.selectOptions(screen.getByLabelText("휴일 구분"), "public");
     await user.click(screen.getByRole("button", { name: "저장" }));
 
     expect(push).toHaveBeenCalledWith("/manager/employee/holidays");

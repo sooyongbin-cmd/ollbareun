@@ -1,5 +1,7 @@
 "use client";
 
+import { scheduleSummary, type ScheduleRule } from "@/lib/employee-schedule";
+
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
@@ -16,6 +18,10 @@ type EmployeeRow = {
   phone: string;
   work_style: "0" | "1" | "2";
   phone_normalized: string;
+  in_time?: string;
+  has_weekend?: boolean;
+  schedule_rules_enabled?: boolean;
+  schedule_rules?: ScheduleRule[];
   is_retired: boolean;
   retired_at: string | null;
   role: "경비원" | "미화원" | "파견";
@@ -366,6 +372,7 @@ export default function EmployeeRosterPage() {
                     직군
                   </SortableHeader>
                   <TableHead>근무형태</TableHead>
+                  <TableHead>출근시간 설정</TableHead>
                   <SortableHeader
                     sortKey="worksite"
                     currentSortKey={sortKey}
@@ -383,7 +390,7 @@ export default function EmployeeRosterPage() {
               <TableBody>
                 {sortedEmployees.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={showRetired ? 9 : 8} className="p-8 text-center text-muted-foreground italic">
+                    <TableCell data-responsive-empty colSpan={showRetired ? 10 : 9} className="p-8 text-center text-muted-foreground italic">
                       조회 결과에 해당하는 직원이 없습니다.
                     </TableCell>
                   </TableRow>
@@ -406,6 +413,7 @@ export default function EmployeeRosterPage() {
                       <TableCell data-label="연락처" className="text-muted-foreground">{formatPhone(employee.phone)}</TableCell>
                       <TableCell data-label="직군" className="text-muted-foreground">{employee.role}</TableCell>
                       <TableCell data-label="근무형태" className="whitespace-nowrap text-muted-foreground">{employee.work_style === "0" ? "일반근무" : employee.work_style === "2" ? "야간근무" : "격일근무"}</TableCell>
+                      <TableCell data-label="출근시간 설정" className="min-w-56 text-xs text-muted-foreground">{scheduleSummary(employee)}</TableCell>
                       <TableCell data-label="근무지" className="text-muted-foreground">
                         {worksiteById.get(assignmentByEmployeeId.get(employee.id)?.worksite_id ?? "") ?? ""}
                       </TableCell>

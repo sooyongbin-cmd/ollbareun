@@ -1,8 +1,10 @@
 "use client";
 
+import { EmployeeScheduleFields } from "@/components/employee-schedule-fields";
+import { legacyScheduleRules, type ScheduleRule } from "@/lib/employee-schedule";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
@@ -39,7 +41,7 @@ export default function EmployeeNewPage() {
   const [workStyle, setWorkStyle] = useState("0");
   const [inTime, setInTime] = useState("08:00");
   const [outTime, setOutTime] = useState("18:00");
-  const [hasWeekend, setHasWeekend] = useState(true);
+  const [scheduleRules, setScheduleRules] = useState<ScheduleRule[]>(() => legacyScheduleRules(true));
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -62,7 +64,8 @@ export default function EmployeeNewPage() {
         work_style: workStyle,
         in_time: inTime,
         out_time: outTime,
-        has_weekend: hasWeekend,
+        has_weekend: false,
+        schedule_rules: scheduleRules,
       });
 
       setSuccessMessage(`직원이름(${result.employee.name}) 연락처(${result.employee.phone}) 직군(${result.employee.role}) 등록완료`);
@@ -141,10 +144,6 @@ export default function EmployeeNewPage() {
               </NativeSelect>
             </div>
             </div>
-            <label className="flex items-center gap-3 text-sm font-semibold text-muted-foreground ml-1">
-              <Checkbox aria-label="휴무적용" checked={hasWeekend} onCheckedChange={(checked) => setHasWeekend(checked === true)} />
-              휴무적용 (주말·공휴일 제외)
-            </label>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <label htmlFor="employee-in-time" className="text-sm font-semibold text-muted-foreground">출근</label>
@@ -159,6 +158,8 @@ export default function EmployeeNewPage() {
               </div>
             </div>
           </div>
+
+          <EmployeeScheduleFields rules={scheduleRules} onChange={setScheduleRules} inTime={inTime} outTime={outTime} workStyle={workStyle} />
 
           <div className="flex flex-wrap gap-3">
             <Button

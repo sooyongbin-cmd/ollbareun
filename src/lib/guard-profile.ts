@@ -18,6 +18,7 @@ export type GuardProfileWorksiteInput = {
 export type GuardProfileAttendanceInput = {
   employee_id: string;
   work_date: string;
+  intime?: string | null;
   work_intime: string | null;
   work_outtime: string | null;
 };
@@ -226,10 +227,12 @@ export function buildGuardProfile(input: {
   });
 
   const attendanceDetails = attendanceForEmployee.map((record) => {
-    const schedule = getScheduleForDate(input.schedules, record.work_date);
+    const schedule = getScheduleForDate(employeeSchedules, record.work_date);
     const expectedInTime = schedule?.in_time;
     const actualInTimestamp = record.work_intime ? new Date(record.work_intime).getTime() : Number.NaN;
-    const expectedInTimestamp = expectedInTime ? seoulTimestamp(record.work_date, expectedInTime) : Number.NaN;
+    const expectedInTimestamp = record.intime
+      ? new Date(record.intime).getTime()
+      : expectedInTime ? seoulTimestamp(record.work_date, expectedInTime) : Number.NaN;
     const isLate = Number.isFinite(actualInTimestamp) && Number.isFinite(expectedInTimestamp)
       ? actualInTimestamp > expectedInTimestamp
       : false;
@@ -346,7 +349,7 @@ export async function loadGuardProfile(employeeIdInput: unknown) {
     supabase.from("worksites").select("id,name"),
     supabase
       .from("work_record")
-      .select("employee_id,work_date,work_intime,work_outtime")
+      .select("employee_id,work_date,intime,work_intime,work_outtime")
       .eq("employee_id", employeeId)
       .gte("work_date", startDate)
       .lte("work_date", endDate)

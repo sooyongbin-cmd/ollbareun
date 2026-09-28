@@ -1,5 +1,8 @@
 "use client";
 
+import { EmployeeScheduleFields } from "@/components/employee-schedule-fields";
+import { employeeScheduleRules, legacyScheduleRules, type ScheduleRule } from "@/lib/employee-schedule";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
@@ -10,7 +13,7 @@ import AlertModal from "@/components/modals/alert-modal";
 import ProcessingModal from "@/components/modals/processing-modal";
 
 type Bootstrap = {
-  employees: { id: string; name: string; is_retired: boolean; work_style: "0" | "1" | "2"; in_time: string; out_time: number; has_weekend?: boolean }[];
+  employees: { id: string; name: string; is_retired: boolean; work_style: "0" | "1" | "2"; in_time: string; out_time: number; has_weekend?: boolean; schedule_rules_enabled?: boolean; schedule_rules?: ScheduleRule[] }[];
   worksites: { id: string; name: string }[];
 };
 
@@ -58,7 +61,7 @@ export default function AssignmentNewPage() {
   const [inTime, setInTime] = useState("08:00");
   const [outTime, setOutTime] = useState("18:00");
   const [workStyle, setWorkStyle] = useState<"0" | "1" | "2">("0");
-  const [hasWeekend, setHasWeekend] = useState(true);
+  const [scheduleRules, setScheduleRules] = useState<ScheduleRule[]>(() => legacyScheduleRules(true));
   const [employeeId, setEmployeeId] = useState("");
   const [data, setData] = useState<Bootstrap>({ employees: [], worksites: [] });
   const [alertMessage, setAlertMessage] = useState("");
@@ -123,7 +126,8 @@ export default function AssignmentNewPage() {
         startDate: formData.get("startDate"),
         endDate: formData.get("endDate"),
         work_style: workStyle,
-        has_weekend: hasWeekend,
+        has_weekend: false,
+        schedule_rules: scheduleRules,
         in_time: inTime,
         out_time: outTime,
       });
@@ -161,7 +165,7 @@ export default function AssignmentNewPage() {
                   const employee = data.employees.find((item) => item.id === id);
                   setEmployeeId(id);
                   setWorkStyle(employee?.work_style ?? "0");
-                  setHasWeekend(employee?.has_weekend ?? true);
+                  setScheduleRules(employeeScheduleRules(employee ?? { has_weekend: true }));
                   setInTime((employee?.in_time ?? "06:00").slice(0, 5));
                   setOutTime(minutesToElapsedTime(employee?.out_time));
                 }} required>
@@ -223,7 +227,7 @@ export default function AssignmentNewPage() {
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-testid="assignment-schedule-row">
+            <div className="grid gap-4 sm:grid-cols-3" data-testid="assignment-schedule-row">
               <div className="space-y-2">
                 <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-work-style">근무형태</label>
                 <NativeSelect className="w-full appearance-none" id="assignment-work-style" value={workStyle} onChange={(event) => {
@@ -232,15 +236,12 @@ export default function AssignmentNewPage() {
                   if (nextWorkStyle === "1") {
                     setInTime("06:00");
                     setOutTime("30:00");
-                    setHasWeekend(false);
                   } else if (nextWorkStyle === "2") {
                     setInTime("22:00");
                     setOutTime("30:00");
-                    setHasWeekend(false);
                   } else {
                     setInTime("08:00");
                     setOutTime("18:00");
-                    setHasWeekend(true);
                   }
                 }} required>
                   <NativeSelectOption value="0">일반근무</NativeSelectOption>
@@ -257,14 +258,9 @@ export default function AssignmentNewPage() {
                 <Input className="w-full" id="assignment-out-time" aria-label="퇴근" type="text" inputMode="numeric" pattern={workStyle === "0" ? "([01]\\d|2[0-3]):[0-5]\\d" : "([01]\\d|2[0-3]):[0-5]\\d|([2-4]\\d):[0-5]\\d"} value={outTime} onChange={(event) => setOutTime(event.target.value)} required />
                 <p className="text-xs text-muted-foreground">{workStyle === "0" ? "퇴근 시각을 입력하세요. 예: 18:00" : "출근일 기준 경과 시간으로 입력합니다. 다음 날 오전 6시는 30:00으로 입력하세요."}</p>
               </div>
-              <div className="space-y-2">
-                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-has-weekend">휴무적용</label>
-                <NativeSelect className="w-full appearance-none" id="assignment-has-weekend" value={hasWeekend ? "true" : "false"} onChange={(event) => setHasWeekend(event.target.value === "true")} required>
-                  <NativeSelectOption value="true">적용</NativeSelectOption>
-                  <NativeSelectOption value="false">미적용</NativeSelectOption>
-                </NativeSelect>
-              </div>
             </div>
+
+            <EmployeeScheduleFields key={employeeId} rules={scheduleRules} onChange={setScheduleRules} inTime={inTime} outTime={outTime} workStyle={workStyle} />
 
             <div className="flex flex-wrap gap-3">
               <Button

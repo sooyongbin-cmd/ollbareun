@@ -1,5 +1,7 @@
 "use client";
 
+import { scheduleSummary, type ScheduleRule } from "@/lib/employee-schedule";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
@@ -19,6 +21,10 @@ type Assignment = {
   worksite_id: string;
   start_date: string;
   end_date: string;
+  in_time?: string;
+  has_weekend?: boolean;
+  schedule_rules_enabled?: boolean;
+  schedule_rules?: ScheduleRule[];
 };
 
 type Employee = {
@@ -71,6 +77,7 @@ export default function AssignmentSavePage() {
   const assignmentId = params.id;
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [worksites, setWorksites] = useState<Worksite[]>([]);
+  const [savedSchedule, setSavedSchedule] = useState("");
   const [employeeId, setEmployeeId] = useState("");
   const [worksiteId, setWorksiteId] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -106,6 +113,7 @@ export default function AssignmentSavePage() {
 
         if (!ignore) {
           setDailyAttendance(dailyAttendancePayload.dailyAttendance ?? []);
+          setSavedSchedule(scheduleSummary(assignmentPayload.assignment));
           setEmployeeId(assignmentPayload.assignment.employee_id);
           setWorksiteId(assignmentPayload.assignment.worksite_id);
           setStartDate(assignmentPayload.assignment.start_date);
@@ -385,6 +393,8 @@ export default function AssignmentSavePage() {
         {error ? <p className="mt-6 text-[1rem] text-destructive">{error}</p> : null}
 
         {!loading && savedStartDate && savedEndDate && currentMonth ? (
+          <>
+          <p className="text-sm text-muted-foreground">배정 당시 출근시간: {savedSchedule}</p>
           <AssignmentDaysOffCalendar
             dailyAttendance={dailyAttendance}
             currentMonth={currentMonth}
@@ -397,6 +407,7 @@ export default function AssignmentSavePage() {
             pendingDate={pendingDayOff}
             startDate={savedStartDate}
           />
+          </>
         ) : null}
       </section>
 

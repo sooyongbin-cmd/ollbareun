@@ -38,6 +38,7 @@ describe("assignment new page", () => {
             endDate: "2026-05-23",
             work_style: "2",
             has_weekend: false,
+            schedule_rules: ["saturday", "sunday", "holiday"].map(day_type => ({ day_type, is_working_day: false, in_time: null, out_time: null })),
             in_time: "22:00",
             out_time: "30:00",
           });
@@ -59,7 +60,7 @@ describe("assignment new page", () => {
     expect(screen.getByLabelText("근무형태")).toBeInTheDocument();
     expect(screen.getByLabelText("출근")).toHaveValue("08:00");
     expect(screen.getByLabelText("퇴근")).toHaveValue("18:00");
-    expect(screen.getByLabelText("휴무적용")).toHaveValue("true");
+    expect(screen.getByLabelText("토요일 적용 방식")).toHaveValue("off");
     const primaryRow = screen.getByTestId("assignment-primary-row");
     const scheduleRow = screen.getByTestId("assignment-schedule-row");
     expect(primaryRow).toContainElement(screen.getByLabelText("근무자"));
@@ -68,7 +69,6 @@ describe("assignment new page", () => {
     expect(scheduleRow).toContainElement(screen.getByLabelText("근무형태"));
     expect(scheduleRow).toContainElement(screen.getByLabelText("출근"));
     expect(scheduleRow).toContainElement(screen.getByLabelText("퇴근"));
-    expect(scheduleRow).toContainElement(screen.getByLabelText("휴무적용"));
     expect([...screen.getByLabelText("근무자").querySelectorAll("option")].map((option) => option.textContent)).toEqual([
       "선택",
       "가나다",
@@ -87,7 +87,7 @@ describe("assignment new page", () => {
     await user.selectOptions(screen.getByLabelText("근무형태"), "2");
     expect(screen.getByLabelText("출근")).toHaveValue("22:00");
     expect(screen.getByLabelText("퇴근")).toHaveValue("30:00");
-    expect(screen.getByLabelText("휴무적용")).toHaveValue("false");
+    expect(screen.getByLabelText("토요일 적용 방식")).toHaveValue("off");
     await user.click(screen.getByRole("button", { name: "배정등록" }));
 
     expect(await screen.findByText("자료를 저장하였습니다.")).toBeInTheDocument();
@@ -103,11 +103,11 @@ describe("assignment new page", () => {
     await user.selectOptions(screen.getByLabelText("근무형태"), "1");
     expect(screen.getByLabelText("출근")).toHaveValue("06:00");
     expect(screen.getByLabelText("퇴근")).toHaveValue("30:00");
-    expect(screen.getByLabelText("휴무적용")).toHaveValue("false");
+    expect(screen.getByLabelText("토요일 적용 방식")).toHaveValue("off");
 
     await user.selectOptions(screen.getByLabelText("근무형태"), "0");
     expect(screen.getByLabelText("출근")).toHaveValue("08:00");
     expect(screen.getByLabelText("퇴근")).toHaveValue("18:00");
-    expect(screen.getByLabelText("휴무적용")).toHaveValue("true");
+    expect(screen.getByLabelText("토요일 적용 방식")).toHaveValue("off");
   });
 });

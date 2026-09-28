@@ -37,13 +37,13 @@ describe("/api/manager/holidays", () => {
     const response = await POST(
       new Request("http://localhost", {
         method: "POST",
-        body: JSON.stringify({ holiday_date: "2026-10-03", name: "개천절" }),
+        body: JSON.stringify({ holiday_date: "2026-10-03", name: "개천절", holiday_type: "public" }),
       }),
     );
 
     expect(response.status).toBe(201);
     expect(insertHolidays).toHaveBeenCalledWith([
-      { holiday_date: "2026-10-03", name: "개천절", selected: "Y" },
+      { holiday_date: "2026-10-03", name: "개천절", selected: "Y", holiday_type: "public" },
     ]);
   });
 });

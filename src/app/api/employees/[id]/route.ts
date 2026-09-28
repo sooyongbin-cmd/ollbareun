@@ -124,6 +124,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
         in_time: body.in_time,
         out_time: body.out_time,
         has_weekend: body.has_weekend,
+        schedule_rules: body.schedule_rules,
       }, supabase),
     });
   } catch (error) {

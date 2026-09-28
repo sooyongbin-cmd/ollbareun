@@ -46,6 +46,27 @@ describe("guard authentication data rules", () => {
     expect(upsert.mock.calls[0][0]).toHaveProperty("has_weekend", true);
   });
 
+  it("saves employee hours and Saturday rules in a single RPC", async () => {
+    const rules = [{ day_type: "saturday", is_working_day: true, in_time: "08:00", out_time: 1020 }];
+    const query = { select: vi.fn().mockReturnThis(), eq: vi.fn().mockResolvedValue({ data: [], error: null }) };
+    const rpc = vi.fn().mockResolvedValue({ data: { id: "emp-1", schedule_rules: rules }, error: null });
+    const client = { from: vi.fn().mockReturnValue(query), rpc };
+    await createEmployee({ name: "홍길동", phone: "01012345678", work_style: "0", in_time: "07:00", out_time: "18:00", schedule_rules: rules }, client as never);
+    expect(rpc).toHaveBeenCalledWith("save_employee_with_schedule", {
+      p_employee: expect.objectContaining({ in_time: "07:00", out_time: 1080, has_weekend: false }), p_rules: rules,
+    });
+    expect(client.from).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses the rule-aware assignment RPC even when the start date is a weekend", async () => {
+    const rules = [{ day_type: "saturday", is_working_day: true, in_time: "08:00", out_time: 1020 }];
+    const rpc = vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: { id: "assign-1" }, error: null }) });
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ rpc } as never);
+    await createAssignment({ employeeId: "emp-1", worksiteId: "site-1", startDate: "2030-01-05", endDate: "2030-01-06",
+      work_style: "0", has_weekend: true, in_time: "07:00", out_time: "18:00", schedule_rules: rules });
+    expect(rpc).toHaveBeenCalledWith("create_assignment_with_schedule_rules", expect.objectContaining({ p_schedule_rules: rules, p_in_time: "07:00" }));
+  });
+
   it("rejects an existing active employee phone number", async () => {
     const existingEmployeesQuery = {
       select: vi.fn().mockReturnThis(),

@@ -175,10 +175,12 @@ describe("guard attendance page", () => {
 
     await user.click(await screen.findByTestId(action));
     expect(await screen.findByRole("heading", { name: action === "clock-in" ? "출근 완료" : "퇴근 완료" })).toBeInTheDocument();
-    expect(
-      screen.getByText(action === "clock-in" ? "오늘도 안전한 근무되세요" : "오늘 하루도 수고하셨습니다."),
-    ).toBeInTheDocument();
-    expect(await screen.findByText(`${action === "clock-in" ? "출근" : "퇴근"} 처리가 완료 되었습니다`)).toBeInTheDocument();
+    if (action === "clock-in") {
+      expect(screen.getByText("오늘도 안전한 근무되세요")).toBeInTheDocument();
+      expect(await screen.findByText("출근 처리가 완료 되었습니다")).toBeInTheDocument();
+    } else {
+      expect(await screen.findByText("오늘 근무는 18시00분까지 기록되었습니다 조심히 들어가세요")).toBeInTheDocument();
+    }
     await user.click(screen.getByRole("button", { name: "확인" }));
 
     await waitFor(() => {
@@ -198,5 +200,67 @@ describe("guard attendance page", () => {
         body: expect.stringContaining('"longitude":"129.064"'),
       }),
     );
+  });
+
+  it("confirms an early clock-out, keeps the modal open while processing, and returns home after completion", async () => {
+    const user = userEvent.setup();
+    const currentTime = new Date("2026-05-20T08:30:00Z").getTime();
+    const nowSpy = vi.spyOn(Date, "now").mockReturnValue(currentTime);
+    const storedSession = JSON.parse(window.localStorage.getItem(guardSessionStorageKey) ?? "{}");
+    storedSession.attendance.intime = "2026-05-20T00:00:00Z";
+    storedSession.attendance.outtime = "2026-05-20T09:00:00Z";
+    window.localStorage.setItem(guardSessionStorageKey, JSON.stringify(storedSession));
+
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: {
+        watchPosition: vi.fn((success: PositionCallback) => {
+          success(inWorksitePosition);
+          return 1;
+        }),
+        getCurrentPosition: vi.fn(),
+        clearWatch: vi.fn(),
+      },
+    });
+
+    let resolveClockOut!: (response: Response) => void;
+    const clockOutPromise = new Promise<Response>((resolve) => {
+      resolveClockOut = resolve;
+    });
+    const fetch = vi.fn(() => clockOutPromise);
+    vi.stubGlobal("fetch", fetch);
+
+    render(<GuardAttendancePage />);
+
+    await user.click(await screen.findByTestId("clock-out"));
+
+    expect(await screen.findByRole("heading", { name: "조퇴 확인" })).toBeInTheDocument();
+    expect(screen.getByText("지금(17시30분) 퇴근하시면 조퇴로 기록됩니다. 계속 진행하시겠습니까?")).toBeInTheDocument();
+    expect(fetch).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "확인" }));
+
+    expect(await screen.findByRole("heading", { name: "퇴근 처리" })).toBeInTheDocument();
+    expect(screen.getByText("퇴근 처리중입니다...")).toBeInTheDocument();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "처리중..." })).toBeDisabled();
+
+    resolveClockOut(
+      Response.json({
+        attendance: {
+          ...storedSession.attendance,
+          work_outtime: "2026-05-20T08:31:00Z",
+        },
+      }),
+    );
+
+    expect(await screen.findByRole("heading", { name: "퇴근 완료" })).toBeInTheDocument();
+    expect(screen.getByText("오늘 근무는 17시31분까지 기록되었습니다 조심히 들어가세요")).toBeInTheDocument();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "확인" }));
+
+    expect(push).toHaveBeenCalledWith("/guard/main");
+    nowSpy.mockRestore();
   });
 });

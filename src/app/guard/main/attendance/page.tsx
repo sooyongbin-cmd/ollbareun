@@ -41,6 +41,8 @@ type AttendanceRow = {
   employee_id: string;
   worksite_id: string;
   work_date: string;
+  intime: string | null;
+  outtime: string | null;
   work_intime: string | null;
   work_outtime: string | null;
 };
@@ -124,6 +126,21 @@ function formatAttendanceTime(value: string | null | undefined) {
     second: "2-digit",
     hour12: false,
   }).format(date);
+}
+
+function formatKoreanHourMinute(value: string | number) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "00시00분";
+
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Seoul",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+  const hour = parts.find((part) => part.type === "hour")?.value ?? "00";
+  const minute = parts.find((part) => part.type === "minute")?.value ?? "00";
+  return `${hour}시${minute}분`;
 }
 
 function getAttendanceStatusCopy({
@@ -218,8 +235,9 @@ export default function GuardAttendancePage() {
   const processingRef = useRef(false);
   const [process, setProcess] = useState<{
     action: "출근" | "퇴근";
-    status: "processing" | "success" | "error";
+    status: "early-confirm" | "processing" | "success" | "error";
     error: string;
+    timeLabel?: string;
   } | null>(null);
   const isProcessing = process?.status === "processing";
   const [error, setError] = useState("");
@@ -375,7 +393,12 @@ export default function GuardAttendancePage() {
       const nextGuard = { ...activeGuard, attendance: result.attendance };
       setGuard(nextGuard);
       writeStoredGuardSession(nextGuard);
-      setProcess({ action, status: "success", error: "" });
+      setProcess({
+        action,
+        status: "success",
+        error: "",
+        timeLabel: action === "퇴근" ? formatKoreanHourMinute(result.attendance.work_outtime ?? Date.now()) : undefined,
+      });
     } catch (attendanceError) {
       const detail = attendanceError instanceof Error ? attendanceError.message : action + " 처리에 실패했습니다.";
       setProcess((current) => current ? { ...current, status: "error", error: detail } : current);
@@ -384,8 +407,32 @@ export default function GuardAttendancePage() {
     }
   }
 
+  function handleAttendanceRequest(action: "출근" | "퇴근") {
+    if (action === "퇴근") {
+      const scheduledClockOut = guard?.attendance?.outtime;
+      const currentTime = Date.now();
+      const scheduledClockOutTime = scheduledClockOut ? new Date(scheduledClockOut).getTime() : Number.NaN;
+
+      if (Number.isFinite(scheduledClockOutTime) && currentTime < scheduledClockOutTime) {
+        setProcess({
+          action,
+          status: "early-confirm",
+          error: "",
+          timeLabel: formatKoreanHourMinute(currentTime),
+        });
+        return;
+      }
+    }
+
+    void handleAttendance(action);
+  }
+
   function handleProcessConfirm() {
     if (!process || process.status === "processing") return;
+    if (process.status === "early-confirm") {
+      void handleAttendance("퇴근");
+      return;
+    }
     const isCompleted = process.status === "success";
     setProcess(null);
     if (isCompleted) {
@@ -456,7 +503,7 @@ export default function GuardAttendancePage() {
             disabled={actionDisabled}
             hidden={isClockedIn || isClockedOut}
             type="button"
-            onClick={() => void handleAttendance("출근")}
+            onClick={() => handleAttendanceRequest("출근")}
           >
             {isProcessing && !isClockedIn ? "처리 중..." : "출근하기"}
           </button>
@@ -467,7 +514,7 @@ export default function GuardAttendancePage() {
             disabled={actionDisabled}
             hidden={!isClockedIn}
             type="button"
-            onClick={() => void handleAttendance("퇴근")}
+            onClick={() => handleAttendanceRequest("퇴근")}
           >
             {isProcessing && isClockedIn ? "처리 중..." : "퇴근하기"}
           </button>
@@ -496,15 +543,25 @@ export default function GuardAttendancePage() {
         >
           <DialogHeader className="guard-attendance-dialog-header">
             <DialogTitle className="guard-attendance-dialog-title">
-              {process?.status === "success" ? `${process.action} 완료` : `${process?.action ?? "출퇴근"} 처리`}
+              {process?.status === "early-confirm"
+                ? "조퇴 확인"
+                : process?.status === "success"
+                  ? `${process.action} 완료`
+                  : `${process?.action ?? "출퇴근"} 처리`}
             </DialogTitle>
           </DialogHeader>
           <DialogDescription aria-live="polite" className="guard-attendance-dialog-copy">
-            {process?.status === "success" ? (
+            {process?.status === "early-confirm" ? (
+              <span>{`지금(${process.timeLabel}) 퇴근하시면 조퇴로 기록됩니다. 계속 진행하시겠습니까?`}</span>
+            ) : process?.status === "success" ? (
+              process.action === "퇴근" ? (
+                <span>{`오늘 근무는 ${process.timeLabel}까지 기록되었습니다 조심히 들어가세요`}</span>
+              ) : (
               <>
-                <span>{process.action === "출근" ? "오늘도 안전한 근무되세요" : "오늘 하루도 수고하셨습니다."}</span>
+                <span>오늘도 안전한 근무되세요</span>
                 <span>{process.action} 처리가 완료 되었습니다</span>
               </>
+              )
             ) : process?.status === "error" ? (
               <span>{process.action} 처리에 실패했습니다.</span>
             ) : (

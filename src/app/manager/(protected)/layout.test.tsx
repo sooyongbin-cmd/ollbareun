@@ -208,17 +208,14 @@ describe("manager layout", () => {
       ?.querySelectorAll("a");
     expect(Array.from(attendanceLinks ?? []).map((link) => link.textContent?.trim())).toEqual([
       "근태관리",
-      "출근현황",
       "휴가관리",
     ]);
-    expect(screen.getByRole("link", { name: "출근현황" })).toHaveAttribute(
-      "href",
-      "/manager/reports/attendance/status",
-    );
+    expect(screen.queryByRole("link", { name: "출근현황" })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "휴가관리" })).toHaveAttribute("href", "/manager/leave");
     expect(screen.getByText("현장점검")).toBeInTheDocument();
     expect(screen.getByText("안전교육")).toBeInTheDocument();
-    expect(screen.getByText("리포트출력")).toBeInTheDocument();
+    expect(screen.queryByText("리포트출력")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "교육이수자료" })).not.toBeInTheDocument();
     expect(screen.getByText("시스템")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "대시보드" })).toHaveAttribute("href", "/manager");
     expect(screen.getByRole("link", { name: "교육자료관리" })).toHaveAttribute(
@@ -259,11 +256,6 @@ describe("manager layout", () => {
       "시스템설정",
     ]);
 
-    const reportLinks = screen
-      .getByText("리포트출력")
-      .closest("[data-sidebar=group]")
-      ?.querySelectorAll("a");
-    expect(Array.from(reportLinks ?? []).map((link) => link.textContent?.trim())).toEqual(["교육이수자료"]);
   });
 
   it("hides passkey request navigation when the feature is disabled", () => {
@@ -293,8 +285,8 @@ describe("manager layout", () => {
     expect(within(breadcrumb).getByText("현장점검현황")).toBeInTheDocument();
   });
 
-  it("marks only the most specific navigation item active", () => {
-    navigationMock.pathname = "/manager/reports/attendance/status";
+  it("keeps the attendance navigation active on its detail routes", () => {
+    navigationMock.pathname = "/manager/reports/attendance/detail/attendance-1";
 
     render(
       <ManagerLayout>
@@ -302,10 +294,9 @@ describe("manager layout", () => {
       </ManagerLayout>,
     );
 
-    expect(screen.getByRole("link", { name: "출근현황" })).toHaveAttribute("data-active", "true");
-    expect(screen.getByRole("link", { name: "근태관리" })).toHaveAttribute("data-active", "false");
+    expect(screen.getByRole("link", { name: "근태관리" })).toHaveAttribute("data-active", "true");
     const breadcrumb = screen.getByRole("navigation", { name: "현재 위치" });
-    expect(within(breadcrumb).getByText("출근현황")).toBeInTheDocument();
+    expect(within(breadcrumb).getByText("근태관리")).toBeInTheDocument();
   });
 
   it("shows the signed-in manager email in the header", async () => {

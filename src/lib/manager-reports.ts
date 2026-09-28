@@ -50,10 +50,6 @@ type DailyAttendanceInput = {
   outtime?: string | null;
 };
 
-type AttendanceStatusEmployeeInput = EmployeeInput & {
-  role?: string | null;
-};
-
 type ResourceInput = {
   id: string;
 };
@@ -81,19 +77,6 @@ export type AttendanceReportRow = {
   outtimeStatus: OuttimeStatus;
   outtimeLabel: "미퇴근" | "조퇴" | "퇴근";
   isLate: boolean;
-};
-
-export type AttendanceStatusRow = {
-  id: string;
-  employeeName: string;
-  workStyle: string;
-  worksiteName: string;
-  scheduledClockIn: string;
-  scheduledClockOut: string;
-  clockInDateTime: string | null;
-  clockOutDateTime: string | null;
-  workDuration: string;
-  status: ManagerAttendanceStatus;
 };
 
 export type AttendanceRecord = {
@@ -250,67 +233,6 @@ function assertDate(date: string) {
   if (normalized !== date) {
     throw new Error("날짜를 올바르게 입력하세요.");
   }
-}
-
-export function buildAttendanceStatus(input: {
-  date: string;
-  now?: Date;
-  employees: AttendanceStatusEmployeeInput[];
-  assignments: AssignmentInput[];
-  worksites: { id: string; name: string }[];
-  dailyAttendance: DailyAttendanceInput[];
-  attendance: AttendanceInput[];
-}): AttendanceStatusRow[] {
-  assertDate(input.date);
-  const nowTimestamp = (input.now ?? new Date()).getTime();
-
-  const employeesById = new Map(input.employees.map((employee) => [employee.id, employee]));
-  const worksitesById = new Map(input.worksites.map((worksite) => [worksite.id, worksite.name]));
-  const scheduledTimes = new Map<string, { intime: string | null; outtime: string | null }>();
-
-  input.dailyAttendance.forEach((dailyAttendance) => {
-    scheduledTimes.set(
-      `${dailyAttendance.employee_id}:${dailyAttendance.worksite_id}:${dailyAttendance.work_date}`,
-      { intime: dailyAttendance.intime, outtime: dailyAttendance.outtime ?? null },
-    );
-  });
-
-  return input.attendance
-    .filter((record) => record.work_date === input.date)
-    .flatMap((record) => {
-      const employee = employeesById.get(record.employee_id);
-      if (!employee || employee.is_retired) {
-        return [];
-      }
-
-      const scheduledTime = scheduledTimes.get(
-        `${record.employee_id}:${record.worksite_id ?? ""}:${record.work_date}`,
-      );
-      const scheduledClockInAt = scheduledTime?.intime ?? record.intime ?? null;
-      const status = getManagerAttendanceStatus({
-        intimeStatus: record.intime_status,
-        scheduledClockIn: scheduledClockInAt,
-        now: input.now ?? new Date(nowTimestamp),
-      });
-
-      return [{
-        id: record.id,
-        employeeName: employee.name,
-        workStyle: workStyleLabel(employee.work_style),
-        worksiteName: worksitesById.get(record.worksite_id ?? "") ?? "-",
-        scheduledClockIn: toKstDateTime(scheduledClockInAt)?.time ?? "-",
-        scheduledClockOut: toKstDateTime(scheduledTime?.outtime ?? record.outtime ?? null)?.time ?? "-",
-        clockInDateTime: toKstDateTime(record.work_intime)?.dateTime ?? null,
-        clockOutDateTime: toKstDateTime(record.work_outtime)?.dateTime ?? null,
-        workDuration: durationLabel(record.work_intime, record.work_outtime),
-        status,
-      }];
-    })
-    .sort((left, right) => {
-      const leftScheduled = left.scheduledClockIn === "-" ? "99:99" : left.scheduledClockIn;
-      const rightScheduled = right.scheduledClockIn === "-" ? "99:99" : right.scheduledClockIn;
-      return leftScheduled.localeCompare(rightScheduled) || left.employeeName.localeCompare(right.employeeName, "ko-KR");
-    });
 }
 
 function kstDateTimeLocalToIso(value: unknown, label: string) {
@@ -519,36 +441,6 @@ export async function loadAttendanceReport(input: { employeeName: string; workDa
     assignments: assignmentsResult.data ?? [],
     dailyAttendance: workRecords,
     now: new Date(),
-  });
-}
-
-export async function loadAttendanceStatus(input: { date: string }) {
-  assertDate(input.date);
-  const supabase = getSupabaseAdmin();
-  const [workRecordResult, assignmentsResult, employeesResult, worksitesResult] = await Promise.all([
-    supabase
-      .from("work_record")
-      .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime,intime_status,outtime_status")
-      .eq("work_date", input.date),
-    supabase.from("work_assignments").select("id,employee_id,worksite_id"),
-    supabase.from("employees").select("id,name,role,work_style,is_retired"),
-    supabase.from("worksites").select("id,name"),
-  ]);
-
-  throwIfError(workRecordResult.error);
-  throwIfError(assignmentsResult.error);
-  throwIfError(employeesResult.error);
-  throwIfError(worksitesResult.error);
-  const workRecords = workRecordResult.data ?? [];
-
-  return buildAttendanceStatus({
-    date: input.date,
-    now: new Date(),
-    employees: employeesResult.data ?? [],
-    assignments: assignmentsResult.data ?? [],
-    worksites: worksitesResult.data ?? [],
-    dailyAttendance: workRecords,
-    attendance: workRecords,
   });
 }
 

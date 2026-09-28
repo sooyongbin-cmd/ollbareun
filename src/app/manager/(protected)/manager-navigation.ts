@@ -6,7 +6,6 @@ import {
   Building2,
   CalendarDays,
   ClipboardCheck,
-  FileCheck2,
   FileClock,
   FileText,
   GraduationCap,
@@ -55,7 +54,6 @@ export const managerNavigationGroups: ManagerNavigationGroup[] = [
     icon: Activity,
     items: [
       { label: "근태관리", href: "/manager/reports/attendance", icon: FileClock },
-      { label: "출근현황", href: "/manager/reports/attendance/status", icon: Activity },
       { label: "휴가관리", href: "/manager/leave", icon: CalendarDays },
     ],
   },
@@ -75,13 +73,6 @@ export const managerNavigationGroups: ManagerNavigationGroup[] = [
       { label: "교육자료관리", href: "/manager/safety/resources", icon: BookOpen },
       { label: "교육이수관리", href: "/manager/safety/completions", icon: GraduationCap },
       { label: "자동알림이력", href: "/manager/safety/notifications", icon: BellRing },
-    ],
-  },
-  {
-    label: "리포트출력",
-    icon: FileClock,
-    items: [
-      { label: "교육이수자료", href: "/manager/reports/education", icon: FileCheck2 },
     ],
   },
   {

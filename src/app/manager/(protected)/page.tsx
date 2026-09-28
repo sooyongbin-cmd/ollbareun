@@ -285,7 +285,7 @@ export default function ManagerPage() {
       description: `총인원 ${data.summary.totalEmployees}명 출근예정 ${data.summary.scheduledEmployeesToday}명 출근율 ${data.summary.attendanceRate}%`,
       ariaLabel: `출근현황 대기 ${data.summary.waitingEmployeesToday} 출근 ${data.summary.onTimeEmployeesToday} 지각 ${data.summary.lateEmployeesToday} 결근 ${data.summary.absentEmployeesToday} 퇴근 ${data.summary.clockedOutEmployeesToday} 조퇴 ${data.summary.earlyLeaveEmployeesToday} 미퇴근 ${data.summary.notClockedOutEmployeesToday} 총인원 ${data.summary.totalEmployees}명 출근예정 ${data.summary.scheduledEmployeesToday}명 출근율 ${data.summary.attendanceRate}%`,
       icon: Users,
-      href: "/manager/reports/attendance/status",
+      href: "/manager/reports/attendance",
     },
     {
       label: "직군별 인원배정",

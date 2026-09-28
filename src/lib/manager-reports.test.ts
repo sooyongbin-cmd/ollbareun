@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildAttendanceReport, buildAttendanceStatus, buildEducationReport, loadAttendanceReport, loadAttendanceStatus, updateAttendanceRecord } from "./manager-reports";
+import { buildAttendanceReport, buildEducationReport, loadAttendanceReport, updateAttendanceRecord } from "./manager-reports";
 import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
 
@@ -161,80 +161,6 @@ describe("manager reports", () => {
     })]);
   });
 
-  it("builds today's expected attendance status and excludes retired employees", () => {
-    const rows = buildAttendanceStatus({
-      date: "2026-09-11",
-      now: new Date("2026-09-11T01:00:00.000Z"),
-      employees: [
-        { id: "emp-1", name: "김철수", role: "경비원", work_style: "0", is_retired: false },
-        { id: "emp-2", name: "이영희", role: "미화원", work_style: "2", is_retired: false },
-        { id: "emp-3", name: "퇴직자", role: "파견", work_style: "1", is_retired: true },
-      ],
-      assignments: [
-        { id: "assignment-1", employee_id: "emp-1", worksite_id: "site-1" },
-        { id: "assignment-2", employee_id: "emp-2", worksite_id: "site-1" },
-        { id: "assignment-3", employee_id: "emp-3", worksite_id: "site-1" },
-      ],
-      worksites: [{ id: "site-1", name: "본사" }],
-      dailyAttendance: [
-        { id: "attendance-1", employee_id: "emp-1", worksite_id: "site-1", work_date: "2026-09-11", intime: "2026-09-10T21:00:00.000Z", outtime: "2026-09-11T09:00:00.000Z" },
-        { id: "record-2", employee_id: "emp-2", worksite_id: "site-1", work_date: "2026-09-11", intime: "2026-09-10T22:00:00.000Z", outtime: "2026-09-11T10:00:00.000Z" },
-        { id: "record-3", employee_id: "emp-3", worksite_id: "site-1", work_date: "2026-09-11", intime: "2026-09-10T21:00:00.000Z" },
-      ],
-      attendance: [
-        {
-          id: "attendance-1",
-          employee_id: "emp-1",
-          worksite_id: "site-1",
-          work_date: "2026-09-11",
-          intime: "2026-09-10T21:00:00.000Z",
-          outtime: "2026-09-11T09:00:00.000Z",
-          work_intime: "2026-09-10T21:05:00.000Z",
-          work_outtime: "2026-09-11T09:05:00.000Z",
-          intime_status: "1",
-        },
-        {
-          id: "record-2",
-          employee_id: "emp-2",
-          worksite_id: "site-1",
-          work_date: "2026-09-11",
-          intime: "2026-09-10T22:00:00.000Z",
-          outtime: "2026-09-11T10:00:00.000Z",
-          work_intime: null,
-          work_outtime: null,
-          intime_status: "0",
-        },
-      ],
-    });
-
-    expect(rows).toEqual([
-      {
-        id: "attendance-1",
-        employeeName: "김철수",
-        workStyle: "일반근무",
-        worksiteName: "본사",
-        scheduledClockIn: "06:00",
-        scheduledClockOut: "18:00",
-        clockInDateTime: "2026-09-11 06:05",
-        clockOutDateTime: "2026-09-11 18:05",
-        workDuration: "12시간",
-        status: "지각",
-      },
-      {
-        id: "record-2",
-        employeeName: "이영희",
-        workStyle: "야간근무",
-        worksiteName: "본사",
-        scheduledClockIn: "07:00",
-        scheduledClockOut: "19:00",
-        clockInDateTime: null,
-        clockOutDateTime: null,
-        workDuration: "-",
-        status: "결근",
-      },
-    ]);
-  });
-
   it("loads the attendance report through the admin client so RLS does not hide manager data", async () => {
     const employeesQuery = { select: vi.fn(), ilike: vi.fn() };
     employeesQuery.select.mockReturnValue(employeesQuery);
@@ -277,97 +203,6 @@ describe("manager reports", () => {
     expect(from).toHaveBeenCalledWith("employees");
     expect(from).toHaveBeenCalledWith("work_record");
     expect(attendanceQuery.eq).toHaveBeenCalledWith("work_date", "2026-09-17");
-  });
-
-  it("includes work records without a scheduled clock-in", () => {
-    const rows = buildAttendanceStatus({
-      date: "2026-09-11",
-      now: new Date("2026-09-11T12:00:00.000Z"),
-      employees: [{ id: "emp-1", name: "김철수", work_style: "2", is_retired: false }],
-      assignments: [{ id: "assignment-1", employee_id: "emp-1", worksite_id: "site-1" }],
-      worksites: [{ id: "site-1", name: "본사" }],
-      dailyAttendance: [{
-        id: "record-1",
-        employee_id: "emp-1",
-        worksite_id: "site-1",
-        work_date: "2026-09-11",
-        intime: null,
-        outtime: "2026-09-11T10:00:00.000Z",
-      }],
-      attendance: [{
-        id: "record-1",
-        employee_id: "emp-1",
-        worksite_id: "site-1",
-        work_date: "2026-09-11",
-        intime: null,
-        outtime: "2026-09-11T10:00:00.000Z",
-        work_intime: null,
-        work_outtime: null,
-        intime_status: "0",
-      }],
-    });
-
-    expect(rows).toEqual([expect.objectContaining({
-      id: "record-1",
-      scheduledClockIn: "-",
-      scheduledClockOut: "19:00",
-      status: "결근",
-    })]);
-  });
-
-  it("shows an employee as waiting before the scheduled clock-in time", () => {
-    const rows = buildAttendanceStatus({
-      date: "2026-09-11",
-      now: new Date("2026-09-11T00:30:00.000Z"),
-      employees: [{ id: "emp-1", name: "김철수", role: "경비원", work_style: "0", is_retired: false }],
-      assignments: [{ id: "assignment-1", employee_id: "emp-1", worksite_id: "site-1" }],
-      worksites: [{ id: "site-1", name: "본사" }],
-      dailyAttendance: [{ id: "record-1", employee_id: "emp-1", worksite_id: "site-1", work_date: "2026-09-11", intime: "2026-09-11T01:00:00.000Z" }],
-      attendance: [{
-        id: "record-1",
-        employee_id: "emp-1",
-        worksite_id: "site-1",
-        work_date: "2026-09-11",
-        intime: "2026-09-11T01:00:00.000Z",
-        work_intime: null,
-        work_outtime: null,
-        intime_status: "0",
-      }],
-    });
-
-    expect(rows[0]).toMatchObject({
-      employeeName: "김철수",
-      clockInDateTime: null,
-      status: "대기",
-    });
-  });
-
-  it("loads attendance status through the admin client so RLS does not hide manager data", async () => {
-    const workRecordQuery = { select: vi.fn(), eq: vi.fn() };
-    workRecordQuery.select.mockReturnValue(workRecordQuery);
-    workRecordQuery.eq.mockResolvedValue({
-      data: [{ id: "attendance-1", employee_id: "emp-1", worksite_id: "site-1", work_date: "2026-09-17", intime: "2026-09-17T00:00:00.000Z", work_intime: "2026-09-17T00:00:00.000Z", work_outtime: null, intime_status: "2" }],
-      error: null,
-    });
-
-    const from = vi.fn((table: string) => {
-      if (table === "work_record") return workRecordQuery;
-      if (table === "work_assignments") return { select: vi.fn().mockResolvedValue({ data: [{ id: "assignment-1", employee_id: "emp-1", worksite_id: "site-1" }], error: null }) };
-      if (table === "employees") return { select: vi.fn().mockResolvedValue({ data: [{ id: "emp-1", name: "김철수", role: "경비원", is_retired: false }], error: null }) };
-      if (table === "worksites") return { select: vi.fn().mockResolvedValue({ data: [{ id: "site-1", name: "본사" }], error: null }) };
-      return workRecordQuery;
-    });
-
-    vi.mocked(getSupabaseAdmin).mockReturnValue({ from } as never);
-    vi.mocked(getSupabase).mockReturnValue({ from: vi.fn() } as never);
-
-    await expect(loadAttendanceStatus({ date: "2026-09-17" })).resolves.toEqual([
-      expect.objectContaining({ employeeName: "김철수", status: "출근" }),
-    ]);
-    expect(getSupabase).not.toHaveBeenCalled();
-    expect(from).toHaveBeenCalledWith("employees");
-    expect(from).toHaveBeenCalledWith("work_record");
-    expect(workRecordQuery.eq).toHaveBeenCalledWith("work_date", "2026-09-17");
   });
 
   it("computes education completion count per active employee", () => {

@@ -161,11 +161,9 @@ export default function AssignmentDaysOffCalendar({
                 aria-pressed={daysOff.has(date)}
                 className={[
                   "flex min-w-0 min-h-24 flex-col items-center justify-start gap-1 px-0.5 py-2 rounded-lg border text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50",
-                  daysOff.has(date)
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : isWeekendOrHoliday
-                      ? "border-transparent bg-orange-100/80 hover:border-orange-300 hover:bg-orange-100 dark:bg-orange-950/30 dark:hover:bg-orange-950/50"
-                      : "border-transparent bg-muted/40 hover:border-primary/40 hover:bg-primary/10",
+                  daysOff.has(date) || isWeekendOrHoliday
+                    ? "border-transparent bg-orange-100/80 hover:border-orange-300 hover:bg-orange-100 dark:bg-orange-950/30 dark:hover:bg-orange-950/50"
+                    : "border-transparent bg-muted/40 hover:border-primary/40 hover:bg-primary/10",
                   date < startDate || date > endDate || disabled || pendingDate === date
                     ? "cursor-not-allowed opacity-40"
                     : "",

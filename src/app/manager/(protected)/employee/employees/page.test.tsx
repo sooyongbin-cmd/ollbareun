@@ -76,6 +76,9 @@ describe("employee roster page", () => {
         if (url.endsWith("/api/education/completions")) {
           return Response.json({ completions: educationCompletions });
         }
+        if (url.endsWith("/api/employee-roles")) {
+          return Response.json({ roles: ["경비원", "미화원", "주차원", "사감"] });
+        }
         return Response.json({}, { status: 404 });
       }),
     );
@@ -143,6 +146,9 @@ describe("employee roster page", () => {
     expect(screen.getByLabelText("이름")).toHaveAttribute("list", "employee-roster-name-options");
     expect(Array.from(document.querySelectorAll<HTMLOptionElement>("#employee-roster-name-options option")).map((option) => option.value)).toEqual(["Alice"]);
     expect(searchSection).toContainElement(screen.getByLabelText("직군"));
+    expect(Array.from((screen.getByLabelText("직군") as HTMLSelectElement).options).map((option) => option.value)).toEqual([
+      "", "경비원", "미화원", "주차원", "사감",
+    ]);
     expect(searchSection).toContainElement(screen.getByRole("checkbox", { name: "퇴직" }));
     expect(screen.getByRole("checkbox", { name: "퇴직" })).not.toBeChecked();
     expect(searchSection).toContainElement(screen.getByRole("link", { name: "직원 등록" }));
@@ -199,6 +205,9 @@ describe("employee roster page", () => {
       }
       if (url.endsWith("/api/education/completions")) {
         return Response.json({ completions: educationCompletions });
+      }
+      if (url.endsWith("/api/employee-roles")) {
+        return Response.json({ roles: ["경비원", "미화원", "주차원", "사감"] });
       }
       return Response.json({}, { status: 404 });
     }));

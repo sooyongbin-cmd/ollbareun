@@ -2,12 +2,13 @@
 
 import { EmployeeScheduleFields } from "@/components/employee-schedule-fields";
 import { legacyScheduleRules, type ScheduleRule } from "@/lib/employee-schedule";
+import { fetchEmployeeRoles } from "@/lib/employee-roles";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { SaveIcon } from "@/components/icons/save-icon";
 import AlertModal from "@/components/modals/alert-modal";
 import ProcessingModal from "@/components/modals/processing-modal";
@@ -38,6 +39,9 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
 
 export default function EmployeeNewPage() {
   const [phone, setPhone] = useState("");
+  const [employeeRoles, setEmployeeRoles] = useState<string[]>([]);
+  const [role, setRole] = useState("");
+  const [loadingRoles, setLoadingRoles] = useState(true);
   const [workStyle, setWorkStyle] = useState("0");
   const [inTime, setInTime] = useState("08:00");
   const [outTime, setOutTime] = useState("18:00");
@@ -46,6 +50,28 @@ export default function EmployeeNewPage() {
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
+
+  useEffect(() => {
+    let ignore = false;
+
+    fetchEmployeeRoles()
+      .then((roles) => {
+        if (!ignore) {
+          setEmployeeRoles(roles);
+          setRole(roles[0] ?? "");
+        }
+      })
+      .catch((loadError) => {
+        if (!ignore) setError(loadError instanceof Error ? loadError.message : "직군 목록을 불러오지 못했습니다.");
+      })
+      .finally(() => {
+        if (!ignore) setLoadingRoles(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -60,7 +86,7 @@ export default function EmployeeNewPage() {
       const result = await postJson<EmployeeResponse>("/api/employees", {
         name: data.get("name"),
         phone: phone.replace(/\D/g, ""),
-        role: data.get("role"),
+        role,
         work_style: workStyle,
         in_time: inTime,
         out_time: outTime,
@@ -127,12 +153,15 @@ export default function EmployeeNewPage() {
                 className="w-full appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"
                 id="employee-role"
                 name="role"
-                defaultValue="경비원"
+                value={role}
+                onChange={(event) => setRole(event.target.value)}
+                disabled={loadingRoles}
                 required
               >
-                <NativeSelectOption value="경비원">경비원</NativeSelectOption>
-                <NativeSelectOption value="미화원">미화원</NativeSelectOption>
-                <NativeSelectOption value="파견">파견</NativeSelectOption>
+                {loadingRoles ? <NativeSelectOption value="">불러오는 중...</NativeSelectOption> : null}
+                {employeeRoles.map((employeeRole) => (
+                  <NativeSelectOption key={employeeRole} value={employeeRole}>{employeeRole}</NativeSelectOption>
+                ))}
               </NativeSelect>
             </div>
             <div className="space-y-2">
@@ -166,7 +195,7 @@ export default function EmployeeNewPage() {
               aria-label="저장"
               className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto"
               data-testid="employee-submit"
-              disabled={saving}
+              disabled={saving || loadingRoles || !role}
               type="submit"
             >
               <SaveIcon size={20} />

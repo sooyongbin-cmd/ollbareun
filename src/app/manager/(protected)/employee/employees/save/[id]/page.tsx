@@ -2,6 +2,7 @@
 
 import { EmployeeScheduleFields } from "@/components/employee-schedule-fields";
 import { employeeScheduleRules, legacyScheduleRules, type ScheduleRule } from "@/lib/employee-schedule";
+import { fetchEmployeeRoles } from "@/lib/employee-roles";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +30,7 @@ type Employee = {
   schedule_rules?: ScheduleRule[];
   is_retired: boolean;
   retired_at: string | null;
-  role: "경비원" | "미화원" | "파견";
+  role: string;
 };
 
 type EmployeeResponse = {
@@ -205,7 +206,8 @@ export default function EmployeeSavePage() {
   const employeeId = params.id;
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [role, setRole] = useState<"경비원" | "미화원" | "파견">("경비원");
+  const [employeeRoles, setEmployeeRoles] = useState<string[]>([]);
+  const [role, setRole] = useState("");
   const [workStyle, setWorkStyle] = useState("1");
   const [inTime, setInTime] = useState("06:00");
   const [outTime, setOutTime] = useState("06:00");
@@ -236,11 +238,18 @@ export default function EmployeeSavePage() {
 
     async function loadEmployee() {
       try {
-        const data = await fetchJson<EmployeeResponse>(`/api/employees/${employeeId}`);
+        const [data, roles] = await Promise.all([
+          fetchJson<EmployeeResponse>(`/api/employees/${employeeId}`),
+          fetchEmployeeRoles(),
+        ]);
+        if (!roles.includes(data.employee.role)) {
+          throw new Error("직원의 현재 직군이 직군 시스템설정에 없습니다.");
+        }
         if (!ignore) {
           setName(data.employee.name);
           setPhone(formatPhoneInput(data.employee.phone));
           setRole(data.employee.role);
+          setEmployeeRoles(roles);
           setWorkStyle(data.employee.work_style ?? "1");
           setInTime((data.employee.in_time ?? "06:00").slice(0, 5));
           const storedOutTime = minutesToElapsedTime(data.employee.out_time);
@@ -407,12 +416,12 @@ export default function EmployeeSavePage() {
                     className="w-full appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.5em_1.5em] bg-no-repeat pr-10"
                     id="employee-role"
                     value={role}
-                    onChange={(event) => setRole(event.target.value as "경비원" | "미화원" | "파견")}
+                    onChange={(event) => setRole(event.target.value)}
                     required
                   >
-                    <NativeSelectOption value="경비원">경비원</NativeSelectOption>
-                    <NativeSelectOption value="미화원">미화원</NativeSelectOption>
-                    <NativeSelectOption value="파견">파견</NativeSelectOption>
+                    {employeeRoles.map((employeeRole) => (
+                      <NativeSelectOption key={employeeRole} value={employeeRole}>{employeeRole}</NativeSelectOption>
+                    ))}
                   </NativeSelect>
                 </div>
                 <div className="space-y-2">

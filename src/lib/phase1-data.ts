@@ -5,6 +5,7 @@ import { type SupabaseClient } from "@supabase/supabase-js";
 import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
 import { getAssignmentDayOffCounts, isAssignmentDayOff } from "./assignment-days-off";
+import { loadEmployeeRoles } from "./employee-roles";
 
 export type EmployeeRow = {
   id: string;
@@ -12,7 +13,7 @@ export type EmployeeRow = {
   phone: string;
   phone_normalized: string;
   is_retired: boolean;
-  role: "경비원" | "미화원" | "파견";
+  role: string;
   work_style: "0" | "1" | "2";
   in_time: string;
   out_time: number;
@@ -217,11 +218,10 @@ export async function createEmployee(
   const name = requireString(input.name, "직원이름");
   const phone = requireString(input.phone, "연락처");
   const phone_normalized = normalizePhone(phone);
-  const role = input.role ? requireString(input.role, "직군") : "경비원";
-  if (!["경비원", "미화원", "파견"].includes(role)) {
-    throw new Error("올바르지 않은 직군입니다.");
-  }
   const schedule = validateEmployeeSchedule(input);
+  const employeeRoles = await loadEmployeeRoles(supabase);
+  const role = input.role ? requireString(input.role, "직군") : employeeRoles[0];
+  if (!employeeRoles.includes(role)) throw new Error("등록되지 않은 직군입니다.");
 
   const { data: existingEmployees, error: existingEmployeesError } = await supabase
     .from("employees")
@@ -303,12 +303,10 @@ export async function updateEmployee(input: {
   const is_retired =
     input.is_retired === true || input.is_retired === "true" || input.is_retired === 1;
   const retired_at = is_retired ? parseRetiredAt(input.retired_at) : null;
-  const role = input.role ? requireString(input.role, "직군") : "경비원";
-  if (!["경비원", "미화원", "파견"].includes(role)) {
-    throw new Error("올바르지 않은 직군입니다.");
-  }
-
   const schedule = validateEmployeeSchedule(input);
+  const employeeRoles = await loadEmployeeRoles(supabase);
+  const role = input.role ? requireString(input.role, "직군") : employeeRoles[0];
+  if (!employeeRoles.includes(role)) throw new Error("등록되지 않은 직군입니다.");
   const { data: currentEmployee, error: currentEmployeeError } = await supabase
     .from("employees")
     .select("id,is_retired,retired_at")

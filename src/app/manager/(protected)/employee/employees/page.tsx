@@ -11,6 +11,7 @@ import { useEffect, useMemo, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
 import { SortableHeader } from "@/components/sortable-header";
+import { fetchEmployeeRoles } from "@/lib/employee-roles";
 
 type EmployeeRow = {
   id: string;
@@ -24,7 +25,7 @@ type EmployeeRow = {
   schedule_rules?: ScheduleRule[];
   is_retired: boolean;
   retired_at: string | null;
-  role: "경비원" | "미화원" | "파견";
+  role: string;
 };
 
 type AttendanceRow = {
@@ -88,6 +89,7 @@ export default function EmployeeRosterPage() {
   const [data, setData] = useState<Bootstrap>(emptyBootstrap);
   const [nameQuery, setNameQuery] = useState("");
   const [roleQuery, setRoleQuery] = useState("");
+  const [employeeRoles, setEmployeeRoles] = useState<string[]>([]);
   const [showRetired, setShowRetired] = useState(false);
   const [sortKey, setSortKey] = useState<"name" | "phone" | "role" | "worksite">("name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
@@ -99,10 +101,11 @@ export default function EmployeeRosterPage() {
 
     async function loadBootstrap() {
       try {
-        const [bootstrapResponse, resourcesResponse, completionsResponse] = await Promise.all([
+        const [bootstrapResponse, resourcesResponse, completionsResponse, roles] = await Promise.all([
           fetch("/api/bootstrap"),
           fetch("/api/education/resources"),
           fetch("/api/education/completions"),
+          fetchEmployeeRoles(),
         ]);
         const [payload, resourcesPayload, completionsPayload] = await Promise.all([
           bootstrapResponse.json(),
@@ -130,6 +133,7 @@ export default function EmployeeRosterPage() {
             educationCompletions: completionsPayload.completions ?? [],
             summary: payload.summary ?? emptyBootstrap.summary,
           });
+          setEmployeeRoles(roles);
         }
       } catch (loadError) {
         if (!ignore) {
@@ -297,9 +301,9 @@ export default function EmployeeRosterPage() {
                 onChange={(event) => setRoleQuery(event.target.value)}
               >
                 <NativeSelectOption value="">전체 직군</NativeSelectOption>
-                <NativeSelectOption value="경비원">경비원</NativeSelectOption>
-                <NativeSelectOption value="미화원">미화원</NativeSelectOption>
-                <NativeSelectOption value="파견">파견</NativeSelectOption>
+                {employeeRoles.map((role) => (
+                  <NativeSelectOption key={role} value={role}>{role}</NativeSelectOption>
+                ))}
               </NativeSelect>
             </div>
           </div>

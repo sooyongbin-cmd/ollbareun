@@ -98,6 +98,10 @@ describe("employee save page", () => {
       vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = String(input);
 
+        if (!init && url.endsWith("/api/employee-roles")) {
+          return Response.json({ roles: ["경비원", "미화원", "주차원", "사감"] });
+        }
+
         if (!init && url.endsWith("/api/employees/emp-1")) {
           return Response.json({
             employee: {
@@ -168,6 +172,9 @@ describe("employee save page", () => {
       screen.getByLabelText("직원이름").closest("div.grid"),
     );
     expect(screen.getByLabelText("직군").closest("div.grid")).toHaveClass("sm:grid-cols-2");
+    expect(Array.from((screen.getByLabelText("직군") as HTMLSelectElement).options).map((option) => option.value)).toEqual([
+      "경비원", "미화원", "주차원", "사감",
+    ]);
     expect(screen.getByLabelText("근무형태").closest("div.grid")).toBe(
       screen.getByLabelText("직군").closest("div.grid"),
     );
@@ -229,9 +236,9 @@ describe("employee save page", () => {
     await user.click(screen.getByRole("button", { name: "저장" }));
 
     expect(screen.getByText("변경사항을 저장하시겠습니까?")).toBeInTheDocument();
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledTimes(2);
     await user.click(screen.getByRole("button", { name: "아니오" }));
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledTimes(2);
     expect(screen.getByLabelText("직원이름")).toHaveValue("Alice");
     await user.click(screen.getByRole("button", { name: "저장" }));
     await user.click(screen.getByRole("button", { name: "예" }));
@@ -292,7 +299,7 @@ describe("employee save page", () => {
     await screen.findByDisplayValue("Alice");
     await user.click(screen.getByRole("button", { name: "목록" }));
     expect(push).toHaveBeenCalledWith("/manager/employee/employees");
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledTimes(2);
   });
 
   it("confirms and deletes the employee", async () => {

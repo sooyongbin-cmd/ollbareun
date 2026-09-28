@@ -17,6 +17,14 @@ vi.mock("./assignment-days-off", () => ({
   isAssignmentDayOff: vi.fn().mockResolvedValue(false),
 }));
 
+function employeeRolesQuery(content = "경비원\n미화원\n주차원\n사감") {
+  return {
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    single: vi.fn().mockResolvedValue({ data: { content }, error: null }),
+  };
+}
+
 describe("guard authentication data rules", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -37,7 +45,9 @@ describe("guard authentication data rules", () => {
     };
     const single = vi.fn().mockResolvedValue({ data: { id: "emp-1" }, error: null });
     const upsert = vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ single }) });
-    const supabase = { from: vi.fn().mockReturnValueOnce(existingEmployeesQuery).mockReturnValue({ upsert }) };
+    const employeesFrom = vi.fn().mockReturnValueOnce(existingEmployeesQuery).mockReturnValue({ upsert });
+    const rolesQuery = employeeRolesQuery();
+    const supabase = { from: vi.fn((table: string) => table === "system_configs" ? rolesQuery : employeesFrom()) };
 
     await createEmployee({ name: "홍길동", phone: "01012345678", work_style: "2", in_time: "22:00", out_time: "30:00", has_weekend: true }, supabase as never);
 
@@ -50,12 +60,36 @@ describe("guard authentication data rules", () => {
     const rules = [{ day_type: "saturday", is_working_day: true, in_time: "08:00", out_time: 1020 }];
     const query = { select: vi.fn().mockReturnThis(), eq: vi.fn().mockResolvedValue({ data: [], error: null }) };
     const rpc = vi.fn().mockResolvedValue({ data: { id: "emp-1", schedule_rules: rules }, error: null });
-    const client = { from: vi.fn().mockReturnValue(query), rpc };
+    const rolesQuery = employeeRolesQuery();
+    const client = { from: vi.fn((table: string) => table === "system_configs" ? rolesQuery : query), rpc };
     await createEmployee({ name: "홍길동", phone: "01012345678", work_style: "0", in_time: "07:00", out_time: "18:00", schedule_rules: rules }, client as never);
     expect(rpc).toHaveBeenCalledWith("save_employee_with_schedule", {
       p_employee: expect.objectContaining({ in_time: "07:00", out_time: 1080, has_weekend: false }), p_rules: rules,
     });
-    expect(client.from).toHaveBeenCalledTimes(1);
+    expect(client.from).toHaveBeenCalledTimes(2);
+  });
+
+  it("accepts a role registered in the employees_role system config", async () => {
+    const rolesQuery = employeeRolesQuery();
+    const employeesQuery = { select: vi.fn().mockReturnThis(), eq: vi.fn().mockResolvedValue({ data: [], error: null }) };
+    const rpc = vi.fn().mockResolvedValue({ data: { id: "emp-1", role: "사감" }, error: null });
+    const client = { from: vi.fn((table: string) => table === "system_configs" ? rolesQuery : employeesQuery), rpc };
+
+    await expect(createEmployee({
+      name: "홍길동", phone: "01012345678", role: "사감", work_style: "0",
+      in_time: "08:00", out_time: "18:00", schedule_rules: [],
+    }, client as never)).resolves.toMatchObject({ role: "사감" });
+    expect(rpc).toHaveBeenCalledWith("save_employee_with_schedule", expect.objectContaining({
+      p_employee: expect.objectContaining({ role: "사감" }),
+    }));
+  });
+
+  it("rejects a role that is not registered in the employees_role system config", async () => {
+    const rolesQuery = employeeRolesQuery();
+    const client = { from: vi.fn(() => rolesQuery) };
+
+    await expect(createEmployee({ name: "홍길동", phone: "01012345678", role: "파견" }, client as never))
+      .rejects.toThrow("등록되지 않은 직군입니다.");
   });
 
   it("uses the rule-aware assignment RPC even when the start date is a weekend", async () => {
@@ -72,7 +106,8 @@ describe("guard authentication data rules", () => {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockResolvedValue({ data: [{ name: "김철수", phone_normalized: "01012345678" }], error: null }),
     };
-    const supabase = { from: vi.fn().mockReturnValue(existingEmployeesQuery) };
+    const rolesQuery = employeeRolesQuery();
+    const supabase = { from: vi.fn((table: string) => table === "system_configs" ? rolesQuery : existingEmployeesQuery) };
 
     await expect(createEmployee({ name: "홍길동", phone: "010-1234-5678" }, supabase as never))
       .rejects.toThrow("동일한 연락처가 있습니다.");
@@ -144,7 +179,8 @@ describe("guard authentication data rules", () => {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockResolvedValue({ data: [{ name: "홍길동", phone_normalized: "01099998888" }], error: null }),
     };
-    const supabase = { from: vi.fn().mockReturnValue(existingEmployeesQuery) };
+    const rolesQuery = employeeRolesQuery();
+    const supabase = { from: vi.fn((table: string) => table === "system_configs" ? rolesQuery : existingEmployeesQuery) };
 
     await expect(createEmployee({ name: "홍길동", phone: "010-1234-5678" }, supabase as never))
       .rejects.toThrow("동일한 이름의 근무자가 있습니다.");

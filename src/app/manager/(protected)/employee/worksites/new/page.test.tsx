@@ -60,6 +60,7 @@ describe("worksite new page", () => {
     render(<WorksiteNewPage />);
 
     expect(screen.getByLabelText("근무지주소")).toHaveAttribute("readonly");
+    expect(screen.getByLabelText("허용반경(m)")).toHaveValue("100");
     expect(screen.queryByText("주소 기준 GPS")).not.toBeInTheDocument();
   });
 
@@ -299,7 +300,6 @@ describe("worksite new page", () => {
     expect(screen.queryByText("주소 기준 GPS")).not.toBeInTheDocument();
     expect(screen.getByTestId("worksite-map")).toBeInTheDocument();
     await user.type(screen.getByLabelText("GPS정보"), "37.1, 126.7");
-    await user.type(screen.getByLabelText("허용반경(m)"), "100");
     await user.click(screen.getByRole("button", { name: "저장" }));
 
     expect(await screen.findByText("자료를 저장하였습니다.")).toBeInTheDocument();

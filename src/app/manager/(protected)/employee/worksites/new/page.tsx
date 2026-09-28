@@ -145,7 +145,14 @@ export default function WorksiteNewPage() {
               <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="worksite-radius">
                 허용반경(m)
               </label>
-              <Input className="w-full" id="worksite-radius" name="radiusMeters" placeholder="100" required />
+              <Input
+                className="w-full"
+                defaultValue="100"
+                id="worksite-radius"
+                name="radiusMeters"
+                placeholder="100"
+                required
+              />
             </div>
           </div>
 

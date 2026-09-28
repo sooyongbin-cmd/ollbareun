@@ -99,4 +99,38 @@ describe("worksite save page", () => {
     await user.click(screen.getByRole("button", { name: "확인" }));
     expect(push).toHaveBeenCalledWith("/manager/employee/worksites");
   });
+
+  it("shows the assignment error when deleting an assigned worksite", async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        if (!init) {
+          return Response.json({
+            worksite: {
+              id: "work-1",
+              name: "본사",
+              address: "부산광역시 부산진구 중앙대로 1",
+              gps_info: { latitude: 37.5, longitude: 127.0 },
+              radius_meters: 100,
+            },
+          });
+        }
+
+        return Response.json(
+          { error: "근무지배정 자료가 있어서 삭제할 수 없습니다." },
+          { status: 400 },
+        );
+      }),
+    );
+
+    render(<WorksiteSavePage />);
+
+    expect(await screen.findByRole("heading", { name: "근무지 상세" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "삭제" }));
+    await user.click(screen.getByRole("button", { name: "예" }));
+
+    expect((await screen.findAllByText("근무지배정 자료가 있어서 삭제할 수 없습니다.")).length).toBeGreaterThan(0);
+    expect(push).not.toHaveBeenCalled();
+  });
 });

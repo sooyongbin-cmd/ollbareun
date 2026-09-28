@@ -233,7 +233,7 @@ export default function WorksiteSavePage() {
         onClose={() => setDeleteConfirmOpen(false)}
         onConfirm={handleDelete}
         title="자료를 삭제하시겠습니까?"
-        description="삭제하면 해당 근무지와 연결된 배정, 출퇴근 기록에 영향을 줄 수 있습니다."
+        description="근무지배정 자료가 있으면 삭제할 수 없습니다."
         loading={deleting}
         loadingLabel="삭제처리중입니다..."
       />

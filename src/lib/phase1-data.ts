@@ -418,8 +418,23 @@ export async function updateWorksite(input: {
 }
 
 export async function deleteWorksite(id: unknown, supabase: SupabaseClient = getSupabase()) {
-  const worksiteId = requireString(id, "근무지");
+  const worksiteId = requireString(id, "근무지");
+  const { data: assignments, error: assignmentError } = await supabase
+    .from("work_assignments")
+    .select("id")
+    .eq("worksite_id", worksiteId)
+    .limit(1);
+
+  throwIfError(assignmentError);
+  if (assignments?.length) {
+    throw new Error("근무지배정 자료가 있어서 삭제할 수 없습니다.");
+  }
+
   const { error } = await supabase.from("worksites").delete().eq("id", worksiteId);
+
+  if (error?.code === "23503" && error.message.includes("work_assignments_worksite_id_fkey")) {
+    throw new Error("근무지배정 자료가 있어서 삭제할 수 없습니다.");
+  }
 
   throwIfError(error);
 }

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { authenticateGuard, clockIn, clockOut, createAssignment, createEmployee, deleteAssignment, deleteAssignmentAfterToday, deleteAssignmentIncludingAttendance, listAssignments, listAssignmentsForEmployee } from "./phase1-data";
+import { authenticateGuard, clockIn, clockOut, createAssignment, createEmployee, deleteAssignment, deleteAssignmentAfterToday, deleteAssignmentIncludingAttendance, deleteWorksite, listAssignments, listAssignmentsForEmployee } from "./phase1-data";
 import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
 import { getAssignmentDayOffCounts, isAssignmentDayOff } from "./assignment-days-off";
@@ -76,6 +76,67 @@ describe("guard authentication data rules", () => {
 
     await expect(createEmployee({ name: "홍길동", phone: "010-1234-5678" }, supabase as never))
       .rejects.toThrow("동일한 연락처가 있습니다.");
+  });
+
+  it("rejects deleting a worksite that has assignments", async () => {
+    const assignmentQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockResolvedValue({ data: [{ id: "assignment-1" }], error: null }),
+    };
+    const worksiteQuery = {
+      delete: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ error: null }),
+    };
+    const supabase = {
+      from: vi.fn((table: string) => table === "work_assignments" ? assignmentQuery : worksiteQuery),
+    };
+
+    await expect(deleteWorksite("work-1", supabase as never))
+      .rejects.toThrow("근무지배정 자료가 있어서 삭제할 수 없습니다.");
+    expect(assignmentQuery.eq).toHaveBeenCalledWith("worksite_id", "work-1");
+    expect(worksiteQuery.delete).not.toHaveBeenCalled();
+  });
+
+  it("deletes a worksite when it has no assignments", async () => {
+    const assignmentQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+    };
+    const worksiteQuery = {
+      delete: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ error: null }),
+    };
+    const supabase = {
+      from: vi.fn((table: string) => table === "work_assignments" ? assignmentQuery : worksiteQuery),
+    };
+
+    await expect(deleteWorksite("work-1", supabase as never)).resolves.toBeUndefined();
+    expect(worksiteQuery.eq).toHaveBeenCalledWith("id", "work-1");
+  });
+
+  it("reports a concurrent assignment when the database rejects worksite deletion", async () => {
+    const assignmentQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+    };
+    const worksiteQuery = {
+      delete: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({
+        error: {
+          code: "23503",
+          message: 'violates foreign key constraint "work_assignments_worksite_id_fkey"',
+        },
+      }),
+    };
+    const supabase = {
+      from: vi.fn((table: string) => table === "work_assignments" ? assignmentQuery : worksiteQuery),
+    };
+
+    await expect(deleteWorksite("work-1", supabase as never))
+      .rejects.toThrow("근무지배정 자료가 있어서 삭제할 수 없습니다.");
   });
 
   it("rejects an existing active employee name", async () => {

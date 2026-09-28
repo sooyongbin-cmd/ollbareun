@@ -1,8 +1,9 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import { elapsedTime, scheduleDayLabels, scheduleDayTypes, type ScheduleRule } from "@/lib/employee-schedule";
+import { elapsedTime, isScheduleDayOff, setScheduleDayOff, scheduleDayLabels, scheduleTimeDayTypes, weekDays, type ScheduleRule } from "@/lib/employee-schedule";
 
 export function EmployeeScheduleFields({ rules, onChange, inTime, outTime, workStyle }: {
   rules: ScheduleRule[]; onChange: (rules: ScheduleRule[]) => void;
@@ -11,8 +12,20 @@ export function EmployeeScheduleFields({ rules, onChange, inTime, outTime, workS
   return (
     <fieldset className="space-y-3 rounded-lg border p-4">
       <legend className="px-2 text-sm font-semibold">요일·공휴일별 설정</legend>
-      <p className="text-xs text-muted-foreground">공휴일 설정은 요일보다 우선합니다. 기본 설정을 사용하면 위 출퇴근시간으로 근무합니다. 격일근무는 배정 시작일부터 격일로 적용합니다.</p>
-      {scheduleDayTypes.map((day) => {
+      <fieldset className="space-y-2">
+        <legend className="mb-2 text-sm font-semibold">휴무일 (복수 선택)</legend>
+        <div className="flex flex-wrap gap-x-5 gap-y-3">
+          {[...weekDays, "holiday" as const].map(day => (
+            <label key={day} className="flex min-h-9 items-center gap-2 text-sm">
+              <Checkbox aria-label={`${scheduleDayLabels[day]} 휴무`} checked={isScheduleDayOff(rules, day)}
+                onCheckedChange={checked => onChange(setScheduleDayOff(rules, day, checked === true, inTime, outTime))} />
+              {scheduleDayLabels[day]}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      <p className="text-xs text-muted-foreground">체크한 요일 또는 공휴일은 휴무입니다. 휴무 요일과 공휴일이 겹쳐도 쉽니다. 출근하는 공휴일의 시간은 공휴일 설정을 우선합니다. 격일근무는 배정 시작일부터 격일로 적용합니다.</p>
+      {[...scheduleTimeDayTypes, ...weekDays.slice(0, 5).filter(day => rules.some(rule => rule.day_type === day && rule.is_working_day))].map((day) => {
         const rule = rules.find((item) => item.day_type === day);
         const mode = !rule ? "default" : rule.is_working_day ? "custom" : "off";
         const update = (value: ScheduleRule | null) => onChange([...rules.filter((item) => item.day_type !== day), ...(value ? [value] : [])]);

@@ -1,7 +1,10 @@
-export const scheduleDayTypes = ["weekday", "saturday", "sunday", "holiday"] as const;
+export const weekDays = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] as const;
+export const scheduleTimeDayTypes = ["weekday", "saturday", "sunday", "holiday"] as const;
+export const scheduleDayTypes = ["weekday", ...weekDays, "holiday"] as const;
 export type ScheduleDayType = typeof scheduleDayTypes[number];
 export const scheduleDayLabels: Record<ScheduleDayType, string> = {
   weekday: "평일", saturday: "토요일", sunday: "일요일", holiday: "공휴일",
+  monday: "월요일", tuesday: "화요일", wednesday: "수요일", thursday: "목요일", friday: "금요일",
 };
 export type ScheduleRule = {
   day_type: ScheduleDayType;
@@ -9,6 +12,23 @@ export type ScheduleRule = {
   in_time: string | null;
   out_time: number | null;
 };
+
+export function isScheduleDayOff(rules: ScheduleRule[], day: ScheduleDayType) {
+  const rule = rules.find(item => item.day_type === day)
+    ?? (weekDays.slice(0, 5).some(weekday => weekday === day) ? rules.find(item => item.day_type === "weekday") : undefined);
+  return rule?.is_working_day === false;
+}
+
+export function setScheduleDayOff(rules: ScheduleRule[], day: ScheduleDayType, off: boolean, inTime: string, outTime: string): ScheduleRule[] {
+  const remaining = rules.filter(item => item.day_type !== day);
+  if (off) return [...remaining, { day_type: day, is_working_day: false, in_time: null, out_time: null }];
+  // A specific workday can override a legacy "all weekdays off" rule.
+  if (isScheduleDayOff(remaining, day)) return [...remaining, {
+    day_type: day, is_working_day: true, in_time: inTime,
+    out_time: Number(outTime.slice(0, 2)) * 60 + Number(outTime.slice(3, 5)),
+  }];
+  return remaining;
+}
 
 export function elapsedTime(value: number) {
   return `${String(Math.floor(value / 60)).padStart(2, "0")}:${String(value % 60).padStart(2, "0")}`;
@@ -27,7 +47,7 @@ export function employeeScheduleRules(employee: {
 }
 
 export function validateScheduleRules(value: unknown, workStyle: unknown): ScheduleRule[] {
-  if (!Array.isArray(value) || value.length > 4) throw new Error("요일별 근무 설정이 올바르지 않습니다.");
+  if (!Array.isArray(value) || value.length > scheduleDayTypes.length) throw new Error("요일별 근무 설정이 올바르지 않습니다.");
   const seen = new Set<string>();
   return value.map((input) => {
     if (!input || typeof input !== "object" || !scheduleDayTypes.includes(input.day_type) || seen.has(input.day_type)
@@ -48,7 +68,8 @@ export function scheduleSummary(employee: {
   in_time?: string; has_weekend?: boolean; schedule_rules_enabled?: boolean; schedule_rules?: ScheduleRule[];
 }) {
   const rules = employeeScheduleRules(employee);
-  return scheduleDayTypes.map((day) => {
+  const days: ScheduleDayType[] = [...scheduleTimeDayTypes, ...weekDays.slice(0, 5).filter(day => rules.some(rule => rule.day_type === day))];
+  return days.map((day) => {
     const rule = rules.find((item) => item.day_type === day);
     return `${scheduleDayLabels[day]} ${rule ? rule.is_working_day ? rule.in_time?.slice(0, 5) : "휴무" : employee.in_time?.slice(0, 5) ?? "-"}`;
   }).join(" · ");

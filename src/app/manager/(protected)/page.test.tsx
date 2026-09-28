@@ -137,20 +137,8 @@ describe("manager dashboard page", () => {
 
     expect(screen.queryByRole("heading", { name: "최근 30일 운영 추이" })).not.toBeInTheDocument();
 
-    const attendanceSection = screen.getByRole("region", { name: "근태현황" });
-    expect(within(attendanceSection).getByRole("columnheader", { name: "근무지" })).toBeInTheDocument();
-    expect(within(attendanceSection).getByRole("columnheader", { name: "근무자" })).toBeInTheDocument();
-    expect(within(attendanceSection).getByRole("columnheader", { name: "출근예정" })).toBeInTheDocument();
-    expect(within(attendanceSection).getByRole("columnheader", { name: "출근일시" })).toBeInTheDocument();
-    expect(within(attendanceSection).getByRole("columnheader", { name: "상태" })).toBeInTheDocument();
-    expect(within(attendanceSection).getByRole("link", { name: "문현동현장" })).toHaveAttribute(
-      "href",
-      "/manager/reports/attendance",
-    );
-    expect(within(attendanceSection).getByText("김철수")).toBeInTheDocument();
-    expect(within(attendanceSection).getByText("09:00")).toBeInTheDocument();
-    expect(within(attendanceSection).getByText("2026-06-04 09:01")).toBeInTheDocument();
-    expect(within(attendanceSection).getByText("지각")).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "근태현황" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "실시간 특이사항 및 긴급피드" })).not.toBeInTheDocument();
 
     const leaveSection = screen.getByRole("region", { name: "금주 휴가현황" });
     expect(within(leaveSection).getByRole("columnheader", { name: "이름" })).toBeInTheDocument();
@@ -180,14 +168,6 @@ describe("manager dashboard page", () => {
     expect(within(assignmentRows[1]).getByText("50%")).toBeInTheDocument();
 
     expect(screen.queryByRole("region", { name: "실시간출근현황 리스트" })).not.toBeInTheDocument();
-    const feedSection = screen.getByRole("region", { name: "실시간 특이사항 및 긴급피드" });
-    expect(within(feedSection).getByRole("heading", { name: "실시간 특이사항 및 긴급피드" })).toBeInTheDocument();
-    const feedItems = within(feedSection).getAllByRole("link");
-    expect(feedItems).toHaveLength(2);
-    expect(feedItems[0]).toHaveAttribute("href", "/manager/inspection/special-remarks/remark-1");
-    expect(feedItems[0]).toHaveTextContent("[청소 | 문현동현장] 10:42");
-    expect(feedItems[0]).toHaveTextContent('"세면대 배수구 막힘 및 누수 발생"');
-    expect(feedItems[1]).toHaveTextContent("[시설 | 센텀현장] 10:15");
   });
 
   it("shows a dashboard-shaped loading state", () => {
@@ -231,6 +211,6 @@ describe("manager dashboard page", () => {
     expect(within(screen.getByRole("region", { name: "운영 요약" })).getByText("0%")).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "최근 30일 운영 추이" })).not.toBeInTheDocument();
     expect(screen.getByText("등록된 인원 배정이 없습니다.")).toBeInTheDocument();
-    expect(screen.getByText("현재 미처리 특이사항이 없습니다.")).toBeInTheDocument();
+    expect(screen.getByText("이번 주 휴가 일정이 없습니다.")).toBeInTheDocument();
   });
 });

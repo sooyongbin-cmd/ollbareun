@@ -51,13 +51,6 @@ type DashboardPayload = {
     };
     unprocessedSpecialRemarks: number;
   };
-  specialRemarkFeed: {
-    id: string;
-    category: "청소" | "시설" | "파견";
-    worksiteName: string;
-    reportedAt: string;
-    content: string;
-  }[];
   worksiteMonitoring: {
     worksiteId: string;
     employeeRole: "경비원" | "미화원" | "파견";
@@ -66,14 +59,6 @@ type DashboardPayload = {
     assignedCount: number;
     inspectedSiteCount: number;
     inspectionSiteCount: number;
-  }[];
-  attendanceToday: {
-    id: string;
-    worksiteName: string;
-    employeeName: string;
-    scheduledClockIn: string;
-    clockInDateTime: string;
-    status: "결근" | "지각" | "출근" | "대기";
   }[];
   weeklyLeaveStatus: {
     id: string;
@@ -111,24 +96,9 @@ const emptyDashboard: DashboardPayload = {
     },
     unprocessedSpecialRemarks: 0,
   },
-  specialRemarkFeed: [],
   worksiteMonitoring: [],
-  attendanceToday: [],
   weeklyLeaveStatus: [],
 };
-
-function formatTime(value: string | null) {
-  if (!value) {
-    return "-";
-  }
-
-  return new Intl.DateTimeFormat("ko-KR", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZone: "Asia/Seoul",
-  }).format(new Date(value));
-}
 
 function formatInspectionProgress(inspectedSiteCount: number, inspectionSiteCount: number) {
   if (inspectionSiteCount <= 0) {
@@ -163,18 +133,6 @@ function aggregateWorksiteMonitoring(worksites: DashboardPayload["worksiteMonito
   }
 
   return Array.from(monitoringByWorksite.values());
-}
-
-function getSpecialRemarkTone(category: DashboardPayload["specialRemarkFeed"][number]["category"]) {
-  if (category === "청소") {
-    return "border-l-red-500 bg-red-50/80 dark:bg-red-950/20";
-  }
-
-  if (category === "시설") {
-    return "border-l-amber-500 bg-amber-50/80 dark:bg-amber-950/20";
-  }
-
-  return "border-l-sky-500 bg-sky-50/80 dark:bg-sky-950/20";
 }
 
 function DashboardSkeleton() {
@@ -274,9 +232,7 @@ export default function ManagerPage() {
                 ...(payload.summary?.employeeRoleCounts ?? {}),
               },
             },
-            specialRemarkFeed: payload.specialRemarkFeed ?? [],
             worksiteMonitoring: payload.worksiteMonitoring ?? [],
-            attendanceToday: payload.attendanceToday ?? [],
             weeklyLeaveStatus: payload.weeklyLeaveStatus ?? [],
           });
         }
@@ -383,61 +339,6 @@ export default function ManagerPage() {
       </section>
 
       <div className="grid min-w-0 gap-6 xl:grid-cols-2">
-        <Card role="region" aria-label="근태현황" className="min-w-0">
-        <CardHeader className="border-b">
-          <CardTitle>
-            <h2 className="flex items-center gap-2 text-base">
-              <CalendarDays aria-hidden="true" className="size-4 text-primary" />
-              근태현황
-            </h2>
-          </CardTitle>
-          <CardDescription>오늘 근태관리 목록을 근무지 순서로 표시합니다.</CardDescription>
-          <CardAction>
-            <Link className="text-sm font-medium text-primary hover:underline" href="/manager/reports/attendance">
-              전체보기
-            </Link>
-          </CardAction>
-        </CardHeader>
-        <CardContent className="min-w-0 px-0">
-          <div className="min-w-0 overflow-x-auto">
-            <Table className="min-w-[42rem]">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>근무지</TableHead>
-                  <TableHead>근무자</TableHead>
-                  <TableHead>출근예정</TableHead>
-                  <TableHead>출근일시</TableHead>
-                  <TableHead>상태</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.attendanceToday.length === 0 ? (
-                  <TableRow>
-                    <TableCell data-responsive-empty colSpan={5} className="h-28 text-center text-muted-foreground">
-                      오늘 근태 기록이 없습니다.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  data.attendanceToday.map((row) => (
-                    <TableRow key={row.id}>
-                      <TableCell data-label="근무지">
-                        <Link className="font-medium text-primary hover:underline" href="/manager/reports/attendance">
-                          {row.worksiteName}
-                        </Link>
-                      </TableCell>
-                      <TableCell data-label="근무자">{row.employeeName}</TableCell>
-                      <TableCell data-label="출근예정" className="whitespace-nowrap">{row.scheduledClockIn}</TableCell>
-                      <TableCell data-label="출근일시" className="whitespace-nowrap">{row.clockInDateTime}</TableCell>
-                      <TableCell data-label="상태">{row.status}</TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-        </Card>
-
         <Card role="region" aria-label="금주 휴가현황" className="min-w-0">
         <CardHeader className="border-b">
           <CardTitle>
@@ -498,9 +399,7 @@ export default function ManagerPage() {
           </div>
         </CardContent>
         </Card>
-      </div>
 
-      <div className="grid min-w-0 gap-6 xl:grid-cols-2">
         <Card role="region" aria-label="현장 실시간 관제" className="min-w-0">
           <CardHeader className="border-b">
             <CardTitle>
@@ -548,38 +447,6 @@ export default function ManagerPage() {
                 </TableBody>
               </Table>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card role="region" aria-label="실시간 특이사항 및 긴급피드" className="min-w-0">
-          <CardHeader className="border-b">
-            <CardTitle>
-              <h2 className="flex items-center gap-2 text-base">
-                <CircleAlert aria-hidden="true" className="size-4 text-primary" />
-                실시간 특이사항 및 긴급피드
-              </h2>
-            </CardTitle>
-            <CardDescription>미처리 특이사항을 최근 신고 순으로 표시합니다.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {data.specialRemarkFeed.length === 0 ? (
-              <div className="flex min-h-28 items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
-                현재 미처리 특이사항이 없습니다.
-              </div>
-            ) : (
-              data.specialRemarkFeed.map((remark) => (
-                <Link
-                  key={remark.id}
-                  className={`block rounded-md border border-border/40 border-l-4 px-3 py-2.5 transition-colors hover:brightness-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${getSpecialRemarkTone(remark.category)}`}
-                  href={`/manager/inspection/special-remarks/${encodeURIComponent(remark.id)}`}
-                >
-                  <p className="text-sm font-semibold leading-5 text-foreground">
-                    [{remark.category} | {remark.worksiteName}] {formatTime(remark.reportedAt)}
-                  </p>
-                  <p className="mt-0.5 whitespace-pre-wrap text-sm leading-5 text-foreground/90">&quot;{remark.content}&quot;</p>
-                </Link>
-              ))
-            )}
           </CardContent>
         </Card>
       </div>

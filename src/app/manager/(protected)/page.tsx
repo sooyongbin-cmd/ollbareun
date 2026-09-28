@@ -176,7 +176,7 @@ type SummaryCard = {
 
 function DashboardSummaryCard({ card }: { card: SummaryCard }) {
   const content = (
-    <Card className="gap-4 bg-gradient-to-t from-primary/[0.035] to-card transition-shadow group-hover:shadow-md">
+    <Card className="h-full gap-4 bg-gradient-to-t from-primary/[0.035] to-card transition-shadow group-hover:shadow-md">
       <CardHeader>
         <CardDescription>{card.label}</CardDescription>
         <CardTitle className="text-2xl tabular-nums md:text-3xl">{card.value}</CardTitle>
@@ -186,7 +186,7 @@ function DashboardSummaryCard({ card }: { card: SummaryCard }) {
           </span>
         </CardAction>
       </CardHeader>
-      <CardContent className="text-xs text-muted-foreground">{card.description}</CardContent>
+      <CardContent className="mt-auto text-xs text-muted-foreground">{card.description}</CardContent>
     </Card>
   );
 
@@ -332,7 +332,7 @@ export default function ManagerPage() {
         </p>
       </div>
 
-      <section aria-label="운영 요약" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section aria-label="운영 요약" className="grid auto-rows-fr gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {summaryCards.map((card) => (
           <DashboardSummaryCard key={card.label} card={card} />
         ))}

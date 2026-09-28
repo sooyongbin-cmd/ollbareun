@@ -100,7 +100,7 @@ describe("worksite save page", () => {
     expect(push).toHaveBeenCalledWith("/manager/employee/worksites");
   });
 
-  it("shows the assignment error when deleting an assigned worksite", async () => {
+  it("shows the assignment deletion error in a modal and returns to the list", async () => {
     const user = userEvent.setup();
     vi.stubGlobal(
       "fetch",
@@ -130,7 +130,11 @@ describe("worksite save page", () => {
     await user.click(screen.getByRole("button", { name: "삭제" }));
     await user.click(screen.getByRole("button", { name: "예" }));
 
-    expect((await screen.findAllByText("근무지배정 자료가 있어서 삭제할 수 없습니다.")).length).toBeGreaterThan(0);
+    expect(await screen.findByRole("heading", { name: "삭제 실패" })).toBeInTheDocument();
+    expect(await screen.findByText("근무지배정 자료가 있어서 삭제할 수 없습니다.")).toBeInTheDocument();
     expect(push).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "확인" }));
+    expect(push).toHaveBeenCalledWith("/manager/employee/worksites");
   });
 });

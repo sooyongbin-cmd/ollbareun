@@ -57,6 +57,7 @@ export default function WorksiteSavePage() {
   const [error, setError] = useState("");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [alertTitle, setAlertTitle] = useState("알림");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const routeError = worksiteId ? error : "근무지를 불러오지 못했습니다.";
@@ -116,6 +117,7 @@ export default function WorksiteSavePage() {
       });
 
       setAlertMessage("자료가 저장되었습니다.");
+      setAlertTitle("알림");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "근무지를 저장하지 못했습니다.");
     } finally {
@@ -130,8 +132,10 @@ export default function WorksiteSavePage() {
     try {
       await deleteRequest(`/api/worksites/${worksiteId}`);
       setAlertMessage("자료가 삭제되었습니다.");
+      setAlertTitle("알림");
     } catch (deleteError) {
-      setError(deleteError instanceof Error ? deleteError.message : "근무지를 삭제하지 못했습니다.");
+      setAlertMessage(deleteError instanceof Error ? deleteError.message : "근무지를 삭제하지 못했습니다.");
+      setAlertTitle("삭제 실패");
     } finally {
       setDeleting(false);
       setDeleteConfirmOpen(false);
@@ -246,7 +250,7 @@ export default function WorksiteSavePage() {
           setAlertMessage("");
           router.push("/manager/employee/worksites");
         }}
-        title="알림"
+        title={alertTitle}
         description={alertMessage}
       />
     </section>

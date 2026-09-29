@@ -84,6 +84,11 @@ export default function AttendanceDetailPage() {
     { id: "attendance-status", label: "상태", value: record.status },
   ] : [];
 
+  function returnToList() {
+    const query = record?.workDate ? `?${new URLSearchParams({ workDate: record.workDate })}` : "";
+    router.push(`/manager/reports/attendance${query}`);
+  }
+
   return <section className="space-y-6">
     <header><h1 className="text-[1.75rem] leading-[1.2]">근태상세</h1></header>
     <section className="rounded-xl border border-border/50 bg-muted/40 p-8">
@@ -105,12 +110,12 @@ export default function AttendanceDetailPage() {
         {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
         <div className="flex gap-3">
           <Button type="submit">저장</Button>
-          <Button className="ml-auto" type="button" variant="outline" onClick={() => router.push("/manager/reports/attendance")}>목록</Button>
+          <Button className="ml-auto" type="button" variant="outline" onClick={returnToList}>목록</Button>
         </div>
       </form> : null}
     </section>
     <ConfirmModal isOpen={confirmOpen} onClose={() => { if (!saving) setConfirmOpen(false); }} onConfirm={save} title="근태 정보를 저장할까요?" loading={saving} loadingLabel="저장 중입니다..." />
-    <AlertModal isOpen={successOpen} onClose={() => { setSuccessOpen(false); router.push("/manager/reports/attendance"); }} title="알림" description="근태 정보가 저장되었습니다." />
+    <AlertModal isOpen={successOpen} onClose={() => { setSuccessOpen(false); returnToList(); }} title="알림" description="근태 정보가 저장되었습니다." />
   </section>;
 }
 

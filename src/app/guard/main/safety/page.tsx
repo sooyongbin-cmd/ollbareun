@@ -1,5 +1,7 @@
 "use client";
 
+import { useEducationRefresh } from "@/lib/use-education-refresh";
+import { notifyEducationChanged, educationTypeLabels, type EducationType } from "@/lib/education-periods";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import LoadingBoard from "@/components/loading-board";
@@ -13,12 +15,14 @@ type EducationResourceRow = {
   title: string;
   youtube_link: string;
   created_at: string;
+  education_type: EducationType;
 };
 
 type EducationCompletionRow = {
   employee_id: string;
   resource_id: string;
   is_completed: boolean;
+  education_type: EducationType;
 };
 
 type GuardSession = {
@@ -104,6 +108,7 @@ function getYoutubeEmbedUrl(youtubeLink: string, origin?: string) {
 }
 
 export default function GuardSafetyEducationPage() {
+  const refreshVersion = useEducationRefresh();
   const [resources, setResources] = useState<EducationResourceRow[]>([]);
   const [completedResourceIds, setCompletedResourceIds] = useState<string[]>([]);
   const [selectedResource, setSelectedResource] = useState<EducationResourceRow | null>(null);
@@ -142,6 +147,7 @@ export default function GuardSafetyEducationPage() {
       }
 
       setMessage("교육이수 처리가 완료되었습니다.");
+      notifyEducationChanged();
       completedResourceIdsRef.current.add(resourceId);
       setCompletedResourceIds((previousIds) =>
         previousIds.includes(resourceId) ? previousIds : [...previousIds, resourceId],
@@ -169,7 +175,7 @@ export default function GuardSafetyEducationPage() {
         const employeeId = readGuardEmployeeId();
         const [resourcesResponse, completionsResponse] = await Promise.all([
           fetch("/api/education/resources"),
-          employeeId ? fetch("/api/education/completions") : Promise.resolve(null),
+          employeeId ? fetch("/api/education/completions?view=current") : Promise.resolve(null),
         ]);
         const resourcesPayload = await resourcesResponse.json();
         const completionsPayload = completionsResponse ? await completionsResponse.json() : { completions: [] };
@@ -182,7 +188,10 @@ export default function GuardSafetyEducationPage() {
         }
 
         if (!ignore) {
-          const nextResources = (resourcesPayload.resources ?? []) as EducationResourceRow[];
+          const currentTypes = new Map(((completionsPayload.completions ?? []) as EducationCompletionRow[])
+            .map((completion) => [completion.resource_id, completion.education_type]));
+          const nextResources = ((resourcesPayload.resources ?? []) as EducationResourceRow[])
+            .map((resource) => ({ ...resource, education_type: currentTypes.get(resource.id) ?? resource.education_type }));
           const nextCompletedResourceIds = new Set(
             ((completionsPayload.completions ?? []) as EducationCompletionRow[])
               .filter((completion) => completion.employee_id === employeeId && completion.is_completed)
@@ -192,7 +201,7 @@ export default function GuardSafetyEducationPage() {
           completedResourceIdsRef.current = nextCompletedResourceIds;
           setResources(nextResources);
           setCompletedResourceIds([...nextCompletedResourceIds]);
-          setMessage("");
+          setListError("");
         }
       } catch (loadError) {
         if (!ignore) {
@@ -210,7 +219,7 @@ export default function GuardSafetyEducationPage() {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [refreshVersion]);
 
   useEffect(() => {
     if (typeof window === "undefined" || window.YT?.Player) {
@@ -437,6 +446,7 @@ export default function GuardSafetyEducationPage() {
                   type="button"
                 >
                   <span className={styles.educationTitle} id={titleId}>{resource.title}</span>
+                  <small className="text-muted-foreground">{educationTypeLabels[resource.education_type]}</small>
                   <span className={`${styles.educationStatus} ${completed ? styles.completedStatus : styles.incompleteStatus}`} id={statusId}>
                     {completed ? (
                       <>

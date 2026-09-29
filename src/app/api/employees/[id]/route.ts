@@ -1,3 +1,4 @@
+import { currentEducationStatus } from "@/lib/education-completions";
 import { deleteEmployee, getEmployeeById, listAssignmentsForEmployee, updateEmployee } from "@/lib/phase1-data";
 import { getManagerUser } from "@/lib/manager-auth";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
@@ -23,10 +24,7 @@ export async function GET(_: Request, { params }: RouteContext) {
     const [employee, assignments, educationCompletionsResult, educationResourcesResult, workRecordsResult, leavesResult, inspectionLogsResult, specialRemarksResult, worksitesResult] = await Promise.all([
       getEmployeeById(id, supabase),
       listAssignmentsForEmployee(id, supabase),
-      supabase
-        .from("education_completions")
-        .select("resource_id,is_completed,completed_at")
-        .eq("employee_id", id),
+      currentEducationStatus(id, supabase).then((data) => ({ data, error: null })),
       supabase.from("education_resources").select("id,title"),
       supabase
         .from("work_record")

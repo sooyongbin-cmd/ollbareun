@@ -1,5 +1,6 @@
 "use client";
 
+import { useEducationRefresh } from "@/lib/use-education-refresh";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import LoadingBoard from "@/components/loading-board";
 import Link from "next/link";
@@ -30,6 +31,7 @@ function subscribeToSessionChange(onStoreChange: () => void) {
 }
 
 export default function GuardSafetySection() {
+  const refreshVersion = useEducationRefresh();
   const storedSession = useSyncExternalStore(
     subscribeToSessionChange,
     readGuardSessionSnapshot,
@@ -39,6 +41,7 @@ export default function GuardSafetySection() {
   const [resources, setResources] = useState<EducationResourceRow[]>([]);
   const [completions, setCompletions] = useState<EducationCompletionRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const employeeId = useMemo(() => {
     if (!storedSession) return null;
@@ -53,13 +56,13 @@ export default function GuardSafetySection() {
   useEffect(() => {
     let ignore = false;
     async function loadEduData() {
-      if (!employeeId) return;
+      if (!employeeId) { setLoading(false); return; }
       try {
         const [resResponse, compResponse] = await Promise.all([
           fetch("/api/education/resources"),
-          fetch("/api/education/completions"),
+          fetch("/api/education/completions?view=current"),
         ]);
-        if (!resResponse.ok || !compResponse.ok) return;
+        if (!resResponse.ok || !compResponse.ok) throw new Error("안전교육 현황을 불러오지 못했습니다.");
 
         const resPayload = await resResponse.json();
         const compPayload = await compResponse.json();
@@ -67,15 +70,17 @@ export default function GuardSafetySection() {
         if (!ignore) {
           setResources(resPayload.resources ?? []);
           setCompletions(compPayload.completions ?? []);
-          setLoading(false);
+          setError("");
         }
       } catch {
-        // Silent fail
+        if (!ignore) setError("안전교육 현황을 불러오지 못했습니다. 교육 받기에서 다시 확인해 주세요.");
+      } finally {
+        if (!ignore) setLoading(false);
       }
     }
     void loadEduData();
     return () => { ignore = true; };
-  }, [employeeId]);
+  }, [employeeId, refreshVersion, storedSession]);
 
   const eduStatus = useMemo(() => {
     if (!employeeId || resources.length === 0) return null;
@@ -96,7 +101,7 @@ export default function GuardSafetySection() {
             <LoadingBoard className="min-h-6 min-w-12" label="안전교육 이수 현황을 불러오는 중입니다." />
           ) : (
             <span className="font-bold text-[1.25rem] text-foreground">
-              {eduStatus ? `${eduStatus.completed} / ${eduStatus.total}` : "정보 없음"}
+              {error ? "확인 필요" : eduStatus ? `${eduStatus.completed} / ${eduStatus.total}` : "교육자료 없음"}
             </span>
           )}
         </div>
@@ -108,13 +113,14 @@ export default function GuardSafetySection() {
         </Link>
       </div>
       
-      {eduStatus && eduStatus.completed < eduStatus.total && (
+      {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+      {!error && eduStatus && eduStatus.completed < eduStatus.total && (
         <p className="text-[0.8125rem] text-destructive font-medium pt-2 border-t border-border/30">
           미이수 교육이 {eduStatus.total - eduStatus.completed}건 있습니다. 교육을 완료해주세요.
         </p>
       )}
       
-      {eduStatus && eduStatus.completed === eduStatus.total && eduStatus.total > 0 && (
+      {!error && eduStatus && eduStatus.completed === eduStatus.total && eduStatus.total > 0 && (
         <p className="text-[0.8125rem] text-primary font-medium pt-2 border-t border-border/30">
           모든 안전교육을 이수하였습니다.
         </p>

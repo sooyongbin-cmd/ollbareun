@@ -30,7 +30,7 @@ describe("education resource detail route", () => {
       id: "resource-1",
       title: "화재 안전 교육",
       youtube_link: "https://www.youtube.com/watch?v=fireSafety",
-      created_at: "2026-05-27T00:00:00.000Z",
+      created_at: "2026-05-27T00:00:00.000Z", education_type: "daily",
     });
 
     const response = await GET({} as Request, { params: Promise.resolve({ id: "resource-1" }) });
@@ -42,7 +42,7 @@ describe("education resource detail route", () => {
         id: "resource-1",
         title: "화재 안전 교육",
         youtube_link: "https://www.youtube.com/watch?v=fireSafety",
-        created_at: "2026-05-27T00:00:00.000Z",
+        created_at: "2026-05-27T00:00:00.000Z", education_type: "daily",
       },
     });
   });
@@ -52,7 +52,7 @@ describe("education resource detail route", () => {
       id: "resource-1",
       title: "순찰 안전 교육",
       youtube_link: "https://youtu.be/patrolSafety",
-      created_at: "2026-05-27T00:00:00.000Z",
+      created_at: "2026-05-27T00:00:00.000Z", education_type: "daily",
     });
 
     const response = await PATCH(
@@ -60,7 +60,7 @@ describe("education resource detail route", () => {
         method: "PATCH",
         body: JSON.stringify({
           title: "순찰 안전 교육",
-          youtubeLink: "https://youtu.be/patrolSafety",
+          youtubeLink: "https://youtu.be/patrolSafety", educationType: "daily",
         }),
       }),
       { params: Promise.resolve({ id: "resource-1" }) },
@@ -71,7 +71,7 @@ describe("education resource detail route", () => {
       {
         id: "resource-1",
         title: "순찰 안전 교육",
-        youtubeLink: "https://youtu.be/patrolSafety",
+        youtubeLink: "https://youtu.be/patrolSafety", educationType: "daily",
       },
       {},
     );
@@ -80,7 +80,7 @@ describe("education resource detail route", () => {
         id: "resource-1",
         title: "순찰 안전 교육",
         youtube_link: "https://youtu.be/patrolSafety",
-        created_at: "2026-05-27T00:00:00.000Z",
+        created_at: "2026-05-27T00:00:00.000Z", education_type: "daily",
       },
     });
   });

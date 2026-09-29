@@ -1,5 +1,6 @@
 "use client";
 
+import { educationTypeLabels, type EducationType } from "@/lib/education-periods";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
@@ -13,13 +14,10 @@ type EducationResourceRow = {
   title: string;
   youtube_link: string;
   created_at: string;
+  education_type: EducationType;
 };
 
-type EducationCompletionRow = {
-  employee_id: string;
-  resource_id: string;
-  is_completed: boolean;
-};
+type EducationCompletionRow = { resource_id: string; completed_count: number };
 
 type EmployeeRow = {
   id: string;
@@ -43,7 +41,7 @@ export default function EducationResourcesPage() {
       try {
         const [resourcesResponse, completionsResponse, bootstrapResponse] = await Promise.all([
           fetch("/api/education/resources"),
-          fetch("/api/education/completions"),
+          fetch("/api/education/completions?view=resources"),
           fetch("/api/bootstrap"),
         ]);
         const resourcesPayload = await resourcesResponse.json();
@@ -62,7 +60,7 @@ export default function EducationResourcesPage() {
 
         if (!ignore) {
           setResources(resourcesPayload.resources ?? []);
-          setCompletions(completionsPayload.completions ?? []);
+          setCompletions(completionsPayload.counts ?? []);
           setEmployees(bootstrapPayload.employees ?? []);
         }
       } catch (loadError) {
@@ -98,20 +96,8 @@ export default function EducationResourcesPage() {
   }, [employees]);
 
   const completedEmployeeCountByResourceId = useMemo(() => {
-    const completedEmployeesByResourceId = new Map<string, Set<string>>();
-
-    completions.forEach((completion) => {
-      if (!completion.is_completed || !activeEmployeeIds.has(completion.employee_id)) {
-        return;
-      }
-
-      const employeeIds = completedEmployeesByResourceId.get(completion.resource_id) ?? new Set<string>();
-      employeeIds.add(completion.employee_id);
-      completedEmployeesByResourceId.set(completion.resource_id, employeeIds);
-    });
-
-    return completedEmployeesByResourceId;
-  }, [activeEmployeeIds, completions]);
+    return new Map(completions.map((row) => [row.resource_id, row.completed_count]));
+  }, [completions]);
 
   const sortedResources = useMemo(() => {
     return [...filteredResources].sort((left, right) => {
@@ -120,8 +106,8 @@ export default function EducationResourcesPage() {
           ? left.title.localeCompare(right.title, "ko-KR")
           : right.title.localeCompare(left.title, "ko-KR");
       } else {
-        const leftCount = completedEmployeeCountByResourceId.get(left.id)?.size ?? 0;
-        const rightCount = completedEmployeeCountByResourceId.get(right.id)?.size ?? 0;
+        const leftCount = completedEmployeeCountByResourceId.get(left.id) ?? 0;
+        const rightCount = completedEmployeeCountByResourceId.get(right.id) ?? 0;
         if (leftCount === rightCount) {
           return left.title.localeCompare(right.title, "ko-KR");
         }
@@ -204,7 +190,7 @@ export default function EducationResourcesPage() {
                   >
                     제목
                   </SortableHeader>
-                  <TableHead className="text-left">유튜브 링크</TableHead>
+                  <TableHead className="text-left">교육구분</TableHead>
                   <SortableHeader
                     sortKey="completions"
                     currentSortKey={sortKey}
@@ -234,22 +220,13 @@ export default function EducationResourcesPage() {
                           {resource.title}
                         </Link>
                       </TableCell>
-                      <TableCell data-label="유튜브 링크" className="text-muted-foreground">
-                        <a
-                          className="underline-offset-4 hover:underline"
-                          href={resource.youtube_link}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {resource.youtube_link}
-                        </a>
-                      </TableCell>
+                      <TableCell data-label="교육구분" className="text-muted-foreground">{educationTypeLabels[resource.education_type]}</TableCell>
                       <TableCell data-label="이수현황" className="font-semibold text-foreground/80">
                         <Link
                           className="text-primary hover:underline"
                           href={`/manager/safety/completions/detail?resourceId=${encodeURIComponent(resource.id)}`}
                         >
-                          {completedEmployeeCountByResourceId.get(resource.id)?.size ?? 0}/{activeEmployeeIds.size}
+                          {completedEmployeeCountByResourceId.get(resource.id) ?? 0}/{activeEmployeeIds.size}
                         </Link>
                       </TableCell>
                     </TableRow>

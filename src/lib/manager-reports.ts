@@ -1,8 +1,10 @@
+import { readAllEducationRows } from "./education-completions";
+import { saveAttendanceWithEducation } from "./attendance-education";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { durationLabel } from "./work-duration";
 import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
-import { getManagerAttendanceStatus, type ManagerAttendanceStatus } from "./manager-attendance-status";
+import { getManagerAttendanceStatus } from "./manager-attendance-status";
 import { deriveAttendanceStatuses } from "./attendance-status";
 
 type EmployeeInput = {
@@ -55,6 +57,7 @@ type ResourceInput = {
 };
 
 type CompletionInput = {
+  education_date?: string | null;
   employee_id: string;
   resource_id: string;
   is_completed: boolean;
@@ -292,27 +295,13 @@ export async function updateAttendanceRecord(input: {
   if (nextWorkOuttime && nextWorkIn && new Date(nextWorkOuttime).getTime() < new Date(nextWorkIn).getTime()) {
     throw new Error("퇴근일시는 출근일시 이후여야 합니다.");
   }
-  const statuses = deriveAttendanceStatuses({
-    scheduledIn: existing.intime,
-    scheduledOut: existing.outtime,
-    workIn: nextWorkIn,
-    workOut: clockInAt ? nextWorkOuttime : (hasClockOut ? clockOutAt : null),
-  });
-  const { data, error } = await supabase
-    .from("work_record")
-    .update({
-      ...(clockInAt ? { work_date: String(input.clockInDateTime).slice(0, 10), work_intime: clockInAt } : {}),
+  return saveAttendanceWithEducation(supabase, {
+    recordId: input.recordId,
+    values: {
+      ...(clockInAt ? { work_intime: clockInAt } : {}),
       ...(clockOutAt ? { work_outtime: clockOutAt } : {}),
-      intime_status: statuses.intime_status,
-      ...(hasClockOut || clockInAt ? { outtime_status: statuses.outtime_status } : {}),
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", input.recordId)
-    .select("id,work_date,work_intime,work_outtime")
-    .single();
-
-  throwIfError(error);
-  return data;
+    },
+  });
 }
 
 export async function loadAttendanceRecord(
@@ -393,29 +382,18 @@ export function buildEducationReport(input: {
   completions: CompletionInput[];
 }): EducationReportRow[] {
   assertYear(input.year);
-  const completionsByEmployee = new Map<string, Set<string>>();
-
-  input.completions.forEach((completion) => {
-    if (!completion.is_completed || !completion.completed_at) {
-      return;
-    }
-    const completedYear = toKstDateTime(completion.completed_at)?.date.slice(0, 4);
-    if (completedYear !== input.year) {
-      return;
-    }
-    const completed = completionsByEmployee.get(completion.employee_id) ?? new Set<string>();
-    completed.add(completion.resource_id);
-    completionsByEmployee.set(completion.employee_id, completed);
-  });
-
-  return input.employees
-    .filter((employee) => !employee.is_retired)
-    .sort((left, right) => left.name.localeCompare(right.name, "ko-KR"))
-    .map((employee) => ({
-      employeeName: employee.name,
-      completedCount: completionsByEmployee.get(employee.id)?.size ?? 0,
-      totalCount: input.resources.length,
-    }));
+  const counts = new Map<string, { completedCount: number; totalCount: number }>();
+  for (const completion of input.completions) {
+    const date = completion.education_date ?? (completion.completed_at ? toKstDateTime(completion.completed_at)?.date : null);
+    if (!date || date.slice(0, 4) !== input.year) continue;
+    const count = counts.get(completion.employee_id) ?? { completedCount: 0, totalCount: 0 };
+    count.totalCount++;
+    if (completion.is_completed) count.completedCount++;
+    counts.set(completion.employee_id, count);
+  }
+  return input.employees.filter((employee) => !employee.is_retired)
+    .sort((a, b) => a.name.localeCompare(b.name, "ko-KR"))
+    .map((employee) => ({ employeeName: employee.name, ...(counts.get(employee.id) ?? { completedCount: 0, totalCount: 0 }) }));
 }
 
 export async function loadAttendanceReport(input: { employeeName: string; workDate: string }) {
@@ -459,11 +437,14 @@ export async function loadAttendanceReport(input: { employeeName: string; workDa
 
 export async function loadEducationReport(input: { year: string }) {
   assertYear(input.year);
-  const supabase = getSupabase();
+  const supabase = getSupabaseAdmin();
   const [employeesResult, resourcesResult, completionsResult] = await Promise.all([
     supabase.from("employees").select("id,name,is_retired"),
     supabase.from("education_resources").select("id"),
-    supabase.from("education_completions").select("employee_id,resource_id,is_completed,completed_at"),
+    readAllEducationRows<CompletionInput>((from, to) => supabase.from("education_completions")
+      .select("employee_id,resource_id,education_date,is_completed,completed_at")
+      .gte("education_date", input.year + "-01-01").lte("education_date", input.year + "-12-31")
+      .order("id").range(from, to)).then((data) => ({ data, error: null })),
   ]);
 
   throwIfError(employeesResult.error);

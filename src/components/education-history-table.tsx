@@ -1,0 +1,170 @@
+"use client";
+
+import { useEffect, useMemo, useState, useSyncExternalStore, type FormEvent } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { educationToday, educationTypes, educationTypeLabels } from "@/lib/education-periods";
+import type { EducationCompletionRow, EducationDayRow } from "@/lib/education-completions";
+
+const subscribe = (callback: () => void) => {
+  window.addEventListener("popstate", callback);
+  return () => window.removeEventListener("popstate", callback);
+};
+const snapshot = () => window.location.search;
+const emptySnapshot = () => "";
+
+export default function EducationHistoryTable({ detail = false }: { detail?: boolean }) {
+  const search = useSyncExternalStore(subscribe, snapshot, emptySnapshot);
+  const defaults = useMemo(() => {
+    const p = new URLSearchParams(search);
+    return { name: p.get("name") ?? "", from: p.get("from") ?? (detail ? "" : educationToday()),
+      to: p.get("to") ?? (detail ? "" : educationToday()), educationType: p.get("educationType") ?? "",
+      resourceId: p.get("resourceId") ?? "", employeeId: p.get("employeeId") ?? "" };
+  }, [search, detail]);
+  const [override, setOverride] = useState<typeof defaults | null>(null);
+  const filters = override ?? defaults;
+  const [applied, setApplied] = useState<typeof defaults | null>(null);
+  const active = applied ?? defaults;
+  const [page, setPage] = useState(1);
+  const [days, setDays] = useState<EducationDayRow[]>([]);
+  const [records, setRecords] = useState<EducationCompletionRow[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [sending, setSending] = useState(false);
+  const [notice, setNotice] = useState("");
+  const [resources, setResources] = useState<{ id: string; title: string }[]>([]);
+  const [reload, setReload] = useState(0);
+  const query = useMemo(() => new URLSearchParams({ ...active, view: detail ? "history" : "days", page: String(page) }).toString(), [active, detail, page]);
+
+  useEffect(() => {
+    if (!detail) return;
+    const controller = new AbortController();
+    fetch("/api/education/resources", { signal: controller.signal }).then(async (response) => {
+      if (!response.ok) return;
+      const result = await response.json();
+      if (!controller.signal.aborted) setResources(result.resources ?? []);
+    }).catch(() => {});
+    return () => controller.abort();
+  }, [detail]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    async function load() {
+      setLoading(true);
+      setError("");
+      try {
+        const response = await fetch(`/api/education/completions?${query}`, { signal: controller.signal });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error ?? "교육이수 목록을 불러오지 못했습니다.");
+        if (!controller.signal.aborted) {
+          setDays(result.rows ?? []);
+          setRecords(result.completions ?? []);
+          setTotal(result.total ?? 0);
+        }
+      } catch (cause) {
+        if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : "조회에 실패했습니다.");
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    }
+    void load();
+    return () => controller.abort();
+  }, [query, reload]);
+
+  function submit(event: FormEvent) {
+    event.preventDefault();
+    setApplied({ ...filters });
+    setPage(1);
+    setReload((value) => value + 1);
+  }
+  function update(key: keyof typeof defaults, value: string) {
+    setOverride({ ...filters, [key]: value });
+  }
+  async function sendReminders() {
+    setSending(true);
+    setNotice("");
+    try {
+      const employeeIds = new Set<string>();
+      for (let index = 1; ; index++) {
+        const params = new URLSearchParams({ ...active, view: "days", page: String(index) });
+        const response = await fetch(`/api/education/completions?${params}`);
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error ?? "알림 대상 조회 실패");
+        (payload.rows as EducationDayRow[]).forEach((day) => {
+          if (day.items.some((item) => !item.is_completed)) employeeIds.add(day.employee_id);
+        });
+        if (index * payload.pageSize >= payload.total) break;
+      }
+      if (!employeeIds.size) { setNotice("조회 조건에 해당하는 미이수 직원이 없습니다."); return; }
+      const response = await fetch("/api/education/reminders/send", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ employeeIds: [...employeeIds] }) });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error ?? "알림 전송 실패");
+      const failed = (result.failedEmployees ?? []).map((entry: { employeeName: string; reason: string }) => `${entry.employeeName}: ${entry.reason}`).join(", ");
+      setNotice(`전송 ${result.successCount ?? 0}명 / 실패 ${result.failedCount ?? 0}명 / 미등록 ${result.unregisteredCount ?? 0}명${failed ? ` (${failed})` : ""}`);
+    } catch (cause) {
+      setNotice(cause instanceof Error ? cause.message : "알림 전송 실패");
+    } finally { setSending(false); }
+  }
+  const label = (item: EducationDayRow["items"][number]) => educationTypeLabels[item.education_type];
+  const items = (day: EducationDayRow, complete: boolean, typeOnly = false) => {
+    const filtered = day.items.filter((item) => item.is_completed === complete);
+    return filtered.length ? filtered.map((item) => <div className="py-1" key={item.id}>{typeOnly ? label(item) : item.resource_title}</div>) : "-";
+  };
+  return <section className="space-y-6">
+    <header><h1 className="text-[1.75rem]">{detail ? "교육이수상세" : "교육이수관리"}</h1>
+      <p className="mt-2 text-sm text-muted-foreground">한국시간 날짜별 교육 이력을 조회합니다. 지난 날짜의 미이수는 이후 이수하더라도 유지됩니다.</p></header>
+    <form onSubmit={submit} aria-label="교육이수 검색" className="rounded-xl border border-border/50 bg-muted/40 p-6">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <label className="space-y-2 text-sm">직원 이름<Input value={filters.name} onChange={(e) => update("name", e.target.value)} /></label>
+        <label className="space-y-2 text-sm">시작일<Input type="date" value={filters.from} onChange={(e) => update("from", e.target.value)} /></label>
+        <label className="space-y-2 text-sm">종료일<Input type="date" value={filters.to} onChange={(e) => update("to", e.target.value)} /></label>
+        <label className="space-y-2 text-sm">교육구분<NativeSelect value={filters.educationType} onChange={(e) => update("educationType", e.target.value)}>
+          <NativeSelectOption value="">전체</NativeSelectOption>
+          {educationTypes.map((type) => <NativeSelectOption key={type} value={type}>{educationTypeLabels[type]}</NativeSelectOption>)}
+        </NativeSelect></label>
+        {detail && <label className="space-y-2 text-sm">교재<NativeSelect value={filters.resourceId} onChange={(e) => update("resourceId", e.target.value)}>
+          <NativeSelectOption value="">전체</NativeSelectOption>
+          {filters.resourceId && !resources.some((resource) => resource.id === filters.resourceId) && <NativeSelectOption value={filters.resourceId}>선택한 교재</NativeSelectOption>}
+          {resources.map((resource) => <NativeSelectOption key={resource.id} value={resource.id}>{resource.title}</NativeSelectOption>)}
+        </NativeSelect></label>}
+      </div>
+      <div className="mt-4 flex flex-wrap gap-3">
+        <Button type="submit">조회</Button>
+        <Button variant="outline" type="button" onClick={() => { const all = { ...defaults, name: "", from: "", to: "", educationType: "", resourceId: "", employeeId: "" }; setOverride(all); setApplied(all); setPage(1); }}>전체 이력</Button>
+        {!detail && <Button className="sm:ml-auto" variant="outline" type="button" disabled={sending || loading} onClick={() => void sendReminders()}>{sending ? "전송 중…" : "미이수 알림 전송"}</Button>}
+      </div>
+      {(active.resourceId || active.employeeId) && <p className="mt-3 text-sm text-muted-foreground">선택한 교재 또는 직원의 이력을 조회 중입니다. ‘전체 이력’으로 조건을 해제할 수 있습니다.</p>}
+    </form>
+    {notice && <p role="status" className="text-sm">{notice}</p>}
+    {error ? <p role="alert" className="text-destructive">{error}</p> : loading ? <p role="status">교육이수 목록을 불러오는 중입니다.</p> : <>
+      <p className="text-right text-sm text-muted-foreground">조회 결과 {total}건</p>
+      <div className="overflow-x-auto rounded-lg border border-border">
+        <Table><TableHeader><TableRow>
+          {(detail ? ["근무자", "날짜", "안전교육", "교육구분", "이수여부", "완료일시"] : ["근무자", "날짜", "이수한 안전교육", "교육구분", "미이수 안전교육", "교육구분"]).map((heading, index) => <TableHead key={index}>{heading}</TableHead>)}
+        </TableRow></TableHeader><TableBody>
+          {detail ? records.map((record) => <TableRow key={record.id}>
+            <TableCell data-label="근무자">{record.employee_name}</TableCell><TableCell data-label="날짜">{record.education_date ?? "날짜 미상"}</TableCell>
+            <TableCell data-label="안전교육">{record.resource_title}</TableCell><TableCell data-label="교육구분">{educationTypeLabels[record.education_type]}</TableCell>
+            <TableCell data-label="이수여부">{record.is_completed ? "이수" : "미이수"}</TableCell>
+            <TableCell data-label="완료일시">{record.completed_at ? new Date(record.completed_at).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }) : "-"}</TableCell>
+          </TableRow>) : days.map((day) => <TableRow key={`${day.employee_id}:${day.education_date}`}>
+            <TableCell data-label="근무자"><Link className="text-primary hover:underline" href={`/manager/safety/completions/detail?${new URLSearchParams({ employeeId: day.employee_id, ...(day.education_date ? { from: day.education_date, to: day.education_date } : {}) })}`}>{day.employee_name}</Link></TableCell>
+            <TableCell data-label="날짜">{day.education_date ?? "날짜 미상"}</TableCell>
+            <TableCell data-label="이수한 안전교육">{items(day, true)}</TableCell><TableCell data-label="교육구분">{items(day, true, true)}</TableCell>
+            <TableCell data-label="미이수 안전교육">{items(day, false)}</TableCell><TableCell data-label="교육구분">{items(day, false, true)}</TableCell>
+          </TableRow>)}
+          {(detail ? !records.length : !days.length) && <TableRow><TableCell colSpan={6} className="p-8 text-center">조회 결과에 해당하는 교육이수 기록이 없습니다.</TableCell></TableRow>}
+        </TableBody></Table>
+      </div>
+      <nav aria-label="교육이수 페이지" className="flex items-center justify-center gap-4">
+        <Button variant="outline" disabled={page === 1} onClick={() => setPage(page - 1)}>이전</Button>
+        <span>{page} / {Math.max(1, Math.ceil(total / 50))}</span>
+        <Button variant="outline" disabled={page * 50 >= total} onClick={() => setPage(page + 1)}>다음</Button>
+      </nav>
+    </>}
+  </section>;
+}

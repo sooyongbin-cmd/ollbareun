@@ -1,3 +1,4 @@
+import { listEducationCompletions } from "./education-completions";
 import { getSupabaseAdmin } from "./supabase-admin";
 import { getManagerAttendanceStatus } from "./manager-attendance-status";
 
@@ -574,7 +575,7 @@ export async function loadManagerDashboardData() {
         .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime,intime_status,outtime_status")
         .or(`work_date.eq.${today},and(outtime.gte.${todayStart},outtime.lt.${tomorrowStart})`),
       supabase.from("education_resources").select("id"),
-      supabase.from("education_completions").select("employee_id,resource_id,is_completed,completed_at"),
+      listEducationCompletions(supabase).then((data) => ({ data, error: null })),
       supabase
         .from("work_assignment_days_off")
         .select("work_assignment_id,day_off_date")

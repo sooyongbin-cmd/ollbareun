@@ -1,6 +1,6 @@
 import webpush from "web-push";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getSupabase } from "@/lib/supabase";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { sendEducationReminderNotifications } from "./education-reminder-notifications";
 
 vi.mock("web-push", () => ({
@@ -10,8 +10,8 @@ vi.mock("web-push", () => ({
   },
 }));
 
-vi.mock("@/lib/supabase", () => ({
-  getSupabase: vi.fn(),
+vi.mock("@/lib/supabase-admin", () => ({
+  getSupabaseAdmin: vi.fn(),
 }));
 
 function createSelectResult(data: unknown[]) {
@@ -64,7 +64,11 @@ describe("sendEducationReminderNotifications", () => {
       throw new Error(`Unexpected table ${table}`);
     });
 
-    vi.mocked(getSupabase).mockReturnValue({ from } as never);
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from, rpc: vi.fn(() => ({ range: vi.fn().mockResolvedValue({ data: [
+      { employee_id: "employee-1", resource_id: "resource-1", is_completed: true },
+      { employee_id: "employee-2", resource_id: "resource-1", is_completed: true },
+      { employee_id: "employee-2", resource_id: "resource-2", is_completed: true },
+    ], error: null }) })) } as never);
     vi.mocked(webpush.sendNotification).mockResolvedValue({} as never);
   });
 

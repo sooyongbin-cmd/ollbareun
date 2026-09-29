@@ -1,5 +1,6 @@
 "use client";
 
+import EducationTypeRadio from "@/components/education-type-radio";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
@@ -73,6 +74,7 @@ export default function EducationResourceNewPage() {
     const formData = new FormData();
     formData.set("title", title);
     formData.set("youtubeLink", youtubeLink);
+    formData.set("educationType", String(sourceFormData.get("educationType") ?? ""));
 
     try {
       setIsSubmitting(true);
@@ -101,6 +103,7 @@ export default function EducationResourceNewPage() {
       <section className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
         <form className="space-y-6" noValidate onSubmit={handleSubmit}>
           <div className="space-y-4">
+            <EducationTypeRadio />
             <div className="space-y-2">
               <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="resource-title">
                 제목

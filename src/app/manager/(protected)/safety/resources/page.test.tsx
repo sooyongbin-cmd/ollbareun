@@ -17,19 +17,20 @@ describe("education resources page", () => {
                 id: "resource-1",
                 title: "화재 안전 교육",
                 youtube_link: "https://www.youtube.com/watch?v=fireSafety",
-                created_at: "2026-05-27T00:00:00.000Z",
+                created_at: "2026-05-27T00:00:00.000Z", education_type: "daily",
               },
               {
                 id: "resource-2",
                 title: "감전 예방 교육",
                 youtube_link: "https://www.youtube.com/watch?v=electricSafety",
-                created_at: "2026-05-28T00:00:00.000Z",
+                created_at: "2026-05-28T00:00:00.000Z", education_type: "monthly",
               },
             ],
           });
         }
-        if (url.endsWith("/api/education/completions")) {
+        if (url.includes("/api/education/completions")) {
           return Response.json({
+            counts: [{ resource_id: "resource-1", completed_count: 1 }, { resource_id: "resource-2", completed_count: 2 }],
             completions: [
               {
                 employee_id: "employee-1",
@@ -97,7 +98,7 @@ describe("education resources page", () => {
       "/manager/safety/resources/new",
     );
     expect(screen.getByRole("columnheader", { name: "제목" })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "유튜브 링크" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "교육구분" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "이수현황" })).toBeInTheDocument();
     
     expect(screen.getByRole("link", { name: "화재 안전 교육" })).toHaveAttribute(

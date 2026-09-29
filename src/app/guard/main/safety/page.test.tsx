@@ -97,19 +97,19 @@ describe("guard safety education page", () => {
                 id: "resource-1",
                 title: fireTitle,
                 youtube_link: "https://www.youtube.com/watch?v=fireSafety",
-                created_at: "2026-05-27T00:00:00.000Z",
+                created_at: "2026-05-27T00:00:00.000Z", education_type: "daily",
               },
               {
                 id: "resource-2",
                 title: patrolTitle,
                 youtube_link: "https://youtu.be/patrolSafety",
-                created_at: "2026-05-27T00:00:00.000Z",
+                created_at: "2026-05-27T00:00:00.000Z", education_type: "daily",
               },
             ],
           });
         }
 
-        if (url.endsWith("/api/education/completions")) {
+        if (url.includes("/api/education/completions")) {
           if (init?.method !== "POST") {
             return Response.json({ completions: completionRows });
           }
@@ -120,6 +120,7 @@ describe("guard safety education page", () => {
             resourceId: "resource-1",
           });
 
+          completionRows = [{ employee_id: "employee-1", resource_id: "resource-1", is_completed: true, completed_at: "2026-05-27T09:10:00.000Z" }];
           return Response.json({
             completion: {
               employee_id: "employee-1",

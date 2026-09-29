@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { listEducationCompletions, markEducationCompletion } from "@/lib/education-completions";
+import { currentEducationStatus, listEducationCompletions, markEducationCompletion } from "@/lib/education-completions";
 import { requireGuardEmployee } from "@/lib/guard-auth-session";
+import { getManagerUser } from "@/lib/manager-auth";
 import { GET, POST } from "./route";
 
 vi.mock("@/lib/education-completions", () => ({
   listEducationCompletions: vi.fn(),
+  currentEducationStatus: vi.fn(),
   markEducationCompletion: vi.fn(),
 }));
 vi.mock("@/lib/guard-auth-session", () => ({
@@ -15,6 +17,8 @@ vi.mock("@/lib/manager-auth", () => ({ getManagerUser: vi.fn().mockResolvedValue
 
 describe("education completions route", () => {
   beforeEach(() => {
+    vi.mocked(getManagerUser).mockResolvedValue({ id: "manager-1" } as never);
+    vi.mocked(currentEducationStatus).mockReset();
     vi.mocked(listEducationCompletions).mockReset();
     vi.mocked(markEducationCompletion).mockReset();
     vi.mocked(requireGuardEmployee).mockReset();
@@ -24,7 +28,8 @@ describe("education completions route", () => {
   it("lists education completions", async () => {
     vi.mocked(listEducationCompletions).mockResolvedValue([
       {
-        employee_id: "employee-1",
+        id: "completion-1", education_date: "2026-05-27", education_type: "daily",
+          employee_id: "employee-1",
         employee_name: "홍길동",
         resource_id: "resource-1",
         resource_title: "화재 안전 교육",
@@ -40,6 +45,7 @@ describe("education completions route", () => {
     await expect(response.json()).resolves.toEqual({
       completions: [
         {
+          id: "completion-1", education_date: "2026-05-27", education_type: "daily",
           employee_id: "employee-1",
           employee_name: "홍길동",
           resource_id: "resource-1",
@@ -52,9 +58,19 @@ describe("education completions route", () => {
     });
   });
 
+  it("scopes guard reads to the authenticated employee regardless of query parameters", async () => {
+    vi.mocked(getManagerUser).mockResolvedValue(null);
+    vi.mocked(currentEducationStatus).mockResolvedValue([]);
+    const response = await GET(new Request("http://localhost/api/education/completions?employeeId=another-employee&view=history"));
+    expect(response.status).toBe(200);
+    expect(currentEducationStatus).toHaveBeenCalledWith("employee-1");
+    expect(listEducationCompletions).not.toHaveBeenCalled();
+  });
+
   it("records an education completion", async () => {
     vi.mocked(markEducationCompletion).mockResolvedValue({
-      employee_id: "employee-1",
+      id: "completion-1", education_date: "2026-05-27", education_type: "daily",
+          employee_id: "employee-1",
       resource_id: "resource-1",
       is_completed: true,
       completed_at: "2026-05-27T09:10:00.000Z",
@@ -77,7 +93,8 @@ describe("education completions route", () => {
     });
     await expect(response.json()).resolves.toEqual({
       completion: {
-        employee_id: "employee-1",
+        id: "completion-1", education_date: "2026-05-27", education_type: "daily",
+          employee_id: "employee-1",
         resource_id: "resource-1",
         is_completed: true,
         completed_at: "2026-05-27T09:10:00.000Z",

@@ -26,7 +26,7 @@ describe("education resource save page", () => {
             resource: {
               id: "resource-1",
               title: "화재 안전 교육",
-              youtube_link: "https://www.youtube.com/watch?v=fireSafety",
+              youtube_link: "https://www.youtube.com/watch?v=fireSafety", education_type: "daily",
             },
           });
         }
@@ -35,7 +35,7 @@ describe("education resource save page", () => {
           const body = JSON.parse(String(init.body));
           expect(body).toEqual({
             title: "순찰 안전 교육",
-            youtubeLink: "https://youtu.be/patrolSafety",
+            youtubeLink: "https://youtu.be/patrolSafety", educationType: "monthly",
           });
           return Response.json({
             resource: {
@@ -64,6 +64,7 @@ describe("education resource save page", () => {
     await user.type(screen.getByLabelText("제목"), "순찰 안전 교육");
     await user.clear(screen.getByLabelText("유튜브 링크"));
     await user.type(screen.getByLabelText("유튜브 링크"), "https://youtu.be/patrolSafety");
+    await user.click(screen.getByRole("radio", { name: "월간" }));
     await user.click(screen.getByRole("button", { name: "저장" }));
 
     expect(await screen.findByText("수정이 완료되었습니다.")).toBeInTheDocument();

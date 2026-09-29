@@ -1,3 +1,4 @@
+import { saveAttendanceWithEducation } from "./attendance-education";
 import { validateScheduleRules, type ScheduleRule } from "./employee-schedule";
 import { canClockIn, canClockOut, canClockOutAtWorksite, normalizePhone } from "./phase1";
 import { requireGpsInfo, type GpsInfo } from "./gps";
@@ -960,20 +961,11 @@ export async function clockIn(input: {
     clock_in_longitude: longitude,
     updated_at: new Date().toISOString(),
   };
-  const { data, error } = existingRecord
-    ? await supabase
-      .from("work_record")
-      .update(recordValues)
-      .eq("id", existingRecord.id)
-      .select("*")
-      .single()
-    : await supabase
-      .from("work_record")
-      .insert(recordValues)
-      .select("*")
-      .single();
-
-  throwIfError(error);
+  const data = await saveAttendanceWithEducation(supabase, {
+    recordId: existingRecord?.id,
+    values: recordValues,
+    guardClockIn: true,
+  });
   return data as AttendanceRow;
 }
 

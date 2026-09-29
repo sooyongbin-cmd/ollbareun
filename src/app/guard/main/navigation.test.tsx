@@ -339,7 +339,7 @@ describe("guard main navigation", () => {
     expect(screen.getByRole("heading", { name: "오늘 근무" })).toBeInTheDocument();
     expect(screen.getByText("본사")).toBeInTheDocument();
     expect(screen.getByText("근무시간 미등록")).toBeInTheDocument();
-    expect(screen.getByRole("status")).toHaveTextContent("출근가능");
+    expect(screen.getByText("출근가능")).toHaveAttribute("role", "status");
   });
 
   it("displays attendance status on the main page", async () => {

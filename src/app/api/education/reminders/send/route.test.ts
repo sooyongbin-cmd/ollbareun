@@ -1,3 +1,4 @@
+vi.mock("@/lib/manager-auth", () => ({ getManagerUser: vi.fn().mockResolvedValue({ id: "manager-1" }) }));
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { sendEducationReminderNotifications } from "@/lib/education-reminder-notifications";
 import { POST } from "./route";

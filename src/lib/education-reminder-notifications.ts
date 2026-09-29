@@ -1,5 +1,6 @@
+import { listEducationCompletions } from "./education-completions";
 import webpush from "web-push";
-import { getSupabase } from "@/lib/supabase";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 type EmployeeRow = {
   id: string;
@@ -78,19 +79,18 @@ export async function sendEducationReminderNotifications(
 ): Promise<EducationReminderResult> {
   configureWebPush();
 
-  const supabase = getSupabase();
+  const supabase = getSupabaseAdmin();
   const hasEmployeeFilter = Array.isArray(input.employeeIds);
   const selectedEmployeeIds = new Set((input.employeeIds ?? []).filter(Boolean));
 
   const [employeesResult, resourcesResult, completionsResult] = await Promise.all([
     supabase.from("employees").select("id, name, is_retired"),
     supabase.from("education_resources").select("id"),
-    supabase.from("education_completions").select("employee_id, resource_id, is_completed"),
+    listEducationCompletions(supabase).then((data) => ({ data, error: null })),
   ]);
 
   if (employeesResult.error) throw new Error(employeesResult.error.message);
   if (resourcesResult.error) throw new Error(resourcesResult.error.message);
-  if (completionsResult.error) throw new Error(completionsResult.error.message);
 
   const employees = (employeesResult.data ?? []) as EmployeeRow[];
   const resources = (resourcesResult.data ?? []) as EducationResourceRow[];

@@ -1,5 +1,7 @@
 "use client";
 
+import EducationTypeRadio from "@/components/education-type-radio";
+import type { EducationType } from "@/lib/education-periods";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useParams, useRouter } from "next/navigation";
@@ -15,6 +17,7 @@ type EducationResource = {
   id: string;
   title: string;
   youtube_link: string;
+  education_type: EducationType;
 };
 
 type EducationResourceResponse = {
@@ -64,6 +67,7 @@ export default function EducationResourceSavePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const resourceId = params.id;
+  const [educationType, setEducationType] = useState<EducationType>("daily");
   const [title, setTitle] = useState("");
   const [youtubeLink, setYoutubeLink] = useState("");
   const [loading, setLoading] = useState(Boolean(resourceId));
@@ -82,6 +86,7 @@ export default function EducationResourceSavePage() {
         const data = await fetchJson<EducationResourceResponse>(`/api/education/resources/${resourceId}`);
         if (!ignore) {
           setTitle(data.resource.title);
+          setEducationType(data.resource.education_type);
           setYoutubeLink(data.resource.youtube_link);
         }
       } catch (loadError) {
@@ -111,7 +116,6 @@ export default function EducationResourceSavePage() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (saving) return;
-    setSaving(true);
     setError("");
 
     const nextTitle = title.trim();
@@ -129,10 +133,11 @@ export default function EducationResourceSavePage() {
     }
 
     try {
+      setSaving(true);
       await fetchJson<EducationResourceResponse>(`/api/education/resources/${resourceId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: nextTitle, youtubeLink: nextYoutubeLink }),
+        body: JSON.stringify({ title: nextTitle, youtubeLink: nextYoutubeLink, educationType }),
       });
 
       setAlertMessage("수정이 완료되었습니다.");
@@ -178,6 +183,7 @@ export default function EducationResourceSavePage() {
         ) : (
           <form className="space-y-6" noValidate onSubmit={handleSubmit}>
             <div className="space-y-4">
+              <EducationTypeRadio value={educationType} onChange={setEducationType} />
               <div className="space-y-2">
                 <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="resource-title">
                   제목

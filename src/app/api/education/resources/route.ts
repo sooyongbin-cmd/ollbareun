@@ -42,6 +42,7 @@ export async function POST(request: Request) {
       resource: await createEducationResource({
         title: formData.get("title"),
         youtubeLink: formData.get("youtubeLink"),
+        educationType: formData.get("educationType"),
       }, supabase),
     });
   } catch (error) {

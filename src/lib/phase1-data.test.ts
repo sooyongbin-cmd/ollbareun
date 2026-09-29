@@ -798,6 +798,16 @@ describe("guard authentication data rules", () => {
     expect(updateQuery.eq).toHaveBeenCalledWith("id", "attendance-1");
   });
 
+  it("saves guard attendance and education through the shared transaction", async () => {
+    const assignment = { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), lte: vi.fn().mockReturnThis(), gte: vi.fn().mockReturnThis(), maybeSingle: vi.fn().mockResolvedValue({ data: { id: "assignment-1" }, error: null }) };
+    const worksite = { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), single: vi.fn().mockResolvedValue({ data: { id: "site-1", name: "본사", gps_info: { latitude: 37.5, longitude: 127 }, radius_meters: 100 }, error: null }) };
+    const existing = { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), maybeSingle: vi.fn().mockResolvedValue({ data: { id: "record-1", work_intime: null }, error: null }) };
+    const rpc = vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: { id: "record-1", work_intime: "2026-05-26T00:00:00.000Z" }, error: null }) });
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from: vi.fn().mockReturnValueOnce(assignment).mockReturnValueOnce(worksite).mockReturnValueOnce(existing), rpc } as never);
+    await expect(clockIn({ employeeId: "emp-1", worksiteId: "site-1", latitude: 37.5, longitude: 127 })).resolves.toMatchObject({ id: "record-1" });
+    expect(rpc).toHaveBeenCalledWith("save_attendance_with_education", expect.objectContaining({ p_record_id: "record-1", p_guard_clock_in: true, p_values: expect.objectContaining({ employee_id: "emp-1", work_intime: "2026-05-26T00:00:00.000Z" }) }));
+  });
+
   it("rejects clock-in when today is an assignment day off", async () => {
     const assignmentQuery = {
       select: vi.fn().mockReturnThis(),

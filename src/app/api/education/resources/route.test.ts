@@ -31,7 +31,7 @@ describe("education resources route", () => {
         id: "resource-1",
         title: "화재 안전 교육",
         youtube_link: "https://www.youtube.com/watch?v=fireSafety",
-        created_at: "2026-05-27T00:00:00.000Z",
+        created_at: "2026-05-27T00:00:00.000Z", education_type: "daily",
       },
     ]);
 
@@ -43,7 +43,7 @@ describe("education resources route", () => {
           id: "resource-1",
           title: "화재 안전 교육",
           youtube_link: "https://www.youtube.com/watch?v=fireSafety",
-          created_at: "2026-05-27T00:00:00.000Z",
+          created_at: "2026-05-27T00:00:00.000Z", education_type: "daily",
         },
       ],
     });
@@ -65,9 +65,10 @@ describe("education resources route", () => {
       id: "resource-1",
       title: "화재 안전 교육",
       youtube_link: "https://www.youtube.com/watch?v=fireSafety",
-      created_at: "2026-05-27T00:00:00.000Z",
+      created_at: "2026-05-27T00:00:00.000Z", education_type: "daily",
     });
     const body = new FormData();
+    body.set("educationType", "daily");
     body.set("title", "화재 안전 교육");
     body.set("youtubeLink", "https://www.youtube.com/watch?v=fireSafety");
 
@@ -77,7 +78,7 @@ describe("education resources route", () => {
     expect(createEducationResource).toHaveBeenCalledWith(
       {
         title: "화재 안전 교육",
-        youtubeLink: "https://www.youtube.com/watch?v=fireSafety",
+        youtubeLink: "https://www.youtube.com/watch?v=fireSafety", educationType: "daily",
       },
       {},
     );
@@ -86,7 +87,7 @@ describe("education resources route", () => {
         id: "resource-1",
         title: "화재 안전 교육",
         youtube_link: "https://www.youtube.com/watch?v=fireSafety",
-        created_at: "2026-05-27T00:00:00.000Z",
+        created_at: "2026-05-27T00:00:00.000Z", education_type: "daily",
       },
     });
   });
@@ -94,6 +95,7 @@ describe("education resources route", () => {
   it("returns a readable timeout error when Supabase does not respond", async () => {
     vi.mocked(createEducationResource).mockRejectedValue(new DOMException("This operation was aborted", "AbortError"));
     const body = new FormData();
+    body.set("educationType", "daily");
     body.set("title", "화재 안전 교육");
     body.set("youtubeLink", "https://www.youtube.com/watch?v=fireSafety");
 

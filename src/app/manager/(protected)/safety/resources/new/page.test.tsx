@@ -22,6 +22,7 @@ describe("education resource new page", () => {
       expect(init?.body).toBeInstanceOf(FormData);
 
       const formData = init?.body as FormData;
+      expect(formData.get("educationType")).toBe("semiannual");
       expect(formData.get("title")).toBe("화재 안전 교육");
       expect(formData.get("youtubeLink")).toBe("https://www.youtube.com/watch?v=fireSafety");
 
@@ -37,6 +38,8 @@ describe("education resource new page", () => {
 
     render(<EducationResourceNewPage />);
 
+    expect(screen.getByRole("radio", { name: "일일" })).toBeChecked();
+    await user.click(screen.getByRole("radio", { name: "반기" }));
     await user.type(screen.getByLabelText("제목"), "화재 안전 교육");
     await user.type(screen.getByLabelText("유튜브 링크"), "https://www.youtube.com/watch?v=fireSafety");
     await user.click(screen.getByRole("button", { name: "저장" }));

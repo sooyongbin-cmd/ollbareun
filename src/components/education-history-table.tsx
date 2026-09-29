@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState, useSyncExternalStore, type FormEvent, type ReactNode } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Switch } from "radix-ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -33,6 +35,7 @@ function formatEducationPeriod(type: EducationDayRow["items"][number]["education
 }
 
 export default function EducationHistoryTable({ detail = false, employeeId, employeeName, employeeDetail = false }: { detail?: boolean; employeeId?: string; employeeName?: string; employeeDetail?: boolean }) {
+  const router = useRouter();
   const search = useSyncExternalStore(subscribe, snapshot, emptySnapshot);
   const defaults = useMemo(() => {
     const p = new URLSearchParams(search);
@@ -49,11 +52,12 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
   const [page, setPage] = useState(1);
   const [days, setDays] = useState<EducationDayRow[]>([]);
   const [records, setRecords] = useState<EducationCompletionRow[]>([]);
+  const [loadedQuery, setLoadedQuery] = useState("");
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [completionOverride, setCompletionOverride] = useState<boolean | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [notice, setNotice] = useState("");
   const [resources, setResources] = useState<{ id: string; title: string }[]>([]);
@@ -61,6 +65,9 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
   const [employeeNamesError, setEmployeeNamesError] = useState("");
   const [reload, setReload] = useState(0);
   const query = useMemo(() => new URLSearchParams({ ...active, view: detail ? "history" : "days", page: String(page) }).toString(), [active, detail, page]);
+  const selectedCompletion = loadedQuery === query && records.length === 1 && total === 1 ? records[0] : null;
+  const isCompleted = completionOverride ?? selectedCompletion?.is_completed ?? false;
+  const listHref = `/manager/safety/completions${active.from ? `?${new URLSearchParams({ from: active.from, to: active.from })}` : ""}`;
 
   useEffect(() => {
     if (detail) return;
@@ -94,7 +101,7 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
   useEffect(() => {
     const controller = new AbortController();
     async function load() {
-      if (employeeDetail && !active.from) {
+      if (employeeDetail && (!active.from || !active.resourceId)) {
         setDays([]);
         setRecords([]);
         setTotal(0);
@@ -112,6 +119,8 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
           setDays(result.rows ?? []);
           setRecords(result.completions ?? []);
           setTotal(result.total ?? 0);
+          setLoadedQuery(query);
+          setCompletionOverride(null);
         }
       } catch (cause) {
         if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : "조회에 실패했습니다.");
@@ -124,7 +133,7 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
       window.clearTimeout(timeout);
       controller.abort();
     };
-  }, [query, reload, detail, employeeDetail, active.from]);
+  }, [query, reload, detail, employeeDetail, active.from, active.resourceId]);
 
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -144,39 +153,41 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
       setNotice("");
     }
   }
-  async function completeEmployeeDate() {
-    if (!employeeId || !active.from) return;
+  async function saveSelectedCompletion(event: FormEvent) {
+    event.preventDefault();
+    if (!selectedCompletion || sending || loading || error) return;
     setSending(true);
     setNotice("");
     try {
-      const response = await fetch("/api/manager/education/completions/complete-date", {
-        method: "POST",
+      const response = await fetch(`/api/manager/education/completions/${encodeURIComponent(selectedCompletion.id)}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ employeeId, educationDate: active.from }),
+        body: JSON.stringify({ isCompleted }),
       });
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error ?? "교육이수 처리에 실패했습니다.");
-      setNotice(result.updatedCount ? `안전교육 ${result.updatedCount}건을 이수 처리했습니다.` : "이수 처리할 미이수 안전교육이 없습니다.");
-      setConfirmOpen(false);
-      setReload((value) => value + 1);
+      if (!response.ok) throw new Error(result.error ?? "교육이수 자료를 저장하지 못했습니다.");
+      setRecords([{ ...selectedCompletion, ...result.completion }]);
+      setCompletionOverride(null);
+      setNotice("교육이수 자료를 저장했습니다.");
     } catch (cause) {
-      setNotice(cause instanceof Error ? cause.message : "교육이수 처리에 실패했습니다.");
-      setConfirmOpen(false);
+      setNotice(cause instanceof Error ? cause.message : "교육이수 자료를 저장하지 못했습니다.");
     } finally {
       setSending(false);
     }
   }
   async function deleteSelectedCompletion() {
-    if (!active.resourceId || records.length !== 1) return;
+    if (!active.resourceId || !selectedCompletion || sending || loading || error) return;
     setSending(true);
     setNotice("");
     try {
-      const response = await fetch(`/api/manager/education/completions/${encodeURIComponent(records[0].id)}`, { method: "DELETE" });
+      const response = await fetch(`/api/manager/education/completions/${encodeURIComponent(selectedCompletion.id)}`, { method: "DELETE" });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error ?? "안전교육 자료 삭제에 실패했습니다.");
       setNotice("안전교육 자료를 삭제했습니다.");
       setDeleteConfirmOpen(false);
-      setReload((value) => value + 1);
+      setRecords([]);
+      setTotal(0);
+      router.push(listHref);
     } catch (cause) {
       setNotice(cause instanceof Error ? cause.message : "안전교육 자료 삭제에 실패했습니다.");
       setDeleteConfirmOpen(false);
@@ -211,15 +222,47 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
   }
   const itemCells = (day: EducationDayRow, render: (item: EducationDayRow["items"][number]) => ReactNode) =>
     day.items.map((item) => <div className="py-1" key={item.id}>{render(item)}</div>);
+  if (employeeDetail) {
+    const unavailable = sending || loading || !!error || !selectedCompletion;
+    return <section className="space-y-6">
+      <header><h1 className="text-[1.75rem]">교육이수상세</h1></header>
+      <form onSubmit={(event) => void saveSelectedCompletion(event)} aria-label="교육이수 자료" className="space-y-6">
+        <div className="grid gap-4 rounded-xl border border-border/50 bg-muted/40 p-6 sm:grid-cols-2 lg:grid-cols-3">
+          <label className="flex min-w-0 flex-col gap-2 text-sm">직원 이름<Input readOnly value={selectedCompletion?.employee_name ?? filters.name} /></label>
+          <label className="flex min-w-0 flex-col gap-2 text-sm">날짜<Input readOnly type="date" value={selectedCompletion?.education_date ?? active.from} /></label>
+          <label className="flex min-w-0 flex-col gap-2 text-sm">안전교육(제목)<Input readOnly value={selectedCompletion?.resource_title ?? ""} /></label>
+          <label className="flex min-w-0 flex-col gap-2 text-sm">교육구분<Input readOnly value={selectedCompletion ? educationTypeLabels[selectedCompletion.education_type] : ""} /></label>
+          <div className="flex min-w-0 flex-col gap-2 text-sm">
+            <label htmlFor="education-completion-status">이수여부</label>
+            <div className="flex h-9 items-center gap-3">
+              <Switch.Root id="education-completion-status" checked={isCompleted} disabled={unavailable} onCheckedChange={(checked) => { setCompletionOverride(checked); setNotice(""); }} className="inline-flex h-6 w-11 shrink-0 items-center rounded-full border-2 border-transparent bg-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary">
+                <Switch.Thumb className="pointer-events-none block size-5 rounded-full bg-white shadow-sm transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0" />
+              </Switch.Root>
+              <span>{selectedCompletion ? isCompleted ? "이수" : "미이수" : ""}</span>
+            </div>
+          </div>
+          <label className="flex min-w-0 flex-col gap-2 text-sm">이수(완료)일시<Input readOnly value={selectedCompletion?.completed_at ? new Date(selectedCompletion.completed_at).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }) : ""} /></label>
+        </div>
+        {loading ? <p role="status">교육이수 자료를 불러오는 중입니다.</p> : error ? <p role="alert" className="text-destructive">{error}</p> : !active.from || !active.resourceId ? <p role="alert">목록에서 날짜를 선택해 교육이수 자료를 열어주세요.</p> : !selectedCompletion ? <p role="alert">해당 교육이수 자료를 한 건으로 확인할 수 없습니다. 목록에서 다시 선택해 주세요.</p> : null}
+        {notice && <p role="status" className="text-sm">{notice}</p>}
+        <div className="flex items-center gap-3 border-t border-border pt-6">
+          <Button type="submit" disabled={unavailable}>{sending ? "처리 중…" : "저장"}</Button>
+          <Button type="button" variant="destructive" disabled={unavailable} onClick={() => setDeleteConfirmOpen(true)}>삭제</Button>
+          <Button type="button" variant="outline" className="ml-auto" disabled={sending} onClick={() => router.push(listHref)}>목록</Button>
+        </div>
+      </form>
+      <ConfirmModal isOpen={deleteConfirmOpen} onClose={() => { if (!sending) setDeleteConfirmOpen(false); }} onConfirm={() => void deleteSelectedCompletion()} title={`근무자 ${selectedCompletion?.employee_name ?? filters.name} 의 ${active.from} 일자 안전교육 자료를 삭제할까요?`} description={selectedCompletion?.resource_title} confirmLabel="삭제" cancelLabel="취소" loading={sending} loadingLabel="삭제 중입니다..." />
+    </section>;
+  }
   return <section className="space-y-6">
     <header><h1 className="text-[1.75rem]">{detail ? "교육이수상세" : "교육이수관리"}</h1>
-      <p className="mt-2 text-sm text-muted-foreground">{employeeDetail ? "선택한 직원의 날짜별 안전교육 이력을 조회합니다." : "한국시간 날짜별 교육 이력을 조회합니다. 지난 날짜의 미이수는 이후 이수하더라도 유지됩니다."}</p></header>
-    <form onSubmit={detail && !employeeDetail ? submit : (event) => event.preventDefault()} aria-label="교육이수 검색" className="rounded-xl border border-border/50 bg-muted/40 p-6">
+      <p className="mt-2 text-sm text-muted-foreground">한국시간 날짜별 교육 이력을 조회합니다. 지난 날짜의 미이수는 이후 이수하더라도 유지됩니다.</p></header>
+    <form onSubmit={detail ? submit : (event) => event.preventDefault()} aria-label="교육이수 검색" className="rounded-xl border border-border/50 bg-muted/40 p-6">
       <div className={detail ? "grid items-end gap-4 sm:grid-cols-2 lg:grid-cols-4" : "flex flex-wrap items-end gap-4"}>
-        <label className={detail ? "space-y-2 text-sm" : "flex min-w-0 flex-[1_1_10rem] flex-col gap-2 text-sm"}>{detail ? "직원 이름" : "이름"}<Input value={filters.name} disabled={employeeDetail} list={detail ? undefined : "education-employee-name-options"} placeholder={detail ? undefined : "이름을 입력하세요."} onChange={(e) => update("name", e.target.value)} />
+        <label className={detail ? "space-y-2 text-sm" : "flex min-w-0 flex-[1_1_10rem] flex-col gap-2 text-sm"}>{detail ? "직원 이름" : "이름"}<Input value={filters.name} list={detail ? undefined : "education-employee-name-options"} placeholder={detail ? undefined : "이름을 입력하세요."} onChange={(e) => update("name", e.target.value)} />
           {!detail && <datalist id="education-employee-name-options">{employeeNames.map((name) => <option key={name} value={name} />)}</datalist>}
         </label>
-        {employeeDetail ? <label className="space-y-2 text-sm">날짜<Input type="date" value={filters.from} onChange={(e) => update("from", e.target.value)} /></label> : !detail ? <fieldset className="min-w-0 flex-[2_1_21rem] text-sm">
+        {!detail ? <fieldset className="min-w-0 flex-[2_1_21rem] text-sm">
           <legend className="mb-2">출근기간</legend>
           <div className="grid grid-cols-1 items-center gap-2 min-[480px]:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
             <Input aria-label="출근 시작일" type="date" value={filters.from} onChange={(e) => update("from", e.target.value)} />
@@ -230,31 +273,28 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
           <label className="space-y-2 text-sm">시작일<Input type="date" value={filters.from} onChange={(e) => update("from", e.target.value)} /></label>
           <label className="space-y-2 text-sm">종료일<Input type="date" value={filters.to} onChange={(e) => update("to", e.target.value)} /></label>
         </>}
-        {!employeeDetail && <label className={detail ? "space-y-2 text-sm" : "flex min-w-0 flex-[1_1_7rem] flex-col gap-2 text-sm"}>교육구분<NativeSelect value={filters.educationType} onChange={(e) => update("educationType", e.target.value)}>
+        <label className={detail ? "space-y-2 text-sm" : "flex min-w-0 flex-[1_1_7rem] flex-col gap-2 text-sm"}>교육구분<NativeSelect value={filters.educationType} onChange={(e) => update("educationType", e.target.value)}>
           <NativeSelectOption value="">전체</NativeSelectOption>
           {educationTypes.map((type) => <NativeSelectOption key={type} value={type}>{educationTypeLabels[type]}</NativeSelectOption>)}
-        </NativeSelect></label>}
-        {detail && !employeeDetail && <label className="space-y-2 text-sm">교재<NativeSelect value={filters.resourceId} onChange={(e) => update("resourceId", e.target.value)}>
+        </NativeSelect></label>
+        {detail && <label className="space-y-2 text-sm">교재<NativeSelect value={filters.resourceId} onChange={(e) => update("resourceId", e.target.value)}>
           <NativeSelectOption value="">전체</NativeSelectOption>
           {filters.resourceId && !resources.some((resource) => resource.id === filters.resourceId) && <NativeSelectOption value={filters.resourceId}>선택한 교재</NativeSelectOption>}
           {resources.map((resource) => <NativeSelectOption key={resource.id} value={resource.id}>{resource.title}</NativeSelectOption>)}
         </NativeSelect></label>}
-        {employeeDetail && <Button type="button" disabled={sending || loading || !employeeId || !active.from} onClick={() => setConfirmOpen(true)}>교육이수처리</Button>}
-        {employeeDetail && <Button type="button" variant="destructive" disabled={sending || loading || !active.resourceId || records.length !== 1} onClick={() => setDeleteConfirmOpen(true)}>삭제</Button>}
         {!detail && <div className="ml-auto flex h-9 shrink-0 items-center justify-end">
           <Button type="button" size="sm" variant="outline" disabled={sending || loading} onClick={() => void sendReminders()}>{sending ? "전송 중…" : "미이수 알림 전송"}</Button>
         </div>}
       </div>
-      {detail && !employeeDetail && <div className="mt-4 flex flex-wrap gap-3">
-        {detail && !employeeDetail && <Button type="submit">조회</Button>}
-        {detail && !employeeDetail && <Button variant="outline" type="button" onClick={() => { const all = { ...defaults, name: "", from: "", to: "", educationType: "", resourceId: "", employeeId: "" }; setOverride(all); setApplied(all); setPage(1); }}>전체 이력</Button>}
+      {detail && <div className="mt-4 flex flex-wrap gap-3">
+        <Button type="submit">조회</Button>
+        <Button variant="outline" type="button" onClick={() => { const all = { ...defaults, name: "", from: "", to: "", educationType: "", resourceId: "", employeeId: "" }; setOverride(all); setApplied(all); setPage(1); }}>전체 이력</Button>
       </div>}
-      {detail && !employeeDetail && (active.resourceId || active.employeeId) && <p className="mt-3 text-sm text-muted-foreground">선택한 교재 또는 직원의 이력을 조회 중입니다. ‘전체 이력’으로 조건을 해제할 수 있습니다.</p>}
+      {detail && (active.resourceId || active.employeeId) && <p className="mt-3 text-sm text-muted-foreground">선택한 교재 또는 직원의 이력을 조회 중입니다. ‘전체 이력’으로 조건을 해제할 수 있습니다.</p>}
       {employeeNamesError && <p role="alert" className="mt-3 text-sm text-destructive">{employeeNamesError} 이름을 직접 입력하여 조회할 수 있습니다.</p>}
     </form>
     {notice && <p role="status" className="text-sm">{notice}</p>}
-    {employeeDetail && !active.from && <p className="text-sm text-muted-foreground">조회할 날짜를 선택하세요.</p>}
-    {employeeDetail && !active.from ? null : error ? <p role="alert" className="text-destructive">{error}</p> : loading ? <p role="status">교육이수 목록을 불러오는 중입니다.</p> : <>
+    {error ? <p role="alert" className="text-destructive">{error}</p> : loading ? <p role="status">교육이수 목록을 불러오는 중입니다.</p> : <>
       <p className="text-right text-sm text-muted-foreground">조회 결과 {total}건</p>
       <div className="overflow-x-auto rounded-lg border border-border">
         <Table><TableHeader><TableRow>
@@ -281,7 +321,5 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
         <Button variant="outline" disabled={page * 50 >= total} onClick={() => setPage(page + 1)}>다음</Button>
       </nav>
     </>}
-    {employeeDetail && <ConfirmModal isOpen={confirmOpen} onClose={() => { if (!sending) setConfirmOpen(false); }} onConfirm={() => void completeEmployeeDate()} title={`근무자 ${filters.name} 의 ${active.from || "0000-00-00"} 일자의 안전교육을 모두 이수처리할까요?`} confirmLabel="이수처리" cancelLabel="취소" loading={sending} loadingLabel="교육이수 처리 중입니다..." />}
-    {employeeDetail && <ConfirmModal isOpen={deleteConfirmOpen} onClose={() => { if (!sending) setDeleteConfirmOpen(false); }} onConfirm={() => void deleteSelectedCompletion()} title={`근무자 ${filters.name} 의 ${active.from || "0000-00-00"} 일자 안전교육 자료를 삭제할까요?`} confirmLabel="삭제" cancelLabel="취소" loading={sending} loadingLabel="삭제 중입니다..." />}
   </section>;
 }

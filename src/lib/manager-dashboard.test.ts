@@ -2,8 +2,43 @@ import { describe, expect, it, vi } from "vitest";
 import { createClient } from "@supabase/supabase-js";
 import * as supabaseAdmin from "./supabase-admin";
 import { buildManagerDashboardData, loadManagerDashboardData } from "./manager-dashboard";
+import { buildAttendanceReport } from "./manager-reports";
 
 describe("manager dashboard data", () => {
+  it("matches report absences when an overnight worker also has a waiting shift", () => {
+    const now = new Date("2026-09-29T11:00:00+09:00");
+    const employees = Array.from({ length: 6 }, (_, index) => ({
+      id: `employee-${index}`, name: `직원 ${index}`, is_retired: false,
+    }));
+    const attendance = [
+      { id: "previous-night", employee_id: "employee-0", work_date: "2026-09-28", intime: "2026-09-28T22:00:00+09:00", outtime: "2026-09-29T06:00:00+09:00" },
+      ...[1, 2, 3, 4].map((index) => ({
+        id: `absent-${index}`, employee_id: `employee-${index}`, work_date: "2026-09-29", intime: "2026-09-29T07:00:00+09:00", outtime: "2026-09-29T18:00:00+09:00",
+      })),
+      { id: "next-night", employee_id: "employee-0", work_date: "2026-09-29", intime: "2026-09-29T22:00:00+09:00", outtime: "2026-09-30T06:00:00+09:00" },
+      { id: "waiting-noon", employee_id: "employee-5", work_date: "2026-09-29", intime: "2026-09-29T12:00:00+09:00", outtime: "2026-09-29T17:00:00+09:00" },
+    ].map((record) => ({
+      ...record, worksite_id: "site-1", intime_status: "0" as const,
+      outtime_status: "0" as const, work_intime: null, work_outtime: null,
+    }));
+    const { summary } = buildManagerDashboardData({
+      now, employees, attendance, dailyAttendance: attendance,
+      worksites: [], assignments: [], educationResources: [], educationCompletions: [],
+    });
+    const rows = buildAttendanceReport({
+      now, employeeName: "", workDate: "2026-09-29", employees,
+      attendance, dailyAttendance: attendance,
+    });
+
+    expect(rows).toHaveLength(7);
+    expect(rows.find((row) => row.id === "previous-night")?.status).toBe("결근");
+    expect(rows.find((row) => row.id === "next-night")?.status).toBe("대기");
+    expect(summary.absentEmployeesToday).toBe(5);
+    expect(summary.waitingEmployeesToday).toBe(2);
+    expect(summary.absentEmployeesToday).toBe(rows.filter((row) => row.status === "결근").length);
+    expect(summary.waitingEmployeesToday).toBe(rows.filter((row) => row.status === "대기").length);
+  });
+
   it.each([
     { name: "대기는 퇴근상태가 있어도 제외", intime: "2026-06-04T12:01:00+09:00", inStatus: "0", outStatus: "2", counts: [1, 0, 0, 0, 0, 0, 0] },
     { name: "출근예정 이전은 상태코드와 무관하게 대기", intime: "2026-06-04T12:01:00+09:00", inStatus: "2", outStatus: "1", counts: [1, 0, 0, 0, 0, 0, 0] },

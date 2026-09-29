@@ -166,9 +166,9 @@ describe("manager reports", () => {
     employeesQuery.select.mockReturnValue(employeesQuery);
     employeesQuery.ilike.mockResolvedValue({ data: [{ id: "emp-1", name: "김철수" }], error: null });
 
-    const attendanceQuery = { select: vi.fn(), eq: vi.fn(), order: vi.fn() };
+    const attendanceQuery = { select: vi.fn(), or: vi.fn(), order: vi.fn() };
     attendanceQuery.select.mockReturnValue(attendanceQuery);
-    attendanceQuery.eq.mockReturnValue(attendanceQuery);
+    attendanceQuery.or.mockReturnValue(attendanceQuery);
     attendanceQuery.order.mockResolvedValue({
       data: [{
         id: "attendance-1",
@@ -202,7 +202,9 @@ describe("manager reports", () => {
     expect(getSupabase).not.toHaveBeenCalled();
     expect(from).toHaveBeenCalledWith("employees");
     expect(from).toHaveBeenCalledWith("work_record");
-    expect(attendanceQuery.eq).toHaveBeenCalledWith("work_date", "2026-09-17");
+    expect(attendanceQuery.or).toHaveBeenCalledWith(
+      "work_date.eq.2026-09-17,and(outtime.gte.2026-09-16T15:00:00.000Z,outtime.lt.2026-09-17T15:00:00.000Z)",
+    );
   });
 
   it("computes education completion count per active employee", () => {

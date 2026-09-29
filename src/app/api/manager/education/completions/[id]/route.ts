@@ -1,5 +1,6 @@
 import { getManagerUser } from "@/lib/manager-auth";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { parseEducationCompletedAt } from "@/lib/education-periods";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -16,6 +17,14 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   if (typeof body?.isCompleted !== "boolean") {
     return Response.json({ error: "이수여부를 확인하세요." }, { status: 400 });
   }
+  let completedAt: string | null = null;
+  if (body.isCompleted) {
+    try {
+      completedAt = parseEducationCompletedAt(body.completedAt);
+    } catch (error) {
+      return Response.json({ error: error instanceof Error ? error.message : "이수(완료)일시를 확인하세요." }, { status: 400 });
+    }
+  }
 
   const supabase = getSupabaseAdmin();
   const { data: existing, error: readError } = await supabase
@@ -30,9 +39,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     .from("education_completions")
     .update({
       is_completed: body.isCompleted,
-      completed_at: body.isCompleted
-        ? existing.is_completed && existing.completed_at ? existing.completed_at : new Date().toISOString()
-        : null,
+      completed_at: completedAt,
     })
     .eq("id", id)
     .eq("is_completed", existing.is_completed)

@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import ConfirmModal from "@/components/modals/confirm-modal";
-import { educationToday, educationTypes, educationTypeLabels } from "@/lib/education-periods";
+import { educationToday, educationTypes, educationTypeLabels, educationDateTimeLocal, parseEducationCompletedAt } from "@/lib/education-periods";
 import type { EducationCompletionRow, EducationDayRow } from "@/lib/education-completions";
 
 const subscribe = (callback: () => void) => {
@@ -59,6 +59,7 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
   const [sending, setSending] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [completionOverride, setCompletionOverride] = useState<boolean | null>(null);
+  const [completedAtOverride, setCompletedAtOverride] = useState<string | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [notice, setNotice] = useState("");
   const [resources, setResources] = useState<{ id: string; title: string }[]>([]);
@@ -68,6 +69,9 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
   const query = useMemo(() => new URLSearchParams({ ...active, view: detail ? "history" : "days", page: String(page) }).toString(), [active, detail, page]);
   const selectedCompletion = loadedQuery === query && records.length === 1 && total === 1 ? records[0] : null;
   const isCompleted = completionOverride ?? selectedCompletion?.is_completed ?? false;
+  const completedAt = isCompleted
+    ? completedAtOverride ?? (selectedCompletion?.completed_at ? educationDateTimeLocal(new Date(selectedCompletion.completed_at)) : "")
+    : "";
   const listHref = useMemo(() => {
     const params = new URLSearchParams(search);
     // Keep the list period separate from the single date used to load this record.
@@ -130,6 +134,7 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
           setTotal(result.total ?? 0);
           setLoadedQuery(query);
           setCompletionOverride(null);
+          setCompletedAtOverride(null);
         }
       } catch (cause) {
         if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : "조회에 실패했습니다.");
@@ -168,10 +173,11 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
     setSending(true);
     setNotice("");
     try {
+      if (isCompleted) parseEducationCompletedAt(completedAt);
       const response = await fetch(`/api/manager/education/completions/${encodeURIComponent(selectedCompletion.id)}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isCompleted }),
+        body: JSON.stringify({ isCompleted, completedAt: isCompleted ? completedAt : null }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error ?? "교육이수 자료를 저장하지 못했습니다.");
@@ -277,13 +283,13 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
           <div className="flex min-w-0 flex-col gap-2 text-sm">
             <label htmlFor="education-completion-status">이수여부</label>
             <div className="flex h-9 items-center gap-3">
-              <Switch.Root id="education-completion-status" checked={isCompleted} disabled={unavailable} onCheckedChange={(checked) => { setCompletionOverride(checked); setNotice(""); }} className="inline-flex h-6 w-11 shrink-0 items-center rounded-full border-2 border-transparent bg-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary">
+              <Switch.Root id="education-completion-status" checked={isCompleted} disabled={unavailable} onCheckedChange={(checked) => { setCompletionOverride(checked); setCompletedAtOverride(checked ? educationDateTimeLocal() : ""); setNotice(""); }} className="inline-flex h-6 w-11 shrink-0 items-center rounded-full border-2 border-transparent bg-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary">
                 <Switch.Thumb className="pointer-events-none block size-5 rounded-full bg-white shadow-sm transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0" />
               </Switch.Root>
               <span>{selectedCompletion ? isCompleted ? "이수" : "미이수" : ""}</span>
             </div>
           </div>
-          <label className="flex min-w-0 flex-col gap-2 text-sm">이수(완료)일시<Input readOnly value={selectedCompletion?.completed_at ? new Date(selectedCompletion.completed_at).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }) : ""} /></label>
+          <label className="flex min-w-0 flex-col gap-2 text-sm">이수(완료)일시<Input type="datetime-local" step="1" required={isCompleted} disabled={unavailable || !isCompleted} value={completedAt} onChange={(event) => { setCompletedAtOverride(event.target.value); setNotice(""); }} /></label>
         </div>
         {loading ? <p role="status">교육이수 자료를 불러오는 중입니다.</p> : error ? <p role="alert" className="text-destructive">{error}</p> : !active.from || !active.resourceId ? <p role="alert">목록에서 날짜를 선택해 교육이수 자료를 열어주세요.</p> : !selectedCompletion ? <p role="alert">해당 교육이수 자료를 한 건으로 확인할 수 없습니다. 목록에서 다시 선택해 주세요.</p> : null}
         {notice && <p role="status" className="text-sm">{notice}</p>}

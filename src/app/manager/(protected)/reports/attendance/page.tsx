@@ -22,7 +22,7 @@ type AttendanceReportRow = {
   intimeStatus: "0" | "1" | "2";
   status: "결근" | "지각" | "출근" | "대기";
   outtimeStatus: "0" | "1" | "2";
-  outtimeLabel: "미퇴근" | "조퇴" | "퇴근";
+  outtimeLabel: "" | "미퇴근" | "조퇴" | "퇴근";
   isLate: boolean;
 };
 

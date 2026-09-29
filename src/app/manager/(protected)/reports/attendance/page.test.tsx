@@ -49,7 +49,7 @@ describe("attendance report page", () => {
     render(<AttendanceReportPage />);
 
     expect(screen.getByRole("heading", { name: "근태관리" })).toBeInTheDocument();
-    expect(screen.getByLabelText("출근날짜")).toHaveValue(workDate);
+    expect(screen.getByLabelText("출퇴근날짜")).toHaveValue(workDate);
     expect(screen.getByRole("button", { name: "엑셀" })).toBeDisabled();
     await waitFor(() => expect(document.querySelector('datalist option[value="김철수"]')).toBeInTheDocument());
     expect(document.querySelector('datalist option[value="홍길동"]')).toBeInTheDocument();
@@ -124,7 +124,7 @@ describe("attendance report page", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     render(<AttendanceReportPage />);
-    await user.clear(screen.getByLabelText("출근날짜"));
+    await user.clear(screen.getByLabelText("출퇴근날짜"));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/manager/reports/attendance?employeeName="));
   });

@@ -75,7 +75,7 @@ export type AttendanceReportRow = {
   intimeStatus: IntimeStatus;
   status: AttendanceReportStatus;
   outtimeStatus: OuttimeStatus;
-  outtimeLabel: "미퇴근" | "조퇴" | "퇴근";
+  outtimeLabel: "" | "미퇴근" | "조퇴" | "퇴근";
   isLate: boolean;
 };
 
@@ -201,6 +201,10 @@ export function buildAttendanceReport(input: {
         scheduledClockIn: scheduledClockInAt,
         now: input.now ?? new Date(nowTimestamp),
       });
+      const scheduledClockOut = toKstDateTime(scheduledTime?.outtime ?? record.outtime ?? null);
+      const hideOuttimeStatus = status === "대기" || status === "결근" || (
+        outtimeStatus === "0" && scheduledClockOut !== null && nowTimestamp < scheduledClockOut.timestamp
+      );
 
       return {
         id: record.id,
@@ -209,14 +213,14 @@ export function buildAttendanceReport(input: {
         employeeName: employeeNamesById.get(record.employee_id) ?? "-",
         workStyle: workStylesByEmployeeId.get(record.employee_id) ?? "-",
         scheduledClockIn: toKstDateTime(scheduledClockInAt)?.time ?? "-",
-        scheduledClockOut: toKstDateTime(scheduledTime?.outtime ?? record.outtime ?? null)?.dateTime ?? "-",
+        scheduledClockOut: scheduledClockOut?.dateTime ?? "-",
         clockInDateTime: toKstDateTime(record.work_intime)?.dateTime ?? "-",
         clockOutDateTime: toKstDateTime(record.work_outtime)?.dateTime ?? null,
         workDuration: durationLabel(record.work_intime, record.work_outtime),
         intimeStatus,
         status,
         outtimeStatus,
-        outtimeLabel: outtimeStatus === "1" ? "조퇴" : outtimeStatus === "2" ? "퇴근" : "미퇴근",
+        outtimeLabel: hideOuttimeStatus ? "" : outtimeStatus === "1" ? "조퇴" : outtimeStatus === "2" ? "퇴근" : "미퇴근",
         isLate: intimeStatus === "1",
       };
     });

@@ -184,7 +184,10 @@ export function buildAttendanceReport(input: {
   });
 
   return input.attendance
-    .filter((record) => record.work_date === input.workDate && employeeIds.has(record.employee_id))
+    .filter((record) => (
+      (record.work_date === input.workDate || toKstDateTime(record.outtime)?.date === input.workDate) &&
+      employeeIds.has(record.employee_id)
+    ))
     .sort((left, right) => left.work_date.localeCompare(right.work_date))
     .map((record) => {
       const scheduledTime = scheduledTimes.get(
@@ -417,7 +420,13 @@ export async function loadAttendanceReport(input: { employeeName: string; workDa
   let workRecordQuery = supabase
     .from("work_record")
     .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime,intime_status,outtime_status");
-  if (input.workDate) workRecordQuery = workRecordQuery.eq("work_date", input.workDate);
+  if (input.workDate) {
+    const dayStart = new Date(`${input.workDate}T00:00:00+09:00`);
+    const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+    workRecordQuery = workRecordQuery.or(
+      `work_date.eq.${input.workDate},and(outtime.gte.${dayStart.toISOString()},outtime.lt.${dayEnd.toISOString()})`,
+    );
+  }
   const [employeesResult, workRecordResult, worksitesResult, assignmentsResult] = await Promise.all([
     supabase.from("employees").select("id,name,work_style").ilike("name", `%${input.employeeName.trim()}%`),
     workRecordQuery.order("work_date", { ascending: true }),

@@ -276,6 +276,17 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       dailyAttendance.intime,
     );
   });
+  const statusByRecord = summaryWorkRecords.map((record) => {
+    const scheduledClockIn = record.intime ?? scheduledTimes.get(`${record.employee_id}:${record.worksite_id}:${record.work_date}`);
+    return scheduledClockIn && new Date(scheduledClockIn).getTime() > now.getTime()
+      ? "대기"
+      : getManagerAttendanceStatus({ intimeStatus: record.intime_status, scheduledClockIn, now });
+  });
+  const waitingEmployeeIds = new Set(
+    summaryWorkRecords
+      .filter((_, index) => statusByRecord[index] === "대기")
+      .map((record) => record.employee_id),
+  );
   let onTimeEmployeesToday = 0;
   let waitingEmployeesToday = 0;
   let absentEmployeesToday = 0;
@@ -283,20 +294,14 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
   let clockedOutEmployeesToday = 0;
   let earlyLeaveEmployeesToday = 0;
   let notClockedOutEmployeesToday = 0;
-  summaryWorkRecords.forEach((record) => {
-    const scheduledClockIn = record.intime ?? scheduledTimes.get(`${record.employee_id}:${record.worksite_id}:${record.work_date}`);
-    const status = scheduledClockIn && new Date(scheduledClockIn).getTime() > now.getTime()
-      ? "대기"
-      : getManagerAttendanceStatus({
-        intimeStatus: record.intime_status,
-        scheduledClockIn,
-        now,
-      });
+  summaryWorkRecords.forEach((record, index) => {
+    const status = statusByRecord[index];
     switch (status) {
       case "대기":
         waitingEmployeesToday += 1;
         return;
       case "결근":
+        if (waitingEmployeeIds.has(record.employee_id)) return;
         absentEmployeesToday += 1;
         return;
       case "지각":

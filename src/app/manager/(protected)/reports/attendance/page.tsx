@@ -156,7 +156,7 @@ export default function AttendanceReportPage() {
           </div>
           <div className="space-y-2">
             <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="attendance-work-date">
-              출근날짜
+              출퇴근날짜
             </label>
             <Input
               className="w-full"

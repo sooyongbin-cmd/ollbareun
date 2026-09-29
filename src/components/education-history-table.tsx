@@ -166,9 +166,7 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error ?? "교육이수 자료를 저장하지 못했습니다.");
-      setRecords([{ ...selectedCompletion, ...result.completion }]);
-      setCompletionOverride(null);
-      setNotice("교육이수 자료를 저장했습니다.");
+      router.push(listHref);
     } catch (cause) {
       setNotice(cause instanceof Error ? cause.message : "교육이수 자료를 저장하지 못했습니다.");
     } finally {

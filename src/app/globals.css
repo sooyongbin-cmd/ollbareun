@@ -491,7 +491,7 @@ html[data-manager-theme="dark"] {
   width: 100%;
   flex-direction: column;
   gap: 20px;
-  padding-top: 20px;
+  padding: 20px 0;
 }
 
 .guard-work-card {

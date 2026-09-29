@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useSyncExternalStore, type FormEvent } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore, type FormEvent, type ReactNode } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,10 +17,13 @@ const subscribe = (callback: () => void) => {
 const snapshot = () => window.location.search;
 const emptySnapshot = () => "";
 
-function oneMonthBefore(date: string) {
-  const [year, month, day] = date.split("-").map(Number);
-  const lastDay = new Date(Date.UTC(year, month - 1, 0)).getUTCDate();
-  return new Date(Date.UTC(year, month - 2, Math.min(day, lastDay))).toISOString().slice(0, 10);
+function formatEducationPeriod(type: EducationDayRow["items"][number]["education_type"], date: string | null) {
+  if (!date) return "";
+  const [year, month] = date.split("-").map(Number);
+  if (type === "monthly") return `${year}년${month}월`;
+  if (type === "quarterly") return `${year}년${Math.ceil(month / 3)}분기`;
+  if (type === "semiannual") return `${year}년${month <= 6 ? "상반기" : "하반기"}`;
+  return date;
 }
 
 export default function EducationHistoryTable({ detail = false, employeeId, employeeName, employeeDetail = false }: { detail?: boolean; employeeId?: string; employeeName?: string; employeeDetail?: boolean }) {
@@ -28,8 +31,9 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
   const defaults = useMemo(() => {
     const p = new URLSearchParams(search);
     const selectedDate = p.get("date") ?? p.get("from") ?? p.get("to") ?? "";
-    return { name: employeeName ?? p.get("name") ?? "", from: employeeDetail ? selectedDate : p.get("from") ?? (detail ? "" : oneMonthBefore(educationToday())),
-      to: employeeDetail ? selectedDate : p.get("to") ?? (detail ? "" : educationToday()), educationType: p.get("educationType") ?? "",
+    const attendanceDate = p.get("attendanceDate") ?? p.get("date") ?? p.get("from") ?? educationToday();
+    return { name: employeeName ?? p.get("name") ?? "", from: employeeDetail ? selectedDate : detail ? p.get("from") ?? "" : attendanceDate,
+      to: employeeDetail ? selectedDate : detail ? p.get("to") ?? "" : attendanceDate, educationType: p.get("educationType") ?? "",
       resourceId: p.get("resourceId") ?? "", employeeId: employeeId ?? p.get("employeeId") ?? "" };
   }, [search, detail, employeeId, employeeName, employeeDetail]);
   const [override, setOverride] = useState<typeof defaults | null>(null);
@@ -123,12 +127,12 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
   }
   function update(key: keyof typeof defaults, value: string) {
     if (filters[key] === value) return;
-    setOverride({ ...filters, [key]: value, ...(employeeDetail && key === "from" ? { to: value } : {}), ...(!detail && key === "name" ? { employeeId: "" } : {}) });
+    setOverride({ ...filters, [key]: value, ...((employeeDetail || !detail) && key === "from" ? { to: value } : {}), ...(!detail && key === "name" ? { employeeId: "" } : {}) });
     if (!detail) {
       setPage(1);
       setLoading(true);
     }
-    if (employeeDetail && key === "from") {
+    if ((employeeDetail || !detail) && key === "from") {
       setPage(1);
       setNotice("");
     }
@@ -180,11 +184,8 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
       setNotice(cause instanceof Error ? cause.message : "알림 전송 실패");
     } finally { setSending(false); }
   }
-  const label = (item: EducationDayRow["items"][number]) => educationTypeLabels[item.education_type];
-  const items = (day: EducationDayRow, complete: boolean, typeOnly = false) => {
-    const filtered = day.items.filter((item) => item.is_completed === complete);
-    return filtered.length ? filtered.map((item) => <div className="py-1" key={item.id}>{typeOnly ? label(item) : item.resource_title}</div>) : "-";
-  };
+  const itemCells = (day: EducationDayRow, render: (item: EducationDayRow["items"][number]) => ReactNode) =>
+    day.items.map((item) => <div className="py-1" key={item.id}>{render(item)}</div>);
   return <section className="space-y-6">
     <header><h1 className="text-[1.75rem]">{detail ? "교육이수상세" : "교육이수관리"}</h1>
       <p className="mt-2 text-sm text-muted-foreground">{employeeDetail ? "선택한 직원의 날짜별 안전교육 이력을 조회합니다." : "한국시간 날짜별 교육 이력을 조회합니다. 지난 날짜의 미이수는 이후 이수하더라도 유지됩니다."}</p></header>
@@ -193,7 +194,7 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
         <label className="space-y-2 text-sm">{detail ? "직원 이름" : "이름"}<Input value={filters.name} disabled={employeeDetail} list={detail ? undefined : "education-employee-name-options"} placeholder={detail ? undefined : "이름을 입력하세요."} onChange={(e) => update("name", e.target.value)} />
           {!detail && <datalist id="education-employee-name-options">{employeeNames.map((name) => <option key={name} value={name} />)}</datalist>}
         </label>
-        {employeeDetail ? <label className="space-y-2 text-sm">날짜<Input type="date" value={filters.from} onChange={(e) => update("from", e.target.value)} /></label> : <>
+        {employeeDetail || !detail ? <label className="space-y-2 text-sm">{employeeDetail ? "날짜" : "출근일"}<Input type="date" value={filters.from} onChange={(e) => update("from", e.target.value)} /></label> : <>
           <label className="space-y-2 text-sm">시작일<Input type="date" value={filters.from} onChange={(e) => update("from", e.target.value)} /></label>
           <label className="space-y-2 text-sm">종료일<Input type="date" value={filters.to} onChange={(e) => update("to", e.target.value)} /></label>
         </>}
@@ -222,7 +223,7 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
       <p className="text-right text-sm text-muted-foreground">조회 결과 {total}건</p>
       <div className="overflow-x-auto rounded-lg border border-border">
         <Table><TableHeader><TableRow>
-          {(detail ? ["근무자", "날짜", "안전교육", "교육구분", "이수여부", "완료일시"] : ["근무자", "날짜", "이수한 안전교육", "교육구분", "미이수 안전교육", "교육구분"]).map((heading, index) => <TableHead key={index}>{heading}</TableHead>)}
+          {(detail ? ["근무자", "날짜", "안전교육", "교육구분", "이수여부", "완료일시"] : ["출근자", "날짜", "안전교육", "구분", "이수여부"]).map((heading, index) => <TableHead key={index}>{heading}</TableHead>)}
         </TableRow></TableHeader><TableBody>
           {detail ? records.map((record) => <TableRow key={record.id}>
             <TableCell data-label="근무자">{record.employee_name}</TableCell><TableCell data-label="날짜">{record.education_date ?? "날짜 미상"}</TableCell>
@@ -230,12 +231,13 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
             <TableCell data-label="이수여부">{record.is_completed ? "이수" : "미이수"}</TableCell>
             <TableCell data-label="완료일시">{record.completed_at ? new Date(record.completed_at).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }) : "-"}</TableCell>
           </TableRow>) : days.map((day) => <TableRow key={`${day.employee_id}:${day.education_date}`}>
-            <TableCell data-label="근무자"><Link className="text-primary hover:underline" href={`/manager/safety/completions/${encodeURIComponent(day.employee_id)}${day.education_date ? `?${new URLSearchParams({ date: day.education_date })}` : ""}`}>{day.employee_name}</Link></TableCell>
-            <TableCell data-label="날짜">{day.education_date ?? "날짜 미상"}</TableCell>
-            <TableCell data-label="이수한 안전교육">{items(day, true)}</TableCell><TableCell data-label="교육구분">{items(day, true, true)}</TableCell>
-            <TableCell data-label="미이수 안전교육">{items(day, false)}</TableCell><TableCell data-label="교육구분">{items(day, false, true)}</TableCell>
+            <TableCell data-label="출근자"><Link className="text-primary hover:underline" href={`/manager/safety/completions/${encodeURIComponent(day.employee_id)}${day.education_date ? `?${new URLSearchParams({ date: day.education_date })}` : ""}`}>{day.employee_name}</Link></TableCell>
+            <TableCell data-label="날짜">{itemCells(day, (item) => formatEducationPeriod(item.education_type, day.education_date))}</TableCell>
+            <TableCell data-label="안전교육">{itemCells(day, (item) => item.resource_title)}</TableCell>
+            <TableCell data-label="구분">{itemCells(day, (item) => educationTypeLabels[item.education_type])}</TableCell>
+            <TableCell data-label="이수여부">{itemCells(day, (item) => item.is_completed ? "이수" : "미이수")}</TableCell>
           </TableRow>)}
-          {(detail ? !records.length : !days.length) && <TableRow><TableCell colSpan={6} className="p-8 text-center">조회 결과에 해당하는 교육이수 기록이 없습니다.</TableCell></TableRow>}
+          {(detail ? !records.length : !days.length) && <TableRow><TableCell colSpan={detail ? 6 : 5} className="p-8 text-center">{detail ? "조회 결과에 해당하는 교육이수 기록이 없습니다." : "선택한 출근일에 출근 기록이 없습니다."}</TableCell></TableRow>}
         </TableBody></Table>
       </div>
       <nav aria-label="교육이수 페이지" className="flex items-center justify-center gap-4">

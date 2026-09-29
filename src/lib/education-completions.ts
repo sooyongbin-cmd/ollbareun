@@ -87,23 +87,23 @@ export async function loadEducationHistory(params: URLSearchParams, supabase = g
 
 export async function loadEducationDays(params: URLSearchParams, supabase = getSupabaseAdmin()) {
   const f = parseEducationFilters(params);
-  if (f.from && f.to && f.from !== f.to) throw new Error("출근일은 하루만 선택할 수 있습니다.");
-  const attendanceDate = f.from ?? f.to;
-  if (!attendanceDate) return { rows: [], total: 0, page: f.page, pageSize: f.pageSize };
+  if (!f.from && !f.to) return { rows: [], total: 0, page: f.page, pageSize: f.pageSize };
 
   type AttendanceRow = { employee_id: string; work_date: string; employees: { name: string } | { name: string }[] | null };
   const attendanceRows = await readAllEducationRows<AttendanceRow>((from, to) => {
     let query = supabase.from("work_record")
       .select("employee_id,work_date,employees!inner(name)")
-      .eq("work_date", attendanceDate)
       .not("work_intime", "is", null);
+    if (f.from) query = query.gte("work_date", f.from);
+    if (f.to) query = query.lte("work_date", f.to);
     if (f.name) query = query.ilike("employees.name", `%${f.name.replace(/[%_\\]/g, "\\$&")}%`);
-    return query.order("employee_id").range(from, to);
+    return query.order("work_date", { ascending: false }).order("employee_id").range(from, to);
   });
   const attendedEmployees = attendanceRows.map((row) => {
     const employee = Array.isArray(row.employees) ? row.employees[0] : row.employees;
     return { employee_id: row.employee_id, employee_name: employee?.name ?? "", education_date: row.work_date };
-  }).sort((left, right) => left.employee_name.localeCompare(right.employee_name, "ko-KR") || left.employee_id.localeCompare(right.employee_id));
+  }).sort((left, right) => right.education_date.localeCompare(left.education_date)
+    || left.employee_name.localeCompare(right.employee_name, "ko-KR") || left.employee_id.localeCompare(right.employee_id));
 
   const total = attendedEmployees.length;
   const pageEmployees = attendedEmployees.slice((f.page - 1) * f.pageSize, f.page * f.pageSize);
@@ -115,16 +115,18 @@ export async function loadEducationDays(params: URLSearchParams, supabase = getS
   const completions = await readAllEducationRows<CompletionRecord>((from, to) => {
     let query = supabase.from("education_completions")
       .select("id,employee_id,resource_id,education_date,education_type,is_completed,completed_at,education_resources!inner(title)")
-      .eq("education_date", attendanceDate)
       .in("employee_id", employeeIds);
+    if (f.from) query = query.gte("education_date", f.from);
+    if (f.to) query = query.lte("education_date", f.to);
     if (f.type) query = query.eq("education_type", f.type);
     return query.range(from, to);
   });
   const priority = { semiannual: 0, quarterly: 1, monthly: 2, daily: 3 } as const;
-  const itemsByEmployee = new Map<string, EducationDayRow["items"]>();
+  const itemsByAttendance = new Map<string, EducationDayRow["items"]>();
   completions.forEach((completion) => {
     const resource = Array.isArray(completion.education_resources) ? completion.education_resources[0] : completion.education_resources;
-    const items = itemsByEmployee.get(completion.employee_id) ?? [];
+    const key = `${completion.employee_id}:${completion.education_date ?? ""}`;
+    const items = itemsByAttendance.get(key) ?? [];
     items.push({
       id: completion.id,
       resource_id: completion.resource_id,
@@ -133,12 +135,12 @@ export async function loadEducationDays(params: URLSearchParams, supabase = getS
       is_completed: completion.is_completed,
       completed_at: completion.completed_at,
     });
-    itemsByEmployee.set(completion.employee_id, items);
+    itemsByAttendance.set(key, items);
   });
 
   const rows = pageEmployees.map((employee) => ({
     ...employee,
-    items: (itemsByEmployee.get(employee.employee_id) ?? []).sort((left, right) =>
+    items: (itemsByAttendance.get(`${employee.employee_id}:${employee.education_date}`) ?? []).sort((left, right) =>
       priority[left.education_type] - priority[right.education_type]
       || left.resource_title.localeCompare(right.resource_title, "ko-KR")
       || left.id.localeCompare(right.id)),

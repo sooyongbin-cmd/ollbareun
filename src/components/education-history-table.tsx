@@ -22,14 +22,14 @@ function oneMonthBefore(date: string) {
   return new Date(Date.UTC(year, month - 2, Math.min(day, lastDay))).toISOString().slice(0, 10);
 }
 
-export default function EducationHistoryTable({ detail = false }: { detail?: boolean }) {
+export default function EducationHistoryTable({ detail = false, employeeId }: { detail?: boolean; employeeId?: string }) {
   const search = useSyncExternalStore(subscribe, snapshot, emptySnapshot);
   const defaults = useMemo(() => {
     const p = new URLSearchParams(search);
     return { name: p.get("name") ?? "", from: p.get("from") ?? (detail ? "" : oneMonthBefore(educationToday())),
       to: p.get("to") ?? (detail ? "" : educationToday()), educationType: p.get("educationType") ?? "",
-      resourceId: p.get("resourceId") ?? "", employeeId: p.get("employeeId") ?? "" };
-  }, [search, detail]);
+      resourceId: p.get("resourceId") ?? "", employeeId: employeeId ?? p.get("employeeId") ?? "" };
+  }, [search, detail, employeeId]);
   const [override, setOverride] = useState<typeof defaults | null>(null);
   const filters = override ?? defaults;
   const [applied, setApplied] = useState<typeof defaults | null>(null);
@@ -189,7 +189,7 @@ export default function EducationHistoryTable({ detail = false }: { detail?: boo
             <TableCell data-label="이수여부">{record.is_completed ? "이수" : "미이수"}</TableCell>
             <TableCell data-label="완료일시">{record.completed_at ? new Date(record.completed_at).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }) : "-"}</TableCell>
           </TableRow>) : days.map((day) => <TableRow key={`${day.employee_id}:${day.education_date}`}>
-            <TableCell data-label="근무자"><Link className="text-primary hover:underline" href={`/manager/safety/completions/detail?${new URLSearchParams({ employeeId: day.employee_id, ...(day.education_date ? { from: day.education_date, to: day.education_date } : {}) })}`}>{day.employee_name}</Link></TableCell>
+            <TableCell data-label="근무자"><Link className="text-primary hover:underline" href={`/manager/safety/completions/${encodeURIComponent(day.employee_id)}${day.education_date ? `?${new URLSearchParams({ from: day.education_date, to: day.education_date })}` : ""}`}>{day.employee_name}</Link></TableCell>
             <TableCell data-label="날짜">{day.education_date ?? "날짜 미상"}</TableCell>
             <TableCell data-label="이수한 안전교육">{items(day, true)}</TableCell><TableCell data-label="교육구분">{items(day, true, true)}</TableCell>
             <TableCell data-label="미이수 안전교육">{items(day, false)}</TableCell><TableCell data-label="교육구분">{items(day, false, true)}</TableCell>

@@ -36,6 +36,15 @@ describe("date-based education report", () => {
     expect(within(row).getByText("월간 안전")).toBeInTheDocument();
     expect(within(row).getByText("월간")).toBeInTheDocument();
   });
+  it("links each employee to the path-based detail route and keeps the row date", async () => {
+    vi.spyOn(educationPeriods, "educationToday").mockReturnValue("2026-09-29");
+    render(<EducationCompletionsPage />);
+    const employeeLink = await screen.findByRole("link", { name: "홍길동" });
+    expect(employeeLink).toHaveAttribute(
+      "href",
+      "/manager/safety/completions/employee-1?from=2026-09-29&to=2026-09-29",
+    );
+  });
   it("automatically queries editable name, date and category filters without search buttons", async () => {
     const user = userEvent.setup(); render(<EducationCompletionsPage />);
     await screen.findByRole("link", { name: "홍길동" });

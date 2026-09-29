@@ -1,6 +1,7 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import EducationHistoryTable from "./education-history-table";
+import type { EducationDayRow } from "@/lib/education-completions";
 
 const { push } = vi.hoisted(() => ({ push: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
@@ -10,6 +11,34 @@ afterEach(() => {
   vi.useRealTimers();
   vi.unstubAllGlobals();
   push.mockReset();
+});
+
+it("groups attendance dates by employee, orders periods before daily records, and preserves detail links", async () => {
+  window.history.replaceState({}, "", "/manager/safety/completions?from=2026-09-01&to=2026-09-30");
+  const item = (id: string, education_type: EducationDayRow["items"][number]["education_type"]) => ({
+    id, resource_id: id, resource_title: id, education_type, is_completed: false, completed_at: null,
+  });
+  const rows: EducationDayRow[] = [
+    { employee_id: "yoon", employee_name: "윤정숙", education_date: "2026-09-29", items: [item("daily-29", "daily"), item("quarter", "quarterly")] },
+    { employee_id: "kim", employee_name: "김민수", education_date: "2026-09-29", items: [item("kim-daily", "daily")] },
+    { employee_id: "yoon", employee_name: "윤정숙", education_date: "2026-09-28", items: [item("daily-28", "daily"), item("month", "monthly"), item("half", "semiannual")] },
+    { employee_id: "another-yoon", employee_name: "윤정숙", education_date: "2026-09-28", items: [] },
+  ];
+  vi.stubGlobal("fetch", vi.fn(async (url: string) => Response.json(url === "/api/bootstrap"
+    ? { employees: [] }
+    : { rows, total: 3, page: 1, pageSize: 50 })));
+  render(<EducationHistoryTable />);
+  expect(await screen.findByText("조회 결과 3명")).toBeInTheDocument();
+  const tableRows = within(screen.getByRole("table")).getAllByRole("row").slice(1);
+  expect(tableRows).toHaveLength(3);
+  expect(tableRows.map((row) => within(row).getAllByRole("cell")[0].textContent)).toEqual(["김민수", "윤정숙", "윤정숙"]);
+  const yoonRow = tableRows[2];
+  expect(within(yoonRow).getAllByText("윤정숙")).toHaveLength(1);
+  const links = within(yoonRow).getAllByRole("link");
+  expect(links.map((link) => link.textContent)).toEqual(["2026년하반기", "2026년3분기", "2026년9월", "2026-09-28", "2026-09-29"]);
+  expect(links[0]).toHaveAttribute("href", "/manager/safety/completions/yoon?date=2026-09-28&resourceId=half&listFrom=2026-09-01&listTo=2026-09-30");
+  expect(links[4]).toHaveAttribute("href", "/manager/safety/completions/yoon?date=2026-09-29&resourceId=daily-29&listFrom=2026-09-01&listTo=2026-09-30");
+  expect(within(yoonRow).getAllByRole("cell")[2].textContent).toBe("halfquartermonthdaily-28daily-29");
 });
 
 it("fills the completion time on toggle and saves the edited value before returning to the original period", async () => {

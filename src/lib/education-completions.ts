@@ -102,24 +102,27 @@ export async function loadEducationDays(params: URLSearchParams, supabase = getS
   const attendedEmployees = attendanceRows.map((row) => {
     const employee = Array.isArray(row.employees) ? row.employees[0] : row.employees;
     return { employee_id: row.employee_id, employee_name: employee?.name ?? "", education_date: row.work_date };
-  }).sort((left, right) => right.education_date.localeCompare(left.education_date)
-    || left.employee_name.localeCompare(right.employee_name, "ko-KR") || left.employee_id.localeCompare(right.employee_id));
+  }).sort((left, right) => left.employee_name.localeCompare(right.employee_name, "ko-KR")
+    || left.employee_id.localeCompare(right.employee_id) || left.education_date.localeCompare(right.education_date));
 
-  const total = attendedEmployees.length;
-  const pageEmployees = attendedEmployees.slice((f.page - 1) * f.pageSize, f.page * f.pageSize);
+  // Paginate whole employees so their attendance days stay together on one page.
+  const employeeIds = [...new Set(attendedEmployees.map((employee) => employee.employee_id))];
+  const total = employeeIds.length;
+  const pageEmployeeIds = employeeIds.slice((f.page - 1) * f.pageSize, f.page * f.pageSize);
+  const pageEmployeeIdSet = new Set(pageEmployeeIds);
+  const pageEmployees = attendedEmployees.filter((employee) => pageEmployeeIdSet.has(employee.employee_id));
   if (!pageEmployees.length) return { rows: [], total, page: f.page, pageSize: f.pageSize };
 
   type CompletionRecord = Pick<EducationCompletionRow, "id" | "employee_id" | "resource_id" | "education_date" | "education_type" | "is_completed" | "completed_at">
     & { education_resources: { title: string } | { title: string }[] | null };
-  const employeeIds = pageEmployees.map((employee) => employee.employee_id);
   const completions = await readAllEducationRows<CompletionRecord>((from, to) => {
     let query = supabase.from("education_completions")
       .select("id,employee_id,resource_id,education_date,education_type,is_completed,completed_at,education_resources!inner(title)")
-      .in("employee_id", employeeIds);
+      .in("employee_id", pageEmployeeIds);
     if (f.from) query = query.gte("education_date", f.from);
     if (f.to) query = query.lte("education_date", f.to);
     if (f.type) query = query.eq("education_type", f.type);
-    return query.range(from, to);
+    return query.order("employee_id").order("education_date").order("id").range(from, to);
   });
   const priority = { semiannual: 0, quarterly: 1, monthly: 2, daily: 3 } as const;
   const itemsByAttendance = new Map<string, EducationDayRow["items"]>();

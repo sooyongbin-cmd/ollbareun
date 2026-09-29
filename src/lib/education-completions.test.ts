@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getSupabaseAdmin } from "./supabase-admin";
-import { currentEducationStatus, listEducationCompletions, markEducationCompletion, parseEducationFilters, readAllEducationRows } from "./education-completions";
+import { currentEducationStatus, listEducationCompletions, loadEducationDays, markEducationCompletion, parseEducationFilters, readAllEducationRows } from "./education-completions";
 import { educationToday, educationPeriodStart, requireEducationType } from "./education-periods";
 import { saveAttendanceWithEducation } from "./attendance-education";
 
@@ -51,4 +51,47 @@ describe("period education", () => {
   it.each(["from=2026-02-30", "from=2026-09-30&to=2026-09-01", "educationType=annual", "page=0"])("validates server filters: %s", (query) => {
     expect(() => parseEducationFilters(new URLSearchParams(query))).toThrow();
   });
+});
+
+it("paginates whole employees and keeps every attendance date with its matching education records", async () => {
+  const attendance = Array.from({ length: 51 }, (_, index) => {
+    const employee_id = `employee-${String(index).padStart(2, "0")}`;
+    return ["2026-09-29", "2026-09-28"].map((work_date) => ({ employee_id, work_date, employees: { name: `직원${String(index).padStart(2, "0")}` } }));
+  }).flat().reverse();
+  const completions = ["2026-09-29", "2026-09-28", "2026-09-27"].map((education_date) => ({
+    id: education_date, employee_id: "employee-00", resource_id: "daily", education_date, education_type: "daily",
+    is_completed: false, completed_at: null, education_resources: { title: "일일교육" },
+  }));
+  const completionEmployeeIds: string[][] = [];
+  const supabase = { from: vi.fn((table: string) => {
+    let selectedEmployees: string[] | undefined;
+    const query = {
+      select: vi.fn().mockReturnThis(), not: vi.fn().mockReturnThis(), gte: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(), order: vi.fn().mockReturnThis(),
+      in: vi.fn((_column: string, ids: string[]) => {
+        selectedEmployees = ids;
+        completionEmployeeIds.push(ids);
+        return query;
+      }),
+      range: vi.fn(async (from: number, to: number) => ({
+        data: (table === "work_record" ? attendance : completions.filter((row) => selectedEmployees?.includes(row.employee_id))).slice(from, to + 1),
+        error: null,
+      })),
+    };
+    return query;
+  }) };
+  const first = await loadEducationDays(new URLSearchParams("from=2026-09-01&to=2026-09-30"), supabase as never);
+  expect(first.total).toBe(51);
+  expect(first.rows).toHaveLength(100);
+  expect(new Set(first.rows.map((row) => row.employee_id)).size).toBe(50);
+  expect(first.rows.slice(0, 2).map((row) => [row.employee_id, row.education_date, row.items.map((item) => item.id)])).toEqual([
+    ["employee-00", "2026-09-28", ["2026-09-28"]], ["employee-00", "2026-09-29", ["2026-09-29"]],
+  ]);
+  const second = await loadEducationDays(new URLSearchParams("from=2026-09-01&to=2026-09-30&page=2"), supabase as never);
+  expect(second.total).toBe(51);
+  expect(second.rows.map((row) => [row.employee_id, row.education_date])).toEqual([
+    ["employee-50", "2026-09-28"], ["employee-50", "2026-09-29"],
+  ]);
+  expect(completionEmployeeIds.map((ids) => ids.length)).toEqual([50, 1]);
+  expect(completionEmployeeIds[1]).toEqual(["employee-50"]);
 });

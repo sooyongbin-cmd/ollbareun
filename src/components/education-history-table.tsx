@@ -19,6 +19,10 @@ const subscribe = (callback: () => void) => {
 const snapshot = () => window.location.search;
 const emptySnapshot = () => "";
 
+type EducationEmployeeRow = Pick<EducationDayRow, "employee_id" | "employee_name"> & {
+  items: (EducationDayRow["items"][number] & Pick<EducationDayRow, "education_date">)[];
+};
+
 function oneMonthBefore(date: string) {
   const [year, month, day] = date.split("-").map(Number);
   const lastDay = new Date(Date.UTC(year, month - 1, 0)).getUTCDate();
@@ -68,6 +72,23 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
   const [employeeNamesError, setEmployeeNamesError] = useState("");
   const [reload, setReload] = useState(0);
   const query = useMemo(() => new URLSearchParams({ ...active, view: detail ? "history" : "days", page: String(page) }).toString(), [active, detail, page]);
+  const employeeRows = useMemo(() => {
+    const employees = new Map<string, EducationEmployeeRow>();
+    for (const day of days) {
+      const employee = employees.get(day.employee_id) ?? { employee_id: day.employee_id, employee_name: day.employee_name, items: [] };
+      employee.items.push(...day.items.map((item) => ({ ...item, education_date: day.education_date })));
+      employees.set(day.employee_id, employee);
+    }
+    const priority = { semiannual: 0, quarterly: 1, monthly: 2, daily: 3 } as const;
+    for (const employee of employees.values()) {
+      employee.items.sort((left, right) => priority[left.education_type] - priority[right.education_type]
+        || (left.education_date ?? "").localeCompare(right.education_date ?? "")
+        || left.resource_title.localeCompare(right.resource_title, "ko-KR")
+        || left.id.localeCompare(right.id));
+    }
+    return [...employees.values()].sort((left, right) => left.employee_name.localeCompare(right.employee_name, "ko-KR")
+      || left.employee_id.localeCompare(right.employee_id));
+  }, [days]);
   const selectedCompletion = loadedQuery === query && records.length === 1 && total === 1 ? records[0] : null;
   const isCompleted = completionOverride ?? selectedCompletion?.is_completed ?? false;
   const completedAt = isCompleted
@@ -270,8 +291,8 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
       setNotice(cause instanceof Error ? cause.message : "알림 전송 실패");
     } finally { setSending(false); }
   }
-  const itemCells = (day: EducationDayRow, render: (item: EducationDayRow["items"][number]) => ReactNode) =>
-    day.items.map((item) => <div className="py-1" key={item.id}>{render(item)}</div>);
+  const itemCells = (employee: EducationEmployeeRow, render: (item: EducationEmployeeRow["items"][number]) => ReactNode) =>
+    employee.items.map((item) => <div className="py-1" key={item.id}>{render(item)}</div>);
   if (employeeDetail) {
     const unavailable = sending || loading || !!error || !selectedCompletion;
     return <section className="space-y-6">
@@ -356,7 +377,7 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
     />
     {notice && <p role="status" className="text-sm">{notice}</p>}
     {error ? <p role="alert" className="text-destructive">{error}</p> : loading ? <p role="status">교육이수 목록을 불러오는 중입니다.</p> : <>
-      <p className="text-right text-sm text-muted-foreground">조회 결과 {total}건</p>
+      <p className="text-right text-sm text-muted-foreground">조회 결과 {total}{detail ? "건" : "명"}</p>
       <div className="overflow-x-auto rounded-lg border border-border">
         <Table><TableHeader><TableRow>
           {(detail ? ["근무자", "날짜", "안전교육", "교육구분", "이수여부", "완료일시"] : ["출근자", "날짜", "안전교육", "구분", "이수여부"]).map((heading, index) => <TableHead key={index}>{heading}</TableHead>)}
@@ -366,12 +387,12 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
             <TableCell data-label="안전교육">{record.resource_title}</TableCell><TableCell data-label="교육구분">{educationTypeLabels[record.education_type]}</TableCell>
             <TableCell data-label="이수여부">{record.is_completed ? "이수" : "미이수"}</TableCell>
             <TableCell data-label="완료일시">{record.completed_at ? new Date(record.completed_at).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }) : "-"}</TableCell>
-          </TableRow>) : days.map((day) => <TableRow key={`${day.employee_id}:${day.education_date}`}>
-            <TableCell data-label="출근자">{day.employee_name}</TableCell>
-            <TableCell data-label="날짜">{itemCells(day, (item) => <Link className="text-primary hover:underline" href={`/manager/safety/completions/${encodeURIComponent(day.employee_id)}?${new URLSearchParams({ date: day.education_date ?? "", resourceId: item.resource_id, listFrom: active.from, listTo: active.to })}`}>{formatEducationPeriod(item.education_type, day.education_date)}</Link>)}</TableCell>
-            <TableCell data-label="안전교육">{itemCells(day, (item) => item.resource_title)}</TableCell>
-            <TableCell data-label="구분">{itemCells(day, (item) => educationTypeLabels[item.education_type])}</TableCell>
-            <TableCell data-label="이수여부">{itemCells(day, (item) => item.is_completed ? "이수" : "미이수")}</TableCell>
+          </TableRow>) : employeeRows.map((employee) => <TableRow key={employee.employee_id}>
+            <TableCell data-label="출근자" className="align-top"><div className="py-1">{employee.employee_name}</div></TableCell>
+            <TableCell data-label="날짜">{itemCells(employee, (item) => <Link className="text-primary hover:underline" href={`/manager/safety/completions/${encodeURIComponent(employee.employee_id)}?${new URLSearchParams({ date: item.education_date ?? "", resourceId: item.resource_id, listFrom: active.from, listTo: active.to })}`}>{formatEducationPeriod(item.education_type, item.education_date)}</Link>)}</TableCell>
+            <TableCell data-label="안전교육">{itemCells(employee, (item) => item.resource_title)}</TableCell>
+            <TableCell data-label="구분">{itemCells(employee, (item) => educationTypeLabels[item.education_type])}</TableCell>
+            <TableCell data-label="이수여부">{itemCells(employee, (item) => item.is_completed ? "이수" : "미이수")}</TableCell>
           </TableRow>)}
           {(detail ? !records.length : !days.length) && <TableRow><TableCell colSpan={detail ? 6 : 5} className="p-8 text-center">{detail ? "조회 결과에 해당하는 교육이수 기록이 없습니다." : "선택한 출근기간에 출근 기록이 없습니다."}</TableCell></TableRow>}
         </TableBody></Table>

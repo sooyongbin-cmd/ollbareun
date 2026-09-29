@@ -58,6 +58,7 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [generateConfirmOpen, setGenerateConfirmOpen] = useState(false);
   const [completionOverride, setCompletionOverride] = useState<boolean | null>(null);
   const [completedAtOverride, setCompletedAtOverride] = useState<string | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -215,6 +216,7 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
       setNotice("출근기간의 시작일과 종료일을 확인하세요.");
       return;
     }
+    setGenerateConfirmOpen(false);
     setGenerating(true);
     setNotice("출근기간의 안전교육이수자료를 생성 중입니다.");
     let processedCount = 0;
@@ -331,7 +333,7 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
           {resources.map((resource) => <NativeSelectOption key={resource.id} value={resource.id}>{resource.title}</NativeSelectOption>)}
         </NativeSelect></label>}
         {!detail && <div className="ml-auto flex min-h-9 flex-wrap items-center justify-end gap-2">
-          <Button type="button" size="sm" disabled={generating || sending || loading || !active.from || !active.to || active.from > active.to} onClick={() => void generateCompletions()}>{generating ? "생성 중…" : "자료생성"}</Button>
+          <Button type="button" size="sm" disabled={generating || sending || loading || !active.from || !active.to || active.from > active.to} onClick={() => setGenerateConfirmOpen(true)}>{generating ? "생성 중…" : "자료생성"}</Button>
           <Button type="button" size="sm" variant="outline" disabled={sending || loading} onClick={() => void sendReminders()}>{sending ? "전송 중…" : "미이수 알림 전송"}</Button>
         </div>}
       </fieldset>
@@ -342,6 +344,16 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
       {detail && (active.resourceId || active.employeeId) && <p className="mt-3 text-sm text-muted-foreground">선택한 교재 또는 직원의 이력을 조회 중입니다. ‘전체 이력’으로 조건을 해제할 수 있습니다.</p>}
       {employeeNamesError && <p role="alert" className="mt-3 text-sm text-destructive">{employeeNamesError} 이름을 직접 입력하여 조회할 수 있습니다.</p>}
     </form>
+    <ConfirmModal
+      isOpen={generateConfirmOpen}
+      onClose={() => setGenerateConfirmOpen(false)}
+      onConfirm={() => void generateCompletions()}
+      title={`출근기간(${active.from}~${active.to})에 출근한 근무자를 대상으로 생성되지 않은 교육이수여부 자료를 생성하시겠습니까?`}
+      confirmLabel="네"
+      cancelLabel="아니오"
+      loading={generating}
+      loadingLabel="교육이수 자료를 생성 중입니다..."
+    />
     {notice && <p role="status" className="text-sm">{notice}</p>}
     {error ? <p role="alert" className="text-destructive">{error}</p> : loading ? <p role="status">교육이수 목록을 불러오는 중입니다.</p> : <>
       <p className="text-right text-sm text-muted-foreground">조회 결과 {total}건</p>

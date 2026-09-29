@@ -185,7 +185,7 @@ export function buildAttendanceReport(input: {
 
   return input.attendance
     .filter((record) => (
-      (record.work_date === input.workDate || toKstDateTime(record.outtime)?.date === input.workDate) &&
+      (record.work_date === input.workDate || toKstDateTime(record.outtime ?? null)?.date === input.workDate) &&
       employeeIds.has(record.employee_id)
     ))
     .sort((left, right) => left.work_date.localeCompare(right.work_date))

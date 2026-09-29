@@ -40,6 +40,7 @@ export default function AttendanceReportPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const searchRequestRef = useRef(0);
+  const today = currentDate();
 
   useEffect(() => {
     let ignore = false;
@@ -216,16 +217,48 @@ export default function AttendanceReportPage() {
                       </TableCell> : null}
                       <TableCell data-label="근무형태">{row.workStyle}</TableCell>
                       <TableCell data-label="근무지">{row.worksiteName ?? "-"}</TableCell>
-                      <TableCell data-label="출근일">{row.workDate}</TableCell>
+                      <TableCell
+                        data-label="출근일"
+                        className={workDate && row.workDate !== workDate ? "text-yellow-700 dark:text-yellow-300" : undefined}
+                      >
+                        {row.workDate}
+                      </TableCell>
                       <TableCell data-label="출근예정">{row.scheduledClockIn}</TableCell>
-                      <TableCell data-label="퇴근예정">{row.scheduledClockOut}</TableCell>
+                      <TableCell
+                        data-label="퇴근예정"
+                        className={row.scheduledClockOut !== "-" && row.scheduledClockOut.slice(0, 10) !== today
+                          ? "text-yellow-700 dark:text-yellow-300"
+                          : undefined}
+                      >
+                        {row.scheduledClockOut}
+                      </TableCell>
                       <TableCell data-label="출근일시">{row.clockInDateTime}</TableCell>
                       <TableCell data-label="퇴근일시">{row.clockOutDateTime ?? "-"}</TableCell>
                       <TableCell data-label="근무시간">{row.workDuration}</TableCell>
-                      <TableCell data-label="출근">
+                      <TableCell
+                        data-label="출근"
+                        className={row.status === "지각"
+                          ? "bg-yellow-100 text-yellow-900 dark:bg-yellow-500/20 dark:text-yellow-200"
+                          : row.status === "결근"
+                            ? "bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-200"
+                            : row.status === "출근"
+                              ? "text-green-700 dark:text-green-300"
+                              : undefined}
+                      >
                         {row.status}
                       </TableCell>
-                      <TableCell data-label="퇴근">{row.outtimeLabel}</TableCell>
+                      <TableCell
+                        data-label="퇴근"
+                        className={row.outtimeLabel === "조퇴"
+                          ? "bg-yellow-100 text-yellow-900 dark:bg-yellow-500/20 dark:text-yellow-200"
+                          : row.outtimeLabel === "미퇴근"
+                            ? "bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-200"
+                            : row.outtimeLabel === "퇴근"
+                              ? "text-green-700 dark:text-green-300"
+                              : undefined}
+                      >
+                        {row.outtimeLabel}
+                      </TableCell>
                     </TableRow>
                   ))
                 )}

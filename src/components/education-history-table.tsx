@@ -57,6 +57,7 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [completionOverride, setCompletionOverride] = useState<boolean | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [notice, setNotice] = useState("");
@@ -193,6 +194,41 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
       setSending(false);
     }
   }
+  async function generateCompletions() {
+    if (generating || sending || loading) return;
+    const { from, to } = active;
+    if (!from || !to || from > to) {
+      setNotice("출근기간의 시작일과 종료일을 확인하세요.");
+      return;
+    }
+    setGenerating(true);
+    setNotice("출근기간의 안전교육이수자료를 생성 중입니다.");
+    let processedCount = 0;
+    try {
+      let nextPage = 1;
+      for (;;) {
+        const response = await fetch("/api/manager/education/completions/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ from, to, page: nextPage }),
+        });
+        const result = await response.json();
+        processedCount += result.processedCount ?? 0;
+        if (!response.ok) throw new Error(result.error ?? "안전교육이수자료 생성에 실패했습니다.");
+        setNotice(`출근 기록 ${processedCount}건 처리 중입니다.`);
+        if (!result.hasMore) break;
+        nextPage = result.nextPage;
+      }
+      setNotice(processedCount
+        ? `출근 기록 ${processedCount}건의 누락된 안전교육이수자료 생성을 완료했습니다.`
+        : "선택한 출근기간에 출근 기록이 없습니다.");
+    } catch (cause) {
+      setNotice(`${cause instanceof Error ? cause.message : "안전교육이수자료 생성에 실패했습니다."} 출근 기록 ${processedCount}건 처리 완료. 다시 실행하면 이미 생성된 자료는 건너뜁니다.`);
+    } finally {
+      setGenerating(false);
+      setReload((value) => value + 1);
+    }
+  }
   async function sendReminders() {
     setSending(true);
     setNotice("");
@@ -256,7 +292,7 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
     <header><h1 className="text-[1.75rem]">{detail ? "교육이수상세" : "교육이수관리"}</h1>
       <p className="mt-2 text-sm text-muted-foreground">한국시간 날짜별 교육 이력을 조회합니다. 지난 날짜의 미이수는 이후 이수하더라도 유지됩니다.</p></header>
     <form onSubmit={detail ? submit : (event) => event.preventDefault()} aria-label="교육이수 검색" className="rounded-xl border border-border/50 bg-muted/40 p-6">
-      <div className={detail ? "grid items-end gap-4 sm:grid-cols-2 lg:grid-cols-4" : "flex flex-wrap items-end gap-4"}>
+      <fieldset disabled={generating} className={detail ? "grid min-w-0 items-end gap-4 sm:grid-cols-2 lg:grid-cols-4" : "flex min-w-0 flex-wrap items-end gap-4"}>
         <label className={detail ? "space-y-2 text-sm" : "flex min-w-0 flex-[1_1_10rem] flex-col gap-2 text-sm"}>{detail ? "직원 이름" : "이름"}<Input value={filters.name} list={detail ? undefined : "education-employee-name-options"} placeholder={detail ? undefined : "이름을 입력하세요."} onChange={(e) => update("name", e.target.value)} />
           {!detail && <datalist id="education-employee-name-options">{employeeNames.map((name) => <option key={name} value={name} />)}</datalist>}
         </label>
@@ -280,10 +316,11 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
           {filters.resourceId && !resources.some((resource) => resource.id === filters.resourceId) && <NativeSelectOption value={filters.resourceId}>선택한 교재</NativeSelectOption>}
           {resources.map((resource) => <NativeSelectOption key={resource.id} value={resource.id}>{resource.title}</NativeSelectOption>)}
         </NativeSelect></label>}
-        {!detail && <div className="ml-auto flex h-9 shrink-0 items-center justify-end">
+        {!detail && <div className="ml-auto flex min-h-9 flex-wrap items-center justify-end gap-2">
+          <Button type="button" size="sm" disabled={generating || sending || loading || !active.from || !active.to || active.from > active.to} onClick={() => void generateCompletions()}>{generating ? "생성 중…" : "자료생성"}</Button>
           <Button type="button" size="sm" variant="outline" disabled={sending || loading} onClick={() => void sendReminders()}>{sending ? "전송 중…" : "미이수 알림 전송"}</Button>
         </div>}
-      </div>
+      </fieldset>
       {detail && <div className="mt-4 flex flex-wrap gap-3">
         <Button type="submit">조회</Button>
         <Button variant="outline" type="button" onClick={() => { const all = { ...defaults, name: "", from: "", to: "", educationType: "", resourceId: "", employeeId: "" }; setOverride(all); setApplied(all); setPage(1); }}>전체 이력</Button>

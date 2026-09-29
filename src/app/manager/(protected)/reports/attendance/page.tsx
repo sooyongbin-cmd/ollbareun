@@ -40,7 +40,6 @@ export default function AttendanceReportPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const searchRequestRef = useRef(0);
-  const today = currentDate();
 
   useEffect(() => {
     let ignore = false;
@@ -226,7 +225,7 @@ export default function AttendanceReportPage() {
                       <TableCell data-label="출근예정">{row.scheduledClockIn}</TableCell>
                       <TableCell
                         data-label="퇴근예정"
-                        className={row.scheduledClockOut !== "-" && row.scheduledClockOut.slice(0, 10) !== today
+                        className={workDate && row.scheduledClockOut !== "-" && row.scheduledClockOut.slice(0, 10) !== workDate
                           ? "text-yellow-700 dark:text-yellow-300"
                           : undefined}
                       >

@@ -68,7 +68,15 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
   const query = useMemo(() => new URLSearchParams({ ...active, view: detail ? "history" : "days", page: String(page) }).toString(), [active, detail, page]);
   const selectedCompletion = loadedQuery === query && records.length === 1 && total === 1 ? records[0] : null;
   const isCompleted = completionOverride ?? selectedCompletion?.is_completed ?? false;
-  const listHref = `/manager/safety/completions${active.from ? `?${new URLSearchParams({ from: active.from, to: active.from })}` : ""}`;
+  const listHref = useMemo(() => {
+    const params = new URLSearchParams(search);
+    // Keep the list period separate from the single date used to load this record.
+    if (params.has("listFrom") || params.has("listTo")) {
+      const period = new URLSearchParams({ from: params.get("listFrom") ?? "", to: params.get("listTo") ?? "" });
+      return `/manager/safety/completions?${period}`;
+    }
+    return `/manager/safety/completions${active.from ? `?${new URLSearchParams({ from: active.from, to: active.from })}` : ""}`;
+  }, [search, active.from]);
 
   useEffect(() => {
     if (detail) return;
@@ -342,7 +350,7 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
             <TableCell data-label="완료일시">{record.completed_at ? new Date(record.completed_at).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }) : "-"}</TableCell>
           </TableRow>) : days.map((day) => <TableRow key={`${day.employee_id}:${day.education_date}`}>
             <TableCell data-label="출근자">{day.employee_name}</TableCell>
-            <TableCell data-label="날짜">{itemCells(day, (item) => <Link className="text-primary hover:underline" href={`/manager/safety/completions/${encodeURIComponent(day.employee_id)}?${new URLSearchParams({ date: day.education_date ?? "", resourceId: item.resource_id })}`}>{formatEducationPeriod(item.education_type, day.education_date)}</Link>)}</TableCell>
+            <TableCell data-label="날짜">{itemCells(day, (item) => <Link className="text-primary hover:underline" href={`/manager/safety/completions/${encodeURIComponent(day.employee_id)}?${new URLSearchParams({ date: day.education_date ?? "", resourceId: item.resource_id, listFrom: active.from, listTo: active.to })}`}>{formatEducationPeriod(item.education_type, day.education_date)}</Link>)}</TableCell>
             <TableCell data-label="안전교육">{itemCells(day, (item) => item.resource_title)}</TableCell>
             <TableCell data-label="구분">{itemCells(day, (item) => educationTypeLabels[item.education_type])}</TableCell>
             <TableCell data-label="이수여부">{itemCells(day, (item) => item.is_completed ? "이수" : "미이수")}</TableCell>

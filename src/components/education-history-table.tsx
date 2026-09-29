@@ -215,15 +215,22 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
     <header><h1 className="text-[1.75rem]">{detail ? "교육이수상세" : "교육이수관리"}</h1>
       <p className="mt-2 text-sm text-muted-foreground">{employeeDetail ? "선택한 직원의 날짜별 안전교육 이력을 조회합니다." : "한국시간 날짜별 교육 이력을 조회합니다. 지난 날짜의 미이수는 이후 이수하더라도 유지됩니다."}</p></header>
     <form onSubmit={detail && !employeeDetail ? submit : (event) => event.preventDefault()} aria-label="교육이수 검색" className="rounded-xl border border-border/50 bg-muted/40 p-6">
-      <div className="grid items-end gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <label className="space-y-2 text-sm">{detail ? "직원 이름" : "이름"}<Input value={filters.name} disabled={employeeDetail} list={detail ? undefined : "education-employee-name-options"} placeholder={detail ? undefined : "이름을 입력하세요."} onChange={(e) => update("name", e.target.value)} />
+      <div className={detail ? "grid items-end gap-4 sm:grid-cols-2 lg:grid-cols-4" : "flex flex-wrap items-end gap-4"}>
+        <label className={detail ? "space-y-2 text-sm" : "flex min-w-0 flex-[1_1_10rem] flex-col gap-2 text-sm"}>{detail ? "직원 이름" : "이름"}<Input value={filters.name} disabled={employeeDetail} list={detail ? undefined : "education-employee-name-options"} placeholder={detail ? undefined : "이름을 입력하세요."} onChange={(e) => update("name", e.target.value)} />
           {!detail && <datalist id="education-employee-name-options">{employeeNames.map((name) => <option key={name} value={name} />)}</datalist>}
         </label>
-        {employeeDetail ? <label className="space-y-2 text-sm">날짜<Input type="date" value={filters.from} onChange={(e) => update("from", e.target.value)} /></label> : !detail ? <fieldset className="space-y-2 text-sm"><legend>출근기간</legend><div className="flex items-center gap-2"><Input aria-label="출근 시작일" type="date" value={filters.from} onChange={(e) => update("from", e.target.value)} /><span>~</span><Input aria-label="출근 종료일" type="date" value={filters.to} onChange={(e) => update("to", e.target.value)} /></div></fieldset> : <>
+        {employeeDetail ? <label className="space-y-2 text-sm">날짜<Input type="date" value={filters.from} onChange={(e) => update("from", e.target.value)} /></label> : !detail ? <fieldset className="min-w-0 flex-[2_1_21rem] text-sm">
+          <legend className="mb-2">출근기간</legend>
+          <div className="grid grid-cols-1 items-center gap-2 min-[480px]:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+            <Input aria-label="출근 시작일" type="date" value={filters.from} onChange={(e) => update("from", e.target.value)} />
+            <span className="hidden min-[480px]:inline" aria-hidden="true">~</span>
+            <Input aria-label="출근 종료일" type="date" value={filters.to} onChange={(e) => update("to", e.target.value)} />
+          </div>
+        </fieldset> : <>
           <label className="space-y-2 text-sm">시작일<Input type="date" value={filters.from} onChange={(e) => update("from", e.target.value)} /></label>
           <label className="space-y-2 text-sm">종료일<Input type="date" value={filters.to} onChange={(e) => update("to", e.target.value)} /></label>
         </>}
-        {!employeeDetail && <label className="space-y-2 text-sm">교육구분<NativeSelect value={filters.educationType} onChange={(e) => update("educationType", e.target.value)}>
+        {!employeeDetail && <label className={detail ? "space-y-2 text-sm" : "flex min-w-0 flex-[1_1_7rem] flex-col gap-2 text-sm"}>교육구분<NativeSelect value={filters.educationType} onChange={(e) => update("educationType", e.target.value)}>
           <NativeSelectOption value="">전체</NativeSelectOption>
           {educationTypes.map((type) => <NativeSelectOption key={type} value={type}>{educationTypeLabels[type]}</NativeSelectOption>)}
         </NativeSelect></label>}
@@ -234,7 +241,9 @@ export default function EducationHistoryTable({ detail = false, employeeId, empl
         </NativeSelect></label>}
         {employeeDetail && <Button type="button" disabled={sending || loading || !employeeId || !active.from} onClick={() => setConfirmOpen(true)}>교육이수처리</Button>}
         {employeeDetail && <Button type="button" variant="destructive" disabled={sending || loading || !active.resourceId || records.length !== 1} onClick={() => setDeleteConfirmOpen(true)}>삭제</Button>}
-        {!detail && <Button type="button" variant="outline" disabled={sending || loading} onClick={() => void sendReminders()}>{sending ? "전송 중…" : "미이수 알림 전송"}</Button>}
+        {!detail && <div className="ml-auto flex h-9 shrink-0 items-center justify-end">
+          <Button type="button" size="sm" variant="outline" disabled={sending || loading} onClick={() => void sendReminders()}>{sending ? "전송 중…" : "미이수 알림 전송"}</Button>
+        </div>}
       </div>
       {detail && !employeeDetail && <div className="mt-4 flex flex-wrap gap-3">
         {detail && !employeeDetail && <Button type="submit">조회</Button>}

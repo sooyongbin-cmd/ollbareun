@@ -16,18 +16,24 @@ const subscribe = (callback: () => void) => {
 const snapshot = () => window.location.search;
 const emptySnapshot = () => "";
 
+function oneMonthBefore(date: string) {
+  const [year, month, day] = date.split("-").map(Number);
+  const lastDay = new Date(Date.UTC(year, month - 1, 0)).getUTCDate();
+  return new Date(Date.UTC(year, month - 2, Math.min(day, lastDay))).toISOString().slice(0, 10);
+}
+
 export default function EducationHistoryTable({ detail = false }: { detail?: boolean }) {
   const search = useSyncExternalStore(subscribe, snapshot, emptySnapshot);
   const defaults = useMemo(() => {
     const p = new URLSearchParams(search);
-    return { name: p.get("name") ?? "", from: p.get("from") ?? (detail ? "" : educationToday()),
+    return { name: p.get("name") ?? "", from: p.get("from") ?? (detail ? "" : oneMonthBefore(educationToday())),
       to: p.get("to") ?? (detail ? "" : educationToday()), educationType: p.get("educationType") ?? "",
       resourceId: p.get("resourceId") ?? "", employeeId: p.get("employeeId") ?? "" };
   }, [search, detail]);
   const [override, setOverride] = useState<typeof defaults | null>(null);
   const filters = override ?? defaults;
   const [applied, setApplied] = useState<typeof defaults | null>(null);
-  const active = applied ?? defaults;
+  const active = detail ? applied ?? defaults : filters;
   const [page, setPage] = useState(1);
   const [days, setDays] = useState<EducationDayRow[]>([]);
   const [records, setRecords] = useState<EducationCompletionRow[]>([]);
@@ -37,8 +43,28 @@ export default function EducationHistoryTable({ detail = false }: { detail?: boo
   const [sending, setSending] = useState(false);
   const [notice, setNotice] = useState("");
   const [resources, setResources] = useState<{ id: string; title: string }[]>([]);
+  const [employeeNames, setEmployeeNames] = useState<string[]>([]);
+  const [employeeNamesError, setEmployeeNamesError] = useState("");
   const [reload, setReload] = useState(0);
   const query = useMemo(() => new URLSearchParams({ ...active, view: detail ? "history" : "days", page: String(page) }).toString(), [active, detail, page]);
+
+  useEffect(() => {
+    if (detail) return;
+    const controller = new AbortController();
+    fetch("/api/bootstrap", { signal: controller.signal }).then(async (response) => {
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error ?? "직원 목록을 불러오지 못했습니다.");
+      if (!controller.signal.aborted) {
+        const names = (result.employees ?? [])
+          .filter((employee: { is_retired?: boolean }) => !employee.is_retired)
+          .map((employee: { name: string }) => employee.name);
+        setEmployeeNames(Array.from(new Set<string>(names)).sort((left, right) => left.localeCompare(right, "ko-KR")));
+      }
+    }).catch((cause) => {
+      if (!controller.signal.aborted) setEmployeeNamesError(cause instanceof Error ? cause.message : "직원 목록을 불러오지 못했습니다.");
+    });
+    return () => controller.abort();
+  }, [detail]);
 
   useEffect(() => {
     if (!detail) return;
@@ -71,9 +97,12 @@ export default function EducationHistoryTable({ detail = false }: { detail?: boo
         if (!controller.signal.aborted) setLoading(false);
       }
     }
-    void load();
-    return () => controller.abort();
-  }, [query, reload]);
+    const timeout = window.setTimeout(() => void load(), detail ? 0 : 300);
+    return () => {
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [query, reload, detail]);
 
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -82,7 +111,12 @@ export default function EducationHistoryTable({ detail = false }: { detail?: boo
     setReload((value) => value + 1);
   }
   function update(key: keyof typeof defaults, value: string) {
-    setOverride({ ...filters, [key]: value });
+    if (filters[key] === value) return;
+    setOverride({ ...filters, [key]: value, ...(!detail && key === "name" ? { employeeId: "" } : {}) });
+    if (!detail) {
+      setPage(1);
+      setLoading(true);
+    }
   }
   async function sendReminders() {
     setSending(true);
@@ -117,9 +151,11 @@ export default function EducationHistoryTable({ detail = false }: { detail?: boo
   return <section className="space-y-6">
     <header><h1 className="text-[1.75rem]">{detail ? "교육이수상세" : "교육이수관리"}</h1>
       <p className="mt-2 text-sm text-muted-foreground">한국시간 날짜별 교육 이력을 조회합니다. 지난 날짜의 미이수는 이후 이수하더라도 유지됩니다.</p></header>
-    <form onSubmit={submit} aria-label="교육이수 검색" className="rounded-xl border border-border/50 bg-muted/40 p-6">
+    <form onSubmit={detail ? submit : (event) => event.preventDefault()} aria-label="교육이수 검색" className="rounded-xl border border-border/50 bg-muted/40 p-6">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <label className="space-y-2 text-sm">직원 이름<Input value={filters.name} onChange={(e) => update("name", e.target.value)} /></label>
+        <label className="space-y-2 text-sm">{detail ? "직원 이름" : "이름"}<Input value={filters.name} list={detail ? undefined : "education-employee-name-options"} placeholder={detail ? undefined : "이름을 입력하세요."} onChange={(e) => update("name", e.target.value)} />
+          {!detail && <datalist id="education-employee-name-options">{employeeNames.map((name) => <option key={name} value={name} />)}</datalist>}
+        </label>
         <label className="space-y-2 text-sm">시작일<Input type="date" value={filters.from} onChange={(e) => update("from", e.target.value)} /></label>
         <label className="space-y-2 text-sm">종료일<Input type="date" value={filters.to} onChange={(e) => update("to", e.target.value)} /></label>
         <label className="space-y-2 text-sm">교육구분<NativeSelect value={filters.educationType} onChange={(e) => update("educationType", e.target.value)}>
@@ -133,11 +169,12 @@ export default function EducationHistoryTable({ detail = false }: { detail?: boo
         </NativeSelect></label>}
       </div>
       <div className="mt-4 flex flex-wrap gap-3">
-        <Button type="submit">조회</Button>
-        <Button variant="outline" type="button" onClick={() => { const all = { ...defaults, name: "", from: "", to: "", educationType: "", resourceId: "", employeeId: "" }; setOverride(all); setApplied(all); setPage(1); }}>전체 이력</Button>
+        {detail && <Button type="submit">조회</Button>}
+        {detail && <Button variant="outline" type="button" onClick={() => { const all = { ...defaults, name: "", from: "", to: "", educationType: "", resourceId: "", employeeId: "" }; setOverride(all); setApplied(all); setPage(1); }}>전체 이력</Button>}
         {!detail && <Button className="sm:ml-auto" variant="outline" type="button" disabled={sending || loading} onClick={() => void sendReminders()}>{sending ? "전송 중…" : "미이수 알림 전송"}</Button>}
       </div>
-      {(active.resourceId || active.employeeId) && <p className="mt-3 text-sm text-muted-foreground">선택한 교재 또는 직원의 이력을 조회 중입니다. ‘전체 이력’으로 조건을 해제할 수 있습니다.</p>}
+      {detail && (active.resourceId || active.employeeId) && <p className="mt-3 text-sm text-muted-foreground">선택한 교재 또는 직원의 이력을 조회 중입니다. ‘전체 이력’으로 조건을 해제할 수 있습니다.</p>}
+      {employeeNamesError && <p role="alert" className="mt-3 text-sm text-destructive">{employeeNamesError} 이름을 직접 입력하여 조회할 수 있습니다.</p>}
     </form>
     {notice && <p role="status" className="text-sm">{notice}</p>}
     {error ? <p role="alert" className="text-destructive">{error}</p> : loading ? <p role="status">교육이수 목록을 불러오는 중입니다.</p> : <>

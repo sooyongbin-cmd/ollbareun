@@ -91,7 +91,7 @@ export default function GuardSafetySection() {
   }, [completions, resources, employeeId]);
 
   return (
-    <section className="mb-6 bg-background rounded-xl p-6 border border-border shadow-sm space-y-4">
+    <section className="mx-5 mb-6 bg-background rounded-xl p-6 border border-border shadow-sm space-y-4">
       <h3 className="text-[0.875rem] font-semibold text-muted-foreground">안전교육 상황</h3>
       
       <div className="flex items-center justify-between">

@@ -22,6 +22,20 @@ type EmployeeResponse = {
   };
 };
 
+type Period = "오전" | "오후";
+type ShiftDay = "당일" | "익일";
+
+const hours = Array.from({ length: 12 }, (_, hour) => String(hour).padStart(2, "0"));
+
+function formatClockTime(period: Period, hour: string) {
+  return `${String(Number(hour) + (period === "오후" ? 12 : 0)).padStart(2, "0")}:00`;
+}
+
+function formatOutTime(day: ShiftDay, period: Period, hour: string) {
+  const dayOffset = day === "익일" ? 24 : 0;
+  return `${String(Number(hour) + (period === "오후" ? 12 : 0) + dayOffset).padStart(2, "0")}:00`;
+}
+
 async function postJson<T>(url: string, body: unknown): Promise<T> {
   const response = await fetch(url, {
     method: "POST",
@@ -43,13 +57,27 @@ export default function EmployeeNewPage() {
   const [role, setRole] = useState("");
   const [loadingRoles, setLoadingRoles] = useState(true);
   const [workStyle, setWorkStyle] = useState("0");
-  const [inTime, setInTime] = useState("08:00");
-  const [outTime, setOutTime] = useState("18:00");
+  const [inPeriod, setInPeriod] = useState<Period>("오전");
+  const [inHour, setInHour] = useState("08");
+  const [outDay, setOutDay] = useState<ShiftDay>("당일");
+  const [outPeriod, setOutPeriod] = useState<Period>("오후");
+  const [outHour, setOutHour] = useState("06");
+  const inTime = formatClockTime(inPeriod, inHour);
+  const outTime = formatOutTime(outDay, outPeriod, outHour);
   const [scheduleRules, setScheduleRules] = useState<ScheduleRule[]>(() => legacyScheduleRules(true));
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
+
+  function changeWorkStyle(nextWorkStyle: string) {
+    setWorkStyle(nextWorkStyle);
+    setInPeriod(nextWorkStyle === "2" ? "오후" : "오전");
+    setInHour(nextWorkStyle === "0" ? "08" : nextWorkStyle === "2" ? "10" : "06");
+    setOutDay(nextWorkStyle === "0" ? "당일" : "익일");
+    setOutPeriod(nextWorkStyle === "0" ? "오후" : "오전");
+    setOutHour("06");
+  }
 
   useEffect(() => {
     let ignore = false;
@@ -166,7 +194,7 @@ export default function EmployeeNewPage() {
             </div>
             <div className="space-y-2">
               <label htmlFor="employee-work-style" className="text-sm font-semibold text-muted-foreground">근무형태</label>
-              <NativeSelect id="employee-work-style" value={workStyle} onChange={(event) => { setWorkStyle(event.target.value); setInTime(event.target.value === "0" ? "08:00" : event.target.value === "2" ? "22:00" : "06:00"); setOutTime(event.target.value === "0" ? "18:00" : "30:00"); }} required>
+              <NativeSelect id="employee-work-style" value={workStyle} onChange={(event) => changeWorkStyle(event.target.value)} required>
                 <NativeSelectOption value="0">일반근무</NativeSelectOption>
                 <NativeSelectOption value="1">격일근무</NativeSelectOption>
                 <NativeSelectOption value="2">야간근무</NativeSelectOption>
@@ -176,14 +204,33 @@ export default function EmployeeNewPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <label htmlFor="employee-in-time" className="text-sm font-semibold text-muted-foreground">출근</label>
-                <Input id="employee-in-time" type="time" value={inTime} onChange={(event) => setInTime(event.target.value)} required />
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-1">
+                  <NativeSelect aria-label="출근 오전/오후" value={inPeriod} onChange={(event) => setInPeriod(event.target.value as Period)}>
+                    <NativeSelectOption value="오전">오전</NativeSelectOption>
+                    <NativeSelectOption value="오후">오후</NativeSelectOption>
+                  </NativeSelect>
+                  <NativeSelect id="employee-in-time" aria-label="출근 시각" value={inHour} onChange={(event) => setInHour(event.target.value)} required>
+                    {hours.map((hour) => <NativeSelectOption key={hour} value={hour}>{hour}시</NativeSelectOption>)}
+                  </NativeSelect>
+                  <output className="min-w-[3.5rem] text-right text-sm tabular-nums" aria-live="polite">{inTime}</output>
+                </div>
               </div>
               <div className="space-y-2">
-                <label htmlFor="employee-out-time" className="text-sm font-semibold text-muted-foreground">퇴근</label>
-                <Input id="employee-out-time" type="text" inputMode="numeric" placeholder={workStyle === "0" ? "18:00" : "30:00"} pattern={workStyle === "0" ? "([01]\\d|2[0-3]):[0-5]\\d" : "([01]\\d|2[0-3]):[0-5]\\d|([2-4]\\d):[0-5]\\d"} value={outTime} onChange={(event) => setOutTime(event.target.value)} required aria-describedby="employee-out-time-help" />
-                <p id="employee-out-time-help" className="text-xs text-muted-foreground">
-                  {workStyle === "0" ? "퇴근 시각을 입력하세요. 예: 18:00" : "출근일 기준 경과 시간으로 입력합니다. 다음 날 오전 6시는 30:00으로 입력하세요."}
-                </p>
+                <label htmlFor="employee-out-day" className="text-sm font-semibold text-muted-foreground">퇴근</label>
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-1">
+                  <NativeSelect id="employee-out-day" aria-label="퇴근일" value={outDay} onChange={(event) => setOutDay(event.target.value as ShiftDay)}>
+                    <NativeSelectOption value="당일">당일</NativeSelectOption>
+                    <NativeSelectOption value="익일" disabled={workStyle === "0"}>익일</NativeSelectOption>
+                  </NativeSelect>
+                  <NativeSelect aria-label="퇴근 오전/오후" value={outPeriod} onChange={(event) => setOutPeriod(event.target.value as Period)}>
+                    <NativeSelectOption value="오전">오전</NativeSelectOption>
+                    <NativeSelectOption value="오후">오후</NativeSelectOption>
+                  </NativeSelect>
+                  <NativeSelect aria-label="퇴근 시각" value={outHour} onChange={(event) => setOutHour(event.target.value)}>
+                    {hours.map((hour) => <NativeSelectOption key={hour} value={hour}>{hour}시</NativeSelectOption>)}
+                  </NativeSelect>
+                  <output className="min-w-[3.5rem] text-right text-sm tabular-nums" aria-live="polite">{outTime}</output>
+                </div>
               </div>
             </div>
           </div>

@@ -19,6 +19,9 @@ export default function GuardMainPage() {
         <Link className="guard-menu-button" href="/guard/main/profile">
           근무 정보
         </Link>
+        <Link className="guard-menu-button" href="/guard/main/leave">
+          휴가 신청
+        </Link>
       </section>
     </div>
   );

@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { useGuardPatrolVisibility } from "./use-guard-patrol-visibility";
+import { useGuardScheduleAvailability } from "./use-guard-schedule-availability";
 
 export default function GuardPatrolLink() {
   const visible = useGuardPatrolVisibility();
+  const { hasWorkSchedule } = useGuardScheduleAvailability();
 
-  return visible ? (
+  return visible && hasWorkSchedule ? (
     <Link className="guard-menu-button" href="/guard/main/work">
       순찰
     </Link>

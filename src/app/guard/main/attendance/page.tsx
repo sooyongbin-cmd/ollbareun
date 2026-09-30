@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { canClockIn, canClockOut, canClockOutAtWorksite, type AttendanceRecord, type Worksite } from "@/lib/phase1";
 import { type GpsInfo } from "@/lib/gps";
 import { getAttendanceStatus } from "../attendance-status";
+import { getGuardWorkAction, selectGuardWorkSchedule, type GuardWorkSchedule } from "@/lib/guard-work-schedule";
 import { subscribeToGuardSessionChange } from "../../guard-session-storage";
 import AttendanceMapSection from "./attendance-map-section";
 import GuardLocationPermissionPrompt from "../guard-location-permission-prompt";
@@ -53,6 +54,7 @@ type GuardSession = {
   assignment: AssignmentRow | null;
   worksite: WorksiteRow | null;
   attendance: AttendanceRow | null;
+  scheduledAttendances?: GuardWorkSchedule[] | null;
 };
 
 type AttendanceViewState = "pending" | "ready" | "outside" | "working" | "complete" | "unavailable";
@@ -247,9 +249,12 @@ export default function GuardAttendancePage() {
 
   useEffect(() => subscribeToGuardSessionChange(() => setGuard(readGuardSessionFromStorage<GuardSession>())), []);
 
+  const hasScheduleState = Array.isArray(guard?.scheduledAttendances);
+  const selectedSchedule = selectGuardWorkSchedule(guard?.scheduledAttendances ?? []);
+  const selectedAction = getGuardWorkAction(selectedSchedule);
   const attendanceStatus = getAttendanceStatus(guard?.attendance);
-  const isClockedIn = attendanceStatus.isOpen;
-  const isClockedOut = attendanceStatus.clockedOutToday;
+  const isClockedIn = hasScheduleState ? selectedAction === "clock-out" : attendanceStatus.isOpen;
+  const isClockedOut = hasScheduleState ? selectedAction === "complete" : attendanceStatus.clockedOutToday;
   const hasLocation = Boolean(latitude.trim() && longitude.trim());
   const clockInDecision =
     guard?.isDayOff
@@ -294,6 +299,11 @@ export default function GuardAttendancePage() {
     locationError: error,
     activeDecisionAllowed: activeDecision.allowed,
   });
+  if (hasScheduleState && selectedAction === "none") {
+    statusCopy.state = "unavailable";
+    statusCopy.title = "오늘 근무가 없습니다.";
+    statusCopy.description = "예정된 근무가 없어 출퇴근할 수 없습니다.";
+  }
   const actionDisabled = isProcessing || statusCopy.state === "unavailable" || statusCopy.state === "pending" || statusCopy.isOutside;
 
   useEffect(() => {
@@ -380,19 +390,55 @@ export default function GuardAttendancePage() {
         if (!decision.allowed) throw new Error(decision.reason);
       }
 
+      const selectedWorkDate = selectGuardWorkSchedule(activeGuard.scheduledAttendances ?? [])?.work_date
+        ?? activeGuard.attendance?.work_date;
       const result = await postJson<{ attendance: AttendanceRow }>(
         action === "출근" ? "/api/attendance/clock-in" : "/api/attendance/clock-out",
         {
           employeeId: activeGuard.employee.id,
           ...(action === "출근" ? { worksiteId: activeGuard.worksite.id } : {}),
+          ...(selectedWorkDate ? { workDate: selectedWorkDate } : {}),
           latitude,
           longitude,
         },
       );
 
-      const nextGuard = { ...activeGuard, attendance: result.attendance };
-      setGuard(nextGuard);
-      writeStoredGuardSession(nextGuard);
+      const scheduleFromAttendance: GuardWorkSchedule = {
+        id: result.attendance.id,
+        employee_id: result.attendance.employee_id,
+        worksite_id: result.attendance.worksite_id,
+        work_date: result.attendance.work_date,
+        intime: result.attendance.intime,
+        outtime: result.attendance.outtime,
+        work_intime: result.attendance.work_intime,
+        work_outtime: result.attendance.work_outtime,
+      };
+      const scheduledAttendances = Array.isArray(activeGuard.scheduledAttendances)
+        ? [
+            ...activeGuard.scheduledAttendances.filter((schedule) => schedule.id !== result.attendance.id),
+            scheduleFromAttendance,
+          ].sort((left, right) => left.work_date.localeCompare(right.work_date))
+        : activeGuard.scheduledAttendances;
+      const nextSelectedSchedule = selectGuardWorkSchedule(scheduledAttendances ?? []);
+      const nextGuard = {
+        ...activeGuard,
+        scheduledAttendances,
+        attendance: nextSelectedSchedule ? { ...nextSelectedSchedule } : result.attendance,
+      };
+      let refreshedGuard: GuardSession = nextGuard;
+      try {
+        const sessionResponse = await fetch("/api/guard/session", { cache: "no-store" });
+        if (sessionResponse.ok) {
+          const sessionPayload = await sessionResponse.json() as { session?: Partial<GuardSession> };
+          if (sessionPayload.session) {
+            refreshedGuard = { ...activeGuard, ...sessionPayload.session };
+          }
+        }
+      } catch {
+        // The attendance result already updates the selected work date locally.
+      }
+      setGuard(refreshedGuard);
+      writeStoredGuardSession(refreshedGuard);
       setProcess({
         action,
         status: "success",

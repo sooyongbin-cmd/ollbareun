@@ -39,6 +39,16 @@ const guardSession = {
     radius_meters: 100,
   },
   attendance: null,
+  scheduledAttendances: [{
+    id: "schedule-1",
+    employee_id: "employee-1",
+    worksite_id: "worksite-1",
+    work_date: "2026-05-24",
+    intime: "2026-05-24T00:00:00.000Z",
+    outtime: "2026-05-24T09:00:00.000Z",
+    work_intime: null,
+    work_outtime: null,
+  }],
 };
 
 describe("guard main navigation", () => {
@@ -331,15 +341,40 @@ describe("guard main navigation", () => {
     expect(await screen.findByRole("heading", { name: "위치 권한이 필요합니다" })).toBeInTheDocument();
   });
 
-  it("prominently displays today's worksite on the main page", async () => {
+  it("displays the selected work date, schedule, and worksite on the main page", async () => {
     window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(guardSession));
 
     render(<GuardMainPage />);
 
     expect(screen.getByRole("heading", { name: "오늘 근무" })).toBeInTheDocument();
     expect(screen.getByText("본사")).toBeInTheDocument();
-    expect(screen.getByText("근무시간 미등록")).toBeInTheDocument();
+    expect(screen.getByText("05/24 (일)")).toBeInTheDocument();
+    expect(screen.getByText("9:00 AM - 6:00 PM")).toBeInTheDocument();
     expect(screen.getByText("출근가능")).toHaveAttribute("role", "status");
+  });
+
+  it("shows the no-work message and disables related entry points when there are no matching records", () => {
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify({
+      ...guardSession,
+      scheduledAttendances: [],
+    }));
+
+    render(
+      <GuardMainLayout>
+        <GuardMainPage />
+      </GuardMainLayout>,
+    );
+
+    expect(screen.getByText("오늘 근무가 없습니다.")).toBeInTheDocument();
+    expect(screen.queryByText("9:00 AM - 6:00 PM")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "출근하기" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "특이사항 보고" })).toBeDisabled();
+    expect(screen.getAllByRole("button", { name: "출퇴근" })).toHaveLength(1);
+    expect(screen.getByRole("button", { name: "출퇴근" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "특이사항" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "점검" })).toBeDisabled();
+    expect(screen.getAllByRole("link", { name: "안전교육" })).toHaveLength(2);
+    expect(screen.getByRole("link", { name: "근무 정보" })).toBeInTheDocument();
   });
 
   it("displays attendance status on the main page", async () => {
@@ -354,13 +389,65 @@ describe("guard main navigation", () => {
         work_intime: `${today}T08:00:00+09:00`,
         work_outtime: `${today}T17:00:00+09:00`,
       },
+      scheduledAttendances: [{
+        id: "att-1",
+        employee_id: "employee-1",
+        worksite_id: "worksite-1",
+        work_date: today,
+        intime: `${today}T08:00:00.000Z`,
+        outtime: `${today}T17:00:00.000Z`,
+        work_intime: `${today}T08:00:00+09:00`,
+        work_outtime: `${today}T17:00:00+09:00`,
+      }],
     };
     window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify(sessionWithAttendance));
 
     render(<GuardMainPage />);
 
     expect(await screen.findByText("근무완료")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "금일 근무 완료" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "금일 근무 완료" })).toBeDisabled();
+  });
+
+  it("chooses the button from the selected work date instead of today's other attendance row", () => {
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify({
+      ...guardSession,
+      attendance: {
+        id: "today-record",
+        employee_id: "employee-1",
+        worksite_id: "worksite-1",
+        work_date: "2026-05-26",
+        work_intime: "2026-05-26T08:00:00+09:00",
+        work_outtime: "2026-05-26T17:00:00+09:00",
+      },
+      scheduledAttendances: [
+        {
+          id: "previous-record",
+          employee_id: "employee-1",
+          worksite_id: "worksite-1",
+          work_date: "2026-05-25",
+          intime: "2026-05-25T22:00:00+09:00",
+          outtime: "2026-05-26T06:00:00+09:00",
+          work_intime: "2026-05-25T22:01:00+09:00",
+          work_outtime: null,
+        },
+        {
+          id: "today-record",
+          employee_id: "employee-1",
+          worksite_id: "worksite-1",
+          work_date: "2026-05-26",
+          intime: "2026-05-26T08:00:00+09:00",
+          outtime: "2026-05-26T17:00:00+09:00",
+          work_intime: "2026-05-26T08:00:00+09:00",
+          work_outtime: "2026-05-26T17:00:00+09:00",
+        },
+      ],
+    }));
+
+    render(<GuardMainPage />);
+
+    expect(screen.getByText("05/25 (월)")).toBeInTheDocument();
+    expect(screen.getByText("퇴근가능")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "퇴근하기" })).toBeEnabled();
   });
 
   it("shows the attendance workflow on the attendance page", async () => {

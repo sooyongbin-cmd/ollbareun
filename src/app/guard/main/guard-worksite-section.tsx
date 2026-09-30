@@ -1,17 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import { readStoredGuardSessionSnapshot, subscribeToGuardSessionChange } from "../guard-session-storage";
 
-import { getAttendanceStatus, type AttendanceTimes } from "./attendance-status";
+import type { AttendanceTimes } from "./attendance-status";
 import GuardLocationGateLink from "./guard-location-gate-link";
-
-type ScheduledShift = {
-  id?: unknown;
-  work_date?: unknown;
-  intime?: unknown;
-  outtime?: unknown;
-};
+import {
+  formatGuardWorkDate,
+  formatGuardWorkTime,
+  getGuardWorkAction,
+  selectGuardWorkSchedule,
+  type GuardWorkSchedule,
+} from "@/lib/guard-work-schedule";
 
 type GuardSession = {
   attendance?: AttendanceTimes | null;
@@ -28,7 +28,7 @@ type GuardSession = {
     in_time?: unknown;
     out_time?: unknown;
   } | null;
-  scheduledAttendances?: ScheduledShift[] | null;
+  scheduledAttendances?: GuardWorkSchedule[] | null;
 };
 
 function readGuardSessionSnapshot() {
@@ -39,103 +39,12 @@ function subscribeToSessionChange(onStoreChange: () => void) {
   return subscribeToGuardSessionChange(onStoreChange);
 }
 
-function getTodayDate() {
-  return new Intl.DateTimeFormat("en-CA", {
-    day: "2-digit",
-    month: "2-digit",
-    timeZone: "Asia/Seoul",
-    year: "numeric",
-  }).format(new Date());
-}
-
-function formatTodayLabel() {
-  const today = getTodayDate();
-  const weekday = new Intl.DateTimeFormat("ko-KR", {
-    timeZone: "Asia/Seoul",
-    weekday: "short",
-  }).format(new Date());
-  const [, month, day] = today.split("-");
-  return `${month}/${day} (${weekday})`;
-}
-
-function toTimestamp(value: unknown) {
-  if (typeof value !== "string" || !value.trim()) return null;
-  const timestamp = Date.parse(value);
-  return Number.isFinite(timestamp) ? timestamp : null;
-}
-
-function isCurrentShift(shift: ScheduledShift, now: number) {
-  const start = toTimestamp(shift.intime);
-  const end = toTimestamp(shift.outtime);
-  if (start === null || end === null) return false;
-
-  if (end >= start) return now >= start && now <= end;
-  return now >= start || now <= end + 24 * 60 * 60 * 1000;
-}
-
-function getShiftTimestamp(shift: ScheduledShift) {
-  return toTimestamp(shift.intime) ?? toTimestamp(shift.outtime) ?? 0;
-}
-
-function selectScheduledShift(shifts: ScheduledShift[], now: number) {
-  const availableShifts = shifts.filter((shift) => toTimestamp(shift.intime) !== null || toTimestamp(shift.outtime) !== null);
-  return availableShifts.find((shift) => isCurrentShift(shift, now))
-    ?? [...availableShifts].sort((left, right) => getShiftTimestamp(right) - getShiftTimestamp(left))[0]
-    ?? null;
-}
-
-function formatScheduledTime(value: unknown) {
-  const timestamp = toTimestamp(value);
-  if (timestamp === null) return null;
-
-  return new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    hour12: true,
-    minute: "2-digit",
-    timeZone: "Asia/Seoul",
-  }).format(new Date(timestamp));
-}
-
-function formatAssignmentTime(value: unknown) {
-  if (typeof value === "number" && Number.isInteger(value) && value >= 0) {
-    return `${String(Math.floor(value / 60)).padStart(2, "0")}:${String(value % 60).padStart(2, "0")}`;
-  }
-  if (typeof value !== "string" || !/^\d{2}:\d{2}/.test(value)) return null;
-  const [hours, minutes] = value.split(":").map(Number);
-  if (!Number.isInteger(hours) || !Number.isInteger(minutes)) return null;
-
-  const period = hours >= 12 ? "PM" : "AM";
-  const hour = hours % 12 || 12;
-  return `${hour}:${String(minutes).padStart(2, "0")} ${period}`;
-}
-
-function getScheduleLabel(session: GuardSession | null, now: number) {
-  const scheduledShift = selectScheduledShift(session?.scheduledAttendances ?? [], now);
-  const scheduledStart = formatScheduledTime(scheduledShift?.intime);
-  const scheduledEnd = formatScheduledTime(scheduledShift?.outtime);
-  if (scheduledStart && scheduledEnd) return `${scheduledStart} - ${scheduledEnd}`;
-
-  const assignmentStart = formatAssignmentTime(session?.assignment?.in_time);
-  const assignmentEnd = formatAssignmentTime(session?.assignment?.out_time);
-  if (assignmentStart && assignmentEnd) return `${assignmentStart} - ${assignmentEnd}`;
-
-  return "근무시간 미등록";
-}
-
 export default function GuardWorksiteSection() {
   const storedSession = useSyncExternalStore(
     subscribeToSessionChange,
     readGuardSessionSnapshot,
     () => null,
   );
-  const todayLabel = useMemo(() => formatTodayLabel(), []);
-  const [now, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(Date.now()), 60_000);
-    return () => window.clearInterval(timer);
-  }, []);
-
   const session = useMemo(() => {
     if (!storedSession) return null;
     try {
@@ -145,9 +54,23 @@ export default function GuardWorksiteSection() {
     }
   }, [storedSession]);
 
-  const attendanceStatus = getAttendanceStatus(session?.attendance);
+  const selectedShift = selectGuardWorkSchedule(session?.scheduledAttendances ?? []);
+  const workAction = getGuardWorkAction(selectedShift);
   const hasAssignedWorksite = Boolean(session?.worksite?.id && session?.worksite?.name);
   const worksiteName = typeof session?.worksite?.name === "string" ? session.worksite.name : null;
+  const scheduledStart = formatGuardWorkTime(selectedShift?.intime ?? null);
+  const scheduledEnd = formatGuardWorkTime(selectedShift?.outtime ?? null);
+  const timeLabel = scheduledStart && scheduledEnd ? `${scheduledStart} - ${scheduledEnd}` : "근무시간 미등록";
+  const statusLabel = workAction === "clock-out"
+    ? "퇴근가능"
+    : workAction === "complete"
+      ? "근무완료"
+      : "출근가능";
+  const buttonLabel = workAction === "clock-out"
+    ? "퇴근하기"
+    : workAction === "complete"
+      ? "금일 근무 완료"
+      : "출근하기";
 
   return (
     <section className="guard-work-card">
@@ -159,13 +82,15 @@ export default function GuardWorksiteSection() {
 
         <div className="guard-schedule-row">
           <div className="guard-schedule-details">
-            <p className="guard-date-emphasis-text">{todayLabel}</p>
-            <div className="guard-schedule-time-row">
-              <p className="guard-body-text">{getScheduleLabel(session, now)}</p>
-              <span className="guard-attendance-status" role="status">
-                {attendanceStatus.clockedOutToday ? "근무완료" : attendanceStatus.isOpen ? "퇴근가능" : "출근가능"}
-              </span>
-            </div>
+            <p className="guard-date-emphasis-text">
+              {selectedShift ? formatGuardWorkDate(selectedShift.work_date) : "오늘 근무가 없습니다."}
+            </p>
+            {selectedShift ? (
+              <div className="guard-schedule-time-row">
+                <p className="guard-body-text">{timeLabel}</p>
+                <span className="guard-attendance-status" role="status">{statusLabel}</span>
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -173,9 +98,10 @@ export default function GuardWorksiteSection() {
           buttonClassName="guard-general-button"
           href="/guard/main/attendance"
           hasAssignedWorksite={hasAssignedWorksite}
+          disabled={!selectedShift || workAction === "complete"}
           variant="default"
         >
-          {attendanceStatus.clockedOutToday ? "금일 근무 완료" : attendanceStatus.isOpen ? "퇴근하기" : "출근하기"}
+          {buttonLabel}
         </GuardLocationGateLink>
       </div>
     </section>

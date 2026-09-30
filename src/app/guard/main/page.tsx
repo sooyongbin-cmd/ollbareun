@@ -1,9 +1,14 @@
+"use client";
+
 import Link from "next/link";
 
 import GuardWorksiteSection from "./guard-worksite-section";
 import GuardPatrolLink from "./guard-patrol-link";
+import { useGuardScheduleAvailability } from "./use-guard-schedule-availability";
 
 export default function GuardMainPage() {
+  const { hasWorkSchedule } = useGuardScheduleAvailability();
+
   return (
     <div className="guard-main-page">
       <GuardWorksiteSection />
@@ -13,9 +18,15 @@ export default function GuardMainPage() {
           안전교육
         </Link>
         <GuardPatrolLink />
-        <Link className="guard-menu-button" href="/guard/main/special-remarks">
-          특이사항 보고
-        </Link>
+        {hasWorkSchedule ? (
+          <Link className="guard-menu-button" href="/guard/main/special-remarks">
+            특이사항 보고
+          </Link>
+        ) : (
+          <button aria-disabled="true" className="guard-menu-button" disabled type="button">
+            특이사항 보고
+          </button>
+        )}
         <Link className="guard-menu-button" href="/guard/main/profile">
           근무 정보
         </Link>

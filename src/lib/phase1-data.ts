@@ -7,6 +7,7 @@ import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
 import { getAssignmentDayOffCounts, isAssignmentDayOff } from "./assignment-days-off";
 import { loadEmployeeRoles } from "./employee-roles";
+import { selectGuardWorkSchedule } from "./guard-work-schedule";
 
 export type EmployeeRow = {
   id: string;
@@ -51,6 +52,8 @@ export type ScheduledAttendanceRow = {
   work_date: string;
   intime: string | null;
   outtime: string | null;
+  work_intime: string | null;
+  work_outtime: string | null;
 };
 
 export type AssignmentListRow = AssignmentRow & {
@@ -784,43 +787,74 @@ export async function authenticateGuard(input: { name: unknown; phone: unknown }
 
 async function loadGuardSessionByEmployee(employee: EmployeeRow) {
   const supabase = getSupabaseAdmin();
+  const today = todayDate();
   const { data: assignment, error: assignmentError } = await supabase
     .from("work_assignments")
     .select("*")
     .eq("employee_id", employee.id)
-    .lte("start_date", todayDate())
-    .gte("end_date", todayDate())
+    .lte("start_date", today)
+    .gte("end_date", today)
     .maybeSingle();
 
   throwIfError(assignmentError);
-  const isDayOff = assignment ? await isAssignmentDayOff(assignment.id, todayDate()) : false;
 
-  const [worksiteResult, attendance] = await Promise.all([
-    assignment
-      ? supabase.from("worksites").select("*").eq("id", assignment.worksite_id).single()
-      : Promise.resolve({ data: null, error: null }),
-    findGuardSessionAttendance(supabase, employee.id),
-  ]);
+  const dayStart = new Date(`${today}T00:00:00+09:00`);
+  const tomorrowStart = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+  const scheduledAttendanceResult = await supabase
+    .from("work_record")
+    .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime")
+    .eq("employee_id", employee.id)
+    .or(`work_date.eq.${today},and(outtime.gte.${dayStart.toISOString()},outtime.lt.${tomorrowStart.toISOString()})`)
+    .order("work_date", { ascending: true });
 
-  throwIfError(worksiteResult.error);
+  throwIfError(scheduledAttendanceResult.error);
+  const scheduledAttendances = (scheduledAttendanceResult.data ?? []) as ScheduledAttendanceRow[];
+  const selectedSchedule = selectGuardWorkSchedule(scheduledAttendances);
 
-  let scheduledAttendances: ScheduledAttendanceRow[] = [];
-  if (assignment) {
-    const scheduledAttendanceResult = await supabase
-      .from("work_record")
-      .select("id,employee_id,worksite_id,work_date,intime,outtime")
-      .eq("employee_id", assignment.employee_id)
-      .eq("worksite_id", assignment.worksite_id)
-      .eq("work_date", todayDate())
-      .order("intime", { ascending: false });
-
-    throwIfError(scheduledAttendanceResult.error);
-    scheduledAttendances = (scheduledAttendanceResult.data ?? []) as ScheduledAttendanceRow[];
+  let selectedAssignment: AssignmentRow | null = null;
+  if (selectedSchedule) {
+    const selectedDateIsCovered = Boolean(
+      assignment
+      && assignment.worksite_id === selectedSchedule.worksite_id
+      && assignment.start_date <= selectedSchedule.work_date
+      && assignment.end_date >= selectedSchedule.work_date,
+    );
+    if (selectedDateIsCovered) {
+      selectedAssignment = assignment as AssignmentRow;
+    } else {
+      const selectedAssignmentResult = await supabase
+        .from("work_assignments")
+        .select("*")
+        .eq("employee_id", employee.id)
+        .eq("worksite_id", selectedSchedule.worksite_id)
+        .lte("start_date", selectedSchedule.work_date)
+        .gte("end_date", selectedSchedule.work_date)
+        .maybeSingle();
+      throwIfError(selectedAssignmentResult.error);
+      selectedAssignment = selectedAssignmentResult.data as AssignmentRow | null;
+    }
   }
+
+  const sessionAssignment = selectedSchedule ? selectedAssignment ?? assignment as AssignmentRow | null : assignment as AssignmentRow | null;
+  const attendance = selectedSchedule
+    ? await findAttendanceByWorkDate(supabase, employee.id, selectedSchedule.work_date)
+    : null;
+  const isDayOff = selectedSchedule
+    ? selectedAssignment
+      ? await isAssignmentDayOff(selectedAssignment.id, selectedSchedule.work_date)
+      : false
+    : assignment
+      ? await isAssignmentDayOff(assignment.id, today)
+      : false;
+  const selectedWorksiteId = selectedSchedule?.worksite_id ?? assignment?.worksite_id ?? null;
+  const worksiteResult = selectedWorksiteId
+    ? await supabase.from("worksites").select("*").eq("id", selectedWorksiteId).maybeSingle()
+    : { data: null, error: null };
+  throwIfError(worksiteResult.error);
 
   return {
     employee: employee as EmployeeRow,
-    assignment: assignment as AssignmentRow | null,
+    assignment: sessionAssignment,
     worksite: worksiteResult.data as WorksiteRow | null,
     attendance,
     scheduledAttendances,
@@ -843,20 +877,30 @@ async function findLatestOpenAttendance(supabase: SupabaseClient, employeeId: st
   return data as AttendanceRow | null;
 }
 
-async function findTodayAttendance(supabase: SupabaseClient, employeeId: string) {
+async function findOpenAttendanceByWorkDate(supabase: SupabaseClient, employeeId: string, workDate: string) {
   const { data, error } = await supabase
     .from("work_record")
     .select("*")
     .eq("employee_id", employeeId)
-    .eq("work_date", todayDate())
+    .eq("work_date", workDate)
+    .not("work_intime", "is", null)
+    .is("work_outtime", null)
     .maybeSingle();
 
   throwIfError(error);
   return data as AttendanceRow | null;
 }
 
-async function findGuardSessionAttendance(supabase: SupabaseClient, employeeId: string) {
-  return (await findLatestOpenAttendance(supabase, employeeId)) ?? (await findTodayAttendance(supabase, employeeId));
+async function findAttendanceByWorkDate(supabase: SupabaseClient, employeeId: string, workDate: string) {
+  const { data, error } = await supabase
+    .from("work_record")
+    .select("*")
+    .eq("employee_id", employeeId)
+    .eq("work_date", workDate)
+    .maybeSingle();
+
+  throwIfError(error);
+  return data as AttendanceRow | null;
 }
 
 export async function loadGuardSessionByEmployeeId(employeeIdInput: unknown) {
@@ -885,11 +929,15 @@ export async function clockIn(input: {
   worksiteId: unknown;
   latitude: unknown;
   longitude: unknown;
+  workDate?: unknown;
 }) {
   const employee_id = requireString(input.employeeId, "직원");
   const worksite_id = requireString(input.worksiteId, "근무지");
   const latitude = requireNumber(input.latitude, "위도");
   const longitude = requireNumber(input.longitude, "경도");
+  const workDate = typeof input.workDate === "string" && input.workDate.trim()
+    ? requireDate(input.workDate, "근무일")
+    : todayDate();
   // Guard authentication is a legacy name/phone flow without a Supabase Auth
   // session. Use the server client so RLS cannot hide the guard's assignment
   // or attendance record from the attendance API.
@@ -900,16 +948,16 @@ export async function clockIn(input: {
     .select("*")
     .eq("employee_id", employee_id)
     .eq("worksite_id", worksite_id)
-    .lte("start_date", todayDate())
-    .gte("end_date", todayDate())
+    .lte("start_date", workDate)
+    .gte("end_date", workDate)
     .maybeSingle();
 
   throwIfError(assignmentError);
   if (!assignment) {
-    throw new Error("오늘 배정된 근무지가 없습니다.");
+    throw new Error(workDate === todayDate() ? "오늘 배정된 근무지가 없습니다." : "선택한 근무일에 배정된 근무지가 없습니다.");
   }
-  if (await isAssignmentDayOff(assignment.id, todayDate())) {
-    throw new Error("오늘은 휴무일로 지정되어 출근할 수 없습니다.");
+  if (await isAssignmentDayOff(assignment.id, workDate)) {
+    throw new Error(workDate === todayDate() ? "오늘은 휴무일로 지정되어 출근할 수 없습니다." : "선택한 근무일은 휴무일로 지정되어 출근할 수 없습니다.");
   }
 
   const { data: worksite, error: worksiteError } = await supabase
@@ -940,7 +988,7 @@ export async function clockIn(input: {
     .from("work_record")
     .select("id,intime,outtime,work_intime,work_outtime")
     .eq("employee_id", employee_id)
-    .eq("work_date", todayDate())
+    .eq("work_date", workDate)
     .maybeSingle();
 
   throwIfError(existingRecordError);
@@ -953,7 +1001,7 @@ export async function clockIn(input: {
   const recordValues = {
     employee_id,
     worksite_id,
-    work_date: todayDate(),
+    work_date: workDate,
     work_intime,
     intime_status,
     outtime_status: "0",
@@ -973,15 +1021,21 @@ export async function clockOut(input: {
   employeeId: unknown;
   latitude: unknown;
   longitude: unknown;
+  workDate?: unknown;
 }) {
   const employee_id = requireString(input.employeeId, "직원");
   const latitude = requireNumber(input.latitude, "위도");
   const longitude = requireNumber(input.longitude, "경도");
+  const workDate = typeof input.workDate === "string" && input.workDate.trim()
+    ? requireDate(input.workDate, "근무일")
+    : null;
   // The guard session is not a Supabase Auth session, so the publishable
   // client would not be able to see the existing attendance row under RLS.
   const supabase = getSupabaseAdmin();
 
-  const attendance = await findLatestOpenAttendance(supabase, employee_id);
+  const attendance = workDate
+    ? await findOpenAttendanceByWorkDate(supabase, employee_id, workDate)
+    : await findLatestOpenAttendance(supabase, employee_id);
 
   const attendanceRecord = attendance?.work_intime
     ? {

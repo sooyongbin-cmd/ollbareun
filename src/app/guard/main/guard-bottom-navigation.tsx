@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { useGuardPatrolVisibility } from "./use-guard-patrol-visibility";
+import { useGuardScheduleAvailability } from "./use-guard-schedule-availability";
 
 const items = [
   { href: "/guard/main", label: "홈", icon: "/guard-assets/home.svg", exact: true },
@@ -18,6 +19,7 @@ const items = [
 export default function GuardBottomNavigation() {
   const pathname = usePathname();
   const patrolEnabled = useGuardPatrolVisibility();
+  const { hasWorkSchedule, canAccessAttendance } = useGuardScheduleAvailability();
 
   return (
     <nav
@@ -27,7 +29,13 @@ export default function GuardBottomNavigation() {
       <div className="guard-footer-items">
         {items.map((item) => {
           const active = item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);
-          const disabled = item.href === "/guard/main/work" && !patrolEnabled;
+          const disabled = item.href === "/guard/main/work"
+            ? !patrolEnabled || !hasWorkSchedule
+            : item.href === "/guard/main/special-remarks"
+              ? !hasWorkSchedule
+              : item.href === "/guard/main/attendance"
+                ? !canAccessAttendance
+                : false;
 
           if (disabled) {
             return (

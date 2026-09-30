@@ -12,6 +12,16 @@ describe("guard main shortcuts", () => {
     window.localStorage.clear();
     window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify({
       employee: { id: "test-guard", role: "경비원" },
+      scheduledAttendances: [{
+        id: "schedule-1",
+        employee_id: "test-guard",
+        worksite_id: "site-1",
+        work_date: "2026-05-26",
+        intime: "2026-05-26T00:00:00.000Z",
+        outtime: "2026-05-26T09:00:00.000Z",
+        work_intime: null,
+        work_outtime: null,
+      }],
     }));
     render(<GuardMainPage />);
 

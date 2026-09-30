@@ -23,6 +23,7 @@ describe("manager dashboard data", () => {
     }));
     const { summary } = buildManagerDashboardData({
       now, employees, attendance, dailyAttendance: attendance,
+      employeeRoles: [],
       worksites: [], assignments: [], educationResources: [], educationCompletions: [],
     });
     const rows = buildAttendanceReport({
@@ -56,6 +57,7 @@ describe("manager dashboard data", () => {
   ])("$name", ({ intime, outtime, workDate, inStatus, outStatus, counts }) => {
     const { summary } = buildManagerDashboardData({
       now: new Date("2026-06-04T12:00:00+09:00"),
+      employeeRoles: [],
       employees: [{ id: "emp-1", name: "직원" }],
       worksites: [], assignments: [], dailyAttendance: [], educationResources: [], educationCompletions: [],
       attendance: [{
@@ -79,8 +81,14 @@ describe("manager dashboard data", () => {
     const client = createClient("https://example.supabase.co", "test-key", {
       auth: { persistSession: false, autoRefreshToken: false },
       global: { fetch: async (url) => {
-        queries.push(new URL(String(url)));
-        return new Response("[]", { headers: { "Content-Type": "application/json" } });
+        const requestUrl = new URL(String(url));
+        queries.push(requestUrl);
+        return new Response(
+          requestUrl.pathname.endsWith("/system_configs")
+            ? JSON.stringify({ content: "경비원\n미화원\n파견" })
+            : "[]",
+          { headers: { "Content-Type": "application/json" } },
+        );
       } },
     });
     const adminSpy = vi.spyOn(supabaseAdmin, "getSupabaseAdmin").mockReturnValue(client);
@@ -93,6 +101,8 @@ describe("manager dashboard data", () => {
         "(work_date.eq.2026-06-04,and(outtime.gte.2026-06-04T00:00:00+09:00,outtime.lt.2026-06-05T00:00:00+09:00))",
       );
       expect(records[0].searchParams.has("work_date")).toBe(false);
+      expect(queries.some((url) => url.pathname.endsWith("/system_configs")
+        && url.searchParams.get("system_code") === "eq.employees_role")).toBe(true);
     } finally {
       adminSpy.mockRestore();
       vi.useRealTimers();
@@ -102,10 +112,11 @@ describe("manager dashboard data", () => {
   it("counts active employees, current clock-ins, and education-uncompleted employees", () => {
     const data = buildManagerDashboardData({
       now: new Date("2026-06-04T03:00:00.000Z"),
+      employeeRoles: ["경비원", "미화원", "파견", "주차원"],
       employees: [
-        { id: "emp-1", name: "김철수", role: "경비원", is_retired: false },
-        { id: "emp-2", name: "이영희", role: "미화원", is_retired: false },
-        { id: "emp-3", name: "퇴직자", role: "파견", is_retired: true },
+        { id: "emp-1", name: "김철수", role: "경비원", work_style: "0", is_retired: false },
+        { id: "emp-2", name: "이영희", role: "미화원", work_style: "1", is_retired: false },
+        { id: "emp-3", name: "퇴직자", role: "파견", work_style: "2", is_retired: true },
       ],
       worksites: [{ id: "work-1", name: "문현동현장" }],
       assignments: [
@@ -178,11 +189,13 @@ describe("manager dashboard data", () => {
       lateEmployeesToday: 0,
       educationUncompleted: 1,
       educationRate: 50,
-      employeeRoleCounts: {
-        guard: 1,
-        cleaner: 1,
-        dispatched: 0,
-      },
+      employeeRoleCounts: [
+        { role: "경비원", count: 1 },
+        { role: "미화원", count: 1 },
+        { role: "파견", count: 0 },
+        { role: "주차원", count: 0 },
+      ],
+      workStyleCounts: { "0": 1, "1": 1, "2": 0 },
       unprocessedSpecialRemarks: 1,
     });
     expect(data.specialRemarkFeed).toEqual([
@@ -219,6 +232,7 @@ describe("manager dashboard data", () => {
   it("counts waiting, absent, and late employees separately", () => {
     const data = buildManagerDashboardData({
       now: new Date("2026-06-04T03:00:00.000Z"),
+      employeeRoles: ["경비원", "미화원", "파견"],
       employees: [
         { id: "emp-1", name: "김철수", is_retired: false },
         { id: "emp-2", name: "이영희", is_retired: false },
@@ -289,6 +303,7 @@ describe("manager dashboard data", () => {
   it("counts waiting records using the same status rule as the attendance status report", () => {
     const data = buildManagerDashboardData({
       now: new Date("2026-06-04T00:30:00.000Z"),
+      employeeRoles: ["경비원", "미화원", "파견"],
       employees: [{ id: "emp-1", name: "김철수", is_retired: false }],
       worksites: [{ id: "work-1", name: "문현동현장" }],
       assignments: [],
@@ -322,6 +337,7 @@ describe("manager dashboard data", () => {
   it("groups current assignments by role and worksite", () => {
     const data = buildManagerDashboardData({
       now: new Date("2026-06-04T03:00:00.000Z"),
+      employeeRoles: ["경비원", "미화원", "파견"],
       employees: [
         { id: "emp-1", name: "김철수", role: "경비원", is_retired: false },
         { id: "emp-2", name: "이영희", role: "미화원", is_retired: false },
@@ -396,6 +412,7 @@ describe("manager dashboard data", () => {
   it("excludes today's days off from worksite assignment totals", () => {
     const data = buildManagerDashboardData({
       now: new Date("2026-06-04T03:00:00.000Z"),
+      employeeRoles: ["경비원", "미화원", "파견"],
       employees: [
         { id: "emp-1", name: "김철수", role: "경비원", is_retired: false },
         { id: "emp-2", name: "이영희", role: "미화원", is_retired: false },

@@ -44,16 +44,13 @@ type DashboardPayload = {
     attendanceRate: number;
     educationUncompleted: number;
     educationRate: number;
-    employeeRoleCounts: {
-      guard: number;
-      cleaner: number;
-      dispatched: number;
-    };
+    employeeRoleCounts: { role: string; count: number }[];
+    workStyleCounts: Record<"0" | "1" | "2", number>;
     unprocessedSpecialRemarks: number;
   };
   worksiteMonitoring: {
     worksiteId: string;
-    employeeRole: "경비원" | "미화원" | "파견";
+    employeeRole: string;
     worksiteName: string;
     attendanceCount: number;
     assignedCount: number;
@@ -89,16 +86,19 @@ const emptyDashboard: DashboardPayload = {
     attendanceRate: 0,
     educationUncompleted: 0,
     educationRate: 0,
-    employeeRoleCounts: {
-      guard: 0,
-      cleaner: 0,
-      dispatched: 0,
-    },
+    employeeRoleCounts: [],
+    workStyleCounts: { "0": 0, "1": 0, "2": 0 },
     unprocessedSpecialRemarks: 0,
   },
   worksiteMonitoring: [],
   weeklyLeaveStatus: [],
 };
+
+const workStyleOptions = [
+  { code: "0", label: "일반근무" },
+  { code: "1", label: "격일근무" },
+  { code: "2", label: "야간근무" },
+] as const;
 
 function formatInspectionProgress(inspectedSiteCount: number, inspectionSiteCount: number) {
   if (inspectionSiteCount <= 0) {
@@ -227,9 +227,12 @@ export default function ManagerPage() {
             summary: {
               ...emptyDashboard.summary,
               ...(payload.summary ?? {}),
-              employeeRoleCounts: {
-                ...emptyDashboard.summary.employeeRoleCounts,
-                ...(payload.summary?.employeeRoleCounts ?? {}),
+              employeeRoleCounts: Array.isArray(payload.summary?.employeeRoleCounts)
+                ? payload.summary.employeeRoleCounts
+                : [],
+              workStyleCounts: {
+                ...emptyDashboard.summary.workStyleCounts,
+                ...(payload.summary?.workStyleCounts ?? {}),
               },
             },
             worksiteMonitoring: payload.worksiteMonitoring ?? [],
@@ -290,16 +293,27 @@ export default function ManagerPage() {
     {
       label: "직군별 인원배정",
       value: (
-        <span className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[1.15rem] md:text-[1.3rem]">
-          <span>경비원 {data.summary.employeeRoleCounts.guard}명</span>
-          <span aria-hidden="true" className="text-muted-foreground">/</span>
-          <span>미화원 {data.summary.employeeRoleCounts.cleaner}명</span>
-          <span aria-hidden="true" className="text-muted-foreground">/</span>
-          <span>파견 {data.summary.employeeRoleCounts.dispatched}명</span>
+        <span className="flex flex-col gap-1">
+          <span className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[1.15rem] md:text-[1.3rem]">
+            {data.summary.employeeRoleCounts.map(({ role, count }, index) => (
+              <span className="inline-flex items-baseline gap-x-2" key={role}>
+                {index > 0 && <span aria-hidden="true" className="text-muted-foreground">/</span>}
+                <span>{role} {count}명</span>
+              </span>
+            ))}
+          </span>
+          <span className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[1rem] text-muted-foreground md:text-[1.1rem]">
+            {workStyleOptions.map(({ code, label }, index) => (
+              <span className="inline-flex items-baseline gap-x-2" key={code}>
+                {index > 0 && <span aria-hidden="true">/</span>}
+                <span>{label} {data.summary.workStyleCounts[code]}명</span>
+              </span>
+            ))}
+          </span>
         </span>
       ),
-      description: "재직 직원 직군별 인원",
-      ariaLabel: `직군별 인원배정 경비원 ${data.summary.employeeRoleCounts.guard}명 미화원 ${data.summary.employeeRoleCounts.cleaner}명 파견 ${data.summary.employeeRoleCounts.dispatched}명`,
+      description: "재직 직원 직군 및 근무형태별 인원",
+      ariaLabel: `직군별 인원배정 ${data.summary.employeeRoleCounts.map(({ role, count }) => `${role} ${count}명`).join(" ")} 근무형태별 인원 ${workStyleOptions.map(({ code, label }) => `${label} ${data.summary.workStyleCounts[code]}명`).join(" ")}`,
       icon: Users,
       href: "/manager/employee/employees",
     },

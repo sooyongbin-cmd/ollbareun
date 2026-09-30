@@ -14,11 +14,12 @@ const dashboardPayload = {
     attendanceRate: 40,
     educationUncompleted: 3,
     educationRate: 80,
-    employeeRoleCounts: {
-      guard: 2,
-      cleaner: 1,
-      dispatched: 1,
-    },
+    employeeRoleCounts: [
+      { role: "경비원", count: 2 },
+      { role: "미화원", count: 1 },
+      { role: "주차원", count: 0 },
+    ],
+    workStyleCounts: { "0": 2, "1": 3, "2": 3 },
     unprocessedSpecialRemarks: 4,
   },
   specialRemarkFeed: [
@@ -112,12 +113,15 @@ describe("manager dashboard page", () => {
     expect(within(attendanceCard).getByText("결근 2")).toHaveClass("text-red-600");
     expect(within(attendanceCard).getByText("지각 1")).toHaveClass("text-pink-600");
     const roleCard = within(summary).getByRole("link", {
-      name: "직군별 인원배정 경비원 2명 미화원 1명 파견 1명",
+      name: "직군별 인원배정 경비원 2명 미화원 1명 주차원 0명 근무형태별 인원 일반근무 2명 격일근무 3명 야간근무 3명",
     });
     expect(roleCard).toHaveAttribute("href", "/manager/employee/employees");
     expect(within(roleCard).getByText("경비원 2명")).toBeInTheDocument();
     expect(within(roleCard).getByText("미화원 1명")).toBeInTheDocument();
-    expect(within(roleCard).getByText("파견 1명")).toBeInTheDocument();
+    expect(within(roleCard).getByText("주차원 0명")).toBeInTheDocument();
+    expect(within(roleCard).getByText("일반근무 2명")).toBeInTheDocument();
+    expect(within(roleCard).getByText("격일근무 3명")).toBeInTheDocument();
+    expect(within(roleCard).getByText("야간근무 3명")).toBeInTheDocument();
 
     const educationCard = within(summary).getByRole("link", {
       name: "안전교육 이수율 80% 안전교육 미이수 3명",

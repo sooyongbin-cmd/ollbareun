@@ -1,11 +1,12 @@
 import { listEducationCompletions } from "./education-completions";
+import { loadEmployeeRoles } from "./employee-roles";
 import { getSupabaseAdmin } from "./supabase-admin";
 import { getManagerAttendanceStatus } from "./manager-attendance-status";
 
 type EmployeeInput = {
   id: string;
   name: string;
-  role?: "경비원" | "미화원" | "파견";
+  role?: string;
   work_style?: "0" | "1" | "2" | null;
   is_retired?: boolean;
 };
@@ -104,11 +105,8 @@ export type ManagerDashboardData = {
     attendanceRate: number;
     educationUncompleted: number;
     educationRate: number;
-    employeeRoleCounts: {
-      guard: number;
-      cleaner: number;
-      dispatched: number;
-    };
+    employeeRoleCounts: { role: string; count: number }[];
+    workStyleCounts: Record<"0" | "1" | "2", number>;
     unprocessedSpecialRemarks: number;
   };
   specialRemarkFeed: {
@@ -120,7 +118,7 @@ export type ManagerDashboardData = {
   }[];
   worksiteMonitoring: {
     worksiteId: string;
-    employeeRole: "경비원" | "미화원" | "파견";
+    employeeRole: string;
     worksiteName: string;
     attendanceCount: number;
     assignedCount: number;
@@ -151,6 +149,7 @@ export type ManagerDashboardData = {
 
 type BuildManagerDashboardInput = {
   now?: Date;
+  employeeRoles: string[];
   employees: EmployeeInput[];
   worksites: WorksiteInput[];
   assignments: AssignmentInput[];
@@ -238,19 +237,14 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
   const activeEmployeeIds = new Set(activeEmployees.map((employee) => employee.id));
   const employeeById = new Map(input.employees.map((employee) => [employee.id, employee]));
   const worksiteById = new Map(input.worksites.map((worksite) => [worksite.id, worksite]));
-  const employeeRoleCounts = {
-    guard: 0,
-    cleaner: 0,
-    dispatched: 0,
-  };
-
+  const employeeRoleCounts = input.employeeRoles.map((role) => ({
+    role,
+    count: activeEmployees.filter((employee) => employee.role === role).length,
+  }));
+  const workStyleCounts: Record<"0" | "1" | "2", number> = { "0": 0, "1": 0, "2": 0 };
   activeEmployees.forEach((employee) => {
-    if (employee.role === "경비원") {
-      employeeRoleCounts.guard += 1;
-    } else if (employee.role === "미화원") {
-      employeeRoleCounts.cleaner += 1;
-    } else if (employee.role === "파견") {
-      employeeRoleCounts.dispatched += 1;
+    if (employee.work_style) {
+      workStyleCounts[employee.work_style] += 1;
     }
   });
   const todayWorkRecords = input.attendance.filter(
@@ -379,7 +373,7 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
     string,
     {
       worksiteId: string;
-      employeeRole: "경비원" | "미화원" | "파견";
+      employeeRole: string;
       assignedCount: number;
       attendanceCount: number;
     }
@@ -514,6 +508,7 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       left.startDate.localeCompare(right.startDate) ||
       left.employeeName.localeCompare(right.employeeName, "ko-KR")
     ));
+  const employeeRoleOrder = new Map(input.employeeRoles.map((role, index) => [role, index]));
 
   return {
     summary: {
@@ -531,6 +526,7 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       educationUncompleted,
       educationRate,
       employeeRoleCounts,
+      workStyleCounts,
       unprocessedSpecialRemarks,
     },
     specialRemarkFeed,
@@ -540,7 +536,9 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
         return worksiteComparison;
       }
 
-      return ["경비원", "미화원", "파견"].indexOf(left.employeeRole) - ["경비원", "미화원", "파견"].indexOf(right.employeeRole);
+      const leftOrder = employeeRoleOrder.get(left.employeeRole) ?? Number.MAX_SAFE_INTEGER;
+      const rightOrder = employeeRoleOrder.get(right.employeeRole) ?? Number.MAX_SAFE_INTEGER;
+      return leftOrder - rightOrder || left.employeeRole.localeCompare(right.employeeRole, "ko-KR");
     }),
     attendanceToday,
     weeklyLeaveStatus,
@@ -565,7 +563,7 @@ export async function loadManagerDashboardData() {
   const tomorrowStart = `${tomorrow}T00:00:00+09:00`;
   const { weekStart, weekEnd } = getWeekRange(today);
 
-  const [employeesResult, worksitesResult, assignmentsResult, weeklyLeaveAssignmentsResult, workRecordResult, resourcesResult, completionsResult, daysOffResult, specialRemarksResult, inspectionSitesResult, inspectionLogsResult, weeklyLeavesResult] =
+  const [employeesResult, worksitesResult, assignmentsResult, weeklyLeaveAssignmentsResult, workRecordResult, resourcesResult, completionsResult, daysOffResult, specialRemarksResult, inspectionSitesResult, inspectionLogsResult, weeklyLeavesResult, employeeRoles] =
     await Promise.all([
       supabase.from("employees").select("id,name,role,work_style,is_retired"),
       supabase.from("worksites").select("id,name"),
@@ -595,6 +593,7 @@ export async function loadManagerDashboardData() {
         .select("id,employee_id,leave_type,start_date,end_date")
         .lte("start_date", weekEnd)
         .gte("end_date", weekStart),
+      loadEmployeeRoles(supabase),
     ]);
 
   throwIfError(employeesResult.error);
@@ -612,6 +611,7 @@ export async function loadManagerDashboardData() {
 
   return buildManagerDashboardData({
     now,
+    employeeRoles,
     employees: employeesResult.data ?? [],
     worksites: worksitesResult.data ?? [],
     assignments: assignmentsResult.data ?? [],

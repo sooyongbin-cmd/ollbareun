@@ -8,7 +8,7 @@ function getServerSnapshot() {
 }
 
 // Presentation only; this is not a substitute for server-side authorization.
-export function useGuardRoleAccess() {
+export function useGuardPatrolVisibility() {
   const snapshot = useSyncExternalStore(
     subscribeToGuardSessionChange,
     readStoredGuardSessionSnapshot,

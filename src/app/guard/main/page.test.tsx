@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import GuardMainPage from "./page";
@@ -22,6 +22,11 @@ describe("guard main shortcuts", () => {
     expect(screen.getByRole("link", { name: "특이사항 보고" })).toHaveAttribute(
       "href",
       "/guard/main/special-remarks",
+    );
+    expect(screen.queryByRole("heading", { name: "안전교육 상황" })).not.toBeInTheDocument();
+    expect(within(screen.getByRole("region", { name: "근무자 바로가기" })).getByRole("link", { name: "안전교육" })).toHaveAttribute(
+      "href",
+      "/guard/main/safety",
     );
   });
 });

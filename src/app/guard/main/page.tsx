@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import GuardSafetySection from "./guard-safety-section";
 import GuardWorksiteSection from "./guard-worksite-section";
 import GuardPatrolLink from "./guard-patrol-link";
 
@@ -8,7 +7,6 @@ export default function GuardMainPage() {
   return (
     <div className="guard-main-page">
       <GuardWorksiteSection />
-      <GuardSafetySection />
 
       <section aria-label="근무자 바로가기" className="guard-main-menu">
         <Link className="guard-menu-button" href="/guard/main/safety">

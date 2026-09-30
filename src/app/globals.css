@@ -641,6 +641,12 @@ html[data-manager-theme="dark"] {
   text-align: center;
 }
 
+.guard-menu-button:disabled,
+.guard-footer-item:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .guard-profile-logout-icon {
   position: relative;
   display: block;

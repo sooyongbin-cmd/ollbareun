@@ -17,7 +17,7 @@ const items = [
 
 export default function GuardBottomNavigation() {
   const pathname = usePathname();
-  const showPatrol = useGuardPatrolVisibility();
+  const patrolEnabled = useGuardPatrolVisibility();
 
   return (
     <nav
@@ -26,8 +26,25 @@ export default function GuardBottomNavigation() {
     >
       <div className="guard-footer-items">
         {items.map((item) => {
-          if (item.href === "/guard/main/work" && !showPatrol) return null;
           const active = item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const disabled = item.href === "/guard/main/work" && !patrolEnabled;
+
+          if (disabled) {
+            return (
+              <button
+                aria-disabled="true"
+                className="guard-footer-item"
+                disabled
+                key={item.href}
+                type="button"
+              >
+                <span className="guard-footer-icon-frame" aria-hidden="true">
+                  <img alt="" className="guard-footer-icon" height={item.label === "근무정보" ? 13 : 16} src={item.icon} width={item.label === "근무정보" ? 13 : 16} />
+                </span>
+                {item.label}
+              </button>
+            );
+          }
 
           return (
             <Link

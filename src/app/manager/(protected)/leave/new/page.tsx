@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { SaveIcon } from "@/components/icons/save-icon";
 import AlertModal from "@/components/modals/alert-modal";
 import ProcessingModal from "@/components/modals/processing-modal";
+import { parseLeaveTypes } from "@/lib/leave-types";
 import ManagerLoadingMessage from "../../manager-loading-message";
 
 type Employee = {
@@ -63,9 +64,10 @@ function formatScheduledTime(value: string | null) {
 export default function LeaveNewPage() {
   const router = useRouter();
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [leaveTypes, setLeaveTypes] = useState<string[]>([]);
   const [employeeId, setEmployeeId] = useState("");
   const [employeeName, setEmployeeName] = useState("");
-  const [leaveType, setLeaveType] = useState<"1" | "2">("1");
+  const [leaveType, setLeaveType] = useState("");
   const [startDate, setStartDate] = useState(todayDate);
   const [endDate, setEndDate] = useState(todayDate);
   const [loading, setLoading] = useState(true);
@@ -81,11 +83,20 @@ export default function LeaveNewPage() {
 
   useEffect(() => {
     let ignore = false;
-    async function loadEmployees() {
+    async function loadFormOptions() {
       try {
-        const payload = await fetchJson<{ employees: Employee[] }>("/api/bootstrap");
+        const [employeePayload, configPayload] = await Promise.all([
+          fetchJson<{ employees: Employee[] }>("/api/bootstrap"),
+          fetchJson<{ config: { content: string } }>("/api/system/configs/leave_code"),
+        ]);
+        const nextLeaveTypes = parseLeaveTypes(configPayload.config.content);
+        if (nextLeaveTypes.length === 0) {
+          throw new Error("leave_code 시스템설정에 휴가종류를 한 개 이상 등록하세요.");
+        }
         if (!ignore) {
-          setEmployees((payload.employees ?? []).filter((employee) => !employee.is_retired));
+          setEmployees((employeePayload.employees ?? []).filter((employee) => !employee.is_retired));
+          setLeaveTypes(nextLeaveTypes);
+          setLeaveType(nextLeaveTypes[0]);
         }
       } catch (loadError) {
         if (!ignore) {
@@ -98,7 +109,7 @@ export default function LeaveNewPage() {
       }
     }
 
-    void loadEmployees();
+    void loadFormOptions();
     return () => {
       ignore = true;
     };
@@ -205,9 +216,9 @@ export default function LeaveNewPage() {
                 <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="leave-type">
                   휴가종류
                 </label>
-                <NativeSelect id="leave-type" value={leaveType} onChange={(event) => setLeaveType(event.target.value as "1" | "2")} required>
-                  <NativeSelectOption value="1">월차</NativeSelectOption>
-                  <NativeSelectOption value="2">연차</NativeSelectOption>
+                <NativeSelect id="leave-type" value={leaveType} onChange={(event) => setLeaveType(event.target.value)} required>
+                  <NativeSelectOption value="">선택하세요.</NativeSelectOption>
+                  {leaveTypes.map((type) => <NativeSelectOption key={type} value={type}>{type}</NativeSelectOption>)}
                 </NativeSelect>
               </div>
               <div className="space-y-2">

@@ -17,11 +17,14 @@ describe("leave new page", () => {
       if (String(input).endsWith("/api/bootstrap")) {
         return Response.json({ employees: [{ id: "emp-1", name: "홍길동", role: "경비원", work_style: "0", is_retired: false }] });
       }
+      if (String(input).endsWith("/api/system/configs/leave_code")) {
+        return Response.json({ config: { content: "월차\n연차" } });
+      }
       if (String(input).startsWith("/api/leave/schedule?")) {
         return Response.json({ workRecords: [{ workDate: "2026-06-01", intime: "2026-06-01T00:00:00.000Z", outtime: "2026-06-01T09:00:00.000Z" }] });
       }
       expect(init?.method).toBe("POST");
-      expect(JSON.parse(String(init?.body))).toEqual({ employeeId: "emp-1", leaveType: "1", startDate: "2026-06-01", endDate: "2026-06-03" });
+      expect(JSON.parse(String(init?.body))).toEqual({ employeeId: "emp-1", leaveType: "월차", startDate: "2026-06-01", endDate: "2026-06-03" });
       return Response.json({ leave: { id: "leave-1" } }, { status: 201 });
     }));
   });
@@ -39,7 +42,7 @@ describe("leave new page", () => {
     render(<LeaveNewPage />);
 
     await user.type(await screen.findByLabelText("이름"), "홍길동");
-    await user.selectOptions(screen.getByLabelText("휴가종류"), "1");
+    await user.selectOptions(screen.getByLabelText("휴가종류"), "월차");
     await user.clear(screen.getByLabelText("시작일"));
     await user.type(screen.getByLabelText("시작일"), "2026-06-01");
     await user.clear(screen.getByLabelText("종료일"));

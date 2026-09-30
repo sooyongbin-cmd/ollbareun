@@ -55,7 +55,7 @@ type AttendanceInput = {
 type LeaveInput = {
   id: string;
   employee_id: string;
-  leave_type: "1" | "2";
+  leave_type: string;
   start_date: string;
   end_date: string;
 };
@@ -138,7 +138,7 @@ export type ManagerDashboardData = {
     employeeName: string;
     employeeRole: string;
     workStyle: string;
-    leaveType: "1" | "2";
+    leaveType: string;
     startDate: string;
     endDate: string;
     worksiteName: string;

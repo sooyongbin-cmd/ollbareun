@@ -12,7 +12,7 @@ type LeaveRow = {
   employeeName: string;
   employeeRole: string;
   workStyle: string;
-  leaveType: "1" | "2";
+  leaveType: string;
   startDate: string;
   endDate: string;
   worksiteName: string;
@@ -24,11 +24,6 @@ type Employee = {
   id: string;
   name: string;
   is_retired?: boolean;
-};
-
-const leaveTypeLabels: Record<LeaveRow["leaveType"], string> = {
-  "1": "월차",
-  "2": "연차",
 };
 
 function formatPeriod(startDate: string | null, endDate: string | null) {
@@ -175,7 +170,7 @@ export default function LeavePage() {
                       <TableCell data-label="직군" className="text-muted-foreground">{row.employeeRole}</TableCell>
                       <TableCell data-label="근무형태" className="text-muted-foreground">{row.workStyle}</TableCell>
                       <TableCell data-label="휴가종류" className="text-muted-foreground">
-                        {leaveTypeLabels[row.leaveType]}
+                        {row.leaveType}
                       </TableCell>
                       <TableCell data-label="휴가기간" className="whitespace-nowrap text-muted-foreground">
                         {row.startDate === row.endDate ? row.startDate : `${row.startDate} ~ ${row.endDate}`}

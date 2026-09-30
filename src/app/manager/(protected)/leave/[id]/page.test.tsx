@@ -19,10 +19,13 @@ describe("leave detail page", () => {
     vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
       if (!init) {
-        return Response.json({ leave: { id: "leave-1", employeeId: "emp-1", employeeName: "홍길동", leaveType: "1", startDate: "2026-06-01", endDate: "2026-06-03" } });
+        if (url.endsWith("/api/system/configs/leave_code")) {
+          return Response.json({ config: { content: "월차\n연차" } });
+        }
+        return Response.json({ leave: { id: "leave-1", employeeId: "emp-1", employeeName: "홍길동", leaveType: "월차", startDate: "2026-06-01", endDate: "2026-06-03" } });
       }
       if (init.method === "PATCH") {
-        expect(JSON.parse(String(init.body))).toEqual({ employeeId: "emp-1", leaveType: "2", startDate: "2026-06-02", endDate: "2026-06-04" });
+        expect(JSON.parse(String(init.body))).toEqual({ employeeId: "emp-1", leaveType: "연차", startDate: "2026-06-02", endDate: "2026-06-04" });
         return Response.json({ leave: { id: "leave-1" } });
       }
       if (init.method === "DELETE") {
@@ -37,7 +40,7 @@ describe("leave detail page", () => {
     render(<LeaveDetailPage />);
 
     expect(await screen.findByDisplayValue("홍길동")).toBeInTheDocument();
-    await user.selectOptions(screen.getByLabelText("휴가종류"), "2");
+    await user.selectOptions(screen.getByLabelText("휴가종류"), "연차");
     await user.clear(screen.getByLabelText("시작일"));
     await user.type(screen.getByLabelText("시작일"), "2026-06-02");
     await user.clear(screen.getByLabelText("종료일"));

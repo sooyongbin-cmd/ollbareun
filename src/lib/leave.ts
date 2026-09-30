@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseAdmin } from "./supabase-admin";
 
-export type LeaveType = "1" | "2";
+export type LeaveType = string;
 
 export type LeaveListRow = {
   id: string;
@@ -30,11 +30,6 @@ export type LeaveScheduledWork = {
   workDate: string;
   intime: string | null;
   outtime: string | null;
-};
-
-export const leaveTypeLabels: Record<LeaveType, string> = {
-  "1": "월차",
-  "2": "연차",
 };
 
 function throwIfError(error: { message?: string } | null | undefined) {
@@ -71,11 +66,7 @@ function requireDate(value: unknown, label: string) {
 }
 
 function requireLeaveType(value: unknown) {
-  if (value !== "1" && value !== "2") {
-    throw new Error("휴가종류를 선택하세요.");
-  }
-
-  return value as LeaveType;
+  return requireString(value, "휴가종류");
 }
 
 function workStyleLabel(workStyle: "0" | "1" | "2" | null | undefined) {

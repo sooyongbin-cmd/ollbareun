@@ -52,7 +52,7 @@ let employeeDetails = {
   leaves: [
     {
       id: "leave-1",
-      leave_type: "2",
+      leave_type: "연차",
       start_date: "2026-06-01",
       end_date: "2026-06-02",
     },

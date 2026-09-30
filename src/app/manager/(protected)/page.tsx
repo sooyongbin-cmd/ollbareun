@@ -62,7 +62,7 @@ type DashboardPayload = {
     employeeName: string;
     employeeRole: string;
     workStyle: string;
-    leaveType: "1" | "2";
+    leaveType: string;
     startDate: string;
     endDate: string;
     worksiteName: string;
@@ -399,7 +399,7 @@ export default function ManagerPage() {
                       </TableCell>
                       <TableCell data-label="직군">{row.employeeRole}</TableCell>
                       <TableCell data-label="근무형태">{row.workStyle}</TableCell>
-                      <TableCell data-label="휴가종류">{row.leaveType === "1" ? "월차" : "연차"}</TableCell>
+                      <TableCell data-label="휴가종류">{row.leaveType}</TableCell>
                       <TableCell data-label="휴가기간" className="whitespace-nowrap">{formatPeriod(row.startDate, row.endDate)}</TableCell>
                       <TableCell data-label="근무지">{row.worksiteName}</TableCell>
                       <TableCell data-label="배정기간" className="whitespace-nowrap">

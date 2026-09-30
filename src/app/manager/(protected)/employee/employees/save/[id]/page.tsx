@@ -75,7 +75,7 @@ type EmployeeAttendance = {
 
 type EmployeeLeave = {
   id: string;
-  leave_type: "1" | "2";
+  leave_type: string;
   start_date: string;
   end_date: string;
 };
@@ -612,7 +612,7 @@ export default function EmployeeSavePage() {
               <tbody>
                 {leaves.map((leave) => (
                   <tr className="border-b border-border last:border-b-0" key={leave.id}>
-                    <td className="px-4 py-3 font-semibold">{leave.leave_type === "1" ? "월차" : "연차"}</td>
+                    <td className="px-4 py-3 font-semibold">{leave.leave_type}</td>
                     <td className="px-4 py-3 text-muted-foreground">{formatLeavePeriod(leave)}</td>
                   </tr>
                 ))}

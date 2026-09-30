@@ -74,7 +74,7 @@ const dashboardPayload = {
       employeeName: "김철수",
       employeeRole: "경비원",
       workStyle: "일반근무",
-      leaveType: "2",
+      leaveType: "연차",
       startDate: "2026-06-01",
       endDate: "2026-06-02",
       worksiteName: "문현동현장",

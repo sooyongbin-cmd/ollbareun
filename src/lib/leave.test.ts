@@ -12,7 +12,7 @@ describe("leave data", () => {
       order: vi.fn(),
     };
     leaveQuery.order.mockReturnValueOnce(leaveQuery).mockResolvedValueOnce({
-      data: [{ id: "leave-1", employee_id: "emp-1", leave_type: "2", start_date: "2026-06-01", end_date: "2026-06-03" }],
+      data: [{ id: "leave-1", employee_id: "emp-1", leave_type: "연차", start_date: "2026-06-01", end_date: "2026-06-03" }],
       error: null,
     });
     const employeesQuery = {
@@ -39,7 +39,7 @@ describe("leave data", () => {
       employeeName: "홍길동",
       employeeRole: "경비원",
       workStyle: "일반근무",
-      leaveType: "2",
+      leaveType: "연차",
       startDate: "2026-06-01",
       endDate: "2026-06-03",
       worksiteName: "본사",
@@ -56,10 +56,10 @@ describe("leave data", () => {
     const updateQuery = { update: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), select: vi.fn().mockReturnThis(), single: updateSingle };
     const supabase = { from: vi.fn().mockReturnValueOnce(insertQuery).mockReturnValueOnce(updateQuery) };
 
-    await expect(createLeave({ employeeId: "emp-1", leaveType: "1", startDate: "2026-06-01", endDate: "2026-06-01" }, supabase as never)).resolves.toEqual({ id: "leave-1" });
-    expect(insertQuery.insert).toHaveBeenCalledWith(expect.objectContaining({ employee_id: "emp-1", leave_type: "1", start_date: "2026-06-01", end_date: "2026-06-01" }));
+    await expect(createLeave({ employeeId: "emp-1", leaveType: "월차", startDate: "2026-06-01", endDate: "2026-06-01" }, supabase as never)).resolves.toEqual({ id: "leave-1" });
+    expect(insertQuery.insert).toHaveBeenCalledWith(expect.objectContaining({ employee_id: "emp-1", leave_type: "월차", start_date: "2026-06-01", end_date: "2026-06-01" }));
 
-    await expect(updateLeave({ id: "leave-1", employeeId: "emp-1", leaveType: "2", startDate: "2026-06-02", endDate: "2026-06-03" }, supabase as never)).resolves.toEqual({ id: "leave-1" });
+    await expect(updateLeave({ id: "leave-1", employeeId: "emp-1", leaveType: "연차", startDate: "2026-06-02", endDate: "2026-06-03" }, supabase as never)).resolves.toEqual({ id: "leave-1" });
     expect(updateQuery.eq).toHaveBeenCalledWith("id", "leave-1");
   });
 
@@ -90,7 +90,7 @@ describe("leave data", () => {
     const leaveReadQuery = {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
-      single: vi.fn().mockResolvedValue({ data: { id: "leave-1", employee_id: "emp-1", leave_type: "1", start_date: "2026-06-01", end_date: "2026-06-01" }, error: null }),
+      single: vi.fn().mockResolvedValue({ data: { id: "leave-1", employee_id: "emp-1", leave_type: "월차", start_date: "2026-06-01", end_date: "2026-06-01" }, error: null }),
     };
     const employeeQuery = {
       select: vi.fn().mockReturnThis(),
@@ -100,12 +100,12 @@ describe("leave data", () => {
     const deleteQuery = { delete: vi.fn().mockReturnThis(), eq: vi.fn().mockResolvedValue({ error: null }) };
     const supabase = { from: vi.fn().mockReturnValueOnce(leaveReadQuery).mockReturnValueOnce(employeeQuery).mockReturnValueOnce(deleteQuery) };
 
-    await expect(getLeave("leave-1", supabase as never)).resolves.toMatchObject({ employeeName: "홍길동", leaveType: "1" });
+    await expect(getLeave("leave-1", supabase as never)).resolves.toMatchObject({ employeeName: "홍길동", leaveType: "월차" });
     await expect(deleteLeave("leave-1", supabase as never)).resolves.toBeUndefined();
     expect(deleteQuery.eq).toHaveBeenCalledWith("id", "leave-1");
   });
 
   it("rejects a reversed leave period", async () => {
-    await expect(createLeave({ employeeId: "emp-1", leaveType: "1", startDate: "2026-06-03", endDate: "2026-06-01" }, {} as never)).rejects.toThrow("종료일은 시작일보다 빠를 수 없습니다.");
+    await expect(createLeave({ employeeId: "emp-1", leaveType: "월차", startDate: "2026-06-03", endDate: "2026-06-01" }, {} as never)).rejects.toThrow("종료일은 시작일보다 빠를 수 없습니다.");
   });
 });

@@ -10,13 +10,14 @@ import { DeleteIcon } from "@/components/icons/delete-icon";
 import AlertModal from "@/components/modals/alert-modal";
 import ConfirmModal from "@/components/modals/confirm-modal";
 import ProcessingModal from "@/components/modals/processing-modal";
+import { parseLeaveTypes } from "@/lib/leave-types";
 import ManagerLoadingMessage from "../../manager-loading-message";
 
 type LeaveRecord = {
   id: string;
   employeeId: string;
   employeeName: string;
-  leaveType: "1" | "2";
+  leaveType: string;
   startDate: string;
   endDate: string;
 };
@@ -43,7 +44,8 @@ export default function LeaveDetailPage() {
   const router = useRouter();
   const leaveId = params.id;
   const [record, setRecord] = useState<LeaveRecord | null>(null);
-  const [leaveType, setLeaveType] = useState<"1" | "2">("1");
+  const [leaveTypes, setLeaveTypes] = useState<string[]>([]);
+  const [leaveType, setLeaveType] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [loading, setLoading] = useState(Boolean(leaveId));
@@ -58,10 +60,22 @@ export default function LeaveDetailPage() {
     let ignore = false;
     async function loadLeave() {
       try {
-        const payload = await fetchJson<{ leave: LeaveRecord }>(`/api/leave/${leaveId}`);
+        const [payload, configPayload] = await Promise.all([
+          fetchJson<{ leave: LeaveRecord }>(`/api/leave/${leaveId}`),
+          fetchJson<{ config: { content: string } }>("/api/system/configs/leave_code"),
+        ]);
+        const configuredLeaveTypes = parseLeaveTypes(configPayload.config.content);
+        if (configuredLeaveTypes.length === 0) {
+          throw new Error("leave_code 시스템설정에 휴가종류를 한 개 이상 등록하세요.");
+        }
         if (!ignore) {
           setRecord(payload.leave);
           setLeaveType(payload.leave.leaveType);
+          setLeaveTypes(
+            configuredLeaveTypes.includes(payload.leave.leaveType)
+              ? configuredLeaveTypes
+              : [payload.leave.leaveType, ...configuredLeaveTypes],
+          );
           setStartDate(payload.leave.startDate);
           setEndDate(payload.leave.endDate);
         }
@@ -158,9 +172,8 @@ export default function LeaveDetailPage() {
                 <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="leave-type">
                   휴가종류
                 </label>
-                <NativeSelect id="leave-type" value={leaveType} onChange={(event) => setLeaveType(event.target.value as "1" | "2")} required>
-                  <NativeSelectOption value="1">월차</NativeSelectOption>
-                  <NativeSelectOption value="2">연차</NativeSelectOption>
+                <NativeSelect id="leave-type" value={leaveType} onChange={(event) => setLeaveType(event.target.value)} required>
+                  {leaveTypes.map((type) => <NativeSelectOption key={type} value={type}>{type}</NativeSelectOption>)}
                 </NativeSelect>
               </div>
               <div className="space-y-2">

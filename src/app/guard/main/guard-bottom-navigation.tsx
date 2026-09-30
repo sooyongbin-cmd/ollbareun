@@ -4,20 +4,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
-import { useGuardPatrolVisibility } from "./use-guard-patrol-visibility";
+import { useGuardRoleAccess } from "./use-guard-role-access";
 
 const items = [
   { href: "/guard/main", label: "홈", icon: "/guard-assets/home.svg", exact: true },
-  { href: "/guard/main/attendance", label: "출퇴근", icon: "/guard-assets/clock.svg" },
+  { href: "/guard/main/attendance", label: "출퇴근", icon: "/guard-assets/clock.svg", roleRestricted: true },
   { href: "/guard/main/safety", label: "안전교육", icon: "/guard-assets/safety.svg" },
-  { href: "/guard/main/work", label: "점검", icon: "/guard-assets/inspection.svg" },
-  { href: "/guard/main/special-remarks", label: "특이사항", icon: "/guard-assets/remarks.svg" },
+  { href: "/guard/main/work", label: "점검", icon: "/guard-assets/inspection.svg", roleRestricted: true },
+  { href: "/guard/main/special-remarks", label: "특이사항", icon: "/guard-assets/remarks.svg", roleRestricted: true },
   { href: "/guard/main/profile", label: "근무정보", icon: "/guard-assets/profile.svg" },
 ];
 
 export default function GuardBottomNavigation() {
   const pathname = usePathname();
-  const patrolEnabled = useGuardPatrolVisibility();
+  const roleAccess = useGuardRoleAccess();
 
   return (
     <nav
@@ -27,7 +27,7 @@ export default function GuardBottomNavigation() {
       <div className="guard-footer-items">
         {items.map((item) => {
           const active = item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);
-          const disabled = item.href === "/guard/main/work" && !patrolEnabled;
+          const disabled = item.roleRestricted && !roleAccess;
 
           if (disabled) {
             return (

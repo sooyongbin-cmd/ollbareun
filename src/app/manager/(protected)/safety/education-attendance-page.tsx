@@ -31,6 +31,7 @@ function Mark({ completed, onClick, label }: { completed: boolean; onClick?: () 
         aria-label={label}
         className="cursor-pointer font-semibold text-destructive"
         onClick={onClick}
+        style={{ color: "#dc2626" }}
         type="button"
       >
         X

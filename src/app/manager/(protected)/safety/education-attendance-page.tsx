@@ -1,9 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { LoaderCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import ManagerLoadingMessage from "../manager-loading-message";
+import { educationTypeLabels, type EducationType } from "@/lib/education-periods";
 import type {
   DailyEducationAttendanceRow,
   MonthlyEducationDetailRow,
@@ -20,8 +24,33 @@ function currentKstYearMonth() {
   return currentKstDate().slice(0, 7);
 }
 
-function Mark({ completed }: { completed: boolean }) {
+function Mark({ completed, onClick, label }: { completed: boolean; onClick?: () => void; label?: string }) {
+  if (!completed && onClick) {
+    return (
+      <button
+        aria-label={label}
+        className="cursor-pointer font-semibold text-destructive"
+        onClick={onClick}
+        type="button"
+      >
+        X
+      </button>
+    );
+  }
   return <span className={completed ? "font-semibold text-muted-foreground" : "text-destructive"}>{completed ? "O" : "X"}</span>;
+}
+
+type CompletionDialogState = {
+  employeeId: string;
+  employeeName: string;
+  educationType: EducationType;
+  workDate: string;
+  status: "confirm" | "saving" | "success";
+  error: string;
+};
+
+function educationDisplayLabel(type: EducationType) {
+  return type === "monthly" ? "월별" : educationTypeLabels[type];
 }
 
 export default function EducationAttendancePage({ mode }: { mode: EducationAttendanceMode }) {
@@ -34,6 +63,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
   const [detailRows, setDetailRows] = useState<MonthlyEducationDetailRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [completionDialog, setCompletionDialog] = useState<CompletionDialogState | null>(null);
   const requestIdRef = useRef(0);
 
   const loadRows = useCallback(async () => {
@@ -80,6 +110,49 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
     const normalizedName = name.trim().toLocaleLowerCase("ko-KR");
     return detailRows.filter((row) => row.employeeName.toLocaleLowerCase("ko-KR").includes(normalizedName));
   }, [detailRows, name]);
+
+  const openCompletionDialog = (employeeId: string, employeeName: string, educationType: EducationType) => {
+    if (isDaily || !/^\d{4}-(0[1-9]|1[0-2])$/.test(yearMonth)) return;
+    setCompletionDialog({
+      employeeId,
+      employeeName,
+      educationType,
+      workDate: `${yearMonth}-01`,
+      status: "confirm",
+      error: "",
+    });
+  };
+
+  const completeEducation = async () => {
+    if (!completionDialog || completionDialog.status !== "confirm") return;
+    const selected = completionDialog;
+    setCompletionDialog({ ...selected, status: "saving", error: "" });
+    try {
+      const response = await fetch("/api/manager/safety-education/complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          employeeId: selected.employeeId,
+          educationType: selected.educationType,
+          yearMonth,
+        }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error ?? "교육이수 처리에 실패했습니다.");
+      setCompletionDialog((current) => current ? { ...current, status: "success", error: "" } : current);
+    } catch (saveError) {
+      setCompletionDialog((current) => current ? {
+        ...current,
+        status: "confirm",
+        error: saveError instanceof Error ? saveError.message : "교육이수 처리에 실패했습니다.",
+      } : current);
+    }
+  };
+
+  const closeCompletionDialogAndReload = () => {
+    setCompletionDialog(null);
+    void loadRows();
+  };
 
   const title = isDaily ? "일별교육이수" : "월별교육이수";
 
@@ -158,9 +231,9 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
             {filteredMonthlyRows.map((row) => (
               <TableRow key={row.employeeId} className="hover:bg-muted/40 transition-colors">
                 <TableCell data-label="이름" className="font-semibold">{row.employeeName}</TableCell>
-                <TableCell data-label="월별"><Mark completed={row.monthly} /></TableCell>
-                <TableCell data-label="분기"><Mark completed={row.quarterly} /></TableCell>
-                <TableCell data-label="반기"><Mark completed={row.semiannual} /></TableCell>
+                <TableCell data-label="월별"><Mark completed={row.monthly} onClick={() => openCompletionDialog(row.employeeId, row.employeeName, "monthly")} label={`${row.employeeName} 근무자 월별 교육 미이수 처리`} /></TableCell>
+                <TableCell data-label="분기"><Mark completed={row.quarterly} onClick={() => openCompletionDialog(row.employeeId, row.employeeName, "quarterly")} label={`${row.employeeName} 근무자 분기 교육 미이수 처리`} /></TableCell>
+                <TableCell data-label="반기"><Mark completed={row.semiannual} onClick={() => openCompletionDialog(row.employeeId, row.employeeName, "semiannual")} label={`${row.employeeName} 근무자 반기 교육 미이수 처리`} /></TableCell>
               </TableRow>
             ))}
           </EducationAttendanceTable>
@@ -172,16 +245,69 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
             emptyMessage="조회년월에 등록된 교육이수 자료가 없습니다."
             headers={["이름", "근무일", "일일"]}
           >
-            {filteredDetailRows.map((row) => (
-              <TableRow key={`${row.employeeId}:${row.workDate}`} className="hover:bg-muted/40 transition-colors">
-                <TableCell data-label="이름" className="font-semibold">{row.employeeName}</TableCell>
-                <TableCell data-label="근무일" className="whitespace-nowrap text-muted-foreground">{row.workDate}</TableCell>
-                <TableCell data-label="일일"><Mark completed={row.daily} /></TableCell>
-              </TableRow>
-            ))}
+            {filteredDetailRows.map((row, index) => {
+              const previous = filteredDetailRows[index - 1];
+              const showName = !previous || previous.employeeId !== row.employeeId;
+              return (
+                <TableRow key={`${row.employeeId}:${row.workDate}`} className="hover:bg-muted/40 transition-colors">
+                  <TableCell data-label="이름" className="font-semibold">{showName ? row.employeeName : "-"}</TableCell>
+                  <TableCell data-label="근무일" className="whitespace-nowrap text-muted-foreground">{row.workDate}</TableCell>
+                  <TableCell data-label="일일"><Mark completed={row.daily} onClick={() => openCompletionDialog(row.employeeId, row.employeeName, "daily")} label={`${row.employeeName} 근무자 일일 교육 미이수 처리 (${row.workDate})`} /></TableCell>
+                </TableRow>
+              );
+            })}
           </EducationAttendanceTable>
         </>
       )}
+
+      <Dialog
+        open={completionDialog !== null}
+        onOpenChange={(open) => {
+          if (open) return;
+          if (completionDialog?.status === "confirm") setCompletionDialog(null);
+        }}
+      >
+        <DialogContent
+          showCloseButton={false}
+          onEscapeKeyDown={(event) => {
+            if (completionDialog?.status !== "confirm") event.preventDefault();
+          }}
+          onInteractOutside={(event) => {
+            if (completionDialog?.status !== "confirm") event.preventDefault();
+          }}
+        >
+          <DialogHeader>
+            <DialogTitle>
+              {completionDialog?.status === "success"
+                ? "처리되었습니다."
+                : `${completionDialog?.employeeName ?? ""} 근무자의 ${completionDialog ? educationDisplayLabel(completionDialog.educationType) : ""} 교육을 이수처리할까요?`}
+            </DialogTitle>
+            {completionDialog?.status === "confirm" ? (
+              <DialogDescription>이수일자는 {completionDialog.workDate} 입니다.</DialogDescription>
+            ) : completionDialog?.status === "saving" ? (
+              <DialogDescription asChild>
+                <div aria-live="polite" className="flex items-center gap-2" role="status">
+                  <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
+                  <span>처리중입니다...</span>
+                </div>
+              </DialogDescription>
+            ) : completionDialog?.status === "success" ? (
+              <DialogDescription>교육이수 처리가 완료되었습니다.</DialogDescription>
+            ) : null}
+          </DialogHeader>
+          {completionDialog?.error ? <p className="text-sm text-destructive" role="alert">{completionDialog.error}</p> : null}
+          {completionDialog?.status === "confirm" ? (
+            <DialogFooter>
+              <Button onClick={() => void completeEducation()} type="button">이수처리</Button>
+              <Button onClick={() => setCompletionDialog(null)} type="button" variant="outline">취소</Button>
+            </DialogFooter>
+          ) : completionDialog?.status === "success" ? (
+            <DialogFooter>
+              <Button onClick={closeCompletionDialogAndReload} type="button">확인</Button>
+            </DialogFooter>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

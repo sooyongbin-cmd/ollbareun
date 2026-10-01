@@ -284,9 +284,9 @@ export async function loadMonthlyEducationAttendance(yearMonth: string) {
     });
   });
   const detailRows = [...detailByEmployeeDay.values()].sort((left, right) =>
-    right.employeeName.localeCompare(left.employeeName, "ko-KR")
-      || right.workDate.localeCompare(left.workDate)
-      || right.employeeId.localeCompare(left.employeeId));
+    left.employeeName.localeCompare(right.employeeName, "ko-KR")
+      || left.workDate.localeCompare(right.workDate)
+      || left.employeeId.localeCompare(right.employeeId));
 
   return { summaryRows, detailRows };
 }

@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import webpush from "web-push";
+import { notificationBranding } from "@/lib/notification-branding";
 
 function configureWebPush() {
   const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
@@ -80,6 +81,7 @@ export async function POST(request: Request) {
       // Format notification payload
       const payload = JSON.stringify({
         title: "안전교육 이수 독려 알림",
+        ...notificationBranding,
         body: `${employeeName} 님 ${uncompletedCount}건의 교육을 이수해주세요.`,
         data: {
           url: "/guard/main",

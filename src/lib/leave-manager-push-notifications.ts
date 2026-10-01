@@ -1,6 +1,7 @@
 import webpush from "web-push";
 import { getSupabaseAdmin } from "./supabase-admin";
 import type { ManagerPushDeliveryResult } from "./manager-push-notifications";
+import { notificationBranding } from "./notification-branding";
 
 type LeaveNotification = {
   id: string;
@@ -41,8 +42,7 @@ export async function sendLeaveManagerNotifications(leave: LeaveNotification): P
   const payload = JSON.stringify({
     title: "새 휴가신청",
     body: `${leave.employeeName} · ${leave.leaveType}\n${period}`,
-    icon: "/manager-icon-192.png",
-    badge: "/manager-icon-192.png",
+    ...notificationBranding,
     data: { url: `/manager/auth?next=${encodeURIComponent(`/manager/leave/${leave.id}`)}` },
   });
   const expiredEndpoints: string[] = [];

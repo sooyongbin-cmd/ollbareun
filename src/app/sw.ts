@@ -1,6 +1,7 @@
 import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
 import { Serwist } from "serwist";
+import { notificationBranding } from "@/lib/notification-branding";
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -37,8 +38,8 @@ self.addEventListener("push", (event) => {
     const title = data.title || "올바름 관리시스템";
     const options = {
       body: data.body || "",
-      icon: data.icon || "/guard-icon.svg",
-      badge: data.badge || "/guard-icon.svg",
+      icon: data.icon || notificationBranding.icon,
+      badge: data.badge || notificationBranding.badge,
       data: data.data || {},
       vibrate: [100, 50, 100],
     };
@@ -66,8 +67,7 @@ self.addEventListener("push", (event) => {
     event.waitUntil(
       self.registration.showNotification("올바름 관리시스템", {
         body: text,
-        icon: "/guard-icon.svg",
-        badge: "/guard-icon.svg",
+        ...notificationBranding,
       })
     );
   }

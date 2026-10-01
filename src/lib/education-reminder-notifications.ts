@@ -1,5 +1,6 @@
 import { listEducationCompletions } from "./education-completions";
 import webpush from "web-push";
+import { notificationBranding } from "./notification-branding";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 type EmployeeRow = {
@@ -158,6 +159,7 @@ export async function sendEducationReminderNotifications(
 
       const payload = JSON.stringify({
         title: "안전교육 이수 독려 알림",
+        ...notificationBranding,
         body: `${target.employeeName} 님 ${target.uncompletedCount}건의 교육을 이수해주세요.`,
         data: {
           url: educationReminderUrl,

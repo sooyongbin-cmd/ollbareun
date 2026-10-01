@@ -1,5 +1,6 @@
 import { getManagerUser } from "@/lib/manager-auth";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { attendanceEducationStatus, markAttendanceEducationCompletions } from "@/lib/education-completions";
 import { deleteAttendanceRecord, loadAttendanceRecord, updateAttendanceRecord } from "@/lib/manager-reports";
 
 type RouteContext = {
@@ -14,7 +15,9 @@ export async function GET(_: Request, { params }: RouteContext) {
     }
 
     const { id } = await params;
-    return Response.json({ attendance: await loadAttendanceRecord(id, getSupabaseAdmin()) });
+    const attendance = await loadAttendanceRecord(id, getSupabaseAdmin());
+    const education = await attendanceEducationStatus(attendance.employeeId, attendance.workDate);
+    return Response.json({ attendance, education });
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "근태 기록을 불러오지 못했습니다." },
@@ -31,14 +34,36 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     }
 
     const { id } = await params;
-    const body = await request.json();
-    return Response.json({
-      attendance: await updateAttendanceRecord({
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object") {
+      return Response.json({ error: "저장할 내용을 확인하세요." }, { status: 400 });
+    }
+    const educationResourceIds = body.educationResourceIds ?? [];
+    if (!Array.isArray(educationResourceIds)
+      || educationResourceIds.some((resourceId: unknown) => typeof resourceId !== "string")) {
+      return Response.json({ error: "교육이수 항목을 확인하세요." }, { status: 400 });
+    }
+
+    const hasAttendanceChanges = Boolean(body.clockInDateTime || body.clockOutDateTime);
+    const attendanceContext = educationResourceIds.length
+      ? await loadAttendanceRecord(id, getSupabaseAdmin())
+      : null;
+    let attendance;
+    if (hasAttendanceChanges || educationResourceIds.length === 0) {
+      attendance = await updateAttendanceRecord({
         recordId: id,
         clockInDateTime: body.clockInDateTime,
         clockOutDateTime: body.clockOutDateTime,
-      }),
-    });
+      });
+    }
+    const education = educationResourceIds.length
+      ? await markAttendanceEducationCompletions({
+        employeeId: attendanceContext!.employeeId,
+        workDate: attendanceContext!.workDate,
+        resourceIds: educationResourceIds,
+      })
+      : [];
+    return Response.json({ ...(attendance ? { attendance } : {}), education });
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "근태 기록 수정에 실패했습니다." },

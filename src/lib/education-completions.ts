@@ -140,8 +140,7 @@ async function educationStatusForDate(employeeId: string, date: string, supabase
     const educationType = educationTypeByKoreanName[completion.education_type];
     if (!educationType) continue;
     const periodStart = educationPeriodStart(educationType, date);
-    const completedAt = completion.completed_at ? new Date(completion.completed_at).getTime() : Number.NaN;
-    if (completion.work_date < periodStart || completion.work_date > date || completedAt > dateEnd) continue;
+    if (completion.work_date < periodStart || completion.work_date > date) continue;
     for (const resource of matchingResources) {
       if (!latestCompletionByResource.has(resource.id)) latestCompletionByResource.set(resource.id, completion);
     }

@@ -84,6 +84,7 @@ export type AttendanceReportRow = {
 
 export type AttendanceRecord = {
   id: string;
+  employeeId: string;
   worksiteName: string;
   workDate: string;
   workStyle: string;
@@ -359,6 +360,7 @@ export async function loadAttendanceRecord(
 
   return {
     id: attendance.id,
+    employeeId: attendance.employee_id,
     worksiteName: worksiteResult.data?.name ?? "-",
     workDate: attendance.work_date,
     workStyle: workStyleLabel(employee?.work_style),

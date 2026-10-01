@@ -27,11 +27,11 @@ export default function GuardMainPage() {
             특이사항 보고
           </button>
         )}
-        <Link className="guard-menu-button" href="/guard/main/profile">
-          근무 정보
-        </Link>
         <Link className="guard-menu-button" href="/guard/main/leave">
           휴가 신청
+        </Link>
+        <Link className="guard-menu-button" href="/guard/main/profile">
+          근무 정보
         </Link>
       </section>
     </div>

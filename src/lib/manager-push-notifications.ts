@@ -1,5 +1,6 @@
 import webpush from "web-push";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { notificationBranding } from "@/lib/notification-branding";
 import type { SpecialRemarkReportRow } from "@/lib/special-remark-reports";
 
 type AdminUserRow = {
@@ -147,8 +148,7 @@ export async function sendSpecialRemarkManagerNotifications(
   const payload = JSON.stringify({
     title: "새 특이사항 보고",
     body: `${report.employee_name} · ${report.worksite_name}\n${getSpecialRemarkExcerpt(report.content)}`,
-    icon: "/manager-icon-192.png",
-    badge: "/manager-icon-192.png",
+    ...notificationBranding,
     data: {
       url: `/manager/auth?next=${encodeURIComponent(reportDetailUrl)}`,
     },

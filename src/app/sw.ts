@@ -38,7 +38,6 @@ self.addEventListener("push", (event) => {
     const title = data.title || "올바름 관리시스템";
     const options = {
       body: data.body || "",
-      icon: data.icon || notificationBranding.icon,
       badge: data.badge || notificationBranding.badge,
       data: data.data || {},
       vibrate: [100, 50, 100],
@@ -67,7 +66,7 @@ self.addEventListener("push", (event) => {
     event.waitUntil(
       self.registration.showNotification("올바름 관리시스템", {
         body: text,
-        ...notificationBranding,
+        badge: notificationBranding.badge,
       })
     );
   }

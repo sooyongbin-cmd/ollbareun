@@ -1,4 +1,4 @@
-import { currentEducationStatus, listEducationCompletions, loadEducationDays, loadEducationHistory, markEducationCompletion, resourceCompletionCounts } from "@/lib/education-completions";
+import { currentEducationStatus, educationStatusForWorkDate, listEducationCompletions, loadEducationDays, loadEducationHistory, markEducationCompletion, resourceCompletionCounts } from "@/lib/education-completions";
 import { guardAuthErrorStatus, requireGuardEmployee } from "@/lib/guard-auth-session";
 import { getManagerUser } from "@/lib/manager-auth";
 
@@ -13,7 +13,11 @@ export async function GET(request: Request) {
       return Response.json({ completions: await listEducationCompletions() });
     }
     const employee = await requireGuardEmployee(request);
-    return Response.json({ completions: await currentEducationStatus(employee.id) });
+    const params = new URL(request.url).searchParams;
+    const completions = params.has("workDate")
+      ? await educationStatusForWorkDate(employee.id, params.get("workDate") ?? "")
+      : await currentEducationStatus(employee.id);
+    return Response.json({ completions });
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "교육이수 목록을 불러오지 못했습니다." },
@@ -26,10 +30,14 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const employee = await requireGuardEmployee(request, body.employeeId);
+    if (typeof body.workDate !== "string" || !body.workDate.trim()) {
+      throw new Error("근무일을 확인할 수 없습니다.");
+    }
     return Response.json({
       completion: await markEducationCompletion({
         employeeId: employee.id,
         resourceId: body.resourceId,
+        workDate: body.workDate,
       }),
     });
   } catch (error) {

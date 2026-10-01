@@ -58,8 +58,8 @@ describe("period education", () => {
     }]);
     expect(supabase.rpc).not.toHaveBeenCalled();
   });
-  it("creates a completion row with the snapshot title and work date", async () => {
-    const today = educationToday();
+  it("creates a completion row with the snapshot title and supplied work date", async () => {
+    const today = "2026-05-26";
     const resource = { id: "r", title: "안전교육", education_type: "일일" };
     const insertedRow = {
       id: "completion-1", employee_id: "e", title: "안전교육", work_date: today,
@@ -87,7 +87,7 @@ describe("period education", () => {
     };
     const supabase = { from: vi.fn((table: keyof typeof queries) => queries[table]()) };
 
-    await expect(markEducationCompletion({ employeeId: "e", resourceId: "r" }, supabase as never)).resolves.toEqual({
+    await expect(markEducationCompletion({ employeeId: "e", resourceId: "r", workDate: today }, supabase as never)).resolves.toEqual({
       id: "completion-1", employee_id: "e", resource_id: "r", education_date: today,
       education_type: "daily", is_completed: true, completed_at: insertedRow.completed_at,
     });

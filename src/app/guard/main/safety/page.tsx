@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import LoadingBoard from "@/components/loading-board";
 import { readStoredGuardSession } from "../../guard-session-storage";
+import { selectGuardWorkSchedule, type GuardWorkSchedule } from "@/lib/guard-work-schedule";
 import { formatYoutubeDuration, getYoutubeVideoId } from "@/lib/youtube";
 import type { YoutubePlayer } from "@/lib/youtube-iframe-types";
 import styles from "./page.module.css";
@@ -29,6 +30,10 @@ type GuardSession = {
   employee?: {
     id?: unknown;
   };
+  attendance?: {
+    work_date?: unknown;
+  } | null;
+  scheduledAttendances?: GuardWorkSchedule[] | null;
 };
 
 type DurationRefreshStatus = "idle" | "loading" | "ready" | "unavailable";
@@ -57,6 +62,35 @@ function createInitialWatchProgress(): WatchProgress {
 function readGuardEmployeeId() {
   const session = readStoredGuardSession<GuardSession>({ touch: true });
   return typeof session?.employee?.id === "string" && session.employee.id.trim() ? session.employee.id.trim() : null;
+}
+
+function isWorkDate(value: unknown): value is string {
+  return typeof value === "string"
+    && /^\d{4}-\d{2}-\d{2}$/.test(value)
+    && Number.isFinite(Date.parse(value))
+    && new Date(value).toISOString().slice(0, 10) === value;
+}
+
+function currentKstDate() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+
+function readEducationWorkDate() {
+  if (typeof window !== "undefined") {
+    const queryWorkDate = new URLSearchParams(window.location.search).get("workDate");
+    if (isWorkDate(queryWorkDate)) return queryWorkDate;
+  }
+
+  const session = readStoredGuardSession<GuardSession>({ touch: true });
+  const scheduledWorkDate = selectGuardWorkSchedule(session?.scheduledAttendances ?? [])?.work_date;
+  if (isWorkDate(scheduledWorkDate)) return scheduledWorkDate;
+  if (isWorkDate(session?.attendance?.work_date)) return session.attendance.work_date;
+  return currentKstDate();
 }
 
 function getYoutubeEmbedUrl(youtubeLink: string, origin?: string) {
@@ -109,6 +143,7 @@ function getYoutubeEmbedUrl(youtubeLink: string, origin?: string) {
 
 export default function GuardSafetyEducationPage() {
   const refreshVersion = useEducationRefresh();
+  const [workDate] = useState(readEducationWorkDate);
   const [resources, setResources] = useState<EducationResourceRow[]>([]);
   const [completedResourceIds, setCompletedResourceIds] = useState<string[]>([]);
   const [selectedResource, setSelectedResource] = useState<EducationResourceRow | null>(null);
@@ -138,7 +173,7 @@ export default function GuardSafetyEducationPage() {
       const response = await fetch("/api/education/completions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ employeeId, resourceId }),
+        body: JSON.stringify({ employeeId, resourceId, workDate }),
       });
       const payload = await response.json();
 
@@ -165,17 +200,20 @@ export default function GuardSafetyEducationPage() {
         completionError instanceof Error ? completionError.message : "교육이수 정보를 저장하지 못했습니다.",
       );
     }
-  }, []);
+  }, [workDate]);
 
   useEffect(() => {
     let ignore = false;
 
+    if (!workDate) return;
+
     async function loadResources() {
       try {
         const employeeId = readGuardEmployeeId();
+        const params = new URLSearchParams({ view: "current", workDate });
         const [resourcesResponse, completionsResponse] = await Promise.all([
           fetch("/api/education/resources"),
-          employeeId ? fetch("/api/education/completions?view=current") : Promise.resolve(null),
+          employeeId ? fetch(`/api/education/completions?${params.toString()}`) : Promise.resolve(null),
         ]);
         const resourcesPayload = await resourcesResponse.json();
         const completionsPayload = completionsResponse ? await completionsResponse.json() : { completions: [] };
@@ -219,7 +257,7 @@ export default function GuardSafetyEducationPage() {
     return () => {
       ignore = true;
     };
-  }, [refreshVersion]);
+  }, [refreshVersion, workDate]);
 
   useEffect(() => {
     if (typeof window === "undefined" || window.YT?.Player) {

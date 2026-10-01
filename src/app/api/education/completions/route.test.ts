@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { currentEducationStatus, listEducationCompletions, markEducationCompletion } from "@/lib/education-completions";
+import { currentEducationStatus, educationStatusForWorkDate, listEducationCompletions, markEducationCompletion } from "@/lib/education-completions";
 import { requireGuardEmployee } from "@/lib/guard-auth-session";
 import { getManagerUser } from "@/lib/manager-auth";
 import { GET, POST } from "./route";
@@ -7,6 +7,7 @@ import { GET, POST } from "./route";
 vi.mock("@/lib/education-completions", () => ({
   listEducationCompletions: vi.fn(),
   currentEducationStatus: vi.fn(),
+  educationStatusForWorkDate: vi.fn(),
   markEducationCompletion: vi.fn(),
 }));
 vi.mock("@/lib/guard-auth-session", () => ({
@@ -19,6 +20,7 @@ describe("education completions route", () => {
   beforeEach(() => {
     vi.mocked(getManagerUser).mockResolvedValue({ id: "manager-1" } as never);
     vi.mocked(currentEducationStatus).mockReset();
+    vi.mocked(educationStatusForWorkDate).mockReset();
     vi.mocked(listEducationCompletions).mockReset();
     vi.mocked(markEducationCompletion).mockReset();
     vi.mocked(requireGuardEmployee).mockReset();
@@ -67,6 +69,15 @@ describe("education completions route", () => {
     expect(listEducationCompletions).not.toHaveBeenCalled();
   });
 
+  it("loads a guard's education status for the supplied work date", async () => {
+    vi.mocked(getManagerUser).mockResolvedValue(null);
+    vi.mocked(educationStatusForWorkDate).mockResolvedValue([]);
+    const response = await GET(new Request("http://localhost/api/education/completions?view=current&workDate=2026-05-26"));
+
+    expect(response.status).toBe(200);
+    expect(educationStatusForWorkDate).toHaveBeenCalledWith("employee-1", "2026-05-26");
+  });
+
   it("records an education completion", async () => {
     vi.mocked(markEducationCompletion).mockResolvedValue({
       id: "completion-1", education_date: "2026-05-27", education_type: "daily",
@@ -82,6 +93,7 @@ describe("education completions route", () => {
         body: JSON.stringify({
           employeeId: "employee-1",
           resourceId: "resource-1",
+          workDate: "2026-05-26",
         }),
       }),
     );
@@ -90,6 +102,7 @@ describe("education completions route", () => {
     expect(markEducationCompletion).toHaveBeenCalledWith({
       employeeId: "employee-1",
       resourceId: "resource-1",
+      workDate: "2026-05-26",
     });
     await expect(response.json()).resolves.toEqual({
       completion: {

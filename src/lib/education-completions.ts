@@ -169,6 +169,15 @@ export async function currentEducationStatus(employeeId: string, supabase = getS
   return educationStatusForDate(employeeId, educationToday(), supabase);
 }
 
+export async function educationStatusForWorkDate(employeeId: string, workDate: string, supabase = getSupabaseAdmin()) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(workDate)
+    || !Number.isFinite(Date.parse(workDate))
+    || new Date(workDate).toISOString().slice(0, 10) !== workDate) {
+    throw new Error("출근 날짜를 확인할 수 없습니다.");
+  }
+  return educationStatusForDate(employeeId, workDate, supabase);
+}
+
 export type AttendanceEducationItem = {
   resourceId: string;
   title: string;

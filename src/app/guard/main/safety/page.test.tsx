@@ -72,6 +72,7 @@ async function loadInitialYoutubeIframe() {
 
 describe("guard safety education page", () => {
   beforeEach(() => {
+    window.history.replaceState({}, "", "/guard/main/safety?workDate=2026-05-26");
     vi.useRealTimers();
     vi.restoreAllMocks();
     playerInstances.length = 0;
@@ -80,6 +81,7 @@ describe("guard safety education page", () => {
       "ollbareun.guard.session",
       JSON.stringify({
         employee: { id: "employee-1" },
+        attendance: { work_date: "2026-05-25" },
       }),
     );
     vi.stubGlobal("YT", {
@@ -118,6 +120,7 @@ describe("guard safety education page", () => {
           expect(body).toEqual({
             employeeId: "employee-1",
             resourceId: "resource-1",
+            workDate: "2026-05-26",
           });
 
           completionRows = [{ employee_id: "employee-1", resource_id: "resource-1", is_completed: true, completed_at: "2026-05-27T09:10:00.000Z" }];

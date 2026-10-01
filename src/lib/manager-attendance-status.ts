@@ -1,6 +1,6 @@
-export type ManagerIntimeStatus = "0" | "1" | "2";
+export type ManagerIntimeStatus = "0" | "1" | "2" | "3";
 
-export type ManagerAttendanceStatus = "출근" | "지각" | "대기" | "결근";
+export type ManagerAttendanceStatus = "출근" | "지각" | "대기" | "결근" | "휴가";
 
 export function getManagerAttendanceStatus(input: {
   intimeStatus: ManagerIntimeStatus | null | undefined;
@@ -9,6 +9,10 @@ export function getManagerAttendanceStatus(input: {
 }): ManagerAttendanceStatus {
   const intimeStatus = input.intimeStatus ?? "0";
   const scheduledTimestamp = input.scheduledClockIn ? new Date(input.scheduledClockIn).getTime() : Number.NaN;
+
+  if (intimeStatus === "3") {
+    return "휴가";
+  }
 
   if (intimeStatus === "0" && Number.isFinite(scheduledTimestamp) && scheduledTimestamp > input.now.getTime()) {
     return "대기";

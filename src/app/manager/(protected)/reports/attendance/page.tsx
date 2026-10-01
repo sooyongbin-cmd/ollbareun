@@ -18,8 +18,8 @@ type AttendanceReportRow = {
   scheduledClockOut: string;
   clockInDateTime: string;
   clockOutDateTime: string | null;
-  intimeStatus: "0" | "1" | "2";
-  status: "결근" | "지각" | "출근" | "대기";
+  intimeStatus: "0" | "1" | "2" | "3";
+  status: "결근" | "지각" | "출근" | "대기" | "휴가";
   outtimeStatus: "0" | "1" | "2";
   outtimeLabel: "" | "미퇴근" | "조퇴" | "퇴근";
   isLate: boolean;

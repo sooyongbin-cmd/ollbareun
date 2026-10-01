@@ -37,7 +37,7 @@ type DailyAttendanceInput = {
   intime: string | null;
 };
 
-type IntimeStatus = "0" | "1" | "2";
+type IntimeStatus = "0" | "1" | "2" | "3";
 
 type AttendanceInput = {
   id?: string;
@@ -131,7 +131,7 @@ export type ManagerDashboardData = {
     employeeName: string;
     scheduledClockIn: string;
     clockInDateTime: string;
-    status: "결근" | "지각" | "출근" | "대기";
+    status: "결근" | "지각" | "출근" | "대기" | "휴가";
   }[];
   weeklyLeaveStatus: {
     id: string;
@@ -264,7 +264,9 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       .filter((dayOff) => dayOff.day_off_date === today)
       .map((dayOff) => dayOff.work_assignment_id),
   );
-  const scheduledEmployeeIdsToday = new Set(summaryWorkRecords.map((record) => record.employee_id));
+  const scheduledEmployeeIdsToday = new Set(
+    summaryWorkRecords.filter((record) => record.intime_status !== "3").map((record) => record.employee_id),
+  );
   const scheduledTimes = new Map<string, string | null>();
   input.dailyAttendance.forEach((dailyAttendance) => {
     scheduledTimes.set(
@@ -274,7 +276,9 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
   });
   const statusByRecord = summaryWorkRecords.map((record) => {
     const scheduledClockIn = record.intime ?? scheduledTimes.get(`${record.employee_id}:${record.worksite_id}:${record.work_date}`);
-    return scheduledClockIn && new Date(scheduledClockIn).getTime() > now.getTime()
+    return record.intime_status === "3"
+      ? "휴가"
+      : scheduledClockIn && new Date(scheduledClockIn).getTime() > now.getTime()
       ? "대기"
       : getManagerAttendanceStatus({ intimeStatus: record.intime_status, scheduledClockIn, now });
   });
@@ -290,6 +294,8 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
     switch (status) {
       case "대기":
         waitingEmployeesToday += 1;
+        return;
+      case "휴가":
         return;
       case "결근":
         absentEmployeesToday += 1;
@@ -457,10 +463,11 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
     inspectionSiteCount: inspectionSiteCountByWorksite.get(row.worksiteId) ?? 0,
   }));
 
-  const attendanceStatusLabels: Record<IntimeStatus, "결근" | "지각" | "출근"> = {
+  const attendanceStatusLabels: Record<IntimeStatus, "결근" | "지각" | "출근" | "휴가"> = {
     "0": "결근",
     "1": "지각",
     "2": "출근",
+    "3": "휴가",
   };
   const attendanceToday = todayWorkRecords
     .map((record) => {

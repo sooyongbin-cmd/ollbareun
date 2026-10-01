@@ -30,7 +30,7 @@ type EmployeeRow = {
 
 type AttendanceRow = {
   employee_id: string;
-  intime_status: "0" | "1" | "2";
+  intime_status: "0" | "1" | "2" | "3";
 };
 
 type EducationResourceRow = {
@@ -192,6 +192,7 @@ export default function EmployeeRosterPage() {
       "0": "결근",
       "1": "지각",
       "2": "출근",
+      "3": "휴가",
     };
 
     return new Map(

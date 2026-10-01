@@ -218,20 +218,18 @@ export async function createLeave(
   supabase: SupabaseClient = getSupabaseAdmin(),
 ) {
   const values = parseLeaveInput(input);
-  const { data, error } = await supabase
-    .from("leave")
-    .insert({
-      employee_id: values.employeeId,
-      leave_type: values.leaveType,
-      start_date: values.startDate,
-      end_date: values.endDate,
-      updated_at: new Date().toISOString(),
-    })
-    .select("id,employee_id,leave_type,start_date,end_date")
-    .single();
+  const { data, error } = await supabase.rpc("create_leave_with_attendance", {
+    p_employee_id: values.employeeId,
+    p_leave_type: values.leaveType,
+    p_start_date: values.startDate,
+    p_end_date: values.endDate,
+  });
 
   throwIfError(error);
-  return data;
+  if (!data) {
+    throw new Error("휴가 신청 결과를 확인하지 못했습니다.");
+  }
+  return data as { id: string; employee_id: string; leave_type: LeaveType; start_date: string; end_date: string };
 }
 
 export async function updateLeave(
@@ -259,6 +257,6 @@ export async function updateLeave(
 
 export async function deleteLeave(id: unknown, supabase: SupabaseClient = getSupabaseAdmin()) {
   const leaveId = requireString(id, "휴가");
-  const { error } = await supabase.from("leave").delete().eq("id", leaveId);
+  const { error } = await supabase.rpc("delete_leave_with_attendance", { p_leave_id: leaveId });
   throwIfError(error);
 }

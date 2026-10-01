@@ -14,14 +14,15 @@ type EmployeeInput = {
   is_retired?: boolean;
 };
 
-type IntimeStatus = "0" | "1" | "2";
+type IntimeStatus = "0" | "1" | "2" | "3";
 type OuttimeStatus = "0" | "1" | "2";
-type AttendanceReportStatus = "결근" | "지각" | "출근" | "대기";
+type AttendanceReportStatus = "결근" | "지각" | "출근" | "대기" | "휴가";
 
 const intimeStatusLabels: Record<IntimeStatus, Exclude<AttendanceReportStatus, "대기">> = {
   "0": "결근",
   "1": "지각",
   "2": "출근",
+  "3": "휴가",
 };
 
 type AttendanceInput = {
@@ -205,7 +206,7 @@ export function buildAttendanceReport(input: {
         now: input.now ?? new Date(nowTimestamp),
       });
       const scheduledClockOut = toKstDateTime(scheduledTime?.outtime ?? record.outtime ?? null);
-      const hideOuttimeStatus = status === "대기" || status === "결근" || (
+      const hideOuttimeStatus = status === "대기" || status === "결근" || status === "휴가" || (
         outtimeStatus === "0" && scheduledClockOut !== null && nowTimestamp < scheduledClockOut.timestamp
       );
       const outtimeLabel: AttendanceReportRow["outtimeLabel"] = hideOuttimeStatus

@@ -35,19 +35,15 @@ describe("leave detail page", () => {
     }));
   });
 
-  it("edits and deletes a leave record", async () => {
+  it("shows the leave record without a save button and deletes it", async () => {
     const user = userEvent.setup();
     render(<LeaveDetailPage />);
 
     expect(await screen.findByDisplayValue("홍길동")).toBeInTheDocument();
-    await user.selectOptions(screen.getByLabelText("휴가종류"), "연차");
-    await user.clear(screen.getByLabelText("시작일"));
-    await user.type(screen.getByLabelText("시작일"), "2026-06-02");
-    await user.clear(screen.getByLabelText("종료일"));
-    await user.type(screen.getByLabelText("종료일"), "2026-06-04");
-    await user.click(screen.getByRole("button", { name: "저장" }));
-    expect(await screen.findByText("휴가가 저장되었습니다.")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "확인" }));
+    expect(screen.getByDisplayValue("월차")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("2026-06-01")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("2026-06-03")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "저장" })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "삭제" }));
     await user.click(screen.getByRole("button", { name: "예" }));

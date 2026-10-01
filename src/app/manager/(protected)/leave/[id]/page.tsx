@@ -1,16 +1,11 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import { SaveIcon } from "@/components/icons/save-icon";
 import { DeleteIcon } from "@/components/icons/delete-icon";
-import AlertModal from "@/components/modals/alert-modal";
 import ConfirmModal from "@/components/modals/confirm-modal";
-import ProcessingModal from "@/components/modals/processing-modal";
-import { parseLeaveTypes } from "@/lib/leave-types";
 import ManagerLoadingMessage from "../../manager-loading-message";
 
 type LeaveRecord = {
@@ -44,40 +39,19 @@ export default function LeaveDetailPage() {
   const router = useRouter();
   const leaveId = params.id;
   const [record, setRecord] = useState<LeaveRecord | null>(null);
-  const [leaveTypes, setLeaveTypes] = useState<string[]>([]);
-  const [leaveType, setLeaveType] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
   const [loading, setLoading] = useState(Boolean(leaveId));
   const [loadError, setLoadError] = useState("");
   const [error, setError] = useState("");
-  const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     let ignore = false;
     async function loadLeave() {
       try {
-        const [payload, configPayload] = await Promise.all([
-          fetchJson<{ leave: LeaveRecord }>(`/api/leave/${leaveId}`),
-          fetchJson<{ config: { content: string } }>("/api/system/configs/leave_code"),
-        ]);
-        const configuredLeaveTypes = parseLeaveTypes(configPayload.config.content);
-        if (configuredLeaveTypes.length === 0) {
-          throw new Error("leave_code 시스템설정에 휴가종류를 한 개 이상 등록하세요.");
-        }
+        const payload = await fetchJson<{ leave: LeaveRecord }>(`/api/leave/${leaveId}`);
         if (!ignore) {
           setRecord(payload.leave);
-          setLeaveType(payload.leave.leaveType);
-          setLeaveTypes(
-            configuredLeaveTypes.includes(payload.leave.leaveType)
-              ? configuredLeaveTypes
-              : [payload.leave.leaveType, ...configuredLeaveTypes],
-          );
-          setStartDate(payload.leave.startDate);
-          setEndDate(payload.leave.endDate);
         }
       } catch (loadFailure) {
         if (!ignore) {
@@ -102,30 +76,6 @@ export default function LeaveDetailPage() {
     };
   }, [leaveId]);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setSaving(true);
-    setError("");
-
-    try {
-      await fetchJson(`/api/leave/${leaveId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          employeeId: record?.employeeId,
-          leaveType,
-          startDate,
-          endDate,
-        }),
-      });
-      setSuccessMessage("휴가가 저장되었습니다.");
-    } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : "휴가 정보를 저장하지 못했습니다.");
-    } finally {
-      setSaving(false);
-    }
-  }
-
   async function handleDelete() {
     setDeleting(true);
     setError("");
@@ -149,7 +99,7 @@ export default function LeaveDetailPage() {
         <div className="space-y-3">
           <h1 className="text-[1.75rem] leading-[1.2]">휴가상세</h1>
           <p className="max-w-[40rem] text-[0.875rem] font-normal leading-relaxed text-muted-foreground">
-            선택한 휴가의 종류와 기간을 수정합니다.
+            선택한 휴가 정보를 확인하고 삭제합니다.
           </p>
         </div>
       </header>
@@ -160,7 +110,7 @@ export default function LeaveDetailPage() {
         ) : routeError ? (
           <p role="alert" className="text-[1rem] text-destructive">{routeError}</p>
         ) : (
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <div className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="leave-employee-name">
@@ -172,36 +122,31 @@ export default function LeaveDetailPage() {
                 <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="leave-type">
                   휴가종류
                 </label>
-                <NativeSelect id="leave-type" value={leaveType} onChange={(event) => setLeaveType(event.target.value)} required>
-                  {leaveTypes.map((type) => <NativeSelectOption key={type} value={type}>{type}</NativeSelectOption>)}
-                </NativeSelect>
+                <Input id="leave-type" value={record?.leaveType ?? ""} readOnly />
               </div>
               <div className="space-y-2">
                 <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="leave-start-date">
                   시작일
                 </label>
-                <Input id="leave-start-date" type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} required />
+                <Input id="leave-start-date" value={record?.startDate ?? ""} readOnly />
               </div>
               <div className="space-y-2">
                 <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="leave-end-date">
                   종료일
                 </label>
-                <Input id="leave-end-date" type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} required />
+                <Input id="leave-end-date" value={record?.endDate ?? ""} readOnly />
               </div>
             </div>
 
             <div className="flex gap-3">
-              <Button aria-label="저장" type="submit" disabled={saving || deleting}>
-                <SaveIcon size={20} />
-              </Button>
-              <Button aria-label="삭제" type="button" variant="outline" onClick={() => setDeleteConfirmOpen(true)} disabled={saving || deleting}>
+              <Button aria-label="삭제" type="button" variant="outline" onClick={() => setDeleteConfirmOpen(true)} disabled={deleting}>
                 <DeleteIcon size={20} />
               </Button>
-              <Button aria-label="목록" type="button" variant="outline" onClick={() => router.push("/manager/leave")} disabled={saving || deleting} className="md:ml-auto">
+              <Button aria-label="목록" type="button" variant="outline" onClick={() => router.push("/manager/leave")} disabled={deleting} className="md:ml-auto">
                 목록
               </Button>
             </div>
-          </form>
+          </div>
         )}
         {error ? <p role="alert" className="mt-6 text-[1rem] text-destructive">{error}</p> : null}
       </section>
@@ -214,16 +159,6 @@ export default function LeaveDetailPage() {
         description="삭제하면 현재 휴가 자료가 완전히 제거됩니다."
         loading={deleting}
         loadingLabel="삭제처리중입니다..."
-      />
-      <ProcessingModal isOpen={saving} message="저장처리중입니다..." />
-      <AlertModal
-        isOpen={Boolean(successMessage)}
-        onClose={() => {
-          setSuccessMessage("");
-          router.push("/manager/leave");
-        }}
-        title="알림"
-        description={successMessage}
       />
     </section>
   );

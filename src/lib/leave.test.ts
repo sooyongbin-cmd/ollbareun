@@ -50,14 +50,18 @@ describe("leave data", () => {
   });
 
   it("creates and updates a leave period with validated values", async () => {
-    const insertSingle = vi.fn().mockResolvedValue({ data: { id: "leave-1" }, error: null });
-    const insertQuery = { insert: vi.fn().mockReturnThis(), select: vi.fn().mockReturnThis(), single: insertSingle };
+    const createRpc = vi.fn().mockResolvedValue({ data: { id: "leave-1" }, error: null });
     const updateSingle = vi.fn().mockResolvedValue({ data: { id: "leave-1" }, error: null });
     const updateQuery = { update: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), select: vi.fn().mockReturnThis(), single: updateSingle };
-    const supabase = { from: vi.fn().mockReturnValueOnce(insertQuery).mockReturnValueOnce(updateQuery) };
+    const supabase = { rpc: createRpc, from: vi.fn().mockReturnValue(updateQuery) };
 
     await expect(createLeave({ employeeId: "emp-1", leaveType: "월차", startDate: "2026-06-01", endDate: "2026-06-01" }, supabase as never)).resolves.toEqual({ id: "leave-1" });
-    expect(insertQuery.insert).toHaveBeenCalledWith(expect.objectContaining({ employee_id: "emp-1", leave_type: "월차", start_date: "2026-06-01", end_date: "2026-06-01" }));
+    expect(createRpc).toHaveBeenCalledWith("create_leave_with_attendance", {
+      p_employee_id: "emp-1",
+      p_leave_type: "월차",
+      p_start_date: "2026-06-01",
+      p_end_date: "2026-06-01",
+    });
 
     await expect(updateLeave({ id: "leave-1", employeeId: "emp-1", leaveType: "연차", startDate: "2026-06-02", endDate: "2026-06-03" }, supabase as never)).resolves.toEqual({ id: "leave-1" });
     expect(updateQuery.eq).toHaveBeenCalledWith("id", "leave-1");
@@ -97,12 +101,12 @@ describe("leave data", () => {
       eq: vi.fn().mockReturnThis(),
       maybeSingle: vi.fn().mockResolvedValue({ data: { name: "홍길동" }, error: null }),
     };
-    const deleteQuery = { delete: vi.fn().mockReturnThis(), eq: vi.fn().mockResolvedValue({ error: null }) };
-    const supabase = { from: vi.fn().mockReturnValueOnce(leaveReadQuery).mockReturnValueOnce(employeeQuery).mockReturnValueOnce(deleteQuery) };
+    const deleteRpc = vi.fn().mockResolvedValue({ data: null, error: null });
+    const supabase = { from: vi.fn().mockReturnValueOnce(leaveReadQuery).mockReturnValueOnce(employeeQuery), rpc: deleteRpc };
 
     await expect(getLeave("leave-1", supabase as never)).resolves.toMatchObject({ employeeName: "홍길동", leaveType: "월차" });
     await expect(deleteLeave("leave-1", supabase as never)).resolves.toBeUndefined();
-    expect(deleteQuery.eq).toHaveBeenCalledWith("id", "leave-1");
+    expect(deleteRpc).toHaveBeenCalledWith("delete_leave_with_attendance", { p_leave_id: "leave-1" });
   });
 
   it("rejects a reversed leave period", async () => {

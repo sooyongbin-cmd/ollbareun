@@ -99,6 +99,13 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
     return () => { requestIdRef.current += 1; };
   }, [loadRows]);
 
+  const employeeNameOptions = useMemo(() => {
+    const employeeNames = isDaily
+      ? dailyRows.map((row) => row.employeeName)
+      : [...monthlyRows.map((row) => row.employeeName), ...detailRows.map((row) => row.employeeName)];
+    return Array.from(new Set(employeeNames)).sort((left, right) => left.localeCompare(right, "ko-KR"));
+  }, [dailyRows, detailRows, isDaily, monthlyRows]);
+
   const filteredDailyRows = useMemo(() => {
     const normalizedName = name.trim().toLocaleLowerCase("ko-KR");
     return dailyRows.filter((row) => row.employeeName.toLocaleLowerCase("ko-KR").includes(normalizedName));
@@ -210,10 +217,14 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
             <Input
               className="block w-full"
               id={`${mode}-education-name`}
+              list={`${mode}-education-name-options`}
               placeholder="이름을 입력하세요."
               value={name}
               onChange={(event) => setName(event.target.value)}
             />
+            <datalist id={`${mode}-education-name-options`}>
+              {employeeNameOptions.map((employeeName) => <option key={employeeName} value={employeeName} />)}
+            </datalist>
           </div>
           <div className="min-w-0 space-y-2">
             <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor={`${mode}-education-period`}>

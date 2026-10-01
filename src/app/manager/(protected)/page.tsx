@@ -320,8 +320,8 @@ export default function ManagerPage() {
     {
       label: "안전교육 월별이수율",
       value: `${data.summary.educationRate}%`,
-      description: `안전교육 미이수 ${data.summary.educationUncompleted}명`,
-      ariaLabel: `안전교육 월별이수율 ${data.summary.educationRate}% 안전교육 미이수 ${data.summary.educationUncompleted}명`,
+      description: `안전교육 미이수 ${data.summary.educationUncompleted}건`,
+      ariaLabel: `안전교육 월별이수율 ${data.summary.educationRate}% 안전교육 미이수 ${data.summary.educationUncompleted}건`,
       icon: GraduationCap,
       href: "/manager/safety/monthly_edu",
     },

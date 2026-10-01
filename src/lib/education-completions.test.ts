@@ -1,10 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getSupabaseAdmin } from "./supabase-admin";
-import { currentEducationStatus, listEducationCompletions, loadEducationDays, markEducationCompletion, parseEducationFilters, readAllEducationRows } from "./education-completions";
+import { currentEducationStatus, loadEducationDays, markEducationCompletion, parseEducationFilters, readAllEducationRows } from "./education-completions";
 import { educationToday, educationPeriodStart, requireEducationType } from "./education-periods";
 import { saveAttendance } from "./attendance";
 
-vi.mock("./supabase-admin", () => ({ getSupabaseAdmin: vi.fn() }));
 beforeEach(() => vi.clearAllMocks());
 
 describe("period education", () => {
@@ -30,19 +28,73 @@ describe("period education", () => {
     expect(await readAllEducationRows(query)).toHaveLength(501);
     expect(query).toHaveBeenLastCalledWith(500, 999);
   });
-  it("queries current valid completions through the server client", async () => {
-    const rpc = vi.fn().mockReturnValue({ range: vi.fn().mockResolvedValue({ data: [], error: null }) });
-    vi.mocked(getSupabaseAdmin).mockReturnValue({ rpc } as never);
-    await expect(listEducationCompletions()).resolves.toEqual([]);
-    await currentEducationStatus("employee-1");
-    expect(rpc).toHaveBeenCalledWith("current_education_status", { p_employee_id: "employee-1" });
+  it("loads guard education status from the current snapshot columns", async () => {
+    const today = educationToday();
+    const rows = {
+      education_resources: [{
+        id: "resource-1", title: "일일 안전교육", youtube_link: "https://youtu.be/video",
+        created_at: "2026-01-01T00:00:00+09:00", education_type: "일일",
+      }],
+      education_completions: [{
+        id: "completion-1", employee_id: "employee-1", title: "일일 안전교육",
+        work_date: today, education_type: "일일", completed_at: `${today}T01:00:00+09:00`,
+      }],
+    };
+    const supabase = {
+      rpc: vi.fn(),
+      from: vi.fn((table: keyof typeof rows) => {
+        const query = {
+          select: vi.fn().mockReturnThis(), order: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(), not: vi.fn().mockReturnThis(),
+          range: vi.fn(async (from: number, to: number) => ({ data: rows[table].slice(from, to + 1), error: null })),
+        };
+        return query;
+      }),
+    };
+
+    await expect(currentEducationStatus("employee-1", supabase as never)).resolves.toMatchObject([{
+      employee_id: "employee-1", resource_id: "resource-1", resource_title: "일일 안전교육",
+      education_type: "daily", is_completed: true, id: "completion-1",
+    }]);
+    expect(supabase.rpc).not.toHaveBeenCalled();
   });
-  it("lets the database choose completion date and preserve the first timestamp", async () => {
-    const row = { employee_id: "e", resource_id: "r", education_date: "2026-09-30", is_completed: true };
-    const rpc = vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: row, error: null }) });
-    vi.mocked(getSupabaseAdmin).mockReturnValue({ rpc } as never);
-    expect(await markEducationCompletion({ employeeId: "e", resourceId: "r" })).toEqual(row);
-    expect(rpc).toHaveBeenCalledWith("complete_education", { p_employee_id: "e", p_resource_id: "r" });
+  it("creates a completion row with the snapshot title and work date", async () => {
+    const today = educationToday();
+    const resource = { id: "r", title: "안전교육", education_type: "일일" };
+    const insertedRow = {
+      id: "completion-1", employee_id: "e", title: "안전교육", work_date: today,
+      education_type: "일일", completed_at: `${today}T01:00:00+09:00`,
+    };
+    let insertValues: Record<string, unknown> | null = null;
+    const queries = {
+      education_resources: vi.fn().mockImplementation(() => {
+        const query = {
+          select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(),
+          single: vi.fn().mockResolvedValue({ data: resource, error: null }),
+        };
+        return query;
+      }),
+      education_completions: vi.fn().mockImplementation(() => {
+        const query = {
+          select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), not: vi.fn().mockReturnThis(),
+          order: vi.fn().mockReturnThis(), limit: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+          insert: vi.fn((values: Record<string, unknown>) => { insertValues = values; return query; }),
+          single: vi.fn().mockResolvedValue({ data: insertedRow, error: null }),
+        };
+        return query;
+      }),
+    };
+    const supabase = { from: vi.fn((table: keyof typeof queries) => queries[table]()) };
+
+    await expect(markEducationCompletion({ employeeId: "e", resourceId: "r" }, supabase as never)).resolves.toEqual({
+      id: "completion-1", employee_id: "e", resource_id: "r", education_date: today,
+      education_type: "daily", is_completed: true, completed_at: insertedRow.completed_at,
+    });
+    expect(insertValues).toEqual({
+      employee_id: "e", title: "안전교육", work_date: today, education_type: "일일",
+      completed_at: expect.any(String),
+    });
   });
   it("propagates the transaction failure instead of reporting attendance success", async () => {
     const rpc = vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: null, error: { message: "근태 저장 실패" } }) });
@@ -58,9 +110,9 @@ it("paginates whole employees and keeps every attendance date with its matching 
     const employee_id = `employee-${String(index).padStart(2, "0")}`;
     return ["2026-09-29", "2026-09-28"].map((work_date) => ({ employee_id, work_date, employees: { name: `직원${String(index).padStart(2, "0")}` } }));
   }).flat().reverse();
-  const completions = ["2026-09-29", "2026-09-28", "2026-09-27"].map((education_date) => ({
-    id: education_date, employee_id: "employee-00", resource_id: "daily", education_date, education_type: "daily",
-    is_completed: false, completed_at: null, education_resources: { title: "일일교육" },
+  const completions = ["2026-09-29", "2026-09-28", "2026-09-27"].map((work_date) => ({
+    id: work_date, employee_id: "employee-00", title: "일일교육", work_date, education_type: "일일",
+    completed_at: null,
   }));
   const completionEmployeeIds: string[][] = [];
   const supabase = { from: vi.fn((table: string) => {

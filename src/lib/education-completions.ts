@@ -98,9 +98,132 @@ export async function listEducationCompletions(supabase: SupabaseClient = getSup
   return [...current.values()];
 }
 
+async function educationStatusForDate(employeeId: string, date: string, supabase: SupabaseClient) {
+  type Resource = {
+    id: string;
+    title: string;
+    youtube_link: string;
+    created_at: string;
+    education_type: string;
+  };
+  type Completion = {
+    id: string;
+    employee_id: string;
+    title: string;
+    work_date: string | null;
+    education_type: string;
+    completed_at: string | null;
+  };
+
+  const [resources, completions] = await Promise.all([
+    readAllEducationRows<Resource>((from, to) => supabase.from("education_resources")
+      .select("id,title,youtube_link,created_at,education_type")
+      .order("title").order("id").range(from, to)),
+    readAllEducationRows<Completion>((from, to) => supabase.from("education_completions")
+      .select("id,employee_id,title,work_date,education_type,completed_at")
+      .eq("employee_id", employeeId).not("completed_at", "is", null)
+      .order("work_date", { ascending: false }).order("completed_at", { ascending: false }).range(from, to)),
+  ]);
+
+  const dateEnd = new Date(`${date}T23:59:59.999+09:00`).getTime();
+  const resourcesBySnapshot = new Map<string, Resource[]>();
+  for (const resource of resources) {
+    const key = `${resource.title}\u0000${resource.education_type}`;
+    const matches = resourcesBySnapshot.get(key) ?? [];
+    matches.push(resource);
+    resourcesBySnapshot.set(key, matches);
+  }
+  const latestCompletionByResource = new Map<string, Completion>();
+  for (const completion of completions) {
+    const matchingResources = resourcesBySnapshot.get(`${completion.title}\u0000${completion.education_type}`);
+    if (!matchingResources?.length || !completion.work_date) continue;
+    const educationType = educationTypeByKoreanName[completion.education_type];
+    if (!educationType) continue;
+    const periodStart = educationPeriodStart(educationType, date);
+    const completedAt = completion.completed_at ? new Date(completion.completed_at).getTime() : Number.NaN;
+    if (completion.work_date < periodStart || completion.work_date > date || completedAt > dateEnd) continue;
+    for (const resource of matchingResources) {
+      if (!latestCompletionByResource.has(resource.id)) latestCompletionByResource.set(resource.id, completion);
+    }
+  }
+
+  return resources.flatMap((resource): EducationCompletionRow[] => {
+    const educationType = educationTypeByKoreanName[resource.education_type];
+    if (!educationType || new Date(resource.created_at).getTime() > dateEnd) return [];
+    const completion = latestCompletionByResource.get(resource.id);
+    return [{
+      id: completion?.id ?? resource.id,
+      employee_id: employeeId,
+      employee_name: "",
+      resource_id: resource.id,
+      resource_title: resource.title,
+      resource_youtube_link: resource.youtube_link,
+      education_date: date,
+      education_type: educationType,
+      is_completed: Boolean(completion),
+      completed_at: completion?.completed_at ?? null,
+    }];
+  });
+}
+
 export async function currentEducationStatus(employeeId: string, supabase = getSupabaseAdmin()) {
-  return readAllEducationRows<EducationCompletionRow>((from, to) =>
-    supabase.rpc("current_education_status", { p_employee_id: employeeId }).range(from, to));
+  return educationStatusForDate(employeeId, educationToday(), supabase);
+}
+
+export type AttendanceEducationItem = {
+  resourceId: string;
+  title: string;
+  educationType: EducationType;
+  isCompleted: boolean;
+  completedAt: string | null;
+};
+
+export async function attendanceEducationStatus(
+  employeeId: string,
+  workDate: string,
+  supabase = getSupabaseAdmin(),
+): Promise<AttendanceEducationItem[]> {
+  if (!employeeId.trim()) throw new Error("직원 정보를 확인할 수 없습니다.");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(workDate)
+    || !Number.isFinite(Date.parse(workDate))
+    || new Date(workDate).toISOString().slice(0, 10) !== workDate) {
+    throw new Error("출근 날짜를 확인할 수 없습니다.");
+  }
+
+  const rows = await educationStatusForDate(employeeId, workDate, supabase);
+  return rows.map((row) => ({
+    resourceId: row.resource_id,
+    title: row.resource_title,
+    educationType: row.education_type,
+    isCompleted: row.is_completed,
+    completedAt: row.completed_at,
+  }));
+}
+
+export async function markAttendanceEducationCompletions(input: {
+  employeeId: string;
+  workDate: string;
+  resourceIds: string[];
+}, supabase = getSupabaseAdmin()) {
+  const selectedIds = [...new Set(input.resourceIds)];
+  if (!selectedIds.length) return [];
+
+  const available = await attendanceEducationStatus(input.employeeId, input.workDate, supabase);
+  const byId = new Map(available.map((item) => [item.resourceId, item]));
+  const unknownId = selectedIds.find((resourceId) => !byId.has(resourceId));
+  if (unknownId) throw new Error("선택한 교육 자료를 확인할 수 없습니다.");
+
+  const results = [];
+  for (const resourceId of selectedIds) {
+    const item = byId.get(resourceId)!;
+    if (item.isCompleted) continue;
+    results.push(await markEducationCompletion({
+      employeeId: input.employeeId,
+      resourceId,
+      workDate: input.workDate,
+    }, supabase));
+  }
+  return results;
 }
 
 export function parseEducationFilters(params: URLSearchParams) {
@@ -249,12 +372,53 @@ export async function resourceCompletionCounts(supabase = getSupabaseAdmin()) {
   return resources.map(({ id }) => ({ resource_id: id, completed_count: employeesByResource.get(id)?.size ?? 0 }));
 }
 
-export async function markEducationCompletion(input: { employeeId: unknown; resourceId: unknown }, supabase = getSupabaseAdmin()) {
+export async function markEducationCompletion(input: { employeeId: unknown; resourceId: unknown; workDate?: unknown }, supabase = getSupabaseAdmin()) {
   const employeeId = typeof input.employeeId === "string" ? input.employeeId.trim() : "";
   const resourceId = typeof input.resourceId === "string" ? input.resourceId.trim() : "";
   if (!employeeId) throw new Error("직원 ID를 입력하세요.");
   if (!resourceId) throw new Error("교재 ID를 입력하세요.");
-  const { data, error } = await supabase.rpc("complete_education", { p_employee_id: employeeId, p_resource_id: resourceId }).single();
+
+  const { data: resource, error: resourceError } = await supabase.from("education_resources")
+    .select("id,title,education_type").eq("id", resourceId).single();
+  throwIfError(resourceError);
+  if (!resource) throw new Error("안전교육 자료를 찾을 수 없습니다.");
+
+  const educationType = educationTypeByKoreanName[resource.education_type];
+  if (!educationType) throw new Error("안전교육구분을 확인할 수 없습니다.");
+  const workDate = typeof input.workDate === "string" ? input.workDate.trim() : educationToday();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(workDate)
+    || !Number.isFinite(Date.parse(workDate))
+    || new Date(workDate).toISOString().slice(0, 10) !== workDate) {
+    throw new Error("교육 날짜를 확인하세요.");
+  }
+  const { data: existingCompletion, error: existingError } = await supabase.from("education_completions")
+    .select("id,employee_id,title,work_date,education_type,completed_at")
+    .eq("employee_id", employeeId).eq("title", resource.title)
+    .eq("education_type", resource.education_type).eq("work_date", workDate)
+    .not("completed_at", "is", null).order("completed_at", { ascending: false }).limit(1).maybeSingle();
+  throwIfError(existingError);
+
+  const { data, error } = existingCompletion
+    ? { data: existingCompletion, error: null }
+    : await supabase.from("education_completions")
+      .insert({
+        employee_id: employeeId,
+        title: resource.title,
+        work_date: workDate,
+        education_type: resource.education_type,
+        completed_at: new Date().toISOString(),
+      })
+      .select("id,employee_id,title,work_date,education_type,completed_at")
+      .single();
   throwIfError(error);
-  return data as Pick<EducationCompletionRow, "id" | "employee_id" | "resource_id" | "education_date" | "education_type" | "is_completed" | "completed_at">;
+  if (!data) throw new Error("교육이수 저장 결과를 확인할 수 없습니다.");
+  return {
+    id: data.id,
+    employee_id: data.employee_id,
+    resource_id: resource.id,
+    education_date: data.work_date,
+    education_type: educationType,
+    is_completed: true,
+    completed_at: data.completed_at,
+  };
 }

@@ -39,10 +39,10 @@ vi.mock("@/lib/supabase-passkey-client", () => ({
 }));
 
 describe("guard profile page", () => {
-  it("keeps privacy and deletion contact accessible on the profile page", () => {
+  it("does not show privacy policy or account deletion links on the profile page", () => {
     render(<GuardProfilePage />);
-    expect(screen.getByRole("link", { name: "개인정보처리방침" })).toHaveAttribute("href", "/privacy-policy");
-    expect(screen.getByRole("link", { name: "개인정보·계정 삭제 문의" })).toHaveAttribute("href", "mailto:cyberbin@naver.com");
+    expect(screen.queryByRole("link", { name: "개인정보처리방침" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "개인정보·계정 삭제 문의" })).not.toBeInTheDocument();
   });
 
   beforeEach(() => {

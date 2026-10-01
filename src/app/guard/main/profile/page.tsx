@@ -7,7 +7,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { getSupabasePasskeyClient } from "@/lib/supabase-passkey-client";
 import { usePasskeyFeatureEnabled } from "@/components/passkey-feature-provider";
 import GuardLogoutButton from "../guard-logout-button";
-import GuardPrivacyLinks from "../../guard-privacy-links";
 import {
   readStoredGuardSessionSnapshot,
   subscribeToGuardSessionChange,
@@ -803,8 +802,6 @@ export default function GuardProfilePage() {
             variant="default"
           />
         </article>
-
-        <GuardPrivacyLinks />
 
         {displayedError ? <p className={styles.message}>{displayedError}</p> : null}
         {loading ? <p className={`${styles.message} ${styles.loadingMessage}`} role="status">개인프로필을 불러오는 중입니다.</p> : null}

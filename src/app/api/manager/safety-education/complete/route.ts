@@ -13,15 +13,22 @@ export async function POST(request: Request) {
     const body = await request.json();
     const employeeId = typeof body.employeeId === "string" ? body.employeeId : "";
     const yearMonth = typeof body.yearMonth === "string" ? body.yearMonth : "";
+    const workDate = typeof body.workDate === "string" ? body.workDate : "";
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(employeeId)) {
       return Response.json({ error: "근무자 정보를 확인하세요." }, { status: 400 });
     }
     if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(yearMonth)) {
       return Response.json({ error: "조회 년월을 확인하세요." }, { status: 400 });
     }
+    const parsedWorkDate = new Date(`${workDate}T00:00:00.000Z`);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(workDate)
+      || !Number.isFinite(parsedWorkDate.getTime())
+      || parsedWorkDate.toISOString().slice(0, 10) !== workDate
+      || workDate.slice(0, 7) !== yearMonth) {
+      return Response.json({ error: "출근일을 확인하세요." }, { status: 400 });
+    }
     const educationType = requireEducationType(body.educationType);
     const educationTypeLabel = educationTypeLabels[educationType];
-    const workDate = `${yearMonth}-01`;
     const supabase = getSupabaseAdmin();
 
     const { data: resources, error: resourceError } = await supabase

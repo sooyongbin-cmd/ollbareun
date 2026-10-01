@@ -112,13 +112,19 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
     return detailRows.filter((row) => row.employeeName.toLocaleLowerCase("ko-KR").includes(normalizedName));
   }, [detailRows, name]);
 
-  const openCompletionDialog = (employeeId: string, employeeName: string, educationType: EducationType) => {
+  const openCompletionDialog = (
+    employeeId: string,
+    employeeName: string,
+    educationType: EducationType,
+    workDate = `${yearMonth}-01`,
+  ) => {
     if (isDaily || !/^\d{4}-(0[1-9]|1[0-2])$/.test(yearMonth)) return;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(workDate) || workDate.slice(0, 7) !== yearMonth) return;
     setCompletionDialog({
       employeeId,
       employeeName,
       educationType,
-      workDate: `${yearMonth}-01`,
+      workDate,
       status: "confirm",
       error: "",
     });
@@ -136,6 +142,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
           employeeId: selected.employeeId,
           educationType: selected.educationType,
           yearMonth,
+          workDate: selected.workDate,
         }),
       });
       const payload = await response.json();
@@ -253,7 +260,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
                 <TableRow key={`${row.employeeId}:${row.workDate}`} className="hover:bg-muted/40 transition-colors">
                   <TableCell data-label="이름" className="font-semibold">{showName ? row.employeeName : "-"}</TableCell>
                   <TableCell data-label="출근일" className="whitespace-nowrap text-muted-foreground">{row.workDate}</TableCell>
-                  <TableCell data-label="일일교육"><Mark completed={row.daily} onClick={() => openCompletionDialog(row.employeeId, row.employeeName, "daily")} label={`${row.employeeName} 근무자 일일교육 미이수 처리 (${row.workDate})`} /></TableCell>
+                  <TableCell data-label="일일교육"><Mark completed={row.daily} onClick={() => openCompletionDialog(row.employeeId, row.employeeName, "daily", row.workDate)} label={`${row.employeeName} 근무자 일일교육 미이수 처리 (${row.workDate})`} /></TableCell>
                 </TableRow>
               );
             })}
@@ -284,7 +291,9 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
                 : `${completionDialog?.employeeName ?? ""} 근무자의 ${completionDialog ? educationDisplayLabel(completionDialog.educationType) : ""} 교육을 이수처리할까요?`}
             </DialogTitle>
             {completionDialog?.status === "confirm" ? (
-              <DialogDescription>이수일자는 {completionDialog.workDate} 입니다.</DialogDescription>
+              <DialogDescription>
+                이수일자는 {completionDialog.educationType === "daily" ? `출근일(${completionDialog.workDate})` : completionDialog.workDate} 입니다.
+              </DialogDescription>
             ) : completionDialog?.status === "saving" ? (
               <DialogDescription asChild>
                 <div aria-live="polite" className="flex items-center gap-2" role="status">

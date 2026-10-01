@@ -111,6 +111,17 @@ function getAttendanceQuery(dateFrom: string, dateToExclusive: string) {
     .range(from, to);
 }
 
+function getWorkDateAttendanceQuery(dateFrom: string, dateToExclusive: string) {
+  const supabase = getSupabaseAdmin();
+  return (from: number, to: number) => supabase.from("work_record")
+    .select("employee_id,work_date,employees!inner(name)")
+    .gte("work_date", dateFrom)
+    .lt("work_date", dateToExclusive)
+    .order("work_date", { ascending: false })
+    .order("employee_id", { ascending: true })
+    .range(from, to);
+}
+
 function completedKeys(records: CompletionRecord[]) {
   const keys = new Set<string>();
   records.forEach((record) => {
@@ -231,29 +242,34 @@ export async function loadMonthlyEducationAttendance(yearMonth: string) {
     };
   }).sort((left, right) => left.employeeName.localeCompare(right.employeeName, "ko-KR") || left.employeeId.localeCompare(right.employeeId));
 
-  const supabase = getSupabaseAdmin();
-  const detailRecords = await readAll<CompletionRecord>((from, to) => supabase.from("education_completions")
-    .select("employee_id,work_date,education_type,completed_at,employees!inner(name)")
-    .gte("work_date", monthStart)
-    .lte("work_date", monthEnd)
-    .order("work_date", { ascending: false })
-    .order("employee_id", { ascending: true })
-    .range(from, to));
+  const detailAttendanceRows = await readAll<AttendanceRecord>(getWorkDateAttendanceQuery(monthStart, nextMonth));
+  const detailEmployeeIds = [...new Set(detailAttendanceRows.map((record) => record.employee_id))];
+  const detailWorkDates = [...new Set(detailAttendanceRows.map((record) => record.work_date))];
+  let dailyDetailCompletions: CompletionRecord[] = [];
+  if (detailEmployeeIds.length && detailWorkDates.length) {
+    const supabase = getSupabaseAdmin();
+    dailyDetailCompletions = await readAll<CompletionRecord>((from, to) => supabase.from("education_completions")
+      .select("employee_id,work_date,education_type,completed_at")
+      .in("employee_id", detailEmployeeIds)
+      .in("work_date", detailWorkDates)
+      .eq("education_type", "일일")
+      .not("completed_at", "is", null)
+      .order("employee_id", { ascending: true })
+      .order("work_date", { ascending: true })
+      .range(from, to));
+  }
 
+  const dailyDetailCompletionKeys = completedKeys(dailyDetailCompletions);
   const detailByEmployeeDay = new Map<string, MonthlyEducationDetailRow>();
-  detailRecords.forEach((record) => {
-    if (!record.work_date) return;
+  detailAttendanceRows.forEach((record) => {
     const key = `${record.employee_id}:${record.work_date}`;
-    const current = detailByEmployeeDay.get(key) ?? {
+    if (!detailByEmployeeDay.has(key)) detailByEmployeeDay.set(key, {
       employeeId: record.employee_id,
       employeeName: employeeName(record),
       workDate: record.work_date,
-      daily: false,
-    };
-    if (record.completed_at && educationMarkByLabel[record.education_type] === "daily") current.daily = true;
-    detailByEmployeeDay.set(key, current);
+      daily: dailyDetailCompletionKeys.has(`${record.employee_id}:${record.work_date}:daily`),
+    });
   });
-
   const detailRows = [...detailByEmployeeDay.values()].sort((left, right) =>
     right.workDate.localeCompare(left.workDate)
       || left.employeeName.localeCompare(right.employeeName, "ko-KR")

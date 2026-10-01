@@ -31,6 +31,13 @@ function formatClockTime(period: Period, hour: string) {
   return `${String(Number(hour) + (period === "오후" ? 12 : 0)).padStart(2, "0")}:00`;
 }
 
+function formatPhoneNumber(phone: string) {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length === 11) return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+  if (digits.length === 10) return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+  return phone;
+}
+
 function formatOutTime(day: ShiftDay, period: Period, hour: string) {
   const dayOffset = day === "익일" ? 24 : 0;
   return `${String(Number(hour) + (period === "오후" ? 12 : 0) + dayOffset).padStart(2, "0")}:00`;
@@ -122,7 +129,7 @@ export default function EmployeeNewPage() {
         schedule_rules: scheduleRules,
       });
 
-      setSuccessMessage(`직원이름(${result.employee.name}) 연락처(${result.employee.phone}) 직군(${result.employee.role}) 등록완료`);
+      setSuccessMessage(`직원이름(${result.employee.name}) 연락처(${formatPhoneNumber(result.employee.phone)}) 직군(${result.employee.role}) 등록완료`);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "요청을 처리하지 못했습니다.");
     } finally {

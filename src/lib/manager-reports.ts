@@ -1,5 +1,5 @@
 import { readAllEducationRows } from "./education-completions";
-import { saveAttendanceWithEducation } from "./attendance-education";
+import { saveAttendance } from "./attendance";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { durationLabel } from "./work-duration";
 import { getSupabase } from "./supabase";
@@ -306,7 +306,7 @@ export async function updateAttendanceRecord(input: {
   if (nextWorkOuttime && nextWorkIn && new Date(nextWorkOuttime).getTime() < new Date(nextWorkIn).getTime()) {
     throw new Error("퇴근일시는 출근일시 이후여야 합니다.");
   }
-  return saveAttendanceWithEducation(supabase, {
+  return saveAttendance(supabase, {
     recordId: input.recordId,
     values: {
       ...(clockInAt ? { work_intime: clockInAt } : {}),

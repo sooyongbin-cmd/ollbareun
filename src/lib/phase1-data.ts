@@ -1,4 +1,4 @@
-import { saveAttendanceWithEducation } from "./attendance-education";
+import { saveAttendance } from "./attendance";
 import { validateScheduleRules, type ScheduleRule } from "./employee-schedule";
 import { canClockIn, canClockOut, canClockOutAtWorksite, normalizePhone } from "./phase1";
 import { requireGpsInfo, type GpsInfo } from "./gps";
@@ -1018,7 +1018,7 @@ export async function clockIn(input: {
     clock_in_longitude: longitude,
     updated_at: new Date().toISOString(),
   };
-  const data = await saveAttendanceWithEducation(supabase, {
+  const data = await saveAttendance(supabase, {
     recordId: existingRecord?.id,
     values: recordValues,
     guardClockIn: true,

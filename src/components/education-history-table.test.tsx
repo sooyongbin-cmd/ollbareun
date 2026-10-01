@@ -29,6 +29,7 @@ it("groups attendance dates by employee, orders periods before daily records, an
     : { rows, total: 3, page: 1, pageSize: 50 })));
   render(<EducationHistoryTable />);
   expect(await screen.findByText("조회 결과 3명")).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "자료생성" })).not.toBeInTheDocument();
   const tableRows = within(screen.getByRole("table")).getAllByRole("row").slice(1);
   expect(tableRows).toHaveLength(3);
   expect(tableRows.map((row) => within(row).getAllByRole("cell")[0].textContent)).toEqual(["김민수", "윤정숙", "윤정숙"]);
@@ -39,6 +40,22 @@ it("groups attendance dates by employee, orders periods before daily records, an
   expect(links[0]).toHaveAttribute("href", "/manager/safety/completions/yoon?date=2026-09-28&resourceId=half&listFrom=2026-09-01&listTo=2026-09-30");
   expect(links[4]).toHaveAttribute("href", "/manager/safety/completions/yoon?date=2026-09-29&resourceId=daily-29&listFrom=2026-09-01&listTo=2026-09-30");
   expect(within(yoonRow).getAllByRole("cell")[2].textContent).toBe("halfquartermonthdaily-28daily-29");
+});
+
+it("includes employees without pre-created education records when requesting reminders", async () => {
+  window.history.replaceState({}, "", "/manager/safety/completions?from=2026-09-01&to=2026-09-30");
+  const fetchMock = vi.fn(async (url: string) => {
+    if (url === "/api/bootstrap") return Response.json({ employees: [] });
+    if (url === "/api/education/reminders/send") return Response.json({ successCount: 1 });
+    return Response.json({ rows: [{ employee_id: "new-employee", employee_name: "신규직원", education_date: "2026-09-30", items: [] }], total: 1, pageSize: 50 });
+  });
+  vi.stubGlobal("fetch", fetchMock);
+  render(<EducationHistoryTable />);
+  await screen.findByText("조회 결과 1명");
+  fireEvent.click(screen.getByRole("button", { name: "미이수 알림 전송" }));
+  await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/education/reminders/send", expect.objectContaining({
+    method: "POST", body: JSON.stringify({ employeeIds: ["new-employee"] }),
+  })));
 });
 
 it("fills the completion time on toggle and saves the edited value before returning to the original period", async () => {

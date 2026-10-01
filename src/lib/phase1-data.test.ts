@@ -877,7 +877,7 @@ describe("guard authentication data rules", () => {
     expect(assignment.lte).toHaveBeenCalledWith("start_date", "2026-05-25");
     expect(assignment.gte).toHaveBeenCalledWith("end_date", "2026-05-25");
     expect(existing.eq).toHaveBeenCalledWith("work_date", "2026-05-25");
-    expect(rpc).toHaveBeenCalledWith("save_attendance_with_education", expect.objectContaining({ p_record_id: "record-1", p_guard_clock_in: true, p_values: expect.objectContaining({ employee_id: "emp-1", work_date: "2026-05-25", work_intime: "2026-05-26T00:00:00.000Z" }) }));
+    expect(rpc).toHaveBeenCalledWith("save_attendance", expect.objectContaining({ p_record_id: "record-1", p_guard_clock_in: true, p_values: expect.objectContaining({ employee_id: "emp-1", work_date: "2026-05-25", work_intime: "2026-05-26T00:00:00.000Z" }) }));
   });
 
   it("rejects clock-in when today is an assignment day off", async () => {

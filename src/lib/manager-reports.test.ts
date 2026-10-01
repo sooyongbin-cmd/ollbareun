@@ -25,6 +25,7 @@ describe("manager reports", () => {
     });
     vi.mocked(getSupabaseAdmin).mockReturnValue({ from: vi.fn().mockReturnValueOnce(existingQuery), rpc: vi.fn((_name, args) => ({ single: () => update(args.p_values).eq().select().single() })) } as never);
     await updateAttendanceRecord({ recordId: "attendance-1", clockInDateTime: "2026-09-09T09:00", clockOutDateTime: undefined });
+    expect(getSupabaseAdmin().rpc).toHaveBeenCalledExactlyOnceWith("save_attendance", expect.objectContaining({ p_record_id: "attendance-1", p_guard_clock_in: false }));
     expect(update.mock.calls[0][0]).not.toHaveProperty("work_outtime");
   });
 

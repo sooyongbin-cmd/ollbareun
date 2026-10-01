@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getSupabaseAdmin } from "./supabase-admin";
 import { currentEducationStatus, listEducationCompletions, loadEducationDays, markEducationCompletion, parseEducationFilters, readAllEducationRows } from "./education-completions";
 import { educationToday, educationPeriodStart, requireEducationType } from "./education-periods";
-import { saveAttendanceWithEducation } from "./attendance-education";
+import { saveAttendance } from "./attendance";
 
 vi.mock("./supabase-admin", () => ({ getSupabaseAdmin: vi.fn() }));
 beforeEach(() => vi.clearAllMocks());
@@ -45,8 +45,8 @@ describe("period education", () => {
     expect(rpc).toHaveBeenCalledWith("complete_education", { p_employee_id: "e", p_resource_id: "r" });
   });
   it("propagates the transaction failure instead of reporting attendance success", async () => {
-    const rpc = vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: null, error: { message: "교육 대상 생성 실패" } }) });
-    await expect(saveAttendanceWithEducation({ rpc } as never, { recordId: "r", values: { work_intime: "2026-09-29T00:00:00Z" } })).rejects.toThrow("교육 대상 생성 실패");
+    const rpc = vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: null, error: { message: "근태 저장 실패" } }) });
+    await expect(saveAttendance({ rpc } as never, { recordId: "r", values: { work_intime: "2026-09-29T00:00:00Z" } })).rejects.toThrow("근태 저장 실패");
   });
   it.each(["from=2026-02-30", "from=2026-09-30&to=2026-09-01", "educationType=annual", "page=0"])("validates server filters: %s", (query) => {
     expect(() => parseEducationFilters(new URLSearchParams(query))).toThrow();

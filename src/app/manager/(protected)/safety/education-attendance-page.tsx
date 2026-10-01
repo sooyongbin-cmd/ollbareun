@@ -157,9 +157,24 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
     }
   };
 
-  const closeCompletionDialogAndReload = () => {
+  const closeCompletionDialogAndShowResult = () => {
+    const selected = completionDialog;
+    if (!selected || selected.status !== "success") return;
+
+    if (selected.educationType === "daily") {
+      setDetailRows((current) => current.map((row) =>
+        row.employeeId === selected.employeeId && row.workDate === selected.workDate
+          ? { ...row, daily: true }
+          : row));
+    } else {
+      setMonthlyRows((current) => current.map((row) => {
+        if (row.employeeId !== selected.employeeId) return row;
+        if (selected.educationType === "monthly") return { ...row, monthly: true };
+        if (selected.educationType === "quarterly") return { ...row, quarterly: true };
+        return { ...row, semiannual: true };
+      }));
+    }
     setCompletionDialog(null);
-    void loadRows();
   };
 
   const title = isDaily ? "일별교육이수" : "월별교육이수";
@@ -313,7 +328,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
             </DialogFooter>
           ) : completionDialog?.status === "success" ? (
             <DialogFooter>
-              <Button onClick={closeCompletionDialogAndReload} type="button">확인</Button>
+              <Button onClick={closeCompletionDialogAndShowResult} type="button">확인</Button>
             </DialogFooter>
           ) : null}
         </DialogContent>

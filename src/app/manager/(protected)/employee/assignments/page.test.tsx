@@ -85,21 +85,25 @@ describe("assignment management page", () => {
     expect(within(row).getByText("본사")).toBeInTheDocument();
     expect(within(row).queryByText("2일")).not.toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "이름" })).toHaveValue("");
-    expect(Array.from(document.querySelectorAll<HTMLOptionElement>("#assignment-name-search option")).map((option) => option.value)).toEqual(["", "홍길동", "이영희", "김철수"]);
+    expect(screen.getByRole("combobox", { name: "이름" })).toHaveAttribute("placeholder", "이름을 입력하세요.");
+    expect(screen.getByRole("combobox", { name: "이름" })).toHaveAttribute("list", "assignment-name-search-options");
+    expect(Array.from(document.querySelectorAll<HTMLOptionElement>("#assignment-name-search-options option")).map((option) => option.value)).toEqual(["홍길동", "이영희", "김철수"]);
     expect(screen.getByRole("combobox", { name: "근무지" })).toHaveValue("");
-    expect(Array.from(document.querySelectorAll<HTMLOptionElement>("#assignment-worksite-search option")).map((option) => option.value)).toEqual(["", "서울지점", "부산지점", "본사"]);
+    expect(screen.getByRole("combobox", { name: "근무지" })).toHaveAttribute("placeholder", "근무지 이름을 입력하세요.");
+    expect(screen.getByRole("combobox", { name: "근무지" })).toHaveAttribute("list", "assignment-worksite-search-options");
+    expect(Array.from(document.querySelectorAll<HTMLOptionElement>("#assignment-worksite-search-options option")).map((option) => option.value)).toEqual(["서울지점", "부산지점", "본사"]);
 
     await user.type(screen.getByLabelText("날짜"), "2026-05-22");
     expect(await screen.findByRole("link", { name: "홍길동" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "김철수" })).not.toBeInTheDocument();
 
     await user.clear(screen.getByLabelText("날짜"));
-    await user.selectOptions(screen.getByLabelText("근무지"), "서울지점");
+    await user.type(screen.getByLabelText("근무지"), "서울");
     expect(screen.queryByRole("link", { name: "홍길동" })).not.toBeInTheDocument();
     expect(await screen.findByRole("link", { name: "김철수" })).toBeInTheDocument();
 
-    await user.selectOptions(screen.getByLabelText("근무지"), "");
-    await user.selectOptions(screen.getByLabelText("이름"), "김철수");
+    await user.clear(screen.getByLabelText("근무지"));
+    await user.type(screen.getByLabelText("이름"), "철수");
     const filteredEmployeeLink = await screen.findByRole("link", { name: "김철수" });
     expect(filteredEmployeeLink).toHaveAttribute("href", "/manager/employee/assignments/save/assign-2");
     expect(push).not.toHaveBeenCalled();

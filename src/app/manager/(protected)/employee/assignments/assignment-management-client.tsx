@@ -114,9 +114,9 @@ export default function AssignmentManagementClient() {
         !normalizedDate ||
         (assignment.start_date <= normalizedDate && normalizedDate <= assignment.end_date);
       const matchesWorksite =
-        !normalizedWorksite || assignment.worksite_name.toLowerCase() === normalizedWorksite;
+        !normalizedWorksite || assignment.worksite_name.toLowerCase().includes(normalizedWorksite);
       const matchesName =
-        !normalizedName || assignment.employee_name.toLowerCase() === normalizedName;
+        !normalizedName || assignment.employee_name.toLowerCase().includes(normalizedName);
 
       return matchesDate && matchesWorksite && matchesName;
     });
@@ -178,29 +178,33 @@ export default function AssignmentManagementClient() {
             <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-name-search">
               이름
             </label>
-            <select
-              className="h-9 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 dark:bg-input/30"
+            <Input
+              className="w-full"
               id="assignment-name-search"
+              list="assignment-name-search-options"
+              placeholder="이름을 입력하세요."
               value={nameQuery}
               onChange={(event) => setNameQuery(event.target.value)}
-            >
-              <option value="">전체</option>
-              {employeeNameOptions.map((name) => <option key={name} value={name}>{name}</option>)}
-            </select>
+            />
+            <datalist id="assignment-name-search-options">
+              {employeeNameOptions.map((name) => <option key={name} value={name} />)}
+            </datalist>
           </div>
           <div className="space-y-2">
             <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-worksite-search">
               근무지
             </label>
-            <select
-              className="h-9 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 dark:bg-input/30"
+            <Input
+              className="w-full"
               id="assignment-worksite-search"
+              list="assignment-worksite-search-options"
+              placeholder="근무지 이름을 입력하세요."
               value={worksiteQuery}
               onChange={(event) => setWorksiteQuery(event.target.value)}
-            >
-              <option value="">전체</option>
-              {worksiteNameOptions.map((name) => <option key={name} value={name}>{name}</option>)}
-            </select>
+            />
+            <datalist id="assignment-worksite-search-options">
+              {worksiteNameOptions.map((name) => <option key={name} value={name} />)}
+            </datalist>
           </div>
           <div className="space-y-2">
             <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-date-search">

@@ -41,6 +41,7 @@ type DashboardPayload = {
     clockedOutEmployeesToday: number;
     earlyLeaveEmployeesToday: number;
     notClockedOutEmployeesToday: number;
+    onLeaveEmployeesToday: number;
     attendanceRate: number;
     educationUncompleted: number;
     educationRate: number;
@@ -83,6 +84,7 @@ const emptyDashboard: DashboardPayload = {
     clockedOutEmployeesToday: 0,
     earlyLeaveEmployeesToday: 0,
     notClockedOutEmployeesToday: 0,
+    onLeaveEmployeesToday: 0,
     attendanceRate: 0,
     educationUncompleted: 0,
     educationRate: 0,
@@ -283,10 +285,11 @@ export default function ManagerPage() {
           <span>퇴근 {data.summary.clockedOutEmployeesToday}</span>
           <span className="text-amber-600 dark:text-amber-400">조퇴 {data.summary.earlyLeaveEmployeesToday}</span>
           <span>미퇴근 {data.summary.notClockedOutEmployeesToday}</span>
+          <span>휴가 {data.summary.onLeaveEmployeesToday}</span>
         </span>
       ),
       description: `총인원 ${data.summary.totalEmployees}명 출근예정 ${data.summary.scheduledEmployeesToday}명 출근율 ${data.summary.attendanceRate}%`,
-      ariaLabel: `출근현황 대기 ${data.summary.waitingEmployeesToday} 출근 ${data.summary.onTimeEmployeesToday} 지각 ${data.summary.lateEmployeesToday} 결근 ${data.summary.absentEmployeesToday} 퇴근 ${data.summary.clockedOutEmployeesToday} 조퇴 ${data.summary.earlyLeaveEmployeesToday} 미퇴근 ${data.summary.notClockedOutEmployeesToday} 총인원 ${data.summary.totalEmployees}명 출근예정 ${data.summary.scheduledEmployeesToday}명 출근율 ${data.summary.attendanceRate}%`,
+      ariaLabel: `출근현황 대기 ${data.summary.waitingEmployeesToday} 출근 ${data.summary.onTimeEmployeesToday} 지각 ${data.summary.lateEmployeesToday} 결근 ${data.summary.absentEmployeesToday} 퇴근 ${data.summary.clockedOutEmployeesToday} 조퇴 ${data.summary.earlyLeaveEmployeesToday} 미퇴근 ${data.summary.notClockedOutEmployeesToday} 휴가 ${data.summary.onLeaveEmployeesToday} 총인원 ${data.summary.totalEmployees}명 출근예정 ${data.summary.scheduledEmployeesToday}명 출근율 ${data.summary.attendanceRate}%`,
       icon: Users,
       href: "/manager/reports/attendance",
     },

@@ -102,6 +102,7 @@ export type ManagerDashboardData = {
     clockedOutEmployeesToday: number;
     earlyLeaveEmployeesToday: number;
     notClockedOutEmployeesToday: number;
+    onLeaveEmployeesToday: number;
     attendanceRate: number;
     educationUncompleted: number;
     educationRate: number;
@@ -328,6 +329,11 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       onTimeEmployeesToday + waitingEmployeesToday + absentEmployeesToday + lateEmployeesToday,
     ),
   );
+  const onLeaveEmployeesToday = new Set(
+    (input.weeklyLeaves ?? [])
+      .filter((leave) => activeEmployeeIds.has(leave.employee_id) && leave.start_date <= today && leave.end_date >= today)
+      .map((leave) => leave.employee_id),
+  ).size;
   const currentAssignments = input.assignments
     .filter(
       (assignment) =>
@@ -540,6 +546,7 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       clockedOutEmployeesToday,
       earlyLeaveEmployeesToday,
       notClockedOutEmployeesToday,
+      onLeaveEmployeesToday,
       attendanceRate,
       educationUncompleted,
       educationRate,

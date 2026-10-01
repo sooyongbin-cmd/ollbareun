@@ -7,7 +7,11 @@ vi.mock("@/lib/supabase-admin", () => ({ getSupabaseAdmin: vi.fn() }));
 describe("monthly daily education attendance", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("lists work records by work_date and marks daily completions for the same employee and date", async () => {
+  it("checks quarterly and semiannual completions across their full periods", async () => {
+    const summaryAttendance = [
+      { employee_id: "employee-1", work_date: "2026-09-03", employees: { name: "홍길동" } },
+      { employee_id: "employee-2", work_date: "2026-09-03", employees: { name: "김철수" } },
+    ];
     const detailAttendance = [
       { employee_id: "employee-1", work_date: "2026-09-03", work_intime: "2026-09-03T00:00:00Z", employees: { name: "홍길동" } },
       { employee_id: "employee-1", work_date: "2026-09-04", work_intime: "2026-09-04T00:00:00Z", employees: { name: "홍길동" } },
@@ -17,6 +21,12 @@ describe("monthly daily education attendance", () => {
     const dailyCompletions = [
       { employee_id: "employee-1", work_date: "2026-09-03", education_type: "일일", completed_at: "2026-09-03T01:00:00Z" },
       { employee_id: "employee-2", work_date: "2026-09-03", education_type: "일일", completed_at: null },
+    ];
+    const periodCompletions = [
+      { employee_id: "employee-1", work_date: "2026-09-30", education_type: "분기", completed_at: "2026-09-30T01:00:00Z" },
+      { employee_id: "employee-1", work_date: "2026-12-31", education_type: "반기", completed_at: "2026-12-31T01:00:00Z" },
+      { employee_id: "employee-2", work_date: "2026-10-01", education_type: "분기", completed_at: "2026-10-01T01:00:00Z" },
+      { employee_id: "employee-2", work_date: "2027-01-01", education_type: "반기", completed_at: "2027-01-01T01:00:00Z" },
     ];
     const queries: { table: string; filters: [string, ...unknown[]][] }[] = [];
     vi.mocked(getSupabaseAdmin).mockReturnValue({
@@ -36,11 +46,15 @@ describe("monthly daily education attendance", () => {
           const isMonthlyDetailAttendance = table === "work_record" && !isMonthlySummaryAttendance;
           const isDailyCompletion = table === "education_completions"
             && query.filters.some(([method, column, value]) => method === "eq" && column === "education_type" && value === "일일");
-          const rows = isMonthlyDetailAttendance
+          const isPeriodCompletion = table === "education_completions"
+            && query.filters.some(([method, column, value]) => method === "in" && column === "education_type" && Array.isArray(value));
+          const rows = isMonthlySummaryAttendance ? summaryAttendance
+            : isMonthlyDetailAttendance
             ? detailAttendance.filter((record) => !query.filters.some(([method, column, operator, value]) =>
               method === "not" && column === "work_intime" && operator === "is" && value === null)
               || record.work_intime !== null)
-            : isDailyCompletion ? dailyCompletions : [];
+            : isDailyCompletion ? dailyCompletions
+              : isPeriodCompletion ? periodCompletions : [];
           return { data: rows.slice(from, to + 1), error: null };
         };
         return builder;
@@ -58,6 +72,8 @@ describe("monthly daily education attendance", () => {
     expect(result.detailRows.find((row) => row.employeeId === "employee-1" && row.workDate === "2026-09-03")?.daily).toBe(true);
     expect(result.detailRows.find((row) => row.employeeId === "employee-1" && row.workDate === "2026-09-04")?.daily).toBe(false);
     expect(result.detailRows.find((row) => row.employeeId === "employee-2" && row.workDate === "2026-09-03")?.daily).toBe(false);
+    expect(result.summaryRows.find((row) => row.employeeId === "employee-1")).toMatchObject({ quarterly: true, semiannual: true });
+    expect(result.summaryRows.find((row) => row.employeeId === "employee-2")).toMatchObject({ quarterly: false, semiannual: false });
 
     const detailQuery = queries.find(({ table, filters }) => table === "work_record"
       && filters.some(([method]) => method === "gte"));
@@ -71,5 +87,10 @@ describe("monthly daily education attendance", () => {
     expect(completionQuery?.filters).toContainEqual(["in", "employee_id", ["employee-1", "employee-2"]]);
     expect(completionQuery?.filters).toContainEqual(["in", "work_date", ["2026-09-03", "2026-09-04"]]);
     expect(completionQuery?.filters).toContainEqual(["not", "completed_at", "is", null]);
+
+    const periodQuery = queries.find(({ table, filters }) => table === "education_completions"
+      && filters.some(([method, column, value]) => method === "in" && column === "education_type" && Array.isArray(value)));
+    expect(periodQuery?.filters).toContainEqual(["gte", "work_date", "2026-07-01"]);
+    expect(periodQuery?.filters).toContainEqual(["lte", "work_date", "2026-12-31"]);
   });
 });

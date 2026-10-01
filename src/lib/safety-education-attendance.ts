@@ -92,6 +92,16 @@ function periodStart(type: EducationType, yearMonth: string) {
   return `${year}-${String(startMonth).padStart(2, "0")}-01`;
 }
 
+function periodEnd(type: EducationType, yearMonth: string) {
+  const [year, month] = yearMonth.split("-").map(Number);
+  const endMonth = type === "quarterly"
+    ? Math.floor((month - 1) / 3) * 3 + 3
+    : type === "semiannual"
+      ? (month <= 6 ? 6 : 12)
+      : month;
+  return new Date(Date.UTC(year, endMonth, 0)).toISOString().slice(0, 10);
+}
+
 function employeeName(record: AttendanceRecord | CompletionRecord) {
   const relation = record.employees;
   const employee = Array.isArray(relation) ? relation[0] : relation;
@@ -202,7 +212,7 @@ export async function loadDailyEducationAttendance(date = educationToday()): Pro
 }
 
 export async function loadMonthlyEducationAttendance(yearMonth: string) {
-  const { from: monthStart, to: monthEnd, nextMonth } = monthBounds(yearMonth);
+  const { from: monthStart, nextMonth } = monthBounds(yearMonth);
   const attendanceRows = await readAll<AttendanceRecord>(getAttendanceQuery(monthStart, nextMonth));
   const namesByEmployee = new Map<string, string>();
   attendanceRows.forEach((record) => namesByEmployee.set(record.employee_id, employeeName(record)));
@@ -212,11 +222,12 @@ export async function loadMonthlyEducationAttendance(yearMonth: string) {
   if (employeeIds.length) {
     const supabase = getSupabaseAdmin();
     const semiannualStart = periodStart("semiannual", yearMonth);
+    const semiannualEnd = periodEnd("semiannual", yearMonth);
     monthlyCompletions = await readAll<CompletionRecord>((from, to) => supabase.from("education_completions")
       .select("employee_id,work_date,education_type,completed_at")
       .in("employee_id", employeeIds)
       .gte("work_date", semiannualStart)
-      .lte("work_date", monthEnd)
+      .lte("work_date", semiannualEnd)
       .in("education_type", ["월간", "분기", "반기"])
       .order("employee_id", { ascending: true })
       .order("work_date", { ascending: true })
@@ -227,10 +238,11 @@ export async function loadMonthlyEducationAttendance(yearMonth: string) {
   const summaryRows = employeeIds.map((id) => {
     const hasInPeriod = (type: EducationType) => {
       const from = periodStart(type, yearMonth);
+      const to = periodEnd(type, yearMonth);
       return monthlyCompletions.some((record) => record.employee_id === id
         && record.work_date !== null
         && record.work_date >= from
-        && record.work_date <= monthEnd
+        && record.work_date <= to
         && educationMarkByLabel[record.education_type] === type
         && completed.has(`${id}:${record.work_date}:${type}`));
     };

@@ -207,6 +207,13 @@ export function buildAttendanceReport(input: {
       const hideOuttimeStatus = status === "대기" || status === "결근" || (
         outtimeStatus === "0" && scheduledClockOut !== null && nowTimestamp < scheduledClockOut.timestamp
       );
+      const outtimeLabel: AttendanceReportRow["outtimeLabel"] = hideOuttimeStatus
+        ? ""
+        : outtimeStatus === "1"
+          ? "조퇴"
+          : outtimeStatus === "2"
+            ? "퇴근"
+            : "미퇴근";
 
       return {
         id: record.id,
@@ -222,7 +229,7 @@ export function buildAttendanceReport(input: {
         intimeStatus,
         status,
         outtimeStatus,
-        outtimeLabel: hideOuttimeStatus ? "" : outtimeStatus === "1" ? "조퇴" : outtimeStatus === "2" ? "퇴근" : "미퇴근",
+        outtimeLabel,
         isLate: intimeStatus === "1",
       };
     })

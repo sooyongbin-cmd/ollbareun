@@ -117,6 +117,7 @@ function getWorkDateAttendanceQuery(dateFrom: string, dateToExclusive: string) {
     .select("employee_id,work_date,employees!inner(name)")
     .gte("work_date", dateFrom)
     .lt("work_date", dateToExclusive)
+    .not("work_intime", "is", null)
     .order("work_date", { ascending: false })
     .order("employee_id", { ascending: true })
     .range(from, to);
@@ -271,9 +272,9 @@ export async function loadMonthlyEducationAttendance(yearMonth: string) {
     });
   });
   const detailRows = [...detailByEmployeeDay.values()].sort((left, right) =>
-    right.workDate.localeCompare(left.workDate)
-      || left.employeeName.localeCompare(right.employeeName, "ko-KR")
-      || left.employeeId.localeCompare(right.employeeId));
+    right.employeeName.localeCompare(left.employeeName, "ko-KR")
+      || right.workDate.localeCompare(left.workDate)
+      || right.employeeId.localeCompare(left.employeeId));
 
   return { summaryRows, detailRows };
 }

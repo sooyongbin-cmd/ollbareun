@@ -9,9 +9,10 @@ describe("monthly daily education attendance", () => {
 
   it("lists work records by work_date and marks daily completions for the same employee and date", async () => {
     const detailAttendance = [
-      { employee_id: "employee-1", work_date: "2026-09-03", work_intime: null, employees: { name: "홍길동" } },
-      { employee_id: "employee-1", work_date: "2026-09-04", work_intime: null, employees: { name: "홍길동" } },
-      { employee_id: "employee-2", work_date: "2026-09-03", work_intime: null, employees: { name: "김철수" } },
+      { employee_id: "employee-1", work_date: "2026-09-03", work_intime: "2026-09-03T00:00:00Z", employees: { name: "홍길동" } },
+      { employee_id: "employee-1", work_date: "2026-09-04", work_intime: "2026-09-04T00:00:00Z", employees: { name: "홍길동" } },
+      { employee_id: "employee-2", work_date: "2026-09-03", work_intime: "2026-09-03T00:00:00Z", employees: { name: "김철수" } },
+      { employee_id: "employee-3", work_date: "2026-09-05", work_intime: null, employees: { name: "박길동" } },
     ];
     const dailyCompletions = [
       { employee_id: "employee-1", work_date: "2026-09-03", education_type: "일일", completed_at: "2026-09-03T01:00:00Z" },
@@ -35,7 +36,10 @@ describe("monthly daily education attendance", () => {
           const isMonthlyDetailAttendance = table === "work_record" && !isMonthlySummaryAttendance;
           const isDailyCompletion = table === "education_completions"
             && query.filters.some(([method, column, value]) => method === "eq" && column === "education_type" && value === "일일");
-          const rows = isMonthlyDetailAttendance ? detailAttendance
+          const rows = isMonthlyDetailAttendance
+            ? detailAttendance.filter((record) => !query.filters.some(([method, column, operator, value]) =>
+              method === "not" && column === "work_intime" && operator === "is" && value === null)
+              || record.work_intime !== null)
             : isDailyCompletion ? dailyCompletions : [];
           return { data: rows.slice(from, to + 1), error: null };
         };
@@ -46,6 +50,11 @@ describe("monthly daily education attendance", () => {
     const result = await loadMonthlyEducationAttendance("2026-09");
 
     expect(result.detailRows).toHaveLength(3);
+    expect(result.detailRows.map((row) => [row.employeeName, row.workDate])).toEqual([
+      ["홍길동", "2026-09-04"],
+      ["홍길동", "2026-09-03"],
+      ["김철수", "2026-09-03"],
+    ]);
     expect(result.detailRows.find((row) => row.employeeId === "employee-1" && row.workDate === "2026-09-03")?.daily).toBe(true);
     expect(result.detailRows.find((row) => row.employeeId === "employee-1" && row.workDate === "2026-09-04")?.daily).toBe(false);
     expect(result.detailRows.find((row) => row.employeeId === "employee-2" && row.workDate === "2026-09-03")?.daily).toBe(false);
@@ -54,7 +63,8 @@ describe("monthly daily education attendance", () => {
       && filters.some(([method]) => method === "gte"));
     expect(detailQuery?.filters).toContainEqual(["gte", "work_date", "2026-09-01"]);
     expect(detailQuery?.filters).toContainEqual(["lt", "work_date", "2026-10-01"]);
-    expect(detailQuery?.filters.some(([method]) => method === "or" || method === "not")).toBe(false);
+    expect(detailQuery?.filters).toContainEqual(["not", "work_intime", "is", null]);
+    expect(detailQuery?.filters.some(([method]) => method === "or")).toBe(false);
 
     const completionQuery = queries.find(({ table, filters }) => table === "education_completions"
       && filters.some(([method, column, value]) => method === "eq" && column === "education_type" && value === "일일"));

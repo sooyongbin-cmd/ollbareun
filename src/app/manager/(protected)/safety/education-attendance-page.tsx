@@ -21,7 +21,7 @@ function currentKstYearMonth() {
 }
 
 function Mark({ completed }: { completed: boolean }) {
-  return <span className={completed ? "font-semibold text-primary" : "text-muted-foreground"}>{completed ? "O" : "X"}</span>;
+  return <span className={completed ? "font-semibold text-muted-foreground" : "text-destructive"}>{completed ? "O" : "X"}</span>;
 }
 
 export default function EducationAttendancePage({ mode }: { mode: EducationAttendanceMode }) {

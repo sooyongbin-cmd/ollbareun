@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { authenticateGuard, clockIn, clockOut, createAssignment, createEmployee, deleteAssignment, deleteAssignmentAfterToday, deleteAssignmentIncludingAttendance, deleteWorksite, listAssignments, listAssignmentsForEmployee, loadGuardSessionByEmployeeId } from "./phase1-data";
+import { authenticateGuard, clockIn, clockOut, createAssignment, createEmployee, deleteAssignment, deleteAssignmentAfterToday, deleteAssignmentIncludingAttendance, deleteWorksite, listAssignmentManagementData, listAssignmentsForEmployee, loadGuardSessionByEmployeeId } from "./phase1-data";
 import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
 import { getAssignmentDayOffCounts, isAssignmentDayOff } from "./assignment-days-off";
@@ -916,7 +916,7 @@ describe("guard authentication data rules", () => {
     expect(isAssignmentDayOff).toHaveBeenCalledWith("assign-1", "2026-05-25");
   });
 
-  it("listAssignments counts days off per assignment", async () => {
+  it("lists assignments and active employee and worksite filter options", async () => {
     const assignmentsQuery = {
       select: vi.fn().mockReturnThis(),
       order: vi.fn().mockReturnThis(),
@@ -933,8 +933,10 @@ describe("guard authentication data rules", () => {
     const employeesQuery = {
       select: vi.fn().mockResolvedValue({
         data: [
-          { id: "emp-1", name: "홍길동", role: "경비원", work_style: "0" },
-          { id: "emp-2", name: "김철수", role: "미화원", work_style: "2" },
+          { id: "emp-1", name: "홍길동", role: "경비원", work_style: "0", is_retired: false },
+          { id: "emp-2", name: "김철수", role: "미화원", work_style: "2", is_retired: false },
+          { id: "emp-3", name: "이영희", role: "미화원", work_style: "1", is_retired: false },
+          { id: "emp-4", name: "퇴직자", role: "경비원", work_style: "0", is_retired: true },
         ],
         error: null,
       }),
@@ -962,9 +964,9 @@ describe("guard authentication data rules", () => {
     vi.mocked(getAssignmentDayOffCounts).mockResolvedValue(new Map([["assign-1", 2]]));
     vi.mocked(getSupabase).mockClear();
 
-    const result = await listAssignments();
+    const result = await listAssignmentManagementData();
     expect(getSupabase).not.toHaveBeenCalled();
-    expect(result).toEqual([
+    expect(result.assignments).toEqual([
       {
         id: "assign-1",
         employee_id: "emp-1",
@@ -990,6 +992,9 @@ describe("guard authentication data rules", () => {
         days_off_count: 0,
       },
     ]);
+    expect(result.employeeNames).toEqual(["홍길동", "김철수", "이영희"]);
+    expect(result.employeeNames).not.toContain("퇴직자");
+    expect(result.worksiteNames).toEqual(["본사", "서울지점"]);
   });
 
   it("lists an employee's assignments with worksite names", async () => {

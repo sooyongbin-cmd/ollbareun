@@ -534,14 +534,14 @@ export async function createAssignment(input: {
   return data as AssignmentRow;
 }
 
-export async function listAssignments() {
+export async function listAssignmentManagementData() {
   // This endpoint is manager-only. Use the privileged server client because
   // a Route Handler does not forward the browser's Supabase auth cookies to
   // the legacy publishable client, which would make RLS return an empty list.
   const supabase = getSupabaseAdmin();
   const [assignmentsResult, employeesResult, worksitesResult, daysOffCountByAssignmentId] = await Promise.all([
     supabase.from("work_assignments").select("*").order("start_date", { ascending: false }).order("created_at", { ascending: false }),
-    supabase.from("employees").select("id,name,role,work_style"),
+    supabase.from("employees").select("id,name,role,work_style,is_retired"),
     supabase.from("worksites").select("id,name"),
     getAssignmentDayOffCounts(),
   ]);
@@ -553,7 +553,7 @@ export async function listAssignments() {
   const employeesById = new Map((employeesResult.data ?? []).map((employee) => [employee.id, employee]));
   const worksitesById = new Map((worksitesResult.data ?? []).map((worksite) => [worksite.id, worksite.name]));
 
-  return (assignmentsResult.data ?? []).map((assignment) => {
+  const assignments = (assignmentsResult.data ?? []).map((assignment) => {
     const employee = employeesById.get(assignment.employee_id);
 
     return {
@@ -565,6 +565,18 @@ export async function listAssignments() {
       days_off_count: daysOffCountByAssignmentId.get(assignment.id) ?? 0,
     };
   }) as AssignmentListRow[];
+
+  return {
+    assignments,
+    employeeNames: Array.from(
+      new Set((employeesResult.data ?? []).filter((employee) => employee.is_retired === false).map((employee) => employee.name)),
+    ),
+    worksiteNames: Array.from(new Set((worksitesResult.data ?? []).map((worksite) => worksite.name))),
+  };
+}
+
+export async function listAssignments() {
+  return (await listAssignmentManagementData()).assignments;
 }
 
 export async function getAssignmentById(id: unknown, supabase: SupabaseClient = getSupabase()) {

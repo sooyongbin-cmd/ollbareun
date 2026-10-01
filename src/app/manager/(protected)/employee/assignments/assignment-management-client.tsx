@@ -22,6 +22,8 @@ type AssignmentRow = {
 
 type AssignmentResponse = {
   assignments: AssignmentRow[];
+  employeeNames: string[];
+  worksiteNames: string[];
 };
 
 async function fetchJson<T>(url: string): Promise<T> {
@@ -52,6 +54,8 @@ export default function AssignmentManagementClient() {
   const searchParams = useSearchParams();
   const initialWorksite = searchParams?.get("worksite") ?? "";
   const [assignments, setAssignments] = useState<AssignmentRow[]>([]);
+  const [employeeNames, setEmployeeNames] = useState<string[]>([]);
+  const [worksiteNames, setWorksiteNames] = useState<string[]>([]);
   const [dateQuery, setDateQuery] = useState("");
   const [worksiteQuery, setWorksiteQuery] = useState(initialWorksite);
   const [nameQuery, setNameQuery] = useState("");
@@ -61,16 +65,16 @@ export default function AssignmentManagementClient() {
   const [error, setError] = useState("");
 
   const employeeNameOptions = useMemo(() => {
-    return Array.from(new Set(assignments.map((assignment) => assignment.employee_name))).sort((left, right) =>
-      left.localeCompare(right, "ko-KR"),
+    return Array.from(new Set(employeeNames)).sort((left, right) =>
+      right.localeCompare(left, "ko-KR"),
     );
-  }, [assignments]);
+  }, [employeeNames]);
 
   const worksiteNameOptions = useMemo(() => {
-    return Array.from(new Set(assignments.map((assignment) => assignment.worksite_name))).sort((left, right) =>
-      left.localeCompare(right, "ko-KR"),
+    return Array.from(new Set(worksiteNames)).sort((left, right) =>
+      right.localeCompare(left, "ko-KR"),
     );
-  }, [assignments]);
+  }, [worksiteNames]);
 
   useEffect(() => {
     let ignore = false;
@@ -80,6 +84,8 @@ export default function AssignmentManagementClient() {
         const data = await fetchJson<AssignmentResponse>("/api/assignments");
         if (!ignore) {
           setAssignments(data.assignments ?? []);
+          setEmployeeNames(data.employeeNames ?? []);
+          setWorksiteNames(data.worksiteNames ?? []);
         }
       } catch (loadError) {
         if (!ignore) {
@@ -109,9 +115,9 @@ export default function AssignmentManagementClient() {
         !normalizedDate ||
         (assignment.start_date <= normalizedDate && normalizedDate <= assignment.end_date);
       const matchesWorksite =
-        !normalizedWorksite || assignment.worksite_name.toLowerCase().includes(normalizedWorksite);
+        !normalizedWorksite || assignment.worksite_name.toLowerCase() === normalizedWorksite;
       const matchesName =
-        !normalizedName || assignment.employee_name.toLowerCase().includes(normalizedName);
+        !normalizedName || assignment.employee_name.toLowerCase() === normalizedName;
 
       return matchesDate && matchesWorksite && matchesName;
     });
@@ -175,56 +181,49 @@ export default function AssignmentManagementClient() {
         aria-label="배정 검색"
         className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
       >
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="grid gap-4 flex-1 md:grid-cols-3">
-            <div className="space-y-2">
-              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-name-search">
-                이름
-              </label>
-              <Input
-                className="w-full"
-                id="assignment-name-search"
-                list="assignment-name-search-options"
-                placeholder="이름을 입력하세요."
-                value={nameQuery}
-                onChange={(event) => setNameQuery(event.target.value)}
-              />
-              <datalist id="assignment-name-search-options">
-                {employeeNameOptions.map((name) => <option key={name} value={name} />)}
-              </datalist>
-            </div>
-            <div className="space-y-2">
-              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-worksite-search">
-                근무지
-              </label>
-              <Input
-                className="w-full"
-                id="assignment-worksite-search"
-                list="assignment-worksite-search-options"
-                placeholder="근무지 이름을 입력하세요."
-                value={worksiteQuery}
-                onChange={(event) => setWorksiteQuery(event.target.value)}
-              />
-              <datalist id="assignment-worksite-search-options">
-                {worksiteNameOptions.map((name) => <option key={name} value={name} />)}
-              </datalist>
-            </div>
-            <div className="space-y-2">
-              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-date-search">
-                날짜
-              </label>
-              <Input
-                className="w-full"
-                id="assignment-date-search"
-                type="date"
-                value={dateQuery}
-                onChange={(event) => setDateQuery(event.target.value)}
-              />
-            </div>
+        <div className="grid gap-4 md:grid-cols-[repeat(3,minmax(0,1fr))_max-content] md:items-end">
+          <div className="space-y-2">
+            <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-name-search">
+              이름
+            </label>
+            <select
+              className="h-9 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 dark:bg-input/30"
+              id="assignment-name-search"
+              value={nameQuery}
+              onChange={(event) => setNameQuery(event.target.value)}
+            >
+              <option value="">전체</option>
+              {employeeNameOptions.map((name) => <option key={name} value={name}>{name}</option>)}
+            </select>
           </div>
-
+          <div className="space-y-2">
+            <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-worksite-search">
+              근무지
+            </label>
+            <select
+              className="h-9 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 dark:bg-input/30"
+              id="assignment-worksite-search"
+              value={worksiteQuery}
+              onChange={(event) => setWorksiteQuery(event.target.value)}
+            >
+              <option value="">전체</option>
+              {worksiteNameOptions.map((name) => <option key={name} value={name}>{name}</option>)}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-date-search">
+              날짜
+            </label>
+            <Input
+              className="w-full"
+              id="assignment-date-search"
+              type="date"
+              value={dateQuery}
+              onChange={(event) => setDateQuery(event.target.value)}
+            />
+          </div>
           <Link
-            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2"
+            className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-primary px-4 text-center text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:w-auto"
             href="/manager/employee/assignments/new"
           >
             <span>배정등록</span>

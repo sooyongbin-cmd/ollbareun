@@ -90,6 +90,32 @@ describe("manager reports", () => {
     ]);
   });
 
+  it("sorts attendance by work date, scheduled clock-in, and scheduled clock-out", () => {
+    const attendance = [
+      { id: "later-start", employee_id: "emp-1", worksite_id: "site-later-start", work_date: "2026-09-18", intime: "2026-09-18T00:00:00.000Z", outtime: "2026-09-18T09:00:00.000Z", work_intime: null, work_outtime: null, intime_status: "2" as const, outtime_status: "2" as const },
+      { id: "later-out", employee_id: "emp-1", worksite_id: "site-later-out", work_date: "2026-09-18", intime: "2026-09-17T23:00:00.000Z", outtime: "2026-09-18T10:00:00.000Z", work_intime: null, work_outtime: null, intime_status: "2" as const, outtime_status: "2" as const },
+      { id: "earlier-out", employee_id: "emp-1", worksite_id: "site-earlier-out", work_date: "2026-09-18", intime: "2026-09-17T23:00:00.000Z", outtime: "2026-09-18T09:00:00.000Z", work_intime: null, work_outtime: null, intime_status: "2" as const, outtime_status: "2" as const },
+      { id: "earlier-date", employee_id: "emp-1", worksite_id: "site-earlier-date", work_date: "2026-09-17", intime: "2026-09-17T12:00:00.000Z", outtime: "2026-09-17T21:00:00.000Z", work_intime: null, work_outtime: null, intime_status: "2" as const, outtime_status: "2" as const },
+    ];
+    const rows = buildAttendanceReport({
+      employeeName: "",
+      workDate: "2026-09-18",
+      employees: [{ id: "emp-1", name: "김철수" }],
+      now: new Date("2026-09-20T00:00:00.000Z"),
+      attendance,
+      dailyAttendance: attendance.map(({ id, employee_id, worksite_id, work_date, intime, outtime }) => ({
+        id, employee_id, worksite_id, work_date, intime, outtime,
+      })),
+    });
+
+    expect(rows.map((row) => row.id)).toEqual([
+      "earlier-date",
+      "earlier-out",
+      "later-out",
+      "later-start",
+    ]);
+  });
+
   it("marks attendance as late when clock-in is after the assigned daily start time", () => {
     const rows = buildAttendanceReport({
       employeeName: "김철수",

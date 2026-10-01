@@ -148,13 +148,13 @@ export default function AttendanceReportPage() {
       </header>
 
       <section aria-label="근태내역 조회" className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
-        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_12rem_auto_auto] md:items-end">
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_12rem_auto] md:items-end">
           <div className="space-y-2">
-            <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="attendance-employee-name">
+            <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor="attendance-employee-name">
               직원이름
             </label>
             <Input
-              className="w-full"
+              className="block w-full"
               id="attendance-employee-name"
               list="attendance-employee-name-options"
               placeholder={employeeNamesLoading ? "직원 목록 로딩 중..." : "전체 직원"}
@@ -168,18 +168,18 @@ export default function AttendanceReportPage() {
             </datalist>
           </div>
           <div className="space-y-2">
-            <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="attendance-work-date">
+            <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor="attendance-work-date">
               출퇴근날짜
             </label>
             <Input
-              className="w-full"
+              className="block w-full"
               id="attendance-work-date"
               type="date"
               value={workDate}
               onChange={(event) => setWorkDate(event.target.value)}
             />
           </div>
-          <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 h-[3rem]" type="button" onClick={handleExport} disabled={rows.length === 0}>
+          <Button className="h-9 min-h-9 px-4 py-0" type="button" onClick={handleExport} disabled={rows.length === 0}>
             엑셀
           </Button>
         </div>

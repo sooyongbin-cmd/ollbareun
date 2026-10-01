@@ -272,14 +272,14 @@ export default function EmployeeRosterPage() {
         aria-label="직원 검색"
         className="rounded-xl border border-border/50 bg-muted/40 p-[1.5rem] md:p-[2rem]"
       >
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="flex flex-1 flex-col gap-4 md:flex-row">
-            <div className="flex-1 space-y-2">
-              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="employee-roster-name-search">
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_max-content] md:items-end">
+          <div className="flex flex-col gap-4 md:contents">
+            <div className="min-w-0 space-y-2">
+              <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor="employee-roster-name-search">
                 이름
               </label>
               <Input
-                className="w-full"
+                className="block w-full"
                 id="employee-roster-name-search"
                 list="employee-roster-name-options"
                 placeholder="이름을 입력하세요."
@@ -290,8 +290,8 @@ export default function EmployeeRosterPage() {
                 {employeeNameOptions.map((name) => <option key={name} value={name} />)}
               </datalist>
             </div>
-            <div className="flex-1 space-y-2">
-              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="employee-roster-role-search">
+            <div className="min-w-0 space-y-2">
+              <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor="employee-roster-role-search">
                 직군
               </label>
               <NativeSelect
@@ -308,7 +308,7 @@ export default function EmployeeRosterPage() {
             </div>
           </div>
 
-          <label className="flex h-[3rem] items-center gap-2 text-[0.875rem] font-semibold text-foreground/80 md:mb-0">
+          <label className="flex h-9 items-center gap-2 whitespace-nowrap text-[0.875rem] font-semibold text-foreground/80">
             <Checkbox
               checked={showRetired}
               onCheckedChange={(checked) => {
@@ -321,7 +321,7 @@ export default function EmployeeRosterPage() {
           </label>
 
           <Link
-            className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full gap-2 text-center md:w-auto"
+            className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-primary px-4 text-center text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:w-auto"
             href="/manager/employee/employees/new"
           >
             <span>직원 등록</span>

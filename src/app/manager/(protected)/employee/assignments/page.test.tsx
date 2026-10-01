@@ -37,7 +37,6 @@ describe("assignment management page", () => {
                 employee_role: "경비원",
                 employee_work_style: "0",
                 worksite_name: "본사",
-                days_off_count: 2,
               },
               {
                 id: "assign-2",
@@ -47,7 +46,6 @@ describe("assignment management page", () => {
                 employee_role: "미화원",
                 employee_work_style: "2",
                 worksite_name: "서울지점",
-                days_off_count: 0,
               },
             ],
             employeeNames: ["홍길동", "김철수", "이영희"],
@@ -69,14 +67,12 @@ describe("assignment management page", () => {
       "href",
       "/manager/employee/assignments/new",
     );
-    expect(screen.getByRole("columnheader", { name: "휴무" })).toBeInTheDocument();
     expect(screen.getAllByRole("columnheader").map((header) => header.textContent?.trim())).toEqual([
       "이름",
       "직군",
       "근무형태",
       "근무지",
       "날짜",
-      "휴무",
     ]);
 
     const employeeLink = await screen.findByRole("link", { name: "홍길동" });
@@ -87,7 +83,7 @@ describe("assignment management page", () => {
     expect(within(row).getByText("경비원")).toBeInTheDocument();
     expect(within(row).getByText("일반근무")).toBeInTheDocument();
     expect(within(row).getByText("본사")).toBeInTheDocument();
-    expect(within(row).getByText("2일")).toBeInTheDocument();
+    expect(within(row).queryByText("2일")).not.toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "이름" })).toHaveValue("");
     expect(Array.from(document.querySelectorAll<HTMLOptionElement>("#assignment-name-search option")).map((option) => option.value)).toEqual(["", "홍길동", "이영희", "김철수"]);
     expect(screen.getByRole("combobox", { name: "근무지" })).toHaveValue("");
@@ -133,7 +129,7 @@ describe("assignment management page", () => {
     );
   });
 
-  it("sorts assignments by date, worksite name, employee name, and days off", async () => {
+  it("sorts assignments by date, worksite name, and employee name", async () => {
     const user = userEvent.setup();
 
     const { container } = renderWithManagerLayout(<AssignmentManagementPage />);
@@ -154,13 +150,13 @@ describe("assignment management page", () => {
     expect(within(trs[0] as HTMLElement).getByText("홍길동")).toBeInTheDocument();
     expect(within(trs[1] as HTMLElement).getByText("김철수")).toBeInTheDocument();
 
-    // Click "휴무" to sort ASC: assign-2 (0일) first, then assign-1 (2일)
-    const daysOffHeader = screen.getByRole("columnheader", { name: "휴무" });
-    await user.click(daysOffHeader);
+    // Click "근무지" to sort ASC: 본사 first, then 서울지점
+    const worksiteHeader = screen.getByRole("columnheader", { name: "근무지" });
+    await user.click(worksiteHeader);
 
     trs = container.querySelectorAll("tbody tr");
-    expect(within(trs[0] as HTMLElement).getByText("김철수")).toBeInTheDocument();
-    expect(within(trs[1] as HTMLElement).getByText("홍길동")).toBeInTheDocument();
+    expect(within(trs[0] as HTMLElement).getByText("홍길동")).toBeInTheDocument();
+    expect(within(trs[1] as HTMLElement).getByText("김철수")).toBeInTheDocument();
 
     // Click "이름" to sort ASC: 김철수 (김) first, then 홍길동 (홍)
     const nameHeader = screen.getByRole("columnheader", { name: "이름" });

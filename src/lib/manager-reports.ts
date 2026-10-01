@@ -191,7 +191,6 @@ export function buildAttendanceReport(input: {
       (record.work_date === input.workDate || toKstDateTime(record.outtime ?? null)?.date === input.workDate) &&
       employeeIds.has(record.employee_id)
     ))
-    .sort((left, right) => left.work_date.localeCompare(right.work_date))
     .map((record) => {
       const scheduledTime = scheduledTimes.get(
         `${record.employee_id}:${record.worksite_id ?? ""}:${record.work_date}`,
@@ -226,7 +225,12 @@ export function buildAttendanceReport(input: {
         outtimeLabel: hideOuttimeStatus ? "" : outtimeStatus === "1" ? "조퇴" : outtimeStatus === "2" ? "퇴근" : "미퇴근",
         isLate: intimeStatus === "1",
       };
-    });
+    })
+    .sort((left, right) =>
+      left.workDate.localeCompare(right.workDate) ||
+      left.scheduledClockIn.localeCompare(right.scheduledClockIn) ||
+      left.scheduledClockOut.localeCompare(right.scheduledClockOut),
+    );
 }
 
 function assertDate(date: string) {

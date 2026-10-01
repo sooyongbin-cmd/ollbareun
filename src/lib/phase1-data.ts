@@ -5,7 +5,7 @@ import { requireGpsInfo, type GpsInfo } from "./gps";
 import { type SupabaseClient } from "@supabase/supabase-js";
 import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
-import { getAssignmentDayOffCounts, isAssignmentDayOff } from "./assignment-days-off";
+import { isAssignmentDayOff } from "./assignment-days-off";
 import { loadEmployeeRoles } from "./employee-roles";
 import { selectGuardWorkSchedule } from "./guard-work-schedule";
 
@@ -61,7 +61,6 @@ export type AssignmentListRow = AssignmentRow & {
   employee_role: EmployeeRow["role"] | null;
   employee_work_style: EmployeeRow["work_style"] | null;
   worksite_name: string;
-  days_off_count: number;
 };
 
 export type EmployeeAssignmentInfo = Pick<AssignmentRow, "id" | "employee_id" | "worksite_id" | "start_date" | "end_date"> & {
@@ -539,11 +538,10 @@ export async function listAssignmentManagementData() {
   // a Route Handler does not forward the browser's Supabase auth cookies to
   // the legacy publishable client, which would make RLS return an empty list.
   const supabase = getSupabaseAdmin();
-  const [assignmentsResult, employeesResult, worksitesResult, daysOffCountByAssignmentId] = await Promise.all([
+  const [assignmentsResult, employeesResult, worksitesResult] = await Promise.all([
     supabase.from("work_assignments").select("*").order("start_date", { ascending: false }).order("created_at", { ascending: false }),
     supabase.from("employees").select("id,name,role,work_style,is_retired"),
     supabase.from("worksites").select("id,name"),
-    getAssignmentDayOffCounts(),
   ]);
 
   throwIfError(assignmentsResult.error);
@@ -562,7 +560,6 @@ export async function listAssignmentManagementData() {
       employee_role: employee?.role ?? null,
       employee_work_style: employee?.work_style ?? null,
       worksite_name: worksitesById.get(assignment.worksite_id) ?? "근무지 없음",
-      days_off_count: daysOffCountByAssignmentId.get(assignment.id) ?? 0,
     };
   }) as AssignmentListRow[];
 

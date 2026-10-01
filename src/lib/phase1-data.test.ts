@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { authenticateGuard, clockIn, clockOut, createAssignment, createEmployee, deleteAssignment, deleteAssignmentAfterToday, deleteAssignmentIncludingAttendance, deleteWorksite, listAssignmentManagementData, listAssignmentsForEmployee, loadGuardSessionByEmployeeId } from "./phase1-data";
 import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
-import { getAssignmentDayOffCounts, isAssignmentDayOff } from "./assignment-days-off";
+import { isAssignmentDayOff } from "./assignment-days-off";
 
 vi.mock("./supabase", () => ({
   getSupabase: vi.fn(),
@@ -13,7 +13,6 @@ vi.mock("./supabase-admin", () => ({
 }));
 
 vi.mock("./assignment-days-off", () => ({
-  getAssignmentDayOffCounts: vi.fn(),
   isAssignmentDayOff: vi.fn().mockResolvedValue(false),
 }));
 
@@ -28,7 +27,6 @@ function employeeRolesQuery(content = "경비원\n미화원\n주차원\n사감")
 describe("guard authentication data rules", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
-    vi.mocked(getAssignmentDayOffCounts).mockResolvedValue(new Map());
     vi.mocked(isAssignmentDayOff).mockResolvedValue(false);
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-05-26T09:00:00+09:00"));
@@ -961,7 +959,6 @@ describe("guard authentication data rules", () => {
       }),
     };
     vi.mocked(getSupabaseAdmin).mockReturnValue(supabase as never);
-    vi.mocked(getAssignmentDayOffCounts).mockResolvedValue(new Map([["assign-1", 2]]));
     vi.mocked(getSupabase).mockClear();
 
     const result = await listAssignmentManagementData();
@@ -977,7 +974,6 @@ describe("guard authentication data rules", () => {
         employee_role: "경비원",
         employee_work_style: "0",
         worksite_name: "본사",
-        days_off_count: 2,
       },
       {
         id: "assign-2",
@@ -989,7 +985,6 @@ describe("guard authentication data rules", () => {
         employee_role: "미화원",
         employee_work_style: "2",
         worksite_name: "서울지점",
-        days_off_count: 0,
       },
     ]);
     expect(result.employeeNames).toEqual(["홍길동", "김철수", "이영희"]);

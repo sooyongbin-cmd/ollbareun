@@ -8,7 +8,6 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import ManagerLoadingMessage from "../../../../manager-loading-message";
-import { SaveIcon } from "@/components/icons/save-icon";
 import { DeleteIcon } from "@/components/icons/delete-icon";
 import ConfirmModal from "@/components/modals/confirm-modal";
 import AlertModal from "@/components/modals/alert-modal";
@@ -88,12 +87,10 @@ export default function AssignmentSavePage() {
   const [dailyAttendance, setDailyAttendance] = useState<DailyAttendance[]>([]);
   const [daysOff, setDaysOff] = useState<Set<string>>(new Set());
   const [holidays, setHolidays] = useState<Set<string>>(new Set());
-  const [pendingDayOff, setPendingDayOff] = useState<string | null>(null);
   const [loading, setLoading] = useState(Boolean(assignmentId));
   const [error, setError] = useState("");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteAfterTodayConfirmOpen, setDeleteAfterTodayConfirmOpen] = useState(false);
-  const [deleteWithAttendanceConfirmOpen, setDeleteWithAttendanceConfirmOpen] = useState(false);
   const [errorAlertMessage, setErrorAlertMessage] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [saving, setSaving] = useState(false);
@@ -192,22 +189,6 @@ export default function AssignmentSavePage() {
     }
   }
 
-  async function handleDeleteIncludingAttendance() {
-    setDeleting(true);
-    setError("");
-    setErrorAlertMessage("");
-
-    try {
-      await deleteRequest(`/api/assignments/${assignmentId}?includeAttendance=true`);
-      setAlertMessage("자료가 삭제되었습니다.");
-    } catch (deleteError) {
-      setErrorAlertMessage(deleteError instanceof Error ? deleteError.message : "자료를 삭제하지 못했습니다.");
-    } finally {
-      setDeleting(false);
-      setDeleteWithAttendanceConfirmOpen(false);
-    }
-  }
-
   async function handleDeleteAfterToday() {
     setDeleting(true);
     setError("");
@@ -224,37 +205,6 @@ export default function AssignmentSavePage() {
     }
   }
 
-  async function handleToggleDayOff(date: string) {
-    if (pendingDayOff) return;
-
-    const wasDayOff = daysOff.has(date);
-    const nextDaysOff = new Set(daysOff);
-    if (wasDayOff) {
-      nextDaysOff.delete(date);
-    } else {
-      nextDaysOff.add(date);
-    }
-
-    setDaysOff(nextDaysOff);
-    setPendingDayOff(date);
-    setError("");
-
-    try {
-      const url = `/api/manager/assignments/${assignmentId}/days-off/${encodeURIComponent(date)}`;
-      const response = await fetch(url, { method: wasDayOff ? "DELETE" : "PUT" });
-      if (!response.ok) {
-        const payload = await response.json().catch(() => ({}));
-        throw new Error(payload.error ?? "휴무일을 처리하지 못했습니다.");
-      }
-    } catch (toggleError) {
-      setDaysOff(new Set(daysOff));
-      setError(toggleError instanceof Error ? toggleError.message : "휴무일을 처리하지 못했습니다.");
-    } finally {
-      setPendingDayOff(null);
-    }
-  }
-
-  const periodChanged = startDate !== savedStartDate || endDate !== savedEndDate;
   const employeeName = employees.find((employee) => employee.id === employeeId)?.name ?? "";
 
   return (
@@ -341,9 +291,6 @@ export default function AssignmentSavePage() {
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <Button aria-label="저장" className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto" disabled={saving || deleting} type="submit">
-                <SaveIcon size={20} />
-              </Button>
               <Button
                 aria-label="삭제"
                 className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto"
@@ -364,17 +311,6 @@ export default function AssignmentSavePage() {
               >
                 <DeleteIcon size={20} />
                 <span>오늘이후 근무예정 자료삭제</span>
-              </Button>
-              <Button
-                aria-label="전체자료삭제"
-                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-destructive/50 bg-background px-4 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto"
-                type="button"
-                disabled={saving || deleting}
-                onClick={() => setDeleteWithAttendanceConfirmOpen(true)}
-                variant="outline"
-              >
-                <DeleteIcon size={20} />
-                <span>전체자료삭제</span>
               </Button>
               <Button
                 aria-label="목록"
@@ -400,11 +336,8 @@ export default function AssignmentSavePage() {
             currentMonth={currentMonth}
             daysOff={daysOff}
             holidays={holidays}
-            disabled={periodChanged}
             endDate={savedEndDate}
             onMonthChange={setCurrentMonth}
-            onToggle={handleToggleDayOff}
-            pendingDate={pendingDayOff}
             startDate={savedStartDate}
           />
           </>
@@ -427,16 +360,6 @@ export default function AssignmentSavePage() {
         onConfirm={handleDeleteAfterToday}
         title="오늘 이후 자료를 포함하여 배정을 삭제할까요?"
         description="오늘 출근한 자료는 보존하고, 오늘 이후의 자료를 삭제합니다. 삭제한 자료는 복구할 수 없습니다."
-        loading={deleting}
-        loadingLabel="삭제처리중입니다..."
-      />
-
-      <ConfirmModal
-        isOpen={deleteWithAttendanceConfirmOpen}
-        onClose={() => setDeleteWithAttendanceConfirmOpen(false)}
-        onConfirm={handleDeleteIncludingAttendance}
-        title="현재 발생한 근태자료를 포함하여 모두 삭제할까요?"
-        description="삭제한 자료는 복구할 수 없습니다."
         loading={deleting}
         loadingLabel="삭제처리중입니다..."
       />

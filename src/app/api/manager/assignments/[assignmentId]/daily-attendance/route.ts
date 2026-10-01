@@ -17,7 +17,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ assignment
 
     const { data, error } = await supabase
       .from("work_record")
-      .select("work_date,intime,outtime")
+      .select("id,work_date,intime,outtime")
       .eq("employee_id", assignment.employee_id)
       .eq("worksite_id", assignment.worksite_id)
       .gte("work_date", assignment.start_date)

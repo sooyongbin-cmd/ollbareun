@@ -2,8 +2,9 @@
 
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
 
-export type DailyAttendance = { work_date: string; intime: string | null; outtime: string | null };
+export type DailyAttendance = { id?: string; work_date: string; intime: string | null; outtime: string | null };
 
 type Props = {
   dailyAttendance?: DailyAttendance[];
@@ -12,10 +13,7 @@ type Props = {
   currentMonth: string;
   daysOff: Set<string>;
   holidays?: Set<string>;
-  pendingDate: string | null;
-  disabled: boolean;
   onMonthChange: (month: string) => void;
-  onToggle: (date: string) => void;
 };
 
 const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
@@ -56,13 +54,12 @@ export default function AssignmentDaysOffCalendar({
   currentMonth,
   daysOff,
   holidays = new Set<string>(),
-  pendingDate,
-  disabled,
   onMonthChange,
-  onToggle,
 }: Props) {
   const timesByDate = new Map<string, { intime: string[]; outtime: string[] }>();
+  const attendanceIdByDate = new Map<string, string>();
   dailyAttendance.forEach((row) => {
+    if (row.id && !attendanceIdByDate.has(row.work_date)) attendanceIdByDate.set(row.work_date, row.id);
     const workDateTimes = timesByDate.get(row.work_date) ?? { intime: [], outtime: [] };
     if (row.intime) workDateTimes.intime.push(row.intime);
     timesByDate.set(row.work_date, workDateTimes);
@@ -72,6 +69,7 @@ export default function AssignmentDaysOffCalendar({
       const outDateKey = Number.isNaN(outDate.getTime())
         ? row.work_date
         : new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(outDate);
+      if (row.id && !attendanceIdByDate.has(outDateKey)) attendanceIdByDate.set(outDateKey, row.id);
       const outDateTimes = timesByDate.get(outDateKey) ?? { intime: [], outtime: [] };
       outDateTimes.outtime.push(row.outtime);
       timesByDate.set(outDateKey, outDateTimes);
@@ -95,21 +93,7 @@ export default function AssignmentDaysOffCalendar({
   const trailingCells = (7 - (cells.length % 7)) % 7;
 
   return (
-    <section className="mt-8 border-t border-border/60 pt-8" aria-labelledby="days-off-calendar-title">
-      <div className="mb-5 space-y-1">
-        <h2 className="text-[1.5rem] font-semibold" id="days-off-calendar-title">
-          휴무일 지정
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          근무기간 안의 날짜를 선택하면 즉시 휴무일로 저장됩니다.
-        </p>
-        {disabled ? (
-          <p className="text-sm font-medium text-destructive" role="status">
-            근무기간 변경 내용을 먼저 저장하세요.
-          </p>
-        ) : null}
-      </div>
-
+    <section className="mt-8 border-t border-border/60 pt-8">
       <div className="mx-auto max-w-[47.5rem] rounded-xl border border-border bg-background p-3 shadow-sm sm:p-5">
         <div className="mb-4 flex items-center justify-between">
           <Button
@@ -155,30 +139,38 @@ export default function AssignmentDaysOffCalendar({
                 const dateObject = new Date(`${date}T00:00:00.000Z`);
                 const isWeekend = dateObject.getUTCDay() === 0 || dateObject.getUTCDay() === 6;
                 const isWeekendOrHoliday = isWeekend || holidays.has(date);
-                return (
-              <button
-                aria-label={`${date} ${daysOff.has(date) ? "휴무일 해제" : "휴무일 지정"}`}
-                aria-pressed={daysOff.has(date)}
-                className={[
+                const attendanceId = attendanceIdByDate.get(date);
+                const withinAssignment = date >= startDate && date <= endDate;
+                const className = [
                   "flex min-w-0 min-h-24 flex-col items-center justify-start gap-1 px-0.5 py-2 rounded-lg border text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50",
                   daysOff.has(date) || isWeekendOrHoliday
                     ? "border-transparent bg-orange-100/80 hover:border-orange-300 hover:bg-orange-100 dark:bg-orange-950/30 dark:hover:bg-orange-950/50"
                     : "border-transparent bg-muted/40 hover:border-primary/40 hover:bg-primary/10",
-                  date < startDate || date > endDate || disabled || pendingDate === date
-                    ? "cursor-not-allowed opacity-40"
-                    : "",
-                ].join(" ")}
-                disabled={date < startDate || date > endDate || disabled || pendingDate !== null}
-                key={date}
-                onClick={() => onToggle(date)}
-                type="button"
-              >
-                <span>{Number(date.slice(-2))}</span>
-                {entriesByDate.get(date)?.map((entry, timeIndex) => (
-                  <span className="text-[0.625rem] leading-tight sm:text-xs" key={`${entry.type}-${date}-${timeIndex}`}><span className="block sm:inline">{entry.type} </span>{formatTime(entry.value)}</span>
-                ))}
-                {daysOff.has(date) ? <span className="sr-only"> 휴무일</span> : null}
-              </button>
+                  !withinAssignment || !attendanceId ? "cursor-not-allowed opacity-40" : "cursor-pointer",
+                ].join(" ");
+                const contents = (
+                  <>
+                    <span>{Number(date.slice(-2))}</span>
+                    {entriesByDate.get(date)?.map((entry, timeIndex) => (
+                      <span className="text-[0.625rem] leading-tight sm:text-xs" key={`${entry.type}-${date}-${timeIndex}`}><span className="block sm:inline">{entry.type} </span>{formatTime(entry.value)}</span>
+                    ))}
+                    {daysOff.has(date) ? <span className="sr-only"> 휴무일</span> : null}
+                  </>
+                );
+
+                return attendanceId && withinAssignment ? (
+                  <Link
+                    aria-label={`${date} 근태상세 보기`}
+                    className={className}
+                    href={`/manager/reports/attendance/detail/${encodeURIComponent(attendanceId)}`}
+                    key={date}
+                  >
+                    {contents}
+                  </Link>
+                ) : (
+                  <div aria-label={`${date} 근태자료 없음`} className={className} key={date}>
+                    {contents}
+                  </div>
                 );
               })()
             ) : (

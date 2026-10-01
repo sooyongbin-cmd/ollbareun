@@ -7,6 +7,7 @@ import AlertModal from "@/components/modals/alert-modal";
 import { PowerIcon } from "@/components/icons/power-icon";
 import { clearStoredGuardSession, readStoredGuardSession } from "../guard-session-storage";
 import { getSupabasePasskeyClient } from "@/lib/supabase-passkey-client";
+import { getAppPushRegistration } from "@/lib/app-push-registration";
 
 const guardLogoutPushResultStorageKey = "ollbareun.guard.logout.pushResult";
 const guardPushRegistrationStorageKey = "ollbareun.guard.pushRegistration";
@@ -34,7 +35,11 @@ async function getCurrentPushEndpoint() {
     return { endpoint: null, status: "unsupported" as const };
   }
 
-  const registration = await navigator.serviceWorker.getRegistration("/sw.js");
+  const registration = await getAppPushRegistration("guard");
+  // A root registration may still be delivering manager alerts on this device.
+  if (!registration) {
+    return { endpoint: null, status: "not-found" as const };
+  }
   const subscription = await registration?.pushManager.getSubscription();
   const endpoint = subscription?.endpoint ?? null;
 

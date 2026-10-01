@@ -60,6 +60,7 @@ function isExpiredSubscriptionError(error: unknown) {
 export async function saveManagerPushSubscription(
   userId: string,
   subscription: ManagerPushSubscriptionInput,
+  previousEndpoint?: string,
 ) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
@@ -79,6 +80,17 @@ export async function saveManagerPushSubscription(
 
   if (error) {
     throw new Error(error.message || "관리자 푸시 구독을 저장하지 못했습니다.");
+  }
+
+  // Save first: a failed replacement must leave the working subscription intact.
+  // Only retire this manager's old endpoint; other devices and guard subscriptions stay valid.
+  if (previousEndpoint && previousEndpoint !== subscription.endpoint) {
+    const { error: cleanupError } = await supabase
+      .from("manager_push_subscriptions")
+      .delete()
+      .eq("user_id", userId)
+      .eq("endpoint", previousEndpoint);
+    if (cleanupError) throw new Error(cleanupError.message || "이전 관리자 푸시 구독을 정리하지 못했습니다.");
   }
 
   return data;

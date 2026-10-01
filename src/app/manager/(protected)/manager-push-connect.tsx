@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { getLegacyPushEndpoint, registerAppPushWorker } from "@/lib/app-push-registration";
 
 type ConnectionStatus = "idle" | "connecting" | "connected" | "error";
 
@@ -48,7 +49,7 @@ export default function ManagerPushConnect() {
         throw new Error("푸시 알림 공개키가 설정되지 않았습니다.");
       }
 
-      const registration = await navigator.serviceWorker.register("/sw.js");
+      const registration = await registerAppPushWorker("manager");
       let subscription = await registration.pushManager.getSubscription();
 
       if (!subscription) {
@@ -58,10 +59,11 @@ export default function ManagerPushConnect() {
         });
       }
 
+      const previousEndpoint = await getLegacyPushEndpoint();
       const response = await fetch("/api/manager/notifications/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subscription: subscription.toJSON() }),
+        body: JSON.stringify({ subscription: subscription.toJSON(), previousEndpoint }),
       });
       const payload = await response.json();
 

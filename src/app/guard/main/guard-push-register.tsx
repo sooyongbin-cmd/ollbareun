@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AlertModal from "@/components/modals/alert-modal";
 import { readStoredGuardSession } from "../guard-session-storage";
+import { registerAppPushWorker } from "@/lib/app-push-registration";
 
 const guardPushRegistrationStorageKey = "ollbareun.guard.pushRegistration";
 
@@ -155,7 +156,7 @@ export default function GuardPushRegister() {
       // 3. Register service worker
       let registration: ServiceWorkerRegistration;
       try {
-        registration = await navigator.serviceWorker.register("/sw.js");
+        registration = await registerAppPushWorker("guard");
         console.log("Service Worker registered successfully:", registration);
       } catch (err) {
         showPushError(

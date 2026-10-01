@@ -18,9 +18,10 @@ describe("ManagerPushConnect", () => {
     });
     Object.defineProperty(navigator, "serviceWorker", {
       configurable: true,
-      value: { register },
+      value: { register, getRegistration: vi.fn().mockResolvedValue(undefined) },
     });
     register.mockResolvedValue({
+      active: { state: "activated" },
       pushManager: { getSubscription, subscribe },
     });
   });
@@ -49,6 +50,25 @@ describe("ManagerPushConnect", () => {
     });
     expect(subscribe).not.toHaveBeenCalled();
     expect(await screen.findByText("이 기기에서 관리자 푸시 알림을 받을 수 있습니다.")).toBeInTheDocument();
+  });
+
+  it("passes the legacy endpoint for migration without unsubscribing it in the browser", async () => {
+    const unsubscribe = vi.fn();
+    const legacy = { endpoint: "https://push.test/legacy", unsubscribe };
+    navigator.serviceWorker.getRegistration = vi.fn().mockResolvedValue({
+      scope: new URL("/", window.location.origin).href,
+      pushManager: { getSubscription: vi.fn().mockResolvedValue(legacy) },
+    });
+    const subscription = { toJSON: () => ({ endpoint: "https://push.test/scoped", keys: { p256dh: "key", auth: "secret" } }) };
+    getSubscription.mockResolvedValue(subscription);
+    const fetch = vi.fn().mockResolvedValue(Response.json({ success: true }));
+    vi.stubGlobal("fetch", fetch);
+    render(<ManagerPushConnect />);
+    await waitFor(() => expect(fetch).toHaveBeenCalledWith(
+      "/api/manager/notifications/subscribe",
+      expect.objectContaining({ body: JSON.stringify({ subscription: subscription.toJSON(), previousEndpoint: legacy.endpoint }) }),
+    ));
+    expect(unsubscribe).not.toHaveBeenCalled();
   });
 
   it("creates a subscription when the browser has none", async () => {

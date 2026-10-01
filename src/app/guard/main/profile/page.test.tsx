@@ -347,6 +347,7 @@ describe("guard profile page", () => {
       configurable: true,
       value: {
         getRegistration: vi.fn().mockResolvedValue({
+          scope: new URL("/guard/", window.location.origin).href,
           pushManager: { getSubscription },
         }),
       },

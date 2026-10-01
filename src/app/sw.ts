@@ -50,7 +50,7 @@ self.addEventListener("push", (event) => {
     event.waitUntil(
       self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
         windowClients.forEach((client) => {
-          if (client.visibilityState === "visible") {
+          if (client.visibilityState === "visible" && client.url.startsWith(self.registration.scope)) {
             client.postMessage({
               type: "PUSH_NOTIFICATION_RECEIVED",
               title,

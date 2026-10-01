@@ -52,6 +52,19 @@ describe("POST /api/manager/notifications/subscribe", () => {
     expect(saveManagerPushSubscription).not.toHaveBeenCalled();
   });
 
+  it("passes the legacy endpoint with the authenticated owner for migration", async () => {
+    vi.mocked(getManagerUserWithRole).mockResolvedValue({
+      user: { id: "user-1" } as never,
+      adminUser: { user_id: "user-1", role: "admin" },
+    });
+    const response = await POST(new Request("http://localhost/api/manager/notifications/subscribe", {
+      method: "POST",
+      body: JSON.stringify({ subscription: validSubscription, previousEndpoint: "https://push.test/old", userId: "someone-else" }),
+    }));
+    expect(response.status).toBe(200);
+    expect(saveManagerPushSubscription).toHaveBeenCalledWith("user-1", validSubscription, "https://push.test/old");
+  });
+
   it("stores a valid subscription for the authenticated manager", async () => {
     vi.mocked(getManagerUserWithRole).mockResolvedValue({
       user: { id: "user-1" } as never,
@@ -70,6 +83,6 @@ describe("POST /api/manager/notifications/subscribe", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(saveManagerPushSubscription).toHaveBeenCalledWith("user-1", validSubscription);
+    expect(saveManagerPushSubscription).toHaveBeenCalledWith("user-1", validSubscription, undefined);
   });
 });

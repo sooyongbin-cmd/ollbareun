@@ -36,7 +36,11 @@ export async function POST(request: Request) {
       return Response.json({ error: "유효한 푸시 구독 정보가 필요합니다." }, { status: 400 });
     }
 
-    const subscription = await saveManagerPushSubscription(authInfo.user.id, body.subscription);
+    if (body.previousEndpoint !== undefined && typeof body.previousEndpoint !== "string") {
+      return Response.json({ error: "이전 푸시 구독 주소가 올바르지 않습니다." }, { status: 400 });
+    }
+
+    const subscription = await saveManagerPushSubscription(authInfo.user.id, body.subscription, body.previousEndpoint);
     return Response.json({ success: true, subscription });
   } catch (error) {
     return Response.json(

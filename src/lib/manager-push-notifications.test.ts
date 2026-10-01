@@ -51,6 +51,39 @@ describe("manager push notifications", () => {
     );
   });
 
+  it("saves the new scope before retiring only this manager's legacy endpoint", async () => {
+    const calls: string[] = [];
+    const single = vi.fn(async () => { calls.push("saved"); return { data: { id: "new" }, error: null }; });
+    const endpointEq = vi.fn(async () => { calls.push("deleted"); return { error: null }; });
+    const ownerEq = vi.fn().mockReturnValue({ eq: endpointEq });
+    const from = vi.fn().mockReturnValue({
+      upsert: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ single }) }),
+      delete: vi.fn().mockReturnValue({ eq: ownerEq }),
+    });
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from } as never);
+    await saveManagerPushSubscription("manager-1", {
+      endpoint: "new-device", keys: { p256dh: "key", auth: "secret" },
+    }, "old-device");
+    expect(calls).toEqual(["saved", "deleted"]);
+    expect(ownerEq).toHaveBeenCalledWith("user_id", "manager-1");
+    expect(endpointEq).toHaveBeenCalledWith("endpoint", "old-device");
+    expect(from.mock.calls.every(([table]) => table === "manager_push_subscriptions")).toBe(true);
+  });
+
+  it("preserves the old subscription when saving the replacement fails", async () => {
+    const remove = vi.fn();
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from: vi.fn().mockReturnValue({
+      upsert: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({
+        single: vi.fn().mockResolvedValue({ error: { message: "save failed" } }),
+      }) }),
+      delete: remove,
+    }) } as never);
+    await expect(saveManagerPushSubscription("manager-1", {
+      endpoint: "new-device", keys: { p256dh: "key", auth: "secret" },
+    }, "old-device")).rejects.toThrow("save failed");
+    expect(remove).not.toHaveBeenCalled();
+  });
+
   it("sends to every registered manager device and links to the report detail", async () => {
     const deleteIn = vi.fn().mockResolvedValue({ error: null });
     const from = vi.fn((table: string) => {

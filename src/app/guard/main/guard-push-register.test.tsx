@@ -82,6 +82,7 @@ describe("GuardPushRegister", () => {
     getSubscriptionMock = vi.fn();
     subscribeMock = vi.fn();
     registerMock = vi.fn().mockResolvedValue({
+      active: { state: "activated" },
       pushManager: {
         getSubscription: getSubscriptionMock,
         subscribe: subscribeMock,

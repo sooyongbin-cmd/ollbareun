@@ -73,6 +73,7 @@ export default function LeaveNewPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [errorModalMessage, setErrorModalMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [scheduledWork, setScheduledWork] = useState<ScheduledWork[]>([]);
   const [scheduleLoading, setScheduleLoading] = useState(false);
@@ -159,6 +160,7 @@ export default function LeaveNewPage() {
     event.preventDefault();
     setSaving(true);
     setError("");
+    setErrorModalMessage("");
 
     try {
       await fetchJson<{ leave: { id: string } }>("/api/leave", {
@@ -168,7 +170,12 @@ export default function LeaveNewPage() {
       });
       setSuccessMessage("휴가가 신청되었습니다.");
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "휴가를 신청하지 못했습니다.");
+      const message = submitError instanceof Error ? submitError.message : "휴가를 신청하지 못했습니다.";
+      if (message === "휴가신청기간이 겹칩니다.") {
+        setErrorModalMessage(message);
+      } else {
+        setError(message);
+      }
     } finally {
       setSaving(false);
     }
@@ -334,6 +341,13 @@ export default function LeaveNewPage() {
       )}
 
       <ProcessingModal isOpen={saving} message="저장처리중입니다..." />
+
+      <AlertModal
+        isOpen={Boolean(errorModalMessage)}
+        onClose={() => setErrorModalMessage("")}
+        title="휴가신청 오류"
+        description={errorModalMessage}
+      />
 
       <AlertModal
         isOpen={Boolean(successMessage)}

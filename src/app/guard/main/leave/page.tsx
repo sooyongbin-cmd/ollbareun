@@ -26,6 +26,7 @@ export default function GuardLeavePage() {
   const [types, setTypes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [errorModalMessage, setErrorModalMessage] = useState("");
   const [pending, setPending] = useState<LeaveInput | null>(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -67,6 +68,7 @@ export default function GuardLeavePage() {
     savingRef.current = true;
     setSaving(true);
     setError("");
+    setErrorModalMessage("");
     try {
       const response = await fetch("/api/guard/leave", {
         method: "POST",
@@ -82,7 +84,12 @@ export default function GuardLeavePage() {
           ? "휴가신청이 완료되었습니다. 일부 관리자에게 푸시알림을 전달하지 못했지만 신청 내역은 저장되었습니다."
           : "휴가신청이 완료되었으며 관리자에게 푸시알림을 전송했습니다.");
     } catch (error) {
-      setError(error instanceof Error ? error.message : "휴가를 신청하지 못했습니다.");
+      const errorMessage = error instanceof Error ? error.message : "휴가를 신청하지 못했습니다.";
+      if (errorMessage === "휴가신청기간이 겹칩니다.") {
+        setErrorModalMessage(errorMessage);
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setPending(null);
       savingRef.current = false;
@@ -139,6 +146,8 @@ export default function GuardLeavePage() {
       </section>
       <ConfirmModal isOpen={Boolean(pending)} onClose={() => setPending(null)} onConfirm={submitLeave}
         title="휴가신청" description={confirmation} loading={saving} loadingLabel="휴가신청을 저장하고 있습니다..." />
+      <AlertModal isOpen={Boolean(errorModalMessage)} title="휴가신청 오류" description={errorModalMessage}
+        onClose={() => setErrorModalMessage("")} />
       <AlertModal isOpen={Boolean(message)} title="알림" description={message} onClose={() => router.push("/guard/main")} />
     </main>
   );

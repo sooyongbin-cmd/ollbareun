@@ -251,7 +251,9 @@ export default function AttendanceReportPage() {
                           ? "bg-yellow-100 text-yellow-900 dark:bg-yellow-500/20 dark:text-yellow-200"
                           : row.status === "결근"
                             ? "bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-200"
-                            : row.status === "출근"
+                            : row.status === "휴가"
+                              ? "bg-sky-100 text-sky-900 dark:bg-sky-500/20 dark:text-sky-200"
+                              : row.status === "출근"
                               ? "text-green-700 dark:text-green-300"
                               : undefined}
                       >

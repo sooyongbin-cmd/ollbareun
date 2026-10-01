@@ -111,6 +111,14 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
     const normalizedName = name.trim().toLocaleLowerCase("ko-KR");
     return detailRows.filter((row) => row.employeeName.toLocaleLowerCase("ko-KR").includes(normalizedName));
   }, [detailRows, name]);
+  const monthlyCompletionRate = useMemo(() => {
+    const summaryCompleted = filteredMonthlyRows.reduce((count, row) =>
+      count + Number(row.monthly) + Number(row.quarterly) + Number(row.semiannual), 0);
+    const dailyCompleted = filteredDetailRows.reduce((count, row) => count + Number(row.daily), 0);
+    const total = filteredMonthlyRows.length * 3 + filteredDetailRows.length;
+    const completed = summaryCompleted + dailyCompleted;
+    return { total, completed, percent: total ? Math.round((completed / total) * 100) : 0 };
+  }, [filteredDetailRows, filteredMonthlyRows]);
 
   const openCompletionDialog = (
     employeeId: string,
@@ -194,7 +202,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
         aria-label={`${title} 조회`}
         className="rounded-xl border border-border/50 bg-muted/40 p-[1.5rem] md:p-[2rem]"
       >
-        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_12rem] md:items-end">
+        <div className={`grid gap-4 md:items-end ${isDaily ? "md:grid-cols-[minmax(0,1fr)_12rem]" : "md:grid-cols-[minmax(0,1fr)_12rem_auto]"}`}>
           <div className="min-w-0 space-y-2">
             <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor={`${mode}-education-name`}>
               이름
@@ -219,6 +227,14 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
               onChange={(event) => isDaily ? setDate(event.target.value) : setYearMonth(event.target.value)}
             />
           </div>
+          {!isDaily ? (
+            <div aria-live="polite" className="min-w-0 space-y-2 text-right md:justify-self-end">
+              <span className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground">이수율</span>
+              <p className="flex min-h-10 items-center justify-end whitespace-nowrap font-semibold">
+                {monthlyCompletionRate.completed}/{monthlyCompletionRate.total} {monthlyCompletionRate.percent}%
+              </p>
+            </div>
+          ) : null}
         </div>
       </section>
 

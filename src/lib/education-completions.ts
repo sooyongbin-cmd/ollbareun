@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseAdmin } from "./supabase-admin";
-import { requireEducationType, type EducationType } from "./education-periods";
+import { educationPeriodStart, educationToday, requireEducationType, type EducationType } from "./education-periods";
 
 export type EducationCompletionRow = {
   id: string;
@@ -21,6 +21,13 @@ export type EducationDayRow = {
   items: Pick<EducationCompletionRow, "id" | "resource_id" | "resource_title" | "education_type" | "is_completed" | "completed_at">[];
 };
 
+const educationTypeByKoreanName: Record<string, EducationType> = {
+  "일일": "daily",
+  "월간": "monthly",
+  "분기": "quarterly",
+  "반기": "semiannual",
+};
+
 function throwIfError(error: { message?: string } | null) {
   if (error) throw new Error(error.message || "교육이수 자료를 불러오지 못했습니다.");
 }
@@ -38,8 +45,51 @@ export async function readAllEducationRows<T>(query: (from: number, to: number) 
 }
 
 export async function listEducationCompletions(supabase: SupabaseClient = getSupabaseAdmin()) {
-  return readAllEducationRows<EducationCompletionRow>((from, to) =>
-    supabase.rpc("current_completed_education").range(from, to));
+  type ResourceSnapshot = Pick<EducationCompletionRow, "resource_id" | "resource_title" | "resource_youtube_link"> & {
+    education_type: string;
+  };
+  type CompletionSnapshot = Pick<EducationCompletionRow, "id" | "employee_id" | "education_type" | "completed_at" | "education_date"> & {
+    title: string;
+  };
+  const [resources, completions] = await Promise.all([
+    readAllEducationRows<ResourceSnapshot>((from, to) => supabase.from("education_resources")
+      .select("resource_id:id,resource_title:title,resource_youtube_link:youtube_link,education_type")
+      .order("title").order("id").range(from, to)),
+    readAllEducationRows<CompletionSnapshot>((from, to) => supabase.from("education_completions")
+      .select("id,employee_id,title,education_type,completed_at,education_date:work_date")
+      .not("completed_at", "is", null).order("employee_id").order("completed_at", { ascending: false }).range(from, to)),
+  ]);
+
+  const resourceByTitle = new Map(resources.map((resource) => [resource.resource_title, resource]));
+  const today = educationToday();
+  const now = Date.now();
+  const current = new Map<string, EducationCompletionRow>();
+
+  for (const completion of completions) {
+    const resource = resourceByTitle.get(completion.title);
+    if (!resource || completion.education_type !== resource.education_type) continue;
+    const educationType = educationTypeByKoreanName[resource.education_type];
+    if (!educationType) continue;
+
+    const periodStart = educationPeriodStart(educationType, today);
+    const completedAt = new Date(completion.completed_at!).getTime();
+    if (completedAt < new Date(`${periodStart}T00:00:00+09:00`).getTime() || completedAt > now) continue;
+
+    const key = `${completion.employee_id}:${resource.resource_id}`;
+    if (!current.has(key)) {
+      current.set(key, {
+        ...completion,
+        employee_name: "",
+        resource_id: resource.resource_id,
+        resource_title: resource.resource_title,
+        resource_youtube_link: resource.resource_youtube_link,
+        education_type: educationType,
+        is_completed: true,
+      });
+    }
+  }
+
+  return [...current.values()];
 }
 
 export async function currentEducationStatus(employeeId: string, supabase = getSupabaseAdmin()) {

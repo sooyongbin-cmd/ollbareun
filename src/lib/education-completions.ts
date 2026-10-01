@@ -27,6 +27,12 @@ const educationTypeByKoreanName: Record<string, EducationType> = {
   "분기": "quarterly",
   "반기": "semiannual",
 };
+const koreanEducationTypeByType: Record<EducationType, string> = {
+  daily: "일일",
+  monthly: "월간",
+  quarterly: "분기",
+  semiannual: "반기",
+};
 
 function throwIfError(error: { message?: string } | null) {
   if (error) throw new Error(error.message || "교육이수 자료를 불러오지 못했습니다.");
@@ -116,21 +122,38 @@ export function parseEducationFilters(params: URLSearchParams) {
 
 export async function loadEducationHistory(params: URLSearchParams, supabase = getSupabaseAdmin()) {
   const f = parseEducationFilters(params);
+  let resourceTitle: string | null = null;
+  if (f.resourceId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(f.resourceId)) {
+    const { data, error } = await supabase.from("education_resources").select("title").eq("id", f.resourceId).maybeSingle();
+    throwIfError(error);
+    resourceTitle = data?.title ?? f.resourceId;
+  } else if (f.resourceId) {
+    resourceTitle = f.resourceId;
+  }
   let query = supabase.from("education_completions")
-    .select("id,employee_id,resource_id,education_date,education_type,is_completed,completed_at,employees!inner(name),education_resources!inner(title,youtube_link)", { count: "exact" });
-  if (f.from) query = query.gte("education_date", f.from);
-  if (f.to) query = query.lte("education_date", f.to);
-  if (f.type) query = query.eq("education_type", f.type);
-  if (f.resourceId) query = query.eq("resource_id", f.resourceId);
+    .select("id,employee_id,title,work_date,education_type,completed_at,employees!inner(name)", { count: "exact" });
+  if (f.from) query = query.gte("work_date", f.from);
+  if (f.to) query = query.lte("work_date", f.to);
+  if (f.type) query = query.eq("education_type", koreanEducationTypeByType[f.type]);
+  if (resourceTitle) query = query.eq("title", resourceTitle);
   if (f.employeeId) query = query.eq("employee_id", f.employeeId);
   if (f.name) query = query.ilike("employees.name", `%${f.name.replace(/[%_\\]/g, "\\$&")}%`);
-  const { data, count, error } = await query.order("education_date", { ascending: false, nullsFirst: false })
+  const { data, count, error } = await query.order("work_date", { ascending: false, nullsFirst: false })
     .order("employee_id").order("id").range((f.page - 1) * f.pageSize, f.page * f.pageSize - 1);
   throwIfError(error);
-  const completions = (data ?? []).map(({ employees, education_resources, ...row }) => {
+  const completions = (data ?? []).map(({ employees, ...row }) => {
     const employee = (Array.isArray(employees) ? employees[0] : employees) as { name: string };
-    const resource = (Array.isArray(education_resources) ? education_resources[0] : education_resources) as { title: string; youtube_link: string };
-    return { ...row, employee_name: employee.name, resource_title: resource.title, resource_youtube_link: resource.youtube_link };
+    const educationType = educationTypeByKoreanName[row.education_type];
+    return {
+      ...row,
+      employee_name: employee.name,
+      resource_id: row.title,
+      resource_title: row.title,
+      resource_youtube_link: "",
+      education_date: row.work_date,
+      education_type: educationType,
+      is_completed: row.completed_at !== null,
+    };
   });
   return { completions, total: count ?? 0, page: f.page, pageSize: f.pageSize };
 }
@@ -163,29 +186,33 @@ export async function loadEducationDays(params: URLSearchParams, supabase = getS
   const pageEmployees = attendedEmployees.filter((employee) => pageEmployeeIdSet.has(employee.employee_id));
   if (!pageEmployees.length) return { rows: [], total, page: f.page, pageSize: f.pageSize };
 
-  type CompletionRecord = Pick<EducationCompletionRow, "id" | "employee_id" | "resource_id" | "education_date" | "education_type" | "is_completed" | "completed_at">
-    & { education_resources: { title: string } | { title: string }[] | null };
+  type CompletionRecord = Pick<EducationCompletionRow, "id" | "employee_id" | "completed_at"> & {
+    title: string;
+    work_date: string | null;
+    education_type: string;
+  };
   const completions = await readAllEducationRows<CompletionRecord>((from, to) => {
     let query = supabase.from("education_completions")
-      .select("id,employee_id,resource_id,education_date,education_type,is_completed,completed_at,education_resources!inner(title)")
+      .select("id,employee_id,title,work_date,education_type,completed_at")
       .in("employee_id", pageEmployeeIds);
-    if (f.from) query = query.gte("education_date", f.from);
-    if (f.to) query = query.lte("education_date", f.to);
-    if (f.type) query = query.eq("education_type", f.type);
-    return query.order("employee_id").order("education_date").order("id").range(from, to);
+    if (f.from) query = query.gte("work_date", f.from);
+    if (f.to) query = query.lte("work_date", f.to);
+    if (f.type) query = query.eq("education_type", koreanEducationTypeByType[f.type]);
+    return query.order("employee_id").order("work_date").order("id").range(from, to);
   });
   const priority = { semiannual: 0, quarterly: 1, monthly: 2, daily: 3 } as const;
   const itemsByAttendance = new Map<string, EducationDayRow["items"]>();
   completions.forEach((completion) => {
-    const resource = Array.isArray(completion.education_resources) ? completion.education_resources[0] : completion.education_resources;
-    const key = `${completion.employee_id}:${completion.education_date ?? ""}`;
+    const educationType = educationTypeByKoreanName[completion.education_type];
+    if (!educationType || !completion.work_date) return;
+    const key = `${completion.employee_id}:${completion.work_date}`;
     const items = itemsByAttendance.get(key) ?? [];
     items.push({
       id: completion.id,
-      resource_id: completion.resource_id,
-      resource_title: resource?.title ?? "",
-      education_type: completion.education_type,
-      is_completed: completion.is_completed,
+      resource_id: completion.title,
+      resource_title: completion.title,
+      education_type: educationType,
+      is_completed: completion.completed_at !== null,
       completed_at: completion.completed_at,
     });
     itemsByAttendance.set(key, items);
@@ -202,8 +229,24 @@ export async function loadEducationDays(params: URLSearchParams, supabase = getS
 }
 
 export async function resourceCompletionCounts(supabase = getSupabaseAdmin()) {
-  return readAllEducationRows<{ resource_id: string; completed_count: number }>((from, to) =>
-    supabase.rpc("education_resource_completion_counts").order("resource_id").range(from, to));
+  type Resource = { id: string; title: string };
+  type Employee = { id: string };
+  const [resources, employees, completions] = await Promise.all([
+    readAllEducationRows<Resource>((from, to) => supabase.from("education_resources")
+      .select("id,title").order("id").range(from, to)),
+    readAllEducationRows<Employee>((from, to) => supabase.from("employees")
+      .select("id").eq("is_retired", false).order("id").range(from, to)),
+    listEducationCompletions(supabase),
+  ]);
+  const activeEmployees = new Set(employees.map((employee) => employee.id));
+  const employeesByResource = new Map<string, Set<string>>();
+  for (const completion of completions) {
+    if (!activeEmployees.has(completion.employee_id)) continue;
+    const employeesForResource = employeesByResource.get(completion.resource_id) ?? new Set<string>();
+    employeesForResource.add(completion.employee_id);
+    employeesByResource.set(completion.resource_id, employeesForResource);
+  }
+  return resources.map(({ id }) => ({ resource_id: id, completed_count: employeesByResource.get(id)?.size ?? 0 }));
 }
 
 export async function markEducationCompletion(input: { employeeId: unknown; resourceId: unknown }, supabase = getSupabaseAdmin()) {

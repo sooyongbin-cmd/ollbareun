@@ -29,25 +29,23 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   const supabase = getSupabaseAdmin();
   const { data: existing, error: readError } = await supabase
     .from("education_completions")
-    .select("id,is_completed,completed_at")
+    .select("id,completed_at")
     .eq("id", id)
     .maybeSingle();
   if (readError) return Response.json({ error: "안전교육 자료를 불러오지 못했습니다." }, { status: 500 });
   if (!existing) return Response.json({ error: "안전교육 자료를 찾을 수 없습니다." }, { status: 404 });
 
-  const { data, error } = await supabase
+  let update = supabase
     .from("education_completions")
-    .update({
-      is_completed: body.isCompleted,
-      completed_at: completedAt,
-    })
-    .eq("id", id)
-    .eq("is_completed", existing.is_completed)
-    .select("id,is_completed,completed_at")
-    .maybeSingle();
+    .update({ completed_at: completedAt })
+    .eq("id", id);
+  update = existing.completed_at === null
+    ? update.is("completed_at", null)
+    : update.eq("completed_at", existing.completed_at);
+  const { data, error } = await update.select("id,completed_at").maybeSingle();
   if (error) return Response.json({ error: "안전교육 자료를 저장하지 못했습니다." }, { status: 500 });
   if (!data) return Response.json({ error: "안전교육 자료가 변경되었습니다. 새로고침 후 다시 저장하세요." }, { status: 409 });
-  return Response.json({ completion: data });
+  return Response.json({ completion: { ...data, is_completed: data.completed_at !== null } });
 }
 
 export async function DELETE(_: Request, { params }: RouteContext) {

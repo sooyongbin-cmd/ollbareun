@@ -1,5 +1,5 @@
 import { readAllEducationRows } from "./education-completions";
-import { requireEducationType, type EducationType } from "./education-periods";
+import { educationTypes, requireEducationType, type EducationType } from "./education-periods";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabase } from "./supabase";
 
@@ -10,6 +10,23 @@ export type EducationResourceRow = {
   created_at: string;
   education_type: EducationType;
 };
+
+const databaseEducationTypes: Record<EducationType, string> = {
+  daily: "일일",
+  monthly: "월간",
+  quarterly: "분기",
+  semiannual: "반기",
+};
+const educationTypesByDatabaseValue = Object.fromEntries(
+  Object.entries(databaseEducationTypes).map(([type, label]) => [label, type]),
+) as Record<string, EducationType>;
+
+function toEducationResourceRow(row: Omit<EducationResourceRow, "education_type"> & { education_type: string }): EducationResourceRow {
+  const educationType = educationTypesByDatabaseValue[row.education_type]
+    ?? (educationTypes.includes(row.education_type as EducationType) ? row.education_type as EducationType : null);
+  if (!educationType) throw new Error("안전교육구분을 확인할 수 없습니다.");
+  return { ...row, education_type: educationType };
+}
 
 function requireString(value: unknown, label: string) {
   if (typeof value !== "string" || value.trim() === "") {
@@ -55,9 +72,10 @@ function throwIfError(error: { message?: string; hint?: string; code?: string } 
 }
 
 export async function listEducationResources(supabase: SupabaseClient = getSupabase()) {
-  return readAllEducationRows<EducationResourceRow>((from, to) => supabase
+  const resources = await readAllEducationRows<Omit<EducationResourceRow, "education_type"> & { education_type: string }>((from, to) => supabase
     .from("education_resources").select("id,title,youtube_link,created_at,education_type")
     .order("created_at", { ascending: false }).order("id").range(from, to));
+  return resources.map(toEducationResourceRow);
 }
 
 export async function getEducationResourceById(
@@ -72,7 +90,7 @@ export async function getEducationResourceById(
     .single();
 
   throwIfError(error);
-  return data as EducationResourceRow;
+  return toEducationResourceRow(data as Omit<EducationResourceRow, "education_type"> & { education_type: string });
 }
 
 export async function createEducationResource(
@@ -87,13 +105,13 @@ export async function createEducationResource(
     .insert({
       title,
       youtube_link: youtubeLink,
-      education_type: educationType,
+      education_type: databaseEducationTypes[educationType],
     })
     .select("id,title,youtube_link,created_at,education_type")
     .single();
 
   throwIfError(error);
-  return data as EducationResourceRow;
+  return toEducationResourceRow(data as Omit<EducationResourceRow, "education_type"> & { education_type: string });
 }
 
 export async function updateEducationResource(
@@ -109,14 +127,14 @@ export async function updateEducationResource(
     .update({
       title,
       youtube_link: youtubeLink,
-      education_type: educationType,
+      education_type: databaseEducationTypes[educationType],
     })
     .eq("id", id)
     .select("id,title,youtube_link,created_at,education_type")
     .single();
 
   throwIfError(error);
-  return data as EducationResourceRow;
+  return toEducationResourceRow(data as Omit<EducationResourceRow, "education_type"> & { education_type: string });
 }
 
 export async function deleteEducationResource(

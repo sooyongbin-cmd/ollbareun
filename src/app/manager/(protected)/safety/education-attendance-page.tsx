@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import ManagerLoadingMessage from "../manager-loading-message";
@@ -99,7 +98,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
         aria-label={`${title} 조회`}
         className="rounded-xl border border-border/50 bg-muted/40 p-[1.5rem] md:p-[2rem]"
       >
-        <form className="grid gap-4 md:grid-cols-[minmax(0,1fr)_12rem_auto] md:items-end" onSubmit={(event) => { event.preventDefault(); void loadRows(); }}>
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_12rem] md:items-end">
           <div className="min-w-0 space-y-2">
             <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor={`${mode}-education-name`}>
               이름
@@ -124,10 +123,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
               onChange={(event) => isDaily ? setDate(event.target.value) : setYearMonth(event.target.value)}
             />
           </div>
-          <Button className="h-9 w-full md:w-auto" type="submit" disabled={loading}>
-            조회
-          </Button>
-        </form>
+        </div>
       </section>
 
       {isDaily ? (

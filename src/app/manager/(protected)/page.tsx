@@ -318,12 +318,12 @@ export default function ManagerPage() {
       href: "/manager/employee/employees",
     },
     {
-      label: "안전교육 이수율",
+      label: "안전교육 월별이수율",
       value: `${data.summary.educationRate}%`,
       description: `안전교육 미이수 ${data.summary.educationUncompleted}명`,
-      ariaLabel: `안전교육 이수율 ${data.summary.educationRate}% 안전교육 미이수 ${data.summary.educationUncompleted}명`,
+      ariaLabel: `안전교육 월별이수율 ${data.summary.educationRate}% 안전교육 미이수 ${data.summary.educationUncompleted}명`,
       icon: GraduationCap,
-      href: "/manager/safety/completions",
+      href: "/manager/safety/monthly_edu",
     },
     {
       label: "미처리 특이사항",

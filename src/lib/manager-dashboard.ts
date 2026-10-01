@@ -1,4 +1,4 @@
-import { listEducationCompletions } from "./education-completions";
+import { loadMonthlyEducationAttendance } from "./safety-education-attendance";
 import { loadEmployeeRoles } from "./employee-roles";
 import { getSupabaseAdmin } from "./supabase-admin";
 import { getManagerAttendanceStatus } from "./manager-attendance-status";
@@ -159,6 +159,7 @@ type BuildManagerDashboardInput = {
   weeklyLeaveAssignments?: AssignmentInput[];
   educationResources: EducationResourceInput[];
   educationCompletions: EducationCompletionInput[];
+  monthlyEducationAttendance?: Awaited<ReturnType<typeof loadMonthlyEducationAttendance>>;
   daysOff?: AssignmentDayOffInput[];
   specialRemarkReports?: SpecialRemarkInput[];
   inspectionSites?: InspectionSiteInput[];
@@ -329,15 +330,24 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
         (!assignment.id || !todayDaysOff.has(assignment.id)),
     );
 
-  const educationUncompleted =
-    allResourceIds.length === 0
+  let educationUncompleted: number;
+  let educationRate: number;
+  if (input.monthlyEducationAttendance) {
+    const { summaryRows, detailRows } = input.monthlyEducationAttendance;
+    const educationTotal = summaryRows.length * 3 + detailRows.length;
+    const educationCompleted = summaryRows.reduce((count, row) =>
+      count + Number(row.monthly) + Number(row.quarterly) + Number(row.semiannual), 0)
+      + detailRows.reduce((count, row) => count + Number(row.daily), 0);
+    educationUncompleted = educationTotal - educationCompleted;
+    educationRate = percent(educationCompleted, educationTotal);
+  } else {
+    educationUncompleted = allResourceIds.length === 0
       ? 0
       : activeEmployees.filter((employee) => {
           const completed = completedByEmployee.get(employee.id);
           return allResourceIds.some((resourceId) => !completed?.has(resourceId));
         }).length;
-  const educationRate =
-    allResourceIds.length === 0
+    educationRate = allResourceIds.length === 0
       ? 0
       : percent(
           activeEmployees.filter((employee) => {
@@ -346,6 +356,7 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
           }).length,
           activeEmployees.length,
         );
+  }
 
   const unprocessedSpecialRemarks = (input.specialRemarkReports ?? []).filter(
     (report) => report.processing_status !== "Y",
@@ -563,7 +574,7 @@ export async function loadManagerDashboardData() {
   const tomorrowStart = `${tomorrow}T00:00:00+09:00`;
   const { weekStart, weekEnd } = getWeekRange(today);
 
-  const [employeesResult, worksitesResult, assignmentsResult, weeklyLeaveAssignmentsResult, workRecordResult, resourcesResult, completionsResult, daysOffResult, specialRemarksResult, inspectionSitesResult, inspectionLogsResult, weeklyLeavesResult, employeeRoles] =
+  const [employeesResult, worksitesResult, assignmentsResult, weeklyLeaveAssignmentsResult, workRecordResult, daysOffResult, specialRemarksResult, inspectionSitesResult, inspectionLogsResult, weeklyLeavesResult, employeeRoles, monthlyEducationAttendance] =
     await Promise.all([
       supabase.from("employees").select("id,name,role,work_style,is_retired"),
       supabase.from("worksites").select("id,name"),
@@ -572,8 +583,6 @@ export async function loadManagerDashboardData() {
       supabase.from("work_record")
         .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime,intime_status,outtime_status")
         .or(`work_date.eq.${today},and(outtime.gte.${todayStart},outtime.lt.${tomorrowStart})`),
-      supabase.from("education_resources").select("id"),
-      listEducationCompletions(supabase).then((data) => ({ data, error: null })),
       supabase
         .from("work_assignment_days_off")
         .select("work_assignment_id,day_off_date")
@@ -594,6 +603,7 @@ export async function loadManagerDashboardData() {
         .lte("start_date", weekEnd)
         .gte("end_date", weekStart),
       loadEmployeeRoles(supabase),
+      loadMonthlyEducationAttendance(today.slice(0, 7)),
     ]);
 
   throwIfError(employeesResult.error);
@@ -601,8 +611,6 @@ export async function loadManagerDashboardData() {
   throwIfError(assignmentsResult.error);
   throwIfError(weeklyLeaveAssignmentsResult.error);
   throwIfError(workRecordResult.error);
-  throwIfError(resourcesResult.error);
-  throwIfError(completionsResult.error);
   throwIfError(daysOffResult.error);
   throwIfError(specialRemarksResult.error);
   throwIfError(inspectionSitesResult.error);
@@ -619,8 +627,9 @@ export async function loadManagerDashboardData() {
     dailyAttendance: (workRecordResult.data ?? []).filter((record) => record.work_date === today && record.intime),
     weeklyLeaves: weeklyLeavesResult.data ?? [],
     weeklyLeaveAssignments: weeklyLeaveAssignmentsResult.data ?? [],
-    educationResources: resourcesResult.data ?? [],
-    educationCompletions: completionsResult.data ?? [],
+    educationResources: [],
+    educationCompletions: [],
+    monthlyEducationAttendance,
     daysOff: daysOffResult.data ?? [],
     specialRemarkReports: specialRemarksResult.data ?? [],
     inspectionSites: inspectionSitesResult.data ?? [],

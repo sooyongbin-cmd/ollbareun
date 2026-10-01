@@ -243,7 +243,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
             loading={loading}
             error={error}
             emptyMessage="조회년월에 등록된 교육이수 자료가 없습니다."
-            headers={["이름", "근무일", "일일"]}
+            headers={["이름", "출근일", "일일교육"]}
           >
             {filteredDetailRows.map((row, index) => {
               const previous = filteredDetailRows[index - 1];
@@ -251,8 +251,8 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
               return (
                 <TableRow key={`${row.employeeId}:${row.workDate}`} className="hover:bg-muted/40 transition-colors">
                   <TableCell data-label="이름" className="font-semibold">{showName ? row.employeeName : "-"}</TableCell>
-                  <TableCell data-label="근무일" className="whitespace-nowrap text-muted-foreground">{row.workDate}</TableCell>
-                  <TableCell data-label="일일"><Mark completed={row.daily} onClick={() => openCompletionDialog(row.employeeId, row.employeeName, "daily")} label={`${row.employeeName} 근무자 일일 교육 미이수 처리 (${row.workDate})`} /></TableCell>
+                  <TableCell data-label="출근일" className="whitespace-nowrap text-muted-foreground">{row.workDate}</TableCell>
+                  <TableCell data-label="일일교육"><Mark completed={row.daily} onClick={() => openCompletionDialog(row.employeeId, row.employeeName, "daily")} label={`${row.employeeName} 근무자 일일교육 미이수 처리 (${row.workDate})`} /></TableCell>
                 </TableRow>
               );
             })}

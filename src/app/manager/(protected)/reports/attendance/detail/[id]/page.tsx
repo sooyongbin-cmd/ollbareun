@@ -59,6 +59,8 @@ export default function AttendanceDetailPage() {
     return () => { active = false; };
   }, [id]);
 
+  const canRequestLeave = record?.intimeStatus === "0" && !clockInDateTime;
+
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (leaveRequested && (clockInDateTime || clockOutDateTime || selectedEducationIds.length > 0)) {
@@ -83,6 +85,7 @@ export default function AttendanceDetailPage() {
 
   async function toggleLeaveRequest() {
     if (leaveTypeLoading) return;
+    if (!canRequestLeave) return;
     setError("");
     if (leaveRequested) {
       setLeaveRequested(false);
@@ -123,7 +126,12 @@ export default function AttendanceDetailPage() {
           ...(clockInDateTime ? { clockInDateTime } : {}),
           ...(clockOutDateTime ? { clockOutDateTime } : {}),
           ...(selectedEducationIds.length ? { educationResourceIds: selectedEducationIds } : {}),
-          ...(leaveRequested ? { leaveRequested: true, leaveType } : {}),
+          ...(leaveRequested && record ? {
+            leaveRequested: true,
+            leaveType,
+            startDate: record.workDate,
+            endDate: record.workDate,
+          } : {}),
         }),
       });
       const payload = await response.json();
@@ -169,7 +177,10 @@ export default function AttendanceDetailPage() {
             <Input className="w-full bg-muted/50" id={field.id} value={field.value || "-"} readOnly />
           </div>)}
           <div className="space-y-2"><label className="ml-1 text-sm font-semibold text-muted-foreground" htmlFor="clock-in-date-time">출근일시</label>
-            <Input id="clock-in-date-time" type="datetime-local" value={clockInDateTime} onChange={(event) => setClockInDateTime(event.target.value)} /></div>
+            <Input id="clock-in-date-time" type="datetime-local" value={clockInDateTime} onChange={(event) => {
+              setClockInDateTime(event.target.value);
+              if (event.target.value) setLeaveRequested(false);
+            }} /></div>
           <div className="space-y-2"><label className="ml-1 text-sm font-semibold text-muted-foreground" htmlFor="clock-out-date-time">퇴근일시</label>
             <Input id="clock-out-date-time" type="datetime-local" value={clockOutDateTime} onChange={(event) => setClockOutDateTime(event.target.value)} /></div>
         </fieldset>
@@ -210,9 +221,10 @@ export default function AttendanceDetailPage() {
                 role="switch"
                 aria-labelledby="attendance-leave-toggle-label"
                 aria-checked={leaveRequested}
-                disabled={leaveTypeLoading}
+                disabled={!canRequestLeave || leaveTypeLoading}
                 onClick={() => void toggleLeaveRequest()}
-                className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 disabled:cursor-wait disabled:opacity-50 ${leaveRequested ? "border-primary bg-primary" : "border-input bg-muted"}`}
+                title={!canRequestLeave ? "결근 상태이며 출근일시가 없는 경우에만 휴가신청할 수 있습니다." : undefined}
+                className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 ${leaveRequested ? "border-primary bg-primary" : "border-input bg-muted"}`}
               >
                 <span aria-hidden="true" className={`inline-block size-4 rounded-full bg-background shadow transition-transform ${leaveRequested ? "translate-x-6" : "translate-x-1"}`} />
               </button>
@@ -228,16 +240,10 @@ export default function AttendanceDetailPage() {
             ) : null}
           </div>
           {leaveRequested ? (
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <label className="ml-1 text-sm font-semibold text-muted-foreground" htmlFor="attendance-leave-start-date">시작일</label>
-                <Input id="attendance-leave-start-date" type="date" value={record.workDate} readOnly className="bg-muted/50" />
-              </div>
-              <div className="space-y-2">
-                <label className="ml-1 text-sm font-semibold text-muted-foreground" htmlFor="attendance-leave-end-date">종료일</label>
-                <Input id="attendance-leave-end-date" type="date" value={record.workDate} readOnly className="bg-muted/50" />
-              </div>
-            </div>
+            <>
+              <input type="hidden" name="startDate" defaultValue={record.workDate} />
+              <input type="hidden" name="endDate" defaultValue={record.workDate} />
+            </>
           ) : null}
         </section>
         {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}

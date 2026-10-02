@@ -65,6 +65,10 @@ export async function PATCH(request: Request, { params }: RouteContext) {
       ? await loadAttendanceRecord(id, getSupabaseAdmin())
       : null;
     if (leaveRequested) {
+      if ((body.startDate !== undefined && body.startDate !== attendanceContext!.workDate)
+        || (body.endDate !== undefined && body.endDate !== attendanceContext!.workDate)) {
+        return Response.json({ error: "휴가 신청일은 출근날짜와 같아야 합니다." }, { status: 400 });
+      }
       const leaveTypes = parseLeaveTypes(await getSystemConfigContent("leave_code"));
       if (!leaveTypes.includes(body.leaveType)) {
         return Response.json({ error: "등록된 휴가구분을 선택하세요." }, { status: 400 });

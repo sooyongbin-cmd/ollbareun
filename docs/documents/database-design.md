@@ -45,22 +45,24 @@ auth.users 1 ── N manager_push_subscriptions
 
 | 테이블 | 주요 필드 | 설명 |
 | --- | --- | --- |
-| `employees` | `id`, `name`, `phone`, `phone_normalized`, `role`, `is_retired`, `auth_user_id`, `passkey_enabled`, `work_style`, `in_time`, `out_time`, `created_at` | 직원 기본정보, 인증 연결, 근무형태·기본 출퇴근 시간 |
+| `employees` | `id`, `name`, `phone`, `phone_normalized`, `role`, `is_retired`, `retired_at`, `auth_user_id`, `passkey_enabled`, `work_style`, `in_time`, `out_time`, `has_weekend`, `schedule_rules_enabled`, `created_at` | 직원 기본정보, 인증 연결, 재직 상태, 근무형태·기본 출퇴근 시간 및 일정 설정 |
 | `worksites` | `id`, `name`, `address`, `gps_info`, `radius_meters`, `created_at` | 근무지와 GPS 출근 인정 범위 |
-| `work_assignments` | `id`, `employee_id`, `worksite_id`, `start_date`, `end_date`, `in_time`, `out_time`, `created_at` | 직원별 근무지 배정 기간 및 배정별 출퇴근 기준 시간 |
+| `work_assignments` | `id`, `employee_id`, `worksite_id`, `start_date`, `end_date`, `in_time`, `out_time`, `work_style`, `has_weekend`, `schedule_rules_enabled`, `created_at` | 직원별 근무지 배정 기간, 배정별 출퇴근 기준 및 일정 설정 |
 | `work_record` | `id`, `employee_id`, `worksite_id`, `work_date`, `intime`, `outtime`, `work_intime`, `work_outtime`, `intime_status`, `outtime_status`, `created_at`, `updated_at` | 직원별 일자 기준 근무예정과 실제 출퇴근을 통합 관리. `(employee_id, work_date)` UNIQUE |
 | `leave` | `id`, `employee_id`, `leave_type`, `start_date`, `end_date`, `created_at`, `updated_at` | 직원별 휴가 종류와 기간 |
 | `assignment_schedule_rules` | `id`, `work_assignment_id`, `day_type`, `is_working_day`, `in_time`, `out_time` | 배정별 요일·공휴일 근무 여부와 예정 출퇴근 시간 |
-| `public_holidays` | `id`, `holiday_date`, `name`, `selected`, `created_at` | 공휴일 및 관리자가 추가한 휴일. `selected = 'Y'`인 날짜만 야간근무 자동 휴무에 사용 |
-| `education_resources` | `id`, `title`, `youtube_link`, `created_at` | 안전교육 자료 |
-| `education_completions` | `employee_id`, `resource_id`, `is_completed`, `completed_at` | 직원별 교육 이수 상태. 직원·자료 복합 PK |
-| `inspection_sites` | `id`, `worksite_id`, `sort_order`, `name`, `address`, `gps_info`, 특이사항 표시·내용·사진 URL, `created_at`, `updated_at` | 근무지에 속한 점검 대상 현장. `sort_order`는 근무지별 점검 순서 |
-| `inspection_logs` | `id`, `inspection_site_id`, `worksite_id`, `employee_id`, 스냅샷 명칭, `site_gps_info`, `qr_payload`, `inspected_at`, `created_at` | QR/NFC 점검 이력. 이력 당시 직원·근무지·현장명을 스냅샷으로 보존 |
-| `inspection_special_reports` | `id`, `worksite_id`, `employee_id`, 스냅샷 명칭, `content`, `photo_url`, `gps_info`, 이메일 상태·처리 상태, `reported_at`, `created_at`, `updated_at` | 특이사항 보고와 사진·GPS·메일 처리 결과 |
+| `employee_schedule_rules` | `id`, `employee_id`, `day_type`, `is_working_day`, `in_time`, `out_time` | 직원별 요일·공휴일 근무 여부와 예정 출퇴근 시간 |
+| `public_holidays` | `id`, `holiday_date`, `name`, `selected`, `holiday_type`, `created_at` | 공휴일 및 관리자가 추가한 휴일. `selected = 'Y'`인 날짜만 야간근무 자동 휴무에 사용 |
+| `education_resources` | `id`, `title`, `youtube_link`, `education_type`, `created_at` | 교육 구분을 포함한 안전교육 자료 |
+| `education_completions` | `id`, `employee_id`, `work_date`, `education_type`, `title`, `completed_at` | 직원별 근무일·교육 구분의 이수 기록 및 교육 제목 |
+| `inspection_sites` | `id`, `worksite_id`, `sort_order`, `name`, `address`, `gps_info`, `special_remark_flag`, `special_remark_content`, `special_remark_photo_url`, `created_at`, `updated_at` | 근무지에 속한 점검 대상 현장. `sort_order`는 근무지별 점검 순서 |
+| `inspection_logs` | `id`, `inspection_site_id`, `worksite_id`, `employee_id`, `employee_name`, `worksite_name`, `site_name`, `site_gps_info`, `qr_payload`, `inspected_at`, `created_at` | QR/NFC 점검 이력. 이력 당시 직원·근무지·현장명을 스냅샷으로 보존 |
+| `inspection_special_reports` | `id`, `worksite_id`, `employee_id`, `employee_name`, `worksite_name`, `content`, `photo_url`, `photo_urls`, `gps_info`, `email_to`, `email_status`, `processing_status`, `reported_at`, `created_at`, `updated_at` | 특이사항 보고와 사진·GPS·메일 처리 결과 |
 | `push_subscriptions` | `id`, `employee_id`, `endpoint`, `p256dh`, `auth`, `created_at`, `updated_at` | 근무자 브라우저 푸시 구독 |
 | `manager_push_subscriptions` | `id`, `user_id`, `endpoint`, `p256dh`, `auth`, `created_at`, `updated_at` | 관리자 브라우저 푸시 구독 |
 | `push_notification_runs` | `id`, `notification_code`, `scheduled_date`, `scheduled_time`, `status`, `sent_at`, `error_message`, `result`, `created_at`, `updated_at` | 교육 알림 실행·중복 방지·결과 이력 |
-| `guard_session_logs` | `id`, `employee_id`, `guard_name`, 로그인·메인 푸시·로그아웃 상태와 시각, 결과 JSON, `created_at`, `updated_at` | 근무자 로그인 세션과 알림 처리 로그 |
+| `guard_session_logs` | `id`, `employee_id`, `guard_name`, `login_status`, `login_at`, `login_error`, `main_push_processed_at`, `main_push_status`, `main_push_result`, `logout_at`, `logout_browser_push_status`, `logout_server_push_status`, `logout_session_status`, `logout_push_result`, `created_at`, `updated_at` | 근무자 로그인 세션, 메인·로그아웃 알림 처리 및 결과 로그 |
+| `guard_auth_sessions` | `id`, `employee_id`, `token_hash`, `created_at`, `expires_at`, `revoked_at` | 근무자 인증 세션의 토큰 해시, 만료 및 폐기 정보 |
 | `guard_passkey_requests` | `id`, `employee_id`, `status`, `requested_at`, `reviewed_at`, `reviewed_by`, `registered_at`, `revoked_at`, `created_at`, `updated_at` | 관리자 승인 기반 Passkey 신청·승인·등록·폐기 이력 |
 | `system_configs` | `system_code`, `parent_system_code`, `content`, `description`, `created_at`, `updated_at` | 메일 주소·기능 플래그 등 운영 설정 및 자유 입력 분류값 |
 | `admin_users` | `id`, `user_id`, `email`, `role`, `created_by`, `first_login_at`, `created_at`, `updated_at` | Supabase Auth 사용자와 관리자 권한 연결 |

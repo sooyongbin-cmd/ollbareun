@@ -29,29 +29,16 @@ function currentDate() {
   return new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
-function isDateValue(value: string) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const parsed = new Date(`${value}T00:00:00.000Z`);
-  return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
-}
-
 export default function AttendanceReportPage() {
   const [employeeName, setEmployeeName] = useState("");
   const [employeeNames, setEmployeeNames] = useState<string[]>([]);
   const [employeeNamesLoading, setEmployeeNamesLoading] = useState(true);
   const [workDate, setWorkDate] = useState(currentDate());
-  const [workDateInitialized, setWorkDateInitialized] = useState(false);
   const [rows, setRows] = useState<AttendanceReportRow[]>([]);
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const searchRequestRef = useRef(0);
-
-  useEffect(() => {
-    const selectedWorkDate = new URLSearchParams(window.location.search).get("workDate");
-    if (selectedWorkDate && isDateValue(selectedWorkDate)) setWorkDate(selectedWorkDate);
-    setWorkDateInitialized(true);
-  }, []);
 
   useEffect(() => {
     let ignore = false;
@@ -116,13 +103,12 @@ export default function AttendanceReportPage() {
   }, [employeeName, workDate]);
 
   useEffect(() => {
-    if (!workDateInitialized) return;
     const timeoutId = window.setTimeout(() => {
       void handleSearch();
     }, 300);
 
     return () => window.clearTimeout(timeoutId);
-  }, [handleSearch, workDateInitialized]);
+  }, [handleSearch]);
 
   const showEmployeeColumn = true;
 

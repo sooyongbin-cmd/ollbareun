@@ -163,8 +163,7 @@ export default function AttendanceDetailPage() {
   }
 
   function returnToList() {
-    const query = record?.workDate ? `?${new URLSearchParams({ workDate: record.workDate })}` : "";
-    router.push(`/manager/reports/attendance${query}`);
+    router.push("/manager/reports/attendance");
   }
 
   return <section className="space-y-6">

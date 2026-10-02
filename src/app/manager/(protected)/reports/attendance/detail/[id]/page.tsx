@@ -4,11 +4,13 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import ConfirmModal from "@/components/modals/confirm-modal";
 import AlertModal from "@/components/modals/alert-modal";
 import ManagerLoadingMessage from "../../../../manager-loading-message";
 import type { AttendanceRecord } from "@/lib/manager-reports";
 import type { AttendanceEducationItem } from "@/lib/education-completions";
+import { parseLeaveTypes } from "@/lib/leave-types";
 
 type ResponsePayload = { attendance: AttendanceRecord; education: AttendanceEducationItem[] };
 
@@ -26,6 +28,10 @@ export default function AttendanceDetailPage() {
   const [record, setRecord] = useState<AttendanceRecord | null>(null);
   const [education, setEducation] = useState<AttendanceEducationItem[]>([]);
   const [selectedEducationIds, setSelectedEducationIds] = useState<string[]>([]);
+  const [leaveRequested, setLeaveRequested] = useState(false);
+  const [leaveTypes, setLeaveTypes] = useState<string[]>([]);
+  const [leaveType, setLeaveType] = useState("");
+  const [leaveTypeLoading, setLeaveTypeLoading] = useState(false);
   const [clockInDateTime, setClockInDateTime] = useState("");
   const [clockOutDateTime, setClockOutDateTime] = useState("");
   const [loading, setLoading] = useState(true);
@@ -55,16 +61,54 @@ export default function AttendanceDetailPage() {
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (leaveRequested && (clockInDateTime || clockOutDateTime || selectedEducationIds.length > 0)) {
+      setErrorAlert("휴가신청은 출근·퇴근 처리 및 교육이수와 함께 할 수 없습니다.");
+      return;
+    }
     if (!clockInDateTime && selectedEducationIds.length > 0) {
       setErrorAlert("출근처리후 교육이수 처리해주세요.");
       return;
     }
-    if (!clockInDateTime && !clockOutDateTime && selectedEducationIds.length === 0) {
+    if (!clockInDateTime && !clockOutDateTime && selectedEducationIds.length === 0 && !leaveRequested) {
       setError("저장할 출근일시 또는 퇴근일시를 입력하세요.");
+      return;
+    }
+    if (leaveRequested && !leaveType) {
+      setErrorAlert("등록된 휴가구분을 선택하세요.");
       return;
     }
     setError("");
     setConfirmOpen(true);
+  }
+
+  async function toggleLeaveRequest() {
+    if (leaveTypeLoading) return;
+    setError("");
+    if (leaveRequested) {
+      setLeaveRequested(false);
+      return;
+    }
+    if (leaveTypes.length > 0) {
+      setLeaveRequested(true);
+      return;
+    }
+
+    setLeaveTypeLoading(true);
+    setErrorAlert("");
+    try {
+      const response = await fetch("/api/system/configs/leave_code");
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error ?? "휴가종류를 불러오지 못했습니다.");
+      const types = parseLeaveTypes(payload.config?.content);
+      if (types.length === 0) throw new Error("등록된 휴가구분이 없습니다. 관리자에게 문의해 주세요.");
+      setLeaveTypes(types);
+      setLeaveType((current) => types.includes(current) ? current : types[0] ?? "");
+      setLeaveRequested(true);
+    } catch (loadError) {
+      setErrorAlert(loadError instanceof Error ? loadError.message : "휴가종류를 불러오지 못했습니다.");
+    } finally {
+      setLeaveTypeLoading(false);
+    }
   }
 
   async function save() {
@@ -78,7 +122,8 @@ export default function AttendanceDetailPage() {
         body: JSON.stringify({
           ...(clockInDateTime ? { clockInDateTime } : {}),
           ...(clockOutDateTime ? { clockOutDateTime } : {}),
-          educationResourceIds: selectedEducationIds,
+          ...(selectedEducationIds.length ? { educationResourceIds: selectedEducationIds } : {}),
+          ...(leaveRequested ? { leaveRequested: true, leaveType } : {}),
         }),
       });
       const payload = await response.json();
@@ -131,12 +176,12 @@ export default function AttendanceDetailPage() {
         <hr className="border-border/60" />
         <section aria-labelledby="attendance-education-heading" className="space-y-4">
           <h2 id="attendance-education-heading" className="text-lg font-semibold">교육이수 현황</h2>
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 gap-3 min-[641px]:grid-cols-2 min-[1280px]:grid-cols-4">
             {educationTypeOrder.map((type) => {
               const items = education.filter((item) => item.educationType === type);
-              return <div key={type} className="grid gap-2 sm:grid-cols-[5rem_1fr] sm:items-start">
+              return <div key={type} className="grid min-w-0 gap-2 min-[641px]:grid-cols-[5rem_1fr] min-[641px]:items-start">
                 <h3 className="pt-2 text-sm font-semibold text-muted-foreground">{educationTypeLabels[type]}</h3>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex min-w-0 flex-wrap gap-2">
                   {items.length ? items.map((item) => {
                     const selected = selectedEducationIds.includes(item.resourceId);
                     return <div key={item.resourceId} className="flex items-center gap-2 rounded-md border border-border/50 bg-background px-3 py-2">
@@ -154,6 +199,47 @@ export default function AttendanceDetailPage() {
             })}
           </div>
         </section>
+        <hr className="border-border/60" />
+        <section aria-labelledby="attendance-leave-heading" className="space-y-4">
+          <h2 id="attendance-leave-heading" className="text-lg font-semibold">휴가신청</h2>
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="flex h-9 items-center gap-3">
+              <span id="attendance-leave-toggle-label" className="text-sm font-medium">휴가신청</span>
+              <button
+                type="button"
+                role="switch"
+                aria-labelledby="attendance-leave-toggle-label"
+                aria-checked={leaveRequested}
+                disabled={leaveTypeLoading}
+                onClick={() => void toggleLeaveRequest()}
+                className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 disabled:cursor-wait disabled:opacity-50 ${leaveRequested ? "border-primary bg-primary" : "border-input bg-muted"}`}
+              >
+                <span aria-hidden="true" className={`inline-block size-4 rounded-full bg-background shadow transition-transform ${leaveRequested ? "translate-x-6" : "translate-x-1"}`} />
+              </button>
+            </div>
+            {leaveRequested ? (
+              <div className="w-full max-w-sm space-y-2 sm:w-64">
+                <label className="ml-1 text-sm font-semibold text-muted-foreground" htmlFor="attendance-leave-type">휴가종류</label>
+                <NativeSelect id="attendance-leave-type" value={leaveType} onChange={(event) => setLeaveType(event.target.value)} required>
+                  <NativeSelectOption value="">선택하세요.</NativeSelectOption>
+                  {leaveTypes.map((type) => <NativeSelectOption key={type} value={type}>{type}</NativeSelectOption>)}
+                </NativeSelect>
+              </div>
+            ) : null}
+          </div>
+          {leaveRequested ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label className="ml-1 text-sm font-semibold text-muted-foreground" htmlFor="attendance-leave-start-date">시작일</label>
+                <Input id="attendance-leave-start-date" type="date" value={record.workDate} readOnly className="bg-muted/50" />
+              </div>
+              <div className="space-y-2">
+                <label className="ml-1 text-sm font-semibold text-muted-foreground" htmlFor="attendance-leave-end-date">종료일</label>
+                <Input id="attendance-leave-end-date" type="date" value={record.workDate} readOnly className="bg-muted/50" />
+              </div>
+            </div>
+          ) : null}
+        </section>
         {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
         <div className="flex gap-3">
           <Button type="submit">저장</Button>
@@ -161,10 +247,10 @@ export default function AttendanceDetailPage() {
         </div>
       </form> : null}
     </section>
-    <ConfirmModal isOpen={confirmOpen} onClose={() => { if (!saving) setConfirmOpen(false); }} onConfirm={save} title="근태 정보를 저장할까요?" loading={saving} loadingLabel="저장 중입니다..." />
+    <ConfirmModal isOpen={confirmOpen} onClose={() => { if (!saving) setConfirmOpen(false); }} onConfirm={save} title="변경사항을 저장할까요?" loading={saving} loadingLabel="저장 중입니다..." />
     <AlertModal isOpen={Boolean(errorAlert)} onClose={() => setErrorAlert("")} title="오류" description={errorAlert} />
     <AlertModal isOpen={successOpen} onClose={() => { setSuccessOpen(false); returnToList(); }} title="알림"
-      description={selectedEducationIds.length ? "근태 정보와 선택한 교육이수가 저장되었습니다." : "근태 정보가 저장되었습니다."} />
+      description={leaveRequested ? "휴가 신청이 완료되었습니다." : selectedEducationIds.length ? "근태 정보와 선택한 교육이수가 저장되었습니다." : "근태 정보가 저장되었습니다."} />
   </section>;
 }
 

@@ -575,7 +575,7 @@ export default function GuardSafetyEducationPage() {
             }
           }}
         >
-          <DialogContent className={`${styles.educationDialog} w-screen max-w-[100vw] max-h-[90dvh] overflow-x-hidden overflow-y-auto p-0 sm:w-[calc(100%-2rem)] sm:max-w-4xl sm:p-6`}>
+          <DialogContent className={`${styles.educationDialog} gap-1 w-screen max-w-[100vw] max-h-[90dvh] overflow-x-hidden overflow-y-auto p-0 sm:w-[calc(100%-2rem)] sm:max-w-4xl sm:p-6`}>
             <DialogHeader className={`${styles.educationDialogHeader} px-4 pt-4 sm:px-0 sm:pt-0`}>
               <DialogTitle className="pr-6">{selectedResource?.title ?? "안전교육 영상"}</DialogTitle>
               <DialogDescription>

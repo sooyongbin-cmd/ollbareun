@@ -12,20 +12,19 @@
 ### 1. 데이터베이스 이전 (Supabase)
 
 1. (소유자) Supabase 사이트에서 신규 가입하고 이메일과 비밀번호를 생성한다.
-2. 소유자 계정 이메일은 `dev500591@gmail.com`을 사용한다. 비밀번호는 승인된 비밀번호 관리자에서 확인하며, 이 문서나 Git 저장소에는 기록하지 않는다.
-3. 로그인한 뒤 좌측의 **Team** 메뉴를 선택한다.
-4. **Invite members**를 선택한다.
-5. **Email address**에 개발자 이메일 `sooyongbin@gmail.com`을 입력한다.
-6. 개발자가 초대를 확인한다.
-7. (소유자) **Team** 메뉴의 member 목록에 개발자가 나타나는지 확인한다.
-8. **Manage access**에서 개발자 권한을 **Developer**에서 **OWNER**로 변경한다.
-9. (개발자) **Transfer project**를 진행한다. 이전 후에도 프로젝트를 조회할 수 있다.
+2. 로그인한 뒤 좌측의 **Team** 메뉴를 선택한다.
+3. **Invite members**를 선택한다.
+4. **Email address**에 개발자 이메일 `sooyongbin@gmail.com`을 입력한다.
+5. 개발자가 초대를 확인한다.
+6. (소유자) **Team** 메뉴의 member 목록에 개발자가 나타나는지 확인한다.
+7. **Manage access**에서 개발자 권한을 **Developer**에서 **OWNER**로 변경한다.
+8. (개발자) **Transfer project**를 진행한다. 이전 후에도 프로젝트를 조회할 수 있다.
 
 ### 2. 운영(배포) 서버 (Vercel)
 
 1. 새로운 계정 ID로 신규 가입한다.
-2. GitHub를 연결하고 프로젝트를 생성한다.
-3. **Settings → Build and Deployment → [Deployment Retention Policy](https://vercel.com/dev02-c7ef/~/settings/build-and-deployment#deployment-retention-policy)**에서 보관 정책을 조정한다.
+2. GitHub를 연결하고 프로젝트를 생성한다. https://github.com/sooyongbin-cmd/ollbareun
+3. **Settings → Build and Deployment → [Deployment Retention Policy](https://vercel.com/dev02-c7ef/~/settings/build-and-deployment#deployment-retention-policy)**에서 보관 정책을 1day 로 조정한다.
 4. Supabase의 **Authentication → URL Configuration → Redirect URLs**에 새 Vercel 주소의 `/auth/callback`을 허용한다.
 5. Supabase service key는 **Project Settings → API Keys**에서 확인한다. Vercel 서버 환경변수에만 등록하고 문서나 Git 저장소에는 기록하지 않는다.
 
@@ -152,17 +151,3 @@ Vercel의 해당 프로젝트에서 **Settings → Environment Variables**로 �
 - 지도·주소 검색, Naver mail, 푸시 알림 연결
 - 정적 이미지, 아이콘, 폰트, PWA 설치 정보
 - 서버 로그의 반복 오류와 5xx 응답 여부
-
-## 6. 롤백
-
-- 애플리케이션 문제는 Vercel의 직전 정상 배포를 재배포한다.
-- DB 변경은 사전에 검증한 역마이그레이션 또는 백업 복구 절차를 사용한다.
-- 데이터가 변경된 후에는 애플리케이션만 먼저 되돌리지 말고 스키마 호환성을 확인한다.
-- 장애 원인, 영향 범위, 롤백 시각과 결과를 기록한다.
-
-## 7. 보안 주의사항
-
-- `.env` 파일과 실제 키를 Git에 커밋하지 않는다.
-- Preview와 Production 환경변수를 구분한다.
-- 퇴사자·담당자 변경 시 서비스 계정과 키를 교체한다.
-- 비밀값이 노출되면 즉시 폐기·재발급하고 관련 로그를 점검한다.

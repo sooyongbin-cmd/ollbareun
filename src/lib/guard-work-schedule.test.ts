@@ -3,6 +3,7 @@ import {
   formatGuardWorkDate,
   formatGuardWorkTime,
   getGuardWorkAction,
+  isTodayGuardWorkDate,
   selectGuardWorkSchedule,
   type GuardWorkSchedule,
 } from "./guard-work-schedule";
@@ -49,5 +50,14 @@ describe("guard work schedule selection", () => {
     expect(formatGuardWorkDate("2026-09-30")).toBe("09/30 (수)");
     expect(formatGuardWorkTime("2026-09-30T01:00:00.000Z")).toBe("10:00 AM");
     expect(formatGuardWorkTime("2026-09-30T21:00:00.000Z")).toBe("6:00 AM");
+  });
+
+  it("compares the work date to today's date in Seoul", () => {
+    const now = new Date("2026-10-01T00:30:00.000Z");
+
+    expect(isTodayGuardWorkDate("2026-10-01", now)).toBe(true);
+    expect(isTodayGuardWorkDate("2026-09-30", now)).toBe(false);
+    expect(isTodayGuardWorkDate("2026-10-02", now)).toBe(false);
+    expect(isTodayGuardWorkDate("invalid", now)).toBe(false);
   });
 });

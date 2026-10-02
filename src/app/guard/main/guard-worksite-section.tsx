@@ -9,6 +9,7 @@ import {
   formatGuardWorkDate,
   formatGuardWorkTime,
   getGuardWorkAction,
+  isTodayGuardWorkDate,
   selectGuardWorkSchedule,
   type GuardWorkSchedule,
 } from "@/lib/guard-work-schedule";
@@ -83,7 +84,12 @@ export default function GuardWorksiteSection() {
         <div className="guard-schedule-row">
           <div className="guard-schedule-details">
             <p className="guard-date-emphasis-text">
-              {selectedShift ? formatGuardWorkDate(selectedShift.work_date) : "오늘 근무가 없습니다."}
+              {selectedShift ? (
+                <>
+                  {formatGuardWorkDate(selectedShift.work_date)}
+                  {!isTodayGuardWorkDate(selectedShift.work_date) ? " 전일출근" : ""}
+                </>
+              ) : "오늘 근무가 없습니다."}
             </p>
             {selectedShift ? (
               <div className="guard-schedule-time-row">

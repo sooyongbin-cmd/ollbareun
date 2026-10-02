@@ -43,6 +43,26 @@ export function formatGuardWorkDate(workDate: string) {
   return `${month}/${day} (${weekday})`;
 }
 
+function formatSeoulDate(date: Date) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Asia/Seoul",
+  }).formatToParts(date);
+  const year = parts.find((part) => part.type === "year")?.value ?? "";
+  const month = parts.find((part) => part.type === "month")?.value ?? "";
+  const day = parts.find((part) => part.type === "day")?.value ?? "";
+  return `${year}-${month}-${day}`;
+}
+
+export function isTodayGuardWorkDate(workDate: string, now = new Date()) {
+  const parsedDate = new Date(`${workDate}T12:00:00+09:00`);
+  if (Number.isNaN(parsedDate.getTime()) || formatSeoulDate(parsedDate) !== workDate) return false;
+
+  return workDate === formatSeoulDate(now);
+}
+
 export function formatGuardWorkTime(value: string | null) {
   if (!value) return null;
   const timestamp = Date.parse(value);

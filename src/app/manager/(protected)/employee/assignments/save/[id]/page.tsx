@@ -12,6 +12,7 @@ import { DeleteIcon } from "@/components/icons/delete-icon";
 import ConfirmModal from "@/components/modals/confirm-modal";
 import AlertModal from "@/components/modals/alert-modal";
 import ProcessingModal from "@/components/modals/processing-modal";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import AssignmentAttendanceCalendar, { type DailyAttendance } from "./assignment-attendance-calendar";
 
 type Assignment = {
@@ -34,6 +35,24 @@ type Employee = {
 type Worksite = {
   id: string;
   name: string;
+};
+
+type AttendanceHistory = {
+  id: string;
+  work_date: string;
+  intime_status: "0" | "1" | "2" | "3" | null;
+  work_intime: string | null;
+};
+
+type AttendanceHistoryResponse = {
+  attendances: AttendanceHistory[];
+};
+
+const attendanceStatusLabels: Record<NonNullable<AttendanceHistory["intime_status"]>, string> = {
+  "0": "결근",
+  "1": "지각",
+  "2": "출근",
+  "3": "휴가",
 };
 
 type AssignmentResponse = {
@@ -84,6 +103,9 @@ export default function AssignmentSavePage() {
   const [savedEndDate, setSavedEndDate] = useState("");
   const [currentMonth, setCurrentMonth] = useState("");
   const [dailyAttendance, setDailyAttendance] = useState<DailyAttendance[]>([]);
+  const [attendanceHistory, setAttendanceHistory] = useState<AttendanceHistory[]>([]);
+  const [attendanceHistoryLoading, setAttendanceHistoryLoading] = useState(Boolean(assignmentId));
+  const [attendanceHistoryError, setAttendanceHistoryError] = useState("");
   const [holidays, setHolidays] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(Boolean(assignmentId));
   const [error, setError] = useState("");
@@ -147,6 +169,41 @@ export default function AssignmentSavePage() {
     }
 
     void loadData();
+
+    return () => {
+      ignore = true;
+    };
+  }, [assignmentId]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadAttendanceHistory() {
+      try {
+        const payload = await fetchJson<AttendanceHistoryResponse>(
+          `/api/manager/assignments/${assignmentId}/attendance-history`,
+        );
+        if (!ignore) {
+          setAttendanceHistory(payload.attendances ?? []);
+        }
+      } catch (historyError) {
+        if (!ignore) {
+          setAttendanceHistoryError(historyError instanceof Error ? historyError.message : "출근 목록을 불러오지 못했습니다.");
+        }
+      } finally {
+        if (!ignore) {
+          setAttendanceHistoryLoading(false);
+        }
+      }
+    }
+
+    if (!assignmentId) {
+      return () => {
+        ignore = true;
+      };
+    }
+
+    void loadAttendanceHistory();
 
     return () => {
       ignore = true;
@@ -348,6 +405,40 @@ export default function AssignmentSavePage() {
           </>
         ) : null}
       </section>
+
+      {!loading && savedStartDate && savedEndDate ? (
+        <section className="space-y-4 rounded-xl border border-border/50 bg-muted/40 p-6">
+          <h2 className="text-xl font-semibold">출근목록</h2>
+          {attendanceHistoryLoading ? (
+            <ManagerLoadingMessage />
+          ) : attendanceHistoryError ? (
+            <p className="text-sm text-destructive">{attendanceHistoryError}</p>
+          ) : attendanceHistory.length === 0 ? (
+            <p className="text-sm text-muted-foreground">배정기간 내 출근 기록이 없습니다.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table className="w-full">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>출근날짜</TableHead>
+                    <TableHead>출근상태</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {attendanceHistory.map((attendance) => (
+                    <TableRow key={attendance.id}>
+                      <TableCell>{attendance.work_date}</TableCell>
+                      <TableCell>
+                        {attendance.intime_status ? attendanceStatusLabels[attendance.intime_status] : "출근"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </section>
+      ) : null}
 
       <ConfirmModal
         isOpen={deleteConfirmOpen}

@@ -84,21 +84,22 @@ describe("special remark report storage deletion", () => {
     ).toBe("employee-1/photo.jpg");
   });
 
-  it("blocks early report and photo deletion", async () => {
-    await expect(deleteSpecialRemarkReport("report-1")).rejects.toThrow("퇴사 후 5년");
-    expect(remove).not.toHaveBeenCalled();
-    expect(deleteEq).not.toHaveBeenCalled();
+  it("deletes a report and its photo without applying the employee retention period", async () => {
+    await expect(deleteSpecialRemarkReport("report-1")).resolves.toBeUndefined();
+
+    expect(remove).toHaveBeenCalledWith(["employee-1/photo.jpg"]);
+    expect(deleteEq).toHaveBeenCalledWith("report-1");
   });
 
   it("does not delete the report row when storage removal fails", async () => {
     remove.mockResolvedValue({ error: { message: "storage failed" } });
 
-    await expect(deleteSpecialRemarkReport("report-1")).rejects.toThrow("퇴사 후 5년");
+    await expect(deleteSpecialRemarkReport("report-1")).rejects.toThrow("storage failed");
 
     expect(deleteEq).not.toHaveBeenCalled();
   });
 
-  it("blocks deletion of every attached photo in a multi-photo report", async () => {
+  it("deletes every attached photo in a multi-photo report", async () => {
     single.mockResolvedValue({
       data: {
         id: "report-1",
@@ -111,8 +112,13 @@ describe("special remark report storage deletion", () => {
       error: null,
     });
 
-    await expect(deleteSpecialRemarkReport("report-1")).rejects.toThrow("퇴사 후 5년");
-    expect(remove).not.toHaveBeenCalled();
+    await expect(deleteSpecialRemarkReport("report-1")).resolves.toBeUndefined();
+
+    expect(remove).toHaveBeenCalledWith([
+      "employee-1/photo-1.jpg",
+      "employee-1/photo-2.jpg",
+    ]);
+    expect(deleteEq).toHaveBeenCalledWith("report-1");
   });
 
   it("rejects images larger than 500KB before uploading them", async () => {

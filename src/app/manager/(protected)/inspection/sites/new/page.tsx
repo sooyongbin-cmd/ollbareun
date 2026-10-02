@@ -26,6 +26,8 @@ declare global {
 type Worksite = {
   id: string;
   name: string;
+  address?: string;
+  gps_info?: GpsInfo | null;
 };
 
 async function postJson<T>(url: string, body: unknown): Promise<T> {
@@ -73,8 +75,16 @@ export default function InspectionSiteNewPage() {
 
         if (!ignore) {
           const nextWorksites = (payload.worksites ?? []) as Worksite[];
+          const requestedWorksiteId = new URLSearchParams(window.location.search).get("worksiteId");
+          const requestedWorksite = nextWorksites.find((worksite) => worksite.id === requestedWorksiteId);
+
           setWorksites(nextWorksites);
-          setWorksiteId(nextWorksites[0]?.id ?? "");
+          setWorksiteId(requestedWorksite?.id ?? nextWorksites[0]?.id ?? "");
+          if (requestedWorksite) {
+            setSiteName(requestedWorksite.name);
+            setAddress(requestedWorksite.address ?? "");
+            setGpsInfo(requestedWorksite.gps_info ?? null);
+          }
         }
       } catch (loadError) {
         if (!ignore) {

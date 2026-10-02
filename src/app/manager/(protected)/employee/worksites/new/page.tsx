@@ -50,6 +50,7 @@ export default function WorksiteNewPage() {
   const [gpsInfo, setGpsInfo] = useState<GpsInfo | null>(null);
   const [saving, setSaving] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [createdWorksiteId, setCreatedWorksiteId] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -88,13 +89,14 @@ export default function WorksiteNewPage() {
     setSaving(true);
 
     try {
-      await postJson<WorksiteResponse>("/api/worksites", {
+      const result = await postJson<WorksiteResponse>("/api/worksites", {
         name: data.get("name"),
         address,
         gpsInfo,
         radiusMeters: data.get("radiusMeters"),
       });
 
+      setCreatedWorksiteId(result.worksite.id);
       setAlertMessage("자료를 저장하였습니다.");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "요청을 처리하지 못했습니다.");
@@ -189,6 +191,11 @@ export default function WorksiteNewPage() {
           setAlertMessage("");
           router.push("/manager/employee/worksites");
         }}
+        secondaryButtonLabel={createdWorksiteId ? "현장등록" : undefined}
+        onSecondaryButtonClick={createdWorksiteId ? () => {
+          setAlertMessage("");
+          router.push(`/manager/inspection/sites/new?worksiteId=${encodeURIComponent(createdWorksiteId)}`);
+        } : undefined}
         title="알림"
         description={alertMessage}
       />

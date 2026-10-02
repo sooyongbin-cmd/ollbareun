@@ -75,6 +75,7 @@ export default function EmployeeNewPage() {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [createdEmployeeId, setCreatedEmployeeId] = useState<string | null>(null);
   const router = useRouter();
 
   function changeWorkStyle(nextWorkStyle: string) {
@@ -129,6 +130,7 @@ export default function EmployeeNewPage() {
         schedule_rules: scheduleRules,
       });
 
+      setCreatedEmployeeId(result.employee.id);
       setSuccessMessage(`직원이름(${result.employee.name}) 연락처(${formatPhoneNumber(result.employee.phone)}) 직군(${result.employee.role}) 등록완료`);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "요청을 처리하지 못했습니다.");
@@ -277,6 +279,11 @@ export default function EmployeeNewPage() {
           setSuccessMessage("");
           router.push("/manager/employee/employees");
         }}
+        secondaryButtonLabel={createdEmployeeId ? "배정등록" : undefined}
+        onSecondaryButtonClick={createdEmployeeId ? () => {
+          setSuccessMessage("");
+          router.push(`/manager/employee/assignments/new?employeeId=${encodeURIComponent(createdEmployeeId)}`);
+        } : undefined}
         title="알림"
         description={successMessage}
       />

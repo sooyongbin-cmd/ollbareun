@@ -6,7 +6,7 @@ import { employeeScheduleRules, legacyScheduleRules, type ScheduleRule } from "@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import { useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import ManagerLoadingMessage from "../../../manager-loading-message";
 import AlertModal from "@/components/modals/alert-modal";
@@ -74,6 +74,14 @@ export default function AssignmentNewPage() {
     left.name.localeCompare(right.name, "ko-KR"),
   );
 
+  const selectEmployee = useCallback((id: string, employee?: Bootstrap["employees"][number]) => {
+    setEmployeeId(id);
+    setWorkStyle(employee?.work_style ?? "0");
+    setScheduleRules(employeeScheduleRules(employee ?? { has_weekend: true }));
+    setInTime((employee?.in_time ?? "06:00").slice(0, 5));
+    setOutTime(minutesToElapsedTime(employee?.out_time));
+  }, []);
+
   useEffect(() => {
     let ignore = false;
 
@@ -87,10 +95,17 @@ export default function AssignmentNewPage() {
         }
 
         if (!ignore) {
+          const employees = payload.employees ?? [];
           setData({
-            employees: payload.employees ?? [],
+            employees,
             worksites: payload.worksites ?? [],
           });
+
+          const requestedEmployeeId = new URLSearchParams(window.location.search).get("employeeId");
+          const requestedEmployee = employees.find((employee: Bootstrap["employees"][number]) =>
+            employee.id === requestedEmployeeId && !employee.is_retired,
+          );
+          if (requestedEmployee) selectEmployee(requestedEmployee.id, requestedEmployee);
         }
       } catch (loadError) {
         if (!ignore) {
@@ -108,7 +123,7 @@ export default function AssignmentNewPage() {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [selectEmployee]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -163,11 +178,7 @@ export default function AssignmentNewPage() {
                 <NativeSelect className="w-full appearance-none" id="assignment-employee" name="employeeId" value={employeeId} onChange={(event) => {
                   const id = event.target.value;
                   const employee = data.employees.find((item) => item.id === id);
-                  setEmployeeId(id);
-                  setWorkStyle(employee?.work_style ?? "0");
-                  setScheduleRules(employeeScheduleRules(employee ?? { has_weekend: true }));
-                  setInTime((employee?.in_time ?? "06:00").slice(0, 5));
-                  setOutTime(minutesToElapsedTime(employee?.out_time));
+                  selectEmployee(id, employee);
                 }} required>
                   <NativeSelectOption value="">선택</NativeSelectOption>
                   {sortedEmployees.map((employee) => (

@@ -16,6 +16,8 @@ interface AlertModalProps {
   title: string;
   description?: string;
   buttonLabel?: string;
+  secondaryButtonLabel?: string;
+  onSecondaryButtonClick?: () => void;
 }
 
 export default function AlertModal({
@@ -24,6 +26,8 @@ export default function AlertModal({
   title,
   description,
   buttonLabel = "확인",
+  secondaryButtonLabel,
+  onSecondaryButtonClick,
 }: AlertModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -32,10 +36,15 @@ export default function AlertModal({
           <DialogTitle>{title}</DialogTitle>
           {description ? <DialogDescription className="leading-relaxed">{description}</DialogDescription> : null}
         </DialogHeader>
-        <DialogFooter>
-          <Button className="w-full sm:w-auto" type="button" onClick={onClose}>
+        <DialogFooter className="flex-row justify-end">
+          <Button className="w-auto" type="button" onClick={onClose}>
             {buttonLabel}
           </Button>
+          {secondaryButtonLabel && onSecondaryButtonClick ? (
+            <Button className="w-auto" type="button" variant="outline" onClick={onSecondaryButtonClick}>
+              {secondaryButtonLabel}
+            </Button>
+          ) : null}
         </DialogFooter>
       </DialogContent>
     </Dialog>

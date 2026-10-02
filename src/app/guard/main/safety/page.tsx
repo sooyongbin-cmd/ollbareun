@@ -575,25 +575,25 @@ export default function GuardSafetyEducationPage() {
             }
           }}
         >
-          <DialogContent className="w-screen max-w-[100vw] max-h-[90dvh] overflow-x-hidden overflow-y-auto p-0 sm:w-[calc(100%-2rem)] sm:max-w-4xl sm:p-6">
-            <DialogHeader className="px-4 pt-4 sm:px-0 sm:pt-0">
+          <DialogContent className={`${styles.educationDialog} w-screen max-w-[100vw] max-h-[90dvh] overflow-x-hidden overflow-y-auto p-0 sm:w-[calc(100%-2rem)] sm:max-w-4xl sm:p-6`}>
+            <DialogHeader className={`${styles.educationDialogHeader} px-4 pt-4 sm:px-0 sm:pt-0`}>
               <DialogTitle className="pr-6">{selectedResource?.title ?? "안전교육 영상"}</DialogTitle>
               <DialogDescription>영상을 끝까지 시청하면 교육이수가 처리됩니다.</DialogDescription>
             </DialogHeader>
-            <section aria-label="안전교육 영상" className="w-full space-y-4">
+            <section aria-label="안전교육 영상" className={`${styles.educationVideoSection} w-full space-y-4`}>
               {selectedResource && selectedEmbedUrl ? (
                 <>
                   <iframe
                     key={selectedResource.id}
                     ref={iframeRef}
-                    className="aspect-video w-full rounded-[0.75rem] border border-border bg-black"
+                    className={`${styles.educationVideoFrame} aspect-video w-full rounded-[0.75rem] border border-border bg-black`}
                     src={selectedEmbedUrl}
                     title={selectedResource.title}
                     onLoad={() => setLoadedIframeResourceId(selectedResource.id)}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
                   />
-                  <p className="text-sm text-muted-foreground">
+                  <p className={`${styles.educationDuration} text-sm text-muted-foreground`}>
                     동영상 길이: {selectedDurationSeconds === null && selectedDurationStatus === "loading"
                       ? "확인 중..."
                       : formatYoutubeDuration(selectedDurationSeconds)}

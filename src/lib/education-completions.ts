@@ -121,7 +121,7 @@ async function educationStatusForDate(employeeId: string, date: string, supabase
       .order("title").order("id").range(from, to)),
     readAllEducationRows<Completion>((from, to) => supabase.from("education_completions")
       .select("id,employee_id,title,work_date,education_type,completed_at")
-      .eq("employee_id", employeeId).not("completed_at", "is", null)
+      .eq("employee_id", employeeId)
       .order("work_date", { ascending: false }).order("completed_at", { ascending: false }).range(from, to)),
   ]);
 

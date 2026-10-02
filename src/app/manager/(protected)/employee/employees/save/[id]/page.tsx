@@ -333,8 +333,9 @@ export default function EmployeeSavePage() {
   }
 
   function handleDeleteConfirm() {
+    const completedEducationCount = educationCompletions.filter((completion) => completion.is_completed).length;
     const relatedCounts = ([
-      ["교육이수", educationCompletions.length],
+      ["교육이수", completedEducationCount],
       ["근무지배정정보", assignments.length],
       ["출근현황", attendance.length],
       ["휴가정보", leaves.length],

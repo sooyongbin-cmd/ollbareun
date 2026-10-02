@@ -37,6 +37,7 @@ type EmployeeResponse = {
   employee: Employee;
   assignments: EmployeeAssignment[];
   educationCompletions: EducationCompletion[];
+  educationCompletionCount: number;
   totalEducationCount: number;
   attendance: EmployeeAttendance[];
   leaves: EmployeeLeave[];
@@ -216,6 +217,7 @@ export default function EmployeeSavePage() {
   const [retiredDate, setRetiredDate] = useState(() => new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" }));
   const [assignments, setAssignments] = useState<EmployeeAssignment[]>([]);
   const [educationCompletions, setEducationCompletions] = useState<EducationCompletion[]>([]);
+  const [educationCompletionCount, setEducationCompletionCount] = useState(0);
   const [totalEducationCount, setTotalEducationCount] = useState(0);
   const [attendance, setAttendance] = useState<EmployeeAttendance[]>([]);
   const [leaves, setLeaves] = useState<EmployeeLeave[]>([]);
@@ -260,6 +262,7 @@ export default function EmployeeSavePage() {
           setRetiredDate(data.employee.retired_at?.slice(0, 10) ?? new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" }));
           setAssignments(data.assignments ?? []);
           setEducationCompletions(data.educationCompletions ?? []);
+          setEducationCompletionCount(data.educationCompletionCount ?? 0);
           setTotalEducationCount(data.totalEducationCount ?? 0);
           setAttendance(data.attendance ?? []);
           setLeaves(data.leaves ?? []);
@@ -333,9 +336,8 @@ export default function EmployeeSavePage() {
   }
 
   function handleDeleteConfirm() {
-    const completedEducationCount = educationCompletions.filter((completion) => completion.is_completed).length;
     const relatedCounts = ([
-      ["교육이수", completedEducationCount],
+      ["교육이수", educationCompletionCount],
       ["근무지배정정보", assignments.length],
       ["출근현황", attendance.length],
       ["휴가정보", leaves.length],

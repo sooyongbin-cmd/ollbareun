@@ -21,10 +21,11 @@ export async function GET(_: Request, { params }: RouteContext) {
 
     const { id } = await params;
     const supabase = getSupabaseAdmin();
-    const [employee, assignments, educationCompletionsResult, educationResourcesResult, workRecordsResult, leavesResult, inspectionLogsResult, specialRemarksResult, worksitesResult] = await Promise.all([
+    const [employee, assignments, educationCompletionsResult, educationCompletionCountResult, educationResourcesResult, workRecordsResult, leavesResult, inspectionLogsResult, specialRemarksResult, worksitesResult] = await Promise.all([
       getEmployeeById(id, supabase),
       listAssignmentsForEmployee(id, supabase),
       currentEducationStatus(id, supabase).then((data) => ({ data, error: null })),
+      supabase.from("education_completions").select("id", { count: "exact", head: true }).eq("employee_id", id),
       supabase.from("education_resources").select("id,title"),
       supabase
         .from("work_record")
@@ -51,6 +52,7 @@ export async function GET(_: Request, { params }: RouteContext) {
     ]);
 
     throwIfQueryError(educationCompletionsResult.error);
+    throwIfQueryError(educationCompletionCountResult.error);
     throwIfQueryError(educationResourcesResult.error);
     throwIfQueryError(workRecordsResult.error);
     throwIfQueryError(leavesResult.error);
@@ -87,6 +89,7 @@ export async function GET(_: Request, { params }: RouteContext) {
       employee,
       assignments,
       educationCompletions,
+      educationCompletionCount: educationCompletionCountResult.count ?? 0,
       totalEducationCount: educationResourcesResult.data?.length ?? 0,
       attendance,
       leaves: leavesResult.data ?? [],

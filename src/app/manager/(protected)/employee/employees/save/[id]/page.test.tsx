@@ -13,6 +13,7 @@ const assignment = {
 };
 let employeeAssignments = [assignment];
 let employeeDetails = {
+  educationCompletionCount: 1,
   educationCompletions: [
     {
       resource_id: "resource-1",
@@ -87,6 +88,7 @@ describe("employee save page", () => {
     useParams.mockReturnValue({ id: "emp-1" });
     employeeAssignments = [assignment];
     employeeDetails = {
+      educationCompletionCount: 1,
       educationCompletions: [...defaultEmployeeDetails.educationCompletions],
       attendance: [...defaultEmployeeDetails.attendance],
       leaves: [...defaultEmployeeDetails.leaves],
@@ -261,6 +263,7 @@ describe("employee save page", () => {
   it("hides the education and assignment section when there are no completed courses or assignments", async () => {
     employeeAssignments = [];
     employeeDetails = {
+      educationCompletionCount: 0,
       educationCompletions: [...defaultEmployeeDetails.educationCompletions].map((completion) => ({ ...completion, is_completed: false })),
       attendance: [...defaultEmployeeDetails.attendance],
       leaves: [...defaultEmployeeDetails.leaves],
@@ -276,6 +279,7 @@ describe("employee save page", () => {
 
   it("hides history sections that have no records", async () => {
     employeeDetails = {
+      educationCompletionCount: 0,
       educationCompletions: [],
       attendance: [],
       leaves: [],

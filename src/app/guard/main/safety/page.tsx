@@ -37,6 +37,9 @@ type GuardSession = {
 };
 
 type DurationRefreshStatus = "idle" | "loading" | "ready" | "unavailable";
+type LockableScreenOrientation = ScreenOrientation & {
+  lock?: (orientation: "landscape") => Promise<void>;
+};
 
 const youtubeApiScriptId = "youtube-iframe-api";
 const youtubePlayerReadyState = 0;
@@ -158,6 +161,35 @@ export default function GuardSafetyEducationPage() {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const playerRef = useRef<YoutubePlayer | null>(null);
   const watchProgressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const orientationLockRequestedRef = useRef(false);
+
+  const lockLandscapeWhenPortrait = useCallback(() => {
+    if (typeof window === "undefined") return;
+
+    const orientation = window.screen.orientation as LockableScreenOrientation | undefined;
+    if (!orientation?.type.startsWith("portrait") || typeof orientation.lock !== "function") return;
+
+    orientationLockRequestedRef.current = true;
+    try {
+      void orientation.lock("landscape").catch(() => undefined);
+    } catch {
+      orientationLockRequestedRef.current = false;
+    }
+  }, []);
+
+  const restoreScreenOrientation = useCallback(() => {
+    if (!orientationLockRequestedRef.current) return;
+    orientationLockRequestedRef.current = false;
+
+    if (typeof window === "undefined") return;
+    try {
+      window.screen.orientation.unlock();
+    } catch {
+      // Orientation locking may be unavailable in this browser context.
+    }
+  }, []);
+
+  useEffect(() => () => restoreScreenOrientation(), [restoreScreenOrientation]);
   const watchProgressRef = useRef<WatchProgress>(createInitialWatchProgress());
   const completedResourceIdsRef = useRef(new Set<string>());
 
@@ -475,6 +507,7 @@ export default function GuardSafetyEducationPage() {
                   data-completed={completed}
                   key={resource.id}
                   onClick={() => {
+                    lockLandscapeWhenPortrait();
                     setLoadedIframeResourceId(null);
                     setSelectedResource(resource);
                     setSelectedDurationStatus("loading");
@@ -507,6 +540,7 @@ export default function GuardSafetyEducationPage() {
           open={selectedResource !== null}
           onOpenChange={(open) => {
             if (!open) {
+              restoreScreenOrientation();
               setSelectedResource(null);
               setLoadedIframeResourceId(null);
               setSelectedDurationSeconds(null);

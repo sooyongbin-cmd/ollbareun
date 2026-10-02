@@ -183,7 +183,7 @@ export default function EducationResourceSavePage() {
         ) : (
           <form className="space-y-6" noValidate onSubmit={handleSubmit}>
             <div className="space-y-4">
-              <EducationTypeRadio value={educationType} onChange={setEducationType} />
+              <EducationTypeRadio value={educationType} disabled />
               <div className="space-y-2">
                 <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="resource-title">
                   제목

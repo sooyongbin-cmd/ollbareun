@@ -35,7 +35,7 @@ describe("education resource save page", () => {
           const body = JSON.parse(String(init.body));
           expect(body).toEqual({
             title: "순찰 안전 교육",
-            youtubeLink: "https://youtu.be/patrolSafety", educationType: "monthly",
+            youtubeLink: "https://youtu.be/patrolSafety", educationType: "daily",
           });
           return Response.json({
             resource: {
@@ -59,12 +59,15 @@ describe("education resource save page", () => {
     expect(await screen.findByRole("heading", { name: "교육자료 상세" })).toBeInTheDocument();
     expect(await screen.findByDisplayValue("화재 안전 교육")).toBeInTheDocument();
     expect(screen.getByDisplayValue("https://www.youtube.com/watch?v=fireSafety")).toBeInTheDocument();
+    for (const type of ["일일", "월간", "분기", "반기"]) {
+      expect(screen.getByRole("radio", { name: type })).toBeDisabled();
+    }
+    expect(screen.getByRole("radio", { name: "일일" })).toBeChecked();
 
     await user.clear(screen.getByLabelText("제목"));
     await user.type(screen.getByLabelText("제목"), "순찰 안전 교육");
     await user.clear(screen.getByLabelText("유튜브 링크"));
     await user.type(screen.getByLabelText("유튜브 링크"), "https://youtu.be/patrolSafety");
-    await user.click(screen.getByRole("radio", { name: "월간" }));
     await user.click(screen.getByRole("button", { name: "저장" }));
 
     expect(await screen.findByText("수정이 완료되었습니다.")).toBeInTheDocument();

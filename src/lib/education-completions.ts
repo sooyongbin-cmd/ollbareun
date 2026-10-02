@@ -63,12 +63,11 @@ export async function listEducationCompletions(supabase: SupabaseClient = getSup
       .order("title").order("id").range(from, to)),
     readAllEducationRows<CompletionSnapshot>((from, to) => supabase.from("education_completions")
       .select("id,employee_id,title,education_type,completed_at,education_date:work_date")
-      .not("completed_at", "is", null).order("employee_id").order("completed_at", { ascending: false }).range(from, to)),
+      .order("employee_id").order("work_date", { ascending: false }).order("id").range(from, to)),
   ]);
 
   const resourceByTitle = new Map(resources.map((resource) => [resource.resource_title, resource]));
   const today = educationToday();
-  const now = Date.now();
   const current = new Map<string, EducationCompletionRow>();
 
   for (const completion of completions) {
@@ -77,9 +76,10 @@ export async function listEducationCompletions(supabase: SupabaseClient = getSup
     const educationType = educationTypeByKoreanName[resource.education_type];
     if (!educationType) continue;
 
+    const completionDate = completion.education_date;
+    if (!completionDate) continue;
     const periodStart = educationPeriodStart(educationType, today);
-    const completedAt = new Date(completion.completed_at!).getTime();
-    if (completedAt < new Date(`${periodStart}T00:00:00+09:00`).getTime() || completedAt > now) continue;
+    if (completionDate < periodStart || completionDate > today) continue;
 
     const key = `${completion.employee_id}:${resource.resource_id}`;
     if (!current.has(key)) {
@@ -283,7 +283,7 @@ export async function loadEducationHistory(params: URLSearchParams, supabase = g
       resource_youtube_link: "",
       education_date: row.work_date,
       education_type: educationType,
-      is_completed: row.completed_at !== null,
+      is_completed: true,
     };
   });
   return { completions, total: count ?? 0, page: f.page, pageSize: f.pageSize };
@@ -343,7 +343,7 @@ export async function loadEducationDays(params: URLSearchParams, supabase = getS
       resource_id: completion.title,
       resource_title: completion.title,
       education_type: educationType,
-      is_completed: completion.completed_at !== null,
+      is_completed: true,
       completed_at: completion.completed_at,
     });
     itemsByAttendance.set(key, items);
@@ -403,7 +403,7 @@ export async function markEducationCompletion(input: { employeeId: unknown; reso
     .select("id,employee_id,title,work_date,education_type,completed_at")
     .eq("employee_id", employeeId).eq("title", resource.title)
     .eq("education_type", resource.education_type).eq("work_date", workDate)
-    .not("completed_at", "is", null).order("completed_at", { ascending: false }).limit(1).maybeSingle();
+    .limit(1).maybeSingle();
   throwIfError(existingError);
 
   const { data, error } = existingCompletion

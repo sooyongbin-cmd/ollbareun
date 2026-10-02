@@ -1,16 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { sendEducationReminderNotifications } from "@/lib/education-reminder-notifications";
+import { processDueEducationReminderJobs } from "@/lib/education-reminder-notifications";
 import { GET } from "./route";
 
 vi.mock("@/lib/education-reminder-notifications", () => ({
-  sendEducationReminderNotifications: vi.fn(),
+  processDueEducationReminderJobs: vi.fn(),
 }));
 
 describe("GET /api/cron/education-reminders", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.EDUCATION_REMINDER_CRON_SECRET = "cron-secret";
-    vi.mocked(sendEducationReminderNotifications).mockResolvedValue({
+    vi.mocked(processDueEducationReminderJobs).mockResolvedValue({
       success: true,
       successCount: 1,
       failedCount: 0,
@@ -32,7 +32,7 @@ describe("GET /api/cron/education-reminders", () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({ success: true, successCount: 1 });
-    expect(sendEducationReminderNotifications).toHaveBeenCalledWith();
+    expect(processDueEducationReminderJobs).toHaveBeenCalledWith();
   });
 
   it("runs from the Supabase Edge Function with the shared cron secret", async () => {
@@ -44,13 +44,13 @@ describe("GET /api/cron/education-reminders", () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({ success: true, successCount: 1 });
-    expect(sendEducationReminderNotifications).toHaveBeenCalledWith();
+    expect(processDueEducationReminderJobs).toHaveBeenCalledWith();
   });
 
   it("rejects non-cron requests", async () => {
     const response = await GET(new Request("http://localhost/api/cron/education-reminders"));
 
     expect(response.status).toBe(403);
-    expect(sendEducationReminderNotifications).not.toHaveBeenCalled();
+    expect(processDueEducationReminderJobs).not.toHaveBeenCalled();
   });
 });

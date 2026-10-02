@@ -1,4 +1,4 @@
-import { sendEducationReminderNotifications } from "@/lib/education-reminder-notifications";
+import { processDueEducationReminderJobs } from "@/lib/education-reminder-notifications";
 
 export async function GET(request: Request) {
   const isVercelCron = request.headers.get("user-agent") === "vercel-cron/1.0";
@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const result = await sendEducationReminderNotifications();
+    const result = await processDueEducationReminderJobs();
     return Response.json(result);
   } catch (error) {
     return Response.json(

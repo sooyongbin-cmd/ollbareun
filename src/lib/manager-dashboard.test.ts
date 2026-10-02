@@ -42,7 +42,7 @@ describe("manager dashboard data", () => {
 
   it.each([
     { name: "대기는 퇴근상태가 있어도 제외", intime: "2026-06-04T12:01:00+09:00", inStatus: "0", outStatus: "2", counts: [1, 0, 0, 0, 0, 0, 0] },
-    { name: "출근예정 이전은 상태코드와 무관하게 대기", intime: "2026-06-04T12:01:00+09:00", inStatus: "2", outStatus: "1", counts: [1, 0, 0, 0, 0, 0, 0] },
+    { name: "출근예정 이전에도 출근상태는 출근으로 집계", intime: "2026-06-04T12:01:00+09:00", inStatus: "2", outStatus: "1", counts: [0, 1, 0, 0, 0, 1, 0] },
     { name: "출근예정시각부터 결근이며 퇴근은 제외", intime: "2026-06-04T12:00:00+09:00", inStatus: "0", outStatus: "2", counts: [0, 0, 0, 1, 0, 0, 0] },
     { name: "결근은 조퇴도 제외", inStatus: "0", outStatus: "1", counts: [0, 0, 0, 1, 0, 0, 0] },
     { name: "결근은 미퇴근도 제외", inStatus: "0", outStatus: "0", counts: [0, 0, 0, 1, 0, 0, 0] },

@@ -276,11 +276,7 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
   });
   const statusByRecord = summaryWorkRecords.map((record) => {
     const scheduledClockIn = record.intime ?? scheduledTimes.get(`${record.employee_id}:${record.worksite_id}:${record.work_date}`);
-    return record.intime_status === "3"
-      ? "휴가"
-      : scheduledClockIn && new Date(scheduledClockIn).getTime() > now.getTime()
-      ? "대기"
-      : getManagerAttendanceStatus({ intimeStatus: record.intime_status, scheduledClockIn, now });
+    return getManagerAttendanceStatus({ intimeStatus: record.intime_status, scheduledClockIn, now });
   });
   let onTimeEmployeesToday = 0;
   let waitingEmployeesToday = 0;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -782,6 +783,9 @@ export default function GuardProfilePage() {
             </div>
           </section>
 
+          <Link className="guard-menu-button" href="/guard/main/leave">
+            휴가 신청
+          </Link>
           <GuardLogoutButton
             ariaLabel="내 정보 확인"
             className={styles.confirmButton}

@@ -320,6 +320,8 @@ describe("guard profile page", () => {
     const sectionHeadings = screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent);
     expect(sectionHeadings.at(-2)).toBe("로그아웃");
     expect(sectionHeadings.at(-1)).toBe("패스키등록");
+    const leaveLink = screen.getByRole("link", { name: "휴가 신청" });
+    expect(screen.getByRole("button", { name: "내 정보 확인" }).previousElementSibling).toBe(leaveLink);
   });
 
   it("clears the guard session and push notification state when logging out from profile", async () => {

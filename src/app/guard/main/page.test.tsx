@@ -34,7 +34,7 @@ describe("guard main shortcuts", () => {
       "/guard/main/special-remarks",
     );
     expect(screen.queryByRole("heading", { name: "안전교육 상황" })).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "휴가 신청" })).toHaveAttribute("href", "/guard/main/leave");
+    expect(screen.queryByRole("link", { name: "휴가 신청" })).not.toBeInTheDocument();
     expect(within(screen.getByRole("region", { name: "근무자 바로가기" })).getByRole("link", { name: "안전교육" })).toHaveAttribute(
       "href",
       "/guard/main/safety?workDate=2026-05-26",

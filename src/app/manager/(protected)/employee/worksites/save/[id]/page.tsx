@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import type { GpsInfo } from "@/lib/gps";
@@ -25,6 +26,19 @@ type WorksiteResponse = {
   worksite: Worksite;
 };
 
+type WorksiteAssignment = {
+  id: string;
+  employee_name: string;
+  employee_role: string | null;
+  work_style: "0" | "1" | "2" | null;
+  start_date: string;
+  end_date: string;
+};
+
+type WorksiteAssignmentResponse = {
+  assignments: WorksiteAssignment[];
+};
+
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, init);
   const payload = await response.json();
@@ -45,6 +59,19 @@ async function deleteRequest(url: string): Promise<void> {
   }
 }
 
+function formatWorkStyle(workStyle: WorksiteAssignment["work_style"]) {
+  if (workStyle === "0") return "일반근무";
+  if (workStyle === "1") return "격일근무";
+  if (workStyle === "2") return "야간근무";
+  return "근무형태 없음";
+}
+
+function formatAssignmentPeriod(assignment: WorksiteAssignment) {
+  return assignment.start_date === assignment.end_date
+    ? assignment.start_date
+    : `${assignment.start_date} ~ ${assignment.end_date}`;
+}
+
 export default function WorksiteSavePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -60,6 +87,9 @@ export default function WorksiteSavePage() {
   const [alertTitle, setAlertTitle] = useState("알림");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [assignments, setAssignments] = useState<WorksiteAssignment[]>([]);
+  const [assignmentsLoading, setAssignmentsLoading] = useState(Boolean(worksiteId));
+  const [assignmentsError, setAssignmentsError] = useState("");
   const routeError = worksiteId ? error : "근무지를 불러오지 못했습니다.";
 
   useEffect(() => {
@@ -92,6 +122,44 @@ export default function WorksiteSavePage() {
     }
 
     void loadWorksite();
+
+    return () => {
+      ignore = true;
+    };
+  }, [worksiteId]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadAssignments() {
+      try {
+        const data = await fetchJson<WorksiteAssignmentResponse>(`/api/worksites/${worksiteId}/assignments`);
+        if (!ignore) {
+          setAssignments(data.assignments ?? []);
+          setAssignmentsError("");
+        }
+      } catch (loadError) {
+        if (!ignore) {
+          setAssignmentsError(loadError instanceof Error ? loadError.message : "근무지배정 이력을 불러오지 못했습니다.");
+        }
+      } finally {
+        if (!ignore) {
+          setAssignmentsLoading(false);
+        }
+      }
+    }
+
+    if (!worksiteId) {
+      setAssignmentsLoading(false);
+      return () => {
+        ignore = true;
+      };
+    }
+
+    setAssignments([]);
+    setAssignmentsError("");
+    setAssignmentsLoading(true);
+    void loadAssignments();
 
     return () => {
       ignore = true;
@@ -231,6 +299,53 @@ export default function WorksiteSavePage() {
 
         {error ? <p className="mt-6 text-[1rem] text-destructive">{error}</p> : null}
       </section>
+
+      {!loading && !routeError ? (
+        <section aria-labelledby="worksite-assignment-history-title" className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
+          <h2 id="worksite-assignment-history-title" className="text-[1.25rem] font-semibold">
+            근무지배정 이력
+          </h2>
+
+          {assignmentsLoading ? (
+            <ManagerLoadingMessage className="mt-6" />
+          ) : assignmentsError ? (
+            <p className="mt-6 text-[1rem] text-destructive">{assignmentsError}</p>
+          ) : (
+            <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
+              <Table className="w-full">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-left">이름</TableHead>
+                    <TableHead className="text-left">직군</TableHead>
+                    <TableHead className="text-left">근무형태</TableHead>
+                    <TableHead className="text-left">배정기간</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {assignments.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="p-8 text-center text-muted-foreground italic">
+                        근무지배정 이력이 없습니다.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    assignments.map((assignment) => (
+                      <TableRow key={assignment.id}>
+                        <TableCell data-label="이름" className="font-semibold">{assignment.employee_name}</TableCell>
+                        <TableCell data-label="직군">{assignment.employee_role ?? "-"}</TableCell>
+                        <TableCell data-label="근무형태">{formatWorkStyle(assignment.work_style)}</TableCell>
+                        <TableCell data-label="배정기간" className="whitespace-nowrap">
+                          {formatAssignmentPeriod(assignment)}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </section>
+      ) : null}
 
       <ConfirmModal
         isOpen={deleteConfirmOpen}

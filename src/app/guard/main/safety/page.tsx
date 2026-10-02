@@ -162,6 +162,9 @@ export default function GuardSafetyEducationPage() {
   const playerRef = useRef<YoutubePlayer | null>(null);
   const watchProgressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const orientationLockRequestedRef = useRef(false);
+  const fullscreenRequestedByEducationRef = useRef(false);
+  const orientationSetupVersionRef = useRef(0);
+  const orientationSetupPromiseRef = useRef<Promise<void> | null>(null);
 
   const lockLandscapeWhenPortrait = useCallback(() => {
     if (typeof window === "undefined") return;
@@ -169,24 +172,47 @@ export default function GuardSafetyEducationPage() {
     const orientation = window.screen.orientation as LockableScreenOrientation | undefined;
     if (!orientation?.type.startsWith("portrait") || typeof orientation.lock !== "function") return;
 
-    orientationLockRequestedRef.current = true;
-    try {
-      void orientation.lock("landscape").catch(() => undefined);
-    } catch {
-      orientationLockRequestedRef.current = false;
+    const requestVersion = ++orientationSetupVersionRef.current;
+    const needsFullscreen = !document.fullscreenElement;
+    const canRequestFullscreen = typeof document.documentElement.requestFullscreen === "function";
+    if (needsFullscreen && canRequestFullscreen) {
+      fullscreenRequestedByEducationRef.current = true;
     }
+
+    const setupPromise = (async () => {
+      if (needsFullscreen && canRequestFullscreen) {
+        await document.documentElement.requestFullscreen();
+      }
+      if (requestVersion !== orientationSetupVersionRef.current) return;
+
+      orientationLockRequestedRef.current = true;
+      await orientation.lock!("landscape");
+    })();
+    orientationSetupPromiseRef.current = setupPromise.catch(() => undefined);
   }, []);
 
   const restoreScreenOrientation = useCallback(() => {
-    if (!orientationLockRequestedRef.current) return;
-    orientationLockRequestedRef.current = false;
+    const setupPromise = orientationSetupPromiseRef.current;
+    orientationSetupPromiseRef.current = null;
+    orientationSetupVersionRef.current += 1;
+    const shouldExitFullscreen = fullscreenRequestedByEducationRef.current;
+    fullscreenRequestedByEducationRef.current = false;
 
-    if (typeof window === "undefined") return;
-    try {
-      window.screen.orientation.unlock();
-    } catch {
-      // Orientation locking may be unavailable in this browser context.
+    if (orientationLockRequestedRef.current && typeof window !== "undefined") {
+      orientationLockRequestedRef.current = false;
+      try {
+        window.screen.orientation.unlock();
+      } catch {
+        // Orientation locking may be unavailable in this browser context.
+      }
     }
+
+    const exitFullscreenIfRequested = () => {
+      if (!shouldExitFullscreen || !document.fullscreenElement || typeof document.exitFullscreen !== "function") return;
+      void document.exitFullscreen().catch(() => undefined);
+    };
+    if (setupPromise) void setupPromise.then(exitFullscreenIfRequested, exitFullscreenIfRequested);
+    else exitFullscreenIfRequested();
   }, []);
 
   useEffect(() => () => restoreScreenOrientation(), [restoreScreenOrientation]);

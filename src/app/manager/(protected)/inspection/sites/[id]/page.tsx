@@ -8,8 +8,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { buildInspectionQrPayload, type InspectionSiteRow } from "@/lib/inspection";
-import type { GpsInfo } from "@/lib/gps";
-import WorksiteGpsPicker from "../../../employee/worksites/worksite-gps-picker";
 import ManagerLoadingMessage from "../../../manager-loading-message";
 import AlertModal from "@/components/modals/alert-modal";
 import ProcessingModal from "@/components/modals/processing-modal";
@@ -34,13 +32,6 @@ declare global {
     onreadingerror: (() => void) | null;
   }
   interface Window {
-    jusoCallBack?: (
-      roadFullAddr?: string,
-      roadAddrPart1?: string,
-      addrDetail?: string,
-      roadAddrPart2?: string,
-      ...rest: string[]
-    ) => void;
     NDEFReader?: new () => NDEFReader;
   }
 }
@@ -86,8 +77,6 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
   const [worksites, setWorksites] = useState<Worksite[]>([]);
   const [worksiteId, setWorksiteId] = useState("");
   const [siteName, setSiteName] = useState("");
-  const [address, setAddress] = useState("");
-  const [gpsInfo, setGpsInfo] = useState<GpsInfo | null>(null);
   const [savedSite, setSavedSite] = useState<InspectionSiteRow | null>(null);
   const [useQrCode, setUseQrCode] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -132,8 +121,6 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
           setWorksites(bootstrapPayload.worksites ?? []);
           setWorksiteId(nextSite.worksite_id);
           setSiteName(nextSite.name);
-          setAddress(nextSite.address);
-          setGpsInfo(nextSite.gps_info);
           setUseQrCode(qrCodeEnabled);
         }
       } catch (loadError) {
@@ -154,35 +141,9 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
     };
   }, [params]);
 
-  useEffect(() => {
-    window.jusoCallBack = (roadFullAddr, roadAddrPart1, addrDetail, roadAddrPart2) => {
-      const selectedAddress =
-        roadFullAddr?.trim() || [roadAddrPart1, addrDetail, roadAddrPart2].filter(Boolean).join(" ").trim();
-      setAddress(selectedAddress);
-    };
-
-    return () => {
-      delete window.jusoCallBack;
-    };
-  }, []);
-
-  function openAddressPopup() {
-    const popup = window.open(
-      "/api/juso/popup",
-      "jusoPopup",
-      "width=570,height=620,scrollbars=yes,resizable=yes",
-    );
-    popup?.focus();
-  }
-
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-
-    if (!gpsInfo) {
-      setError("GPS정보를 입력하거나 지도에서 위치를 선택하세요.");
-      return;
-    }
 
     setSaving(true);
     try {
@@ -191,7 +152,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ worksiteId, sortOrder: savedSite?.sort_order ?? 1, name: siteName, address, gpsInfo }),
+          body: JSON.stringify({ worksiteId, sortOrder: savedSite?.sort_order ?? 1, name: siteName }),
         },
       );
       setSavedSite(payload.site);
@@ -384,19 +345,6 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="inspection-address">
-                  현장주소
-                </label>
-                <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_8.25rem]">
-                  <Input className="w-full" id="inspection-address" value={address} readOnly required />
-                  <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full whitespace-nowrap md:w-full" type="button" onClick={openAddressPopup} variant="outline">
-                    주소 검색
-                  </Button>
-                </div>
-              </div>
-
-              <WorksiteGpsPicker address={address} value={gpsInfo} onChange={setGpsInfo} hideInput />
             </div>
 
             <div className="flex flex-col gap-3 md:flex-row">

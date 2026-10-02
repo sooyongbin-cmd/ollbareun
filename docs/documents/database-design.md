@@ -54,8 +54,8 @@ auth.users 1 ── N manager_push_subscriptions
 | `public_holidays` | `id`, `holiday_date`, `name`, `selected`, `created_at` | 공휴일 및 관리자가 추가한 휴일. `selected = 'Y'`인 날짜만 야간근무 자동 휴무에 사용 |
 | `education_resources` | `id`, `title`, `youtube_link`, `created_at` | 안전교육 자료 |
 | `education_completions` | `employee_id`, `resource_id`, `is_completed`, `completed_at` | 직원별 교육 이수 상태. 직원·자료 복합 PK |
-| `inspection_sites` | `id`, `worksite_id`, `sort_order`, `name`, `address`, `gps_info`, 특이사항 표시·내용·사진 URL, `created_at`, `updated_at` | 근무지에 속한 점검 대상 현장. `sort_order`는 근무지별 점검 순서 |
-| `inspection_logs` | `id`, `inspection_site_id`, `worksite_id`, `employee_id`, 스냅샷 명칭, `site_gps_info`, `qr_payload`, `inspected_at`, `created_at` | QR/NFC 점검 이력. 이력 당시 직원·근무지·현장명을 스냅샷으로 보존 |
+| `inspection_sites` | `id`, `worksite_id`, `sort_order`, `name`, `created_at` | 근무지에 속한 점검 대상 현장. `sort_order`는 근무지별 점검 순서 |
+| `inspection_logs` | `id`, `inspection_site_id`, `worksite_id`, `employee_id`, 스냅샷 명칭, `site_gps_info`, `qr_payload`, `inspected_at`, `created_at` | QR/NFC 점검 이력. 이력 당시 직원·근무지·현장명과 연결된 근무지 좌표를 스냅샷으로 보존 |
 | `inspection_special_reports` | `id`, `worksite_id`, `employee_id`, 스냅샷 명칭, `content`, `photo_url`, `gps_info`, 이메일 상태·처리 상태, `reported_at`, `created_at`, `updated_at` | 특이사항 보고와 사진·GPS·메일 처리 결과 |
 | `push_subscriptions` | `id`, `employee_id`, `endpoint`, `p256dh`, `auth`, `created_at`, `updated_at` | 근무자 브라우저 푸시 구독 |
 | `manager_push_subscriptions` | `id`, `user_id`, `endpoint`, `p256dh`, `auth`, `created_at`, `updated_at` | 관리자 브라우저 푸시 구독 |
@@ -105,7 +105,7 @@ auth.users 1 ── N manager_push_subscriptions
 ### 식별자·필수값·참조 무결성
 
 - UUID 식별자를 사용하는 업무 테이블의 기본키는 `gen_random_uuid()`를 기본값으로 사용한다. `education_completions`는 `(employee_id, resource_id)` 복합 PK, `system_configs`는 `system_code` 텍스트 PK다.
-- 직원명·연락처·정규화 연락처, 근무지명·주소, 점검 현장명·주소, 점검 이력의 스냅샷 명칭, 특이사항 내용, 교육 제목·YouTube 링크, 시스템 코드·내용은 `NOT NULL` 및 공백 문자열 방지 CHECK를 적용한다.
+- 직원명·연락처·정규화 연락처, 근무지명·주소, 점검 현장명, 점검 이력의 스냅샷 명칭, 특이사항 내용, 교육 제목·YouTube 링크, 시스템 코드·내용은 `NOT NULL` 및 공백 문자열 방지 CHECK를 적용한다.
 - 주요 외래키와 삭제 규칙은 다음과 같다.
   - `employees.auth_user_id → auth.users.id`: `ON DELETE SET NULL`
   - `work_assignments.employee_id → employees.id`: `ON DELETE CASCADE`
@@ -127,7 +127,7 @@ auth.users 1 ── N manager_push_subscriptions
 - `assignment_schedule_rules`는 배정별 요일·공휴일 근무 여부와 시각을 저장한다. `leave` 기간에 포함되는 예정 근무는 `work_record.intime_status = '3'`으로 표시한다.
 - 근무기록은 `(employee_id, work_date)` UNIQUE이며, `intime`·`outtime`은 예정 시각, `work_intime`·`work_outtime`은 실제 시각이다. `work_outtime`은 출근 시각 없이 저장할 수 없다.
 - `intime_status`는 `0` 미출근, `1` 지각, `2` 출근, `3` 휴가를 사용하고, 조기퇴근 시 `outtime_status = '4'`를 저장한다.
-- 근무지·점검 현장의 `gps_info`, 점검 이력의 `site_gps_info`는 객체이며 `latitude`·`longitude` 숫자 필드를 가져야 한다. 특이사항 보고의 `gps_info`는 애플리케이션에서 같은 형태로 정규화하지만 현재 DB CHECK는 없다.
+- 근무지의 `gps_info`와 점검 이력의 `site_gps_info`는 객체이며 `latitude`·`longitude` 숫자 필드를 가져야 한다. 점검 현장 자체에는 주소나 GPS를 저장하지 않는다. 특이사항 보고의 `gps_info`는 애플리케이션에서 같은 형태로 정규화하지만 현재 DB CHECK는 없다.
 - `radius_meters`는 현재 애플리케이션에서 최소 1m로 보정하며 DB CHECK는 없다.
 - 교육 이수는 `is_completed = false`이면 `completed_at IS NULL`, `true`이면 `completed_at IS NOT NULL`이어야 한다.
 - 푸시 구독은 근무자의 `(employee_id, endpoint)`를 UNIQUE로 관리한다. 관리자 구독은 `(user_id, endpoint)`와 `endpoint`를 모두 UNIQUE로 관리해 한 브라우저 엔드포인트의 중복 등록을 막는다.

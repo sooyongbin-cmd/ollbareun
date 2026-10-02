@@ -36,7 +36,6 @@ describe("inspection data helpers", () => {
       worksite_id: "work-1",
       worksite_name: "본사",
       name: "지하 1층",
-      gps_info: { latitude: 37.5, longitude: 127.1 },
     });
 
     expect(payload).toEqual({
@@ -46,7 +45,6 @@ describe("inspection data helpers", () => {
       worksiteId: "work-1",
       worksiteName: "본사",
       siteName: "지하 1층",
-      gpsInfo: { latitude: 37.5, longitude: 127.1 },
     });
     expect(parseInspectionQrPayload(JSON.stringify(payload))).toEqual(payload);
   });
@@ -73,8 +71,6 @@ describe("inspection data helpers", () => {
           id: "site-1",
           worksite_id: "work-1",
           name: "정문",
-          address: "서울시 중구 세종대로 1",
-          gps_info: { latitude: 37.5, longitude: 127 },
           created_at: "2026-06-04T00:00:00Z",
         },
         error: null,
@@ -97,8 +93,6 @@ describe("inspection data helpers", () => {
       createInspectionSite({
         worksiteId: "work-1",
         name: "정문",
-        address: "서울시 중구 세종대로 1",
-        gpsInfo: { latitude: 37.5, longitude: 127 },
       }),
     ).resolves.toMatchObject({
       id: "site-1",
@@ -110,8 +104,6 @@ describe("inspection data helpers", () => {
       worksite_id: "work-1",
       sort_order: 5,
       name: "정문",
-      address: "서울시 중구 세종대로 1",
-      gps_info: { latitude: 37.5, longitude: 127 },
     });
   });
 
@@ -125,8 +117,6 @@ describe("inspection data helpers", () => {
           id: "site-1",
           worksite_id: "work-1",
           name: "Gate",
-          address: "Seoul",
-          gps_info: { latitude: 37.5, longitude: 127 },
         },
         error: null,
       }),
@@ -150,16 +140,12 @@ describe("inspection data helpers", () => {
         worksiteId: "work-1",
         sortOrder: 2,
         name: "Gate",
-        address: "Seoul",
-        gpsInfo: { latitude: 37.5, longitude: 127 },
       }),
     ).resolves.toMatchObject({ id: "site-1", worksite_name: "Worksite" });
     expect(updateQuery.update).toHaveBeenCalledWith({
       worksite_id: "work-1",
       sort_order: 2,
       name: "Gate",
-      address: "Seoul",
-      gps_info: { latitude: 37.5, longitude: 127 },
     });
     expect(updateQuery.eq).toHaveBeenCalledWith("id", "site-1");
   });
@@ -189,8 +175,6 @@ describe("inspection data helpers", () => {
             id: "site-1",
             worksite_id: "work-1",
             name: "정문",
-            address: "서울시 중구 세종대로 1",
-            gps_info: { latitude: 37.5, longitude: 127 },
             created_at: "2026-06-04T00:00:00Z",
           },
         ],
@@ -274,7 +258,7 @@ describe("inspection data helpers", () => {
       insert: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({
-        data: { id: "site-1", worksite_id: "work-1", name: "정문", address: "서울", gps_info: { latitude: 37.5, longitude: 127 } },
+        data: { id: "site-1", worksite_id: "work-1", name: "정문" },
         error: null,
       }),
     };
@@ -290,8 +274,6 @@ describe("inspection data helpers", () => {
     await createInspectionSite({
       worksiteId: "work-1",
       name: "정문",
-      address: "서울",
-      gpsInfo: { latitude: 37.5, longitude: 127 },
     }, supabase as never);
 
     expect(insertQuery.insert).toHaveBeenCalledWith(expect.objectContaining({ worksite_id: "work-1", sort_order: 1 }));
@@ -305,7 +287,7 @@ describe("inspection data helpers", () => {
       select: vi.fn().mockReturnThis(),
       order: vi.fn().mockResolvedValue({
         data: [
-          { id: "site-1", worksite_id: "work-1", name: "정문", address: "서울시", gps_info: { latitude: 37.5, longitude: 127 } },
+          { id: "site-1", worksite_id: "work-1", name: "정문" },
         ],
         error: null,
       }),
@@ -369,7 +351,6 @@ describe("inspection data helpers", () => {
       worksite_id: "work-wrong",
       worksite_name: "조작",
       name: "조작",
-      gps_info: { latitude: 1, longitude: 1 },
     });
     const siteQuery = {
       select: vi.fn().mockReturnThis(),
@@ -379,7 +360,6 @@ describe("inspection data helpers", () => {
           id: "site-1",
           worksite_id: "work-1",
           name: "정문",
-          gps_info: { latitude: 37.5, longitude: 127 },
         },
         error: null,
       }),
@@ -388,7 +368,7 @@ describe("inspection data helpers", () => {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       maybeSingle: vi.fn().mockResolvedValue({
-        data: { id: "work-1", name: "본사" },
+        data: { id: "work-1", name: "본사", gps_info: { latitude: 37.5, longitude: 127 } },
         error: null,
       }),
     };
@@ -431,7 +411,6 @@ describe("inspection data helpers", () => {
       worksite_id: "work-1",
       worksite_name: "본사",
       name: "정문",
-      gps_info: { latitude: 37.5, longitude: 127 },
     });
     const siteQuery = {
       select: vi.fn().mockReturnThis(),

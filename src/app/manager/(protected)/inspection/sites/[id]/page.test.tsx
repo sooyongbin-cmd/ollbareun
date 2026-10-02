@@ -24,8 +24,6 @@ const site = {
   worksite_name: "Worksite",
   sort_order: 1,
   name: "Gate",
-  address: "Seoul",
-  gps_info: { latitude: 37.5, longitude: 127 },
 };
 
 describe("inspection site detail page", () => {
@@ -66,12 +64,10 @@ describe("inspection site detail page", () => {
           return Response.json({ config: { content: qrCodeConfigContent } });
         }
         if (url.endsWith("/api/inspection/sites/site-1") && init?.method === "PATCH") {
-          expect(JSON.parse(String(init.body))).toMatchObject({
+          expect(JSON.parse(String(init.body))).toEqual({
             worksiteId: "work-1",
             sortOrder: 1,
             name: "Gate",
-            address: "Seoul",
-            gpsInfo: { latitude: 37.5, longitude: 127 },
           });
           return Response.json({ site });
         }
@@ -86,12 +82,12 @@ describe("inspection site detail page", () => {
     );
   });
 
-  it("loads without showing the GPS input and returns to the list after save confirmation", async () => {
+  it("hides address and GPS and returns to the list after save confirmation", async () => {
     const user = userEvent.setup();
     render(<InspectionSiteDetailPage params={Promise.resolve({ id: "site-1" })} />);
 
     expect(await screen.findByDisplayValue("Gate")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("Seoul")).toHaveAttribute("readonly");
+    expect(screen.queryByLabelText("현장주소")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("GPS정보")).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "저장" }));

@@ -9,7 +9,6 @@ const qrPayload = {
   worksiteId: "work-1",
   worksiteName: "본사",
   siteName: "정문",
-  gpsInfo: { latitude: 37.5, longitude: 127 },
 };
 
 function setGuardSession() {
@@ -96,8 +95,6 @@ describe("guard inspection NFC page", () => {
             worksite_id: "work-1",
             worksite_name: "蹂몄궗",
             name: "?뺣Ц",
-            address: "釉뚮씪?곗?",
-            gps_info: { latitude: 37.5, longitude: 127 },
           },
         });
       }
@@ -140,8 +137,6 @@ describe("guard inspection NFC page", () => {
             worksite_id: "work-1",
             worksite_name: "Worksite",
             name: "Gate",
-            address: "Address",
-            gps_info: { latitude: 37.5, longitude: 127 },
           },
         });
       }
@@ -181,8 +176,6 @@ describe("guard inspection NFC page", () => {
             worksite_id: "work-1",
             worksite_name: "Worksite",
             name: "Gate",
-            address: "Address",
-            gps_info: { latitude: 37.5, longitude: 127 },
           },
         });
       }

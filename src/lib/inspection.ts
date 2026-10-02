@@ -11,15 +11,12 @@ export type InspectionSiteRow = {
   worksite_name: string;
   sort_order: number;
   name: string;
-  address: string;
-  gps_info: GpsInfo;
   today_inspection?: {
     inspected_at: string;
     employee_name: string;
     employee_role: string;
   } | null;
   created_at?: string;
-  updated_at?: string;
 };
 
 export type InspectionLogRow = {
@@ -44,8 +41,9 @@ export type InspectionQrPayload = {
   worksiteId: string;
   worksiteName: string;
   siteName: string;
-  gpsInfo: GpsInfo;
 };
+
+const INSPECTION_SITE_COLUMNS = "id,worksite_id,sort_order,name,created_at";
 
 type RawInspectionSite = Omit<InspectionSiteRow, "worksite_name">;
 
@@ -164,7 +162,7 @@ async function attachTodayInspections(sites: InspectionSiteRow[], supabase: Supa
   }));
 }
 
-export function buildInspectionQrPayload(site: Pick<InspectionSiteRow, "id" | "worksite_id" | "worksite_name" | "name" | "gps_info">): InspectionQrPayload {
+export function buildInspectionQrPayload(site: Pick<InspectionSiteRow, "id" | "worksite_id" | "worksite_name" | "name">): InspectionQrPayload {
   return {
     type: INSPECTION_QR_TYPE,
     version: 1,
@@ -172,7 +170,6 @@ export function buildInspectionQrPayload(site: Pick<InspectionSiteRow, "id" | "w
     worksiteId: site.worksite_id,
     worksiteName: site.worksite_name,
     siteName: site.name,
-    gpsInfo: site.gps_info,
   };
 }
 
@@ -190,7 +187,6 @@ export function parseInspectionQrPayload(value: unknown): InspectionQrPayload {
     worksiteId: requireString(payload.worksiteId, "근무지"),
     worksiteName: requireString(payload.worksiteName, "근무지명"),
     siteName: requireString(payload.siteName, "현장명"),
-    gpsInfo: requireGpsInfo(payload.gpsInfo),
   };
 }
 
@@ -219,7 +215,7 @@ export async function listInspectionSites(
   const name = typeof input.name === "string" ? input.name.trim() : "";
   const sitesQuery = supabase
     .from("inspection_sites")
-    .select("*")
+    .select(INSPECTION_SITE_COLUMNS)
     .order("created_at", { ascending: false });
 
   const sitesResult = name
@@ -240,13 +236,9 @@ export async function listInspectionSites(
 export async function createInspectionSite(input: {
   worksiteId: unknown;
   name: unknown;
-  address: unknown;
-  gpsInfo: unknown;
 }, supabase: SupabaseClient = getSupabase()) {
   const worksite_id = requireString(input.worksiteId, "근무지");
   const name = requireString(input.name, "현장명");
-  const address = requireString(input.address, "현장주소");
-  const gps_info = requireGpsInfo(input.gpsInfo);
   const { data: lastSite, error: lastSiteError } = await supabase
     .from("inspection_sites")
     .select("sort_order")
@@ -258,8 +250,8 @@ export async function createInspectionSite(input: {
   const sort_order = (lastSite?.sort_order ?? 0) + 1;
   const { data, error } = await supabase
     .from("inspection_sites")
-    .insert({ worksite_id, sort_order, name, address, gps_info })
-    .select("*")
+    .insert({ worksite_id, sort_order, name })
+    .select(INSPECTION_SITE_COLUMNS)
     .single();
 
   throwIfError(error);
@@ -280,8 +272,11 @@ export async function createInspectionSite(input: {
 
 export async function getInspectionSiteById(id: unknown, supabase: SupabaseClient = getSupabase()) {
   const siteId = requireString(id, "현장");
-  const { data, error } = await supabase.from("inspection_sites").select("*").eq("id", siteId).single();
+  const { data, error } = await supabase.from("inspection_sites").select(INSPECTION_SITE_COLUMNS).eq("id", siteId).single();
   throwIfError(error);
+  if (!data) {
+    throw new Error("현장 정보를 찾을 수 없습니다.");
+  }
 
   const { data: worksite, error: worksiteError } = await supabase
     .from("worksites")
@@ -301,20 +296,16 @@ export async function updateInspectionSite(input: {
   worksiteId: unknown;
   sortOrder: unknown;
   name: unknown;
-  address: unknown;
-  gpsInfo: unknown;
 }, supabase: SupabaseClient = getSupabaseAdmin()) {
   const siteId = requireString(input.id, "현장");
   const worksite_id = requireString(input.worksiteId, "근무지");
   const sort_order = requirePositiveInteger(input.sortOrder, "점검순서");
   const name = requireString(input.name, "현장명");
-  const address = requireString(input.address, "현장주소");
-  const gps_info = requireGpsInfo(input.gpsInfo);
   const { data, error } = await supabase
     .from("inspection_sites")
-    .update({ worksite_id, sort_order, name, address, gps_info })
+    .update({ worksite_id, sort_order, name })
     .eq("id", siteId)
-    .select("*")
+    .select(INSPECTION_SITE_COLUMNS)
     .single();
 
   throwIfError(error);
@@ -393,7 +384,7 @@ export async function createInspectionLog(input: {
 
   const { data: site, error: siteError } = await supabase
     .from("inspection_sites")
-    .select("*")
+    .select("id,worksite_id,name")
     .eq("id", qrPayload.siteId)
     .maybeSingle();
   throwIfError(siteError);
@@ -406,7 +397,7 @@ export async function createInspectionLog(input: {
 
   const { data: worksite, error: worksiteError } = await supabase
     .from("worksites")
-    .select("id,name")
+    .select("id,name,gps_info")
     .eq("id", site.worksite_id)
     .maybeSingle();
   throwIfError(worksiteError);
@@ -423,7 +414,9 @@ export async function createInspectionLog(input: {
       employee_name,
       worksite_name: worksite?.name ?? "근무지 없음",
       site_name: site.name,
-      site_gps_info: requireGpsInfo(site.gps_info),
+      // inspection_logs keeps its required coordinate snapshot. Use the associated
+      // worksite location because inspection_sites no longer stores its own GPS.
+      site_gps_info: requireGpsInfo(worksite.gps_info),
       qr_payload: qrPayload,
     })
     .select("*")

@@ -34,8 +34,6 @@ describe("/api/inspection/sites/[id]", () => {
       worksite_name: "Worksite",
       sort_order: 1,
       name: "Gate",
-      address: "Seoul",
-      gps_info: { latitude: 37.5, longitude: 127 },
     });
 
     const response = await GET(new Request("http://localhost/api/inspection/sites/site-1"), context);
@@ -53,16 +51,12 @@ describe("/api/inspection/sites/[id]", () => {
       worksite_name: "Worksite",
       sort_order: 1,
       name: "Gate",
-      address: "Seoul",
-      gps_info: { latitude: 37.5, longitude: 127 },
     });
 
     const body = {
       worksiteId: "work-1",
       sortOrder: 1,
       name: "Gate",
-      address: "Seoul",
-      gpsInfo: { latitude: 37.5, longitude: 127 },
     };
     const response = await PATCH(
       new Request("http://localhost/api/inspection/sites/site-1", {

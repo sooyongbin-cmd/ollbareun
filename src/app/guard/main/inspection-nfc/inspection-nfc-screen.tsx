@@ -461,9 +461,6 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
               <div className="grid gap-1 text-[0.9375rem]">
                 <span className="font-semibold">{nfcPayload.siteName}</span>
                 <span className="text-muted-foreground">{nfcPayload.worksiteName}</span>
-                <span className="text-muted-foreground">
-                  {nfcPayload.gpsInfo.latitude.toFixed(6)}, {nfcPayload.gpsInfo.longitude.toFixed(6)}
-                </span>
               </div>
             ) : null}
             {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p> : null}

@@ -13,7 +13,6 @@ type InspectionSite = {
   worksite_name: string;
   sort_order: number;
   name: string;
-  address: string;
   today_inspection?: {
     inspected_at: string;
     employee_name: string;

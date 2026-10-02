@@ -22,13 +22,11 @@ describe("inspection sites page", () => {
                 worksite_name: "Worksite",
                 sort_order: 1,
                 name: "Gate",
-                address: "Seoul",
                 today_inspection: {
                   inspected_at: "2026-06-04T00:00:00+00:00",
                   employee_name: "Alice",
                   employee_role: "경비원",
                 },
-                gps_info: { latitude: 37.5, longitude: 127 },
               },
             ],
           });
@@ -73,10 +71,10 @@ describe("inspection sites page", () => {
         if (url.startsWith("/api/inspection/sites")) {
           return Response.json({
             sites: [
-              { id: "s-1", worksite_name: "강남빌딩", sort_order: 2, name: "101동", address: "A" },
-              { id: "s-2", worksite_name: "홍대타워", sort_order: 1, name: "정문", address: "B" },
-              { id: "s-3", worksite_name: "강남빌딩", sort_order: 1, name: "102동", address: "C" },
-              { id: "s-4", worksite_name: "홍대타워", sort_order: 2, name: "후문", address: "D" },
+              { id: "s-1", worksite_name: "강남빌딩", sort_order: 2, name: "101동" },
+              { id: "s-2", worksite_name: "홍대타워", sort_order: 1, name: "정문" },
+              { id: "s-3", worksite_name: "강남빌딩", sort_order: 1, name: "102동" },
+              { id: "s-4", worksite_name: "홍대타워", sort_order: 2, name: "후문" },
             ],
           });
         }
@@ -108,8 +106,8 @@ describe("inspection sites page", () => {
       }
       return Response.json({
         sites: [
-          { id: "s-1", worksite_id: "work-1", worksite_name: "Worksite", sort_order: 1, name: "101동", address: "" },
-          { id: "s-2", worksite_id: "work-1", worksite_name: "Worksite", sort_order: 2, name: "102동", address: "" },
+          { id: "s-1", worksite_id: "work-1", worksite_name: "Worksite", sort_order: 1, name: "101동" },
+          { id: "s-2", worksite_id: "work-1", worksite_name: "Worksite", sort_order: 2, name: "102동" },
         ],
       });
     });
@@ -135,7 +133,7 @@ describe("inspection sites page", () => {
       vi.fn(async (input: RequestInfo | URL) => {
         if (String(input).startsWith("/api/inspection/sites")) {
           return Response.json({
-            sites: [{ id: "site-1", worksite_name: "Worksite", name: "Gate", address: "Seoul" }],
+            sites: [{ id: "site-1", worksite_name: "Worksite", name: "Gate" }],
           });
         }
         return Response.json({}, { status: 404 });

@@ -10,7 +10,6 @@ const qrPayload = {
   worksiteId: "work-1",
   worksiteName: "본사",
   siteName: "정문",
-  gpsInfo: { latitude: 37.5, longitude: 127 },
 };
 
 vi.mock("@zxing/browser", () => ({

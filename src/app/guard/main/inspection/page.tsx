@@ -146,9 +146,6 @@ export default function GuardInspectionPage() {
               <div className="grid gap-1 text-[0.9375rem]">
                 <span className="font-semibold">{qrPayload.siteName}</span>
                 <span className="text-muted-foreground">{qrPayload.worksiteName}</span>
-                <span className="text-muted-foreground">
-                  {qrPayload.gpsInfo.latitude.toFixed(6)}, {qrPayload.gpsInfo.longitude.toFixed(6)}
-                </span>
               </div>
             ) : null}
             {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p> : null}

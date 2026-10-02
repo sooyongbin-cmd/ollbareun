@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import InspectionSiteNewPage from "./page";
@@ -27,11 +27,9 @@ describe("inspection site new page", () => {
           });
         }
         if (url.endsWith("/api/inspection/sites")) {
-          expect(JSON.parse(String(init?.body))).toMatchObject({
-          worksiteId: "work-1",
+          expect(JSON.parse(String(init?.body))).toEqual({
+            worksiteId: "work-1",
             name: "Gate",
-            address: "Seoul",
-            gpsInfo: { latitude: 37.5, longitude: 127 },
           });
           return Response.json({
             site: {
@@ -39,8 +37,6 @@ describe("inspection site new page", () => {
               worksite_id: "work-1",
               worksite_name: "Worksite",
               name: "Gate",
-              address: "Seoul",
-              gps_info: { latitude: 37.5, longitude: 127 },
             },
           });
         }
@@ -55,14 +51,11 @@ describe("inspection site new page", () => {
 
     expect(await screen.findByRole("option", { name: "Worksite" })).toBeInTheDocument();
     expect(screen.queryByLabelText("점검순서")).not.toBeInTheDocument();
-    expect(screen.getByLabelText("현장주소")).toHaveAttribute("readonly");
+    expect(screen.queryByLabelText("현장주소")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("GPS정보")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "QR인쇄" })).not.toBeInTheDocument();
 
     await user.type(screen.getByLabelText("현장명"), "Gate");
-    act(() => {
-      window.jusoCallBack?.("Seoul", "Seoul", "", "");
-    });
-    await user.type(screen.getByLabelText("GPS정보"), "37.5, 127");
     await user.click(screen.getByRole("button", { name: "저장" }));
 
     expect(await screen.findByText("현장이 저장되었습니다.")).toBeInTheDocument();

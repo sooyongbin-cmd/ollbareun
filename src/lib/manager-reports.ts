@@ -95,10 +95,6 @@ export type AttendanceRecord = {
   intimeStatus: IntimeStatus;
   outtimeStatus: OuttimeStatus;
   outtimeLabel: "미퇴근" | "조퇴" | "퇴근";
-  clockInLatitude: number | null;
-  clockInLongitude: number | null;
-  clockOutLatitude: number | null;
-  clockOutLongitude: number | null;
   employeeName: string;
   clockInDateTime: string;
   clockOutDateTime: string | null;
@@ -327,7 +323,7 @@ export async function loadAttendanceRecord(
 
   const { data: attendance, error: attendanceError } = await supabase
     .from("work_record")
-    .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime,intime_status,outtime_status,clock_in_latitude,clock_in_longitude,clock_out_latitude,clock_out_longitude")
+    .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime,intime_status,outtime_status")
     .eq("id", recordId)
     .single();
 
@@ -368,10 +364,6 @@ export async function loadAttendanceRecord(
     scheduledClockIn: scheduledIn?.time ?? "-",
     scheduledClockOut: scheduledOut?.time ?? "-",
     status: status ?? "결근",
-    clockInLatitude: attendance.clock_in_latitude ?? null,
-    clockInLongitude: attendance.clock_in_longitude ?? null,
-    clockOutLatitude: attendance.clock_out_latitude ?? null,
-    clockOutLongitude: attendance.clock_out_longitude ?? null,
     employeeName: employee?.name ?? "-",
     clockInDateTime: toKstDateTime(attendance.work_intime)?.dateTime ?? "-",
     clockOutDateTime: toKstDateTime(attendance.work_outtime)?.dateTime ?? null,

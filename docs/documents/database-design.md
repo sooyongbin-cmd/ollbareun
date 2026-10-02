@@ -48,7 +48,7 @@ auth.users 1 ── N manager_push_subscriptions
 | `employees` | `id`, `name`, `phone`, `phone_normalized`, `role`, `is_retired`, `auth_user_id`, `passkey_enabled`, `work_style`, `in_time`, `out_time`, `created_at` | 직원 기본정보, 인증 연결, 근무형태·기본 출퇴근 시간 |
 | `worksites` | `id`, `name`, `address`, `gps_info`, `radius_meters`, `created_at` | 근무지와 GPS 출근 인정 범위 |
 | `work_assignments` | `id`, `employee_id`, `worksite_id`, `start_date`, `end_date`, `in_time`, `out_time`, `created_at` | 직원별 근무지 배정 기간 및 배정별 출퇴근 기준 시간 |
-| `work_record` | `id`, `employee_id`, `worksite_id`, `work_date`, `intime`, `outtime`, `work_intime`, `work_outtime`, `intime_status`, `outtime_status`, 출퇴근 위도·경도, `created_at`, `updated_at` | 직원별 일자 기준 근무예정과 실제 출퇴근을 통합 관리. `(employee_id, work_date)` UNIQUE |
+| `work_record` | `id`, `employee_id`, `worksite_id`, `work_date`, `intime`, `outtime`, `work_intime`, `work_outtime`, `intime_status`, `outtime_status`, `created_at`, `updated_at` | 직원별 일자 기준 근무예정과 실제 출퇴근을 통합 관리. `(employee_id, work_date)` UNIQUE |
 | `leave` | `id`, `employee_id`, `leave_type`, `start_date`, `end_date`, `created_at`, `updated_at` | 직원별 휴가 종류와 기간 |
 | `assignment_schedule_rules` | `id`, `work_assignment_id`, `day_type`, `is_working_day`, `in_time`, `out_time` | 배정별 요일·공휴일 근무 여부와 예정 출퇴근 시간 |
 | `public_holidays` | `id`, `holiday_date`, `name`, `selected`, `created_at` | 공휴일 및 관리자가 추가한 휴일. `selected = 'Y'`인 날짜만 야간근무 자동 휴무에 사용 |
@@ -82,8 +82,6 @@ auth.users 1 ── N manager_push_subscriptions
 | `intime_status` | `text` | 불가 | `0` 결근, `1` 지각, `2` 정상출근, `3` 정상근무 |
 | `outtime_status` | `text` | 가능 | `4` 조기퇴근 |
 | `created_at`, `updated_at` | `timestamptz` | 불가 | 생성·수정 시각 |
-| `clock_in_latitude`, `clock_in_longitude` | `double precision` | 가능 | 출근 처리 GPS 좌표 보존용 |
-| `clock_out_latitude`, `clock_out_longitude` | `double precision` | 가능 | 퇴근 처리 GPS 좌표 보존용 |
 
 상태는 다음 순서로 기록한다.
 

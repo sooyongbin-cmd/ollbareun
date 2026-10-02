@@ -78,10 +78,6 @@ export type AttendanceRow = {
   work_outtime: string | null;
   intime_status: "0" | "1" | "2";
   outtime_status: "0" | "1" | "2";
-  clock_in_latitude: number | null;
-  clock_in_longitude: number | null;
-  clock_out_latitude: number | null;
-  clock_out_longitude: number | null;
   created_at: string;
   updated_at: string;
 };
@@ -1013,8 +1009,6 @@ export async function clockIn(input: {
     work_intime,
     intime_status,
     outtime_status: "0",
-    clock_in_latitude: latitude,
-    clock_in_longitude: longitude,
     updated_at: new Date().toISOString(),
   };
   const data = await saveAttendance(supabase, {
@@ -1097,8 +1091,6 @@ export async function clockOut(input: {
       work_outtime,
       intime_status: attendance.intime_status,
       outtime_status: isEarlyDeparture ? "1" : "2",
-      clock_out_latitude: latitude,
-      clock_out_longitude: longitude,
       updated_at: new Date().toISOString(),
     })
     .eq("id", attendance.id)

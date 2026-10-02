@@ -2,7 +2,6 @@ import { act, fireEvent, render, screen, waitFor, within } from "@testing-librar
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ManagerLayout from "./layout";
-import { PasskeyFeatureProvider } from "@/components/passkey-feature-provider";
 
 const navigationMock = vi.hoisted(() => ({ pathname: "/manager" }));
 const authMocks = vi.hoisted(() => ({
@@ -247,24 +246,11 @@ describe("manager layout", () => {
       ?.querySelectorAll("a");
     expect(Array.from(systemLinks ?? []).map((link) => link.textContent?.trim())).toEqual([
       "로그현황",
-      "패스키 요청 관리",
       "관리자관리",
       "프로젝트 문서",
       "시스템설정",
     ]);
 
-  });
-
-  it("hides passkey request navigation when the feature is disabled", () => {
-    render(
-      <PasskeyFeatureProvider enabled={false}>
-        <ManagerLayout>
-          <div>관리자 본문</div>
-        </ManagerLayout>
-      </PasskeyFeatureProvider>,
-    );
-
-    expect(screen.queryByRole("link", { name: "패스키 요청 관리" })).not.toBeInTheDocument();
   });
 
   it("marks the current route active and shows its breadcrumb", () => {

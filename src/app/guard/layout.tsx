@@ -1,9 +1,7 @@
 import {
   defaultKakaoOpenGraphMetadata,
   getKakaoOpenGraphMetadata,
-  isSystemConfigEnabled,
 } from "@/lib/system-configs";
-import { PasskeyFeatureProvider } from "@/components/passkey-feature-provider";
 import type { Metadata, ResolvingMetadata } from "next";
 import GuardInstallPrompt from "./guard-install-prompt";
 import InAppBrowserChecker from "./in-app-browser-checker";
@@ -48,11 +46,9 @@ export default async function GuardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const passkeyEnabled = await isSystemConfigEnabled("system_passkey");
-
   return (
     <GuardZoomScope>
-      <PasskeyFeatureProvider enabled={passkeyEnabled}>{children}</PasskeyFeatureProvider>
+      {children}
       <GuardInstallPrompt />
       <InAppBrowserChecker />
     </GuardZoomScope>

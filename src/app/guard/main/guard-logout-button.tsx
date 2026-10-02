@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import AlertModal from "@/components/modals/alert-modal";
 import { PowerIcon } from "@/components/icons/power-icon";
 import { clearStoredGuardSession, readStoredGuardSession } from "../guard-session-storage";
-import { getSupabasePasskeyClient } from "@/lib/supabase-passkey-client";
 import { getAppPushRegistration } from "@/lib/app-push-registration";
 
 const guardLogoutPushResultStorageKey = "ollbareun.guard.logout.pushResult";
@@ -150,12 +149,6 @@ export default function GuardLogoutButton({
         serverSubscription = "failed";
         console.error("Failed to remove push subscription from backend:", error);
       }
-    }
-
-    try {
-      await getSupabasePasskeyClient().auth.signOut();
-    } catch (error) {
-      console.error("Failed to clear guard passkey session:", error);
     }
 
     try {

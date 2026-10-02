@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { GpsInfo } from "@/lib/gps";
 import AlertModal from "@/components/modals/alert-modal";
-import { getSupabasePasskeyClient } from "@/lib/supabase-passkey-client";
 import { isCurrentInAppBrowser, isStandaloneGuardApp } from "./in-app-browser";
 import InAppBrowserGuide from "./in-app-browser-guide";
 import GuardBrowserGate from "./guard-browser-gate";
@@ -15,7 +14,6 @@ import {
   hasActiveStoredGuardSession,
   writeStoredGuardSession,
 } from "./guard-session-storage";
-import { usePasskeyFeatureEnabled } from "@/components/passkey-feature-provider";
 
 type EmployeeRow = {
   id: string;
@@ -174,7 +172,6 @@ function getSessionText(status: LogoutPushResult["session"]) {
 
 export default function GuardPage() {
   const router = useRouter();
-  const passkeyEnabled = usePasskeyFeatureEnabled();
   const [savedGuardName, setSavedGuardName] = useState(readStoredGuardName);
   const [phone, setPhone] = useState("");
   const [logoutPushResult] = useState(readLogoutPushResult);
@@ -269,47 +266,6 @@ export default function GuardPage() {
     }
   }
 
-  async function handlePasskeyLogin() {
-    if (!passkeyEnabled || isGuardLoginPending) {
-      return;
-    }
-    try {
-      setErrorMessage("");
-      setIsGuardLoginPending(true);
-      setGuardLoginProgress("패스키 로그인 요청을 전송하고 있습니다.");
-
-      const supabase = getSupabasePasskeyClient();
-      const { data, error } = await supabase.auth.signInWithPasskey();
-
-      if (error) {
-        throw error;
-      }
-
-      const accessToken = data.session?.access_token;
-      if (!accessToken) {
-        throw new Error("패스키 로그인 세션을 확인하지 못했습니다.");
-      }
-
-      const response = await fetch("/api/guard/passkeys/session", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      const session = await response.json();
-
-      if (!response.ok) {
-        throw new Error(session.error ?? "패스키 로그인에 실패했습니다.");
-      }
-
-      writeStoredGuardSession(session);
-      router.push("/guard/main");
-    } catch (passkeyError) {
-      const message = passkeyError instanceof Error ? passkeyError.message : "패스키 로그인에 실패했습니다.";
-      setErrorMessage(message);
-      setIsGuardLoginPending(false);
-      setGuardLoginProgress("");
-    }
-  }
-
   if (!sessionCheckComplete) {
     return null;
   }
@@ -393,17 +349,6 @@ export default function GuardPage() {
                 )}
               </form>
             </section>
-
-            {passkeyEnabled ? (
-              <section className="w-full rounded-xl border border-border/50 bg-muted/40 p-5">
-                <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full" onClick={handlePasskeyLogin} type="button">
-                  패스키로 로그인
-                </Button>
-                <p className="mt-3 text-[0.8125rem] leading-relaxed text-muted-foreground">
-                  관리자 승인을 받은 뒤 이 기기에 패스키를 등록한 근무자만 사용할 수 있습니다.
-                </p>
-              </section>
-            ) : null}
 
             <section hidden className="w-full rounded-xl border border-border/50 bg-muted/40 p-6">
               <div className="space-y-2">

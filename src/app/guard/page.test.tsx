@@ -1,27 +1,18 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import GuardPage from "./page";
-import { PasskeyFeatureProvider } from "@/components/passkey-feature-provider";
 
 const push = vi.fn();
 const replace = vi.fn();
-const signInWithPasskey = vi.fn();
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push, replace }),
-}));
-
-vi.mock("@/lib/supabase-passkey-client", () => ({
-  getSupabasePasskeyClient: () => ({
-    auth: { signInWithPasskey },
-  }),
 }));
 
 describe("guard login page", () => {
   beforeEach(() => {
     push.mockReset();
     replace.mockReset();
-    signInWithPasskey.mockReset();
     vi.restoreAllMocks();
     Object.defineProperty(window, "location", {
       value: {
@@ -63,35 +54,6 @@ describe("guard login page", () => {
     expect(screen.queryByRole("button", { name: "경비원 인증" })).not.toBeInTheDocument();
     const resultSection = (await screen.findByText("처리 내역 없음")).closest("section");
     expect(resultSection).toHaveAttribute("hidden");
-  });
-
-  it("places the passkey login section below the guard login section", async () => {
-    setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1");
-    setStandaloneMode(true);
-    render(<GuardPage />);
-
-    const loginSection = await screen.findByRole("region", { name: "근무자 로그인" });
-    const passkeyButton = await screen.findByRole("button", { name: "패스키로 로그인" });
-    const passkeySection = passkeyButton.closest("section");
-
-    expect(loginSection).toContainElement(screen.getByLabelText("이름"));
-    expect(loginSection).toContainElement(screen.getByLabelText("연락처"));
-    expect(loginSection).toContainElement(screen.getByRole("button", { name: "로그인" }));
-    expect(passkeySection).not.toBeNull();
-    expect(Boolean(loginSection.compareDocumentPosition(passkeySection!) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
-  });
-
-  it("hides the passkey login section when the feature is disabled", async () => {
-    setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1");
-    setStandaloneMode(true);
-    render(
-      <PasskeyFeatureProvider enabled={false}>
-        <GuardPage />
-      </PasskeyFeatureProvider>,
-    );
-
-    await screen.findByRole("region", { name: "근무자 로그인" });
-    expect(screen.queryByRole("button", { name: "패스키로 로그인" })).not.toBeInTheDocument();
   });
 
   it("redirects to guard main when an active guard session exists", () => {
@@ -148,77 +110,6 @@ describe("guard login page", () => {
       expect(screen.getByText("메인 화면으로 이동합니다.")).toBeInTheDocument();
     });
     expect(push).toHaveBeenCalledWith("/guard/main");
-  });
-
-  it("stores a guard session after passkey login succeeds", async () => {
-    setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1");
-    setStandaloneMode(true);
-    signInWithPasskey.mockResolvedValue({
-      data: { session: { access_token: "token-1" } },
-      error: null,
-    });
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(
-        Response.json({
-          employee: { id: "emp-1", name: "홍길동" },
-          assignment: null,
-          worksite: null,
-          attendance: null,
-        }),
-      ),
-    );
-
-    render(<GuardPage />);
-    fireEvent.click(await screen.findByRole("button", { name: "패스키로 로그인" }));
-
-    await waitFor(() => {
-      expect(push).toHaveBeenCalledWith("/guard/main");
-    });
-    expect(fetch).toHaveBeenCalledWith("/api/guard/passkeys/session", {
-      method: "POST",
-      headers: { Authorization: "Bearer token-1" },
-    });
-    const storedSession = JSON.parse(window.localStorage.getItem("ollbareun.guard.session") ?? "{}");
-    expect(storedSession).toMatchObject({
-      employee: { id: "emp-1" },
-      createdAt: expect.any(String),
-      lastActiveAt: expect.any(String),
-    });
-  });
-
-  it("shows login pending modal during passkey login", async () => {
-    setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1");
-    setStandaloneMode(true);
-    signInWithPasskey.mockResolvedValue({
-      data: { session: { access_token: "token-1" } },
-      error: null,
-    });
-
-    let resolveSession!: (response: Response) => void;
-    const sessionPromise = new Promise<Response>((resolve) => {
-      resolveSession = resolve;
-    });
-    vi.stubGlobal("fetch", vi.fn(() => sessionPromise));
-
-    render(<GuardPage />);
-    fireEvent.click(await screen.findByRole("button", { name: "패스키로 로그인" }));
-
-    expect(await screen.findByText("로그인 진행 중")).toBeInTheDocument();
-    expect(screen.getByRole("alert")).toHaveClass("top-1/2", "-translate-y-1/2");
-
-    resolveSession(
-      Response.json({
-        employee: { id: "emp-1", name: "홍길동" },
-        assignment: null,
-        worksite: null,
-        attendance: null,
-      }),
-    );
-
-    await waitFor(() => {
-      expect(push).toHaveBeenCalledWith("/guard/main");
-    });
   });
 
   it("hides the last logout push cleanup result", async () => {

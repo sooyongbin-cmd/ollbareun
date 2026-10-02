@@ -23,12 +23,10 @@ import {
   managerNavigationGroups,
 } from "./manager-navigation";
 import ManagerPushConnect from "./manager-push-connect";
-import { usePasskeyFeatureEnabled } from "@/components/passkey-feature-provider";
 
 export default function ManagerSidebar() {
   const pathname = usePathname();
   const { openMobile, setOpenMobile } = useSidebar();
-  const passkeyEnabled = usePasskeyFeatureEnabled();
   const currentNavigation = findManagerNavigation(pathname);
 
   const closeMobileMenu = () => {
@@ -103,7 +101,7 @@ export default function ManagerSidebar() {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {group.items.filter((item) => passkeyEnabled || item.href !== "/manager/system/passkeys").map((item) => (
+                {group.items.map((item) => (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
                       asChild

@@ -20,7 +20,7 @@
 ## 2. 주요 관계
 
 ```text
-auth.users 1 ── 0..1 employees ── N work_assignments N ── 1 worksites
+employees 1 ── N work_assignments N ── 1 worksites
                          │                 │
                          │                 ├── N assignment_schedule_rules
                          │
@@ -30,7 +30,6 @@ auth.users 1 ── 0..1 employees ── N work_assignments N ── 1 worksite
                          ├── N inspection_logs
                          ├── N inspection_special_reports
                          ├── N push_subscriptions
-                         └── N guard_passkey_requests
 
 worksites 1 ── N inspection_sites 1 ── 0..N inspection_logs
 auth.users 1 ── 0..1 admin_users
@@ -45,7 +44,7 @@ auth.users 1 ── N manager_push_subscriptions
 
 | 테이블 | 주요 필드 | 설명 |
 | --- | --- | --- |
-| `employees` | `id`, `name`, `phone`, `phone_normalized`, `role`, `is_retired`, `auth_user_id`, `passkey_enabled`, `work_style`, `in_time`, `out_time`, `created_at` | 직원 기본정보, 인증 연결, 근무형태·기본 출퇴근 시간 |
+| `employees` | `id`, `name`, `phone`, `phone_normalized`, `role`, `is_retired`, `work_style`, `in_time`, `out_time`, `created_at` | 직원 기본정보, 근무형태·기본 출퇴근 시간 |
 | `worksites` | `id`, `name`, `address`, `gps_info`, `radius_meters`, `created_at` | 근무지와 GPS 출근 인정 범위 |
 | `work_assignments` | `id`, `employee_id`, `worksite_id`, `start_date`, `end_date`, `in_time`, `out_time`, `created_at` | 직원별 근무지 배정 기간 및 배정별 출퇴근 기준 시간 |
 | `work_record` | `id`, `employee_id`, `worksite_id`, `work_date`, `intime`, `outtime`, `work_intime`, `work_outtime`, `intime_status`, `outtime_status`, `created_at`, `updated_at` | 직원별 일자 기준 근무예정과 실제 출퇴근을 통합 관리. `(employee_id, work_date)` UNIQUE |
@@ -61,7 +60,6 @@ auth.users 1 ── N manager_push_subscriptions
 | `manager_push_subscriptions` | `id`, `user_id`, `endpoint`, `p256dh`, `auth`, `created_at`, `updated_at` | 관리자 브라우저 푸시 구독 |
 | `push_notification_runs` | `id`, `notification_code`, `scheduled_date`, `scheduled_time`, `status`, `sent_at`, `error_message`, `result`, `created_at`, `updated_at` | 교육 알림 실행·중복 방지·결과 이력 |
 | `guard_session_logs` | `id`, `employee_id`, `guard_name`, 로그인·메인 푸시·로그아웃 상태와 시각, 결과 JSON, `created_at`, `updated_at` | 근무자 로그인 세션과 알림 처리 로그 |
-| `guard_passkey_requests` | `id`, `employee_id`, `status`, `requested_at`, `reviewed_at`, `reviewed_by`, `registered_at`, `revoked_at`, `created_at`, `updated_at` | 관리자 승인 기반 Passkey 신청·승인·등록·폐기 이력 |
 | `system_configs` | `system_code`, `parent_system_code`, `content`, `description`, `created_at`, `updated_at` | 메일 주소·기능 플래그 등 운영 설정 및 자유 입력 분류값 |
 | `admin_users` | `id`, `user_id`, `email`, `role`, `created_by`, `first_login_at`, `created_at`, `updated_at` | Supabase Auth 사용자와 관리자 권한 연결 |
 
@@ -98,7 +96,6 @@ auth.users 1 ── N manager_push_subscriptions
 - `employees.work_style`은 `0` 일반근무, `1` 격일근무, `2` 야간근무이며, `role`은 `경비원`, `미화원`, `파견` 중 하나다.
 - `public_holidays.selected`와 `inspection_special_reports.processing_status`는 `Y/N`이다.
 - 이메일 상태는 `pending`, `sent`, `failed`, `not_requested`, 알림 실행 상태는 `processing`, `sent`, `failed`, `skipped`다.
-- Passkey 요청 상태는 `pending`, `approved`, `rejected`, `registered`, `revoked`다.
 
 ## 4. 핵심 제약조건
 
@@ -107,11 +104,10 @@ auth.users 1 ── N manager_push_subscriptions
 - UUID 식별자를 사용하는 업무 테이블의 기본키는 `gen_random_uuid()`를 기본값으로 사용한다. `education_completions`는 `(employee_id, resource_id)` 복합 PK, `system_configs`는 `system_code` 텍스트 PK다.
 - 직원명·연락처·정규화 연락처, 근무지명·주소, 점검 현장명, 점검 이력의 스냅샷 명칭, 특이사항 내용, 교육 제목·YouTube 링크, 시스템 코드·내용은 `NOT NULL` 및 공백 문자열 방지 CHECK를 적용한다.
 - 주요 외래키와 삭제 규칙은 다음과 같다.
-  - `employees.auth_user_id → auth.users.id`: `ON DELETE SET NULL`
   - `work_assignments.employee_id → employees.id`: `ON DELETE CASCADE`
   - `work_record.employee_id → employees.id`, `work_record.worksite_id → worksites.id`: `ON DELETE CASCADE`
   - `leave.employee_id → employees.id`, `assignment_schedule_rules.work_assignment_id → work_assignments.id`: `ON DELETE CASCADE`
-  - 교육 이수의 직원·자료 참조와 Passkey 요청의 직원 참조: `ON DELETE CASCADE`
+  - 교육 이수의 직원·자료 참조: `ON DELETE CASCADE`
   - `inspection_sites.worksite_id`: `ON DELETE CASCADE`
   - `inspection_logs`의 현장·근무지·직원 참조와 특이사항 보고의 근무지·직원 참조: `ON DELETE SET NULL`
   - `admin_users.user_id → auth.users.id`: `ON DELETE CASCADE`, `admin_users.created_by → auth.users.id`: `ON DELETE SET NULL`
@@ -120,7 +116,7 @@ auth.users 1 ── N manager_push_subscriptions
 
 ### 업무 규칙 및 상태 검증
 
-- 직원 `role`은 `경비원`, `미화원`, `파견`만 허용하고, `work_style`은 `0`, `1`, `2`만 허용한다. `auth_user_id`는 NULL을 허용하되 한 직원 계정에만 연결되며, Passkey 관련 컬럼은 서버 서비스 역할만 변경할 수 있다.
+- 직원 `role`은 `경비원`, `미화원`, `파견`만 허용하고, `work_style`은 `0`, `1`, `2`만 허용한다.
 - 직원의 `(name, phone_normalized)`는 UNIQUE이며, 전화번호 검색·로그인은 입력값을 정규화한 뒤 비교한다.
 - 근무 배정은 `start_date <= end_date`이고 동일 직원의 기간이 겹치지 않도록 `daterange` 기반 GiST EXCLUDE 제약을 적용한다. 애플리케이션도 저장 전에 동일 조건을 확인한다.
 - 배정별 `in_time`, `out_time`이 없으면 직원 기본 시간을 사용한다. 시간 형식은 애플리케이션에서 `HH:mm[:ss]`로 검증한다.
@@ -135,7 +131,6 @@ auth.users 1 ── N manager_push_subscriptions
 - 알림 실행 이력은 `notification_code`, `scheduled_date`, `scheduled_time` 조합이 UNIQUE이고, `scheduled_time`은 `HH:mm` 정규식으로 검증한다. 상태는 `processing`, `sent`, `failed`, `skipped`만 허용한다.
 - 특이사항 메일 상태는 `pending`, `sent`, `failed`, `not_requested`이며 `sent`일 때 `email_sent_at`이 있어야 한다. `not_requested`를 지원하므로 `email_to`는 NULL을 허용한다. 처리 상태는 `Y/N`이다.
 - 세션 로그의 로그인 상태는 `success/failed`, 메인 푸시 상태는 `success/warning/error/skipped`만 허용한다.
-- Passkey 요청은 정의된 5개 상태만 허용하며 `approved/rejected`는 `reviewed_at`, `registered`는 `registered_at`, `revoked`는 `revoked_at`이 반드시 있어야 한다. 직원별 `pending/approved` 진행 중 요청은 하나만 허용한다.
 - 관리자 역할은 `admin/super_admin`만 허용한다. `user_id`가 있는 관리자 계정은 하나만 연결되고, 이메일은 공백 제거·소문자 기준으로 중복되지 않는다.
 - 시스템 설정의 `system_code`와 `content`는 공백이 아니어야 하며, `parent_system_code`는 관리자 화면의 자유 입력 분류값 또는 NULL이다.
 
@@ -145,7 +140,7 @@ auth.users 1 ── N manager_push_subscriptions
 
 | 테이블 | 인덱스 및 목적 |
 | --- | --- |
-| `employees` | `employees_name_phone_normalized_key` `(name, phone_normalized)` UNIQUE 로그인·중복 방지, `employees_auth_user_id_key` `auth_user_id` 부분 UNIQUE 인증 사용자 연결, `employees_passkey_enabled_idx` Passkey 대상 필터 |
+| `employees` | `employees_name_phone_normalized_key` `(name, phone_normalized)` UNIQUE 로그인·중복 방지 |
 | `worksites` | PK 인덱스만 있음. 현재 목록은 `created_at` 정렬 후 이름을 클라이언트에서 필터링 |
 | `work_assignments` | `work_assignments_employee_period_no_overlap` GiST EXCLUDE 기간 중복 방지, `idx_work_assignments_worksite_id` 근무지별 배정 조회 |
 | `work_record` | `work_record_employee_date_key` `(employee_id, work_date)` UNIQUE로 일별 중복 방지, `work_record_work_date_idx` 날짜별 조회, `work_record_worksite_id_idx` 근무지별 조회 |
@@ -159,7 +154,6 @@ auth.users 1 ── N manager_push_subscriptions
 | `manager_push_subscriptions` | `manager_push_subscriptions_user_id_idx` 관리자별 구독 조회, `(user_id, endpoint)` 및 `endpoint` UNIQUE |
 | `push_notification_runs` | `push_notification_runs_created_at_idx` 최신 실행순, `push_notification_runs_schedule_idx` 스케줄 확인, `push_notification_runs_unique_schedule` 동일 스케줄 UNIQUE |
 | `guard_session_logs` | `guard_session_logs_login_at_idx` 최신 세션순, `guard_session_logs_employee_id_idx`, `guard_session_logs_login_status_idx`, `guard_session_logs_guard_name_idx` 조건 조회 |
-| `guard_passkey_requests` | `guard_passkey_requests_employee_id_idx`, `guard_passkey_requests_status_idx`, `guard_passkey_requests_requested_at_idx` 승인 목록 조회, `guard_passkey_requests_one_open_request_per_employee_idx` 진행 중 요청 부분 UNIQUE |
 | `system_configs` | `system_configs_parent_system_code_idx` 분류값 조회 |
 | `admin_users` | `admin_users_role_idx`, `admin_users_created_at_idx`, `admin_users_created_by_idx`, `admin_users_first_login_at_idx`, `admin_users_user_id_unique_idx` NULL이 아닌 `user_id` 부분 UNIQUE, `admin_users_email_unique_idx` `lower(btrim(email))` UNIQUE 및 기존 `email` UNIQUE |
 
@@ -176,7 +170,6 @@ auth.users 1 ── N manager_push_subscriptions
 - 교육 리포트는 직원과 자료를 조인해 이수 여부를 표시하고, 완료 건수는 완료 상태이면서 `completed_at`이 조회 연도에 속하는 자료만 포함한다.
 - 교육 알림 실행 이력은 알림 코드·상태를 선택적으로 필터링하고 `created_at DESC`, 기본 최대 100건을 조회한다. insert 후 트리거가 최신 100건만 남긴다.
 - 근무자 세션 로그는 `login_at DESC`로 정렬하고 `guard_name`, `login_status`, 메인 푸시 상태를 선택적으로 필터링한다. 관리 화면은 페이지 범위를 사용한다.
-- Passkey 요청은 직원별 최신 요청을 `requested_at DESC LIMIT 1`로 조회하고, 관리자 목록은 같은 기준의 전체 최신순이다.
 - 관리자 푸시는 `admin_users`에서 연결된 `user_id`를 모은 뒤 `manager_push_subscriptions.user_id IN (...)`으로 발송 대상을 조회한다. 만료된 endpoint는 endpoint 기준으로 삭제한다.
 - 공휴일은 `holiday_date`를 conflict 기준으로 upsert하고, 근무 일정 생성 함수는 `selected = 'Y'`인 공휴일과 배정 규칙을 사용한다.
 
@@ -191,9 +184,8 @@ auth.users 1 ── N manager_push_subscriptions
 ## 6. 보안 및 저장소
 
 - 관리자 전용 작업과 민감한 배정·일정 규칙·일별 예정시각 작업은 서버의 Supabase 관리 클라이언트를 사용한다.
-- RLS 정책과 권한은 마이그레이션으로 관리한다. `push_notification_runs`, `manager_push_subscriptions`, `assignment_schedule_rules`, `leave`, `work_record`, `guard_passkey_requests`, `public_holidays`는 일반 클라이언트 권한을 제한하고 서버 역할 중심으로 접근한다.
+- RLS 정책과 권한은 마이그레이션으로 관리한다. `push_notification_runs`, `manager_push_subscriptions`, `assignment_schedule_rules`, `leave`, `work_record`, `public_holidays`는 일반 클라이언트 권한을 제한하고 서버 역할 중심으로 접근한다.
 - 특이사항 사진은 `special-remarks` 저장소에 저장하고 보고 삭제 시 연결 파일도 삭제한다.
-- Passkey 컬럼 변경은 서버 서비스 역할만 허용하는 트리거로 보호한다.
 - 서비스 역할 키와 메일·푸시 비밀값은 서버 환경변수에만 저장하며 클라이언트에 노출하지 않는다.
 
 ## 7. 마이그레이션 관리

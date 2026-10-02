@@ -11,7 +11,6 @@ export function getSupabaseAdmin() {
       auth: {
         autoRefreshToken: false,
         persistSession: false,
-        experimental: { passkey: true },
       },
     });
   }

@@ -4,12 +4,8 @@ import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import GuardProfilePage from "./page";
-import { PasskeyFeatureProvider } from "@/components/passkey-feature-provider";
 
 const push = vi.fn();
-const signInWithPassword = vi.fn();
-const registerPasskey = vi.fn();
-const signOut = vi.fn();
 
 function dateKeyInSeoul() {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
@@ -32,12 +28,6 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push }),
 }));
 
-vi.mock("@/lib/supabase-passkey-client", () => ({
-  getSupabasePasskeyClient: () => ({
-    auth: { signInWithPassword, registerPasskey, signOut },
-  }),
-}));
-
 describe("guard profile page", () => {
   it("does not show privacy policy or account deletion links on the profile page", () => {
     render(<GuardProfilePage />);
@@ -47,20 +37,14 @@ describe("guard profile page", () => {
 
   beforeEach(() => {
     vi.restoreAllMocks();
-    signInWithPassword.mockReset();
-    registerPasskey.mockReset();
-    signOut.mockReset();
     push.mockReset();
     window.localStorage.clear();
     window.sessionStorage.clear();
   });
 
-  it("loads the logged-in guard profile and renders profile and passkey sections", async () => {
+  it("loads the logged-in guard profile", async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
-      if (url.startsWith("/api/guard/passkey-requests/me")) {
-        return Response.json({ request: null });
-      }
       if (url.startsWith("/api/guard/profile")) {
         return Response.json({
           schedules: [
@@ -84,7 +68,6 @@ describe("guard profile page", () => {
     render(<GuardProfilePage />);
 
     expect(await screen.findByRole("heading", { name: "개인프로필" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "패스키등록" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "근무스케줄" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "월별출근현황" })).toBeInTheDocument();
     expect(screen.getByText("2026-05-01 ~ 2026-05-31")).toBeInTheDocument();
@@ -92,8 +75,7 @@ describe("guard profile page", () => {
     expect(screen.getByText("2026-05")).toBeInTheDocument();
     expect(screen.getByText("3일")).toBeInTheDocument();
     expect(screen.getByText("25시간 30분")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "패스키 등록 요청" })).toBeInTheDocument();
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
   });
 
   it("groups planned attendance into future weeks and renders Monday through Sunday from the selected week", async () => {
@@ -103,9 +85,6 @@ describe("guard profile page", () => {
     const currentWeekDayOff = addDateDays(currentWeekStart, 1);
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
-      if (url.startsWith("/api/guard/passkey-requests/me")) {
-        return Response.json({ request: null });
-      }
       if (url.startsWith("/api/guard/profile")) {
         return Response.json({
           schedules: [{ id: "assign-1", period: `${currentWeekStart} ~ ${addDateDays(nextWeekStart, 2)}`, worksiteName: "본사" }],
@@ -151,9 +130,6 @@ describe("guard profile page", () => {
     const monthLabel = `${Number(monthKey.slice(5, 7))}월`;
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
-      if (url.startsWith("/api/guard/passkey-requests/me")) {
-        return Response.json({ request: null });
-      }
       if (url.startsWith("/api/guard/profile")) {
         return Response.json({
           schedules: [],
@@ -214,9 +190,6 @@ describe("guard profile page", () => {
     const monthLabel = (monthKey: string) => `${Number(monthKey.slice(5, 7))}월`;
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
-      if (url.startsWith("/api/guard/passkey-requests/me")) {
-        return Response.json({ request: null });
-      }
       if (url.startsWith("/api/guard/profile")) {
         return Response.json({
           schedules: [],
@@ -270,40 +243,11 @@ describe("guard profile page", () => {
     expect(screen.getByText("정상 출근 (09:00~18:00)")).toBeInTheDocument();
   });
 
-  it("hides the passkey registration section when the feature is disabled", async () => {
+  it("keeps the logout action available at the bottom of the profile", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: RequestInfo | URL) => {
         if (String(input).startsWith("/api/guard/profile")) {
-          return Response.json({ schedules: [], monthlyAttendance: [] });
-        }
-        return Response.json({}, { status: 404 });
-      }),
-    );
-    window.sessionStorage.setItem(
-      "ollbareun.guard.session",
-      JSON.stringify({ employee: { id: "emp-1", name: "홍길동" } }),
-    );
-
-    render(
-      <PasskeyFeatureProvider enabled={false}>
-        <GuardProfilePage />
-      </PasskeyFeatureProvider>,
-    );
-
-    await screen.findByRole("heading", { name: "개인프로필" });
-    expect(screen.queryByRole("heading", { name: "패스키등록" })).not.toBeInTheDocument();
-  });
-
-  it("places logout directly above passkey registration at the bottom", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async (input: RequestInfo | URL) => {
-        const url = String(input);
-        if (url.startsWith("/api/guard/passkey-requests/me")) {
-          return Response.json({ request: null });
-        }
-        if (url.startsWith("/api/guard/profile")) {
           return Response.json({ schedules: [], monthlyAttendance: [] });
         }
         return Response.json({}, { status: 404 });
@@ -318,8 +262,7 @@ describe("guard profile page", () => {
 
     await screen.findByRole("heading", { name: "개인프로필" });
     const sectionHeadings = screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent);
-    expect(sectionHeadings.at(-2)).toBe("로그아웃");
-    expect(sectionHeadings.at(-1)).toBe("패스키등록");
+    expect(sectionHeadings.at(-1)).toBe("로그아웃");
     const leaveLink = screen.getByRole("link", { name: "휴가 신청" });
     expect(screen.getByRole("button", { name: "내 정보 확인" }).previousElementSibling).toBe(leaveLink);
   });
@@ -329,9 +272,6 @@ describe("guard profile page", () => {
     const getSubscription = vi.fn().mockResolvedValue({ endpoint: "https://push.example.test/current", unsubscribe });
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
-      if (url.startsWith("/api/guard/passkey-requests/me")) {
-        return Response.json({ request: null });
-      }
       if (url.startsWith("/api/guard/profile")) {
         return Response.json({ schedules: [], monthlyAttendance: [] });
       }
@@ -398,9 +338,6 @@ describe("guard profile page", () => {
   it("hydrates without text mismatch when a stored guard session exists on refresh", async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
-      if (url.startsWith("/api/guard/passkey-requests/me")) {
-        return Response.json({ request: null });
-      }
       if (url.startsWith("/api/guard/profile")) {
         return Response.json({ schedules: [], monthlyAttendance: [] });
       }
@@ -432,46 +369,10 @@ describe("guard profile page", () => {
     consoleError.mockRestore();
   });
 
-  it("requests passkey registration from the profile page", async () => {
-    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-      const url = String(input);
-      if (url.startsWith("/api/guard/profile")) {
-        return Response.json({ schedules: [], monthlyAttendance: [] });
-      }
-      if (url.startsWith("/api/guard/passkey-requests/me")) {
-        return Response.json({ request: null });
-      }
-      if (url === "/api/guard/passkey-requests" && init?.method === "POST") {
-        return Response.json({ request: { id: "req-1", status: "pending" } });
-      }
-      return Response.json({}, { status: 404 });
-    });
-    vi.stubGlobal("fetch", fetchMock);
-    window.sessionStorage.setItem(
-      "ollbareun.guard.session",
-      JSON.stringify({ employee: { id: "emp-1", name: "홍길동" } }),
-    );
-
-    render(<GuardProfilePage />);
-    const passkeyRequestButton = await screen.findByRole("button", { name: "패스키 등록 요청" });
-    await waitFor(() => expect(passkeyRequestButton).not.toBeDisabled());
-    fireEvent.click(passkeyRequestButton);
-
-    expect(await screen.findByText("관리자 승인 대기 중입니다.")).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledWith("/api/guard/passkey-requests", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ employeeId: "emp-1" }),
-    });
-  });
-
   it("shows an error message when loading profile data fails", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: RequestInfo | URL) => {
-        if (String(input).startsWith("/api/guard/passkey-requests/me")) {
-          return Response.json({ request: null });
-        }
         return Response.json({ error: "개인프로필을 불러오지 못했습니다." }, { status: 500 });
       }),
     );
@@ -487,9 +388,6 @@ describe("guard profile page", () => {
   it("hides the screen zoom section on the profile page", async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
-      if (url.startsWith("/api/guard/passkey-requests/me")) {
-        return Response.json({ request: null });
-      }
       if (url.startsWith("/api/guard/profile")) {
         return Response.json({ schedules: [], monthlyAttendance: [] });
       }
@@ -513,9 +411,6 @@ describe("guard profile page", () => {
   it("places the font zoom section at the top and stores font zoom independently", async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
-      if (url.startsWith("/api/guard/passkey-requests/me")) {
-        return Response.json({ request: null });
-      }
       if (url.startsWith("/api/guard/profile")) {
         return Response.json({ schedules: [], monthlyAttendance: [] });
       }

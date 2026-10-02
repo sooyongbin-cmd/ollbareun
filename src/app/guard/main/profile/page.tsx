@@ -5,8 +5,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getSupabasePasskeyClient } from "@/lib/supabase-passkey-client";
-import { usePasskeyFeatureEnabled } from "@/components/passkey-feature-provider";
 import GuardLogoutButton from "../guard-logout-button";
 import {
   readStoredGuardSessionSnapshot,
@@ -80,11 +78,6 @@ type PlannedAttendanceRow = {
   outTime?: string | null;
   isLeave?: boolean;
 };
-
-type PasskeyRequest = {
-  id: string;
-  status: "pending" | "approved" | "rejected" | "registered" | "revoked";
-} | null;
 
 type ModalKind = "work" | "absence";
 
@@ -443,45 +436,15 @@ function LegacyProfileCompatibility({
   );
 }
 
-function LegacyProfileAccountActions({
-  passkeyEnabled,
-  passkeyRequest,
-  passkeyLoading,
-  passkeyMessage,
-  getPasskeyStatusText,
-  handlePasskeyRequest,
-  handlePasskeyRegistration,
-}: {
-  passkeyEnabled: boolean;
-  passkeyRequest: PasskeyRequest;
-  passkeyLoading: boolean;
-  passkeyMessage: string;
-  getPasskeyStatusText: () => string;
-  handlePasskeyRequest: () => void;
-  handlePasskeyRegistration: () => void;
-}) {
+function ProfileAccountActions() {
   return (
     <div className={styles.legacyCompatibility}>
       <section aria-label="로그아웃"><h2>로그아웃</h2><GuardLogoutButton /></section>
-      {passkeyEnabled ? (
-        <section aria-label="패스키 등록">
-          <h2>패스키등록</h2>
-          <p>{getPasskeyStatusText()}</p>
-          {passkeyMessage ? <p>{passkeyMessage}</p> : null}
-          {!passkeyRequest || passkeyRequest.status === "rejected" || passkeyRequest.status === "revoked" ? (
-            <Button disabled={passkeyLoading} onClick={handlePasskeyRequest} type="button">패스키 등록 요청</Button>
-          ) : null}
-          {passkeyRequest?.status === "approved" ? (
-            <Button disabled={passkeyLoading} onClick={handlePasskeyRegistration} type="button">이 기기에 패스키 등록</Button>
-          ) : null}
-        </section>
-      ) : null}
     </div>
   );
 }
 
 export default function GuardProfilePage() {
-  const passkeyEnabled = usePasskeyFeatureEnabled();
   const storedSession = useSyncExternalStore(
     subscribeToGuardSessionChange,
     readStoredGuardSessionSnapshot,
@@ -490,10 +453,7 @@ export default function GuardProfilePage() {
   const session = useMemo(() => parseGuardSession(storedSession), [storedSession]);
   const employeeId = session?.employeeId ?? null;
   const [profile, setProfile] = useState<GuardProfilePayload | null>(null);
-  const [passkeyRequest, setPasskeyRequest] = useState<PasskeyRequest>(null);
   const [loading, setLoading] = useState(false);
-  const [passkeyLoading, setPasskeyLoading] = useState(false);
-  const [passkeyMessage, setPasskeyMessage] = useState("");
   const [error, setError] = useState("");
   const [logoutStarted, setLogoutStarted] = useState(false);
   const [activeModal, setActiveModal] = useState<ModalKind | null>(null);
@@ -538,103 +498,6 @@ export default function GuardProfilePage() {
     void loadProfile();
     return () => { ignore = true; };
   }, [employeeId]);
-
-  useEffect(() => {
-    if (!employeeId || !passkeyEnabled) return;
-
-    let ignore = false;
-    const guardEmployeeId = employeeId;
-
-    async function loadPasskeyRequest() {
-      try {
-        setPasskeyLoading(true);
-        const response = await fetch(`/api/guard/passkey-requests/me?employeeId=${encodeURIComponent(guardEmployeeId)}`);
-        const payload = await response.json();
-
-        if (!response.ok) throw new Error(payload.error ?? "패스키 요청 상태를 불러오지 못했습니다.");
-        if (!ignore) setPasskeyRequest(payload.request ?? null);
-      } catch (loadError) {
-        if (!ignore) setPasskeyMessage(loadError instanceof Error ? loadError.message : "패스키 요청 상태를 불러오지 못했습니다.");
-      } finally {
-        if (!ignore) setPasskeyLoading(false);
-      }
-    }
-
-    void loadPasskeyRequest();
-    return () => { ignore = true; };
-  }, [employeeId, passkeyEnabled]);
-
-  async function handlePasskeyRequest() {
-    if (!employeeId || !passkeyEnabled) return;
-
-    try {
-      setPasskeyLoading(true);
-      setPasskeyMessage("");
-      const response = await fetch("/api/guard/passkey-requests", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ employeeId }),
-      });
-      const payload = await response.json();
-
-      if (!response.ok) throw new Error(payload.error ?? "패스키 등록 요청을 처리하지 못했습니다.");
-      setPasskeyRequest(payload.request);
-      setPasskeyMessage("패스키 등록 요청을 보냈습니다. 관리자 승인 후 등록할 수 있습니다.");
-    } catch (requestError) {
-      setPasskeyMessage(requestError instanceof Error ? requestError.message : "패스키 등록 요청을 처리하지 못했습니다.");
-    } finally {
-      setPasskeyLoading(false);
-    }
-  }
-
-  async function handlePasskeyRegistration() {
-    if (!employeeId || !passkeyEnabled) return;
-
-    try {
-      setPasskeyLoading(true);
-      setPasskeyMessage("");
-      const credentialResponse = await fetch("/api/guard/passkeys/registration-credential", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ employeeId }),
-      });
-      const credential = await credentialResponse.json();
-
-      if (!credentialResponse.ok) throw new Error(credential.error ?? "패스키 등록 인증 정보를 만들지 못했습니다.");
-
-      const supabase = getSupabasePasskeyClient();
-      const signInResult = await supabase.auth.signInWithPassword({ email: credential.email, password: credential.password });
-      if (signInResult.error) throw signInResult.error;
-      const registerResult = await supabase.auth.registerPasskey();
-      if (registerResult.error) throw registerResult.error;
-
-      const completeResponse = await fetch("/api/guard/passkeys/complete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ employeeId }),
-      });
-      const completePayload = await completeResponse.json();
-      if (!completeResponse.ok) throw new Error(completePayload.error ?? "패스키 등록 완료 처리를 하지 못했습니다.");
-
-      await supabase.auth.signOut();
-      setPasskeyRequest(completePayload.request);
-      setPasskeyMessage("이 기기에 패스키를 등록했습니다. 다음 로그인부터 패스키로 로그인할 수 있습니다.");
-    } catch (registerError) {
-      setPasskeyMessage(registerError instanceof Error ? registerError.message : "패스키 등록에 실패했습니다.");
-    } finally {
-      setPasskeyLoading(false);
-    }
-  }
-
-  function getPasskeyStatusText() {
-    if (passkeyLoading) return "패스키 상태를 확인하는 중입니다.";
-    if (!passkeyRequest) return "아직 패스키 등록 요청이 없습니다.";
-    if (passkeyRequest.status === "pending") return "관리자 승인 대기 중입니다.";
-    if (passkeyRequest.status === "approved") return "승인되었습니다. 이 기기에 패스키를 등록할 수 있습니다.";
-    if (passkeyRequest.status === "registered") return "패스키 등록이 완료되었습니다.";
-    if (passkeyRequest.status === "rejected") return "관리자가 요청을 거절했습니다.";
-    return "패스키 사용이 해제되었습니다.";
-  }
 
   const today = getSeoulTodayDate();
   const currentMonth = today.slice(0, 7);
@@ -802,15 +665,7 @@ export default function GuardProfilePage() {
         {loading ? <p className={`${styles.message} ${styles.loadingMessage}`} role="status">개인프로필을 불러오는 중입니다.</p> : null}
       </main>
 
-      <LegacyProfileAccountActions
-        passkeyEnabled={passkeyEnabled}
-        passkeyRequest={passkeyRequest}
-        passkeyLoading={passkeyLoading}
-        passkeyMessage={passkeyMessage}
-        getPasskeyStatusText={getPasskeyStatusText}
-        handlePasskeyRequest={() => void handlePasskeyRequest()}
-        handlePasskeyRegistration={() => void handlePasskeyRegistration()}
-      />
+      <ProfileAccountActions />
 
       {activeModal ? (
         <ProfileModal

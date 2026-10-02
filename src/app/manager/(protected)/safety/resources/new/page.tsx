@@ -33,6 +33,7 @@ export default function EducationResourceNewPage() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [errorAlertMessage, setErrorAlertMessage] = useState("");
   const router = useRouter();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -43,6 +44,7 @@ export default function EducationResourceNewPage() {
     }
 
     setError("");
+    setErrorAlertMessage("");
 
     const sourceFormData = new FormData(event.currentTarget);
     const title = String(sourceFormData.get("title") ?? "").trim();
@@ -84,7 +86,12 @@ export default function EducationResourceNewPage() {
       if (submitError instanceof DOMException && submitError.name === "AbortError") {
         setError("저장 요청 시간이 초과되었습니다. 잠시 후 다시 시도하세요.");
       } else {
-        setError(submitError instanceof Error ? submitError.message : "교재를 저장하지 못했습니다.");
+        const message = submitError instanceof Error ? submitError.message : "교재를 저장하지 못했습니다.";
+        if (message.startsWith("기존의 ") && message.endsWith(" 안전교육 자료가 있습니다.")) {
+          setErrorAlertMessage(message);
+        } else {
+          setError(message);
+        }
       }
     } finally {
       setIsSubmitting(false);
@@ -158,6 +165,13 @@ export default function EducationResourceNewPage() {
       </section>
 
       <ProcessingModal isOpen={isSubmitting} message="저장처리중입니다..." />
+
+      <AlertModal
+        isOpen={Boolean(errorAlertMessage)}
+        onClose={() => setErrorAlertMessage("")}
+        title="오류"
+        description={errorAlertMessage}
+      />
 
       <AlertModal
         isOpen={Boolean(alertMessage)}

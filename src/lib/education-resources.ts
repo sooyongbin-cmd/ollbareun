@@ -1,5 +1,5 @@
 import { readAllEducationRows } from "./education-completions";
-import { educationTypes, requireEducationType, type EducationType } from "./education-periods";
+import { educationTypeLabels, educationTypes, requireEducationType, type EducationType } from "./education-periods";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabase } from "./supabase";
 
@@ -100,6 +100,17 @@ export async function createEducationResource(
   const title = requireString(input.title, "제목");
   const youtubeLink = requireYoutubeLink(input.youtubeLink);
   const educationType = requireEducationType(input.educationType);
+  const { data: existingResource, error: existingResourceError } = await supabase
+    .from("education_resources")
+    .select("id")
+    .in("education_type", [databaseEducationTypes[educationType], educationType])
+    .limit(1)
+    .maybeSingle();
+  throwIfError(existingResourceError);
+  if (existingResource) {
+    throw new Error(`기존의 ${educationTypeLabels[educationType]} 안전교육 자료가 있습니다.`);
+  }
+
   const { data, error } = await supabase
     .from("education_resources")
     .insert({

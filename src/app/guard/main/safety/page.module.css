@@ -173,7 +173,7 @@
     flex-direction: column;
     gap: 0.25rem;
     overflow: hidden !important;
-    padding: 0.5rem !important;
+    padding: 0.25rem 0.5rem !important;
   }
 
   .educationDialogHeader {
@@ -199,14 +199,13 @@
 
   .educationVideoFrame {
     width: auto !important;
-    height: min(100%, calc(100dvh - 7rem)) !important;
+    height: min(100%, calc(100dvh - 4rem)) !important;
     max-width: 100% !important;
     max-height: 100% !important;
     min-height: 0;
     flex: 0 1 auto;
     aspect-ratio: 16 / 9;
   }
-
 }
 
 .emptyState {

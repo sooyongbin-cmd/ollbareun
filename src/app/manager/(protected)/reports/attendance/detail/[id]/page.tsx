@@ -31,6 +31,7 @@ export default function AttendanceDetailPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [errorAlert, setErrorAlert] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
 
@@ -54,6 +55,10 @@ export default function AttendanceDetailPage() {
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!clockInDateTime && selectedEducationIds.length > 0) {
+      setErrorAlert("출근처리후 교육이수 처리해주세요.");
+      return;
+    }
     if (!clockInDateTime && !clockOutDateTime && selectedEducationIds.length === 0) {
       setError("저장할 출근일시 또는 퇴근일시를 입력하세요.");
       return;
@@ -157,6 +162,7 @@ export default function AttendanceDetailPage() {
       </form> : null}
     </section>
     <ConfirmModal isOpen={confirmOpen} onClose={() => { if (!saving) setConfirmOpen(false); }} onConfirm={save} title="근태 정보를 저장할까요?" loading={saving} loadingLabel="저장 중입니다..." />
+    <AlertModal isOpen={Boolean(errorAlert)} onClose={() => setErrorAlert("")} title="오류" description={errorAlert} />
     <AlertModal isOpen={successOpen} onClose={() => { setSuccessOpen(false); returnToList(); }} title="알림"
       description={selectedEducationIds.length ? "근태 정보와 선택한 교육이수가 저장되었습니다." : "근태 정보가 저장되었습니다."} />
   </section>;

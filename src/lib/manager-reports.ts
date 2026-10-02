@@ -378,7 +378,18 @@ export async function deleteAttendanceRecord(recordId: string) {
     throw new Error("근태 기록을 확인할 수 없습니다.");
   }
 
-  throw new Error("근태 기록은 퇴사 후 5년의 보관기간이 끝나기 전 삭제할 수 없습니다. 수정이 필요하면 기록을 정정해 주세요.");
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("work_record")
+    .delete()
+    .eq("id", recordId)
+    .select("id")
+    .maybeSingle();
+
+  throwIfError(error);
+  if (!data) {
+    throw new Error("근태 기록을 확인할 수 없습니다.");
+  }
 }
 
 export function buildEducationReport(input: {

@@ -36,10 +36,14 @@ export default function AttendanceDetailPage() {
   const [clockOutDateTime, setClockOutDateTime] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
   const [errorAlert, setErrorAlert] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [clockedInDeleteConfirmOpen, setClockedInDeleteConfirmOpen] = useState(false);
+  const [deleteSuccessOpen, setDeleteSuccessOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -146,6 +150,35 @@ export default function AttendanceDetailPage() {
     }
   }
 
+  async function confirmDelete() {
+    if (deleting) return;
+    setDeleting(true);
+    setErrorAlert("");
+    try {
+      const response = await fetch(`/api/manager/reports/attendance/${id}`, { method: "DELETE" });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error ?? "근태 기록을 삭제하지 못했습니다.");
+      setDeleteConfirmOpen(false);
+      setClockedInDeleteConfirmOpen(false);
+      setDeleteSuccessOpen(true);
+    } catch (deleteError) {
+      setDeleteConfirmOpen(false);
+      setClockedInDeleteConfirmOpen(false);
+      setErrorAlert(deleteError instanceof Error ? deleteError.message : "근태 기록을 삭제하지 못했습니다.");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  function confirmInitialDelete() {
+    setDeleteConfirmOpen(false);
+    if (record?.clockInDateTime && record.clockInDateTime !== "-") {
+      setClockedInDeleteConfirmOpen(true);
+      return;
+    }
+    void confirmDelete();
+  }
+
   const readOnlyFields = record ? [
     { id: "attendance-work-date", label: "출근날짜", value: record.workDate },
     { id: "attendance-employee-name", label: "이름", value: record.employeeName },
@@ -247,15 +280,19 @@ export default function AttendanceDetailPage() {
         </section>
         {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
         <div className="flex gap-3">
-          <Button type="submit">저장</Button>
-          <Button className="ml-auto" type="button" variant="outline" onClick={returnToList}>목록</Button>
+          <Button type="submit" disabled={saving || deleting}>저장</Button>
+          <Button type="button" variant="destructive" disabled={saving || deleting} onClick={() => setDeleteConfirmOpen(true)}>삭제</Button>
+          <Button className="ml-auto" type="button" variant="outline" disabled={saving || deleting} onClick={returnToList}>목록</Button>
         </div>
       </form> : null}
     </section>
     <ConfirmModal isOpen={confirmOpen} onClose={() => { if (!saving) setConfirmOpen(false); }} onConfirm={save} title="변경사항을 저장할까요?" loading={saving} loadingLabel="저장 중입니다..." />
+    <ConfirmModal isOpen={deleteConfirmOpen} onClose={() => { if (!deleting) setDeleteConfirmOpen(false); }} onConfirm={confirmInitialDelete} title="자료를 삭제하시겠습니까?" description="삭제한 자료는 복구할 수 없습니다." loading={deleting} loadingLabel="삭제 중입니다..." />
+    <ConfirmModal isOpen={clockedInDeleteConfirmOpen} onClose={() => { if (!deleting) setClockedInDeleteConfirmOpen(false); }} onConfirm={confirmDelete} title="출근처리된 자료입니다. 그래도 삭제하시겠습니까?" description="삭제한 자료는 복구할 수 없습니다." loading={deleting} loadingLabel="삭제 중입니다..." />
     <AlertModal isOpen={Boolean(errorAlert)} onClose={() => setErrorAlert("")} title="오류" description={errorAlert} />
     <AlertModal isOpen={successOpen} onClose={() => { setSuccessOpen(false); returnToList(); }} title="알림"
       description={leaveRequested ? "휴가 신청이 완료되었습니다." : selectedEducationIds.length ? "근태 정보와 선택한 교육이수가 저장되었습니다." : "근태 정보가 저장되었습니다."} />
+    <AlertModal isOpen={deleteSuccessOpen} onClose={() => { setDeleteSuccessOpen(false); returnToList(); }} title="알림" description="자료가 삭제되었습니다" />
   </section>;
 }
 

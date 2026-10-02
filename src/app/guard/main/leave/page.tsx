@@ -119,11 +119,11 @@ export default function GuardLeavePage() {
             <form ref={formRef} className="contents" onSubmit={(event) => { event.preventDefault(); requestConfirmation(); }}>
               <fieldset className="space-y-2" disabled={saving || Boolean(pending) || Boolean(message)}>
                 <legend>휴가기간</legend>
-                <div className="flex min-w-0 items-center gap-2">
-                  <Input aria-label="시작일" type="date" className="min-w-0 flex-1" value={values.startDate}
+                <div className="flex min-w-0 items-center" style={{ letterSpacing: "-1px", gap: "2px" }}>
+                  <Input aria-label="시작일" type="date" className="min-w-0 flex-1" style={{ width: "100px" }} value={values.startDate}
                     onChange={(event) => setValues((current) => ({ ...current, startDate: event.target.value }))} required />
                   <span>~</span>
-                  <Input aria-label="종료일" type="date" className="min-w-0 flex-1" value={values.endDate}
+                  <Input aria-label="종료일" type="date" className="min-w-0 flex-1" style={{ width: "100px" }} value={values.endDate}
                     onChange={(event) => setValues((current) => ({ ...current, endDate: event.target.value }))} required />
                 </div>
               </fieldset>

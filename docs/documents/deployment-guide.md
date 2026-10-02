@@ -9,10 +9,25 @@
 
 ## 2. 사전 준비
 
-- GitHub 저장소와 Vercel 프로젝트를 연결한다.
-- 운영 Supabase 프로젝트를 생성하고 연결 정보를 확보한다.
-- 외부 서비스 운영 키와 발신 계정을 준비한다.
-- 운영 도메인과 HTTPS 적용 여부를 확인한다.
+### 1. 데이터베이스 이전 (Supabase)
+
+1. (소유자) Supabase 사이트에서 신규 가입하고 이메일과 비밀번호를 생성한다.
+2. 소유자 계정 이메일은 `dev500591@gmail.com`을 사용한다. 비밀번호는 승인된 비밀번호 관리자에서 확인하며, 이 문서나 Git 저장소에는 기록하지 않는다.
+3. 로그인한 뒤 좌측의 **Team** 메뉴를 선택한다.
+4. **Invite members**를 선택한다.
+5. **Email address**에 개발자 이메일 `sooyongbin@gmail.com`을 입력한다.
+6. 개발자가 초대를 확인한다.
+7. (소유자) **Team** 메뉴의 member 목록에 개발자가 나타나는지 확인한다.
+8. **Manage access**에서 개발자 권한을 **Developer**에서 **OWNER**로 변경한다.
+9. (개발자) **Transfer project**를 진행한다. 이전 후에도 프로젝트를 조회할 수 있다.
+
+### 2. 운영(배포) 서버 (Vercel)
+
+1. 새로운 계정 ID로 신규 가입한다.
+2. GitHub를 연결하고 프로젝트를 생성한다.
+3. **Settings → Build and Deployment → [Deployment Retention Policy](https://vercel.com/dev02-c7ef/~/settings/build-and-deployment#deployment-retention-policy)**에서 보관 정책을 조정한다.
+4. Supabase의 **Authentication → URL Configuration → Redirect URLs**에 새 Vercel 주소의 `/auth/callback`을 허용한다.
+5. Supabase service key는 **Project Settings → API Keys**에서 확인한다. Vercel 서버 환경변수에만 등록하고 문서나 Git 저장소에는 기록하지 않는다.
 
 ## 3. 환경변수
 

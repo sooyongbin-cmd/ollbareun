@@ -71,7 +71,6 @@ export const managerNavigationGroups: ManagerNavigationGroup[] = [
     icon: GraduationCap,
     items: [
       { label: "교육자료관리", href: "/manager/safety/resources", icon: BookOpen },
-      { label: "교육이수관리", href: "/manager/safety/completions", icon: GraduationCap },
       { label: "일별교육이수", href: "/manager/safety/daily_edu", icon: CalendarDays },
       { label: "월별교육이수", href: "/manager/safety/monthly_edu", icon: CalendarDays },
       { label: "자동알림이력", href: "/manager/safety/notifications", icon: BellRing },

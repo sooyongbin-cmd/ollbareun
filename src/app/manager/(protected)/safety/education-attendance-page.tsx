@@ -64,6 +64,8 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
   const [detailRows, setDetailRows] = useState<MonthlyEducationDetailRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [reminderSending, setReminderSending] = useState(false);
+  const [reminderNotice, setReminderNotice] = useState("");
   const [completionDialog, setCompletionDialog] = useState<CompletionDialogState | null>(null);
   const requestIdRef = useRef(0);
 
@@ -126,6 +128,39 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
     const completed = summaryCompleted + dailyCompleted;
     return { total, completed, percent: total ? Math.round((completed / total) * 100) : 0 };
   }, [filteredDetailRows, filteredMonthlyRows]);
+
+  const sendReminders = async () => {
+    const employeeIds = Array.from(new Set([
+      ...filteredMonthlyRows.map((row) => row.employeeId),
+      ...filteredDetailRows.map((row) => row.employeeId),
+    ]));
+    setReminderNotice("");
+    if (!employeeIds.length) {
+      setReminderNotice("조회 조건에 해당하는 미이수 직원이 없습니다.");
+      return;
+    }
+
+    setReminderSending(true);
+    try {
+      const response = await fetch("/api/education/reminders/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ employeeIds }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error ?? "알림 전송 실패");
+      const failed = (result.failedEmployees ?? [])
+        .map((entry: { employeeName: string; reason: string }) => `${entry.employeeName}: ${entry.reason}`)
+        .join(", ");
+      setReminderNotice(
+        `전송 ${result.successCount ?? 0}명 / 실패 ${result.failedCount ?? 0}명 / 미등록 ${result.unregisteredCount ?? 0}명${failed ? ` (${failed})` : ""}`,
+      );
+    } catch (sendError) {
+      setReminderNotice(sendError instanceof Error ? sendError.message : "알림 전송 실패");
+    } finally {
+      setReminderSending(false);
+    }
+  };
 
   const openCompletionDialog = (
     employeeId: string,
@@ -209,7 +244,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
         aria-label={`${title} 조회`}
         className="rounded-xl border border-border/50 bg-muted/40 p-[1.5rem] md:p-[2rem]"
       >
-        <div className={`grid gap-4 md:items-end ${isDaily ? "md:grid-cols-[minmax(0,1fr)_12rem]" : "md:grid-cols-[minmax(0,1fr)_12rem_auto]"}`}>
+        <div className={`grid gap-4 md:items-end ${isDaily ? "md:grid-cols-[minmax(0,1fr)_12rem]" : "md:grid-cols-[minmax(0,1fr)_12rem_auto_auto]"}`}>
           <div className="min-w-0 space-y-2">
             <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor={`${mode}-education-name`}>
               이름
@@ -246,7 +281,21 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
               </p>
             </div>
           ) : null}
+          {!isDaily ? (
+            <div className="flex min-h-10 items-end justify-end">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={reminderSending || loading || !!error}
+                onClick={() => void sendReminders()}
+              >
+                {reminderSending ? "전송 중…" : "미이수 알림 전송"}
+              </Button>
+            </div>
+          ) : null}
         </div>
+        {reminderNotice ? <p role="status" className="mt-4 text-sm">{reminderNotice}</p> : null}
       </section>
 
       {isDaily ? (

@@ -126,7 +126,7 @@ describe("manager dashboard page", () => {
     const educationCard = within(summary).getByRole("link", {
       name: "안전교육 이수율 80% 안전교육 미이수 3명",
     });
-    expect(educationCard).toHaveAttribute("href", "/manager/safety/completions");
+    expect(educationCard).toHaveAttribute("href", "/manager/safety/monthly_edu");
     expect(within(educationCard).getByText("안전교육 이수율")).toBeInTheDocument();
     expect(within(educationCard).getByText("80%")).toBeInTheDocument();
     expect(within(educationCard).getByText("안전교육 미이수 3명")).toBeInTheDocument();

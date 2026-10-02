@@ -24,11 +24,6 @@ type AssignmentInput = {
   end_date: string;
 };
 
-type AssignmentDayOffInput = {
-  work_assignment_id: string;
-  day_off_date: string;
-};
-
 type DailyAttendanceInput = {
   id?: string;
   employee_id: string;
@@ -161,7 +156,6 @@ type BuildManagerDashboardInput = {
   educationResources: EducationResourceInput[];
   educationCompletions: EducationCompletionInput[];
   monthlyEducationAttendance?: Awaited<ReturnType<typeof loadMonthlyEducationAttendance>>;
-  daysOff?: AssignmentDayOffInput[];
   specialRemarkReports?: SpecialRemarkInput[];
   inspectionSites?: InspectionSiteInput[];
   inspectionLogs?: InspectionLogInput[];
@@ -260,10 +254,15 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
   const todayAttendance = todayWorkRecords.filter((record) => record.work_intime);
   const allResourceIds = input.educationResources.map((resource) => resource.id);
   const completedByEmployee = completedResourceIdsByEmployee(input.educationCompletions);
-  const todayDaysOff = new Set(
-    (input.daysOff ?? [])
-      .filter((dayOff) => dayOff.day_off_date === today)
-      .map((dayOff) => dayOff.work_assignment_id),
+  const scheduledAssignmentKeysToday = new Set(
+    summaryWorkRecords
+      .filter((record) => record.intime_status !== "3" && Boolean(record.intime))
+      .map((record) => `${record.employee_id}:${record.worksite_id}`),
+  );
+  const employeesOnLeaveToday = new Set(
+    (input.weeklyLeaves ?? [])
+      .filter((leave) => activeEmployeeIds.has(leave.employee_id) && leave.start_date <= today && leave.end_date >= today)
+      .map((leave) => leave.employee_id),
   );
   const scheduledEmployeeIdsToday = new Set(
     summaryWorkRecords.filter((record) => record.intime_status !== "3").map((record) => record.employee_id),
@@ -339,7 +338,8 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       (assignment) =>
         inDateRange(today, assignment.start_date, assignment.end_date) &&
         activeEmployeeIds.has(assignment.employee_id) &&
-        (!assignment.id || !todayDaysOff.has(assignment.id)),
+        !employeesOnLeaveToday.has(assignment.employee_id) &&
+        scheduledAssignmentKeysToday.has(`${assignment.employee_id}:${assignment.worksite_id}`),
     );
 
   let educationUncompleted: number;
@@ -588,7 +588,7 @@ export async function loadManagerDashboardData() {
   const tomorrowStart = `${tomorrow}T00:00:00+09:00`;
   const { weekStart, weekEnd } = getWeekRange(today);
 
-  const [employeesResult, worksitesResult, assignmentsResult, weeklyLeaveAssignmentsResult, workRecordResult, daysOffResult, specialRemarksResult, inspectionSitesResult, inspectionLogsResult, weeklyLeavesResult, employeeRoles, monthlyEducationAttendance] =
+  const [employeesResult, worksitesResult, assignmentsResult, weeklyLeaveAssignmentsResult, workRecordResult, specialRemarksResult, inspectionSitesResult, inspectionLogsResult, weeklyLeavesResult, employeeRoles, monthlyEducationAttendance] =
     await Promise.all([
       supabase.from("employees").select("id,name,role,work_style,is_retired"),
       supabase.from("worksites").select("id,name"),
@@ -597,10 +597,6 @@ export async function loadManagerDashboardData() {
       supabase.from("work_record")
         .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime,intime_status,outtime_status")
         .or(`work_date.eq.${today},and(outtime.gte.${todayStart},outtime.lt.${tomorrowStart})`),
-      supabase
-        .from("work_assignment_days_off")
-        .select("work_assignment_id,day_off_date")
-        .eq("day_off_date", today),
       supabase
         .from("inspection_special_reports")
         .select("id,employee_id,employee_name,worksite_name,content,reported_at,processing_status")
@@ -625,7 +621,6 @@ export async function loadManagerDashboardData() {
   throwIfError(assignmentsResult.error);
   throwIfError(weeklyLeaveAssignmentsResult.error);
   throwIfError(workRecordResult.error);
-  throwIfError(daysOffResult.error);
   throwIfError(specialRemarksResult.error);
   throwIfError(inspectionSitesResult.error);
   throwIfError(inspectionLogsResult.error);
@@ -644,7 +639,6 @@ export async function loadManagerDashboardData() {
     educationResources: [],
     educationCompletions: [],
     monthlyEducationAttendance,
-    daysOff: daysOffResult.data ?? [],
     specialRemarkReports: specialRemarksResult.data ?? [],
     inspectionSites: inspectionSitesResult.data ?? [],
     inspectionLogs: inspectionLogsResult.data ?? [],

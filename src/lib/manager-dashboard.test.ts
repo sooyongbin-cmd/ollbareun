@@ -409,7 +409,7 @@ describe("manager dashboard data", () => {
     ]);
   });
 
-  it("excludes today's days off from worksite assignment totals", () => {
+  it("counts only assignments with scheduled work records at each worksite", () => {
     const data = buildManagerDashboardData({
       now: new Date("2026-06-04T03:00:00.000Z"),
       employeeRoles: ["경비원", "미화원", "파견"],
@@ -422,11 +422,20 @@ describe("manager dashboard data", () => {
         { id: "assign-1", employee_id: "emp-1", worksite_id: "work-1", start_date: "2026-01-01", end_date: "2026-12-31" },
         { id: "assign-2", employee_id: "emp-2", worksite_id: "work-1", start_date: "2026-01-01", end_date: "2026-12-31" },
       ],
-      attendance: [],
+      attendance: [
+        {
+          employee_id: "emp-1",
+          worksite_id: "work-1",
+          work_date: "2026-06-04",
+          intime: "2026-06-04T00:00:00.000Z",
+          intime_status: "0",
+          work_intime: null,
+          work_outtime: null,
+        },
+      ],
       educationResources: [],
       educationCompletions: [],
       dailyAttendance: [],
-      daysOff: [{ work_assignment_id: "assign-2", day_off_date: "2026-06-04" }],
     });
 
     expect(data.worksiteMonitoring).toEqual([

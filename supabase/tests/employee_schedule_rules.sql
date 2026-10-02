@@ -12,7 +12,6 @@ begin
   if (select to_char(intime at time zone 'Asia/Seoul','HH24:MI') from public.work_record where employee_id=e and work_date='2030-01-04') is distinct from '07:00' then raise exception 'weekday fallback failed'; end if;
   if (select to_char(intime at time zone 'Asia/Seoul','HH24:MI') from public.work_record where employee_id=e and work_date='2030-01-05') is distinct from '08:00' then raise exception 'Saturday override failed'; end if;
   if exists(select 1 from public.work_record where employee_id=e and work_date='2030-01-06') then raise exception 'Sunday off failed'; end if;
-  if not exists(select 1 from public.work_assignment_days_off where work_assignment_id=a and day_off_date='2030-01-06') then raise exception 'day-off registration failed'; end if;
   -- Employee edits cannot change an assignment snapshot.
   perform public.save_employee_with_schedule(jsonb_build_object('id',e,'in_time','09:00'), '[]');
   perform public.generate_assignment_daily_attendance(a);

@@ -28,11 +28,7 @@ export type GuardProfileScheduledAttendanceInput = {
   work_date: string;
   intime: string | null;
   outtime: string | null;
-};
-
-export type GuardProfileDayOffInput = {
-  work_assignment_id: string;
-  day_off_date: string;
+  intime_status?: string | null;
 };
 
 export type GuardProfilePlannedAttendanceRow = {
@@ -40,12 +36,7 @@ export type GuardProfilePlannedAttendanceRow = {
   workDate: string;
   inTime: string | null;
   outTime: string | null;
-  isDayOff: boolean;
-};
-
-export type GuardProfilePlannedDayOffRow = {
-  assignmentId: string;
-  workDate: string;
+  isLeave: boolean;
 };
 
 export type GuardProfileScheduleRow = {
@@ -68,13 +59,12 @@ export type GuardProfileAttendanceDetail = {
 
 export type GuardProfileAbsenceDetail = {
   workDate: string;
-  reason: "결근" | "휴무";
+  reason: "결근" | "휴가";
 };
 
 export type GuardProfile = {
   schedules: GuardProfileScheduleRow[];
   plannedAttendance: GuardProfilePlannedAttendanceRow[];
-  plannedDaysOff: GuardProfilePlannedDayOffRow[];
   monthlyAttendance: GuardProfileMonthlyAttendanceRow[];
   attendanceDetails: GuardProfileAttendanceDetail[];
   absenceDetails: GuardProfileAbsenceDetail[];
@@ -189,7 +179,6 @@ export function buildGuardProfile(input: {
   worksites: GuardProfileWorksiteInput[];
   attendance: GuardProfileAttendanceInput[];
   scheduledAttendance?: GuardProfileScheduledAttendanceInput[];
-  daysOff?: GuardProfileDayOffInput[];
 }): GuardProfile {
   const { startDate, endDate } = getRecentOneYearDateRange(input.today);
   // Include the Monday-to-Sunday range containing today so the current week's
@@ -197,15 +186,6 @@ export function buildGuardProfile(input: {
   const plannedFromDate = startOfCurrentWeek(input.today ?? todayDate());
   const employeeSchedules = input.schedules.filter((schedule) => schedule.employee_id === input.employeeId);
   const employeeAssignmentIds = new Set(employeeSchedules.map((schedule) => schedule.id));
-  const plannedDayOffKeys = new Set(
-    (input.daysOff ?? [])
-      .filter(
-        (dayOff) =>
-          employeeAssignmentIds.has(dayOff.work_assignment_id) &&
-          dayOff.day_off_date >= plannedFromDate,
-      )
-      .map((dayOff) => `${dayOff.work_assignment_id}:${dayOff.day_off_date}`),
-  );
   const worksiteById = new Map(input.worksites.map((worksite) => [worksite.id, worksite.name]));
   const monthlyRows = new Map<string, { attendanceDates: Set<string>; workMinutes: number }>();
   const attendanceForEmployee = input.attendance
@@ -247,16 +227,16 @@ export function buildGuardProfile(input: {
   });
 
   const actualAttendanceDates = new Set(attendanceForEmployee.map((record) => record.work_date));
-  const employeeDaysOff = (input.daysOff ?? []).filter((dayOff) => employeeAssignmentIds.has(dayOff.work_assignment_id));
-  const dayOffDates = new Set(
-    employeeDaysOff
-      .filter((dayOff) => dayOff.day_off_date >= startDate && dayOff.day_off_date <= endDate)
-      .map((dayOff) => dayOff.day_off_date),
-  );
   const absenceDetails = [
-    ...employeeDaysOff
-      .filter((dayOff) => dayOff.day_off_date >= startDate && dayOff.day_off_date <= endDate)
-      .map((dayOff) => ({ workDate: dayOff.day_off_date, reason: "휴무" as const })),
+    ...(input.scheduledAttendance ?? [])
+      .filter(
+        (scheduled) =>
+          employeeAssignmentIds.has(scheduled.work_assignment_id) &&
+          scheduled.work_date >= startDate &&
+          scheduled.work_date <= endDate &&
+          scheduled.intime_status === "3",
+      )
+      .map((scheduled) => ({ workDate: scheduled.work_date, reason: "휴가" as const })),
     ...(input.scheduledAttendance ?? [])
       .filter(
         (scheduled) =>
@@ -264,8 +244,8 @@ export function buildGuardProfile(input: {
           scheduled.work_date >= startDate &&
           scheduled.work_date <= (input.today ?? endDate) &&
           Boolean(scheduled.intime) &&
-          !actualAttendanceDates.has(scheduled.work_date) &&
-          !dayOffDates.has(scheduled.work_date),
+          scheduled.intime_status !== "3" &&
+          !actualAttendanceDates.has(scheduled.work_date),
       )
       .map((scheduled) => ({ workDate: scheduled.work_date, reason: "결근" as const })),
   ].sort((left, right) => left.workDate.localeCompare(right.workDate));
@@ -306,22 +286,7 @@ export function buildGuardProfile(input: {
         workDate: scheduled.work_date,
         inTime: scheduled.intime,
         outTime: scheduled.outtime,
-        isDayOff: plannedDayOffKeys.has(`${scheduled.work_assignment_id}:${scheduled.work_date}`),
-      })),
-    plannedDaysOff: (input.daysOff ?? [])
-      .filter(
-        (dayOff) =>
-          employeeAssignmentIds.has(dayOff.work_assignment_id) &&
-          dayOff.day_off_date >= plannedFromDate,
-      )
-      .sort(
-        (left, right) =>
-          left.day_off_date.localeCompare(right.day_off_date) ||
-          left.work_assignment_id.localeCompare(right.work_assignment_id),
-      )
-      .map((dayOff) => ({
-        assignmentId: dayOff.work_assignment_id,
-        workDate: dayOff.day_off_date,
+        isLeave: scheduled.intime_status === "3",
       })),
     monthlyAttendance: [...monthlyRows.entries()]
       .sort(([left], [right]) => left.localeCompare(right))
@@ -363,27 +328,17 @@ export async function loadGuardProfile(employeeIdInput: unknown) {
   const scheduleInputs = (schedulesResult.data ?? []) as GuardProfileScheduleInput[];
   const assignmentIds = scheduleInputs.map((schedule) => schedule.id);
   const scheduleDataClient = getSupabaseAdmin();
-  const [scheduledAttendanceResult, daysOffResult] = assignmentIds.length
-    ? await Promise.all([
-        scheduleDataClient
-          .from("work_record")
-          .select("employee_id,worksite_id,work_date,intime,outtime")
-          .eq("employee_id", employeeId)
-          .gte("work_date", startDate)
-          .lte("work_date", endDate)
-          .order("work_date", { ascending: true }),
-        scheduleDataClient
-          .from("work_assignment_days_off")
-          .select("work_assignment_id,day_off_date")
-          .in("work_assignment_id", assignmentIds)
-          .order("day_off_date", { ascending: true }),
-      ])
-    : [
-        { data: [], error: null },
-        { data: [], error: null },
-      ];
+  const scheduledAttendanceResult = assignmentIds.length
+    ? await scheduleDataClient
+        .from("work_record")
+        .select("employee_id,worksite_id,work_date,intime,outtime,intime_status")
+        .eq("employee_id", employeeId)
+        .gte("work_date", startDate)
+        .lte("work_date", endDate)
+        .order("work_date", { ascending: true })
+    : { data: [], error: null };
 
-  // These two tables are deliberately optional for older deployments. The profile
+  // Scheduled records are deliberately optional for older deployments. The profile
   // page can still render attendance summaries when the supporting schedules have
   // not been backfilled yet.
   const scheduledAttendance = scheduledAttendanceResult.error
@@ -401,17 +356,15 @@ export async function loadGuardProfile(employeeIdInput: unknown) {
           work_date: record.work_date,
           intime: record.intime,
           outtime: record.outtime,
+          intime_status: record.intime_status,
         } : null;
       })
-      .filter((record): record is GuardProfileScheduledAttendanceInput => Boolean(record));
-  const daysOff = daysOffResult.error ? [] : (daysOffResult.data ?? []) as GuardProfileDayOffInput[];
-
+      .filter((record) => record !== null) as GuardProfileScheduledAttendanceInput[];
   return buildGuardProfile({
     employeeId,
     schedules: scheduleInputs,
     worksites: (worksitesResult.data ?? []) as GuardProfileWorksiteInput[],
     attendance: (attendanceResult.data ?? []) as GuardProfileAttendanceInput[],
     scheduledAttendance,
-    daysOff,
   });
 }

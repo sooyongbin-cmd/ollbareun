@@ -3,7 +3,6 @@ import {
   buildGuardProfile,
   getRecentOneYearDateRange,
   type GuardProfileAttendanceInput,
-  type GuardProfileDayOffInput,
   type GuardProfileScheduleInput,
   type GuardProfileScheduledAttendanceInput,
   type GuardProfileWorksiteInput,
@@ -66,19 +65,13 @@ describe("guard profile data", () => {
     ]);
   });
 
-  it("returns the employee's planned attendance and future days off for weekly schedule rendering", () => {
+  it("returns the employee's planned attendance for weekly schedule rendering", () => {
     const scheduledAttendance: GuardProfileScheduledAttendanceInput[] = [
       { work_assignment_id: "assign-1", work_date: "2026-09-14", intime: "2026-09-14T21:00:00.000Z", outtime: null },
       { work_assignment_id: "assign-1", work_date: "2026-09-18", intime: "2026-09-18T21:00:00.000Z", outtime: null },
       { work_assignment_id: "assign-1", work_date: "2026-09-21", intime: null, outtime: "2026-09-21T21:00:00.000Z" },
       { work_assignment_id: "assign-other", work_date: "2026-09-18", intime: "2026-09-18T21:00:00.000Z", outtime: null },
     ];
-    const daysOff: GuardProfileDayOffInput[] = [
-      { work_assignment_id: "assign-1", day_off_date: "2026-09-19" },
-      { work_assignment_id: "assign-1", day_off_date: "2026-09-13" },
-      { work_assignment_id: "assign-other", day_off_date: "2026-09-19" },
-    ];
-
     const profile = buildGuardProfile({
       employeeId: "emp-1",
       today: "2026-09-18",
@@ -89,7 +82,6 @@ describe("guard profile data", () => {
       worksites,
       attendance: [],
       scheduledAttendance,
-      daysOff,
     });
 
     expect(profile.plannedAttendance).toEqual([
@@ -98,25 +90,22 @@ describe("guard profile data", () => {
         workDate: "2026-09-14",
         inTime: "2026-09-14T21:00:00.000Z",
         outTime: null,
-        isDayOff: false,
+        isLeave: false,
       },
       {
         assignmentId: "assign-1",
         workDate: "2026-09-18",
         inTime: "2026-09-18T21:00:00.000Z",
         outTime: null,
-        isDayOff: false,
+        isLeave: false,
       },
       {
         assignmentId: "assign-1",
         workDate: "2026-09-21",
         inTime: null,
         outTime: "2026-09-21T21:00:00.000Z",
-        isDayOff: false,
+        isLeave: false,
       },
-    ]);
-    expect(profile.plannedDaysOff).toEqual([
-      { assignmentId: "assign-1", workDate: "2026-09-19" },
     ]);
   });
 
@@ -210,18 +199,10 @@ describe("guard profile data", () => {
             outtime: "2026-06-05T09:00:00.000Z",
           },
         ],
-        daysOff: [
-          { work_assignment_id: "assign-1", day_off_date: "2026-05-11" },
-          { work_assignment_id: "assign-other", day_off_date: "2026-05-12" },
-          { work_assignment_id: "assign-2", day_off_date: "2026-06-05" },
-        ],
       }),
     ).toMatchObject({
       monthlyAttendance: [{ yearMonth: "2026-05", attendanceDays: 0, workHoursTotal: "0분" }],
-      absenceDetails: [
-        { workDate: "2026-05-10", reason: "결근" },
-        { workDate: "2026-05-11", reason: "휴무" },
-      ],
+      absenceDetails: [{ workDate: "2026-05-10", reason: "결근" }],
     });
   });
 });

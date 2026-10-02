@@ -48,10 +48,9 @@ describe("assignment save page", () => {
           });
         }
 
-        if (!init && url.endsWith("/api/manager/assignments/assign-1/days-off")) {
+        if (!init && url === "/api/manager/holidays?year=2026") {
           return Response.json({
-            daysOff: [{ day_off_date: "2026-05-22" }],
-            holidays: ["2026-05-21"],
+            holidays: [{ holiday_date: "2026-05-21", selected: "Y" }],
           });
         }
 
@@ -63,16 +62,6 @@ describe("assignment save page", () => {
               { work_date: "2026-05-23", intime: "2026-05-22T23:00:00.000Z", outtime: "2026-05-23T09:00:00.000Z" },
             ],
           });
-        }
-
-        if (init?.method === "PUT" && url.endsWith("/api/manager/assignments/assign-1/days-off/2026-05-23")) {
-          return Response.json({
-            dayOff: { day_off_date: "2026-05-23" },
-          });
-        }
-
-        if (init?.method === "DELETE" && url.endsWith("/api/manager/assignments/assign-1/days-off/2026-05-22")) {
-          return new Response(null, { status: 204 });
         }
 
         if (init?.method === "PATCH" && url.endsWith("/api/assignments/assign-1")) {
@@ -203,36 +192,17 @@ describe("assignment save page", () => {
     expect(screen.getByText("삭제 오류")).toBeInTheDocument();
   });
 
-  it("shows the assignment calendar and immediately toggles days off", async () => {
-    const user = userEvent.setup();
-
+  it("shows the assignment attendance calendar without day-off controls", async () => {
     render(<AssignmentSavePage />);
 
-    expect(await screen.findByRole("heading", { name: "휴무일 지정" })).toBeInTheDocument();
-    expect(screen.queryByText("날짜별 출퇴근 예정시각은 한국 시간 기준입니다.")).not.toBeInTheDocument();
-    expect(screen.getByText("근무기간 안의 날짜를 선택하면 즉시 휴무일로 저장됩니다.")).toBeInTheDocument();
+    expect(await screen.findByText("2026년 5월")).toBeInTheDocument();
     expect(screen.getByText("일")).toBeInTheDocument();
     expect(screen.getByText("토")).toBeInTheDocument();
 
-    const firstDayCell = screen.getByRole("button", { name: "2026-05-21 휴무일 지정" });
+    const firstDayCell = screen.getByLabelText("2026-05-21 근태자료 없음");
     expect(firstDayCell).toHaveClass("bg-orange-100/80");
     expect(firstDayCell.textContent).toContain("출근 06:00");
-    const nextDayCell = screen.getByRole("button", { name: "2026-05-22 휴무일 해제" });
-    expect(nextDayCell.textContent).toMatch(/퇴근 06:00출근 22:00/);
-    const regularShiftCell = screen.getByRole("button", { name: "2026-05-23 휴무일 지정" });
-    expect(regularShiftCell).toHaveClass("bg-orange-100/80");
-    expect(regularShiftCell.textContent).toMatch(/출근 08:00퇴근 18:00/);
-
-    const existingDayOff = screen.getByRole("button", { name: "2026-05-22 휴무일 해제" });
-    expect(existingDayOff).toHaveAttribute("aria-pressed", "true");
-    await user.click(existingDayOff);
-    expect(existingDayOff).toHaveAttribute("aria-pressed", "false");
-
-    const newDayOff = screen.getByRole("button", { name: "2026-05-23 휴무일 지정" });
-    await user.click(newDayOff);
-    expect(screen.getByRole("button", { name: "2026-05-23 휴무일 해제" })).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
+    expect(screen.getByLabelText("2026-05-23 근태자료 없음")).toHaveClass("bg-orange-100/80");
+    expect(screen.queryByRole("button", { name: /휴무일/ })).not.toBeInTheDocument();
   });
 });

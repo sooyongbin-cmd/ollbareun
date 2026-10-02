@@ -13,7 +13,7 @@
 - 기본 식별자는 UUID를 사용하고 생성·수정 시각은 `timestamptz`로 저장한다.
 - 업무 데이터의 참조 무결성은 외래키와 삭제 규칙(`cascade`, `set null`)으로 보장한다.
 - 기간, 상태, GPS 구조, 완료 상태처럼 데이터만으로 검증할 수 있는 규칙은 DB 제약조건으로 검증한다.
-- 휴무일·일별 예정 출퇴근 시각은 근무 배정 기간과 항상 일치해야 한다.
+- 일별 예정 출퇴근 시각은 근무 배정 기간 안에서 근무 일정 규칙에 따라 생성한다. 휴가는 직원별 기간으로 관리한다.
 - 브라우저 공개키와 서버 전용키의 데이터 접근 범위를 분리한다.
 - 아래 인덱스 목록에서는 모든 `PRIMARY KEY`가 만드는 PK 인덱스는 반복 기재하지 않고, 업무 조회·UNIQUE·EXCLUDE 인덱스를 중심으로 정리한다.
 
@@ -22,9 +22,10 @@
 ```text
 auth.users 1 ── 0..1 employees ── N work_assignments N ── 1 worksites
                          │                 │
-                         │                 ├── N work_assignment_days_off
+                         │                 ├── N assignment_schedule_rules
                          │
                          ├── N work_record N ── 1 worksites
+                         ├── N leave
                          ├── N education_completions N ── 1 education_resources
                          ├── N inspection_logs
                          ├── N inspection_special_reports
@@ -37,7 +38,7 @@ auth.users 1 ── N manager_push_subscriptions
 ```
 
 - `inspection_logs`와 `inspection_special_reports`의 직원·근무지·현장 참조는 이력 보존을 위해 일부 `set null`로 동작한다.
-- `public_holidays`는 `work_assignment_days_off`와 외래키로 연결하지 않고, 야간근무 일정 생성 함수가 선택된 휴일을 조회해 반영한다.
+- 근무 일정 생성 함수는 배정별 일정 규칙, 선택된 공휴일, 직원 휴가 기간을 조회해 `work_record`의 예정 근태와 상태를 생성한다.
 - `auth.users`와 `storage.objects`는 Supabase 관리 영역이며 애플리케이션 테이블 목록에는 별도로 포함하지 않는다.
 
 ## 3. 테이블 정의
@@ -47,8 +48,9 @@ auth.users 1 ── N manager_push_subscriptions
 | `employees` | `id`, `name`, `phone`, `phone_normalized`, `role`, `is_retired`, `auth_user_id`, `passkey_enabled`, `work_style`, `in_time`, `out_time`, `created_at` | 직원 기본정보, 인증 연결, 근무형태·기본 출퇴근 시간 |
 | `worksites` | `id`, `name`, `address`, `gps_info`, `radius_meters`, `created_at` | 근무지와 GPS 출근 인정 범위 |
 | `work_assignments` | `id`, `employee_id`, `worksite_id`, `start_date`, `end_date`, `in_time`, `out_time`, `created_at` | 직원별 근무지 배정 기간 및 배정별 출퇴근 기준 시간 |
-| `work_assignment_days_off` | `id`, `work_assignment_id`, `day_off_date`, `created_at` | 배정별 수동·자동 휴무일 |
 | `work_record` | `id`, `employee_id`, `worksite_id`, `work_date`, `intime`, `outtime`, `work_intime`, `work_outtime`, `intime_status`, `outtime_status`, 출퇴근 위도·경도, `created_at`, `updated_at` | 직원별 일자 기준 근무예정과 실제 출퇴근을 통합 관리. `(employee_id, work_date)` UNIQUE |
+| `leave` | `id`, `employee_id`, `leave_type`, `start_date`, `end_date`, `created_at`, `updated_at` | 직원별 휴가 종류와 기간 |
+| `assignment_schedule_rules` | `id`, `work_assignment_id`, `day_type`, `is_working_day`, `in_time`, `out_time` | 배정별 요일·공휴일 근무 여부와 예정 출퇴근 시간 |
 | `public_holidays` | `id`, `holiday_date`, `name`, `selected`, `created_at` | 공휴일 및 관리자가 추가한 휴일. `selected = 'Y'`인 날짜만 야간근무 자동 휴무에 사용 |
 | `education_resources` | `id`, `title`, `youtube_link`, `created_at` | 안전교육 자료 |
 | `education_completions` | `employee_id`, `resource_id`, `is_completed`, `completed_at` | 직원별 교육 이수 상태. 직원·자료 복합 PK |
@@ -109,8 +111,8 @@ auth.users 1 ── N manager_push_subscriptions
 - 주요 외래키와 삭제 규칙은 다음과 같다.
   - `employees.auth_user_id → auth.users.id`: `ON DELETE SET NULL`
   - `work_assignments.employee_id → employees.id`: `ON DELETE CASCADE`
-  - `work_assignment_days_off.work_assignment_id → work_assignments.id`: `ON DELETE CASCADE`
   - `work_record.employee_id → employees.id`, `work_record.worksite_id → worksites.id`: `ON DELETE CASCADE`
+  - `leave.employee_id → employees.id`, `assignment_schedule_rules.work_assignment_id → work_assignments.id`: `ON DELETE CASCADE`
   - 교육 이수의 직원·자료 참조와 Passkey 요청의 직원 참조: `ON DELETE CASCADE`
   - `inspection_sites.worksite_id`: `ON DELETE CASCADE`
   - `inspection_logs`의 현장·근무지·직원 참조와 특이사항 보고의 근무지·직원 참조: `ON DELETE SET NULL`
@@ -124,9 +126,9 @@ auth.users 1 ── N manager_push_subscriptions
 - 직원의 `(name, phone_normalized)`는 UNIQUE이며, 전화번호 검색·로그인은 입력값을 정규화한 뒤 비교한다.
 - 근무 배정은 `start_date <= end_date`이고 동일 직원의 기간이 겹치지 않도록 `daterange` 기반 GiST EXCLUDE 제약을 적용한다. 애플리케이션도 저장 전에 동일 조건을 확인한다.
 - 배정별 `in_time`, `out_time`이 없으면 직원 기본 시간을 사용한다. 시간 형식은 애플리케이션에서 `HH:mm[:ss]`로 검증한다.
-- 배정 휴무일은 `(work_assignment_id, day_off_date)` UNIQUE이며, 트리거로 해당 배정의 시작일·종료일 안에서만 저장한다. 배정 기간을 줄이면 범위 밖 휴무일은 자동 삭제한다.
+- `assignment_schedule_rules`는 배정별 요일·공휴일 근무 여부와 시각을 저장한다. `leave` 기간에 포함되는 예정 근무는 `work_record.intime_status = '3'`으로 표시한다.
 - 근무기록은 `(employee_id, work_date)` UNIQUE이며, `intime`·`outtime`은 예정 시각, `work_intime`·`work_outtime`은 실제 시각이다. `work_outtime`은 출근 시각 없이 저장할 수 없다.
-- `intime_status`는 `0` 결근, `1` 지각, `2` 정상출근, `3` 정상근무를 사용하고, 조기퇴근 시 `outtime_status = '4'`를 저장한다.
+- `intime_status`는 `0` 미출근, `1` 지각, `2` 출근, `3` 휴가를 사용하고, 조기퇴근 시 `outtime_status = '4'`를 저장한다.
 - 근무지·점검 현장의 `gps_info`, 점검 이력의 `site_gps_info`는 객체이며 `latitude`·`longitude` 숫자 필드를 가져야 한다. 특이사항 보고의 `gps_info`는 애플리케이션에서 같은 형태로 정규화하지만 현재 DB CHECK는 없다.
 - `radius_meters`는 현재 애플리케이션에서 최소 1m로 보정하며 DB CHECK는 없다.
 - 교육 이수는 `is_completed = false`이면 `completed_at IS NULL`, `true`이면 `completed_at IS NOT NULL`이어야 한다.
@@ -148,9 +150,9 @@ auth.users 1 ── N manager_push_subscriptions
 | `employees` | `employees_name_phone_normalized_key` `(name, phone_normalized)` UNIQUE 로그인·중복 방지, `employees_auth_user_id_key` `auth_user_id` 부분 UNIQUE 인증 사용자 연결, `employees_passkey_enabled_idx` Passkey 대상 필터 |
 | `worksites` | PK 인덱스만 있음. 현재 목록은 `created_at` 정렬 후 이름을 클라이언트에서 필터링 |
 | `work_assignments` | `work_assignments_employee_period_no_overlap` GiST EXCLUDE 기간 중복 방지, `idx_work_assignments_worksite_id` 근무지별 배정 조회 |
-| `work_assignment_days_off` | `work_assignment_days_off_assignment_date_unique` `(work_assignment_id, day_off_date)` UNIQUE, `work_assignment_days_off_date_idx` 날짜별 휴무 조회 |
 | `work_record` | `work_record_employee_date_key` `(employee_id, work_date)` UNIQUE로 일별 중복 방지, `work_record_work_date_idx` 날짜별 조회, `work_record_worksite_id_idx` 근무지별 조회 |
 | `public_holidays` | `holiday_date` UNIQUE 공휴일 upsert·날짜 조회 |
+| `leave` | `leave_employee_id_idx`, `leave_period_idx` 직원별 휴가와 기간 조회 |
 | `education_completions` | `education_completions_employee_id_idx`, `education_completions_resource_id_idx`, `education_completions_is_completed_idx`, 복합 PK로 직원·자료별 교육 상태 조회 |
 | `inspection_sites` | `inspection_sites_worksite_id_idx` 근무지별 현장 조회, `inspection_sites_worksite_sort_order_idx` 근무지별 점검 순서 조회, `inspection_sites_name_idx` 현장명 정렬·검색 |
 | `inspection_logs` | `inspection_logs_worksite_id_idx` 근무지별 필터, `inspection_logs_inspected_at_idx` `inspected_at DESC` 최신 점검순 조회 |
@@ -168,8 +170,8 @@ auth.users 1 ── N manager_push_subscriptions
 - 직원 로그인은 `name = 입력 이름`과 `phone_normalized = 정규화 전화번호`를 함께 사용한다. 직원 목록은 재직 여부·직무·이름 검색과 `created_at DESC`를 사용한다.
 - 근무지 목록은 `created_at DESC`를 기본 정렬로 사용하고 이름·주소 조건을 적용한다. 현재 이름·주소 필터는 목록 데이터에 대한 클라이언트 필터다.
 - 근무 배정은 `start_date DESC, created_at DESC`로 정렬하고, 직원·근무지 조건 또는 `start_date <= 기준일 AND end_date >= 기준일`로 현재 배정을 찾는다. 수정 시 같은 직원의 기간 겹침을 `start_date <= 대상 종료일 AND end_date >= 대상 시작일`로 확인한다.
-- 휴무일은 `work_assignment_id`와 `day_off_date`를 함께 사용해 단건 upsert·삭제하고, 날짜별 전체 휴무 목록은 `day_off_date`로 조회한다.
-- 일별 예정·실제 출퇴근은 `work_record`에서 직원·근무일·배정 기간을 기준으로 조회한다. 대시보드·근태 현황은 `work_date = 기준일` 및 `intime IS NOT NULL`을 기준으로 예정 인원을 집계한다.
+- 배정 상세의 일별 근태는 `work_record`에서 배정 기간의 날짜별 예정 출퇴근을 조회하며, 달력의 공휴일 표시는 `public_holidays`를 기준으로 한다.
+- 일별 예정·실제 출퇴근은 `work_record`에서 직원·근무일·배정 기간을 기준으로 조회한다. 대시보드·근태 현황은 기준일의 예정 출근시각 존재 여부와 휴가 상태를 기준으로 집계한다.
 - 실제 근태는 근무자별 미퇴근 기록을 `employee_id`, `work_outtime IS NULL`, `work_intime DESC`, `LIMIT 1`로 찾고, 당일 기록은 `employee_id + work_date`로 찾는다. 리포트는 `work_date`의 연도 범위(`YYYY-01-01`부터 `YYYY-12-31`)를 조회하고 날짜순으로 정렬한다.
 - 점검 이력은 근무지 필터와 `inspected_at DESC`를 사용한다. 점검 현장은 `worksite_id` 또는 현장명 기준으로 조회한다.
 - 특이사항 보고는 연도·근무지·보고자 조건과 `reported_at DESC`를 사용하며, 메일 상태별 재처리 대상을 `email_status`로 찾는다.
@@ -178,7 +180,7 @@ auth.users 1 ── N manager_push_subscriptions
 - 근무자 세션 로그는 `login_at DESC`로 정렬하고 `guard_name`, `login_status`, 메인 푸시 상태를 선택적으로 필터링한다. 관리 화면은 페이지 범위를 사용한다.
 - Passkey 요청은 직원별 최신 요청을 `requested_at DESC LIMIT 1`로 조회하고, 관리자 목록은 같은 기준의 전체 최신순이다.
 - 관리자 푸시는 `admin_users`에서 연결된 `user_id`를 모은 뒤 `manager_push_subscriptions.user_id IN (...)`으로 발송 대상을 조회한다. 만료된 endpoint는 endpoint 기준으로 삭제한다.
-- 공휴일은 `holiday_date`를 conflict 기준으로 upsert하고, 자동 휴무 생성 함수는 `selected = 'Y'`인 날짜만 사용한다.
+- 공휴일은 `holiday_date`를 conflict 기준으로 upsert하고, 근무 일정 생성 함수는 `selected = 'Y'`인 공휴일과 배정 규칙을 사용한다.
 
 ### 인덱스 보완 검토 대상
 
@@ -190,8 +192,8 @@ auth.users 1 ── N manager_push_subscriptions
 
 ## 6. 보안 및 저장소
 
-- 관리자 전용 작업과 민감한 배정·휴무·일별 예정시각 작업은 서버의 Supabase 관리 클라이언트를 사용한다.
-- RLS 정책과 권한은 마이그레이션으로 관리한다. `push_notification_runs`, `manager_push_subscriptions`, `work_assignment_days_off`, `work_record`, `guard_passkey_requests`, `public_holidays`는 일반 클라이언트 권한을 제한하고 서버 역할 중심으로 접근한다.
+- 관리자 전용 작업과 민감한 배정·일정 규칙·일별 예정시각 작업은 서버의 Supabase 관리 클라이언트를 사용한다.
+- RLS 정책과 권한은 마이그레이션으로 관리한다. `push_notification_runs`, `manager_push_subscriptions`, `assignment_schedule_rules`, `leave`, `work_record`, `guard_passkey_requests`, `public_holidays`는 일반 클라이언트 권한을 제한하고 서버 역할 중심으로 접근한다.
 - 특이사항 사진은 `special-remarks` 저장소에 저장하고 보고 삭제 시 연결 파일도 삭제한다.
 - Passkey 컬럼 변경은 서버 서비스 역할만 허용하는 트리거로 보호한다.
 - 서비스 역할 키와 메일·푸시 비밀값은 서버 환경변수에만 저장하며 클라이언트에 노출하지 않는다.

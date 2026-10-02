@@ -110,10 +110,9 @@ describe("guard profile page", () => {
         return Response.json({
           schedules: [{ id: "assign-1", period: `${currentWeekStart} ~ ${addDateDays(nextWeekStart, 2)}`, worksiteName: "본사" }],
           plannedAttendance: [
-            { assignmentId: "assign-1", workDate: today, inTime: "2026-09-18T21:00:00.000Z", outTime: null, isDayOff: false },
-            { assignmentId: "assign-1", workDate: nextWeekStart, inTime: "2026-09-25T21:00:00.000Z", outTime: null, isDayOff: false },
+            { assignmentId: "assign-1", workDate: today, inTime: "2026-09-18T21:00:00.000Z", outTime: null, isLeave: false },
+            { assignmentId: "assign-1", workDate: nextWeekStart, inTime: "2026-09-25T21:00:00.000Z", outTime: null, isLeave: false },
           ],
-          plannedDaysOff: [{ assignmentId: "assign-1", workDate: currentWeekDayOff }],
           monthlyAttendance: [],
         });
       }

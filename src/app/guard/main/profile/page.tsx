@@ -61,13 +61,12 @@ type AttendanceDetail = {
 
 type AbsenceDetail = {
   workDate: string;
-  reason: "결근" | "휴무";
+  reason: "결근" | "휴가";
 };
 
 type GuardProfilePayload = {
   schedules: ScheduleRow[];
   plannedAttendance?: PlannedAttendanceRow[];
-  plannedDaysOff?: PlannedDayOffRow[];
   monthlyAttendance: MonthlyAttendanceRow[];
   attendanceDetails?: AttendanceDetail[];
   absenceDetails?: AbsenceDetail[];
@@ -78,12 +77,7 @@ type PlannedAttendanceRow = {
   workDate: string;
   inTime?: string | null;
   outTime?: string | null;
-  isDayOff?: boolean;
-};
-
-type PlannedDayOffRow = {
-  assignmentId: string;
-  workDate: string;
+  isLeave?: boolean;
 };
 
 type PasskeyRequest = {
@@ -170,7 +164,6 @@ type ScheduleWeekOption = {
 function getScheduleWeekOptions(profile: GuardProfilePayload | null, today: string): ScheduleWeekOption[] {
   const plannedDates = new Set([
     ...(profile?.plannedAttendance ?? []).map((planned) => planned.workDate),
-    ...(profile?.plannedDaysOff ?? []).map((dayOff) => dayOff.workDate),
   ]);
   const weekStarts = new Set(
     [...plannedDates]
@@ -526,7 +519,6 @@ export default function GuardProfilePage() {
           setProfile({
             schedules: payload.schedules ?? [],
             plannedAttendance: payload.plannedAttendance ?? [],
-            plannedDaysOff: payload.plannedDaysOff ?? [],
             monthlyAttendance: payload.monthlyAttendance ?? [],
             attendanceDetails: payload.attendanceDetails ?? [],
             absenceDetails: payload.absenceDetails ?? [],
@@ -660,10 +652,9 @@ export default function GuardProfilePage() {
   ) ?? null;
   const weekDates = selectedScheduleWeekOption ? getWeekDates(selectedScheduleWeekOption.startDate) : [];
   const plannedWorkDates = useMemo(() => {
-    const plannedDaysOff = new Set((profile?.plannedDaysOff ?? []).map((dayOff) => `${dayOff.assignmentId}:${dayOff.workDate}`));
     return new Set(
       (profile?.plannedAttendance ?? [])
-        .filter((planned) => !planned.isDayOff && !plannedDaysOff.has(`${planned.assignmentId}:${planned.workDate}`))
+        .filter((planned) => !planned.isLeave)
         .map((planned) => planned.workDate),
     );
   }, [profile]);

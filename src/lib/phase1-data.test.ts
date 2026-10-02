@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { authenticateGuard, clockIn, clockOut, createAssignment, createEmployee, deleteAssignment, deleteAssignmentAfterToday, deleteAssignmentIncludingAttendance, deleteWorksite, listAssignmentManagementData, listAssignmentsForEmployee, loadGuardSessionByEmployeeId } from "./phase1-data";
 import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
-import { isAssignmentDayOff } from "./assignment-days-off";
 
 vi.mock("./supabase", () => ({
   getSupabase: vi.fn(),
@@ -10,10 +9,6 @@ vi.mock("./supabase", () => ({
 
 vi.mock("./supabase-admin", () => ({
   getSupabaseAdmin: vi.fn(),
-}));
-
-vi.mock("./assignment-days-off", () => ({
-  isAssignmentDayOff: vi.fn().mockResolvedValue(false),
 }));
 
 function employeeRolesQuery(content = "경비원\n미화원\n주차원\n사감") {
@@ -27,7 +22,6 @@ function employeeRolesQuery(content = "경비원\n미화원\n주차원\n사감")
 describe("guard authentication data rules", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
-    vi.mocked(isAssignmentDayOff).mockResolvedValue(false);
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-05-26T09:00:00+09:00"));
   });
@@ -102,7 +96,7 @@ describe("guard authentication data rules", () => {
     const result = await loadGuardSessionByEmployeeId("emp-1");
 
     expect(scheduledQuery.select).toHaveBeenCalledWith(
-      "id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime",
+      "id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime,intime_status",
     );
     expect(scheduledQuery.eq).toHaveBeenCalledWith("employee_id", "emp-1");
     expect(scheduledQuery.or).toHaveBeenCalledWith(
@@ -114,7 +108,6 @@ describe("guard authentication data rules", () => {
       scheduledAttendances: [scheduledShift],
       worksite: { id: "site-1", name: "본사" },
     });
-    expect(isAssignmentDayOff).toHaveBeenCalledWith("assignment-1", workDate);
   });
 
   it("accepts next-day elapsed clock-out input for alternate and night shifts and stores time of day", async () => {
@@ -369,7 +362,6 @@ describe("guard authentication data rules", () => {
     expect(assignmentQuery.eq).toHaveBeenCalledWith("employee_id", "emp-1");
     expect(assignmentQuery.lte).toHaveBeenCalledWith("start_date", "2026-05-26");
     expect(assignmentQuery.gte).toHaveBeenCalledWith("end_date", "2026-05-26");
-    expect(isAssignmentDayOff).toHaveBeenCalledWith("assign-1", "2026-05-26");
   });
 
   it("loads an open previous-day attendance record into the guard session", async () => {
@@ -880,7 +872,7 @@ describe("guard authentication data rules", () => {
     expect(rpc).toHaveBeenCalledWith("save_attendance", expect.objectContaining({ p_record_id: "record-1", p_guard_clock_in: true, p_values: expect.objectContaining({ employee_id: "emp-1", work_date: "2026-05-25", work_intime: "2026-05-26T00:00:00.000Z" }) }));
   });
 
-  it("rejects clock-in when today is an assignment day off", async () => {
+  it("rejects clock-in when no work schedule exists for the assignment date", async () => {
     const assignmentQuery = {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
@@ -897,10 +889,33 @@ describe("guard authentication data rules", () => {
         error: null,
       }),
     };
+    const worksiteQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({
+        data: {
+          id: "work-1",
+          name: "본사",
+          gps_info: { latitude: 37.5, longitude: 127 },
+          radius_meters: 200,
+        },
+        error: null,
+      }),
+    };
+    const workRecordQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+    };
+    const from = vi.fn((table: string) => {
+      if (table === "work_assignments") return assignmentQuery;
+      if (table === "worksites") return worksiteQuery;
+      if (table === "work_record") return workRecordQuery;
+      throw new Error(`Unexpected table: ${table}`);
+    });
     vi.mocked(getSupabaseAdmin).mockReturnValue({
-      from: vi.fn().mockReturnValue(assignmentQuery),
+      from,
     } as never);
-    vi.mocked(isAssignmentDayOff).mockResolvedValue(true);
 
     await expect(
       clockIn({
@@ -910,8 +925,8 @@ describe("guard authentication data rules", () => {
         latitude: 37.5,
         longitude: 127,
       }),
-    ).rejects.toThrow("선택한 근무일은 휴무일로 지정되어 출근할 수 없습니다.");
-    expect(isAssignmentDayOff).toHaveBeenCalledWith("assign-1", "2026-05-25");
+    ).rejects.toThrow("선택한 근무일은 근무 예정이 없어 출근할 수 없습니다.");
+    expect(from).toHaveBeenCalledWith("work_record");
   });
 
   it("lists assignments and active employee and worksite filter options", async () => {

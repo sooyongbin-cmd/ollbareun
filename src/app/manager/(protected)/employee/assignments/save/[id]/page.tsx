@@ -12,7 +12,7 @@ import { DeleteIcon } from "@/components/icons/delete-icon";
 import ConfirmModal from "@/components/modals/confirm-modal";
 import AlertModal from "@/components/modals/alert-modal";
 import ProcessingModal from "@/components/modals/processing-modal";
-import AssignmentDaysOffCalendar, { type DailyAttendance } from "./assignment-days-off-calendar";
+import AssignmentAttendanceCalendar, { type DailyAttendance } from "./assignment-attendance-calendar";
 
 type Assignment = {
   id: string;
@@ -40,9 +40,8 @@ type AssignmentResponse = {
   assignment: Assignment;
 };
 
-type DaysOffResponse = {
-  daysOff: { day_off_date: string }[];
-  holidays?: string[];
+type HolidayResponse = {
+  holidays: { holiday_date: string; selected: string }[];
 };
 
 type Bootstrap = {
@@ -85,7 +84,6 @@ export default function AssignmentSavePage() {
   const [savedEndDate, setSavedEndDate] = useState("");
   const [currentMonth, setCurrentMonth] = useState("");
   const [dailyAttendance, setDailyAttendance] = useState<DailyAttendance[]>([]);
-  const [daysOff, setDaysOff] = useState<Set<string>>(new Set());
   const [holidays, setHolidays] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(Boolean(assignmentId));
   const [error, setError] = useState("");
@@ -101,25 +99,33 @@ export default function AssignmentSavePage() {
 
     async function loadData() {
       try {
-        const [assignmentPayload, bootstrapPayload, daysOffPayload, dailyAttendancePayload] = await Promise.all([
+        const [assignmentPayload, bootstrapPayload, dailyAttendancePayload] = await Promise.all([
           fetchJson<AssignmentResponse>(`/api/assignments/${assignmentId}`),
           fetchJson<Bootstrap>("/api/bootstrap"),
-          fetchJson<DaysOffResponse>(`/api/manager/assignments/${assignmentId}/days-off`),
           fetchJson<{ dailyAttendance: DailyAttendance[] }>(`/api/manager/assignments/${assignmentId}/daily-attendance`),
         ]);
 
+        const assignment = assignmentPayload.assignment;
+        const firstYear = Number(assignment.start_date.slice(0, 4));
+        const lastYear = Number(assignment.end_date.slice(0, 4));
+        const holidayPayloads = await Promise.all(
+          Array.from({ length: lastYear - firstYear + 1 }, (_, index) => firstYear + index)
+            .map((year) => fetchJson<HolidayResponse>(`/api/manager/holidays?year=${year}`)),
+        );
+
         if (!ignore) {
           setDailyAttendance(dailyAttendancePayload.dailyAttendance ?? []);
-          setSavedSchedule(scheduleSummary(assignmentPayload.assignment));
-          setEmployeeId(assignmentPayload.assignment.employee_id);
-          setWorksiteId(assignmentPayload.assignment.worksite_id);
-          setStartDate(assignmentPayload.assignment.start_date);
-          setEndDate(assignmentPayload.assignment.end_date);
-          setSavedStartDate(assignmentPayload.assignment.start_date);
-          setSavedEndDate(assignmentPayload.assignment.end_date);
-          setCurrentMonth(assignmentPayload.assignment.start_date.slice(0, 7));
-          setDaysOff(new Set((daysOffPayload.daysOff ?? []).map((dayOff) => dayOff.day_off_date)));
-          setHolidays(new Set(daysOffPayload.holidays ?? []));
+          setSavedSchedule(scheduleSummary(assignment));
+          setEmployeeId(assignment.employee_id);
+          setWorksiteId(assignment.worksite_id);
+          setStartDate(assignment.start_date);
+          setEndDate(assignment.end_date);
+          setSavedStartDate(assignment.start_date);
+          setSavedEndDate(assignment.end_date);
+          setCurrentMonth(assignment.start_date.slice(0, 7));
+          setHolidays(new Set(holidayPayloads.flatMap((payload) =>
+            (payload.holidays ?? []).filter((holiday) => holiday.selected === "Y").map((holiday) => holiday.holiday_date),
+          )));
           setEmployees(bootstrapPayload.employees ?? []);
           setWorksites(bootstrapPayload.worksites ?? []);
         }
@@ -331,10 +337,9 @@ export default function AssignmentSavePage() {
         {!loading && savedStartDate && savedEndDate && currentMonth ? (
           <>
           <p className="text-sm text-muted-foreground">배정 당시 출근시간: {savedSchedule}</p>
-          <AssignmentDaysOffCalendar
+          <AssignmentAttendanceCalendar
             dailyAttendance={dailyAttendance}
             currentMonth={currentMonth}
-            daysOff={daysOff}
             holidays={holidays}
             endDate={savedEndDate}
             onMonthChange={setCurrentMonth}

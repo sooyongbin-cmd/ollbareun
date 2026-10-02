@@ -5,6 +5,7 @@ export type GuardWorkSchedule = {
   work_date: string;
   intime: string | null;
   outtime: string | null;
+  intime_status?: "0" | "1" | "2" | "3";
   work_intime: string | null;
   work_outtime: string | null;
 };

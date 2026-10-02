@@ -5,7 +5,6 @@ import { requireGpsInfo, type GpsInfo } from "./gps";
 import { type SupabaseClient } from "@supabase/supabase-js";
 import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
-import { isAssignmentDayOff } from "./assignment-days-off";
 import { loadEmployeeRoles } from "./employee-roles";
 import { selectGuardWorkSchedule } from "./guard-work-schedule";
 
@@ -54,6 +53,7 @@ export type ScheduledAttendanceRow = {
   outtime: string | null;
   work_intime: string | null;
   work_outtime: string | null;
+  intime_status?: "0" | "1" | "2" | "3";
 };
 
 export type AssignmentListRow = AssignmentRow & {
@@ -811,7 +811,7 @@ async function loadGuardSessionByEmployee(employee: EmployeeRow) {
   const tomorrowStart = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
   const scheduledAttendanceResult = await supabase
     .from("work_record")
-    .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime")
+    .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime,intime_status")
     .eq("employee_id", employee.id)
     .or(`work_date.eq.${today},and(outtime.gte.${dayStart.toISOString()},outtime.lt.${tomorrowStart.toISOString()})`)
     .order("work_date", { ascending: true });
@@ -848,13 +848,10 @@ async function loadGuardSessionByEmployee(employee: EmployeeRow) {
   const attendance = selectedSchedule
     ? await findAttendanceByWorkDate(supabase, employee.id, selectedSchedule.work_date)
     : null;
-  const isDayOff = selectedSchedule
-    ? selectedAssignment
-      ? await isAssignmentDayOff(selectedAssignment.id, selectedSchedule.work_date)
-      : false
-    : assignment
-      ? await isAssignmentDayOff(assignment.id, today)
-      : false;
+  const isDayOff = Boolean(
+    (selectedAssignment || assignment) &&
+    (!selectedSchedule || selectedSchedule.intime_status === "3"),
+  );
   const selectedWorksiteId = selectedSchedule?.worksite_id ?? assignment?.worksite_id ?? null;
   const worksiteResult = selectedWorksiteId
     ? await supabase.from("worksites").select("*").eq("id", selectedWorksiteId).maybeSingle()
@@ -965,10 +962,6 @@ export async function clockIn(input: {
   if (!assignment) {
     throw new Error(workDate === todayDate() ? "오늘 배정된 근무지가 없습니다." : "선택한 근무일에 배정된 근무지가 없습니다.");
   }
-  if (await isAssignmentDayOff(assignment.id, workDate)) {
-    throw new Error(workDate === todayDate() ? "오늘은 휴무일로 지정되어 출근할 수 없습니다." : "선택한 근무일은 휴무일로 지정되어 출근할 수 없습니다.");
-  }
-
   const { data: worksite, error: worksiteError } = await supabase
     .from("worksites")
     .select("*")
@@ -995,12 +988,18 @@ export async function clockIn(input: {
 
   const { data: existingRecord, error: existingRecordError } = await supabase
     .from("work_record")
-    .select("id,intime,outtime,work_intime,work_outtime")
+    .select("id,intime,outtime,work_intime,work_outtime,intime_status")
     .eq("employee_id", employee_id)
     .eq("work_date", workDate)
     .maybeSingle();
 
   throwIfError(existingRecordError);
+  if (existingRecord?.intime_status === "3") {
+    throw new Error(workDate === todayDate() ? "오늘은 휴가로 등록되어 출근할 수 없습니다." : "선택한 근무일은 휴가로 등록되어 출근할 수 없습니다.");
+  }
+  if (!existingRecord?.intime) {
+    throw new Error(workDate === todayDate() ? "오늘은 근무 예정이 없어 출근할 수 없습니다." : "선택한 근무일은 근무 예정이 없어 출근할 수 없습니다.");
+  }
   if (existingRecord?.work_intime) {
     throw new Error("이미 출근 처리되었습니다.");
   }

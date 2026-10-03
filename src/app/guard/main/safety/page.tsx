@@ -542,8 +542,9 @@ export default function GuardSafetyEducationPage() {
                   }}
                   type="button"
                 >
-                  <span className={styles.educationTitle} id={titleId}>{resource.title}</span>
-                  <small className="text-muted-foreground">{educationTypeLabels[resource.education_type]}</small>
+                  <span className={styles.educationTitle} id={titleId}>
+                    {resource.title} ({educationTypeLabels[resource.education_type]})
+                  </span>
                   <span className={`${styles.educationStatus} ${completed ? styles.completedStatus : styles.incompleteStatus}`} id={statusId}>
                     {completed ? (
                       <>

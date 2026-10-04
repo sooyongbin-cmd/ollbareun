@@ -1,6 +1,8 @@
 "use client";
 
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useEffect, useMemo, useState } from "react";
 import { Check } from "lucide-react";
@@ -32,6 +34,18 @@ type PushNotificationRunRow = {
   result: unknown | null;
   created_at: string;
   updated_at: string;
+};
+
+type EducationReminderExecutionResult = {
+  success?: boolean;
+  skipped?: boolean;
+  reason?: string;
+  scheduledDate?: string;
+  scheduledTime?: string;
+  successCount?: number;
+  failedCount?: number;
+  unregisteredCount?: number;
+  failedEmployees?: { employeeId: string; employeeName: string; reason: string }[];
 };
 
 function formatDateTime(value: string | null) {
@@ -71,6 +85,11 @@ export default function ManagerSafetyNotificationsPage() {
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [isRunningReminder, setIsRunningReminder] = useState(false);
+  const [runDialogOpen, setRunDialogOpen] = useState(false);
+  const [runResult, setRunResult] = useState<EducationReminderExecutionResult | null>(null);
+  const [runError, setRunError] = useState("");
 
   const queryString = useMemo(() => {
     const params = new URLSearchParams();
@@ -113,7 +132,52 @@ export default function ManagerSafetyNotificationsPage() {
     return () => {
       ignore = true;
     };
-  }, [queryString]);
+  }, [queryString, refreshKey]);
+
+  const runEducationReminders = async () => {
+    setRunDialogOpen(true);
+    setIsRunningReminder(true);
+    setRunResult(null);
+    setRunError("");
+
+    try {
+      const response = await fetch("/api/notifications/education-reminders/run", {
+        method: "POST",
+        cache: "no-store",
+      });
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(payload?.error ?? "교육알림 Edge Function 실행에 실패했습니다.");
+      }
+
+      setRunResult(payload as EducationReminderExecutionResult);
+      setRefreshKey((current) => current + 1);
+    } catch (runError) {
+      setRunError(runError instanceof Error ? runError.message : "교육알림 실행 결과를 확인하지 못했습니다.");
+    } finally {
+      setIsRunningReminder(false);
+    }
+  };
+
+  const closeRunDialog = (open: boolean) => {
+    if (isRunningReminder && !open) return;
+    setRunDialogOpen(open);
+  };
+
+  const runResultHasCounts = Boolean(
+    runResult
+      && (typeof runResult.successCount === "number"
+        || typeof runResult.failedCount === "number"
+        || typeof runResult.unregisteredCount === "number"),
+  );
+  const runResultHasNoPushes = Boolean(
+    runResult
+      && !runResult.skipped
+      && (runResult.successCount ?? 0) === 0
+      && (runResult.failedCount ?? 0) === 0
+      && (runResult.unregisteredCount ?? 0) === 0,
+  );
 
   return (
     <section className="space-y-[1.5rem]">
@@ -127,7 +191,7 @@ export default function ManagerSafetyNotificationsPage() {
       </header>
 
       <section aria-label="자동알림 검색" className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap items-end gap-4">
           <div className="w-[13.75rem] space-y-2">
             <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="notification-code">
               알림코드
@@ -158,6 +222,11 @@ export default function ManagerSafetyNotificationsPage() {
               <NativeSelectOption value="failed">실패</NativeSelectOption>
               <NativeSelectOption value="skipped">건너뜀</NativeSelectOption>
             </NativeSelect>
+          </div>
+          <div className="ml-auto">
+            <Button type="button" onClick={() => void runEducationReminders()} disabled={isRunningReminder}>
+              {isRunningReminder ? "실행 중…" : "교육 알림 지금 실행"}
+            </Button>
           </div>
         </div>
       </section>
@@ -216,6 +285,72 @@ export default function ManagerSafetyNotificationsPage() {
           </div>
         )}
       </section>
+
+      <Dialog open={runDialogOpen} onOpenChange={closeRunDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {isRunningReminder ? "교육 알림 실행 중" : runError ? "교육 알림 실행 실패" : "교육 알림 실행 결과"}
+            </DialogTitle>
+            <DialogDescription>
+              {isRunningReminder
+                ? "기한이 지난 안전교육 예약 작업을 확인하고 있습니다."
+                : runError
+                  ? "Edge Function 실행 중 오류가 발생했습니다."
+                  : runResult?.skipped
+                    ? "중복 실행으로 이번 요청을 건너뛰었습니다."
+                    : runResultHasNoPushes
+                      ? "실행은 완료됐지만 전송된 푸시가 없습니다. 기한이 지난 미이수 작업이 없을 수 있습니다."
+                      : "기한이 지난 안전교육 예약 작업의 푸시 전송 결과입니다."}
+            </DialogDescription>
+          </DialogHeader>
+
+          {isRunningReminder ? (
+            <ManagerLoadingMessage />
+          ) : runError ? (
+            <p role="alert" className="text-sm text-destructive">{runError}</p>
+          ) : runResult ? (
+            <div className="space-y-3">
+              {runResultHasCounts ? (
+                <dl className="grid grid-cols-3 gap-3 rounded-lg border bg-muted/30 p-4 text-center text-sm">
+                  <div>
+                    <dt className="text-muted-foreground">성공</dt>
+                    <dd className="mt-1 font-semibold">{runResult.successCount ?? 0}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground">실패</dt>
+                    <dd className="mt-1 font-semibold">{runResult.failedCount ?? 0}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground">구독 없음</dt>
+                    <dd className="mt-1 font-semibold">{runResult.unregisteredCount ?? 0}</dd>
+                  </div>
+                </dl>
+              ) : null}
+              {runResult.scheduledDate && runResult.scheduledTime ? (
+                <p className="text-xs text-muted-foreground">
+                  실행 시각: {runResult.scheduledDate} {runResult.scheduledTime}
+                </p>
+              ) : null}
+              {runResult.failedEmployees && runResult.failedEmployees.length > 0 ? (
+                <ul className="max-h-48 space-y-1 overflow-y-auto rounded-lg border p-3 text-sm">
+                  {runResult.failedEmployees.map((employee) => (
+                    <li key={employee.employeeId}>
+                      <span className="font-medium">{employee.employeeName}</span>: {employee.reason}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+          ) : null}
+
+          {!isRunningReminder ? (
+            <DialogFooter>
+              <Button type="button" onClick={() => setRunDialogOpen(false)}>확인</Button>
+            </DialogFooter>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

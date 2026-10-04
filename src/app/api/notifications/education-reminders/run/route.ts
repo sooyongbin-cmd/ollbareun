@@ -12,7 +12,25 @@ export async function POST() {
       return Response.json({ error: "교육알림 실행 인증값이 구성되지 않았습니다." }, { status: 500 });
     }
 
-    const { data, error } = await getSupabaseAdmin().functions.invoke("education-reminders", {
+    const supabase = getSupabaseAdmin();
+    const makeDueAt = new Date(Date.now() - 1_000).toISOString();
+    const { error: rescheduleError } = await supabase
+      .from("education_reminder_jobs")
+      .update({
+        due_at: makeDueAt,
+        next_attempt_at: makeDueAt,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("status", "pending");
+
+    if (rescheduleError) {
+      return Response.json(
+        { error: rescheduleError.message || "대기 중인 교육알림 작업을 준비하지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    const { data, error } = await supabase.functions.invoke("education-reminders", {
       body: { source: "manager-manual" },
       headers: { "x-cron-secret": cronSecret },
     });

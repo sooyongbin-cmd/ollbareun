@@ -32,7 +32,7 @@ describe("attendance report page", () => {
             workStyle: "격일근무",
             worksiteName: "본사",
             scheduledClockIn: "09:00",
-            scheduledClockOut: "18:00",
+            scheduledClockOut: "2026-06-04 18:00",
             clockInDateTime: "2026-06-04 09:00",
             clockOutDateTime: "2026-06-04 18:00",
             workDuration: "9시간",
@@ -63,7 +63,7 @@ describe("attendance report page", () => {
         `/api/manager/reports/attendance?employeeName=%EA%B9%80%EC%B2%A0%EC%88%98&workDate=${workDate}`,
       ),
     );
-    expect(await screen.findByText("2026-06-04 09:00")).toBeInTheDocument();
+    expect(await screen.findByText("2026-06-04 09:00 ~18:00")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "엑셀" })).toBeEnabled();
     expect(screen.getByText("지각")).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "출근" })).toBeInTheDocument();
@@ -74,13 +74,16 @@ describe("attendance report page", () => {
     expect(screen.getByRole("link", { name: "김철수 (경비,격일) 근태 상세 보기" })).toHaveAttribute(
       "href", "/manager/reports/attendance/detail/attendance-1",
     );
-    expect(screen.getByRole("columnheader", { name: "출근예정" })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "출근시각" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "출퇴근예정" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "출퇴근" })).toBeInTheDocument();
     expect(screen.queryByRole("columnheader", { name: "출근일" })).not.toBeInTheDocument();
     expect(screen.queryByRole("columnheader", { name: "근무형태" })).not.toBeInTheDocument();
-    expect(screen.getByText("2026-06-04 09:00", { selector: "td" })).not.toHaveAttribute("href");
-    expect(screen.getByText("18:00", { selector: "td" })).toBeInTheDocument();
-    expect(screen.getByText("09:00", { selector: "td" })).toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "출근예정" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "퇴근예정" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "출근시각" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "퇴근일시" })).not.toBeInTheDocument();
+    expect(screen.getByText("2026-06-04 09:00 ~18:00", { selector: "td" })).not.toHaveAttribute("href");
+    expect(screen.getByText("09:00 ~ 18:00", { selector: "td" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /출근등록/ })).not.toBeInTheDocument();
   });
 
@@ -101,7 +104,7 @@ describe("attendance report page", () => {
             workStyle: "일반근무",
             worksiteName: "본사",
             scheduledClockIn: "09:00",
-            scheduledClockOut: "18:00",
+            scheduledClockOut: "2026-06-04 18:00",
             clockInDateTime: "2026-06-04 09:00",
             clockOutDateTime: null,
             workDuration: "-",

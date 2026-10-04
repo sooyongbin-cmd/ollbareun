@@ -58,8 +58,34 @@ function formatScheduledClockOut(row: AttendanceReportRow) {
     : row.scheduledClockOut;
 }
 
+function scheduledClockInOut(row: AttendanceReportRow) {
+  const clockIn = scheduledClockIn(row);
+  const clockOut = formatScheduledClockOut(row);
+  if (clockIn === "-") return clockOut;
+  if (clockOut === "-") return clockIn;
+  const separator = /^\d{2}:\d{2}$/.test(clockOut) ? " ~" : " ~ ";
+  return `${clockIn}${separator}${clockOut}`;
+}
+
 function clockInTime(value: string) {
   return value.match(/(?:T|\s)(\d{2}:\d{2})(?::\d{2}(?:\.\d+)?)?$/)?.[1] ?? value;
+}
+
+function formatClockOut(row: AttendanceReportRow) {
+  const clockOut = row.clockOutDateTime;
+  if (!clockOut || clockOut === "-") return "-";
+
+  const scheduledClockInDate = scheduledClockIn(row).slice(0, 10);
+  return scheduledClockInDate !== "-" && clockOut.slice(0, 10) === scheduledClockInDate
+    ? clockOut.slice(11)
+    : clockOut;
+}
+
+function clockInOut(row: AttendanceReportRow) {
+  const clockIn = clockInTime(row.clockInDateTime);
+  const clockOut = formatClockOut(row);
+  if (clockIn === "-" && clockOut === "-") return "-";
+  return `${clockIn} ~ ${clockOut}`;
 }
 
 export default function AttendanceReportPage() {
@@ -144,17 +170,15 @@ export default function AttendanceReportPage() {
   }, [handleSearch]);
 
   async function handleExport() {
-    const headers = ["이름", "근무지", "출근예정", "퇴근예정", "출근시각", "퇴근일시", "출근", "퇴근"];
+    const headers = ["이름", "근무지", "출퇴근예정", "출퇴근", "출근", "퇴근"];
     await saveRowsAsXls({
       fileName: `올바름_근태_${employeeName.trim() || "전체"}_${workDate || "전체기간"}`,
       headers,
       rows: rows.map((row) => [
         employeeSummary(row),
         row.worksiteName,
-        scheduledClockIn(row),
-        formatScheduledClockOut(row),
-        clockInTime(row.clockInDateTime),
-        row.clockOutDateTime ?? "-",
+        scheduledClockInOut(row),
+        clockInOut(row),
         row.status,
         row.outtimeLabel,
       ]),
@@ -221,10 +245,8 @@ export default function AttendanceReportPage() {
                 <TableRow>
                   <TableHead className="text-left">이름</TableHead>
                   <TableHead className="text-left">근무지</TableHead>
-                  <TableHead className="text-left">출근예정</TableHead>
-                  <TableHead className="text-left">퇴근예정</TableHead>
-                  <TableHead className="text-left">출근시각</TableHead>
-                  <TableHead className="text-left">퇴근일시</TableHead>
+                  <TableHead className="text-left">출퇴근예정</TableHead>
+                  <TableHead className="text-left">출퇴근</TableHead>
                   <TableHead className="text-left">출근</TableHead>
                   <TableHead className="text-left">퇴근</TableHead>
                 </TableRow>
@@ -232,7 +254,7 @@ export default function AttendanceReportPage() {
               <TableBody>
                 {rows.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={8} className="p-8 text-center text-muted-foreground italic">
+                    <TableCell data-responsive-empty colSpan={6} className="p-8 text-center text-muted-foreground italic">
                       {searched ? "조회 결과가 없습니다." : "조회 조건을 입력하세요."}
                     </TableCell>
                   </TableRow>
@@ -246,23 +268,17 @@ export default function AttendanceReportPage() {
                       </TableCell>
                       <TableCell data-label="근무지">{row.worksiteName ?? "-"}</TableCell>
                       <TableCell
-                        data-label="출근예정"
-                        className={row.scheduledClockIn !== "-" && row.workDate !== currentDate()
-                          ? "text-yellow-700 dark:text-yellow-300"
-                          : undefined}
+                        data-label="출퇴근예정"
+                        className={
+                          (row.scheduledClockIn !== "-" && row.workDate !== currentDate())
+                          || (workDate && row.scheduledClockOut !== "-" && row.scheduledClockOut.slice(0, 10) !== workDate)
+                            ? "text-yellow-700 dark:text-yellow-300"
+                            : undefined
+                        }
                       >
-                        {scheduledClockIn(row)}
+                        {scheduledClockInOut(row)}
                       </TableCell>
-                      <TableCell
-                        data-label="퇴근예정"
-                        className={workDate && row.scheduledClockOut !== "-" && row.scheduledClockOut.slice(0, 10) !== workDate
-                          ? "text-yellow-700 dark:text-yellow-300"
-                          : undefined}
-                      >
-                        {formatScheduledClockOut(row)}
-                      </TableCell>
-                      <TableCell data-label="출근시각">{clockInTime(row.clockInDateTime)}</TableCell>
-                      <TableCell data-label="퇴근일시">{row.clockOutDateTime ?? "-"}</TableCell>
+                      <TableCell data-label="출퇴근">{clockInOut(row)}</TableCell>
                       <TableCell
                         data-label="출근"
                         className={row.status === "지각"

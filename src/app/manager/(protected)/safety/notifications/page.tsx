@@ -287,7 +287,7 @@ export default function ManagerSafetyNotificationsPage() {
       </section>
 
       <Dialog open={runDialogOpen} onOpenChange={closeRunDialog}>
-        <DialogContent>
+        <DialogContent className="dark:text-white">
           <DialogHeader>
             <DialogTitle>
               {isRunningReminder ? "교육 알림 실행 중" : runError ? "교육 알림 실행 실패" : "교육 알림 실행 결과"}

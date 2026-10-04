@@ -28,7 +28,8 @@ describe("attendance report page", () => {
             id: "attendance-1",
             workDate: "2026-06-04",
             employeeName: "김철수",
-            workStyle: "일반근무",
+            employeeRole: "경비원",
+            workStyle: "격일근무",
             worksiteName: "본사",
             scheduledClockIn: "09:00",
             scheduledClockOut: "18:00",
@@ -70,10 +71,15 @@ describe("attendance report page", () => {
     expect(screen.getByText("퇴근", { selector: "td" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "이름" })).toBeInTheDocument();
     expect(screen.queryByRole("columnheader", { name: "수정" })).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "김철수 근태 상세 보기" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "김철수(경비,격일) 근태 상세 보기" })).toHaveAttribute(
       "href", "/manager/reports/attendance/detail/attendance-1",
     );
+    expect(screen.getByRole("columnheader", { name: "출근예정" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "출근시각" })).toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "출근일" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "근무형태" })).not.toBeInTheDocument();
     expect(screen.getByText("2026-06-04 09:00", { selector: "td" })).not.toHaveAttribute("href");
+    expect(screen.getByText("09:00", { selector: "td" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /출근등록/ })).not.toBeInTheDocument();
   });
 
@@ -90,6 +96,7 @@ describe("attendance report page", () => {
             id: "attendance-1",
             workDate: "2026-06-04",
             employeeName: "김철수",
+            employeeRole: "경비원",
             workStyle: "일반근무",
             worksiteName: "본사",
             scheduledClockIn: "09:00",
@@ -110,7 +117,7 @@ describe("attendance report page", () => {
     render(<AttendanceReportPage />);
     await waitFor(() => expect(document.querySelector('datalist option[value="김철수"]')).toBeInTheDocument());
     await user.type(screen.getByLabelText("직원이름"), "김철수");
-    expect(await screen.findByRole("link", { name: "김철수 근태 상세 보기" })).toHaveAttribute(
+    expect(await screen.findByRole("link", { name: "김철수(경비,일반) 근태 상세 보기" })).toHaveAttribute(
       "href", "/manager/reports/attendance/detail/attendance-1",
     );
   });

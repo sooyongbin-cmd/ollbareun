@@ -10,6 +10,7 @@ import { deriveAttendanceStatuses } from "./attendance-status";
 type EmployeeInput = {
   id: string;
   name: string;
+  role?: string | null;
   work_style?: "0" | "1" | "2" | null;
   is_retired?: boolean;
 };
@@ -70,6 +71,7 @@ export type AttendanceReportRow = {
   workDate: string;
   worksiteName: string;
   employeeName: string;
+  employeeRole: string;
   workStyle: string;
   scheduledClockIn: string;
   scheduledClockOut: string;
@@ -173,6 +175,7 @@ export function buildAttendanceReport(input: {
       .map((employee) => employee.id),
   );
   const employeeNamesById = new Map(input.employees.map((employee) => [employee.id, employee.name]));
+  const employeeRolesById = new Map(input.employees.map((employee) => [employee.id, employee.role ?? "-"]));
   const workStylesByEmployeeId = new Map(input.employees.map((employee) => [employee.id, workStyleLabel(employee.work_style)]));
   const worksiteNamesById = new Map((input.worksites ?? []).map((worksite) => [worksite.id, worksite.name]));
   const scheduledTimes = new Map<string, { intime: string | null; outtime: string | null }>();
@@ -218,6 +221,7 @@ export function buildAttendanceReport(input: {
         workDate: record.work_date,
         worksiteName: worksiteNamesById.get(record.worksite_id ?? "") ?? "-",
         employeeName: employeeNamesById.get(record.employee_id) ?? "-",
+        employeeRole: employeeRolesById.get(record.employee_id) ?? "-",
         workStyle: workStylesByEmployeeId.get(record.employee_id) ?? "-",
         scheduledClockIn: toKstDateTime(scheduledClockInAt)?.time ?? "-",
         scheduledClockOut: scheduledClockOut?.dateTime ?? "-",
@@ -427,7 +431,7 @@ export async function loadAttendanceReport(input: { employeeName: string; workDa
     );
   }
   const [employeesResult, workRecordResult, worksitesResult, assignmentsResult] = await Promise.all([
-    supabase.from("employees").select("id,name,work_style").ilike("name", `%${input.employeeName.trim()}%`),
+    supabase.from("employees").select("id,name,role,work_style").ilike("name", `%${input.employeeName.trim()}%`),
     workRecordQuery.order("work_date", { ascending: true }),
     supabase.from("worksites").select("id,name"),
     supabase.from("work_assignments").select("id,employee_id,worksite_id"),

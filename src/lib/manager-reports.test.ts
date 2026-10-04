@@ -35,7 +35,7 @@ describe("manager reports", () => {
       workDate: "2026-03-02",
       worksites: [{ id: "site-1", name: "본사" }],
       employees: [
-        { id: "emp-1", name: "김철수", work_style: "0" },
+        { id: "emp-1", name: "김철수", role: "경비원", work_style: "0" },
         { id: "emp-2", name: "이영희" },
       ],
       attendance: [
@@ -75,6 +75,7 @@ describe("manager reports", () => {
         id: "attendance-1",
         workDate: "2026-03-02",
         employeeName: "김철수",
+        employeeRole: "경비원",
         workStyle: "일반근무",
         worksiteName: "본사",
         scheduledClockIn: "09:00",

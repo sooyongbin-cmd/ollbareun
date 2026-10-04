@@ -40,13 +40,22 @@ function employeeSummary(row: AttendanceReportRow) {
         ? "주차"
         : employeeRole;
   const workStyle = row.workStyle.endsWith("근무") ? row.workStyle.slice(0, -2) : row.workStyle;
-  return `${row.employeeName}(${role},${workStyle})`;
+  return `${row.employeeName} (${role},${workStyle})`;
 }
 
 function scheduledClockIn(row: AttendanceReportRow) {
   return row.workDate && row.scheduledClockIn !== "-"
     ? `${row.workDate} ${row.scheduledClockIn}`
     : "-";
+}
+
+function formatScheduledClockOut(row: AttendanceReportRow) {
+  if (row.scheduledClockOut === "-") return "-";
+
+  const clockInDate = scheduledClockIn(row).slice(0, 10);
+  return clockInDate !== "-" && row.scheduledClockOut.slice(0, 10) === clockInDate
+    ? row.scheduledClockOut.slice(11)
+    : row.scheduledClockOut;
 }
 
 function clockInTime(value: string) {
@@ -143,7 +152,7 @@ export default function AttendanceReportPage() {
         employeeSummary(row),
         row.worksiteName,
         scheduledClockIn(row),
-        row.scheduledClockOut,
+        formatScheduledClockOut(row),
         clockInTime(row.clockInDateTime),
         row.clockOutDateTime ?? "-",
         row.status,
@@ -250,7 +259,7 @@ export default function AttendanceReportPage() {
                           ? "text-yellow-700 dark:text-yellow-300"
                           : undefined}
                       >
-                        {row.scheduledClockOut}
+                        {formatScheduledClockOut(row)}
                       </TableCell>
                       <TableCell data-label="출근시각">{clockInTime(row.clockInDateTime)}</TableCell>
                       <TableCell data-label="퇴근일시">{row.clockOutDateTime ?? "-"}</TableCell>

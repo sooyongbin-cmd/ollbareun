@@ -43,47 +43,38 @@ function employeeSummary(row: AttendanceReportRow) {
   return `${row.employeeName} (${role},${workStyle})`;
 }
 
-function scheduledClockIn(row: AttendanceReportRow) {
-  return row.workDate && row.scheduledClockIn !== "-"
-    ? `${row.workDate} ${row.scheduledClockIn}`
-    : "-";
+function formatDateTimeForQueryDate(value: string | null | undefined, queryDate: string, fallbackDate?: string) {
+  if (!value || value === "-") return "-";
+
+  const dateTime = value.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/);
+  if (dateTime) {
+    return queryDate && dateTime[1] === queryDate ? dateTime[2] : `${dateTime[1]} ${dateTime[2]}`;
+  }
+
+  const time = value.match(/^(\d{2}:\d{2})$/);
+  if (time && fallbackDate) {
+    return queryDate && fallbackDate === queryDate ? time[1] : `${fallbackDate} ${time[1]}`;
+  }
+
+  return value;
 }
 
-function formatScheduledClockOut(row: AttendanceReportRow) {
-  if (row.scheduledClockOut === "-") return "-";
-
-  const clockInDate = scheduledClockIn(row).slice(0, 10);
-  return clockInDate !== "-" && row.scheduledClockOut.slice(0, 10) === clockInDate
-    ? row.scheduledClockOut.slice(11)
-    : row.scheduledClockOut;
+function scheduledClockIn(row: AttendanceReportRow, queryDate: string) {
+  const value = row.scheduledClockIn === "-" ? "-" : `${row.workDate} ${row.scheduledClockIn}`;
+  return formatDateTimeForQueryDate(value, queryDate, row.workDate);
 }
 
-function scheduledClockInOut(row: AttendanceReportRow) {
-  const clockIn = scheduledClockIn(row);
-  const clockOut = formatScheduledClockOut(row);
+function scheduledClockInOut(row: AttendanceReportRow, queryDate: string) {
+  const clockIn = scheduledClockIn(row, queryDate);
+  const clockOut = formatDateTimeForQueryDate(row.scheduledClockOut, queryDate, row.workDate);
   if (clockIn === "-") return clockOut;
   if (clockOut === "-") return clockIn;
-  const separator = /^\d{2}:\d{2}$/.test(clockOut) ? " ~" : " ~ ";
-  return `${clockIn}${separator}${clockOut}`;
+  return `${clockIn} ~ ${clockOut}`;
 }
 
-function clockInTime(value: string) {
-  return value.match(/(?:T|\s)(\d{2}:\d{2})(?::\d{2}(?:\.\d+)?)?$/)?.[1] ?? value;
-}
-
-function formatClockOut(row: AttendanceReportRow) {
-  const clockOut = row.clockOutDateTime;
-  if (!clockOut || clockOut === "-") return "-";
-
-  const scheduledClockInDate = scheduledClockIn(row).slice(0, 10);
-  return scheduledClockInDate !== "-" && clockOut.slice(0, 10) === scheduledClockInDate
-    ? clockOut.slice(11)
-    : clockOut;
-}
-
-function clockInOut(row: AttendanceReportRow) {
-  const clockIn = clockInTime(row.clockInDateTime);
-  const clockOut = formatClockOut(row);
+function clockInOut(row: AttendanceReportRow, queryDate: string) {
+  const clockIn = formatDateTimeForQueryDate(row.clockInDateTime, queryDate, row.workDate);
+  const clockOut = formatDateTimeForQueryDate(row.clockOutDateTime, queryDate, row.workDate);
   if (clockIn === "-" && clockOut === "-") return "-";
   return `${clockIn} ~ ${clockOut}`;
 }
@@ -177,8 +168,8 @@ export default function AttendanceReportPage() {
       rows: rows.map((row) => [
         employeeSummary(row),
         row.worksiteName,
-        scheduledClockInOut(row),
-        clockInOut(row),
+        scheduledClockInOut(row, workDate),
+        clockInOut(row, workDate),
         row.status,
         row.outtimeLabel,
       ]),
@@ -276,9 +267,9 @@ export default function AttendanceReportPage() {
                             : undefined
                         }
                       >
-                        {scheduledClockInOut(row)}
+                        {scheduledClockInOut(row, workDate)}
                       </TableCell>
-                      <TableCell data-label="출퇴근">{clockInOut(row)}</TableCell>
+                      <TableCell data-label="출퇴근">{clockInOut(row, workDate)}</TableCell>
                       <TableCell
                         data-label="출근"
                         className={row.status === "지각"

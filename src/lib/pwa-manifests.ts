@@ -16,7 +16,7 @@ export function guardPwaManifest(): MetadataRoute.Manifest {
     start_url: "/guard",
     scope: "/guard",
     display: "standalone",
-    orientation: "portrait",
+    orientation: "any",
     background_color: "#ffffff",
     theme_color: "#0066cc",
     icons: brandIcons,

@@ -13,7 +13,7 @@ describe("PWA manifests", () => {
       start_url: "/guard",
       scope: "/guard",
       display: "standalone",
-      orientation: "portrait",
+      orientation: "any",
     });
     expect(manager).toMatchObject({
       name: "올바름 관리자",

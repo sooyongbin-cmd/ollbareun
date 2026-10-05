@@ -232,7 +232,7 @@ export default function InspectionSitesPage() {
         className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
       >
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="space-y-2 flex-1">
+          <div className="flex flex-1 flex-col gap-2">
             <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="site-worksite-search">
               근무지
             </label>
@@ -248,7 +248,7 @@ export default function InspectionSitesPage() {
               {worksiteNameOptions.map((name) => <option key={name} value={name} />)}
             </datalist>
           </div>
-          <div className="space-y-2 flex-1">
+          <div className="flex flex-1 flex-col gap-2">
             <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="site-search">
               점검지
             </label>
@@ -265,7 +265,7 @@ export default function InspectionSitesPage() {
             </datalist>
           </div>
           <div className="flex gap-3">
-            <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 gap-2 whitespace-nowrap" href="/manager/inspection/sites/new">
+            <Link className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 gap-2 whitespace-nowrap" href="/manager/inspection/sites/new">
               <span>점검지 등록</span>
               <ArrowRightIcon size={18} />
             </Link>

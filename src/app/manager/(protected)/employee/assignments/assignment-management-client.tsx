@@ -174,7 +174,7 @@ export default function AssignmentManagementClient() {
         className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
       >
         <div className="grid gap-4 md:grid-cols-[repeat(3,minmax(0,1fr))_max-content] md:items-end">
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-name-search">
               이름
             </label>
@@ -190,7 +190,7 @@ export default function AssignmentManagementClient() {
               {employeeNameOptions.map((name) => <option key={name} value={name} />)}
             </datalist>
           </div>
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-worksite-search">
               근무지
             </label>
@@ -206,7 +206,7 @@ export default function AssignmentManagementClient() {
               {worksiteNameOptions.map((name) => <option key={name} value={name} />)}
             </datalist>
           </div>
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-date-search">
               날짜
             </label>

@@ -184,7 +184,7 @@ export default function AttendanceReportPage() {
 
       <section aria-label="근태내역 조회" className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
         <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_12rem_auto] md:items-end">
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor="attendance-employee-name">
               직원이름
             </label>
@@ -202,7 +202,7 @@ export default function AttendanceReportPage() {
               ))}
             </datalist>
           </div>
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor="attendance-work-date">
               출퇴근날짜
             </label>

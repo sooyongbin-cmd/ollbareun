@@ -266,7 +266,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
         className="rounded-xl border border-border/50 bg-muted/40 p-[1.5rem] md:p-[2rem]"
       >
         <div className={`grid gap-4 md:items-end ${isDaily ? "md:grid-cols-[minmax(0,1fr)_12rem]" : "md:grid-cols-[minmax(0,1fr)_12rem_auto_auto]"}`}>
-          <div className="min-w-0 space-y-2">
+          <div className="min-w-0 flex flex-col gap-2">
             <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor={`${mode}-education-name`}>
               이름
             </label>
@@ -282,7 +282,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
               {employeeNameOptions.map((employeeName) => <option key={employeeName} value={employeeName} />)}
             </datalist>
           </div>
-          <div className="min-w-0 space-y-2">
+          <div className="min-w-0 flex flex-col gap-2">
             <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor={`${mode}-education-period`}>
               {isDaily ? "조회일" : "조회년월"}
             </label>
@@ -295,15 +295,15 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
             />
           </div>
           {!isDaily ? (
-            <div aria-live="polite" className="min-w-0 space-y-2 text-right md:justify-self-end">
+            <div aria-live="polite" className="min-w-0 flex flex-col gap-2 text-right md:justify-self-end">
               <span className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground">이수율</span>
-              <p className="flex min-h-10 items-center justify-end whitespace-nowrap font-semibold">
+              <p className="flex h-9 items-center justify-end whitespace-nowrap font-semibold">
                 {monthlyCompletionRate.completed}/{monthlyCompletionRate.total} {monthlyCompletionRate.percent}%
               </p>
             </div>
           ) : null}
           {!isDaily ? (
-            <div className="flex min-h-10 items-end justify-end">
+            <div className="flex h-9 items-center justify-end">
               <Button type="button" disabled={isRunningReminder} onClick={() => void runEducationReminders()}>
                 {isRunningReminder ? "실행 중…" : "교육알림"}
               </Button>

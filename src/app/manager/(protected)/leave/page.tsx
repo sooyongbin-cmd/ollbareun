@@ -103,7 +103,7 @@ export default function LeavePage() {
 
       <section aria-label="휴가 검색" className="rounded-xl border border-border/50 bg-muted/40 p-[1.5rem] md:p-[2rem]">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="flex-1 space-y-2 md:max-w-[32rem]">
+          <div className="flex flex-1 flex-col gap-2 md:max-w-[32rem]">
             <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="leave-name-search">
               이름
             </label>
@@ -120,7 +120,7 @@ export default function LeavePage() {
             </datalist>
           </div>
           <Link
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto"
+            className="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto"
             href="/manager/leave/new"
           >
             <span>휴가신청</span>

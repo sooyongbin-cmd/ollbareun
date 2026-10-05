@@ -275,7 +275,7 @@ export default function EmployeeRosterPage() {
       >
         <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_max-content] md:items-end">
           <div className="flex flex-col gap-4 md:contents">
-            <div className="min-w-0 space-y-2">
+            <div className="min-w-0 flex flex-col gap-2">
               <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor="employee-roster-name-search">
                 이름
               </label>
@@ -291,7 +291,7 @@ export default function EmployeeRosterPage() {
                 {employeeNameOptions.map((name) => <option key={name} value={name} />)}
               </datalist>
             </div>
-            <div className="min-w-0 space-y-2">
+            <div className="min-w-0 flex flex-col gap-2">
               <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor="employee-roster-role-search">
                 직군
               </label>

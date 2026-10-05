@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
@@ -28,8 +27,8 @@ type SystemConfigFormProps = {
 
 export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFormProps) {
   const router = useRouter();
-  const [systemCode, setSystemCode] = useState(initialConfig?.system_code ?? "");
-  const [parentSystemCode, setParentSystemCode] = useState(initialConfig?.parent_system_code ?? "");
+  const systemCode = initialConfig?.system_code ?? "";
+  const parentSystemCode = initialConfig?.parent_system_code ?? "";
   const [description, setDescription] = useState(initialConfig?.description ?? "");
   const [content, setContent] = useState(initialConfig?.content ?? "");
   const [saving, setSaving] = useState(false);
@@ -154,35 +153,6 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
           />
         )}
       </div>
-
-      {mode === "edit" ? (
-        <div className="space-y-2">
-          <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="system-code">
-            시스템코드
-          </label>
-          <Input
-            className="w-full"
-            disabled
-            id="system-code"
-            onChange={(event) => setSystemCode(event.target.value)}
-            value={systemCode}
-          />
-        </div>
-      ) : null}
-
-      {mode === "edit" ? (
-        <div className="space-y-2">
-          <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="parent-system-code">
-            분류
-          </label>
-          <Input
-            className="w-full"
-            id="parent-system-code"
-            onChange={(event) => setParentSystemCode(event.target.value)}
-            value={parentSystemCode}
-          />
-        </div>
-      ) : null}
 
       {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p> : null}
 

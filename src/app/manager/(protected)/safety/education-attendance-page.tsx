@@ -50,6 +50,18 @@ type CompletionDialogState = {
   error: string;
 };
 
+type EducationReminderExecutionResult = {
+  success?: boolean;
+  skipped?: boolean;
+  reason?: string;
+  scheduledDate?: string;
+  scheduledTime?: string;
+  successCount?: number;
+  failedCount?: number;
+  unregisteredCount?: number;
+  failedEmployees?: { employeeId: string; employeeName: string; reason: string }[];
+};
+
 function educationDisplayLabel(type: EducationType) {
   return type === "monthly" ? "월별" : educationTypeLabels[type];
 }
@@ -64,8 +76,10 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
   const [detailRows, setDetailRows] = useState<MonthlyEducationDetailRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [reminderSending, setReminderSending] = useState(false);
-  const [reminderNotice, setReminderNotice] = useState("");
+  const [isRunningReminder, setIsRunningReminder] = useState(false);
+  const [runDialogOpen, setRunDialogOpen] = useState(false);
+  const [runResult, setRunResult] = useState<EducationReminderExecutionResult | null>(null);
+  const [runError, setRunError] = useState("");
   const [completionDialog, setCompletionDialog] = useState<CompletionDialogState | null>(null);
   const requestIdRef = useRef(0);
 
@@ -129,38 +143,49 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
     return { total, completed, percent: total ? Math.round((completed / total) * 100) : 0 };
   }, [filteredDetailRows, filteredMonthlyRows]);
 
-  const sendReminders = async () => {
-    const employeeIds = Array.from(new Set([
-      ...filteredMonthlyRows.map((row) => row.employeeId),
-      ...filteredDetailRows.map((row) => row.employeeId),
-    ]));
-    setReminderNotice("");
-    if (!employeeIds.length) {
-      setReminderNotice("조회 조건에 해당하는 미이수 직원이 없습니다.");
-      return;
-    }
+  const runEducationReminders = async () => {
+    setRunDialogOpen(true);
+    setIsRunningReminder(true);
+    setRunResult(null);
+    setRunError("");
 
-    setReminderSending(true);
     try {
-      const response = await fetch("/api/education/reminders/send", {
+      const response = await fetch("/api/notifications/education-reminders/run", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ employeeIds }),
+        cache: "no-store",
       });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error ?? "알림 전송 실패");
-      const failed = (result.failedEmployees ?? [])
-        .map((entry: { employeeName: string; reason: string }) => `${entry.employeeName}: ${entry.reason}`)
-        .join(", ");
-      setReminderNotice(
-        `전송 ${result.successCount ?? 0}명 / 실패 ${result.failedCount ?? 0}명 / 미등록 ${result.unregisteredCount ?? 0}명${failed ? ` (${failed})` : ""}`,
-      );
-    } catch (sendError) {
-      setReminderNotice(sendError instanceof Error ? sendError.message : "알림 전송 실패");
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(payload?.error ?? "교육알림 Edge Function 실행에 실패했습니다.");
+      }
+
+      setRunResult(payload as EducationReminderExecutionResult);
+    } catch (runError) {
+      setRunError(runError instanceof Error ? runError.message : "교육알림 실행 결과를 확인하지 못했습니다.");
     } finally {
-      setReminderSending(false);
+      setIsRunningReminder(false);
     }
   };
+
+  const closeRunDialog = (open: boolean) => {
+    if (isRunningReminder && !open) return;
+    setRunDialogOpen(open);
+  };
+
+  const runResultHasCounts = Boolean(
+    runResult
+      && (typeof runResult.successCount === "number"
+        || typeof runResult.failedCount === "number"
+        || typeof runResult.unregisteredCount === "number"),
+  );
+  const runResultHasNoPushes = Boolean(
+    runResult
+      && !runResult.skipped
+      && (runResult.successCount ?? 0) === 0
+      && (runResult.failedCount ?? 0) === 0
+      && (runResult.unregisteredCount ?? 0) === 0,
+  );
 
   const openCompletionDialog = (
     employeeId: string,
@@ -283,19 +308,12 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
           ) : null}
           {!isDaily ? (
             <div className="flex min-h-10 items-end justify-end">
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                disabled={reminderSending || loading || !!error}
-                onClick={() => void sendReminders()}
-              >
-                {reminderSending ? "전송 중…" : "미이수 알림 전송"}
+              <Button type="button" disabled={isRunningReminder} onClick={() => void runEducationReminders()}>
+                {isRunningReminder ? "실행 중…" : "교육알림"}
               </Button>
             </div>
           ) : null}
         </div>
-        {reminderNotice ? <p role="status" className="mt-4 text-sm">{reminderNotice}</p> : null}
       </section>
 
       {isDaily ? (
@@ -358,6 +376,72 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
           </EducationAttendanceTable>
         </>
       )}
+
+      <Dialog open={runDialogOpen} onOpenChange={closeRunDialog}>
+        <DialogContent className="dark:text-white">
+          <DialogHeader>
+            <DialogTitle>
+              {isRunningReminder ? "교육알림 실행 중" : runError ? "교육알림 실행 실패" : "교육알림 실행 결과"}
+            </DialogTitle>
+            <DialogDescription>
+              {isRunningReminder
+                ? "기한이 지난 안전교육 예약 작업을 확인하고 있습니다."
+                : runError
+                  ? "Edge Function 실행 중 오류가 발생했습니다."
+                  : runResult?.skipped
+                    ? "중복 실행으로 이번 요청을 건너뛰었습니다."
+                    : runResultHasNoPushes
+                      ? "실행은 완료됐지만 전송된 푸시가 없습니다. 기한이 지난 미이수 작업이 없을 수 있습니다."
+                      : "기한이 지난 안전교육 예약 작업의 푸시 전송 결과입니다."}
+            </DialogDescription>
+          </DialogHeader>
+
+          {isRunningReminder ? (
+            <ManagerLoadingMessage />
+          ) : runError ? (
+            <p role="alert" className="text-sm text-destructive">{runError}</p>
+          ) : runResult ? (
+            <div className="space-y-3">
+              {runResultHasCounts ? (
+                <dl className="grid grid-cols-3 gap-3 rounded-lg border bg-muted/30 p-4 text-center text-sm">
+                  <div>
+                    <dt className="text-muted-foreground">성공</dt>
+                    <dd className="mt-1 font-semibold">{runResult.successCount ?? 0}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground">실패</dt>
+                    <dd className="mt-1 font-semibold">{runResult.failedCount ?? 0}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground">구독 없음</dt>
+                    <dd className="mt-1 font-semibold">{runResult.unregisteredCount ?? 0}</dd>
+                  </div>
+                </dl>
+              ) : null}
+              {runResult.scheduledDate && runResult.scheduledTime ? (
+                <p className="text-xs text-muted-foreground">
+                  실행 시각: {runResult.scheduledDate} {runResult.scheduledTime}
+                </p>
+              ) : null}
+              {runResult.failedEmployees && runResult.failedEmployees.length > 0 ? (
+                <ul className="max-h-48 space-y-1 overflow-y-auto rounded-lg border p-3 text-sm">
+                  {runResult.failedEmployees.map((employee) => (
+                    <li key={employee.employeeId}>
+                      <span className="font-medium">{employee.employeeName}</span>: {employee.reason}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+          ) : null}
+
+          {!isRunningReminder ? (
+            <DialogFooter>
+              <Button type="button" onClick={() => setRunDialogOpen(false)}>확인</Button>
+            </DialogFooter>
+          ) : null}
+        </DialogContent>
+      </Dialog>
 
       <Dialog
         open={completionDialog !== null}

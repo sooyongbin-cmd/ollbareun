@@ -41,7 +41,7 @@ async function fetchLogs(worksiteId: string) {
   const payload = await response.json();
 
   if (!response.ok) {
-    throw new Error(payload.error ?? "현장점검현황을 불러오지 못했습니다.");
+    throw new Error(payload.error ?? "점검지점검현황을 불러오지 못했습니다.");
   }
 
   return (payload.logs ?? []) as InspectionLog[];
@@ -96,7 +96,7 @@ export default function InspectionLogsPage() {
         }
       } catch (loadError) {
         if (!ignore) {
-          setError(loadError instanceof Error ? loadError.message : "현장점검현황을 불러오지 못했습니다.");
+          setError(loadError instanceof Error ? loadError.message : "점검지점검현황을 불러오지 못했습니다.");
         }
       } finally {
         if (!ignore) {
@@ -115,14 +115,14 @@ export default function InspectionLogsPage() {
   return (
     <section className="space-y-[1.5rem]">
       <header>
-        <h1 className="text-[1.75rem] leading-[1.2]">현장점검현황</h1>
+        <h1 className="text-[1.75rem] leading-[1.2]">점검지점검현황</h1>
         <p className="mt-2 max-w-[40rem] text-[0.875rem] font-normal leading-relaxed text-muted-foreground">
-          근무지별 현장점검 기록을 확인합니다.
+          근무지별 점검지 점검 기록을 확인합니다.
         </p>
       </header>
 
       <section
-        aria-label="현장점검현황 검색"
+        aria-label="점검지점검현황 검색"
         className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
       >
         <div className="space-y-2 max-w-[26.25rem]">
@@ -146,7 +146,7 @@ export default function InspectionLogsPage() {
       </section>
 
       <section
-        aria-label="현장점검현황 목록"
+        aria-label="점검지점검현황 목록"
         className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
       >
         <div className="mb-4 flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
@@ -164,7 +164,7 @@ export default function InspectionLogsPage() {
                 <TableRow>
                   <TableHead className="text-left">점검일자</TableHead>
                   <TableHead className="text-left">근무지</TableHead>
-                  <TableHead className="text-left">현장명</TableHead>
+                  <TableHead className="text-left">점검지명</TableHead>
                   <TableHead className="text-left">점검자</TableHead>
                   <TableHead className="text-left">직군</TableHead>
                 </TableRow>
@@ -181,7 +181,7 @@ export default function InspectionLogsPage() {
                     <TableRow key={log.id} className="hover:bg-muted/40 transition-colors">
                       <TableCell data-label="점검일자">{formatDateTime(log.inspected_at)}</TableCell>
                       <TableCell data-label="근무지">{log.worksite_name}</TableCell>
-                      <TableCell data-label="현장명" className="font-semibold">{log.site_name}</TableCell>
+                      <TableCell data-label="점검지명" className="font-semibold">{log.site_name}</TableCell>
                       <TableCell data-label="점검자">{log.employee_name}</TableCell>
                       <TableCell data-label="직군">{log.employee_role ?? "직군 없음"}</TableCell>
                     </TableRow>

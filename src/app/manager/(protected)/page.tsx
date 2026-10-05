@@ -417,15 +417,15 @@ export default function ManagerPage() {
         </CardContent>
         </Card>
 
-        <Card role="region" aria-label="현장 실시간 관제" className="min-w-0">
+        <Card role="region" aria-label="점검지 점검 현황" className="min-w-0">
           <CardHeader className="border-b">
             <CardTitle>
               <h2 className="flex items-center gap-2 text-base">
                 <MapPinned aria-hidden="true" className="size-4 text-primary" />
-                현장 실시간 관제
+                점검지 점검 현황
               </h2>
             </CardTitle>
-            <CardDescription>오늘 근무지별 출근 인원과 현장점검 진행 현황을 표시합니다.</CardDescription>
+            <CardDescription>오늘 근무지별 출근 인원과 점검지 점검 진행 현황을 표시합니다.</CardDescription>
           </CardHeader>
           <CardContent className="min-w-0 px-0">
             <div className="min-w-0 overflow-x-auto">

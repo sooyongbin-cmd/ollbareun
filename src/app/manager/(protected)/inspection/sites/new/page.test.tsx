@@ -55,10 +55,10 @@ describe("inspection site new page", () => {
     expect(screen.queryByLabelText("GPS정보")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "QR인쇄" })).not.toBeInTheDocument();
 
-    await user.type(screen.getByLabelText("현장명"), "Gate");
+    await user.type(screen.getByLabelText("점검지명"), "Gate");
     await user.click(screen.getByRole("button", { name: "저장" }));
 
-    expect(await screen.findByText("현장이 저장되었습니다.")).toBeInTheDocument();
+    expect(await screen.findByText("점검지가 저장되었습니다.")).toBeInTheDocument();
     expect(push).not.toHaveBeenCalled();
 
     await user.click(screen.getByRole("button", { name: "확인" }));

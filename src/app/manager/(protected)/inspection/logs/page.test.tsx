@@ -36,10 +36,10 @@ describe("inspection logs page", () => {
     const user = userEvent.setup();
     render(<InspectionLogsPage />);
 
-    expect(await screen.findByRole("heading", { name: "현장점검현황" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "점검지점검현황" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "점검일자" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "근무지" })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "현장명" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "점검지명" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "점검자" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "직군" })).toBeInTheDocument();
 

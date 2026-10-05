@@ -338,7 +338,7 @@ export default function EmployeeSavePage() {
       ["근무지배정정보", assignments.length],
       ["출근현황", attendance.length],
       ["휴가정보", leaves.length],
-      ["현장점검", inspectionLogs.length],
+      ["점검지점검", inspectionLogs.length],
       ["특이사항", specialRemarks.length],
     ] as const)
       .filter(([, count]) => count > 0)
@@ -640,16 +640,16 @@ export default function EmployeeSavePage() {
 
       {!loading && !routeError && inspectionLogs.length > 0 ? (
         <section
-          aria-label="현장점검"
+          aria-label="점검지점검"
           className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
         >
-          <h2 className="text-[1.25rem] font-semibold">현장점검</h2>
+          <h2 className="text-[1.25rem] font-semibold">점검지점검</h2>
           <div className="mt-6 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
             <table className="w-full min-w-[42rem] text-sm">
               <thead>
                 <tr className="border-b border-border">
                   <th className="px-4 py-3 text-left font-semibold">점검일자</th>
-                  <th className="px-4 py-3 text-left font-semibold">현장명</th>
+                  <th className="px-4 py-3 text-left font-semibold">점검지명</th>
                   <th className="px-4 py-3 text-left font-semibold">근무지</th>
                 </tr>
               </thead>

@@ -211,7 +211,7 @@ describe("manager layout", () => {
     ]);
     expect(screen.queryByRole("link", { name: "출근현황" })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "휴가관리" })).toHaveAttribute("href", "/manager/leave");
-    expect(screen.getByText("현장점검")).toBeInTheDocument();
+    expect(screen.getByText("점검지점검")).toBeInTheDocument();
     expect(screen.getByText("안전교육")).toBeInTheDocument();
     expect(screen.queryByText("리포트출력")).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "교육이수자료" })).not.toBeInTheDocument();
@@ -222,7 +222,7 @@ describe("manager layout", () => {
       "/manager/safety/resources",
     );
     expect(screen.queryByRole("link", { name: "교육이수관리" })).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "자동알림이력" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "교육알림" })).toHaveAttribute(
       "href",
       "/manager/safety/notifications",
     );
@@ -262,10 +262,10 @@ describe("manager layout", () => {
       </ManagerLayout>,
     );
 
-    expect(screen.getByRole("link", { name: "현장점검현황" })).toHaveAttribute("data-active", "true");
+    expect(screen.getByRole("link", { name: "점검지점검현황" })).toHaveAttribute("data-active", "true");
     const breadcrumb = screen.getByRole("navigation", { name: "현재 위치" });
-    expect(within(breadcrumb).getByText("현장점검")).toBeInTheDocument();
-    expect(within(breadcrumb).getByText("현장점검현황")).toBeInTheDocument();
+    expect(within(breadcrumb).getByText("점검지점검")).toBeInTheDocument();
+    expect(within(breadcrumb).getByText("점검지점검현황")).toBeInTheDocument();
   });
 
   it("keeps the attendance navigation active on its detail routes", () => {

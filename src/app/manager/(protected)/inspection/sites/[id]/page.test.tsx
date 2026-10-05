@@ -91,7 +91,7 @@ describe("inspection site detail page", () => {
     expect(screen.queryByLabelText("GPS정보")).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "저장" }));
-    expect(await screen.findByText("현장이 저장되었습니다.")).toBeInTheDocument();
+    expect(await screen.findByText("점검지가 저장되었습니다.")).toBeInTheDocument();
     expect(push).not.toHaveBeenCalled();
 
     await user.click(screen.getByRole("button", { name: "확인" }));
@@ -230,10 +230,10 @@ describe("inspection site detail page", () => {
 
     expect(await screen.findByDisplayValue("Gate")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "삭제" }));
-    expect(screen.getByText("현장을 삭제하시겠습니까?")).toBeInTheDocument();
+    expect(screen.getByText("점검지를 삭제하시겠습니까?")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "예" }));
 
-    expect(await screen.findByText("현장이 삭제되었습니다.")).toBeInTheDocument();
+    expect(await screen.findByText("점검지가 삭제되었습니다.")).toBeInTheDocument();
     expect(push).not.toHaveBeenCalled();
 
     await user.click(screen.getByRole("button", { name: "확인" }));

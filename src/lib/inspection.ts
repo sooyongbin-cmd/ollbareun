@@ -177,16 +177,16 @@ export function parseInspectionQrPayload(value: unknown): InspectionQrPayload {
   const payload = parsePayloadObject(value);
 
   if (payload.type !== INSPECTION_QR_TYPE || payload.version !== 1) {
-    throw new Error("현장점검 QR 코드가 아닙니다.");
+    throw new Error("점검지 점검 QR 코드가 아닙니다.");
   }
 
   return {
     type: INSPECTION_QR_TYPE,
     version: 1,
-    siteId: requireString(payload.siteId, "현장"),
+    siteId: requireString(payload.siteId, "점검지"),
     worksiteId: requireString(payload.worksiteId, "근무지"),
     worksiteName: requireString(payload.worksiteName, "근무지명"),
-    siteName: requireString(payload.siteName, "현장명"),
+    siteName: requireString(payload.siteName, "점검지명"),
   };
 }
 
@@ -209,18 +209,23 @@ export function compareInspectionSites<T extends { worksite_name?: string | null
 }
 
 export async function listInspectionSites(
-  input: { name?: unknown } = {},
+  input: { name?: unknown; worksiteId?: unknown } = {},
   supabase: SupabaseClient = getSupabase(),
 ) {
   const name = typeof input.name === "string" ? input.name.trim() : "";
-  const sitesQuery = supabase
+  const worksiteId = typeof input.worksiteId === "string" ? input.worksiteId.trim() : "";
+  let sitesQuery = supabase
     .from("inspection_sites")
     .select(INSPECTION_SITE_COLUMNS)
     .order("created_at", { ascending: false });
 
-  const sitesResult = name
-    ? await sitesQuery.ilike("name", `%${name}%`)
-    : await sitesQuery;
+  if (worksiteId) {
+    sitesQuery = sitesQuery.eq("worksite_id", worksiteId);
+  }
+  if (name) {
+    sitesQuery = sitesQuery.ilike("name", `%${name}%`);
+  }
+  const sitesResult = await sitesQuery;
   const worksitesResult = await supabase.from("worksites").select("id,name");
 
   throwIfError(sitesResult.error);
@@ -238,7 +243,7 @@ export async function createInspectionSite(input: {
   name: unknown;
 }, supabase: SupabaseClient = getSupabase()) {
   const worksite_id = requireString(input.worksiteId, "근무지");
-  const name = requireString(input.name, "현장명");
+  const name = requireString(input.name, "점검지명");
   const { data: lastSite, error: lastSiteError } = await supabase
     .from("inspection_sites")
     .select("sort_order")
@@ -271,11 +276,11 @@ export async function createInspectionSite(input: {
 }
 
 export async function getInspectionSiteById(id: unknown, supabase: SupabaseClient = getSupabase()) {
-  const siteId = requireString(id, "현장");
+  const siteId = requireString(id, "점검지");
   const { data, error } = await supabase.from("inspection_sites").select(INSPECTION_SITE_COLUMNS).eq("id", siteId).single();
   throwIfError(error);
   if (!data) {
-    throw new Error("현장 정보를 찾을 수 없습니다.");
+    throw new Error("점검지 정보를 찾을 수 없습니다.");
   }
 
   const { data: worksite, error: worksiteError } = await supabase
@@ -297,10 +302,10 @@ export async function updateInspectionSite(input: {
   sortOrder: unknown;
   name: unknown;
 }, supabase: SupabaseClient = getSupabaseAdmin()) {
-  const siteId = requireString(input.id, "현장");
+  const siteId = requireString(input.id, "점검지");
   const worksite_id = requireString(input.worksiteId, "근무지");
   const sort_order = requirePositiveInteger(input.sortOrder, "점검순서");
-  const name = requireString(input.name, "현장명");
+  const name = requireString(input.name, "점검지명");
   const { data, error } = await supabase
     .from("inspection_sites")
     .update({ worksite_id, sort_order, name })
@@ -328,10 +333,10 @@ export async function swapInspectionSiteSortOrder(input: {
   draggedSiteId: unknown;
   targetSiteId: unknown;
 }, supabase: SupabaseClient = getSupabaseAdmin()) {
-  const draggedSiteId = requireString(input.draggedSiteId, "이동할 현장");
-  const targetSiteId = requireString(input.targetSiteId, "대상 현장");
+  const draggedSiteId = requireString(input.draggedSiteId, "이동할 점검지");
+  const targetSiteId = requireString(input.targetSiteId, "대상 점검지");
   if (draggedSiteId === targetSiteId) {
-    throw new Error("서로 다른 현장을 선택하세요.");
+    throw new Error("서로 다른 점검지를 선택하세요.");
   }
 
   const { data: sites, error: sitesError } = await supabase
@@ -342,7 +347,7 @@ export async function swapInspectionSiteSortOrder(input: {
   const draggedSite = sites?.find((site) => site.id === draggedSiteId);
   const targetSite = sites?.find((site) => site.id === targetSiteId);
   if (!draggedSite || !targetSite) {
-    throw new Error("현장 정보를 찾을 수 없습니다.");
+    throw new Error("점검지 정보를 찾을 수 없습니다.");
   }
   if (draggedSite.worksite_id !== targetSite.worksite_id) {
     throw new Error("같은 근무지 안에서만 순서를 변경할 수 있습니다.");
@@ -367,7 +372,7 @@ export async function swapInspectionSiteSortOrder(input: {
 }
 
 export async function deleteInspectionSite(id: unknown, supabase: SupabaseClient = getSupabaseAdmin()) {
-  const siteId = requireString(id, "현장");
+  const siteId = requireString(id, "점검지");
   const { error } = await supabase.from("inspection_sites").delete().eq("id", siteId);
   throwIfError(error);
 }
@@ -389,10 +394,10 @@ export async function createInspectionLog(input: {
     .maybeSingle();
   throwIfError(siteError);
   if (!site) {
-    throw new Error("NFC 태그에 연결된 현장 정보를 찾을 수 없습니다.");
+    throw new Error("NFC 태그에 연결된 점검지 정보를 찾을 수 없습니다.");
   }
   if (input.authorizedWorksiteId && site.worksite_id !== input.authorizedWorksiteId) {
-    throw new Error("배정된 근무지의 현장만 점검할 수 있습니다.");
+    throw new Error("배정된 근무지의 점검지만 점검할 수 있습니다.");
   }
 
   const { data: worksite, error: worksiteError } = await supabase

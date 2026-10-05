@@ -90,9 +90,9 @@ export default function InspectionSiteNewPage() {
         worksiteId,
         name: siteName,
       });
-      setAlertMessage("현장이 저장되었습니다.");
+      setAlertMessage("점검지가 저장되었습니다.");
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "현장을 등록하지 못했습니다.");
+      setError(submitError instanceof Error ? submitError.message : "점검지를 등록하지 못했습니다.");
     } finally {
       setSaving(false);
     }
@@ -107,9 +107,9 @@ export default function InspectionSiteNewPage() {
   return (
     <section className="space-y-[1.5rem]">
       <header>
-        <h1 className="text-[1.75rem] leading-[1.2]">현장등록</h1>
+        <h1 className="text-[1.75rem] leading-[1.2]">점검지 등록</h1>
         <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground mt-2 max-w-[40rem]">
-          근무지에 속한 현장을 등록하고 점검 QR을 생성합니다.
+          근무지에 속한 점검지를 등록하고 점검 QR을 생성합니다.
         </p>
       </header>
 
@@ -138,7 +138,7 @@ export default function InspectionSiteNewPage() {
 
             <div className="space-y-2">
               <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="inspection-site-name">
-                현장명
+                점검지명
               </label>
               <Input
                 className="w-full"
@@ -146,7 +146,7 @@ export default function InspectionSiteNewPage() {
                 name="name"
                 value={siteName}
                 onChange={(event) => setSiteName(event.target.value)}
-                placeholder="현장 이름을 입력하세요."
+                placeholder="점검지 이름을 입력하세요."
                 required
               />
             </div>

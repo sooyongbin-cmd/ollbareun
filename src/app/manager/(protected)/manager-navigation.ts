@@ -57,11 +57,11 @@ export const managerNavigationGroups: ManagerNavigationGroup[] = [
     ],
   },
   {
-    label: "현장점검",
+    label: "점검지점검",
     icon: ClipboardCheck,
     items: [
-      { label: "현장관리", href: "/manager/inspection/sites", icon: MapPinned },
-      { label: "현장점검현황", href: "/manager/inspection/logs", icon: ListChecks },
+      { label: "점검지관리", href: "/manager/inspection/sites", icon: MapPinned },
+      { label: "점검지점검현황", href: "/manager/inspection/logs", icon: ListChecks },
       { label: "특이사항", href: "/manager/inspection/special-remarks", icon: MessageSquareWarning },
     ],
   },
@@ -72,7 +72,7 @@ export const managerNavigationGroups: ManagerNavigationGroup[] = [
       { label: "교육자료관리", href: "/manager/safety/resources", icon: BookOpen },
       { label: "일별교육이수", href: "/manager/safety/daily_edu", icon: CalendarDays },
       { label: "월별교육이수", href: "/manager/safety/monthly_edu", icon: CalendarDays },
-      { label: "자동알림이력", href: "/manager/safety/notifications", icon: BellRing },
+      { label: "교육알림", href: "/manager/safety/notifications", icon: BellRing },
     ],
   },
   {

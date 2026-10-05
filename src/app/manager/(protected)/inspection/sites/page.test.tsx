@@ -40,14 +40,14 @@ describe("inspection sites page", () => {
     const user = userEvent.setup();
     render(<InspectionSitesPage />);
 
-    expect(screen.getByRole("heading", { name: "현장관리" })).toBeInTheDocument();
-    expect(screen.getByLabelText("현장이름")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "현장등록" })).toHaveAttribute(
+    expect(screen.getByRole("heading", { name: "점검지관리" })).toBeInTheDocument();
+    expect(screen.getByLabelText("점검지명")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "점검지 등록" })).toHaveAttribute(
       "href",
       "/manager/inspection/sites/new",
     );
 
-    await user.type(screen.getByLabelText("현장이름"), "Gate");
+    await user.type(screen.getByLabelText("점검지명"), "Gate");
     await user.click(screen.getByRole("button", { name: "조회" }));
 
     expect(await screen.findByText("Gate")).toBeInTheDocument();

@@ -149,7 +149,7 @@ export async function loadBootstrap() {
   // the route has verified the manager session, because the legacy data client
   // does not carry the Supabase auth cookies in a Route Handler.
   const supabase = getSupabaseAdmin();
-  const [employeesResult, worksitesResult, assignmentsResult, attendanceResult] =
+  const [employeesResult, worksitesResult, assignmentsResult, attendanceResult, inspectionSitesResult] =
     await Promise.all([
       supabase.from("employees").select("*,schedule_rules:employee_schedule_rules(day_type,is_working_day,in_time,out_time)").order("created_at", { ascending: false }),
       supabase.from("worksites").select("*").order("created_at", { ascending: false }),
@@ -164,19 +164,26 @@ export async function loadBootstrap() {
         .select("*")
         .eq("work_date", todayDate())
         .order("created_at", { ascending: false }),
+      supabase.from("inspection_sites").select("worksite_id"),
     ]);
 
   throwIfError(employeesResult.error);
   throwIfError(worksitesResult.error);
   throwIfError(assignmentsResult.error);
   throwIfError(attendanceResult.error);
+  throwIfError(inspectionSitesResult.error);
 
   const employees = employeesResult.data ?? [];
   const attendance = attendanceResult.data ?? [];
+  const inspectionSiteCounts = (inspectionSitesResult.data ?? []).reduce<Record<string, number>>((counts, site) => {
+    counts[site.worksite_id] = (counts[site.worksite_id] ?? 0) + 1;
+    return counts;
+  }, {});
 
   return {
     employees,
     worksites: worksitesResult.data ?? [],
+    inspectionSiteCounts,
     assignments: assignmentsResult.data ?? [],
     attendance,
     summary: {

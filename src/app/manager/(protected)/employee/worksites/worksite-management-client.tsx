@@ -24,11 +24,13 @@ type AssignmentRow = {
 type Bootstrap = {
   worksites: WorksiteRow[];
   assignments: AssignmentRow[];
+  inspectionSiteCounts: Record<string, number>;
 };
 
 const emptyBootstrap: Bootstrap = {
   worksites: [],
   assignments: [],
+  inspectionSiteCounts: {},
 };
 
 export default function WorksiteManagementClient() {
@@ -86,6 +88,7 @@ export default function WorksiteManagementClient() {
           setData({
             worksites: payload.worksites ?? [],
             assignments: payload.assignments ?? [],
+            inspectionSiteCounts: payload.inspectionSiteCounts ?? {},
           });
         }
       } catch (loadError) {
@@ -231,6 +234,7 @@ export default function WorksiteManagementClient() {
                   >
                     근무지명
                   </SortableHeader>
+                  <TableHead className="text-center">점검지</TableHead>
                   <SortableHeader
                     sortKey="count"
                     currentSortKey={sortKey}
@@ -255,7 +259,7 @@ export default function WorksiteManagementClient() {
               <TableBody>
                 {sortedWorksites.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={4} className="p-8 text-center text-muted-foreground italic">
+                    <TableCell data-responsive-empty colSpan={5} className="p-8 text-center text-muted-foreground italic">
                       조회 결과에 해당하는 근무지가 없습니다.
                     </TableCell>
                   </TableRow>
@@ -270,6 +274,14 @@ export default function WorksiteManagementClient() {
                             href={`/manager/employee/worksites/save/${worksite.id}`}
                           >
                             {worksite.name}
+                          </Link>
+                        </TableCell>
+                        <TableCell data-label="점검지" className="text-center">
+                          <Link
+                            className="text-primary font-semibold hover:underline"
+                            href={`/manager/inspection/sites?worksiteId=${encodeURIComponent(worksite.id)}`}
+                          >
+                            {data.inspectionSiteCounts[worksite.id] ?? 0}
                           </Link>
                         </TableCell>
                         <TableCell data-label="배정인원수" className="text-center">

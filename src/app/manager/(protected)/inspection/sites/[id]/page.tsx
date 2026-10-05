@@ -125,7 +125,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
         }
       } catch (loadError) {
         if (!ignore) {
-          setError(loadError instanceof Error ? loadError.message : "현장 정보를 불러오지 못했습니다.");
+          setError(loadError instanceof Error ? loadError.message : "점검지 정보를 불러오지 못했습니다.");
         }
       } finally {
         if (!ignore) {
@@ -157,9 +157,9 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
       );
       setSavedSite(payload.site);
       setShouldReturnToList(true);
-      setAlertMessage("현장이 저장되었습니다.");
+      setAlertMessage("점검지가 저장되었습니다.");
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "현장을 저장하지 못했습니다.");
+      setError(submitError instanceof Error ? submitError.message : "점검지를 저장하지 못했습니다.");
     } finally {
       setSaving(false);
     }
@@ -177,9 +177,9 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
         method: "DELETE",
       });
       setShouldReturnToList(true);
-      setAlertMessage("현장이 삭제되었습니다.");
+      setAlertMessage("점검지가 삭제되었습니다.");
     } catch (deleteError) {
-      setError(deleteError instanceof Error ? deleteError.message : "현장을 삭제하지 못했습니다.");
+      setError(deleteError instanceof Error ? deleteError.message : "점검지를 삭제하지 못했습니다.");
     } finally {
       setDeleting(false);
       setDeleteConfirmOpen(false);
@@ -198,7 +198,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
         payload: buildInspectionQrPayload(savedSite),
         worksiteName: savedSite.worksite_name,
         siteName: savedSite.name,
-        fileName: `올바름_현장점검_${savedSite.worksite_name}_${savedSite.name}`,
+        fileName: `올바름_점검지점검_${savedSite.worksite_name}_${savedSite.name}`,
       });
     } catch (printError) {
       setError(printError instanceof Error ? printError.message : "QR 파일을 저장하지 못했습니다.");
@@ -297,9 +297,9 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
   return (
     <section className="space-y-[1.5rem]">
       <header>
-        <h1 className="text-[1.75rem] leading-[1.2]">현장상세</h1>
+        <h1 className="text-[1.75rem] leading-[1.2]">점검지 상세</h1>
         <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground mt-2 max-w-[40rem]">
-          현장 정보를 수정하고 QR코드와 NFC URL을 생성합니다.
+          점검지 정보를 수정하고 QR코드와 NFC URL을 생성합니다.
         </p>
       </header>
 
@@ -333,7 +333,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
 
               <div className="space-y-2">
                 <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="inspection-site-name">
-                  현장명
+                  점검지명
                 </label>
                 <Input
                   className="w-full"
@@ -394,8 +394,8 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
         isOpen={deleteConfirmOpen}
         onClose={() => setDeleteConfirmOpen(false)}
         onConfirm={handleDelete}
-        title="현장을 삭제하시겠습니까?"
-        description="삭제하면 현재 현장 자료가 완전히 제거됩니다."
+        title="점검지를 삭제하시겠습니까?"
+        description="삭제하면 현재 점검지 자료가 완전히 제거됩니다."
         loading={deleting}
         loadingLabel="삭제처리중입니다..."
       />

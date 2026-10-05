@@ -77,7 +77,7 @@ describe("saveInspectionQrImage", () => {
     });
 
     expect(fillText).toHaveBeenCalledWith("근무지 : 본사", 210, 32);
-    expect(fillText).toHaveBeenCalledWith("현장명 : 정문", 210, 70);
+    expect(fillText).toHaveBeenCalledWith("점검지명 : 정문", 210, 70);
     expect(drawImage).toHaveBeenCalled();
     expect(click).toHaveBeenCalled();
   });

@@ -18,7 +18,7 @@ export async function GET(request: Request) {
     return Response.json({ logs: await listInspectionLogs({ worksiteId }) });
   } catch (error) {
     return Response.json(
-      { error: error instanceof Error ? error.message : "현장점검현황을 불러오지 못했습니다." },
+      { error: error instanceof Error ? error.message : "점검지점검현황을 불러오지 못했습니다." },
       { status: guardAuthErrorStatus(error, 400) },
     );
   }
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     return Response.json(
-      { error: error instanceof Error ? error.message : "현장점검을 저장하지 못했습니다." },
+      { error: error instanceof Error ? error.message : "점검지 점검을 저장하지 못했습니다." },
       { status: guardAuthErrorStatus(error, 400) },
     );
   }

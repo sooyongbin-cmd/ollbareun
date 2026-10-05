@@ -65,7 +65,7 @@ export async function saveInspectionQrImage(input: {
   context.textAlign = "center";
   context.textBaseline = "middle";
   context.fillText(`근무지 : ${input.worksiteName}`, width / 2, 32);
-  context.fillText(`현장명 : ${input.siteName}`, width / 2, 70);
+  context.fillText(`점검지명 : ${input.siteName}`, width / 2, 70);
   context.drawImage(qrImage, 50, titleHeight, 320, 320);
 
   const blob = await canvasToBlob(canvas);

@@ -219,7 +219,7 @@ describe("employee save page", () => {
     const leaveSection = screen.getByRole("region", { name: "휴가정보" });
     expect(within(leaveSection).getByText("연차")).toBeInTheDocument();
     expect(within(leaveSection).getByText("2026-06-01 ~ 2026-06-02")).toBeInTheDocument();
-    const inspectionSection = screen.getByRole("region", { name: "현장점검" });
+    const inspectionSection = screen.getByRole("region", { name: "점검지점검" });
     expect(within(inspectionSection).getByText("정문")).toBeInTheDocument();
     expect(within(inspectionSection).getByText("본사")).toBeInTheDocument();
     const remarksSection = screen.getByRole("region", { name: "특이사항" });
@@ -293,7 +293,7 @@ describe("employee save page", () => {
     expect(screen.getByRole("region", { name: "교육이수 및 근무지배정 정보" })).toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "출근현황" })).not.toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "휴가정보" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("region", { name: "현장점검" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "점검지점검" })).not.toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "특이사항" })).not.toBeInTheDocument();
   });
 
@@ -318,7 +318,7 @@ describe("employee save page", () => {
     expect(screen.getByText("현재자료를 삭제할까요?")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "예" }));
-    expect(screen.getByText("교육이수(1건) 출근현황(2건) 휴가정보(1건) 현장점검(1건) 특이사항(1건)의 자료가 있습니다. 삭제후에는 복구할 수 없습니다. 해당 자료도 모두 함께 삭제할까요?")).toBeInTheDocument();
+    expect(screen.getByText("교육이수(1건) 출근현황(2건) 휴가정보(1건) 점검지점검(1건) 특이사항(1건)의 자료가 있습니다. 삭제후에는 복구할 수 없습니다. 해당 자료도 모두 함께 삭제할까요?")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "예" }));
 
     expect(push).toHaveBeenCalledWith("/manager/employee/employees");

@@ -164,7 +164,12 @@ export default function SpecialRemarksPage() {
                         </Link>
                       </TableCell>
                       <TableCell data-label="점검자">{report.employee_name}</TableCell>
-                      <TableCell data-label="특이사항내용" className="max-w-[26.25rem]">{summarizeContent(report.content)}</TableCell>
+                      <TableCell
+                        data-label="특이사항내용"
+                        className="max-w-[26.25rem] min-w-0 whitespace-normal break-words [overflow-wrap:anywhere] align-top"
+                      >
+                        {summarizeContent(report.content)}
+                      </TableCell>
                       <TableCell data-label="첨부사진">
                         {getFirstPhotoUrl(report) ? (
                           // eslint-disable-next-line @next/next/no-img-element

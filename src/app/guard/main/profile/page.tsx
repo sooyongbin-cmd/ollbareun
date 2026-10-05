@@ -172,6 +172,7 @@ function getScheduleWeekOptions(profile: GuardProfilePayload | null, today: stri
 
   return [...weekStarts]
     .sort((left, right) => left.localeCompare(right))
+    .slice(0, 4)
     .map((startDate) => {
       const endDate = addDays(startDate, 6);
       const isCurrentWeek = startDate <= today && today <= endDate;
@@ -204,7 +205,7 @@ function getMonthlyOptions(profile: GuardProfilePayload | null, currentMonth: st
     }
   }
 
-  return [...monthKeys].sort((left, right) => right.localeCompare(left));
+  return [...monthKeys].sort((left, right) => right.localeCompare(left)).slice(0, 4);
 }
 
 function formatMonth(monthKey: string) {

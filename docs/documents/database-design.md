@@ -58,7 +58,6 @@ auth.users 1 ── N manager_push_subscriptions
 | `inspection_special_reports` | `id`, `worksite_id`, `employee_id`, 스냅샷 명칭, `content`, `photo_url`, `gps_info`, 이메일 상태·처리 상태, `reported_at`, `created_at`, `updated_at` | 특이사항 보고와 사진·GPS·메일 처리 결과 |
 | `push_subscriptions` | `id`, `employee_id`, `endpoint`, `p256dh`, `auth`, `created_at`, `updated_at` | 근무자 브라우저 푸시 구독 |
 | `manager_push_subscriptions` | `id`, `user_id`, `endpoint`, `p256dh`, `auth`, `created_at`, `updated_at` | 관리자 브라우저 푸시 구독 |
-| `push_notification_runs` | `id`, `notification_code`, `scheduled_date`, `scheduled_time`, `status`, `sent_at`, `error_message`, `result`, `created_at`, `updated_at` | 교육 알림 실행·중복 방지·결과 이력 |
 | `guard_session_logs` | `id`, `employee_id`, `guard_name`, 로그인·메인 푸시·로그아웃 상태와 시각, 결과 JSON, `created_at`, `updated_at` | 근무자 로그인 세션과 알림 처리 로그 |
 | `system_configs` | `system_code`, `parent_system_code`, `content`, `description`, `created_at`, `updated_at` | 메일 주소·기능 플래그 등 운영 설정 및 자유 입력 분류값 |
 | `admin_users` | `id`, `user_id`, `email`, `role`, `created_by`, `first_login_at`, `created_at`, `updated_at` | Supabase Auth 사용자와 관리자 권한 연결 |
@@ -152,7 +151,6 @@ auth.users 1 ── N manager_push_subscriptions
 | `inspection_special_reports` | `inspection_special_reports_worksite_id_idx`, `inspection_special_reports_employee_id_idx` 필터, `inspection_special_reports_reported_at_idx` 최신 보고순, `inspection_special_reports_email_status_idx` 처리 상태 필터 |
 | `push_subscriptions` | `push_subscriptions_employee_id_idx` 푸시 발송 대상 조회와 `push_subscriptions_employee_endpoint_key` `(employee_id, endpoint)` UNIQUE 중복 방지 |
 | `manager_push_subscriptions` | `manager_push_subscriptions_user_id_idx` 관리자별 구독 조회, `(user_id, endpoint)` 및 `endpoint` UNIQUE |
-| `push_notification_runs` | `push_notification_runs_created_at_idx` 최신 실행순, `push_notification_runs_schedule_idx` 스케줄 확인, `push_notification_runs_unique_schedule` 동일 스케줄 UNIQUE |
 | `guard_session_logs` | `guard_session_logs_login_at_idx` 최신 세션순, `guard_session_logs_employee_id_idx`, `guard_session_logs_login_status_idx`, `guard_session_logs_guard_name_idx` 조건 조회 |
 | `system_configs` | `system_configs_parent_system_code_idx` 분류값 조회 |
 | `admin_users` | `admin_users_role_idx`, `admin_users_created_at_idx`, `admin_users_created_by_idx`, `admin_users_first_login_at_idx`, `admin_users_user_id_unique_idx` NULL이 아닌 `user_id` 부분 UNIQUE, `admin_users_email_unique_idx` `lower(btrim(email))` UNIQUE 및 기존 `email` UNIQUE |
@@ -184,7 +182,7 @@ auth.users 1 ── N manager_push_subscriptions
 ## 6. 보안 및 저장소
 
 - 관리자 전용 작업과 민감한 배정·일정 규칙·일별 예정시각 작업은 서버의 Supabase 관리 클라이언트를 사용한다.
-- RLS 정책과 권한은 마이그레이션으로 관리한다. `push_notification_runs`, `manager_push_subscriptions`, `assignment_schedule_rules`, `leave`, `work_record`, `public_holidays`는 일반 클라이언트 권한을 제한하고 서버 역할 중심으로 접근한다.
+- RLS 정책과 권한은 마이그레이션으로 관리한다. `manager_push_subscriptions`, `assignment_schedule_rules`, `leave`, `work_record`, `public_holidays`는 일반 클라이언트 권한을 제한하고 서버 역할 중심으로 접근한다.
 - 특이사항 사진은 `special-remarks` 저장소에 저장하고 보고 삭제 시 연결 파일도 삭제한다.
 - 서비스 역할 키와 메일·푸시 비밀값은 서버 환경변수에만 저장하며 클라이언트에 노출하지 않는다.
 

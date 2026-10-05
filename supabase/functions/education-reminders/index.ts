@@ -1,4 +1,3 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { requestEducationReminders } from "./reminder-client.ts";
 
 declare const Deno: {
@@ -7,13 +6,6 @@ declare const Deno: {
   };
   serve(handler: (request: Request) => Response | Promise<Response>): void;
 };
-
-const notificationCode = "education_reminder";
-const notificationHistoryEnabledConfigCode = "system_log_002";
-/* Supabase Cron이 발송 시간을 관리하므로 함수 내부 시간 조건은 일시 비활성화합니다.
-const dailyPushMessageTimeCode = "daily_push_message_time";
-const dailyPushTimePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
-*/
 
 function jsonResponse(body: unknown, init?: ResponseInit) {
   return new Response(JSON.stringify(body), {
@@ -34,15 +26,6 @@ function requireEnv(name: string) {
   return value;
 }
 
-/* Supabase Cron이 매일 09:00에 호출하므로 system_configs 시간 비교는 비활성화합니다.
-function parseDailyPushMessageTimes(content: string) {
-  return content
-    .split(",")
-    .map((time) => time.trim())
-    .filter((time) => dailyPushTimePattern.test(time));
-}
-*/
-
 function formatKstDate(date = new Date()) {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Seoul",
@@ -61,25 +44,6 @@ function formatKstTime(date = new Date()) {
   }).format(date);
 }
 
-async function isNotificationHistoryEnabled(supabase: SupabaseClient) {
-  const { data, error } = await supabase
-    .from("system_configs")
-    .select("content")
-    .eq("system_code", notificationHistoryEnabledConfigCode)
-    .maybeSingle();
-
-  if (error) {
-    console.error("Failed to read notification history setting:", error);
-    return false;
-  }
-
-  if (!data || typeof data.content !== "string") {
-    return false;
-  }
-
-  return data.content.trim().toUpperCase() === "Y";
-}
-
 Deno.serve(async (request) => {
   const cronSecret = requireEnv("EDUCATION_REMINDER_CRON_SECRET");
   if (request.headers.get("x-cron-secret") !== cronSecret) {
@@ -87,116 +51,26 @@ Deno.serve(async (request) => {
   }
 
   const now = new Date();
-  // 한국 시간 값은 실행 이력과 응답에 사용하므로 유지합니다.
+  // 한국 시간 값을 실행 응답에 포함합니다.
   const scheduledDate = formatKstDate(now);
   const scheduledTime = formatKstTime(now);
-  const supabase = createClient(requireEnv("SUPABASE_URL"), requireEnv("SUPABASE_SERVICE_ROLE_KEY"), {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
-
-  /*
-  const { data: config, error: configError } = await supabase
-    .from("system_configs")
-    .select("content")
-    .eq("system_code", dailyPushMessageTimeCode)
-    .maybeSingle();
-
-  if (configError) {
-    return jsonResponse({ error: configError.message }, { status: 500 });
-  }
-
-  const scheduledTimes = parseDailyPushMessageTimes(config?.content ?? "");
-  if (!scheduledTimes.includes(scheduledTime)) {
-    return jsonResponse({
-      success: true,
-      skipped: true,
-      reason: "not_scheduled_time",
-      scheduledDate,
-      scheduledTime,
-      configuredTimes: scheduledTimes,
-    });
-  }
-  */
-
-  const shouldRecordHistory = await isNotificationHistoryEnabled(supabase);
-  let runId: string | null = null;
-
-  if (shouldRecordHistory) {
-    const { data: run, error: runInsertError } = await supabase
-      .from("push_notification_runs")
-      .insert({
-        notification_code: notificationCode,
-        scheduled_date: scheduledDate,
-        scheduled_time: scheduledTime,
-        status: "processing",
-      })
-      .select("id")
-      .single();
-
-    if (runInsertError) {
-      if (runInsertError.code === "23505") {
-        return jsonResponse({
-          success: true,
-          skipped: true,
-          reason: "duplicate",
-          scheduledDate,
-          scheduledTime,
-        });
-      }
-
-      return jsonResponse({ error: runInsertError.message }, { status: 500 });
-    }
-
-    runId = run.id;
-  }
 
   try {
     const result = await requestEducationReminders({
       apiUrl: requireEnv("EDUCATION_REMINDER_API_URL"),
       cronSecret,
     });
-    const errorMessage = result.failedCount > 0 && result.failedEmployees.length > 0
-      ? result.failedEmployees.map((failed) => `${failed.employeeName}: ${failed.reason}`).join(", ")
-      : null;
-
-    if (runId) {
-      await supabase
-        .from("push_notification_runs")
-        .update({
-          status: "sent",
-          sent_at: new Date().toISOString(),
-          result,
-          error_message: errorMessage,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", runId);
-    }
 
     return jsonResponse({
       ...result,
       scheduledDate,
       scheduledTime,
-      ...(runId ? { runId } : {}),
     });
   } catch (error) {
     const errorMessage = error instanceof Error
       ? error.message
       : "안전교육 자동알림 발송 중 오류가 발생했습니다.";
-    if (runId) {
-      await supabase
-        .from("push_notification_runs")
-        .update({
-          status: "failed",
-          error_message: errorMessage,
-          result: { error: errorMessage },
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", runId);
-    }
 
-    return jsonResponse({ error: errorMessage, scheduledDate, scheduledTime, ...(runId ? { runId } : {}) }, { status: 500 });
+    return jsonResponse({ error: errorMessage, scheduledDate, scheduledTime }, { status: 500 });
   }
 });

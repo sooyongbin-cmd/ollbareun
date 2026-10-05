@@ -14,7 +14,7 @@ Maintaining two independent Web Push senders also allowed their runtime, credent
 
 ## Design
 
-1. Keep scheduling, duplicate prevention, and run-history recording in the Supabase Edge Function.
+1. Keep scheduling in Supabase Cron and claim each due reminder through the `education_reminder_jobs` queue. Do not persist run-level history or use a run-history table for duplicate prevention.
 2. Move actual scheduled delivery through the existing Next.js server sender used by the working manager button.
 3. Add shared-secret authentication to the Next.js cron route while preserving Vercel Cron user-agent support.
 4. Configure the Edge Function with the stable production cron API URL and call it with `x-cron-secret`.
@@ -24,8 +24,8 @@ Maintaining two independent Web Push senders also allowed their runtime, credent
 
 - The Edge Function rejects requests without its cron secret.
 - The Next.js cron route rejects requests that are neither Vercel Cron nor authenticated with the shared secret.
-- Non-success downstream responses become failed push-run records with the HTTP status and returned error.
-- Successful downstream results are stored unchanged in `push_notification_runs`.
+- Non-success downstream responses are returned to the caller with the HTTP status and error details.
+- Successful downstream results are returned unchanged; run-level results are not persisted.
 
 ## Testing
 

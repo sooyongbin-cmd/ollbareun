@@ -51,9 +51,6 @@ type CompletionDialogState = {
 };
 
 type EducationReminderExecutionResult = {
-  success?: boolean;
-  skipped?: boolean;
-  reason?: string;
   scheduledDate?: string;
   scheduledTime?: string;
   successCount?: number;
@@ -181,7 +178,6 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
   );
   const runResultHasNoPushes = Boolean(
     runResult
-      && !runResult.skipped
       && (runResult.successCount ?? 0) === 0
       && (runResult.failedCount ?? 0) === 0
       && (runResult.unregisteredCount ?? 0) === 0,
@@ -388,11 +384,9 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
                 ? "기한이 지난 안전교육 예약 작업을 확인하고 있습니다."
                 : runError
                   ? "Edge Function 실행 중 오류가 발생했습니다."
-                  : runResult?.skipped
-                    ? "중복 실행으로 이번 요청을 건너뛰었습니다."
-                    : runResultHasNoPushes
-                      ? "실행은 완료됐지만 전송된 푸시가 없습니다. 기한이 지난 미이수 작업이 없을 수 있습니다."
-                      : "기한이 지난 안전교육 예약 작업의 푸시 전송 결과입니다."}
+                  : runResultHasNoPushes
+                    ? "실행은 완료됐지만 전송된 푸시가 없습니다. 기한이 지난 미이수 작업이 없을 수 있습니다."
+                    : "기한이 지난 안전교육 예약 작업의 푸시 전송 결과입니다."}
             </DialogDescription>
           </DialogHeader>
 

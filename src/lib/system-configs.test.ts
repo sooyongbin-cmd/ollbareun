@@ -123,9 +123,9 @@ describe("isSystemConfigEnabled", () => {
 
     vi.mocked(getSupabaseAdmin).mockReturnValue({ from } as never);
 
-    await expect(isSystemConfigEnabled("system_log_001")).resolves.toBe(true);
+    await expect(isSystemConfigEnabled("test_feature_enabled")).resolves.toBe(true);
     expect(from).toHaveBeenCalledWith("system_configs");
-    expect(eq).toHaveBeenCalledWith("system_code", "system_log_001");
+    expect(eq).toHaveBeenCalledWith("system_code", "test_feature_enabled");
   });
 
   it("returns false for N or an unavailable setting", async () => {

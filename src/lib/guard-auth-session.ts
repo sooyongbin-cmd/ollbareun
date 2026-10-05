@@ -92,20 +92,6 @@ export async function requireGuardWorksite(request: Request, claimedEmployeeId?:
   return { employee, worksite: session.worksite };
 }
 
-export async function requireGuardSessionLogOwner(request: Request, logId: string) {
-  const employee = await requireGuardEmployee(request);
-  const { data, error } = await getSupabaseAdmin()
-    .from("guard_session_logs")
-    .select("employee_id")
-    .eq("id", logId)
-    .maybeSingle();
-  if (error) throw new Error(error.message || "로그 기록 소유자를 확인하지 못했습니다.");
-  if (!data || data.employee_id !== employee.id) {
-    throw new GuardAuthorizationError("본인의 로그인 로그만 수정할 수 있습니다.");
-  }
-  return employee;
-}
-
 export async function revokeGuardAuthSession(request: Request) {
   const token = readCookie(request);
   if (token) {

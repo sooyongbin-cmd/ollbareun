@@ -223,10 +223,6 @@ describe("manager layout", () => {
     );
     expect(screen.queryByRole("link", { name: "교육이수관리" })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "교육알림" })).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "로그현황" })).toHaveAttribute(
-      "href",
-      "/manager/system/logs",
-    );
     expect(screen.queryByRole("link", { name: "DB I/O" })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "시스템설정" })).toHaveAttribute(
       "href",
@@ -239,7 +235,6 @@ describe("manager layout", () => {
       .closest("[data-sidebar=group]")
       ?.querySelectorAll("a");
     expect(Array.from(systemLinks ?? []).map((link) => link.textContent?.trim())).toEqual([
-      "로그현황",
       "관리자관리",
       "시스템설정",
     ]);

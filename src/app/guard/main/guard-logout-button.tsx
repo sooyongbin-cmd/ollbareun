@@ -14,7 +14,6 @@ const guardPushRegistrationStorageKey = "ollbareun.guard.pushRegistration";
 type LogoutPushResult = {
   completedAt: string;
   employeeId: string | null;
-  sessionLogId?: string | null;
   endpoint: string | null;
   browserSubscription: "removed" | "not-found" | "unsupported" | "failed";
   serverSubscription: "removed" | "not-found" | "skipped" | "failed";
@@ -22,10 +21,9 @@ type LogoutPushResult = {
 };
 
 function readGuardSessionInfo() {
-  const session = readStoredGuardSession<{ employee?: { id?: unknown }; sessionLogId?: unknown }>();
+  const session = readStoredGuardSession<{ employee?: { id?: unknown } }>();
   return {
     employeeId: typeof session?.employee?.id === "string" ? session.employee.id : null,
-    sessionLogId: typeof session?.sessionLogId === "string" ? session.sessionLogId : null,
   };
 }
 
@@ -66,26 +64,6 @@ function clearPushRegistrationCache() {
   }
 }
 
-async function recordLogoutResult(sessionLogId: string | null, result: LogoutPushResult) {
-  if (!sessionLogId) {
-    return;
-  }
-
-  try {
-    await fetch(`/api/guard/session-logs/${sessionLogId}/logout`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        browserPushStatus: result.browserSubscription,
-        serverPushStatus: result.serverSubscription,
-        sessionStatus: result.session,
-        result,
-      }),
-    });
-  } catch (error) {
-    console.error("Failed to record guard logout log:", error);
-  }
-}
 
 type GuardLogoutButtonProps = {
   ariaLabel?: string;
@@ -117,7 +95,7 @@ export default function GuardLogoutButton({
     setLoggingOut(true);
     setLogoutStarted(true);
     onLogoutStart?.();
-    const { employeeId, sessionLogId } = readGuardSessionInfo();
+    const { employeeId } = readGuardSessionInfo();
     let endpoint: string | null = null;
     let browserSubscription: LogoutPushResult["browserSubscription"] = "not-found";
     let serverSubscription: LogoutPushResult["serverSubscription"] = "skipped";
@@ -162,14 +140,12 @@ export default function GuardLogoutButton({
     const logoutResult = {
       completedAt: new Date().toISOString(),
       employeeId,
-      sessionLogId,
       endpoint,
       browserSubscription,
       serverSubscription,
       session,
     };
 
-    await recordLogoutResult(sessionLogId, logoutResult);
     writeLogoutPushResult(logoutResult);
 
     try {

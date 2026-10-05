@@ -41,7 +41,6 @@ function writeGuardSession(employeeId = "employee-1") {
     guardSessionStorageKey,
     JSON.stringify({
       employee: { id: employeeId },
-      sessionLogId: null,
     }),
   );
 }

@@ -14,7 +14,6 @@ export default function GuardSessionGate() {
   useEffect(() => {
     const storedSession = readStoredGuardSession<{
       employee: { id: string };
-      sessionLogId?: string;
     }>({ touch: true });
 
     if (!storedSession) {
@@ -46,7 +45,6 @@ export default function GuardSessionGate() {
           writeStoredGuardSession({
             ...durableSession,
             ...payload.session,
-            sessionLogId: durableSession.sessionLogId,
           });
         }
       } catch {

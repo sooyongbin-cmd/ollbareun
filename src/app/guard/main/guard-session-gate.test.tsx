@@ -20,7 +20,6 @@ describe("GuardSessionGate", () => {
       "ollbareun.guard.session",
       JSON.stringify({
         employee: { id: "employee-1", name: "이전 이름" },
-        sessionLogId: "log-1",
       }),
     );
     vi.stubGlobal(
@@ -47,7 +46,6 @@ describe("GuardSessionGate", () => {
         window.localStorage.getItem("ollbareun.guard.session") ?? "{}",
       );
       expect(session.employee.name).toBe("홍길동");
-      expect(session.sessionLogId).toBe("log-1");
     });
     expect(replace).not.toHaveBeenCalled();
   });

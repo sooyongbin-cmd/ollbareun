@@ -59,13 +59,13 @@ describe("auth callback route", () => {
     vi.mocked(getSupabaseAdmin).mockReturnValue(admin.client as never);
 
     const response = await GET(
-      new Request("http://localhost/auth/callback?code=abc&next=%2Fmanager%2Fsystem%2Flogs"),
+      new Request("http://localhost/auth/callback?code=abc&next=%2Fmanager"),
     );
 
     expect(exchangeCodeForSession).toHaveBeenCalledWith("abc");
     expect(admin.insert).not.toHaveBeenCalled();
     expect(response.status).toBe(307);
-    expect(response.headers.get("location")).toBe("http://localhost/manager/system/logs");
+    expect(response.headers.get("location")).toBe("http://localhost/manager");
   });
 
   it("registers the authenticated callback user as super_admin when admin_users is empty after setup verification", async () => {

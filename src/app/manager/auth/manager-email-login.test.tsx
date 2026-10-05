@@ -13,7 +13,7 @@ describe("manager google login", () => {
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
     Object.defineProperty(window, "location", {
-      value: new URL("http://localhost/manager/auth?next=%2Fmanager%2Fsystem%2Flogs"),
+      value: new URL("http://localhost/manager/auth?next=%2Fmanager"),
       writable: true,
     });
   });
@@ -31,7 +31,7 @@ describe("manager google login", () => {
     expect(signInWithOAuth).toHaveBeenCalledWith({
       provider: "google",
       options: {
-        redirectTo: "http://localhost/auth/callback?next=%2Fmanager%2Fsystem%2Flogs",
+        redirectTo: "http://localhost/auth/callback?next=%2Fmanager",
       },
     });
   });
@@ -41,7 +41,7 @@ describe("manager google login", () => {
     Object.defineProperty(window, "location", {
       value: {
         origin: "http://localhost",
-        search: "?next=%2Fmanager%2Fsystem%2Flogs",
+        search: "?next=%2Fmanager",
         assign,
       },
       writable: true,
@@ -62,7 +62,7 @@ describe("manager google login", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         setupCode: "setup-code",
-        nextPath: "/manager/system/logs",
+        nextPath: "/manager",
       }),
     });
     expect(assign).toHaveBeenCalledWith("https://accounts.google.com/o/oauth2/v2/auth");

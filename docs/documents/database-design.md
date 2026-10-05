@@ -58,7 +58,6 @@ auth.users 1 ── N manager_push_subscriptions
 | `inspection_special_reports` | `id`, `worksite_id`, `employee_id`, 스냅샷 명칭, `content`, `photo_url`, `gps_info`, 이메일 상태·처리 상태, `reported_at`, `created_at`, `updated_at` | 특이사항 보고와 사진·GPS·메일 처리 결과 |
 | `push_subscriptions` | `id`, `employee_id`, `endpoint`, `p256dh`, `auth`, `created_at`, `updated_at` | 근무자 브라우저 푸시 구독 |
 | `manager_push_subscriptions` | `id`, `user_id`, `endpoint`, `p256dh`, `auth`, `created_at`, `updated_at` | 관리자 브라우저 푸시 구독 |
-| `guard_session_logs` | `id`, `employee_id`, `guard_name`, 로그인·메인 푸시·로그아웃 상태와 시각, 결과 JSON, `created_at`, `updated_at` | 근무자 로그인 세션과 알림 처리 로그 |
 | `system_configs` | `system_code`, `parent_system_code`, `content`, `description`, `created_at`, `updated_at` | 메일 주소·기능 플래그 등 운영 설정 및 자유 입력 분류값 |
 | `admin_users` | `id`, `user_id`, `email`, `role`, `created_by`, `first_login_at`, `created_at`, `updated_at` | Supabase Auth 사용자와 관리자 권한 연결 |
 
@@ -129,7 +128,6 @@ auth.users 1 ── N manager_push_subscriptions
 - 공휴일은 `holiday_date` UNIQUE, `selected`는 `Y/N`이다. 야간근무 자동 휴무는 주말 또는 `selected = 'Y'` 공휴일을 대상으로 한다.
 - 알림 실행 이력은 `notification_code`, `scheduled_date`, `scheduled_time` 조합이 UNIQUE이고, `scheduled_time`은 `HH:mm` 정규식으로 검증한다. 상태는 `processing`, `sent`, `failed`, `skipped`만 허용한다.
 - 특이사항 메일 상태는 `pending`, `sent`, `failed`, `not_requested`이며 `sent`일 때 `email_sent_at`이 있어야 한다. `not_requested`를 지원하므로 `email_to`는 NULL을 허용한다. 처리 상태는 `Y/N`이다.
-- 세션 로그의 로그인 상태는 `success/failed`, 메인 푸시 상태는 `success/warning/error/skipped`만 허용한다.
 - 관리자 역할은 `admin/super_admin`만 허용한다. `user_id`가 있는 관리자 계정은 하나만 연결되고, 이메일은 공백 제거·소문자 기준으로 중복되지 않는다.
 - 시스템 설정의 `system_code`와 `content`는 공백이 아니어야 하며, `parent_system_code`는 관리자 화면의 자유 입력 분류값 또는 NULL이다.
 
@@ -151,7 +149,6 @@ auth.users 1 ── N manager_push_subscriptions
 | `inspection_special_reports` | `inspection_special_reports_worksite_id_idx`, `inspection_special_reports_employee_id_idx` 필터, `inspection_special_reports_reported_at_idx` 최신 보고순, `inspection_special_reports_email_status_idx` 처리 상태 필터 |
 | `push_subscriptions` | `push_subscriptions_employee_id_idx` 푸시 발송 대상 조회와 `push_subscriptions_employee_endpoint_key` `(employee_id, endpoint)` UNIQUE 중복 방지 |
 | `manager_push_subscriptions` | `manager_push_subscriptions_user_id_idx` 관리자별 구독 조회, `(user_id, endpoint)` 및 `endpoint` UNIQUE |
-| `guard_session_logs` | `guard_session_logs_login_at_idx` 최신 세션순, `guard_session_logs_employee_id_idx`, `guard_session_logs_login_status_idx`, `guard_session_logs_guard_name_idx` 조건 조회 |
 | `system_configs` | `system_configs_parent_system_code_idx` 분류값 조회 |
 | `admin_users` | `admin_users_role_idx`, `admin_users_created_at_idx`, `admin_users_created_by_idx`, `admin_users_first_login_at_idx`, `admin_users_user_id_unique_idx` NULL이 아닌 `user_id` 부분 UNIQUE, `admin_users_email_unique_idx` `lower(btrim(email))` UNIQUE 및 기존 `email` UNIQUE |
 
@@ -167,7 +164,6 @@ auth.users 1 ── N manager_push_subscriptions
 - 특이사항 보고는 연도·근무지·보고자 조건과 `reported_at DESC`를 사용하며, 메일 상태별 재처리 대상을 `email_status`로 찾는다.
 - 교육 리포트는 직원과 자료를 조인해 이수 여부를 표시하고, 완료 건수는 완료 상태이면서 `completed_at`이 조회 연도에 속하는 자료만 포함한다.
 - 교육 알림 실행 이력은 알림 코드·상태를 선택적으로 필터링하고 `created_at DESC`, 기본 최대 100건을 조회한다. insert 후 트리거가 최신 100건만 남긴다.
-- 근무자 세션 로그는 `login_at DESC`로 정렬하고 `guard_name`, `login_status`, 메인 푸시 상태를 선택적으로 필터링한다. 관리 화면은 페이지 범위를 사용한다.
 - 관리자 푸시는 `admin_users`에서 연결된 `user_id`를 모은 뒤 `manager_push_subscriptions.user_id IN (...)`으로 발송 대상을 조회한다. 만료된 endpoint는 endpoint 기준으로 삭제한다.
 - 공휴일은 `holiday_date`를 conflict 기준으로 upsert하고, 근무 일정 생성 함수는 `selected = 'Y'`인 공휴일과 배정 규칙을 사용한다.
 
@@ -177,7 +173,6 @@ auth.users 1 ── N manager_push_subscriptions
 - `work_assignments`의 현재 직원·기간 조회는 GiST EXCLUDE 인덱스와 조건식을 함께 사용한다. 데이터량이 커지면 직원별 기간 조회용 B-tree 복합 인덱스의 실행계획을 확인한다.
 - `worksites`의 이름 검색·생성일 정렬은 현재 보조 인덱스가 없다. 서버 측 검색·페이지네이션으로 전환할 때 `name` 또는 `created_at` 인덱스를 검토한다.
 - `inspection_logs`는 현재 근무지·시각 중심이다. 현장별 또는 직원별 이력 조회가 추가되면 `inspection_site_id`, `employee_id` 인덱스를 검토한다.
-- `guard_session_logs.guard_name` 인덱스는 현재 `ILIKE '%검색어%'` 조건에서는 효율이 제한될 수 있으므로, 검색량이 커지면 trigram 인덱스 또는 prefix 검색으로 전환을 검토한다.
 
 ## 6. 보안 및 저장소
 

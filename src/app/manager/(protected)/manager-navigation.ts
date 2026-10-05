@@ -76,7 +76,6 @@ export const managerNavigationGroups: ManagerNavigationGroup[] = [
     label: "시스템",
     icon: Settings,
     items: [
-      { label: "로그현황", href: "/manager/system/logs", icon: Activity },
       { label: "관리자관리", href: "/manager/system/admin-users", icon: ShieldCheck },
       { label: "시스템설정", href: "/manager/system/configs", icon: Settings },
     ],

@@ -278,9 +278,6 @@ describe("guard profile page", () => {
       if (url === "/api/notifications/unsubscribe" && init?.method === "POST") {
         return Response.json({ deletedCount: 1 });
       }
-      if (url === "/api/guard/session-logs/log-1/logout" && init?.method === "PATCH") {
-        return Response.json({ success: true });
-      }
       return Response.json({}, { status: 404 });
     });
     vi.stubGlobal("fetch", fetchMock);
@@ -297,7 +294,6 @@ describe("guard profile page", () => {
       "ollbareun.guard.session",
       JSON.stringify({
         employee: { id: "emp-1", name: "Alice" },
-        sessionLogId: "log-1",
         createdAt: new Date().toISOString(),
         lastActiveAt: new Date().toISOString(),
       }),

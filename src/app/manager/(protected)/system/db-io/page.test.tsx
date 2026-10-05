@@ -13,7 +13,7 @@ describe("manager database io page", () => {
             tables: [
               {
                 schemaName: "public",
-                tableName: "guard_session_logs",
+                tableName: "employees",
                 blocksRead: 120,
                 blocksHit: 880,
                 cacheHitRatePercent: 88,
@@ -30,7 +30,7 @@ describe("manager database io page", () => {
                 sharedBlocksHit: 880,
                 tempBlocksRead: 0,
                 tempBlocksWritten: 0,
-                query: "select * from public.guard_session_logs",
+                query: "select * from public.employees",
               },
             ],
             queryStatsAvailable: true,
@@ -47,8 +47,8 @@ describe("manager database io page", () => {
     expect(await screen.findByRole("heading", { name: "DB I/O" })).toBeInTheDocument();
     expect(await screen.findByText("테이블별 I/O")).toBeInTheDocument();
     expect(screen.getByText("쿼리별 I/O")).toBeInTheDocument();
-    expect(screen.getByText("public.guard_session_logs")).toBeInTheDocument();
-    expect(screen.getByText("select * from public.guard_session_logs")).toBeInTheDocument();
+    expect(screen.getByText("public.employees")).toBeInTheDocument();
+    expect(screen.getByText("select * from public.employees")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "새로고침" })).toBeInTheDocument();
   });
 

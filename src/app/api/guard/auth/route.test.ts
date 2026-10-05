@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { authenticateGuard } from "@/lib/phase1-data";
-import { createGuardSessionLog } from "@/lib/guard-session-logs";
 import { createGuardAuthSession } from "@/lib/guard-auth-session";
 import { POST } from "./route";
 
@@ -8,24 +7,22 @@ vi.mock("@/lib/phase1-data", () => ({
   authenticateGuard: vi.fn(),
 }));
 
-vi.mock("@/lib/guard-session-logs", () => ({
-  createGuardSessionLog: vi.fn(),
+vi.mock("@/lib/guard-auth-session", () => ({
+  createGuardAuthSession: vi.fn().mockResolvedValue({ setCookie: "test-cookie" }),
 }));
-vi.mock("@/lib/guard-auth-session", () => ({ createGuardAuthSession: vi.fn().mockResolvedValue({ setCookie: "test-cookie" }) }));
 
 describe("guard auth route", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
 
-  it("creates a success login log and returns its id", async () => {
+  it("creates an authenticated session on success", async () => {
     vi.mocked(authenticateGuard).mockResolvedValue({
       employee: { id: "emp-1", name: "홍길동" },
       assignment: null,
       worksite: null,
       attendance: null,
     } as never);
-    vi.mocked(createGuardSessionLog).mockResolvedValue({ id: "log-1" } as never);
 
     const response = await POST(
       new Request("http://localhost/api/guard/auth", {
@@ -35,17 +32,15 @@ describe("guard auth route", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(createGuardSessionLog).toHaveBeenCalledWith({
-      employeeId: "emp-1",
-      guardName: "홍길동",
-      loginStatus: "success",
+    expect(createGuardAuthSession).toHaveBeenCalledWith("emp-1");
+    expect(response.headers.get("Set-Cookie")).toBe("test-cookie");
+    await expect(response.json()).resolves.toMatchObject({
+      employee: { id: "emp-1", name: "홍길동" },
     });
-    await expect(response.json()).resolves.toMatchObject({ sessionLogId: "log-1" });
   });
 
-  it("creates a failed login log when authentication fails", async () => {
+  it("returns an authentication error when credentials are invalid", async () => {
     vi.mocked(authenticateGuard).mockRejectedValue(new Error("등록된 직원 정보와 일치하지 않습니다."));
-    vi.mocked(createGuardSessionLog).mockResolvedValue({ id: "log-2" } as never);
 
     const response = await POST(
       new Request("http://localhost/api/guard/auth", {
@@ -55,10 +50,8 @@ describe("guard auth route", () => {
     );
 
     expect(response.status).toBe(401);
-    expect(createGuardSessionLog).toHaveBeenCalledWith({
-      guardName: "홍길동",
-      loginStatus: "failed",
-      loginError: "등록된 직원 정보와 일치하지 않습니다.",
+    await expect(response.json()).resolves.toEqual({
+      error: "등록된 직원 정보와 일치하지 않습니다.",
     });
   });
 });

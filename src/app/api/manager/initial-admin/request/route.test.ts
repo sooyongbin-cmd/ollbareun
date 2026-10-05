@@ -53,7 +53,7 @@ describe("initial admin request route", () => {
         method: "POST",
         body: JSON.stringify({
           setupCode: " setup-code ",
-          nextPath: "/manager/system/logs",
+          nextPath: "/manager",
         }),
       }),
     );

@@ -160,9 +160,14 @@ function getScheduleWeekOptions(profile: GuardProfilePayload | null, today: stri
     ...(profile?.plannedAttendance ?? []).map((planned) => planned.workDate),
   ]);
   const weekStarts = new Set(
-    [...plannedDates]
-      .filter((date) => date >= today)
-      .map((date) => getWeekStart(date)),
+    profile
+      ? [
+          getWeekStart(today),
+          ...[...plannedDates]
+            .filter((date) => date >= today)
+            .map((date) => getWeekStart(date)),
+        ]
+      : [],
   );
 
   return [...weekStarts]
@@ -522,6 +527,14 @@ export default function GuardProfilePage() {
         .map((planned) => planned.workDate),
     );
   }, [profile]);
+
+  const plannedLeaveDates = useMemo(() => {
+    return new Set(
+      (profile?.plannedAttendance ?? [])
+        .filter((planned) => planned.isLeave)
+        .map((planned) => planned.workDate),
+    );
+  }, [profile]);
   const workStyleLabel = session?.workStyle === "2" ? "주간" : "격일";
   const worksiteName = session?.worksiteName || profile?.schedules[0]?.worksiteName || "근무 현장 미등록";
 
@@ -577,16 +590,18 @@ export default function GuardProfilePage() {
               <div className={styles.weekdayGrid}>
                 {weekDates.map((weekday) => {
                   const isWorkday = plannedWorkDates.has(weekday.date);
+                  const isLeave = !isWorkday && plannedLeaveDates.has(weekday.date);
+                  const statusLabel = isWorkday ? "근무" : isLeave ? "휴가" : "휴무";
                   return (
                     <div
-                      aria-label={`${weekday.date} ${isWorkday ? "근무" : "휴무"}`}
+                      aria-label={`${weekday.date} ${statusLabel}`}
                       className={styles.weekday}
                       key={weekday.date}
                     >
                       <span>{weekday.label}</span>
                       <span className={styles.weekdayDate}>{formatWeekdayDate(weekday.date)}</span>
                       <span className={`${styles.weekdayStatus} ${isWorkday ? styles.isWork : styles.isOff}`}>
-                        {isWorkday ? "근무" : "휴무"}
+                        {statusLabel}
                       </span>
                     </div>
                   );

@@ -100,6 +100,12 @@ function startOfCurrentWeek(dateKey: string) {
   return date.toISOString().slice(0, 10);
 }
 
+function endOfCurrentWeek(dateKey: string) {
+  const date = new Date(`${startOfCurrentWeek(dateKey)}T00:00:00.000Z`);
+  date.setUTCDate(date.getUTCDate() + 6);
+  return date.toISOString().slice(0, 10);
+}
+
 function addUtcYears(dateText: string, years: number) {
   const date = new Date(`${dateText}T00:00:00.000Z`);
   date.setUTCFullYear(date.getUTCFullYear() + years);
@@ -302,7 +308,8 @@ export function buildGuardProfile(input: {
 
 export async function loadGuardProfile(employeeIdInput: unknown) {
   const employeeId = requireEmployeeId(employeeIdInput);
-  const { startDate, endDate } = getRecentOneYearDateRange();
+  const today = todayDate();
+  const { startDate, endDate } = getRecentOneYearDateRange(today);
   const supabase = getSupabaseAdmin();
 
   const [schedulesResult, worksitesResult, attendanceResult] = await Promise.all([
@@ -327,6 +334,10 @@ export async function loadGuardProfile(employeeIdInput: unknown) {
 
   const scheduleInputs = (schedulesResult.data ?? []) as GuardProfileScheduleInput[];
   const assignmentIds = scheduleInputs.map((schedule) => schedule.id);
+  const scheduleEndDate = scheduleInputs.reduce(
+    (latestDate, schedule) => schedule.end_date > latestDate ? schedule.end_date : latestDate,
+    endOfCurrentWeek(today),
+  );
   const scheduleDataClient = getSupabaseAdmin();
   const scheduledAttendanceResult = assignmentIds.length
     ? await scheduleDataClient
@@ -334,7 +345,7 @@ export async function loadGuardProfile(employeeIdInput: unknown) {
         .select("employee_id,worksite_id,work_date,intime,outtime,intime_status")
         .eq("employee_id", employeeId)
         .gte("work_date", startDate)
-        .lte("work_date", endDate)
+        .lte("work_date", scheduleEndDate)
         .order("work_date", { ascending: true })
     : { data: [], error: null };
 

@@ -3,6 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import InspectionSitesPage from "./page";
 
+vi.mock("next/navigation", () => ({
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 describe("inspection sites page", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -56,8 +60,10 @@ describe("inspection sites page", () => {
     });
     await user.type(screen.getByLabelText("근무지"), "Worksite");
     await user.type(screen.getByLabelText("점검지"), "Gate");
-    await user.click(screen.getByRole("button", { name: "조회" }));
 
+    await waitFor(() => {
+      expect(fetch).toHaveBeenLastCalledWith("/api/inspection/sites?worksiteId=work-1&name=Gate");
+    });
     expect(await screen.findByText("Gate")).toBeInTheDocument();
     const dataRow = screen.getAllByRole("row")[1];
     const cells = within(dataRow).getAllByRole("cell");
@@ -66,9 +72,6 @@ describe("inspection sites page", () => {
       "href",
       "/manager/inspection/sites/site-1",
     );
-    await waitFor(() => {
-      expect(fetch).toHaveBeenLastCalledWith("/api/inspection/sites?worksiteId=work-1&name=Gate");
-    });
   });
 
   it("sorts sites by worksite (ascending) then sort order (ascending)", async () => {

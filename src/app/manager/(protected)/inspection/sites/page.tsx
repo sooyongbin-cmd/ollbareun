@@ -1,10 +1,10 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
-import { useEffect, useMemo, useState, type DragEvent, type FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState, type DragEvent } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
 
@@ -81,11 +81,11 @@ function formatInspectionTime(value?: string) {
 }
 
 export default function InspectionSitesPage() {
+  const searchParams = useSearchParams();
+  const requestedWorksiteId = searchParams?.get("worksiteId") ?? "";
+  const previousRequestedWorksiteId = useRef(requestedWorksiteId);
   const [query, setQuery] = useState("");
-  const [siteNameFilter, setSiteNameFilter] = useState("");
-  const [worksiteFilter, setWorksiteFilter] = useState(() =>
-    typeof window === "undefined" ? "" : new URLSearchParams(window.location.search).get("worksiteId") ?? "",
-  );
+  const [worksiteFilter, setWorksiteFilter] = useState(requestedWorksiteId);
   const [worksiteNameFilter, setWorksiteNameFilter] = useState("");
   const [worksiteQuery, setWorksiteQuery] = useState("");
   const [worksites, setWorksites] = useState<Worksite[]>([]);
@@ -94,7 +94,6 @@ export default function InspectionSitesPage() {
   const [error, setError] = useState("");
   const [draggedSiteId, setDraggedSiteId] = useState<string | null>(null);
   const [reordering, setReordering] = useState(false);
-  const [searchRevision, setSearchRevision] = useState(0);
 
   const worksiteNameOptions = useMemo(
     () => Array.from(new Set(worksites.map((worksite) => worksite.name))).sort((left, right) => left.localeCompare(right, "ko-KR")),
@@ -140,40 +139,54 @@ export default function InspectionSitesPage() {
   useEffect(() => {
     let ignore = false;
 
-    setLoading(true);
-    setError("");
-    fetchSites(siteNameFilter, worksiteFilter, worksiteNameFilter)
-      .then((nextSites) => {
-        if (!ignore) {
-          setSites(sortInspectionSites(nextSites));
-        }
-      })
-      .catch((loadError) => {
-        if (!ignore) {
-          setError(loadError instanceof Error ? loadError.message : "점검지 목록을 불러오지 못했습니다.");
-        }
-      })
-      .finally(() => {
-        if (!ignore) {
-          setLoading(false);
-        }
-      });
+    const timeoutId = window.setTimeout(() => {
+      setLoading(true);
+      setError("");
+      fetchSites(query, worksiteFilter, worksiteNameFilter)
+        .then((nextSites) => {
+          if (!ignore) {
+            setSites(sortInspectionSites(nextSites));
+          }
+        })
+        .catch((loadError) => {
+          if (!ignore) {
+            setError(loadError instanceof Error ? loadError.message : "점검지 목록을 불러오지 못했습니다.");
+          }
+        })
+        .finally(() => {
+          if (!ignore) {
+            setLoading(false);
+          }
+        });
+    }, 250);
 
     return () => {
       ignore = true;
+      window.clearTimeout(timeoutId);
     };
-  }, [searchRevision, siteNameFilter, worksiteFilter, worksiteNameFilter]);
+  }, [query, worksiteFilter, worksiteNameFilter]);
 
-  function handleSearch(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const normalizedWorksiteQuery = worksiteQuery.trim();
+  useEffect(() => {
+    if (previousRequestedWorksiteId.current === requestedWorksiteId) {
+      return;
+    }
+
+    previousRequestedWorksiteId.current = requestedWorksiteId;
+    setWorksiteFilter(requestedWorksiteId);
+    setWorksiteNameFilter("");
+    setQuery("");
+    const selectedWorksite = worksites.find((worksite) => worksite.id === requestedWorksiteId);
+    setWorksiteQuery(selectedWorksite?.name ?? "");
+  }, [requestedWorksiteId, worksites]);
+
+  function handleWorksiteChange(value: string) {
+    setWorksiteQuery(value);
+    const normalizedWorksiteQuery = value.trim();
     const matchingWorksite = worksites.find(
       (worksite) => worksite.name.toLocaleLowerCase("ko-KR") === normalizedWorksiteQuery.toLocaleLowerCase("ko-KR"),
     );
     setWorksiteFilter(matchingWorksite?.id ?? "");
     setWorksiteNameFilter(matchingWorksite ? "" : normalizedWorksiteQuery);
-    setSiteNameFilter(query.trim());
-    setSearchRevision((revision) => revision + 1);
   }
 
   async function handleDrop(targetSite: InspectionSite) {
@@ -218,7 +231,7 @@ export default function InspectionSitesPage() {
         aria-label="점검지 검색"
         className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
       >
-        <form className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between" onSubmit={handleSearch}>
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-2 flex-1">
             <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="site-worksite-search">
               근무지
@@ -229,7 +242,7 @@ export default function InspectionSitesPage() {
               list="inspection-worksite-options"
               placeholder="근무지를 입력하세요."
               value={worksiteQuery}
-              onChange={(event) => setWorksiteQuery(event.target.value)}
+              onChange={(event) => handleWorksiteChange(event.target.value)}
             />
             <datalist id="inspection-worksite-options">
               {worksiteNameOptions.map((name) => <option key={name} value={name} />)}
@@ -252,15 +265,12 @@ export default function InspectionSitesPage() {
             </datalist>
           </div>
           <div className="flex gap-3">
-            <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 min-w-[6rem]" type="submit" variant="outline">
-              조회
-            </Button>
             <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 gap-2 whitespace-nowrap" href="/manager/inspection/sites/new">
               <span>점검지 등록</span>
               <ArrowRightIcon size={18} />
             </Link>
           </div>
-        </form>
+        </div>
       </section>
 
       <section

@@ -209,11 +209,12 @@ export function compareInspectionSites<T extends { worksite_name?: string | null
 }
 
 export async function listInspectionSites(
-  input: { name?: unknown; worksiteId?: unknown } = {},
+  input: { name?: unknown; worksiteId?: unknown; worksiteName?: unknown } = {},
   supabase: SupabaseClient = getSupabase(),
 ) {
   const name = typeof input.name === "string" ? input.name.trim() : "";
   const worksiteId = typeof input.worksiteId === "string" ? input.worksiteId.trim() : "";
+  const worksiteName = typeof input.worksiteName === "string" ? input.worksiteName.trim() : "";
   let sitesQuery = supabase
     .from("inspection_sites")
     .select(INSPECTION_SITE_COLUMNS)
@@ -231,7 +232,17 @@ export async function listInspectionSites(
   throwIfError(sitesResult.error);
   throwIfError(worksitesResult.error);
 
-  const sites = attachWorksiteNames((sitesResult.data ?? []) as RawInspectionSite[], worksitesResult.data ?? []);
+  const matchingWorksiteIds = worksiteName && !worksiteId
+    ? new Set(
+      (worksitesResult.data ?? [])
+        .filter((worksite) => worksite.name.toLocaleLowerCase("ko-KR").includes(worksiteName.toLocaleLowerCase("ko-KR")))
+        .map((worksite) => worksite.id),
+    )
+    : null;
+  const filteredSites = matchingWorksiteIds
+    ? ((sitesResult.data ?? []) as RawInspectionSite[]).filter((site) => matchingWorksiteIds.has(site.worksite_id))
+    : (sitesResult.data ?? []) as RawInspectionSite[];
+  const sites = attachWorksiteNames(filteredSites, worksitesResult.data ?? []);
 
   const sitesWithTodayInspections = await attachTodayInspections(sites, supabase);
 

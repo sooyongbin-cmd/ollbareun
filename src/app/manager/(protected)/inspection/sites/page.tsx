@@ -2,10 +2,9 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
-import { useEffect, useState, type DragEvent, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type DragEvent, type FormEvent } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
 
@@ -27,9 +26,10 @@ type Worksite = {
   name: string;
 };
 
-async function fetchSites(name: string, worksiteId: string) {
+async function fetchSites(name: string, worksiteId: string, worksiteName: string) {
   const params = new URLSearchParams();
   if (worksiteId) params.set("worksiteId", worksiteId);
+  if (worksiteName) params.set("worksiteName", worksiteName);
   if (name.trim()) params.set("name", name.trim());
   const queryString = params.toString();
   const query = queryString ? `?${queryString}` : "";
@@ -82,15 +82,28 @@ function formatInspectionTime(value?: string) {
 
 export default function InspectionSitesPage() {
   const [query, setQuery] = useState("");
+  const [siteNameFilter, setSiteNameFilter] = useState("");
   const [worksiteFilter, setWorksiteFilter] = useState(() =>
     typeof window === "undefined" ? "" : new URLSearchParams(window.location.search).get("worksiteId") ?? "",
   );
+  const [worksiteNameFilter, setWorksiteNameFilter] = useState("");
+  const [worksiteQuery, setWorksiteQuery] = useState("");
   const [worksites, setWorksites] = useState<Worksite[]>([]);
   const [sites, setSites] = useState<InspectionSite[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [draggedSiteId, setDraggedSiteId] = useState<string | null>(null);
   const [reordering, setReordering] = useState(false);
+  const [searchRevision, setSearchRevision] = useState(0);
+
+  const worksiteNameOptions = useMemo(
+    () => Array.from(new Set(worksites.map((worksite) => worksite.name))).sort((left, right) => left.localeCompare(right, "ko-KR")),
+    [worksites],
+  );
+  const siteNameOptions = useMemo(
+    () => Array.from(new Set(sites.map((site) => site.name))).sort((left, right) => left.localeCompare(right, "ko-KR")),
+    [sites],
+  );
 
   useEffect(() => {
     let ignore = false;
@@ -103,7 +116,13 @@ export default function InspectionSitesPage() {
           throw new Error(payload.error ?? "근무지 목록을 불러오지 못했습니다.");
         }
         if (!ignore) {
-          setWorksites(payload.worksites ?? []);
+          const nextWorksites = (payload.worksites ?? []) as Worksite[];
+          setWorksites(nextWorksites);
+          const requestedWorksiteId = new URLSearchParams(window.location.search).get("worksiteId") ?? "";
+          const selectedWorksite = nextWorksites.find((worksite) => worksite.id === requestedWorksiteId);
+          if (selectedWorksite) {
+            setWorksiteQuery((current) => current || selectedWorksite.name);
+          }
         }
       } catch (loadError) {
         if (!ignore) {
@@ -118,23 +137,12 @@ export default function InspectionSitesPage() {
     };
   }, []);
 
-  async function loadSites(name = query) {
-    await Promise.resolve();
-    setLoading(true);
-    setError("");
-    try {
-      setSites(sortInspectionSites(await fetchSites(name, worksiteFilter)));
-    } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "점검지 목록을 불러오지 못했습니다.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
   useEffect(() => {
     let ignore = false;
 
-    fetchSites("", worksiteFilter)
+    setLoading(true);
+    setError("");
+    fetchSites(siteNameFilter, worksiteFilter, worksiteNameFilter)
       .then((nextSites) => {
         if (!ignore) {
           setSites(sortInspectionSites(nextSites));
@@ -154,11 +162,18 @@ export default function InspectionSitesPage() {
     return () => {
       ignore = true;
     };
-  }, [worksiteFilter]);
+  }, [searchRevision, siteNameFilter, worksiteFilter, worksiteNameFilter]);
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    void loadSites(query);
+    const normalizedWorksiteQuery = worksiteQuery.trim();
+    const matchingWorksite = worksites.find(
+      (worksite) => worksite.name.toLocaleLowerCase("ko-KR") === normalizedWorksiteQuery.toLocaleLowerCase("ko-KR"),
+    );
+    setWorksiteFilter(matchingWorksite?.id ?? "");
+    setWorksiteNameFilter(matchingWorksite ? "" : normalizedWorksiteQuery);
+    setSiteNameFilter(query.trim());
+    setSearchRevision((revision) => revision + 1);
   }
 
   async function handleDrop(targetSite: InspectionSite) {
@@ -208,31 +223,33 @@ export default function InspectionSitesPage() {
             <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="site-worksite-search">
               근무지
             </label>
-            <NativeSelect
+            <Input
               className="w-full"
               id="site-worksite-search"
-              value={worksiteFilter}
-              onChange={(event) => setWorksiteFilter(event.target.value)}
-            >
-              <NativeSelectOption value="">전체</NativeSelectOption>
-              {worksites.map((worksite) => (
-                <NativeSelectOption key={worksite.id} value={worksite.id}>
-                  {worksite.name}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
+              list="inspection-worksite-options"
+              placeholder="근무지를 입력하세요."
+              value={worksiteQuery}
+              onChange={(event) => setWorksiteQuery(event.target.value)}
+            />
+            <datalist id="inspection-worksite-options">
+              {worksiteNameOptions.map((name) => <option key={name} value={name} />)}
+            </datalist>
           </div>
           <div className="space-y-2 flex-1">
             <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="site-search">
-              점검지명
+              점검지
             </label>
             <Input
               className="w-full"
               id="site-search"
+              list="inspection-site-options"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="점검지 이름을 입력하세요."
+              placeholder="점검지를 입력하세요."
             />
+            <datalist id="inspection-site-options">
+              {siteNameOptions.map((name) => <option key={name} value={name} />)}
+            </datalist>
           </div>
           <div className="flex gap-3">
             <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 min-w-[6rem]" type="submit" variant="outline">

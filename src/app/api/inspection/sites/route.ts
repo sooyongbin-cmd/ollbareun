@@ -10,7 +10,8 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const name = url.searchParams.get("name") ?? "";
     const worksiteId = url.searchParams.get("worksiteId") ?? "";
-    return Response.json({ sites: await listInspectionSites({ name, worksiteId }, getSupabaseAdmin()) });
+    const worksiteName = url.searchParams.get("worksiteName") ?? "";
+    return Response.json({ sites: await listInspectionSites({ name, worksiteId, worksiteName }, getSupabaseAdmin()) });
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "점검지 목록을 불러오지 못했습니다." },

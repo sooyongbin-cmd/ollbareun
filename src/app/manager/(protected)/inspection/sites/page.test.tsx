@@ -44,15 +44,18 @@ describe("inspection sites page", () => {
     render(<InspectionSitesPage />);
 
     expect(screen.getByRole("heading", { name: "점검지관리" })).toBeInTheDocument();
-    expect(screen.getByLabelText("근무지")).toBeInTheDocument();
-    expect(screen.getByLabelText("점검지명")).toBeInTheDocument();
+    expect(screen.getByLabelText("근무지")).toHaveAttribute("list", "inspection-worksite-options");
+    expect(screen.getByLabelText("점검지")).toHaveAttribute("list", "inspection-site-options");
     expect(screen.getByRole("link", { name: "점검지 등록" })).toHaveAttribute(
       "href",
       "/manager/inspection/sites/new",
     );
 
-    await user.selectOptions(screen.getByLabelText("근무지"), "work-1");
-    await user.type(screen.getByLabelText("점검지명"), "Gate");
+    await waitFor(() => {
+      expect(document.querySelector('#inspection-worksite-options option[value="Worksite"]')).not.toBeNull();
+    });
+    await user.type(screen.getByLabelText("근무지"), "Worksite");
+    await user.type(screen.getByLabelText("점검지"), "Gate");
     await user.click(screen.getByRole("button", { name: "조회" }));
 
     expect(await screen.findByText("Gate")).toBeInTheDocument();

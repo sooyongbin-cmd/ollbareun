@@ -27,7 +27,6 @@ export async function POST(request: Request) {
     const body = await request.json();
     return Response.json({
       config: await createSystemConfig({
-        systemCode: body.systemCode,
         parentSystemCode: body.parentSystemCode,
         description: body.description,
         content: body.content,

@@ -53,7 +53,6 @@ describe("/api/system/configs", () => {
       new Request("http://localhost/api/system/configs", {
         method: "POST",
         body: JSON.stringify({
-          systemCode: "manager_email",
           parentSystemCode: "",
           description: "Manager notification email address",
           content: "admin@example.com",
@@ -63,7 +62,6 @@ describe("/api/system/configs", () => {
 
     expect(response.status).toBe(200);
     expect(createSystemConfig).toHaveBeenCalledWith({
-      systemCode: "manager_email",
       parentSystemCode: "",
       description: "Manager notification email address",
       content: "admin@example.com",

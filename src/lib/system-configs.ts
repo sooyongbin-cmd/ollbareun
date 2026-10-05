@@ -107,29 +107,58 @@ export async function getKakaoOpenGraphMetadata() {
 }
 
 export async function createSystemConfig(input: {
-  systemCode: unknown;
   parentSystemCode?: unknown;
   description?: unknown;
   content: unknown;
 }) {
-  const system_code = requireServerStoredSystemCode(input.systemCode);
   const parent_system_code = optionalString(input.parentSystemCode);
   const description = optionalString(input.description);
   const content = requireString(input.content, "내용");
   const supabase = getSupabaseAdmin();
-  const { data, error } = await supabase
-    .from("system_configs")
-    .insert({
-      system_code,
-      parent_system_code,
-      description,
-      content,
-    })
-    .select(systemConfigSelect)
-    .single();
 
-  throwIfError(error);
-  return data as SystemConfigRow;
+  // Allocate codes on the server so callers cannot choose or overwrite the code.
+  // Re-read after a primary-key collision to handle two concurrent registrations.
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const { data: existing, error: lookupError } = await supabase
+      .from("system_configs")
+      .select("system_code")
+      .like("system_code", "S______");
+
+    throwIfError(lookupError);
+
+    const latestSerial = ((existing ?? []) as Array<{ system_code: string }>).reduce(
+      (latest, config) => {
+        const match = /^S(\d{6})$/.exec(config.system_code);
+        return match ? Math.max(latest, Number(match[1])) : latest;
+      },
+      0,
+    );
+
+    if (latestSerial >= 999999) {
+      throw new Error("시스템코드 일련번호가 모두 사용되었습니다.");
+    }
+
+    const system_code = `S${String(latestSerial + 1).padStart(6, "0")}`;
+    const { data, error } = await supabase
+      .from("system_configs")
+      .insert({
+        system_code,
+        parent_system_code,
+        description,
+        content,
+      })
+      .select(systemConfigSelect)
+      .single();
+
+    if (error?.code === "23505" && attempt < 4) {
+      continue;
+    }
+
+    throwIfError(error);
+    return data as SystemConfigRow;
+  }
+
+  throw new Error("시스템코드를 생성하지 못했습니다. 다시 시도하세요.");
 }
 
 export async function updateSystemConfig(input: {

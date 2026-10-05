@@ -31,7 +31,6 @@ describe("system configs page", () => {
       "설명",
       "내용",
       "시스템코드",
-      "상위시스템코드",
     ]);
     expect(await screen.findByRole("link", { name: "Manager notification email address" })).toHaveAttribute(
       "href",

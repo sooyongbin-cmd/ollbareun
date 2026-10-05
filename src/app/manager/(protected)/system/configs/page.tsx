@@ -92,13 +92,12 @@ export default function SystemConfigsPage() {
                   <TableHead className="text-left">설명</TableHead>
                   <TableHead className="text-left">내용</TableHead>
                   <TableHead className="text-left">시스템코드</TableHead>
-                  <TableHead className="text-left">상위시스템코드</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {configs.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={4} className="p-8 text-center text-muted-foreground italic">
+                    <TableCell data-responsive-empty colSpan={3} className="p-8 text-center text-muted-foreground italic">
                       등록된 시스템설정이 없습니다.
                     </TableCell>
                   </TableRow>
@@ -112,7 +111,6 @@ export default function SystemConfigsPage() {
                       </TableCell>
                       <TableCell data-label="내용" className="max-w-[32.5rem] whitespace-pre-wrap">{config.content}</TableCell>
                       <TableCell data-label="시스템코드" className="font-semibold">{config.system_code}</TableCell>
-                      <TableCell data-label="상위시스템코드">{config.parent_system_code ?? "-"}</TableCell>
                     </TableRow>
                   ))
                 )}

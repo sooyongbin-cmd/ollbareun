@@ -10,7 +10,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("system config form", () => {
-  it("shows fields in description, content, system code, and category order", () => {
+  it("hides system code and category fields while creating a config", () => {
     render(<SystemConfigForm mode="create" />);
 
     const fields = screen.getAllByRole("textbox");
@@ -18,9 +18,8 @@ describe("system config form", () => {
     expect(fields).toEqual([
       screen.getByLabelText("설명"),
       screen.getByLabelText("내용"),
-      screen.getByLabelText("시스템코드"),
-      screen.getByLabelText("분류"),
     ]);
-    expect(screen.getByLabelText("분류")).toHaveValue("");
+    expect(screen.queryByLabelText("시스템코드")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("분류")).not.toBeInTheDocument();
   });
 });

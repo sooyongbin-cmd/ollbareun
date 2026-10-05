@@ -14,6 +14,8 @@ import { notifyManagerThemeChange } from "../../../manager-theme-provider";
 import ConfirmModal from "@/components/modals/confirm-modal";
 import ProcessingModal from "@/components/modals/processing-modal";
 
+const managerThemeOptions = ["light", "dark", "system"] as const;
+
 type SystemConfigFormProps = {
   mode: "create" | "edit";
   initialConfig?: {
@@ -61,8 +63,7 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
           method: mode === "create" ? "POST" : "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            systemCode,
-            parentSystemCode,
+            ...(mode === "edit" ? { systemCode, parentSystemCode } : {}),
             description,
             content,
           }),
@@ -124,41 +125,64 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
       </div>
 
       <div className="space-y-2">
-        <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="system-config-content">
+        <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" id="system-config-content-label">
           내용
         </label>
-        <Textarea
-          className="w-full min-h-[11.25rem] resize-y"
-          id="system-config-content"
-          onChange={(event) => setContent(event.target.value)}
-          value={content}
-        />
+        {isThemeConfig ? (
+          <fieldset aria-labelledby="system-config-content-label" className="flex flex-wrap gap-5">
+            {managerThemeOptions.map((theme) => (
+              <label key={theme} className="flex cursor-pointer items-center gap-2 text-sm">
+                <input
+                  className="size-4 accent-primary"
+                  name="system-config-content"
+                  onChange={() => setContent(theme)}
+                  required
+                  type="radio"
+                  value={theme}
+                  checked={content === theme}
+                />
+                {theme}
+              </label>
+            ))}
+          </fieldset>
+        ) : (
+          <Textarea
+            className="w-full min-h-[11.25rem] resize-y"
+            id="system-config-content"
+            onChange={(event) => setContent(event.target.value)}
+            value={content}
+          />
+        )}
       </div>
 
-      <div className="space-y-2">
-        <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="system-code">
-          시스템코드
-        </label>
-        <Input
-          className="w-full"
-          disabled={mode === "edit"}
-          id="system-code"
-          onChange={(event) => setSystemCode(event.target.value)}
-          value={systemCode}
-        />
-      </div>
+      {mode === "edit" ? (
+        <div className="space-y-2">
+          <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="system-code">
+            시스템코드
+          </label>
+          <Input
+            className="w-full"
+            disabled
+            id="system-code"
+            onChange={(event) => setSystemCode(event.target.value)}
+            value={systemCode}
+          />
+        </div>
+      ) : null}
 
-      <div className="space-y-2">
-        <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="parent-system-code">
-          분류
-        </label>
-        <Input
-          className="w-full"
-          id="parent-system-code"
-          onChange={(event) => setParentSystemCode(event.target.value)}
-          value={parentSystemCode}
-        />
-      </div>
+      {mode === "edit" ? (
+        <div className="space-y-2">
+          <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="parent-system-code">
+            분류
+          </label>
+          <Input
+            className="w-full"
+            id="parent-system-code"
+            onChange={(event) => setParentSystemCode(event.target.value)}
+            value={parentSystemCode}
+          />
+        </div>
+      ) : null}
 
       {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p> : null}
 

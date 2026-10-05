@@ -1,4 +1,5 @@
 import { getSystemConfig } from "@/lib/system-configs";
+import { isManagerThemeSystemCode, managerThemeSystemCode } from "@/lib/manager-theme";
 import SystemConfigForm from "../system-config-form";
 
 type PageProps = {
@@ -8,7 +9,14 @@ type PageProps = {
 export default async function EditSystemConfigPage({ params }: PageProps) {
   const { systemCode } = await params;
   const decodedSystemCode = decodeURIComponent(systemCode);
-  const config = await getSystemConfig(decodedSystemCode);
+  const config = isManagerThemeSystemCode(decodedSystemCode)
+    ? {
+        system_code: managerThemeSystemCode,
+        parent_system_code: null,
+        description: "이 브라우저의 관리자 테마",
+        content: "system",
+      }
+    : await getSystemConfig(decodedSystemCode);
 
   return (
     <section className="space-y-[1.5rem]">

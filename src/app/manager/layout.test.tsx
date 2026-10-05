@@ -1,11 +1,6 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import ManagerRootLayout, { metadata } from "./layout";
-
-vi.mock("@/lib/system-configs", () => ({
-  getManagerTheme: vi.fn().mockResolvedValue("system"),
-  isSystemConfigEnabled: vi.fn().mockResolvedValue(false),
-}));
 
 describe("manager root layout", () => {
   it("links the manager manifest, sets title and favicon icon", () => {

@@ -1,5 +1,5 @@
 import { getSupabaseAdmin } from "./supabase-admin";
-import { normalizeManagerTheme } from "./manager-theme";
+import { isManagerThemeSystemCode } from "./manager-theme";
 
 export type SystemConfigRow = {
   system_code: string;
@@ -26,6 +26,14 @@ function requireString(value: unknown, label: string) {
   return value.trim();
 }
 
+function requireServerStoredSystemCode(value: unknown) {
+  const systemCode = requireString(value, "시스템코드");
+  if (isManagerThemeSystemCode(systemCode)) {
+    throw new Error("THEME_CODE는 이 브라우저에만 저장할 수 있습니다.");
+  }
+  return systemCode;
+}
+
 function optionalString(value: unknown) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
@@ -48,11 +56,13 @@ export async function listSystemConfigs() {
     .order("description", { ascending: true });
 
   throwIfError(error);
-  return (data ?? []) as SystemConfigRow[];
+  return ((data ?? []) as SystemConfigRow[]).map((config) =>
+    isManagerThemeSystemCode(config.system_code) ? { ...config, content: "system" } : config,
+  );
 }
 
 export async function getSystemConfig(systemCodeInput: unknown) {
-  const systemCode = requireString(systemCodeInput, "시스템코드");
+  const systemCode = requireServerStoredSystemCode(systemCodeInput);
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("system_configs")
@@ -73,14 +83,6 @@ export async function isSystemConfigEnabled(systemCodeInput: unknown) {
     return (await getSystemConfigContent(systemCodeInput)).trim().toUpperCase() === "Y";
   } catch {
     return false;
-  }
-}
-
-export async function getManagerTheme() {
-  try {
-    return normalizeManagerTheme(await getSystemConfigContent("THEME_CODE"));
-  } catch {
-    return "system";
   }
 }
 
@@ -110,7 +112,7 @@ export async function createSystemConfig(input: {
   description?: unknown;
   content: unknown;
 }) {
-  const system_code = requireString(input.systemCode, "시스템코드");
+  const system_code = requireServerStoredSystemCode(input.systemCode);
   const parent_system_code = optionalString(input.parentSystemCode);
   const description = optionalString(input.description);
   const content = requireString(input.content, "내용");
@@ -136,7 +138,7 @@ export async function updateSystemConfig(input: {
   description?: unknown;
   content: unknown;
 }) {
-  const system_code = requireString(input.systemCode, "시스템코드");
+  const system_code = requireServerStoredSystemCode(input.systemCode);
   const parent_system_code = optionalString(input.parentSystemCode);
   const description = optionalString(input.description);
   const content = requireString(input.content, "내용");
@@ -158,7 +160,7 @@ export async function updateSystemConfig(input: {
 }
 
 export async function deleteSystemConfig(systemCodeInput: unknown) {
-  const systemCode = requireString(systemCodeInput, "시스템코드");
+  const systemCode = requireServerStoredSystemCode(systemCodeInput);
   const supabase = getSupabaseAdmin();
   const { error } = await supabase.from("system_configs").delete().eq("system_code", systemCode);
   throwIfError(error);

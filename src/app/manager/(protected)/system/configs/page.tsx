@@ -1,6 +1,7 @@
 "use client";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { isManagerThemeSystemCode, readManagerTheme } from "@/lib/manager-theme";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
@@ -20,7 +21,11 @@ async function fetchConfigs() {
     throw new Error(payload.error ?? "시스템설정을 불러오지 못했습니다.");
   }
 
-  return (payload.configs ?? []) as SystemConfig[];
+  return ((payload.configs ?? []) as SystemConfig[]).map((config) =>
+    isManagerThemeSystemCode(config.system_code)
+      ? { ...config, content: readManagerTheme() }
+      : config,
+  );
 }
 
 export default function SystemConfigsPage() {

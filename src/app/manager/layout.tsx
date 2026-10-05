@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { getManagerTheme } from "@/lib/system-configs";
 import ManagerThemeProvider from "./manager-theme-provider";
 
 export const metadata: Metadata = {
@@ -11,13 +10,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function ManagerRootLayout({
+export default function ManagerRootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const initialTheme = await getManagerTheme();
-
   return (
-    <ManagerThemeProvider initialTheme={initialTheme}>
+    <ManagerThemeProvider initialTheme="system">
       {children}
     </ManagerThemeProvider>
   );

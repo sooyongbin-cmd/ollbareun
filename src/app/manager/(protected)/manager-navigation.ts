@@ -6,7 +6,6 @@ import {
   CalendarDays,
   ClipboardCheck,
   FileClock,
-  FileText,
   GraduationCap,
   LayoutDashboard,
   ListChecks,
@@ -79,7 +78,6 @@ export const managerNavigationGroups: ManagerNavigationGroup[] = [
     items: [
       { label: "로그현황", href: "/manager/system/logs", icon: Activity },
       { label: "관리자관리", href: "/manager/system/admin-users", icon: ShieldCheck },
-      { label: "프로젝트 문서", href: "https://ollbareun.vercel.app/docs/documents/", icon: FileText },
       { label: "시스템설정", href: "/manager/system/configs", icon: Settings },
     ],
   },

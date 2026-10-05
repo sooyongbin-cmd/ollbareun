@@ -232,10 +232,7 @@ describe("manager layout", () => {
       "href",
       "/manager/system/configs",
     );
-    expect(screen.getByRole("link", { name: "프로젝트 문서" })).toHaveAttribute(
-      "href",
-      "https://ollbareun.vercel.app/docs/documents/",
-    );
+    expect(screen.queryByRole("link", { name: "프로젝트 문서" })).not.toBeInTheDocument();
 
     const systemLinks = screen
       .getByText("시스템")
@@ -244,7 +241,6 @@ describe("manager layout", () => {
     expect(Array.from(systemLinks ?? []).map((link) => link.textContent?.trim())).toEqual([
       "로그현황",
       "관리자관리",
-      "프로젝트 문서",
       "시스템설정",
     ]);
 

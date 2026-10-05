@@ -232,7 +232,7 @@ export default function WorksiteManagementClient() {
                     onSort={handleSort}
                     className="text-left"
                   >
-                    근무지명
+                    근무지
                   </SortableHeader>
                   <TableHead className="text-center">점검지</TableHead>
                   <SortableHeader
@@ -268,7 +268,7 @@ export default function WorksiteManagementClient() {
                     const count = worksiteCounts[worksite.id] ?? 0;
                     return (
                       <TableRow key={worksite.id} className="hover:bg-muted/40 transition-colors">
-                        <TableCell data-label="근무지명" className="font-semibold">
+                        <TableCell data-label="근무지" className="font-semibold">
                           <Link
                             className="text-primary hover:underline"
                             href={`/manager/employee/worksites/save/${worksite.id}`}
@@ -277,12 +277,16 @@ export default function WorksiteManagementClient() {
                           </Link>
                         </TableCell>
                         <TableCell data-label="점검지" className="text-center">
-                          <Link
-                            className="text-primary font-semibold hover:underline"
-                            href={`/manager/inspection/sites?worksiteId=${encodeURIComponent(worksite.id)}`}
-                          >
-                            {data.inspectionSiteCounts[worksite.id] ?? 0}
-                          </Link>
+                          {(data.inspectionSiteCounts[worksite.id] ?? 0) > 0 ? (
+                            <Link
+                              className="text-primary font-semibold hover:underline"
+                              href={`/manager/inspection/sites?worksiteId=${encodeURIComponent(worksite.id)}`}
+                            >
+                              {data.inspectionSiteCounts[worksite.id]}
+                            </Link>
+                          ) : (
+                            <span className="text-muted-foreground">0</span>
+                          )}
                         </TableCell>
                         <TableCell data-label="배정인원수" className="text-center">
                           {count > 0 ? (

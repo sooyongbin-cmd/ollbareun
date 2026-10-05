@@ -10,6 +10,9 @@ describe("inspection sites page", () => {
       "fetch",
       vi.fn(async (input: RequestInfo | URL) => {
         const url = String(input);
+        if (url.endsWith("/api/bootstrap")) {
+          return Response.json({ worksites: [{ id: "work-1", name: "Worksite" }] });
+        }
         if (url === "/api/inspection/sites/swap-order") {
           return Response.json({ success: true });
         }
@@ -41,12 +44,14 @@ describe("inspection sites page", () => {
     render(<InspectionSitesPage />);
 
     expect(screen.getByRole("heading", { name: "점검지관리" })).toBeInTheDocument();
+    expect(screen.getByLabelText("근무지")).toBeInTheDocument();
     expect(screen.getByLabelText("점검지명")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "점검지 등록" })).toHaveAttribute(
       "href",
       "/manager/inspection/sites/new",
     );
 
+    await user.selectOptions(screen.getByLabelText("근무지"), "work-1");
     await user.type(screen.getByLabelText("점검지명"), "Gate");
     await user.click(screen.getByRole("button", { name: "조회" }));
 
@@ -59,7 +64,7 @@ describe("inspection sites page", () => {
       "/manager/inspection/sites/site-1",
     );
     await waitFor(() => {
-      expect(fetch).toHaveBeenLastCalledWith("/api/inspection/sites?name=Gate");
+      expect(fetch).toHaveBeenLastCalledWith("/api/inspection/sites?worksiteId=work-1&name=Gate");
     });
   });
 
@@ -68,6 +73,9 @@ describe("inspection sites page", () => {
       "fetch",
       vi.fn(async (input: RequestInfo | URL) => {
         const url = String(input);
+        if (url.endsWith("/api/bootstrap")) {
+          return Response.json({ worksites: [] });
+        }
         if (url.startsWith("/api/inspection/sites")) {
           return Response.json({
             sites: [
@@ -131,6 +139,9 @@ describe("inspection sites page", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: RequestInfo | URL) => {
+        if (String(input).endsWith("/api/bootstrap")) {
+          return Response.json({ worksites: [] });
+        }
         if (String(input).startsWith("/api/inspection/sites")) {
           return Response.json({
             sites: [{ id: "site-1", worksite_name: "Worksite", name: "Gate" }],

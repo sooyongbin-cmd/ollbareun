@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
 import { useEffect, useState, type DragEvent, type FormEvent } from "react";
@@ -19,6 +20,11 @@ type InspectionSite = {
     employee_name: string;
     employee_role: string;
   } | null;
+};
+
+type Worksite = {
+  id: string;
+  name: string;
 };
 
 async function fetchSites(name: string, worksiteId: string) {
@@ -76,14 +82,41 @@ function formatInspectionTime(value?: string) {
 
 export default function InspectionSitesPage() {
   const [query, setQuery] = useState("");
-  const [worksiteFilter] = useState(() =>
+  const [worksiteFilter, setWorksiteFilter] = useState(() =>
     typeof window === "undefined" ? "" : new URLSearchParams(window.location.search).get("worksiteId") ?? "",
   );
+  const [worksites, setWorksites] = useState<Worksite[]>([]);
   const [sites, setSites] = useState<InspectionSite[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [draggedSiteId, setDraggedSiteId] = useState<string | null>(null);
   const [reordering, setReordering] = useState(false);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadWorksites() {
+      try {
+        const response = await fetch("/api/bootstrap");
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload.error ?? "근무지 목록을 불러오지 못했습니다.");
+        }
+        if (!ignore) {
+          setWorksites(payload.worksites ?? []);
+        }
+      } catch (loadError) {
+        if (!ignore) {
+          setError(loadError instanceof Error ? loadError.message : "근무지 목록을 불러오지 못했습니다.");
+        }
+      }
+    }
+
+    void loadWorksites();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   async function loadSites(name = query) {
     await Promise.resolve();
@@ -171,6 +204,24 @@ export default function InspectionSitesPage() {
         className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
       >
         <form className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between" onSubmit={handleSearch}>
+          <div className="space-y-2 flex-1">
+            <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="site-worksite-search">
+              근무지
+            </label>
+            <NativeSelect
+              className="w-full"
+              id="site-worksite-search"
+              value={worksiteFilter}
+              onChange={(event) => setWorksiteFilter(event.target.value)}
+            >
+              <NativeSelectOption value="">전체</NativeSelectOption>
+              {worksites.map((worksite) => (
+                <NativeSelectOption key={worksite.id} value={worksite.id}>
+                  {worksite.name}
+                </NativeSelectOption>
+              ))}
+            </NativeSelect>
+          </div>
           <div className="space-y-2 flex-1">
             <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="site-search">
               점검지명

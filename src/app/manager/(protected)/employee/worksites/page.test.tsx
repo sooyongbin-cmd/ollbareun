@@ -127,8 +127,8 @@ describe("worksite management page", () => {
     expect(within(rows[1]).getByText("본사")).toBeInTheDocument();
     expect(within(rows[2]).getByText("서울지점")).toBeInTheDocument();
 
-    // Click "근무지명" to sort DESC: 서울지점 first, then 본사
-    const nameHeader = screen.getByRole("columnheader", { name: "근무지명" });
+    // Click "근무지" to sort DESC: 서울지점 first, then 본사
+    const nameHeader = screen.getByRole("columnheader", { name: "근무지" });
     await user.click(nameHeader);
 
     const updatedRows = screen.getAllByRole("row");

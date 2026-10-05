@@ -65,13 +65,13 @@ export default function AssignmentManagementClient() {
 
   const employeeNameOptions = useMemo(() => {
     return Array.from(new Set(employeeNames)).sort((left, right) =>
-      right.localeCompare(left, "ko-KR"),
+      left.localeCompare(right, "ko-KR"),
     );
   }, [employeeNames]);
 
   const worksiteNameOptions = useMemo(() => {
     return Array.from(new Set(worksiteNames)).sort((left, right) =>
-      right.localeCompare(left, "ko-KR"),
+      left.localeCompare(right, "ko-KR"),
     );
   }, [worksiteNames]);
 

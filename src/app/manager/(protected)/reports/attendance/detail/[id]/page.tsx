@@ -222,7 +222,7 @@ export default function AttendanceDetailPage() {
           <div className="grid grid-cols-1 gap-3 min-[641px]:grid-cols-2 min-[1280px]:grid-cols-4">
             {educationTypeOrder.map((type) => {
               const items = education.filter((item) => item.educationType === type);
-              return <div key={type} className="grid min-w-0 gap-2 min-[641px]:grid-cols-[5rem_1fr] min-[641px]:items-start">
+              return <div key={type} className="grid min-w-0 gap-x-2 gap-y-1 min-[641px]:grid-cols-[3rem_1fr] min-[641px]:items-start">
                 <h3 className="pt-2 text-sm font-semibold text-muted-foreground">{educationTypeLabels[type]}</h3>
                 <div className="flex min-w-0 flex-wrap gap-2">
                   {items.length ? items.map((item) => {
@@ -233,7 +233,7 @@ export default function AttendanceDetailPage() {
                         <Button type="button" size="sm" variant={selected ? "default" : "outline"}
                           aria-label={`${item.title} 이수 처리`} aria-pressed={selected}
                           onClick={() => toggleEducation(item.resourceId)}>
-                          {selected ? "이수 예정" : "이수"}
+                          {selected ? "이수" : "미이수"}
                         </Button>}
                     </div>;
                   }) : <p className="py-2 text-sm text-muted-foreground">등록된 교육이 없습니다.</p>}

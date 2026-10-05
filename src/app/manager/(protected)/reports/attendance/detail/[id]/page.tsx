@@ -223,7 +223,7 @@ export default function AttendanceDetailPage() {
             {educationTypeOrder.map((type) => {
               const items = education.filter((item) => item.educationType === type);
               return <div key={type} className="grid min-w-0 gap-x-3.5 gap-y-1 min-[641px]:grid-cols-[max-content_1fr] items-center">
-                <h3 className="pt-2 text-sm font-semibold text-muted-foreground">{educationTypeLabels[type]}</h3>
+                <h3 className="text-sm font-semibold text-muted-foreground">{educationTypeLabels[type]}</h3>
                 <div className="flex min-w-0 flex-wrap gap-2">
                   {items.length ? items.map((item) => {
                     const selected = selectedEducationIds.includes(item.resourceId);

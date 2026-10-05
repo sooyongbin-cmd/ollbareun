@@ -1,4 +1,4 @@
-import { getSystemConfig } from "@/lib/system-configs";
+import { getSystemConfig, getSystemConfigDescription } from "@/lib/system-configs";
 import { isManagerThemeSystemCode, managerThemeSystemCode } from "@/lib/manager-theme";
 import SystemConfigForm from "../system-config-form";
 
@@ -9,11 +9,12 @@ type PageProps = {
 export default async function EditSystemConfigPage({ params }: PageProps) {
   const { systemCode } = await params;
   const decodedSystemCode = decodeURIComponent(systemCode);
-  const config = isManagerThemeSystemCode(decodedSystemCode)
+  const isThemeConfig = isManagerThemeSystemCode(decodedSystemCode);
+  const config = isThemeConfig
     ? {
         system_code: managerThemeSystemCode,
         parent_system_code: null,
-        description: "이 브라우저의 관리자 테마",
+        description: await getSystemConfigDescription(managerThemeSystemCode),
         content: "system",
       }
     : await getSystemConfig(decodedSystemCode);

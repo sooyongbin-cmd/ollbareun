@@ -74,6 +74,19 @@ export async function getSystemConfig(systemCodeInput: unknown) {
   return data as SystemConfigRow;
 }
 
+export async function getSystemConfigDescription(systemCodeInput: unknown) {
+  const systemCode = requireString(systemCodeInput, "시스템코드");
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("system_configs")
+    .select("description")
+    .eq("system_code", systemCode)
+    .maybeSingle();
+
+  throwIfError(error);
+  return data?.description ?? null;
+}
+
 export async function getSystemConfigContent(systemCodeInput: unknown) {
   return (await getSystemConfig(systemCodeInput)).content;
 }

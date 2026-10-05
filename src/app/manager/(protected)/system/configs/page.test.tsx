@@ -30,13 +30,12 @@ describe("system configs page", () => {
     expect(screen.getAllByRole("columnheader").map((header) => header.textContent)).toEqual([
       "설명",
       "내용",
-      "시스템코드",
     ]);
     expect(await screen.findByRole("link", { name: "Manager notification email address" })).toHaveAttribute(
       "href",
       "/manager/system/configs/manager_email",
     );
-    expect(screen.getByText("manager_email")).toBeInTheDocument();
+    expect(screen.queryByText("manager_email")).not.toBeInTheDocument();
     expect(screen.getByText("admin@example.com")).toBeInTheDocument();
   });
 });

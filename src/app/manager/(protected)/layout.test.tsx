@@ -222,10 +222,7 @@ describe("manager layout", () => {
       "/manager/safety/resources",
     );
     expect(screen.queryByRole("link", { name: "교육이수관리" })).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "교육알림" })).toHaveAttribute(
-      "href",
-      "/manager/safety/notifications",
-    );
+    expect(screen.queryByRole("link", { name: "교육알림" })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "로그현황" })).toHaveAttribute(
       "href",
       "/manager/system/logs",

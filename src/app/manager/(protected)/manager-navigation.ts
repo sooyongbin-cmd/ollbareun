@@ -1,7 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
   Activity,
-  BellRing,
   BookOpen,
   Building2,
   CalendarDays,
@@ -72,7 +71,6 @@ export const managerNavigationGroups: ManagerNavigationGroup[] = [
       { label: "교육자료관리", href: "/manager/safety/resources", icon: BookOpen },
       { label: "일별교육이수", href: "/manager/safety/daily_edu", icon: CalendarDays },
       { label: "월별교육이수", href: "/manager/safety/monthly_edu", icon: CalendarDays },
-      { label: "교육알림", href: "/manager/safety/notifications", icon: BellRing },
     ],
   },
   {

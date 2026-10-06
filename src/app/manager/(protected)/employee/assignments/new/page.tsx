@@ -170,9 +170,9 @@ export default function AssignmentNewPage() {
           <ManagerLoadingMessage />
         ) : (
           <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(22.5rem,2fr)]" data-testid="assignment-primary-row">
-              <div className="space-y-2">
-                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-employee">
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(22.5rem,2fr)] lg:items-end" data-testid="assignment-primary-row">
+              <div className="flex flex-col gap-2">
+                <label className="block leading-5 text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-employee">
                   근무자
                 </label>
                 <NativeSelect className="w-full appearance-none" id="assignment-employee" name="employeeId" value={employeeId} onChange={(event) => {
@@ -188,8 +188,8 @@ export default function AssignmentNewPage() {
                   ))}
                 </NativeSelect>
               </div>
-              <div className="space-y-2">
-                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-worksite">
+              <div className="flex flex-col gap-2">
+                <label className="block leading-5 text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-worksite">
                   근무지
                 </label>
                 <NativeSelect className="w-full appearance-none" id="assignment-worksite" name="worksiteId" required>
@@ -201,8 +201,8 @@ export default function AssignmentNewPage() {
                   ))}
                 </NativeSelect>
               </div>
-              <div className="space-y-2 lg:min-w-[22.5rem]">
-                <p className="text-[0.875rem] font-semibold text-muted-foreground ml-1">근무기간</p>
+              <div className="flex flex-col gap-2 lg:min-w-[22.5rem]">
+                <p className="leading-5 text-[0.875rem] font-semibold text-muted-foreground ml-1">근무기간</p>
                 <div className="grid gap-2 sm:grid-cols-2">
                   <label className="sr-only" htmlFor="assignment-start-date">
                     시작일

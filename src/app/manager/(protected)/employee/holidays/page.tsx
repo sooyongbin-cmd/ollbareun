@@ -129,7 +129,7 @@ export default function HolidaysPage() {
                 <TableRow>
                   <TableHead>공휴일 날짜</TableHead>
                   <TableHead>휴일명</TableHead><TableHead>휴일 구분</TableHead>
-                  <TableHead className="text-right">선택</TableHead>
+                  <TableHead className="text-center">선택</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -146,8 +146,8 @@ export default function HolidaysPage() {
                     <TableCell data-label="휴일 구분"><NativeSelect aria-label={row.holiday_date + " 휴일 구분"} value={row.holiday_type ?? "public"} disabled={busy || !!saving} onChange={event => void changeType(row, event.target.value)}>
                       <NativeSelectOption value="public">국공휴일</NativeSelectOption><NativeSelectOption value="custom">회사 지정 휴일</NativeSelectOption>
                     </NativeSelect></TableCell>
-                    <TableCell data-label="선택" className="text-right">
-                      <Checkbox aria-label={row.holiday_date + " 휴일 선택"} checked={row.selected === "Y"} disabled={busy || !!saving} onCheckedChange={checked => void toggle(row, checked === true)} />
+                    <TableCell data-label="선택" className="text-center">
+                      <Checkbox className="justify-self-center" aria-label={row.holiday_date + " 휴일 선택"} checked={row.selected === "Y"} disabled={busy || !!saving} onCheckedChange={checked => void toggle(row, checked === true)} />
                     </TableCell>
                   </TableRow>
                 ))}

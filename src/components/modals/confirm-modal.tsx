@@ -48,7 +48,7 @@ export default function ConfirmModal({
               </div>
             </AlertDialogDescription>
           ) : description ? (
-            <AlertDialogDescription>{description}</AlertDialogDescription>
+            <AlertDialogDescription className="whitespace-pre-line">{description}</AlertDialogDescription>
           ) : null}
         </AlertDialogHeader>
         {!loading ? (

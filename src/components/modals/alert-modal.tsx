@@ -34,7 +34,7 @@ export default function AlertModal({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          {description ? <DialogDescription className="leading-relaxed">{description}</DialogDescription> : null}
+          {description ? <DialogDescription className="whitespace-pre-line leading-relaxed">{description}</DialogDescription> : null}
         </DialogHeader>
         <DialogFooter className="flex-row justify-end">
           <Button className="w-auto" type="button" onClick={onClose}>

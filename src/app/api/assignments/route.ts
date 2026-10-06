@@ -3,6 +3,7 @@ import {
   AssignmentOverlapError,
   createAssignment,
   listAssignmentManagementData,
+  listAttendanceForEmployeeInPeriod,
   listAssignmentsForEmployeeInPeriod,
 } from "@/lib/phase1-data";
 
@@ -21,9 +22,11 @@ export async function GET(request: Request) {
         return Response.json({ error: "근무자와 근무기간을 모두 입력하세요." }, { status: 400 });
       }
 
-      return Response.json({
-        assignments: await listAssignmentsForEmployeeInPeriod(employeeId, startDate, endDate),
-      });
+      const [assignments, attendanceRecords] = await Promise.all([
+        listAssignmentsForEmployeeInPeriod(employeeId, startDate, endDate),
+        listAttendanceForEmployeeInPeriod(employeeId, startDate, endDate),
+      ]);
+      return Response.json({ assignments, attendanceRecords });
     }
 
     return Response.json(await listAssignmentManagementData());
@@ -41,11 +44,14 @@ export async function POST(request: Request) {
       return Response.json({ error: "관리자 인증이 필요합니다." }, { status: 401 });
     }
     const body = await request.json();
-    return Response.json({ assignment: await createAssignment(body) });
+    return Response.json(await createAssignment(body));
   } catch (error) {
     if (error instanceof AssignmentOverlapError) {
+      const overlapDetails = error.conflicts.length > 1
+        ? { conflicts: error.conflicts }
+        : { conflict: error.conflicts[0] ?? null };
       return Response.json(
-        { error: error.message, conflict: error.conflict },
+        { error: error.message, ...overlapDetails },
         { status: 409 },
       );
     }

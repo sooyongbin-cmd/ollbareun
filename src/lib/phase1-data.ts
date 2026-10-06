@@ -53,12 +53,14 @@ export type AssignmentConflict = {
 };
 
 export class AssignmentOverlapError extends Error {
+  readonly conflicts: AssignmentConflict[];
   readonly conflict: AssignmentConflict | null;
 
-  constructor(conflict: AssignmentConflict | null) {
+  constructor(conflicts: AssignmentConflict[] | AssignmentConflict | null) {
     super("해당 직원의 근무기간이 기존 배정과 겹칩니다.");
     this.name = "AssignmentOverlapError";
-    this.conflict = conflict;
+    this.conflicts = Array.isArray(conflicts) ? conflicts : conflicts ? [conflicts] : [];
+    this.conflict = this.conflicts[0] ?? null;
   }
 }
 
@@ -150,20 +152,18 @@ function throwIfError(error: { message: string } | null) {
   }
 }
 
-async function findAssignmentConflict(employeeId: string, startDate: string, endDate: string) {
+async function findAssignmentConflicts(employeeId: string, startDate: string, endDate: string) {
   const supabase = getSupabaseAdmin();
-  const { data: assignment, error: assignmentError } = await supabase
+  const { data: assignments, error: assignmentError } = await supabase
     .from("work_assignments")
     .select("id,employee_id,start_date,end_date")
     .eq("employee_id", employeeId)
     .lte("start_date", endDate)
     .gte("end_date", startDate)
-    .order("start_date", { ascending: true })
-    .limit(1)
-    .maybeSingle();
+    .order("start_date", { ascending: true });
 
   throwIfError(assignmentError);
-  if (!assignment) return null;
+  if (!assignments?.length) return [];
 
   const { data: employee, error: employeeError } = await supabase
     .from("employees")
@@ -172,13 +172,13 @@ async function findAssignmentConflict(employeeId: string, startDate: string, end
     .maybeSingle();
   throwIfError(employeeError);
 
-  return {
+  return assignments.map((assignment) => ({
     id: assignment.id,
     employeeId,
     employeeName: employee?.name ?? "근무자",
     startDate: assignment.start_date,
     endDate: assignment.end_date,
-  } satisfies AssignmentConflict;
+  } satisfies AssignmentConflict));
 }
 
 export async function loadBootstrap() {
@@ -374,6 +374,29 @@ export async function listAssignmentsForEmployeeInPeriod(
   })) as ExistingAssignmentSummary[];
 }
 
+export async function listAttendanceForEmployeeInPeriod(
+  employeeIdInput: unknown,
+  startDateInput: unknown,
+  endDateInput: unknown,
+) {
+  const employeeId = requireString(employeeIdInput, "근무자");
+  const startDate = requireDate(startDateInput, "시작일");
+  const endDate = requireDate(endDateInput, "종료일");
+  if (startDate > endDate) throw new Error("종료일은 시작일보다 빠를 수 없습니다.");
+
+  const { data, error } = await getSupabaseAdmin()
+    .from("work_record")
+    .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime")
+    .eq("employee_id", employeeId)
+    .gte("work_date", startDate)
+    .lte("work_date", endDate)
+    .or("work_intime.not.is.null,work_outtime.not.is.null")
+    .order("work_date", { ascending: true });
+
+  throwIfError(error);
+  return (data ?? []) as ScheduledAttendanceRow[];
+}
+
 export async function updateEmployee(input: {
   id: unknown;
   name: unknown;
@@ -539,6 +562,7 @@ export async function createAssignment(input: {
   in_time?: unknown;
   out_time?: unknown;
   resolveOverlap?: unknown;
+  resolveOverlapConflicts?: unknown;
   resolveOverlapAssignmentId?: unknown;
   resolveOverlapStartDate?: unknown;
   resolveOverlapEndDate?: unknown;
@@ -548,11 +572,25 @@ export async function createAssignment(input: {
   const { start_date, end_date } = requireDateRange(input);
   const has_weekend = input.has_weekend === true || input.has_weekend === "true" || input.has_weekend === 1;
   const resolveOverlap = input.resolveOverlap === true;
-  const confirmedOverlap = resolveOverlap ? {
-    id: requireString(input.resolveOverlapAssignmentId, "기존 배정"),
-    start_date: requireDate(input.resolveOverlapStartDate, "기존 배정 시작일"),
-    end_date: requireDate(input.resolveOverlapEndDate, "기존 배정 종료일"),
-  } : null;
+  const confirmedConflicts = resolveOverlap
+    ? (Array.isArray(input.resolveOverlapConflicts)
+      ? input.resolveOverlapConflicts.map((item) => {
+        if (!item || typeof item !== "object") throw new Error("기존 배정 확인 정보가 올바르지 않습니다.");
+        const conflict = item as Record<string, unknown>;
+        return {
+          id: requireString(conflict.id, "기존 배정"),
+          startDate: requireDate(conflict.startDate, "기존 배정 시작일"),
+          endDate: requireDate(conflict.endDate, "기존 배정 종료일"),
+        };
+      })
+      : input.resolveOverlapAssignmentId
+        ? [{
+          id: requireString(input.resolveOverlapAssignmentId, "기존 배정"),
+          startDate: requireDate(input.resolveOverlapStartDate, "기존 배정 시작일"),
+          endDate: requireDate(input.resolveOverlapEndDate, "기존 배정 종료일"),
+        }]
+        : (() => { throw new Error("기존 배정 확인 정보가 올바르지 않습니다."); })())
+    : null;
 
   const schedule = validateEmployeeSchedule({ work_style: input.work_style, in_time: input.in_time, out_time: input.out_time });
   const rules = input.schedule_rules === undefined ? undefined : validateScheduleRules(input.schedule_rules, input.work_style);
@@ -616,18 +654,9 @@ export async function createAssignment(input: {
     }
   }
   const supabase = getSupabaseAdmin();
-  const rpcName = resolveOverlap
-    ? "resolve_assignment_overlap_transactionally"
-    : rules === undefined
-      ? "create_assignment_with_daily_attendance"
-      : "create_assignment_with_schedule_rules";
   const rpcArgs = {
     ...(rules === undefined ? {} : { p_schedule_rules: rules }),
-    ...(confirmedOverlap ? {
-      p_expected_assignment_id: confirmedOverlap.id,
-      p_expected_start_date: confirmedOverlap.start_date,
-      p_expected_end_date: confirmedOverlap.end_date,
-    } : {}),
+    p_expected_conflicts: confirmedConflicts,
     p_employee_id: employee_id,
     p_worksite_id: worksite_id,
     p_start_date: start_date,
@@ -637,18 +666,21 @@ export async function createAssignment(input: {
     p_in_time: schedule.in_time ?? null,
     p_out_time: schedule.out_time ?? null,
   };
-  const { data, error } = await supabase.rpc(rpcName, rpcArgs).single();
+  const { data, error } = await supabase.rpc("resolve_assignment_overlaps_transactionally", rpcArgs).single();
 
   if (
     error?.code === "23P01"
     || error?.message.includes("근무기간이 기존 배정과 겹칩니다")
     || error?.message.includes("겹치는 근무기간 배정")
   ) {
-    const conflict = await findAssignmentConflict(employee_id, start_date, end_date);
-    throw new AssignmentOverlapError(conflict);
+    const conflicts = await findAssignmentConflicts(employee_id, start_date, end_date);
+    if (conflicts.length) throw new AssignmentOverlapError(conflicts);
   }
   throwIfError(error);
-  return data as AssignmentRow;
+  const result = data as { assignment: AssignmentRow; adjusted_assignments: {
+    oldStartDate: string; oldEndDate: string; newPeriods: { startDate: string; endDate: string }[];
+  }[] };
+  return { assignment: result.assignment, adjustedAssignments: result.adjusted_assignments ?? [] };
 }
 
 export async function listAssignmentManagementData() {

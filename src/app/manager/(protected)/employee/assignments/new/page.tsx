@@ -30,6 +30,11 @@ type AssignmentResponse = {
   assignment: {
     id: string;
   };
+  adjustedAssignments: {
+    oldStartDate: string;
+    oldEndDate: string;
+    newPeriods: { startDate: string; endDate: string }[];
+  }[];
 };
 
 type ExistingAssignment = {
@@ -47,7 +52,17 @@ type ExistingAssignment = {
 
 type ExistingAssignmentResponse = {
   assignments: ExistingAssignment[];
+  attendanceRecords: AttendanceHistoryRow[];
   error?: string;
+};
+
+type AttendanceHistoryRow = {
+  id: string;
+  work_date: string;
+  intime: string | null;
+  outtime: string | null;
+  work_intime: string | null;
+  work_outtime: string | null;
 };
 
 type AssignmentRequestBody = Record<string, unknown>;
@@ -56,7 +71,7 @@ class AssignmentRequestError extends Error {
   constructor(
     message: string,
     readonly status: number,
-    readonly conflict?: AssignmentConflict | null,
+    readonly conflicts: AssignmentConflict[] = [],
   ) {
     super(message);
     this.name = "AssignmentRequestError";
@@ -75,7 +90,7 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
     throw new AssignmentRequestError(
       payload.error ?? "배정을 처리하지 못했습니다.",
       response.status,
-      payload.conflict ?? null,
+      payload.conflicts ?? (payload.conflict ? [payload.conflict] : []),
     );
   }
 
@@ -149,6 +164,24 @@ function formatAssignmentDaysOff(assignment: ExistingAssignment) {
   return daysOff.length ? daysOff.join(" · ") : "없음";
 }
 
+function formatSeoulTime(value: string | null) {
+  if (!value) return "-";
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(new Date(value));
+}
+
+function formatAttendanceRange(start: string | null, end: string | null) {
+  return `${formatSeoulTime(start)} ~ ${formatSeoulTime(end)}`;
+}
+
+function assignmentPeriod(startDate: string, endDate: string) {
+  return startDate === endDate ? startDate : `${startDate} ~ ${endDate}`;
+}
+
 export default function AssignmentNewPage() {
   const [startDate, setStartDate] = useState(todayDate);
   const [endDate, setEndDate] = useState(() => defaultEndDate(startDate));
@@ -162,13 +195,15 @@ export default function AssignmentNewPage() {
   const [existingAssignmentData, setExistingAssignmentData] = useState<{
     key: string;
     assignments: ExistingAssignment[];
-  }>({ key: "", assignments: [] });
+    attendanceRecords: AttendanceHistoryRow[];
+    failed: boolean;
+  }>({ key: "", assignments: [], attendanceRecords: [], failed: false });
   const [alertMessage, setAlertMessage] = useState("");
   const [createdAssignmentId, setCreatedAssignmentId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [pendingConflict, setPendingConflict] = useState<{
     body: AssignmentRequestBody;
-    conflict: AssignmentConflict;
+    conflicts: AssignmentConflict[];
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -179,12 +214,19 @@ export default function AssignmentNewPage() {
   const existingAssignments = existingAssignmentData.key === existingAssignmentKey
     ? existingAssignmentData.assignments
     : [];
+  const attendanceRecords = existingAssignmentData.key === existingAssignmentKey
+    ? existingAssignmentData.attendanceRecords
+    : [];
+  const assignmentLookupReady = Boolean(existingAssignmentKey) && existingAssignmentData.key === existingAssignmentKey;
+  const assignmentSubmitDisabled = saving
+    || (Boolean(existingAssignmentKey) && (!assignmentLookupReady || existingAssignmentData.failed || attendanceRecords.length > 0));
   const sortedEmployees = data.employees.filter((employee) => !employee.is_retired).sort((left, right) =>
     left.name.localeCompare(right.name, "ko-KR"),
   );
 
   const selectEmployee = useCallback((id: string, employee?: Bootstrap["employees"][number]) => {
     setEmployeeId(id);
+    setError("");
     setWorkStyle(employee?.work_style ?? "0");
     setScheduleRules(employeeScheduleRules(employee ?? { has_weekend: true }));
     setInTime((employee?.in_time ?? "06:00").slice(0, 5));
@@ -250,11 +292,19 @@ export default function AssignmentNewPage() {
         }
 
         if (!ignore) {
-          setExistingAssignmentData({ key, assignments: payload.assignments ?? [] });
+          setExistingAssignmentData({
+            key,
+            assignments: payload.assignments ?? [],
+            attendanceRecords: payload.attendanceRecords ?? [],
+            failed: false,
+          });
+          if (payload.attendanceRecords?.length) {
+            setError(`날짜(${payload.attendanceRecords[0].work_date})에 출근이력이 있습니다.`);
+          }
         }
       } catch (loadError) {
         if (!ignore) {
-          setExistingAssignmentData({ key, assignments: [] });
+          setExistingAssignmentData({ key, assignments: [], attendanceRecords: [], failed: true });
           setError(loadError instanceof Error ? loadError.message : "기존 배정 자료를 불러오지 못했습니다.");
         }
       }
@@ -270,7 +320,7 @@ export default function AssignmentNewPage() {
   async function submitAssignment(
     body: AssignmentRequestBody,
     resolveOverlap: boolean,
-    confirmedConflict?: AssignmentConflict,
+    confirmedConflicts?: AssignmentConflict[],
   ) {
     if (saving) return;
     setSaving(true);
@@ -279,24 +329,39 @@ export default function AssignmentNewPage() {
     try {
       const result = await postJson<AssignmentResponse>("/api/assignments", {
         ...body,
-        ...(resolveOverlap && confirmedConflict ? {
+        ...(resolveOverlap ? {
           resolveOverlap: true,
-          resolveOverlapAssignmentId: confirmedConflict.id,
-          resolveOverlapStartDate: confirmedConflict.startDate,
-          resolveOverlapEndDate: confirmedConflict.endDate,
+          resolveOverlapConflicts: confirmedConflicts,
+          ...(confirmedConflicts?.length === 1 ? {
+            resolveOverlapAssignmentId: confirmedConflicts[0].id,
+            resolveOverlapStartDate: confirmedConflicts[0].startDate,
+            resolveOverlapEndDate: confirmedConflicts[0].endDate,
+          } : {}),
         } : {}),
       });
 
       setPendingConflict(null);
       setCreatedAssignmentId(result.assignment.id);
-      setAlertMessage("자료를 저장하였습니다.");
+      const adjustmentMessages = (result.adjustedAssignments ?? []).map((adjustment) => {
+        const previousPeriod = assignmentPeriod(adjustment.oldStartDate, adjustment.oldEndDate);
+        if (!adjustment.newPeriods.length) {
+          return `기존 ${previousPeriod} 배정은 신규 배정기간에 포함되어 삭제되었습니다.`;
+        }
+        const nextPeriods = adjustment.newPeriods.map((period) => assignmentPeriod(period.startDate, period.endDate));
+        if (nextPeriods.length === 1) {
+          return `기존 ${previousPeriod} 배정은 ${nextPeriods[0]} 으로 변경되었습니다.`;
+        }
+        return `기존 ${previousPeriod} 배정은 ${nextPeriods.join(" 및 ")}로 분리되었습니다.`;
+      });
+      adjustmentMessages.push(`신규 ${assignmentPeriod(String(body.startDate), String(body.endDate))} 배정이 생성되었습니다. 작업이 완료되었습니다.`);
+      setAlertMessage(adjustmentMessages.join("\n"));
     } catch (submitError) {
       if (
         submitError instanceof AssignmentRequestError
         && submitError.status === 409
-        && submitError.conflict
+        && submitError.conflicts.length > 0
       ) {
-        setPendingConflict({ body, conflict: submitError.conflict });
+        setPendingConflict({ body, conflicts: submitError.conflicts });
       } else {
         setPendingConflict(null);
         setError(submitError instanceof Error ? submitError.message : "배정을 처리하지 못했습니다.");
@@ -308,7 +373,7 @@ export default function AssignmentNewPage() {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (saving) return;
+    if (assignmentSubmitDisabled) return;
     const formData = new FormData(event.currentTarget);
     void submitAssignment({
       employeeId: formData.get("employeeId"),
@@ -390,6 +455,7 @@ export default function AssignmentNewPage() {
                     value={startDate}
                     onChange={(event) => {
                       const nextStartDate = event.target.value;
+                      setError("");
                       setStartDate(nextStartDate);
                       setEndDate(defaultEndDate(nextStartDate));
                     }}
@@ -405,7 +471,10 @@ export default function AssignmentNewPage() {
                     name="endDate"
                     type="date"
                     value={endDate}
-                    onChange={(event) => setEndDate(event.target.value)}
+                    onChange={(event) => {
+                      setError("");
+                      setEndDate(event.target.value);
+                    }}
                     required
                   />
                 </div>
@@ -452,7 +521,7 @@ export default function AssignmentNewPage() {
                 aria-label="배정등록"
                 className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto"
                 data-testid="assignment-submit"
-                disabled={saving}
+                disabled={assignmentSubmitDisabled}
                 type="submit"
               >
                 배정등록
@@ -515,17 +584,50 @@ export default function AssignmentNewPage() {
         </section>
       )}
 
+      {attendanceRecords.length > 0 && (
+        <section
+          aria-label="근무기간내 출근 이력"
+          className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
+        >
+          <h2 className="text-lg font-semibold">근무기간내 출근 이력</h2>
+          <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>날짜</TableHead>
+                  <TableHead>출퇴근예정</TableHead>
+                  <TableHead>출퇴근</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {attendanceRecords.map((record) => (
+                  <TableRow key={record.id}>
+                    <TableCell data-label="날짜" className="whitespace-nowrap text-muted-foreground">{record.work_date}</TableCell>
+                    <TableCell data-label="출퇴근예정" className="whitespace-nowrap text-muted-foreground">
+                      {formatAttendanceRange(record.intime, record.outtime)}
+                    </TableCell>
+                    <TableCell data-label="출퇴근" className="whitespace-nowrap text-muted-foreground">
+                      {formatAttendanceRange(record.work_intime, record.work_outtime)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </section>
+      )}
+
       <ProcessingModal isOpen={saving && !pendingConflict} message="저장처리중입니다..." />
 
       <ConfirmModal
         isOpen={Boolean(pendingConflict)}
         onClose={() => setPendingConflict(null)}
         onConfirm={() => {
-          if (pendingConflict) void submitAssignment(pendingConflict.body, true, pendingConflict.conflict);
+          if (pendingConflict) void submitAssignment(pendingConflict.body, true, pendingConflict.conflicts);
         }}
         title="배정 기간 중복"
         description={pendingConflict
-          ? `근무자 (${pendingConflict.conflict.employeeName}) 의 기존배정 (${pendingConflict.conflict.startDate}~${pendingConflict.conflict.endDate}) 자료와 배정기간이 중복됩니다. 기존 배정기간을 조정할까요?`
+          ? `${pendingConflict.conflicts.map((conflict) => `근무자 (${conflict.employeeName}) 의 기존배정 (${conflict.startDate}~${conflict.endDate})`).join("\n")} 자료와 배정기간이 중복됩니다. 기존 배정기간을 조정할까요?`
           : undefined}
         loading={saving}
         loadingLabel="기존 배정기간을 조정하고 있습니다..."

@@ -3,7 +3,7 @@ import {
   AssignmentOverlapError,
   createAssignment,
   listAssignmentManagementData,
-  listAssignmentsForEmployeeAndWorksite,
+  listAssignmentsForEmployeeInPeriod,
 } from "@/lib/phase1-data";
 
 export async function GET(request: Request) {

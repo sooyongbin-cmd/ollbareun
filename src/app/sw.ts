@@ -36,29 +36,39 @@ self.addEventListener("push", (event) => {
   try {
     const data = event.data.json();
     const title = data.title || "올바름 관리시스템";
+    const notificationData =
+      data.data && typeof data.data === "object" && !Array.isArray(data.data)
+        ? data.data
+        : {};
+    const notificationId =
+      typeof notificationData.notificationId === "string"
+        ? notificationData.notificationId
+        : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+    const savedNotificationData = { ...notificationData, notificationId };
     const options = {
       body: data.body || "",
       badge: data.badge || notificationBranding.badge,
-      data: data.data || {},
+      data: savedNotificationData,
       vibrate: [100, 50, 100],
     };
 
-    event.waitUntil(self.registration.showNotification(title, options));
-
-    // Post message to active, visible client windows (foreground app)
     event.waitUntil(
-      self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
-        windowClients.forEach((client) => {
-          if (client.visibilityState === "visible" && client.url.startsWith(self.registration.scope)) {
-            client.postMessage({
-              type: "PUSH_NOTIFICATION_RECEIVED",
-              title,
-              body: options.body,
-              data: options.data,
-            });
-          }
-        });
-      }),
+      self.registration.showNotification(title, options).then(() =>
+        // Let visible app windows read the notification from the service worker registration.
+        self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
+          windowClients.forEach((client) => {
+            if (client.visibilityState === "visible" && client.url.startsWith(self.registration.scope)) {
+              client.postMessage({
+                type: "PUSH_NOTIFICATION_RECEIVED",
+                title,
+                body: options.body,
+                notificationId,
+                data: options.data,
+              });
+            }
+          });
+        }),
+      ),
     );
   } catch (err) {
     console.error("Error parsing push notification data:", err);

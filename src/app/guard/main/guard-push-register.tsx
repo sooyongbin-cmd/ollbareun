@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import AlertModal from "@/components/modals/alert-modal";
 import { readStoredGuardSession } from "../guard-session-storage";
-import { registerAppPushWorker } from "@/lib/app-push-registration";
+import { getAppPushRegistration, registerAppPushWorker } from "@/lib/app-push-registration";
 
 const guardPushRegistrationStorageKey = "ollbareun.guard.pushRegistration";
 
@@ -36,6 +36,25 @@ function readStoredGuardSessionInfo(): StoredGuardSessionInfo {
   return {
     employeeId: typeof session?.employee?.id === "string" ? session.employee.id : null,
   };
+}
+
+function getNotificationUrl(notification: Notification) {
+  const url = (notification.data as { url?: unknown } | null)?.url;
+  return typeof url === "string" ? url : null;
+}
+
+function getNotificationKey(notification: Notification) {
+  const notificationId = (notification.data as { notificationId?: unknown } | null)?.notificationId;
+  if (typeof notificationId === "string" && notificationId) {
+    return notificationId;
+  }
+
+  return [
+    notification.timestamp,
+    notification.title,
+    notification.body,
+    getNotificationUrl(notification) ?? "",
+  ].join("\u0000");
 }
 
 function readStoredGuardPushRegistration(): StoredGuardPushRegistration | null {
@@ -81,6 +100,7 @@ function writeStoredGuardPushRegistration(input: { employeeId: string; endpoint:
 
 export default function GuardPushRegister() {
   const router = useRouter();
+  const pathname = usePathname();
   const [showInAppModal, setShowInAppModal] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalBody, setModalBody] = useState("");
@@ -88,6 +108,97 @@ export default function GuardPushRegister() {
   const [showPushErrorModal, setShowPushErrorModal] = useState(false);
   const [pushErrorTitle, setPushErrorTitle] = useState("");
   const [pushErrorBody, setPushErrorBody] = useState("");
+  const notificationQueueRef = useRef<Notification[]>([]);
+  const activeNotificationRef = useRef<Notification | null>(null);
+  const seenNotificationKeysRef = useRef(new Set<string>());
+
+  const showNextPendingNotification = useCallback(() => {
+    if (activeNotificationRef.current) return;
+
+    const notification = notificationQueueRef.current.shift();
+    if (!notification) return;
+
+    activeNotificationRef.current = notification;
+    setModalTitle(notification.title || "안전교육 독려 알림");
+    setModalBody(notification.body || "");
+    setModalUrl(getNotificationUrl(notification));
+    setShowInAppModal(true);
+  }, []);
+
+  const queuePendingNotifications = useCallback((notifications: Notification[]) => {
+    notifications
+      .slice()
+      .sort((left, right) => left.timestamp - right.timestamp)
+      .forEach((notification) => {
+        const key = getNotificationKey(notification);
+        if (seenNotificationKeysRef.current.has(key)) return;
+
+        seenNotificationKeysRef.current.add(key);
+        notificationQueueRef.current.push(notification);
+      });
+
+    showNextPendingNotification();
+  }, [showNextPendingNotification]);
+
+  const checkPendingNotifications = useCallback(async (expectedNotification?: {
+    notificationId?: string;
+    title?: string;
+    body?: string;
+    url?: string | null;
+  }) => {
+    if (
+      !("serviceWorker" in navigator) ||
+      typeof navigator.serviceWorker.getRegistration !== "function"
+    ) {
+      return false;
+    }
+
+    try {
+      const registration = await getAppPushRegistration("guard");
+      if (!registration || typeof registration.getNotifications !== "function") {
+        return false;
+      }
+
+      const notifications = await registration.getNotifications();
+      queuePendingNotifications(notifications);
+      if (!expectedNotification) return true;
+
+      return notifications.some((notification) => {
+        const notificationId = (notification.data as { notificationId?: unknown } | null)?.notificationId;
+        if (expectedNotification.notificationId && notificationId === expectedNotification.notificationId) {
+          return true;
+        }
+
+        return notification.title === expectedNotification.title &&
+          notification.body === expectedNotification.body &&
+          getNotificationUrl(notification) === expectedNotification.url;
+      });
+    } catch (error) {
+      console.error("Failed to read pending guard push notifications:", error);
+      return false;
+    }
+  }, [queuePendingNotifications]);
+
+  useEffect(() => {
+    if (pathname !== "/guard/main") return;
+
+    const checkIfVisible = () => {
+      if (document.visibilityState === "visible") {
+        void checkPendingNotifications();
+      }
+    };
+
+    checkIfVisible();
+    document.addEventListener("visibilitychange", checkIfVisible);
+    window.addEventListener("focus", checkIfVisible);
+    window.addEventListener("pageshow", checkIfVisible);
+
+    return () => {
+      document.removeEventListener("visibilitychange", checkIfVisible);
+      window.removeEventListener("focus", checkIfVisible);
+      window.removeEventListener("pageshow", checkIfVisible);
+    };
+  }, [checkPendingNotifications, pathname]);
   const showPushError = useCallback((title: string, description: string) => {
     setPushErrorTitle(title);
     setPushErrorBody(description);
@@ -262,10 +373,19 @@ export default function GuardPushRegister() {
 
     const handleServiceWorkerMessage = (event: MessageEvent) => {
       if (event.data && event.data.type === "PUSH_NOTIFICATION_RECEIVED") {
-        setModalTitle(event.data.title || "안전교육 독려 알림");
-        setModalBody(event.data.body || "");
-        setModalUrl(typeof event.data.data?.url === "string" ? event.data.data.url : null);
-        setShowInAppModal(true);
+        void checkPendingNotifications({
+          notificationId: typeof event.data.notificationId === "string" ? event.data.notificationId : undefined,
+          title: typeof event.data.title === "string" ? event.data.title : undefined,
+          body: typeof event.data.body === "string" ? event.data.body : undefined,
+          url: typeof event.data.data?.url === "string" ? event.data.data.url : null,
+        }).then((notificationIsActive) => {
+          if (notificationIsActive) return;
+
+          setModalTitle(event.data.title || "안전교육 독려 알림");
+          setModalBody(event.data.body || "");
+          setModalUrl(typeof event.data.data?.url === "string" ? event.data.data.url : null);
+          setShowInAppModal(true);
+        });
       }
     };
 
@@ -273,13 +393,16 @@ export default function GuardPushRegister() {
     return () => {
       navigator.serviceWorker.removeEventListener("message", handleServiceWorkerMessage);
     };
-  }, []);
+  }, [checkPendingNotifications]);
 
   function handleInAppModalClose() {
+    activeNotificationRef.current?.close();
+    activeNotificationRef.current = null;
     setShowInAppModal(false);
     if (modalUrl) {
       router.push(modalUrl);
     }
+    window.setTimeout(showNextPendingNotification, 0);
   }
 
   return (

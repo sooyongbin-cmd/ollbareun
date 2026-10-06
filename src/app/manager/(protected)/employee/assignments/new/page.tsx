@@ -34,6 +34,7 @@ type AssignmentResponse = {
 
 type ExistingAssignment = {
   id: string;
+  worksite_name: string;
   start_date: string;
   end_date: string;
   work_style: "0" | "1" | "2" | null;
@@ -172,7 +173,9 @@ export default function AssignmentNewPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const router = useRouter();
-  const existingAssignmentKey = employeeId && worksiteId ? `${employeeId}:${worksiteId}` : "";
+  const existingAssignmentKey = employeeId && startDate && endDate && startDate <= endDate
+    ? `${employeeId}:${startDate}:${endDate}`
+    : "";
   const existingAssignments = existingAssignmentData.key === existingAssignmentKey
     ? existingAssignmentData.assignments
     : [];
@@ -232,14 +235,14 @@ export default function AssignmentNewPage() {
   }, [selectEmployee]);
 
   useEffect(() => {
-    if (!employeeId || !worksiteId) return;
+    if (!employeeId || !startDate || !endDate || startDate > endDate) return;
 
     let ignore = false;
-    const key = `${employeeId}:${worksiteId}`;
+    const key = `${employeeId}:${startDate}:${endDate}`;
 
     async function loadExistingAssignments() {
       try {
-        const query = new URLSearchParams({ employeeId, worksiteId });
+        const query = new URLSearchParams({ employeeId, startDate, endDate });
         const response = await fetch(`/api/assignments?${query.toString()}`);
         const payload = await response.json() as ExistingAssignmentResponse;
         if (!response.ok) {
@@ -262,7 +265,7 @@ export default function AssignmentNewPage() {
     return () => {
       ignore = true;
     };
-  }, [employeeId, worksiteId]);
+  }, [employeeId, startDate, endDate]);
 
   async function submitAssignment(
     body: AssignmentRequestBody,
@@ -474,11 +477,12 @@ export default function AssignmentNewPage() {
           aria-label="기존 배정 목록"
           className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
         >
-          <h2 className="text-lg font-semibold">기존 배정 목록</h2>
+          <h2 className="text-lg font-semibold">근무기간 내 기존 배정 목록</h2>
           <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
             <Table className="w-full">
               <TableHeader>
                 <TableRow>
+                  <TableHead>근무지</TableHead>
                   <TableHead>근무기간</TableHead>
                   <TableHead>근무형태</TableHead>
                   <TableHead>출퇴근</TableHead>
@@ -488,6 +492,9 @@ export default function AssignmentNewPage() {
               <TableBody>
                 {existingAssignments.map((assignment) => (
                   <TableRow key={assignment.id}>
+                    <TableCell data-label="근무지" className="whitespace-nowrap text-muted-foreground">
+                      {assignment.worksite_name}
+                    </TableCell>
                     <TableCell data-label="근무기간" className="whitespace-nowrap text-muted-foreground">
                       {formatAssignmentPeriod(assignment)}
                     </TableCell>

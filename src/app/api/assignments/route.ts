@@ -14,14 +14,15 @@ export async function GET(request: Request) {
 
     const searchParams = new URL(request.url).searchParams;
     const employeeId = searchParams.get("employeeId");
-    const worksiteId = searchParams.get("worksiteId");
-    if (employeeId || worksiteId) {
-      if (!employeeId || !worksiteId) {
-        return Response.json({ error: "근무자와 근무지를 모두 선택하세요." }, { status: 400 });
+    const startDate = searchParams.get("startDate");
+    const endDate = searchParams.get("endDate");
+    if (employeeId || startDate || endDate) {
+      if (!employeeId || !startDate || !endDate) {
+        return Response.json({ error: "근무자와 근무기간을 모두 입력하세요." }, { status: 400 });
       }
 
       return Response.json({
-        assignments: await listAssignmentsForEmployeeAndWorksite(employeeId, worksiteId),
+        assignments: await listAssignmentsForEmployeeInPeriod(employeeId, startDate, endDate),
       });
     }
 

@@ -34,6 +34,10 @@ describe("assignment new page", () => {
           });
         }
 
+        if (!init && url.startsWith("/api/assignments?")) {
+          return Response.json({ assignments: [] });
+        }
+
         if (init?.method === "POST" && url.endsWith("/api/assignments")) {
           assignmentRequests.push({ body: JSON.parse(String(init.body)) });
           return assignmentResponses.shift() ?? Response.json({ assignment: { id: "assign-1" } });

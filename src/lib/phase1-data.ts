@@ -328,32 +328,48 @@ export async function listAssignmentsForEmployee(
 
 export type ExistingAssignmentSummary = Pick<
   AssignmentRow,
-  "id" | "start_date" | "end_date" | "in_time" | "out_time"
+  "id" | "worksite_id" | "start_date" | "end_date" | "in_time" | "out_time"
 > & {
+  worksite_name: string;
   work_style: EmployeeRow["work_style"] | null;
   has_weekend: boolean | null;
   schedule_rules_enabled: boolean | null;
   schedule_rules: ScheduleRule[];
 };
 
-export async function listAssignmentsForEmployeeAndWorksite(
+export async function listAssignmentsForEmployeeInPeriod(
   employeeIdInput: unknown,
-  worksiteIdInput: unknown,
+  startDateInput: unknown,
+  endDateInput: unknown,
 ) {
   const employeeId = requireString(employeeIdInput, "근무자");
-  const worksiteId = requireString(worksiteIdInput, "근무지");
+  const startDate = requireDate(startDateInput, "시작일");
+  const endDate = requireDate(endDateInput, "종료일");
+  if (startDate > endDate) throw new Error("종료일은 시작일보다 빠를 수 없습니다.");
+
   const supabase = getSupabaseAdmin();
-  const { data, error } = await supabase
+  const assignmentsResult = await supabase
     .from("work_assignments")
-    .select("id,start_date,end_date,work_style,has_weekend,schedule_rules_enabled,in_time,out_time,schedule_rules:assignment_schedule_rules(day_type,is_working_day,in_time,out_time)")
+    .select("id,worksite_id,start_date,end_date,work_style,has_weekend,schedule_rules_enabled,in_time,out_time,schedule_rules:assignment_schedule_rules(day_type,is_working_day,in_time,out_time)")
     .eq("employee_id", employeeId)
-    .eq("worksite_id", worksiteId)
+    .lte("start_date", endDate)
+    .gte("end_date", startDate)
     .order("start_date", { ascending: false })
     .order("created_at", { ascending: false });
 
-  throwIfError(error);
-  return (data ?? []).map((assignment) => ({
+  throwIfError(assignmentsResult.error);
+  const assignments = assignmentsResult.data ?? [];
+  const worksiteIds = Array.from(new Set(assignments.map((assignment) => assignment.worksite_id)));
+  const worksitesResult = worksiteIds.length
+    ? await supabase.from("worksites").select("id,name").in("id", worksiteIds)
+    : { data: [], error: null };
+
+  throwIfError(worksitesResult.error);
+  const worksitesById = new Map((worksitesResult.data ?? []).map((worksite) => [worksite.id, worksite.name]));
+
+  return assignments.map((assignment) => ({
     ...assignment,
+    worksite_name: worksitesById.get(assignment.worksite_id) ?? "근무지 없음",
     schedule_rules: assignment.schedule_rules ?? [],
   })) as ExistingAssignmentSummary[];
 }

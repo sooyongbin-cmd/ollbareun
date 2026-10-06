@@ -29,7 +29,7 @@ describe("/api/assignments", () => {
       worksiteNames: ["본사"],
     } as never);
 
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/assignments"));
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
@@ -42,7 +42,7 @@ describe("/api/assignments", () => {
   it("denies assignment access without a manager session", async () => {
     vi.mocked(getManagerUser).mockResolvedValue(null);
 
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/assignments"));
 
     expect(response.status).toBe(401);
     expect(listAssignmentManagementData).not.toHaveBeenCalled();

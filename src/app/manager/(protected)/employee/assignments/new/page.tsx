@@ -46,6 +46,7 @@ type ExistingAssignment = {
 
 type ExistingAssignmentResponse = {
   assignments: ExistingAssignment[];
+  error?: string;
 };
 
 type AssignmentRequestBody = Record<string, unknown>;

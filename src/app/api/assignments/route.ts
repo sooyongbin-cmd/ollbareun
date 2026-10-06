@@ -6,13 +6,13 @@ import {
   listAssignmentsForEmployeeAndWorksite,
 } from "@/lib/phase1-data";
 
-export async function GET(request?: Request) {
+export async function GET(request: Request) {
   try {
     if (!await getManagerUser()) {
       return Response.json({ error: "관리자 인증이 필요합니다." }, { status: 401 });
     }
 
-    const searchParams = request ? new URL(request.url).searchParams : new URLSearchParams();
+    const searchParams = new URL(request.url).searchParams;
     const employeeId = searchParams.get("employeeId");
     const worksiteId = searchParams.get("worksiteId");
     if (employeeId || worksiteId) {

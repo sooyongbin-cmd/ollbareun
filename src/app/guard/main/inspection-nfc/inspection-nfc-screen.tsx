@@ -9,6 +9,7 @@ import {
   type InspectionLogRow,
 } from "@/lib/inspection";
 import AlertModal from "@/components/modals/alert-modal";
+import { isStandaloneApp } from "@/lib/in-app-browser";
 import { readStoredGuardSession, readStoredGuardSessionSnapshot, subscribeToGuardSessionChange } from "../../guard-session-storage";
 import styles from "./page.module.css";
 
@@ -257,7 +258,13 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [showAppRequired, setShowAppRequired] = useState(false);
+  const [isAppContext, setIsAppContext] = useState<boolean | null>(null);
   const handledPayloadRef = useRef("");
+
+  useEffect(() => {
+    setIsAppContext(isStandaloneApp() || document.referrer.startsWith("android-app://"));
+  }, []);
 
   const saveInspectionPayload = useCallback(
     async (rawPayload: unknown) => {
@@ -317,8 +324,17 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
   );
 
   useEffect(() => {
+    if (isAppContext === null) {
+      return;
+    }
+
     const initialSource = getInitialSourceFromUrl();
     if (initialSource) {
+      if (!isAppContext) {
+        setShowAppRequired(true);
+        return;
+      }
+
       queueMicrotask(() => {
         void saveInspectionSource(initialSource);
       });
@@ -353,7 +369,7 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
         setStatus("NFC 태그 읽기를 시작하지 못했습니다.");
         setError(scanError instanceof Error ? scanError.message : "NFC 태그 읽기를 시작하지 못했습니다.");
       });
-  }, [saveInspectionSource]);
+  }, [isAppContext, saveInspectionSource]);
 
   function handleSuccessAlertClose() {
     setAlertMessage("");
@@ -442,6 +458,12 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
           title="알림"
           description={alertMessage}
         />
+        <AlertModal
+          isOpen={showAppRequired}
+          onClose={() => setShowAppRequired(false)}
+          title="근무자앱에서 처리해 주세요"
+          description="현재 웹브라우저로 열렸습니다. 이 주소에서는 점검 기록을 저장하지 않습니다. 홈 화면의 ‘올바름 근무자’ 앱을 실행한 뒤 순찰 화면에서 NFC 태그를 다시 태깅해 주세요."
+        />
       </main>
     );
   }
@@ -488,6 +510,12 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
         onClose={handleSuccessAlertClose}
         title="알림"
         description={alertMessage}
+      />
+      <AlertModal
+        isOpen={showAppRequired}
+        onClose={() => setShowAppRequired(false)}
+        title="근무자앱에서 처리해 주세요"
+        description="현재 웹브라우저로 열렸습니다. 이 주소에서는 점검 기록을 저장하지 않습니다. 홈 화면의 ‘올바름 근무자’ 앱을 실행한 뒤 순찰 화면에서 NFC 태그를 다시 태깅해 주세요."
       />
     </div>
   );

@@ -204,7 +204,7 @@ export default function AttendanceReportPage() {
           </div>
           <div className="flex flex-col gap-2">
             <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor="attendance-work-date">
-              출퇴근날짜
+              출퇴근예정일
             </label>
             <Input
               className="block w-full"

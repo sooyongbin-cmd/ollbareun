@@ -569,10 +569,29 @@ html[data-manager-theme="dark"] {
 }
 
 .guard-date-emphasis-text {
+  display: flex;
+  align-items: center;
   color: #141414;
   font-size: 16px;
   font-weight: 600;
   line-height: 23px;
+}
+
+.guard-date-weekday {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  line-height: inherit;
+}
+
+.guard-date-parenthesis {
+  display: inline-block;
+  line-height: inherit;
+  transform: translateY(-1px);
+}
+
+.guard-date-note {
+  margin-left: 6px;
 }
 
 .guard-schedule-time-row {

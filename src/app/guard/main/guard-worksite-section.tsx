@@ -72,6 +72,8 @@ export default function GuardWorksiteSection() {
     : workAction === "complete"
       ? "금일 근무 완료"
       : "출근하기";
+  const formattedWorkDate = selectedShift ? formatGuardWorkDate(selectedShift.work_date) : null;
+  const formattedWorkDateMatch = formattedWorkDate?.match(/^(.+?) \((.+)\)$/);
 
   return (
     <section className="guard-work-card">
@@ -86,8 +88,19 @@ export default function GuardWorksiteSection() {
             <p className="guard-date-emphasis-text">
               {selectedShift ? (
                 <>
-                  {formatGuardWorkDate(selectedShift.work_date)}
-                  {!isTodayGuardWorkDate(selectedShift.work_date) ? " 전일출근" : ""}
+                  {formattedWorkDateMatch ? (
+                    <>
+                      <span>{formattedWorkDateMatch[1]}</span>
+                      <span className="guard-date-weekday">
+                        <span className="guard-date-parenthesis">(</span>
+                        <span>{formattedWorkDateMatch[2]}</span>
+                        <span className="guard-date-parenthesis">)</span>
+                      </span>
+                    </>
+                  ) : formattedWorkDate}
+                  {!isTodayGuardWorkDate(selectedShift.work_date) ? (
+                    <span className="guard-date-note">전일출근</span>
+                  ) : null}
                 </>
               ) : "오늘 근무가 없습니다."}
             </p>

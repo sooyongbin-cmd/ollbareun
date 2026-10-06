@@ -1,11 +1,18 @@
 "use client";
 
 import { EmployeeScheduleFields } from "@/components/employee-schedule-fields";
-import { employeeScheduleRules, legacyScheduleRules, type ScheduleRule } from "@/lib/employee-schedule";
+import {
+  employeeScheduleRules,
+  legacyScheduleRules,
+  scheduleDayLabels,
+  type ScheduleDayType,
+  type ScheduleRule,
+} from "@/lib/employee-schedule";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import ManagerLoadingMessage from "../../../manager-loading-message";
@@ -23,6 +30,22 @@ type AssignmentResponse = {
   assignment: {
     id: string;
   };
+};
+
+type ExistingAssignment = {
+  id: string;
+  start_date: string;
+  end_date: string;
+  work_style: "0" | "1" | "2" | null;
+  has_weekend: boolean | null;
+  schedule_rules_enabled: boolean | null;
+  in_time: string | null;
+  out_time: number | null;
+  schedule_rules: ScheduleRule[];
+};
+
+type ExistingAssignmentResponse = {
+  assignments: ExistingAssignment[];
 };
 
 type AssignmentRequestBody = Record<string, unknown>;
@@ -74,6 +97,56 @@ function minutesToElapsedTime(value: number | undefined) {
   return `${String(Math.floor(value / 60)).padStart(2, "0")}:${String(value % 60).padStart(2, "0")}`;
 }
 
+function formatAssignmentPeriod(assignment: ExistingAssignment) {
+  return assignment.start_date === assignment.end_date
+    ? assignment.start_date
+    : `${assignment.start_date} ~ ${assignment.end_date}`;
+}
+
+function formatAssignmentWorkStyle(workStyle: ExistingAssignment["work_style"]) {
+  if (workStyle === "0") return "일반근무";
+  if (workStyle === "1") return "격일근무";
+  if (workStyle === "2") return "야간근무";
+  return "근무형태 없음";
+}
+
+function formatAssignmentClockOut(value: number | null) {
+  if (value === null) return "-";
+  return `${String(Math.floor(value / 60)).padStart(2, "0")}:${String(value % 60).padStart(2, "0")}`;
+}
+
+function formatAssignmentDaysOff(assignment: ExistingAssignment) {
+  const daysOff: string[] = [];
+  if (assignment.work_style === "1") daysOff.push("격일");
+
+  if (!assignment.schedule_rules_enabled) {
+    if (assignment.has_weekend) daysOff.push("토요일", "일요일", "공휴일");
+    return daysOff.length ? daysOff.join(" · ") : "없음";
+  }
+
+  const rules = assignment.schedule_rules ?? [];
+  const weekdays: ScheduleDayType[] = ["monday", "tuesday", "wednesday", "thursday", "friday"];
+  const weekdayRule = rules.find((rule) => rule.day_type === "weekday");
+  const weekdayDaysOff = weekdays.filter((day) => {
+    const rule = rules.find((item) => item.day_type === day) ?? weekdayRule;
+    return rule?.is_working_day === false;
+  });
+
+  if (weekdayDaysOff.length === weekdays.length) {
+    daysOff.push("평일");
+  } else {
+    daysOff.push(...weekdayDaysOff.map((day) => scheduleDayLabels[day]));
+  }
+
+  (["saturday", "sunday", "holiday"] as const).forEach((day) => {
+    if (rules.find((rule) => rule.day_type === day)?.is_working_day === false) {
+      daysOff.push(scheduleDayLabels[day]);
+    }
+  });
+
+  return daysOff.length ? daysOff.join(" · ") : "없음";
+}
+
 export default function AssignmentNewPage() {
   const [startDate, setStartDate] = useState(todayDate);
   const [endDate, setEndDate] = useState(() => defaultEndDate(startDate));
@@ -82,7 +155,12 @@ export default function AssignmentNewPage() {
   const [workStyle, setWorkStyle] = useState<"0" | "1" | "2">("0");
   const [scheduleRules, setScheduleRules] = useState<ScheduleRule[]>(() => legacyScheduleRules(true));
   const [employeeId, setEmployeeId] = useState("");
+  const [worksiteId, setWorksiteId] = useState("");
   const [data, setData] = useState<Bootstrap>({ employees: [], worksites: [] });
+  const [existingAssignmentData, setExistingAssignmentData] = useState<{
+    key: string;
+    assignments: ExistingAssignment[];
+  }>({ key: "", assignments: [] });
   const [alertMessage, setAlertMessage] = useState("");
   const [createdAssignmentId, setCreatedAssignmentId] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -93,6 +171,10 @@ export default function AssignmentNewPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const router = useRouter();
+  const existingAssignmentKey = employeeId && worksiteId ? `${employeeId}:${worksiteId}` : "";
+  const existingAssignments = existingAssignmentData.key === existingAssignmentKey
+    ? existingAssignmentData.assignments
+    : [];
   const sortedEmployees = data.employees.filter((employee) => !employee.is_retired).sort((left, right) =>
     left.name.localeCompare(right.name, "ko-KR"),
   );
@@ -147,6 +229,39 @@ export default function AssignmentNewPage() {
       ignore = true;
     };
   }, [selectEmployee]);
+
+  useEffect(() => {
+    if (!employeeId || !worksiteId) return;
+
+    let ignore = false;
+    const key = `${employeeId}:${worksiteId}`;
+
+    async function loadExistingAssignments() {
+      try {
+        const query = new URLSearchParams({ employeeId, worksiteId });
+        const response = await fetch(`/api/assignments?${query.toString()}`);
+        const payload = await response.json() as ExistingAssignmentResponse;
+        if (!response.ok) {
+          throw new Error(payload.error ?? "기존 배정 자료를 불러오지 못했습니다.");
+        }
+
+        if (!ignore) {
+          setExistingAssignmentData({ key, assignments: payload.assignments ?? [] });
+        }
+      } catch (loadError) {
+        if (!ignore) {
+          setExistingAssignmentData({ key, assignments: [] });
+          setError(loadError instanceof Error ? loadError.message : "기존 배정 자료를 불러오지 못했습니다.");
+        }
+      }
+    }
+
+    void loadExistingAssignments();
+
+    return () => {
+      ignore = true;
+    };
+  }, [employeeId, worksiteId]);
 
   async function submitAssignment(
     body: AssignmentRequestBody,
@@ -240,7 +355,14 @@ export default function AssignmentNewPage() {
                 <label className="block leading-5 text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="assignment-worksite">
                   근무지
                 </label>
-                <NativeSelect className="w-full appearance-none" id="assignment-worksite" name="worksiteId" required>
+                <NativeSelect
+                  className="w-full appearance-none"
+                  id="assignment-worksite"
+                  name="worksiteId"
+                  value={worksiteId}
+                  onChange={(event) => setWorksiteId(event.target.value)}
+                  required
+                >
                   <NativeSelectOption value="">선택</NativeSelectOption>
                   {data.worksites.map((worksite) => (
                     <NativeSelectOption key={worksite.id} value={worksite.id}>
@@ -345,6 +467,45 @@ export default function AssignmentNewPage() {
         )}
 
       </section>
+
+      {existingAssignments.length > 0 && (
+        <section
+          aria-label="기존 배정 목록"
+          className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
+        >
+          <h2 className="text-lg font-semibold">기존 배정 목록</h2>
+          <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>근무기간</TableHead>
+                  <TableHead>근무형태</TableHead>
+                  <TableHead>출퇴근</TableHead>
+                  <TableHead>휴무</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {existingAssignments.map((assignment) => (
+                  <TableRow key={assignment.id}>
+                    <TableCell data-label="근무기간" className="whitespace-nowrap text-muted-foreground">
+                      {formatAssignmentPeriod(assignment)}
+                    </TableCell>
+                    <TableCell data-label="근무형태" className="whitespace-nowrap text-muted-foreground">
+                      {formatAssignmentWorkStyle(assignment.work_style)}
+                    </TableCell>
+                    <TableCell data-label="출퇴근" className="whitespace-nowrap text-muted-foreground">
+                      {assignment.in_time?.slice(0, 5) ?? "-"} ~ {formatAssignmentClockOut(assignment.out_time)}
+                    </TableCell>
+                    <TableCell data-label="휴무" className="text-muted-foreground">
+                      {formatAssignmentDaysOff(assignment)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </section>
+      )}
 
       <ProcessingModal isOpen={saving && !pendingConflict} message="저장처리중입니다..." />
 

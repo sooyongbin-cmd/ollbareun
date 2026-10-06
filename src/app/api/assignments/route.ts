@@ -1,10 +1,28 @@
 import { getManagerUser } from "@/lib/manager-auth";
-import { AssignmentOverlapError, createAssignment, listAssignmentManagementData } from "@/lib/phase1-data";
+import {
+  AssignmentOverlapError,
+  createAssignment,
+  listAssignmentManagementData,
+  listAssignmentsForEmployeeAndWorksite,
+} from "@/lib/phase1-data";
 
-export async function GET() {
+export async function GET(request?: Request) {
   try {
     if (!await getManagerUser()) {
       return Response.json({ error: "관리자 인증이 필요합니다." }, { status: 401 });
+    }
+
+    const searchParams = request ? new URL(request.url).searchParams : new URLSearchParams();
+    const employeeId = searchParams.get("employeeId");
+    const worksiteId = searchParams.get("worksiteId");
+    if (employeeId || worksiteId) {
+      if (!employeeId || !worksiteId) {
+        return Response.json({ error: "근무자와 근무지를 모두 선택하세요." }, { status: 400 });
+      }
+
+      return Response.json({
+        assignments: await listAssignmentsForEmployeeAndWorksite(employeeId, worksiteId),
+      });
     }
 
     return Response.json(await listAssignmentManagementData());

@@ -326,6 +326,38 @@ export async function listAssignmentsForEmployee(
   })) as EmployeeAssignmentInfo[];
 }
 
+export type ExistingAssignmentSummary = Pick<
+  AssignmentRow,
+  "id" | "start_date" | "end_date" | "in_time" | "out_time"
+> & {
+  work_style: EmployeeRow["work_style"] | null;
+  has_weekend: boolean | null;
+  schedule_rules_enabled: boolean | null;
+  schedule_rules: ScheduleRule[];
+};
+
+export async function listAssignmentsForEmployeeAndWorksite(
+  employeeIdInput: unknown,
+  worksiteIdInput: unknown,
+) {
+  const employeeId = requireString(employeeIdInput, "근무자");
+  const worksiteId = requireString(worksiteIdInput, "근무지");
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("work_assignments")
+    .select("id,start_date,end_date,work_style,has_weekend,schedule_rules_enabled,in_time,out_time,schedule_rules:assignment_schedule_rules(day_type,is_working_day,in_time,out_time)")
+    .eq("employee_id", employeeId)
+    .eq("worksite_id", worksiteId)
+    .order("start_date", { ascending: false })
+    .order("created_at", { ascending: false });
+
+  throwIfError(error);
+  return (data ?? []).map((assignment) => ({
+    ...assignment,
+    schedule_rules: assignment.schedule_rules ?? [],
+  })) as ExistingAssignmentSummary[];
+}
+
 export async function updateEmployee(input: {
   id: unknown;
   name: unknown;

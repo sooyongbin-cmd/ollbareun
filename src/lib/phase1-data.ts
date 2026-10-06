@@ -44,6 +44,24 @@ export type AssignmentRow = {
   created_at: string;
 };
 
+export type AssignmentConflict = {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  startDate: string;
+  endDate: string;
+};
+
+export class AssignmentOverlapError extends Error {
+  readonly conflict: AssignmentConflict | null;
+
+  constructor(conflict: AssignmentConflict | null) {
+    super("해당 직원의 근무기간이 기존 배정과 겹칩니다.");
+    this.name = "AssignmentOverlapError";
+    this.conflict = conflict;
+  }
+}
+
 export type ScheduledAttendanceRow = {
   id: string;
   employee_id: string;
@@ -132,16 +150,35 @@ function throwIfError(error: { message: string } | null) {
   }
 }
 
-function throwAssignmentOverlapError() {
-  throw new Error("이미 겹치는 근무기간 배정이 있습니다.");
-}
+async function findAssignmentConflict(employeeId: string, startDate: string, endDate: string) {
+  const supabase = getSupabaseAdmin();
+  const { data: assignment, error: assignmentError } = await supabase
+    .from("work_assignments")
+    .select("id,employee_id,start_date,end_date")
+    .eq("employee_id", employeeId)
+    .lte("start_date", endDate)
+    .gte("end_date", startDate)
+    .order("start_date", { ascending: true })
+    .limit(1)
+    .maybeSingle();
 
-function throwIfAssignmentWriteError(error: { message: string; code?: string } | null) {
-  if (error?.code === "23P01") {
-    throwAssignmentOverlapError();
-  }
+  throwIfError(assignmentError);
+  if (!assignment) return null;
 
-  throwIfError(error);
+  const { data: employee, error: employeeError } = await supabase
+    .from("employees")
+    .select("name")
+    .eq("id", employeeId)
+    .maybeSingle();
+  throwIfError(employeeError);
+
+  return {
+    id: assignment.id,
+    employeeId,
+    employeeName: employee?.name ?? "근무자",
+    startDate: assignment.start_date,
+    endDate: assignment.end_date,
+  } satisfies AssignmentConflict;
 }
 
 export async function loadBootstrap() {
@@ -453,11 +490,21 @@ export async function createAssignment(input: {
   schedule_rules?: unknown;
   in_time?: unknown;
   out_time?: unknown;
+  resolveOverlap?: unknown;
+  resolveOverlapAssignmentId?: unknown;
+  resolveOverlapStartDate?: unknown;
+  resolveOverlapEndDate?: unknown;
 }) {
   const employee_id = requireString(input.employeeId, "직원");
-  const worksite_id = requireString(input.worksiteId, "근무지");
+  const worksite_id = requireString(input.worksiteId, "근무지");
   const { start_date, end_date } = requireDateRange(input);
   const has_weekend = input.has_weekend === true || input.has_weekend === "true" || input.has_weekend === 1;
+  const resolveOverlap = input.resolveOverlap === true;
+  const confirmedOverlap = resolveOverlap ? {
+    id: requireString(input.resolveOverlapAssignmentId, "기존 배정"),
+    start_date: requireDate(input.resolveOverlapStartDate, "기존 배정 시작일"),
+    end_date: requireDate(input.resolveOverlapEndDate, "기존 배정 종료일"),
+  } : null;
 
   const schedule = validateEmployeeSchedule({ work_style: input.work_style, in_time: input.in_time, out_time: input.out_time });
   const rules = input.schedule_rules === undefined ? undefined : validateScheduleRules(input.schedule_rules, input.work_style);
@@ -520,8 +567,19 @@ export async function createAssignment(input: {
       throw new Error(`근무기간의 마지막날(${end_date})이 휴일입니다. 근무기간 종료일을 조정하세요.`);
     }
   }
-  const { data, error } = await getSupabaseAdmin().rpc(rules === undefined ? "create_assignment_with_daily_attendance" : "create_assignment_with_schedule_rules", {
+  const supabase = getSupabaseAdmin();
+  const rpcName = resolveOverlap
+    ? "resolve_assignment_overlap_transactionally"
+    : rules === undefined
+      ? "create_assignment_with_daily_attendance"
+      : "create_assignment_with_schedule_rules";
+  const rpcArgs = {
     ...(rules === undefined ? {} : { p_schedule_rules: rules }),
+    ...(confirmedOverlap ? {
+      p_expected_assignment_id: confirmedOverlap.id,
+      p_expected_start_date: confirmedOverlap.start_date,
+      p_expected_end_date: confirmedOverlap.end_date,
+    } : {}),
     p_employee_id: employee_id,
     p_worksite_id: worksite_id,
     p_start_date: start_date,
@@ -530,9 +588,18 @@ export async function createAssignment(input: {
     p_has_weekend: has_weekend,
     p_in_time: schedule.in_time ?? null,
     p_out_time: schedule.out_time ?? null,
-  }).single();
+  };
+  const { data, error } = await supabase.rpc(rpcName, rpcArgs).single();
 
-  throwIfAssignmentWriteError(error);
+  if (
+    error?.code === "23P01"
+    || error?.message.includes("근무기간이 기존 배정과 겹칩니다")
+    || error?.message.includes("겹치는 근무기간 배정")
+  ) {
+    const conflict = await findAssignmentConflict(employee_id, start_date, end_date);
+    throw new AssignmentOverlapError(conflict);
+  }
+  throwIfError(error);
   return data as AssignmentRow;
 }
 

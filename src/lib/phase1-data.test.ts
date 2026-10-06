@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { authenticateGuard, clockIn, clockOut, createAssignment, createEmployee, deleteAssignment, deleteAssignmentAfterToday, deleteAssignmentIncludingAttendance, deleteWorksite, listAssignmentManagementData, listAssignmentsForEmployee, loadGuardSessionByEmployeeId } from "./phase1-data";
+import { AssignmentOverlapError, authenticateGuard, clockIn, clockOut, createAssignment, createEmployee, deleteAssignment, deleteAssignmentAfterToday, deleteAssignmentIncludingAttendance, deleteWorksite, listAssignmentManagementData, listAssignmentsForEmployee, loadGuardSessionByEmployeeId } from "./phase1-data";
 import { getSupabase } from "./supabase";
 import { getSupabaseAdmin } from "./supabase-admin";
 
@@ -465,7 +465,17 @@ describe("guard authentication data rules", () => {
   });
 
   it("rejects overlapping assignment periods for the same employee", async () => {
+    const conflictQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+    };
     const supabaseAdmin = {
+      from: vi.fn().mockReturnValue(conflictQuery),
       rpc: vi.fn().mockReturnValue({
         single: vi.fn().mockResolvedValue({
           data: null,
@@ -482,12 +492,93 @@ describe("guard authentication data rules", () => {
         startDate: "2026-05-25",
         endDate: "2026-05-27",
       }),
-    ).rejects.toThrow("이미 겹치는 근무기간 배정이 있습니다.");
+    ).rejects.toBeInstanceOf(AssignmentOverlapError);
     expect(supabaseAdmin.rpc).toHaveBeenCalledWith("create_assignment_with_daily_attendance", expect.objectContaining({
       p_employee_id: "emp-1",
       p_worksite_id: "work-1",
       p_start_date: "2026-05-25",
       p_end_date: "2026-05-27",
+    }));
+  });
+
+  it("returns the overlapping assignment and employee name for the confirmation flow", async () => {
+    const assignmentQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({
+        data: { id: "old-1", employee_id: "emp-1", start_date: "2026-01-01", end_date: "2026-12-31" },
+        error: null,
+      }),
+    };
+    const employeeQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: { name: "홍길동" }, error: null }),
+    };
+    const supabaseAdmin = {
+      from: vi.fn((table: string) => table === "work_assignments" ? assignmentQuery : employeeQuery),
+      rpc: vi.fn().mockReturnValue({
+        single: vi.fn().mockResolvedValue({
+          data: null,
+          error: { message: "해당 직원의 근무기간이 기존 배정과 겹칩니다." },
+        }),
+      }),
+    };
+    vi.mocked(getSupabaseAdmin).mockReturnValue(supabaseAdmin as never);
+
+    await expect(createAssignment({
+      employeeId: "emp-1",
+      worksiteId: "work-1",
+      startDate: "2026-06-01",
+      endDate: "2027-06-01",
+      schedule_rules: [],
+    })).rejects.toMatchObject({
+      name: "AssignmentOverlapError",
+      conflict: {
+        id: "old-1",
+        employeeId: "emp-1",
+        employeeName: "홍길동",
+        startDate: "2026-01-01",
+        endDate: "2026-12-31",
+      },
+    });
+    expect(supabaseAdmin.from).toHaveBeenCalledWith("work_assignments");
+    expect(assignmentQuery.lte).toHaveBeenCalledWith("start_date", "2027-06-01");
+    expect(assignmentQuery.gte).toHaveBeenCalledWith("end_date", "2026-06-01");
+    expect(employeeQuery.eq).toHaveBeenCalledWith("id", "emp-1");
+  });
+
+  it("passes the confirmed conflict snapshot to the transactional resolver", async () => {
+    const rpc = vi.fn().mockReturnValue({
+      single: vi.fn().mockResolvedValue({ data: { id: "new-1" }, error: null }),
+    });
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ rpc } as never);
+
+    await createAssignment({
+      employeeId: "emp-1",
+      worksiteId: "work-1",
+      startDate: "2026-06-01",
+      endDate: "2027-06-01",
+      schedule_rules: [],
+      resolveOverlap: true,
+      resolveOverlapAssignmentId: "old-1",
+      resolveOverlapStartDate: "2026-01-01",
+      resolveOverlapEndDate: "2026-12-31",
+    });
+
+    expect(rpc).toHaveBeenCalledWith("resolve_assignment_overlap_transactionally", expect.objectContaining({
+      p_employee_id: "emp-1",
+      p_worksite_id: "work-1",
+      p_start_date: "2026-06-01",
+      p_end_date: "2027-06-01",
+      p_expected_assignment_id: "old-1",
+      p_expected_start_date: "2026-01-01",
+      p_expected_end_date: "2026-12-31",
+      p_schedule_rules: [],
     }));
   });
 
@@ -862,7 +953,7 @@ describe("guard authentication data rules", () => {
   it("clocks in against the selected scheduled work date", async () => {
     const assignment = { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), lte: vi.fn().mockReturnThis(), gte: vi.fn().mockReturnThis(), maybeSingle: vi.fn().mockResolvedValue({ data: { id: "assignment-1" }, error: null }) };
     const worksite = { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), single: vi.fn().mockResolvedValue({ data: { id: "site-1", name: "본사", gps_info: { latitude: 37.5, longitude: 127 }, radius_meters: 100 }, error: null }) };
-    const existing = { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), maybeSingle: vi.fn().mockResolvedValue({ data: { id: "record-1", work_intime: null }, error: null }) };
+    const existing = { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), maybeSingle: vi.fn().mockResolvedValue({ data: { id: "record-1", intime: "2026-05-25T23:00:00.000Z", work_intime: null }, error: null }) };
     const rpc = vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: { id: "record-1", work_intime: "2026-05-26T00:00:00.000Z" }, error: null }) });
     vi.mocked(getSupabaseAdmin).mockReturnValue({ from: vi.fn().mockReturnValueOnce(assignment).mockReturnValueOnce(worksite).mockReturnValueOnce(existing), rpc } as never);
     await expect(clockIn({ employeeId: "emp-1", worksiteId: "site-1", workDate: "2026-05-25", latitude: 37.5, longitude: 127 })).resolves.toMatchObject({ id: "record-1" });

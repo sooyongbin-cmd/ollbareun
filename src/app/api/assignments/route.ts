@@ -1,5 +1,5 @@
 import { getManagerUser } from "@/lib/manager-auth";
-import { createAssignment, listAssignmentManagementData } from "@/lib/phase1-data";
+import { AssignmentOverlapError, createAssignment, listAssignmentManagementData } from "@/lib/phase1-data";
 
 export async function GET() {
   try {
@@ -24,6 +24,12 @@ export async function POST(request: Request) {
     const body = await request.json();
     return Response.json({ assignment: await createAssignment(body) });
   } catch (error) {
+    if (error instanceof AssignmentOverlapError) {
+      return Response.json(
+        { error: error.message, conflict: error.conflict },
+        { status: 409 },
+      );
+    }
     return Response.json(
       { error: error instanceof Error ? error.message : "근무지를 배정하지 못했습니다." },
       { status: 400 },

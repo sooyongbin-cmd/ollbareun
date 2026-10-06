@@ -4,6 +4,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import AssignmentNewPage from "./page";
 
 const push = vi.fn();
+let assignmentResponses: Response[];
+let assignmentRequests: { body: Record<string, unknown> }[];
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push }),
@@ -13,6 +15,8 @@ describe("assignment new page", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     push.mockReset();
+    assignmentResponses = [];
+    assignmentRequests = [];
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -31,18 +35,8 @@ describe("assignment new page", () => {
         }
 
         if (init?.method === "POST" && url.endsWith("/api/assignments")) {
-          expect(JSON.parse(String(init.body))).toEqual({
-            employeeId: "emp-1",
-            worksiteId: "work-1",
-            startDate: "2026-05-21",
-            endDate: "2026-05-23",
-            work_style: "2",
-            has_weekend: false,
-            schedule_rules: ["saturday", "sunday", "holiday"].map(day_type => ({ day_type, is_working_day: false, in_time: null, out_time: null })),
-            in_time: "22:00",
-            out_time: "30:00",
-          });
-          return Response.json({ assignment: { id: "assign-1" } });
+          assignmentRequests.push({ body: JSON.parse(String(init.body)) });
+          return assignmentResponses.shift() ?? Response.json({ assignment: { id: "assign-1" } });
         }
 
         return Response.json({}, { status: 404 });
@@ -91,6 +85,17 @@ describe("assignment new page", () => {
     await user.click(screen.getByRole("button", { name: "배정등록" }));
 
     expect(await screen.findByText("자료를 저장하였습니다.")).toBeInTheDocument();
+    expect(assignmentRequests[0].body).toEqual({
+      employeeId: "emp-1",
+      worksiteId: "work-1",
+      startDate: "2026-05-21",
+      endDate: "2026-05-23",
+      work_style: "2",
+      has_weekend: false,
+      schedule_rules: ["saturday", "sunday", "holiday"].map(day_type => ({ day_type, is_working_day: false, in_time: null, out_time: null })),
+      in_time: "22:00",
+      out_time: "30:00",
+    });
     await user.click(screen.getByRole("button", { name: "확인" }));
     expect(push).toHaveBeenCalledWith("/manager/employee/assignments/save/assign-1");
   });
@@ -109,5 +114,83 @@ describe("assignment new page", () => {
     expect(screen.getByLabelText("출근")).toHaveValue("08:00");
     expect(screen.getByLabelText("퇴근")).toHaveValue("18:00");
     expect(screen.getByLabelText("토요일 적용 방식")).toHaveValue("off");
+  });
+
+  it("shows the overlapping employee and dates in a confirmation modal and does not save when declined", async () => {
+    const user = userEvent.setup();
+    assignmentResponses.push(Response.json({
+      error: "해당 직원의 근무기간이 기존 배정과 겹칩니다.",
+      conflict: {
+        id: "old-1",
+        employeeId: "emp-1",
+        employeeName: "홍길동",
+        startDate: "2026-01-01",
+        endDate: "2026-12-31",
+      },
+    }, { status: 409 }));
+
+    render(<AssignmentNewPage />);
+    await screen.findByRole("heading", { name: "배정등록" });
+    await user.selectOptions(screen.getByLabelText("근무자"), "emp-1");
+    await user.selectOptions(screen.getByLabelText("근무지"), "work-1");
+    await user.click(screen.getByRole("button", { name: "배정등록" }));
+
+    expect(await screen.findByText(
+      "근무자 (홍길동) 의 기존배정 (2026-01-01~2026-12-31) 자료와 배정기간이 중복됩니다. 기존 배정기간을 조정할까요?",
+    )).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "아니오" }));
+
+    expect(screen.queryByText(/기존배정/)).not.toBeInTheDocument();
+    expect(assignmentRequests).toHaveLength(1);
+    expect(assignmentRequests[0].body).not.toHaveProperty("resolveOverlap");
+  });
+
+  it("sends the confirmed overlap adjustment request", async () => {
+    const user = userEvent.setup();
+    assignmentResponses.push(
+      Response.json({
+        error: "해당 직원의 근무기간이 기존 배정과 겹칩니다.",
+        conflict: {
+          id: "old-1",
+          employeeId: "emp-1",
+          employeeName: "홍길동",
+          startDate: "2026-01-01",
+          endDate: "2026-12-31",
+        },
+      }, { status: 409 }),
+      Response.json({ assignment: { id: "assign-2" } }),
+    );
+
+    render(<AssignmentNewPage />);
+    await screen.findByRole("heading", { name: "배정등록" });
+    await user.selectOptions(screen.getByLabelText("근무자"), "emp-1");
+    await user.selectOptions(screen.getByLabelText("근무지"), "work-1");
+    await user.click(screen.getByRole("button", { name: "배정등록" }));
+    await screen.findByText(/기존배정/);
+    await user.click(screen.getByRole("button", { name: "예" }));
+
+    expect(await screen.findByText("자료를 저장하였습니다.")).toBeInTheDocument();
+    expect(assignmentRequests).toHaveLength(2);
+    expect(assignmentRequests[1].body).toMatchObject({
+      employeeId: "emp-1",
+      resolveOverlap: true,
+      resolveOverlapAssignmentId: "old-1",
+      resolveOverlapStartDate: "2026-01-01",
+      resolveOverlapEndDate: "2026-12-31",
+    });
+  });
+
+  it("shows assignment save errors in an alert modal", async () => {
+    const user = userEvent.setup();
+    assignmentResponses.push(Response.json({ error: "저장 오류" }, { status: 400 }));
+
+    render(<AssignmentNewPage />);
+    await screen.findByRole("heading", { name: "배정등록" });
+    await user.selectOptions(screen.getByLabelText("근무자"), "emp-1");
+    await user.selectOptions(screen.getByLabelText("근무지"), "work-1");
+    await user.click(screen.getByRole("button", { name: "배정등록" }));
+
+    expect(await screen.findByRole("dialog")).toHaveTextContent("저장 오류");
+    expect(screen.getAllByText("저장 오류")).toHaveLength(1);
   });
 });

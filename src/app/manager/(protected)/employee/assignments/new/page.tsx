@@ -10,7 +10,9 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import ManagerLoadingMessage from "../../../manager-loading-message";
 import AlertModal from "@/components/modals/alert-modal";
+import ConfirmModal from "@/components/modals/confirm-modal";
 import ProcessingModal from "@/components/modals/processing-modal";
+import type { AssignmentConflict } from "@/lib/phase1-data";
 
 type Bootstrap = {
   employees: { id: string; name: string; is_retired: boolean; work_style: "0" | "1" | "2"; in_time: string; out_time: number; has_weekend?: boolean; schedule_rules_enabled?: boolean; schedule_rules?: ScheduleRule[] }[];
@@ -23,6 +25,19 @@ type AssignmentResponse = {
   };
 };
 
+type AssignmentRequestBody = Record<string, unknown>;
+
+class AssignmentRequestError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly conflict?: AssignmentConflict | null,
+  ) {
+    super(message);
+    this.name = "AssignmentRequestError";
+  }
+}
+
 async function postJson<T>(url: string, body: unknown): Promise<T> {
   const response = await fetch(url, {
     method: "POST",
@@ -32,7 +47,11 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
   const payload = await response.json();
 
   if (!response.ok) {
-    throw new Error(payload.error ?? "배정을 처리하지 못했습니다.");
+    throw new AssignmentRequestError(
+      payload.error ?? "배정을 처리하지 못했습니다.",
+      response.status,
+      payload.conflict ?? null,
+    );
   }
 
   return payload as T;
@@ -67,6 +86,10 @@ export default function AssignmentNewPage() {
   const [alertMessage, setAlertMessage] = useState("");
   const [createdAssignmentId, setCreatedAssignmentId] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [pendingConflict, setPendingConflict] = useState<{
+    body: AssignmentRequestBody;
+    conflict: AssignmentConflict;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const router = useRouter();
@@ -125,35 +148,60 @@ export default function AssignmentNewPage() {
     };
   }, [selectEmployee]);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function submitAssignment(
+    body: AssignmentRequestBody,
+    resolveOverlap: boolean,
+    confirmedConflict?: AssignmentConflict,
+  ) {
     if (saving) return;
     setSaving(true);
     setError("");
 
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-
     try {
       const result = await postJson<AssignmentResponse>("/api/assignments", {
-        employeeId: formData.get("employeeId"),
-        worksiteId: formData.get("worksiteId"),
-        startDate: formData.get("startDate"),
-        endDate: formData.get("endDate"),
-        work_style: workStyle,
-        has_weekend: false,
-        schedule_rules: scheduleRules,
-        in_time: inTime,
-        out_time: outTime,
+        ...body,
+        ...(resolveOverlap && confirmedConflict ? {
+          resolveOverlap: true,
+          resolveOverlapAssignmentId: confirmedConflict.id,
+          resolveOverlapStartDate: confirmedConflict.startDate,
+          resolveOverlapEndDate: confirmedConflict.endDate,
+        } : {}),
       });
 
+      setPendingConflict(null);
       setCreatedAssignmentId(result.assignment.id);
       setAlertMessage("자료를 저장하였습니다.");
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "배정을 처리하지 못했습니다.");
+      if (
+        submitError instanceof AssignmentRequestError
+        && submitError.status === 409
+        && submitError.conflict
+      ) {
+        setPendingConflict({ body, conflict: submitError.conflict });
+      } else {
+        setPendingConflict(null);
+        setError(submitError instanceof Error ? submitError.message : "배정을 처리하지 못했습니다.");
+      }
     } finally {
       setSaving(false);
     }
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (saving) return;
+    const formData = new FormData(event.currentTarget);
+    void submitAssignment({
+      employeeId: formData.get("employeeId"),
+      worksiteId: formData.get("worksiteId"),
+      startDate: formData.get("startDate"),
+      endDate: formData.get("endDate"),
+      work_style: workStyle,
+      has_weekend: false,
+      schedule_rules: scheduleRules,
+      in_time: inTime,
+      out_time: outTime,
+    }, false);
   }
 
   return (
@@ -296,10 +344,30 @@ export default function AssignmentNewPage() {
           </form>
         )}
 
-        {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mt-6 text-center">{error}</p> : null}
       </section>
 
-      <ProcessingModal isOpen={saving} message="저장처리중입니다..." />
+      <ProcessingModal isOpen={saving && !pendingConflict} message="저장처리중입니다..." />
+
+      <ConfirmModal
+        isOpen={Boolean(pendingConflict)}
+        onClose={() => setPendingConflict(null)}
+        onConfirm={() => {
+          if (pendingConflict) void submitAssignment(pendingConflict.body, true, pendingConflict.conflict);
+        }}
+        title="배정 기간 중복"
+        description={pendingConflict
+          ? `근무자 (${pendingConflict.conflict.employeeName}) 의 기존배정 (${pendingConflict.conflict.startDate}~${pendingConflict.conflict.endDate}) 자료와 배정기간이 중복됩니다. 기존 배정기간을 조정할까요?`
+          : undefined}
+        loading={saving}
+        loadingLabel="기존 배정기간을 조정하고 있습니다..."
+      />
+
+      <AlertModal
+        isOpen={Boolean(error)}
+        onClose={() => setError("")}
+        title="오류"
+        description={error}
+      />
 
       <AlertModal
         isOpen={Boolean(alertMessage)}

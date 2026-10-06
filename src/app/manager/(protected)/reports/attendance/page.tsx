@@ -43,25 +43,79 @@ function employeeSummary(row: AttendanceReportRow) {
   return `${row.employeeName} (${role},${workStyle})`;
 }
 
-function formatDateTimeForQueryDate(value: string | null | undefined, queryDate: string, fallbackDate?: string) {
-  if (!value || value === "-") return "-";
+type DateTimeDisplay = {
+  text: string;
+  differsFromQueryDate: boolean;
+};
+
+function formatDateTimeSegment(value: string | null | undefined, queryDate: string, fallbackDate?: string): DateTimeDisplay {
+  if (!value || value === "-") {
+    return { text: "-", differsFromQueryDate: false };
+  }
 
   const dateTime = value.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/);
   if (dateTime) {
-    return queryDate && dateTime[1] === queryDate ? dateTime[2] : `${dateTime[1]} ${dateTime[2]}`;
+    const differsFromQueryDate = Boolean(queryDate && dateTime[1] !== queryDate);
+    return {
+      text: queryDate && dateTime[1] === queryDate ? dateTime[2] : `${dateTime[1]} ${dateTime[2]}`,
+      differsFromQueryDate,
+    };
   }
 
   const time = value.match(/^(\d{2}:\d{2})$/);
   if (time && fallbackDate) {
-    return queryDate && fallbackDate === queryDate ? time[1] : `${fallbackDate} ${time[1]}`;
+    const differsFromQueryDate = Boolean(queryDate && fallbackDate !== queryDate);
+    return {
+      text: queryDate && fallbackDate === queryDate ? time[1] : `${fallbackDate} ${time[1]}`,
+      differsFromQueryDate,
+    };
   }
 
-  return value;
+  return { text: value, differsFromQueryDate: false };
+}
+
+function formatDateTimeForQueryDate(value: string | null | undefined, queryDate: string, fallbackDate?: string) {
+  return formatDateTimeSegment(value, queryDate, fallbackDate).text;
 }
 
 function scheduledClockIn(row: AttendanceReportRow, queryDate: string) {
   const value = row.scheduledClockIn === "-" ? "-" : `${row.workDate} ${row.scheduledClockIn}`;
   return formatDateTimeForQueryDate(value, queryDate, row.workDate);
+}
+
+function scheduledClockInDisplay(row: AttendanceReportRow, queryDate: string) {
+  const value = row.scheduledClockIn === "-" ? "-" : `${row.workDate} ${row.scheduledClockIn}`;
+  return formatDateTimeSegment(value, queryDate, row.workDate);
+}
+
+function DateTimePart({ display }: { display: DateTimeDisplay }) {
+  return (
+    <span className={display.differsFromQueryDate ? "text-yellow-700 dark:text-yellow-300" : undefined}>
+      {display.text}
+    </span>
+  );
+}
+
+function DateTimeRange({
+  start,
+  end,
+  omitMissing = false,
+}: {
+  start: DateTimeDisplay;
+  end: DateTimeDisplay;
+  omitMissing?: boolean;
+}) {
+  if (omitMissing && start.text === "-") return <DateTimePart display={end} />;
+  if (omitMissing && end.text === "-") return <DateTimePart display={start} />;
+  if (start.text === "-" && end.text === "-") return "-";
+
+  return (
+    <>
+      <DateTimePart display={start} />
+      {" ~ "}
+      <DateTimePart display={end} />
+    </>
+  );
 }
 
 function scheduledClockInOut(row: AttendanceReportRow, queryDate: string) {
@@ -258,18 +312,19 @@ export default function AttendanceReportPage() {
                         </Link>
                       </TableCell>
                       <TableCell data-label="근무지">{row.worksiteName ?? "-"}</TableCell>
-                      <TableCell
-                        data-label="출퇴근예정"
-                        className={
-                          (row.scheduledClockIn !== "-" && row.workDate !== currentDate())
-                          || (workDate && row.scheduledClockOut !== "-" && row.scheduledClockOut.slice(0, 10) !== workDate)
-                            ? "text-yellow-700 dark:text-yellow-300"
-                            : undefined
-                        }
-                      >
-                        {scheduledClockInOut(row, workDate)}
+                      <TableCell data-label="출퇴근예정">
+                        <DateTimeRange
+                          start={scheduledClockInDisplay(row, workDate)}
+                          end={formatDateTimeSegment(row.scheduledClockOut, workDate, row.workDate)}
+                          omitMissing
+                        />
                       </TableCell>
-                      <TableCell data-label="출퇴근">{clockInOut(row, workDate)}</TableCell>
+                      <TableCell data-label="출퇴근">
+                        <DateTimeRange
+                          start={formatDateTimeSegment(row.clockInDateTime, workDate, row.workDate)}
+                          end={formatDateTimeSegment(row.clockOutDateTime, workDate, row.workDate)}
+                        />
+                      </TableCell>
                       <TableCell
                         data-label="출근"
                         className={row.status === "지각"

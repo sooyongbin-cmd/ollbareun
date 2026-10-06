@@ -50,7 +50,6 @@ function getNotificationKey(notification: Notification) {
   }
 
   return [
-    notification.timestamp,
     notification.title,
     notification.body,
     getNotificationUrl(notification) ?? "",
@@ -126,16 +125,13 @@ export default function GuardPushRegister() {
   }, []);
 
   const queuePendingNotifications = useCallback((notifications: Notification[]) => {
-    notifications
-      .slice()
-      .sort((left, right) => left.timestamp - right.timestamp)
-      .forEach((notification) => {
-        const key = getNotificationKey(notification);
-        if (seenNotificationKeysRef.current.has(key)) return;
+    notifications.forEach((notification) => {
+      const key = getNotificationKey(notification);
+      if (seenNotificationKeysRef.current.has(key)) return;
 
-        seenNotificationKeysRef.current.add(key);
-        notificationQueueRef.current.push(notification);
-      });
+      seenNotificationKeysRef.current.add(key);
+      notificationQueueRef.current.push(notification);
+    });
 
     showNextPendingNotification();
   }, [showNextPendingNotification]);

@@ -8,7 +8,6 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import ManagerLoadingMessage from "../../../../manager-loading-message";
-import { DeleteIcon } from "@/components/icons/delete-icon";
 import ConfirmModal from "@/components/modals/confirm-modal";
 import AlertModal from "@/components/modals/alert-modal";
 import ProcessingModal from "@/components/modals/processing-modal";
@@ -111,6 +110,7 @@ export default function AssignmentSavePage() {
   const [error, setError] = useState("");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [errorAlertMessage, setErrorAlertMessage] = useState("");
+  const [errorAlertTitle, setErrorAlertTitle] = useState("저장 오류");
   const [alertMessage, setAlertMessage] = useState("");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -229,7 +229,8 @@ export default function AssignmentSavePage() {
 
       setAlertMessage("자료가 저장되었습니다.");
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "자료를 저장하지 못했습니다.");
+      setErrorAlertTitle("저장 오류");
+      setErrorAlertMessage(submitError instanceof Error ? submitError.message : "자료를 저장하지 못했습니다.");
     } finally {
       setSaving(false);
     }
@@ -244,6 +245,7 @@ export default function AssignmentSavePage() {
       await deleteRequest(`/api/assignments/${assignmentId}`);
       setAlertMessage("자료가 삭제되었습니다.");
     } catch (deleteError) {
+      setErrorAlertTitle("삭제 오류");
       setErrorAlertMessage(deleteError instanceof Error ? deleteError.message : "자료를 삭제하지 못했습니다.");
     } finally {
       setDeleting(false);
@@ -252,6 +254,7 @@ export default function AssignmentSavePage() {
   }
 
   const employeeName = employees.find((employee) => employee.id === employeeId)?.name ?? "";
+  const hasAttendance = attendanceHistory.length > 0;
 
   return (
     <section className="space-y-[1.5rem]">
@@ -295,6 +298,7 @@ export default function AssignmentSavePage() {
                   id="assignment-worksite"
                   value={worksiteId}
                   onChange={(event) => setWorksiteId(event.target.value)}
+                  disabled={attendanceHistoryLoading || Boolean(attendanceHistoryError) || hasAttendance}
                   required
                 >
                   <NativeSelectOption value="">선택</NativeSelectOption>
@@ -317,7 +321,7 @@ export default function AssignmentSavePage() {
                     id="assignment-start-date"
                     type="date"
                     value={startDate}
-                    onChange={(event) => setStartDate(event.target.value)}
+                    readOnly
                     required
                   />
                   <label className="sr-only" htmlFor="assignment-end-date">
@@ -336,27 +340,41 @@ export default function AssignmentSavePage() {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <Button
-                aria-label="삭제"
-                className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto"
-                type="button"
-                disabled={saving || deleting}
-                onClick={() => setDeleteConfirmOpen(true)}
-                variant="outline"
-              >
-                <DeleteIcon size={20} />
-              </Button>
-              <Button
-                aria-label="목록"
-                className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:ml-auto w-full md:w-auto"
-                type="button"
-                disabled={saving || deleting}
-                onClick={() => router.push("/manager/employee/assignments")}
-                variant="outline"
-              >
-                목록
-              </Button>
+            <div className="space-y-3">
+              {savedSchedule ? (
+                <p className="text-center text-sm text-muted-foreground">
+                  배정 당시 출근시간: {savedSchedule}
+                </p>
+              ) : null}
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  className="w-full md:w-auto"
+                  type="submit"
+                  disabled={saving || deleting}
+                >
+                  저장
+                </Button>
+                <Button
+                  aria-label="삭제"
+                  className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto"
+                  type="button"
+                  disabled={saving || deleting || attendanceHistoryLoading || Boolean(attendanceHistoryError) || hasAttendance}
+                  onClick={() => setDeleteConfirmOpen(true)}
+                  variant="outline"
+                >
+                  삭제
+                </Button>
+                <Button
+                  aria-label="목록"
+                  className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:ml-auto w-full md:w-auto"
+                  type="button"
+                  disabled={saving || deleting}
+                  onClick={() => router.push("/manager/employee/assignments")}
+                  variant="outline"
+                >
+                  목록
+                </Button>
+              </div>
             </div>
           </form>
         )}
@@ -364,8 +382,6 @@ export default function AssignmentSavePage() {
         {error ? <p className="mt-6 text-[1rem] text-destructive">{error}</p> : null}
 
         {!loading && savedStartDate && savedEndDate && currentMonth ? (
-          <>
-          <p className="text-sm text-muted-foreground">배정 당시 출근시간: {savedSchedule}</p>
           <AssignmentAttendanceCalendar
             dailyAttendance={dailyAttendance}
             currentMonth={currentMonth}
@@ -374,7 +390,6 @@ export default function AssignmentSavePage() {
             onMonthChange={setCurrentMonth}
             startDate={savedStartDate}
           />
-          </>
         ) : null}
       </section>
 
@@ -437,7 +452,7 @@ export default function AssignmentSavePage() {
       <AlertModal
         isOpen={Boolean(errorAlertMessage)}
         onClose={() => setErrorAlertMessage("")}
-        title="삭제 오류"
+        title={errorAlertTitle}
         description={errorAlertMessage}
       />
     </section>

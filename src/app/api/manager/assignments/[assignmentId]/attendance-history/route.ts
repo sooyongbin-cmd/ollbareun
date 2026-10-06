@@ -11,7 +11,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ assignment
     const supabase = getSupabaseAdmin();
     const { data: assignment, error: assignmentError } = await supabase
       .from("work_assignments")
-      .select("employee_id,worksite_id,start_date,end_date")
+      .select("employee_id,start_date,end_date")
       .eq("id", assignmentId)
       .single();
 
@@ -19,12 +19,11 @@ export async function GET(_: Request, { params }: { params: Promise<{ assignment
 
     const { data, error } = await supabase
       .from("work_record")
-      .select("id,work_date,intime_status,work_intime")
+      .select("id,work_date,intime_status,work_intime,work_outtime")
       .eq("employee_id", assignment.employee_id)
-      .eq("worksite_id", assignment.worksite_id)
       .gte("work_date", assignment.start_date)
       .lte("work_date", assignment.end_date)
-      .not("work_intime", "is", null)
+      .or("work_intime.not.is.null,work_outtime.not.is.null")
       .order("work_date", { ascending: false });
 
     if (error) throw new Error(error.message);

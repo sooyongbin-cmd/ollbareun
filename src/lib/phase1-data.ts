@@ -600,37 +600,19 @@ export async function updateAssignment(input: {
 }, supabase: SupabaseClient = getSupabase()) {
   const id = requireString(input.id, "배정");
   const employee_id = requireString(input.employeeId, "직원");
-  const worksite_id = requireString(input.worksiteId, "근무지");
+  const worksite_id = requireString(input.worksiteId, "근무지");
   const { start_date, end_date } = requireDateRange(input);
 
-  const { data: overlappingAssignment, error: overlapError } = await supabase
-    .from("work_assignments")
-    .select("id")
-    .eq("employee_id", employee_id)
-    .neq("id", id)
-    .lte("start_date", end_date)
-    .gte("end_date", start_date)
-    .limit(1)
-    .maybeSingle();
-
-  throwIfError(overlapError);
-  if (overlappingAssignment) {
-    throwAssignmentOverlapError();
-  }
-
-  const { data, error } = await supabase
-    .from("work_assignments")
-    .update({ employee_id, worksite_id, start_date, end_date })
-    .eq("id", id)
-    .select("*")
-    .single();
-
-  throwIfAssignmentWriteError(error);
-  const { error: scheduleError } = await supabase.rpc("generate_assignment_daily_attendance", {
+  const { error } = await supabase.rpc("update_assignment_with_daily_attendance", {
     p_assignment_id: id,
+    p_employee_id: employee_id,
+    p_worksite_id: worksite_id,
+    p_start_date: start_date,
+    p_end_date: end_date,
   });
-  throwIfError(scheduleError);
-  return data as AssignmentRow;
+  throwIfError(error);
+
+  return getAssignmentById(id, supabase);
 }
 
 export async function deleteAssignment(id: unknown, supabase: SupabaseClient = getSupabase()) {

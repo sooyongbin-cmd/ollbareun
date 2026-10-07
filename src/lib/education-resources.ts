@@ -74,10 +74,13 @@ function throwIfError(error: { message?: string; hint?: string; code?: string } 
   }
 }
 
-export async function listEducationResources(supabase: SupabaseClient = getSupabase()) {
-  const resources = await readAllEducationRows<Omit<EducationResourceRow, "education_type"> & { education_type: string }>((from, to) => supabase
-    .from("education_resources").select("id,title,youtube_link,created_at,education_type,startdate,enddate")
-    .order("created_at", { ascending: false }).order("id").range(from, to));
+export async function listEducationResources(supabase: SupabaseClient = getSupabase(), workDate?: string) {
+  if (workDate !== undefined) requireEducationResourceDates(workDate, workDate);
+  const resources = await readAllEducationRows<Omit<EducationResourceRow, "education_type"> & { education_type: string }>((from, to) => {
+    let query = supabase.from("education_resources").select("id,title,youtube_link,created_at,education_type,startdate,enddate");
+    if (workDate !== undefined) query = query.lte("startdate", workDate).gte("enddate", workDate);
+    return query.order("created_at", { ascending: false }).order("id").range(from, to);
+  });
   return resources.map(toEducationResourceRow);
 }
 

@@ -1,7 +1,8 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
@@ -28,7 +29,8 @@ export default function AttendanceDetailPage() {
   const router = useRouter();
   const [record, setRecord] = useState<AttendanceRecord | null>(null);
   const [education, setEducation] = useState<AttendanceEducationItem[]>([]);
-  const [selectedEducationIds, setSelectedEducationIds] = useState<string[]>([]);
+  const [completingResourceId, setCompletingResourceId] = useState<string | null>(null);
+  const completionBusy = useRef(false);
   const [leaveRequested, setLeaveRequested] = useState(false);
   const [leaveTypes, setLeaveTypes] = useState<string[]>([]);
   const [leaveType, setLeaveType] = useState("");
@@ -68,15 +70,11 @@ export default function AttendanceDetailPage() {
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (leaveRequested && (clockInDateTime || clockOutDateTime || selectedEducationIds.length > 0)) {
+    if (leaveRequested && (clockInDateTime || clockOutDateTime)) {
       setErrorAlert("휴가신청은 출근·퇴근 처리 및 교육이수와 함께 할 수 없습니다.");
       return;
     }
-    if (!clockInDateTime && selectedEducationIds.length > 0) {
-      setErrorAlert("출근처리후 교육이수 처리해주세요.");
-      return;
-    }
-    if (!clockInDateTime && !clockOutDateTime && selectedEducationIds.length === 0 && !leaveRequested) {
+    if (!clockInDateTime && !clockOutDateTime && !leaveRequested) {
       setError("저장할 출근일시 또는 퇴근일시를 입력하세요.");
       return;
     }
@@ -130,7 +128,6 @@ export default function AttendanceDetailPage() {
         body: JSON.stringify({
           ...(clockInDateTime ? { clockInDateTime } : {}),
           ...(clockOutDateTime ? { clockOutDateTime } : {}),
-          ...(selectedEducationIds.length ? { educationResourceIds: selectedEducationIds } : {}),
           ...(leaveRequested && record ? {
             leaveRequested: true,
             leaveType,
@@ -190,12 +187,25 @@ export default function AttendanceDetailPage() {
     { id: "attendance-status", label: "상태", value: record.status },
   ] : [];
 
-  function toggleEducation(resourceId: string) {
-    setSelectedEducationIds((previous) => previous.includes(resourceId)
-      ? previous.filter((selectedId) => selectedId !== resourceId)
-      : [...previous, resourceId]);
+  async function completeEducation(resourceId: string) {
+    if (!record || completionBusy.current || saving || deleting) return;
+    completionBusy.current = true;
+    setCompletingResourceId(resourceId);
+    setError("");
+    try {
+      const response = await fetch(`/api/manager/reports/attendance/${id}/education`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ resourceId }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error ?? "교육이수 처리에 실패했습니다.");
+      setEducation((items) => items.map((item) => item.resourceId === resourceId ? { ...item, isCompleted: true } : item));
+    } catch (cause) {
+      setErrorAlert(cause instanceof Error ? cause.message : "교육이수 처리에 실패했습니다.");
+    } finally {
+      completionBusy.current = false;
+      setCompletingResourceId(null);
+    }
   }
-
   function returnToList() {
     router.push("/manager/reports/attendance");
   }
@@ -220,28 +230,21 @@ export default function AttendanceDetailPage() {
         <hr className="border-border/60" />
         <section aria-labelledby="attendance-education-heading" className="space-y-4">
           <h2 id="attendance-education-heading" className="text-lg font-semibold">교육이수 현황</h2>
-          <div className="grid grid-cols-1 gap-3 min-[641px]:grid-cols-2 min-[1280px]:grid-cols-4">
-            {educationTypeOrder.map((type) => {
-              const items = education.filter((item) => item.educationType === type);
-              return <div key={type} className="grid min-w-0 gap-x-3.5 gap-y-1 min-[641px]:grid-cols-[max-content_1fr] items-center">
-                <h3 className="text-sm font-semibold text-muted-foreground">{educationTypeLabels[type]}</h3>
-                <div className="flex min-w-0 flex-wrap gap-2">
-                  {items.length ? items.map((item) => {
-                    const selected = selectedEducationIds.includes(item.resourceId);
-                    return <div key={item.resourceId} className="flex items-center gap-2 rounded-md border border-border/50 bg-background px-3 py-2">
-                      <span className="text-sm">{item.title}</span>
-                      {item.isCompleted ? <span className="text-sm font-semibold text-emerald-700">이수</span> :
-                        <Button type="button" size="sm" variant={selected ? "default" : "outline"}
-                          aria-label={`${item.title} 이수 처리`} aria-pressed={selected}
-                          onClick={() => toggleEducation(item.resourceId)}>
-                          {selected ? "이수" : "미이수"}
-                        </Button>}
-                    </div>;
-                  }) : <p className="py-2 text-sm text-muted-foreground">등록된 교육이 없습니다.</p>}
-                </div>
-              </div>;
-            })}
-          </div>
+          <Table>
+            <TableHeader><TableRow><TableHead>구분</TableHead><TableHead>교육</TableHead><TableHead>이수</TableHead></TableRow></TableHeader>
+            <TableBody>
+              {education.length === 0 ? <TableRow><TableCell data-responsive-empty colSpan={3}>출근날짜에 해당하는 교육자료가 없습니다.</TableCell></TableRow> :
+                [...education].sort((left, right) => educationTypeOrder.indexOf(left.educationType) - educationTypeOrder.indexOf(right.educationType) || left.title.localeCompare(right.title, "ko-KR")).map((item) => <TableRow key={item.resourceId}>
+                  <TableCell data-label="구분">{educationTypeLabels[item.educationType]}</TableCell>
+                  <TableCell data-label="교육">{item.title}</TableCell>
+                  <TableCell data-label="이수">{item.isCompleted ? <span className="font-semibold text-emerald-700">이수</span> :
+                    <Button type="button" size="sm" variant="outline" aria-label={`${item.title} 이수 처리`} disabled={saving || deleting || completingResourceId !== null} onClick={() => void completeEducation(item.resourceId)}>
+                      {completingResourceId === item.resourceId ? "이수처리중..." : "미이수"}
+                    </Button>}
+                  </TableCell>
+                </TableRow>)}
+            </TableBody>
+          </Table>
         </section>
         <hr className="border-border/60" />
         <section aria-labelledby="attendance-leave-heading" className="space-y-4">
@@ -281,9 +284,9 @@ export default function AttendanceDetailPage() {
         </section>
         {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
         <div className="flex gap-3">
-          <Button type="submit" disabled={saving || deleting}>저장</Button>
-          <Button type="button" variant="destructive" disabled={saving || deleting} onClick={() => setDeleteConfirmOpen(true)}>삭제</Button>
-          <Button className="ml-auto" type="button" variant="outline" disabled={saving || deleting} onClick={returnToList}>목록</Button>
+          <Button type="submit" disabled={saving || deleting || completingResourceId !== null}>저장</Button>
+          <Button type="button" variant="destructive" disabled={saving || deleting || completingResourceId !== null} onClick={() => setDeleteConfirmOpen(true)}>삭제</Button>
+          <Button className="ml-auto" type="button" variant="outline" disabled={saving || deleting || completingResourceId !== null} onClick={returnToList}>목록</Button>
         </div>
       </form> : null}
     </section>
@@ -292,7 +295,7 @@ export default function AttendanceDetailPage() {
     <ConfirmModal isOpen={clockedInDeleteConfirmOpen} onClose={() => { if (!deleting) setClockedInDeleteConfirmOpen(false); }} onConfirm={confirmDelete} title="출근처리된 자료입니다. 그래도 삭제하시겠습니까?" description="삭제한 자료는 복구할 수 없습니다." loading={deleting} loadingLabel="삭제 중입니다..." />
     <AlertModal isOpen={Boolean(errorAlert)} onClose={() => setErrorAlert("")} title="오류" description={errorAlert} />
     <AlertModal isOpen={successOpen} onClose={() => { setSuccessOpen(false); returnToList(); }} title="알림"
-      description={leaveRequested ? "휴가 신청이 완료되었습니다." : selectedEducationIds.length ? "근태 정보와 선택한 교육이수가 저장되었습니다." : "근태 정보가 저장되었습니다."} />
+      description={leaveRequested ? "휴가 신청이 완료되었습니다." : "근태 정보가 저장되었습니다."} />
     <AlertModal isOpen={deleteSuccessOpen} onClose={() => { setDeleteSuccessOpen(false); returnToList(); }} title="알림" description="자료가 삭제되었습니다" />
   </section>;
 }

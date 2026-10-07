@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import AttendanceDetailPage from "./page";
 
@@ -9,6 +9,26 @@ vi.mock("next/navigation", () => ({
 
 describe("attendance detail page", () => {
   beforeEach(() => vi.restoreAllMocks());
+
+  it("shows an ordered list and immediately completes an incomplete resource", async () => {
+    const education = [
+      { resourceId: "other", title: "기타교재", educationType: "other", isCompleted: true },
+      { resourceId: "quarterly", title: "분기교재", educationType: "quarterly", isCompleted: false },
+      { resourceId: "daily", title: "일일교재", educationType: "daily", isCompleted: true },
+    ];
+    const fetchMock = vi.fn().mockResolvedValueOnce(Response.json({ attendance: { workDate: "2026-10-07", clockInDateTime: "2026-10-07 09:00", clockOutDateTime: null }, education }))
+      .mockResolvedValueOnce(Response.json({ resourceId: "quarterly", isCompleted: true }));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<AttendanceDetailPage />);
+    await screen.findByText("분기교재");
+    const rows = screen.getAllByRole("row").slice(1);
+    expect(rows.map((row) => within(row).getAllByRole("cell")[0].textContent)).toEqual(["일일", "분기", "기타"]);
+    expect(within(rows[0]).queryByRole("button")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "분기교재 이수 처리" }));
+    await waitFor(() => expect(screen.queryByRole("button", { name: "분기교재 이수 처리" })).not.toBeInTheDocument());
+    expect(fetchMock).toHaveBeenLastCalledWith("/api/manager/reports/attendance/attendance-1/education", expect.objectContaining({ method: "POST", body: JSON.stringify({ resourceId: "quarterly" }) }));
+    expect(within(screen.getAllByRole("row")[2]).getByText("이수")).toBeInTheDocument();
+  });
 
   it("prefills clock-in and clock-out inputs from the existing record", async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce(Response.json({ attendance: {

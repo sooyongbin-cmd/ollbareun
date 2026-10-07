@@ -1,7 +1,7 @@
 "use client";
 
 import { useEducationRefresh } from "@/lib/use-education-refresh";
-import { notifyEducationChanged, educationTypeLabels, type EducationType } from "@/lib/education-periods";
+import { notifyEducationChanged, educationTypeLabels, educationTypes, isEducationResourceForDate, type EducationType } from "@/lib/education-periods";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import LoadingBoard from "@/components/loading-board";
@@ -17,6 +17,8 @@ type EducationResourceRow = {
   youtube_link: string;
   created_at: string;
   education_type: EducationType;
+  startdate: string;
+  enddate: string;
 };
 
 type EducationCompletionRow = {
@@ -213,7 +215,7 @@ export default function GuardSafetyEducationPage() {
         const employeeId = readGuardEmployeeId();
         const params = new URLSearchParams({ view: "current", workDate });
         const [resourcesResponse, completionsResponse] = await Promise.all([
-          fetch("/api/education/resources"),
+          fetch(`/api/education/resources?${new URLSearchParams({ workDate }).toString()}`),
           employeeId ? fetch(`/api/education/completions?${params.toString()}`) : Promise.resolve(null),
         ]);
         const resourcesPayload = await resourcesResponse.json();
@@ -227,10 +229,8 @@ export default function GuardSafetyEducationPage() {
         }
 
         if (!ignore) {
-          const currentTypes = new Map(((completionsPayload.completions ?? []) as EducationCompletionRow[])
-            .map((completion) => [completion.resource_id, completion.education_type]));
           const nextResources = ((resourcesPayload.resources ?? []) as EducationResourceRow[])
-            .map((resource) => ({ ...resource, education_type: currentTypes.get(resource.id) ?? resource.education_type }));
+            .filter((resource) => isEducationResourceForDate(resource, workDate));
           const nextCompletedResourceIds = new Set(
             ((completionsPayload.completions ?? []) as EducationCompletionRow[])
               .filter((completion) => completion.employee_id === employeeId && completion.is_completed)
@@ -286,7 +286,8 @@ export default function GuardSafetyEducationPage() {
   const sortedResources = useMemo(
     () =>
       [...resources].sort((left, right) => {
-        return left.title.localeCompare(right.title, "ko-KR");
+        return educationTypes.indexOf(left.education_type) - educationTypes.indexOf(right.education_type)
+          || left.title.localeCompare(right.title, "ko-KR");
       }),
     [resources],
   );
@@ -486,7 +487,7 @@ export default function GuardSafetyEducationPage() {
                   type="button"
                 >
                   <span className={styles.educationTitle} id={titleId}>
-                    {resource.title} ({educationTypeLabels[resource.education_type]})
+                    {resource.title} ({resource.education_type === "monthly" ? "월별" : educationTypeLabels[resource.education_type]})
                   </span>
                   <span className={`${styles.educationStatus} ${completed ? styles.completedStatus : styles.incompleteStatus}`} id={statusId}>
                     {completed ? (

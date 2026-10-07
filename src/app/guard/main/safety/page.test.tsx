@@ -61,7 +61,7 @@ function completionPosts() {
 }
 
 async function loadInitialYoutubeIframe() {
-  fireEvent.click(screen.getByRole("button", { name: fireTitle }));
+  fireEvent.click(screen.getByRole("button", { name: `${fireTitle} (일일)` }));
   const iframe = await screen.findByTitle(fireTitle);
   fireEvent.load(iframe);
   await waitFor(() => {
@@ -71,6 +71,26 @@ async function loadInitialYoutubeIframe() {
 }
 
 describe("guard safety education page", () => {
+  it("filters by attendance date and orders all categories", async () => {
+    const rows = [
+      { id: "other", title: "기타교재", education_type: "other" },
+      { id: "half", title: "반기교재", education_type: "semiannual" },
+      { id: "quarter", title: "분기교재", education_type: "quarterly" },
+      { id: "month", title: "월별교재", education_type: "monthly" },
+      { id: "day", title: "일일교재", education_type: "daily" },
+    ].map((row) => ({ ...row, startdate: "2026-05-26", enddate: "2026-05-26", youtube_link: "https://youtu.be/test" }));
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => String(input).includes("/api/education/resources")
+      ? Response.json({ resources: [...rows, { ...rows[0], id: "expired", title: "지난교재", enddate: "2026-05-25" }, { ...rows[0], id: "future", title: "다음교재", startdate: "2026-05-27", enddate: "2026-05-31" }] })
+      : Response.json({ completions: [] }));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<GuardSafetyEducationPage />);
+    await screen.findByText("일일교재 (일일)");
+    expect(within(screen.getByLabelText("안전교육 자료")).getAllByRole("button").map((button) => button.textContent)).toEqual([
+      "일일교재 (일일)미이수", "월별교재 (월별)미이수", "분기교재 (분기)미이수", "반기교재 (반기)미이수", "기타교재 (기타)미이수",
+    ]);
+    expect(screen.queryByText(/지난교재|다음교재/)).not.toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith("/api/education/resources?workDate=2026-05-26");
+  });
   beforeEach(() => {
     window.history.replaceState({}, "", "/guard/main/safety?workDate=2026-05-26");
     vi.useRealTimers();
@@ -92,20 +112,20 @@ describe("guard safety education page", () => {
       vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = String(input);
 
-        if (url.endsWith("/api/education/resources")) {
+        if (url.split("?")[0].endsWith("/api/education/resources")) {
           return Response.json({
             resources: [
               {
                 id: "resource-1",
                 title: fireTitle,
                 youtube_link: "https://www.youtube.com/watch?v=fireSafety",
-                created_at: "2026-05-27T00:00:00.000Z", education_type: "daily",
+                created_at: "2026-05-27T00:00:00.000Z", education_type: "daily", startdate: "2026-05-26", enddate: "2026-05-26",
               },
               {
                 id: "resource-2",
                 title: patrolTitle,
                 youtube_link: "https://youtu.be/patrolSafety",
-                created_at: "2026-05-27T00:00:00.000Z", education_type: "daily",
+                created_at: "2026-05-27T00:00:00.000Z", education_type: "daily", startdate: "2026-05-26", enddate: "2026-05-26",
               },
             ],
           });
@@ -142,8 +162,8 @@ describe("guard safety education page", () => {
   it("shows safety education titles and their completion states", async () => {
     render(<GuardSafetyEducationPage />);
 
-    expect(await screen.findByRole("button", { name: fireTitle })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: patrolTitle })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: `${fireTitle} (일일)` })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: `${patrolTitle} (일일)` })).toBeInTheDocument();
     expect(screen.getByText("0/2 완료 (0%)")).toBeInTheDocument();
     expect(screen.getAllByText("미이수")).toHaveLength(2);
     expect(screen.queryByRole("button", { name: "https://www.youtube.com/watch?v=fireSafety" })).not.toBeInTheDocument();
@@ -153,8 +173,8 @@ describe("guard safety education page", () => {
   it("opens the selected education video without adding a title inside the video region", async () => {
     render(<GuardSafetyEducationPage />);
 
-    expect(await screen.findByRole("button", { name: fireTitle })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: fireTitle }));
+    expect(await screen.findByRole("button", { name: `${fireTitle} (일일)` })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: `${fireTitle} (일일)` }));
 
     await waitFor(() => {
       const iframeUrl = new URL(screen.getByTitle(fireTitle).getAttribute("src") ?? "");
@@ -166,7 +186,7 @@ describe("guard safety education page", () => {
     expect(screen.getByTitle(fireTitle)).toHaveClass("w-full");
     const videoSection = screen.getByRole("region", { name: "안전교육 영상" });
     expect(within(videoSection).queryByText(fireTitle)).not.toBeInTheDocument();
-    expect(within(videoSection).getByText("동영상 길이: 확인 중...")).toBeInTheDocument();
+    expect(screen.getByText(/동영상 길이: 확인 중/)).toBeInTheDocument();
   });
 
   it("changes the iframe when a safety education item is selected", async () => {
@@ -174,10 +194,10 @@ describe("guard safety education page", () => {
 
     render(<GuardSafetyEducationPage />);
 
-    expect(await screen.findByRole("button", { name: fireTitle })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: fireTitle }));
+    expect(await screen.findByRole("button", { name: `${fireTitle} (일일)` })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: `${fireTitle} (일일)` }));
     await user.click(screen.getByRole("button", { name: "Close" }));
-    await user.click(screen.getByRole("button", { name: patrolTitle }));
+    await user.click(screen.getByRole("button", { name: `${patrolTitle} (일일)` }));
 
     await waitFor(() => {
       const iframeUrl = new URL(screen.getByTitle(patrolTitle).getAttribute("src") ?? "");
@@ -198,8 +218,8 @@ describe("guard safety education page", () => {
 
     render(<GuardSafetyEducationPage />);
 
-    expect(await screen.findByRole("button", { name: patrolTitle })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: fireTitle })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: `${patrolTitle} (일일)` })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: `${fireTitle} (일일)` })).toBeInTheDocument();
     expect(screen.getByText("1/2 완료 (50%)")).toBeInTheDocument();
     expect(screen.getByText("이수 완료")).toBeInTheDocument();
   });
@@ -207,8 +227,8 @@ describe("guard safety education page", () => {
   it("waits for the YouTube iframe to load before creating the API player", async () => {
     render(<GuardSafetyEducationPage />);
 
-    expect(await screen.findByRole("button", { name: fireTitle })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: fireTitle }));
+    expect(await screen.findByRole("button", { name: `${fireTitle} (일일)` })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: `${fireTitle} (일일)` }));
     const iframe = await screen.findByTitle(fireTitle);
     expect(playerInstances).toHaveLength(0);
 
@@ -222,19 +242,19 @@ describe("guard safety education page", () => {
   it("refreshes the displayed duration from the YouTube player when the modal opens", async () => {
     render(<GuardSafetyEducationPage />);
 
-    expect(await screen.findByRole("button", { name: fireTitle })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: `${fireTitle} (일일)` })).toBeInTheDocument();
     await loadInitialYoutubeIframe();
 
     playerInstances[0].duration = 180;
     playerInstances[0].options.events?.onReady?.({ target: playerInstances[0] });
 
-    expect(await screen.findByText("동영상 길이: 3:00")).toBeInTheDocument();
+    expect(await screen.findByText(/동영상 길이: 3:00/)).toBeInTheDocument();
   });
 
   it("forces playback speed back to 1x when the user changes it", async () => {
     render(<GuardSafetyEducationPage />);
 
-    expect(await screen.findByRole("button", { name: fireTitle })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: `${fireTitle} (일일)` })).toBeInTheDocument();
     await loadInitialYoutubeIframe();
 
     playerInstances[0].options.events?.onReady?.({ target: playerInstances[0] });
@@ -248,9 +268,9 @@ describe("guard safety education page", () => {
     render(<GuardSafetyEducationPage />);
 
     await vi.waitFor(() => {
-      expect(screen.getByRole("button", { name: fireTitle })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: `${fireTitle} (일일)` })).toBeInTheDocument();
     });
-    fireEvent.click(screen.getByRole("button", { name: fireTitle }));
+    fireEvent.click(screen.getByRole("button", { name: `${fireTitle} (일일)` }));
     fireEvent.load(screen.getByTitle(fireTitle));
     await vi.waitFor(() => expect(playerInstances).toHaveLength(1));
 
@@ -268,7 +288,7 @@ describe("guard safety education page", () => {
   it("does not record completion when the video ends without enough normal watch time", async () => {
     render(<GuardSafetyEducationPage />);
 
-    expect(await screen.findByRole("button", { name: fireTitle })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: `${fireTitle} (일일)` })).toBeInTheDocument();
     await loadInitialYoutubeIframe();
 
     playerInstances[0].options.events?.onStateChange?.({ data: 0 });
@@ -281,9 +301,9 @@ describe("guard safety education page", () => {
     render(<GuardSafetyEducationPage />);
 
     await vi.waitFor(() => {
-      expect(screen.getByRole("button", { name: fireTitle })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: `${fireTitle} (일일)` })).toBeInTheDocument();
     });
-    fireEvent.click(screen.getByRole("button", { name: fireTitle }));
+    fireEvent.click(screen.getByRole("button", { name: `${fireTitle} (일일)` }));
     fireEvent.load(screen.getByTitle(fireTitle));
     await vi.waitFor(() => expect(playerInstances).toHaveLength(1));
 
@@ -296,9 +316,9 @@ describe("guard safety education page", () => {
     playerInstances[0].options.events?.onStateChange?.({ data: 0 });
 
     await vi.waitFor(() => {
-      expect(screen.getByRole("button", { name: fireTitle })).toHaveAttribute("data-completed", "true");
+      expect(screen.getByRole("button", { name: `${fireTitle} (일일)` })).toHaveAttribute("data-completed", "true");
     });
-    expect(screen.getByRole("button", { name: patrolTitle })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: `${patrolTitle} (일일)` })).toBeInTheDocument();
     expect(screen.getByText("1/2 완료 (50%)")).toBeInTheDocument();
     await vi.waitFor(() => {
       expect(completionPosts()).toHaveLength(1);

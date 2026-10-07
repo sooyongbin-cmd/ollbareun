@@ -33,7 +33,7 @@ describe("period education", () => {
     const rows = {
       education_resources: [{
         id: "resource-1", title: "일일 안전교육", youtube_link: "https://youtu.be/video",
-        created_at: "2026-01-01T00:00:00+09:00", education_type: "일일",
+        created_at: "2026-01-01T00:00:00+09:00", education_type: "일일", startdate: "2026-01-01", enddate: "2026-12-31",
       }],
       education_completions: [{
         id: "completion-1", employee_id: "employee-1", title: "일일 안전교육",
@@ -45,7 +45,7 @@ describe("period education", () => {
       from: vi.fn((table: keyof typeof rows) => {
         const query = {
           select: vi.fn().mockReturnThis(), order: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockReturnThis(), not: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(), not: vi.fn().mockReturnThis(), lte: vi.fn().mockReturnThis(), gte: vi.fn().mockReturnThis(),
           range: vi.fn(async (from: number, to: number) => ({ data: rows[table].slice(from, to + 1), error: null })),
         };
         return query;
@@ -60,7 +60,7 @@ describe("period education", () => {
   });
   it("creates a completion row with the snapshot title and supplied work date", async () => {
     const today = "2026-05-26";
-    const resource = { id: "r", title: "안전교육", education_type: "일일" };
+    const resource = { id: "r", title: "안전교육", education_type: "일일", startdate: "2026-01-01", enddate: "2026-12-31" };
     const insertedRow = {
       id: "completion-1", employee_id: "e", title: "안전교육", work_date: today,
       education_type: "일일", completed_at: `${today}T01:00:00+09:00`,

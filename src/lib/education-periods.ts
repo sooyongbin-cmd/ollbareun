@@ -1,5 +1,8 @@
 export const educationTypes = ["daily", "monthly", "quarterly", "semiannual", "other"] as const;
 export type EducationType = typeof educationTypes[number];
+export function isEducationResourceForDate(resource: { startdate: string; enddate: string }, date: string) {
+  return Boolean(resource.startdate && resource.enddate && resource.startdate <= date && date <= resource.enddate);
+}
 export const educationTypeLabels: Record<EducationType, string> = {
   daily: "일일", monthly: "월간", quarterly: "분기", semiannual: "반기", other: "기타",
 };

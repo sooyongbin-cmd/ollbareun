@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseAdmin } from "./supabase-admin";
-import { educationPeriodStart, educationToday, requireEducationType, type EducationType } from "./education-periods";
+import { educationPeriodStart, educationToday, requireEducationType, educationTypes, isEducationResourceForDate, type EducationType } from "./education-periods";
 
 export type EducationCompletionRow = {
   id: string;
@@ -106,6 +106,8 @@ async function educationStatusForDate(employeeId: string, date: string, supabase
     title: string;
     youtube_link: string;
     created_at: string;
+    startdate: string;
+    enddate: string;
     education_type: string;
   };
   type Completion = {
@@ -119,15 +121,16 @@ async function educationStatusForDate(employeeId: string, date: string, supabase
 
   const [resources, completions] = await Promise.all([
     readAllEducationRows<Resource>((from, to) => supabase.from("education_resources")
-      .select("id,title,youtube_link,created_at,education_type")
+      .select("id,title,youtube_link,created_at,education_type,startdate,enddate")
+      .lte("startdate", date).gte("enddate", date)
       .order("title").order("id").range(from, to)),
     readAllEducationRows<Completion>((from, to) => supabase.from("education_completions")
       .select("id,employee_id,title,work_date,education_type,completed_at")
       .eq("employee_id", employeeId)
+      .eq("work_date", date)
       .order("work_date", { ascending: false }).order("completed_at", { ascending: false }).range(from, to)),
   ]);
 
-  const dateEnd = new Date(`${date}T23:59:59.999+09:00`).getTime();
   const resourcesBySnapshot = new Map<string, Resource[]>();
   for (const resource of resources) {
     const key = `${resource.title}\u0000${resource.education_type}`;
@@ -141,8 +144,7 @@ async function educationStatusForDate(employeeId: string, date: string, supabase
     if (!matchingResources?.length || !completion.work_date) continue;
     const educationType = educationTypeByKoreanName[completion.education_type];
     if (!educationType) continue;
-    const periodStart = educationPeriodStart(educationType, date);
-    if (completion.work_date < periodStart || completion.work_date > date) continue;
+    if (completion.work_date !== date || completion.employee_id !== employeeId) continue;
     for (const resource of matchingResources) {
       if (!latestCompletionByResource.has(resource.id)) latestCompletionByResource.set(resource.id, completion);
     }
@@ -150,7 +152,7 @@ async function educationStatusForDate(employeeId: string, date: string, supabase
 
   return resources.flatMap((resource): EducationCompletionRow[] => {
     const educationType = educationTypeByKoreanName[resource.education_type];
-    if (!educationType || new Date(resource.created_at).getTime() > dateEnd) return [];
+    if (!educationType || !isEducationResourceForDate(resource, date)) return [];
     const completion = latestCompletionByResource.get(resource.id);
     return [{
       id: completion?.id ?? resource.id,
@@ -207,7 +209,8 @@ export async function attendanceEducationStatus(
     educationType: row.education_type,
     isCompleted: row.is_completed,
     completedAt: row.completed_at,
-  }));
+  })).sort((left, right) => educationTypes.indexOf(left.educationType) - educationTypes.indexOf(right.educationType)
+    || left.title.localeCompare(right.title, "ko-KR"));
 }
 
 export async function markAttendanceEducationCompletions(input: {
@@ -389,7 +392,7 @@ export async function markEducationCompletion(input: { employeeId: unknown; reso
   if (!resourceId) throw new Error("교재 ID를 입력하세요.");
 
   const { data: resource, error: resourceError } = await supabase.from("education_resources")
-    .select("id,title,education_type").eq("id", resourceId).single();
+    .select("id,title,education_type,startdate,enddate").eq("id", resourceId).single();
   throwIfError(resourceError);
   if (!resource) throw new Error("안전교육 자료를 찾을 수 없습니다.");
 
@@ -401,6 +404,7 @@ export async function markEducationCompletion(input: { employeeId: unknown; reso
     || new Date(workDate).toISOString().slice(0, 10) !== workDate) {
     throw new Error("교육 날짜를 확인하세요.");
   }
+  if (!isEducationResourceForDate(resource, workDate)) throw new Error("출근날짜에 해당하는 교육자료가 아닙니다.");
   const { data: existingCompletion, error: existingError } = await supabase.from("education_completions")
     .select("id,employee_id,title,work_date,education_type,completed_at")
     .eq("employee_id", employeeId).eq("title", resource.title)

@@ -359,7 +359,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
                   const subjects = detailRows.filter((detail) => detail.employeeId === row.employeeId).flatMap((detail) => detail.subjects);
                   const total = subjects.filter((subject) => subject.isCompleted !== null).length;
                   const completed = subjects.filter((subject) => subject.isCompleted === true).length;
-                  return <span className={completed < total ? "font-semibold text-destructive" : "font-semibold text-muted-foreground"}>{total === 0 ? "-" : `${completed}/${total}`}</span>;
+                  return <span className={completed < total ? "font-semibold text-destructive" : "font-semibold text-muted-foreground"} style={completed < total ? { color: "#dc2626" } : undefined}>{total === 0 ? "-" : `${completed}/${total}`}</span>;
                 })()}</TableCell>
                 {monthlyEducationTypes.map((type) => <TableCell key={type} data-label={educationDisplayLabel(type)}>
                   {resourceCounts[type] === 0 ? "-" : row[type] === resourceCounts[type] ? <span className="font-semibold text-muted-foreground">{row[type]}/{resourceCounts[type]}</span> :

@@ -4,8 +4,10 @@ import { educationToday, educationTypes, educationTypeLabels, isEducationResourc
 type AttendanceRecord = {
   employee_id: string;
   work_date: string;
-  employees: { name: string } | { name: string }[] | null;
+  employees: AttendanceEmployee | AttendanceEmployee[] | null;
 };
+
+type AttendanceEmployee = { name: string; role?: string; work_style?: string | null };
 
 type CompletionRecord = {
   employee_id: string;
@@ -20,6 +22,9 @@ type CompletionRecord = {
 export type DailyEducationAttendanceRow = {
   employeeId: string;
   employeeName: string;
+  employeeRole: string;
+  workStyle: string;
+  workDate: string;
 } & Record<EducationType, number>;
 
 export type EducationResourceCounts = Record<EducationType, number>;
@@ -92,7 +97,7 @@ function getAttendanceQuery(dateFrom: string, dateToExclusive: string) {
   const end = kstDateTime(dateToExclusive);
   const supabase = getSupabaseAdmin();
   return (from: number, to: number) => supabase.from("work_record")
-    .select("employee_id,work_date,employees!inner(name)")
+    .select("employee_id,work_date,employees!inner(name,role,work_style)")
     .not("work_intime", "is", null)
     .or(`and(work_intime.gte.${start},work_intime.lt.${end}),and(outtime.gte.${start},outtime.lt.${end})`)
     .order("work_date", { ascending: true })
@@ -135,9 +140,12 @@ export async function loadDailyEducationAttendance(date = educationToday()): Pro
     resourceCounts[type] = matches.length;
     resourcesByType.set(type, matches);
   }
-  const namesByEmployee = new Map<string, string>();
-  attendanceRows.forEach((record) => namesByEmployee.set(record.employee_id, employeeName(record)));
-  const employeeIds = [...namesByEmployee.keys()];
+  const attendanceByEmployee = new Map<string, AttendanceRecord>();
+  attendanceRows.forEach((record) => {
+    const previous = attendanceByEmployee.get(record.employee_id);
+    if (!previous || record.work_date > previous.work_date) attendanceByEmployee.set(record.employee_id, record);
+  });
+  const employeeIds = [...attendanceByEmployee.keys()];
   const completions = employeeIds.length && resources.length
     ? await readAll<CompletionRecord & { title: string }>((from, to) => supabase.from("education_completions")
       .select("employee_id,work_date,title,education_type,completed_at")
@@ -152,7 +160,14 @@ export async function loadDailyEducationAttendance(date = educationToday()): Pro
       counts[type] = (resourcesByType.get(type) ?? []).filter((resource) =>
         completed.has(JSON.stringify([id, resource.title, resource.education_type]))).length;
     }
-    return { employeeId: id, employeeName: namesByEmployee.get(id) ?? "", ...counts };
+    const record = attendanceByEmployee.get(id)!;
+    const employee = Array.isArray(record.employees) ? record.employees[0] : record.employees;
+    const workStyle = employee?.work_style === "0" ? "일반근무"
+      : employee?.work_style === "1" ? "격일근무" : employee?.work_style === "2" ? "야간근무" : "-";
+    return {
+      employeeId: id, employeeName: employee?.name ?? "", employeeRole: employee?.role ?? "-",
+      workStyle, workDate: record.work_date, ...counts,
+    };
   }).sort((left, right) => left.employeeName.localeCompare(right.employeeName, "ko-KR") || left.employeeId.localeCompare(right.employeeId));
   return { rows, resourceCounts };
 }

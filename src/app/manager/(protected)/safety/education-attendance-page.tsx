@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { calculateMonthlyEducationSummary } from "@/lib/monthly-education-summary";
+import { employeeSummary } from "@/lib/employee-summary";
 import ManagerLoadingMessage from "../manager-loading-message";
 import { educationTypeLabels, educationTypes, type EducationType } from "@/lib/education-periods";
 import type {
@@ -242,6 +243,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
   };
 
   const title = isDaily ? "일일교육이수" : "월별교육이수";
+  const today = currentKstDate();
 
   return (
     <section className="space-y-[1.5rem]">
@@ -312,11 +314,14 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
           loading={loading}
           error={error}
           emptyMessage="조회 결과에 해당하는 근무자가 없습니다."
-          headers={["이름", ...educationTypes.map((type) => `${educationDisplayLabel(type)}(${resourceCounts[type]})`)]}
+          headers={["이름", "출근일", ...educationTypes.map((type) => `${educationDisplayLabel(type)}(${resourceCounts[type]})`)]}
         >
           {filteredDailyRows.map((row) => (
             <TableRow key={row.employeeId} className="hover:bg-muted/40 transition-colors">
-              <TableCell data-label="이름" className="font-semibold">{row.employeeName}</TableCell>
+              <TableCell data-label="이름" className="font-semibold">{employeeSummary(row)}</TableCell>
+              <TableCell data-label="출근일" className={`whitespace-nowrap ${row.workDate && row.workDate !== today ? "text-yellow-500" : "text-muted-foreground"}`}>
+                {row.workDate || "-"}
+              </TableCell>
               {educationTypes.map((type) => <TableCell key={type} data-label={educationDisplayLabel(type)}>
                 <span className={resourceCounts[type] > 0 && row[type] < resourceCounts[type] ? "text-destructive" : "font-semibold text-muted-foreground"}>
                   {resourceCounts[type] === 0 ? "-" : `${row[type]}/${resourceCounts[type]}`}

@@ -7,7 +7,11 @@ it("counts active resources and same-date completions by subject, including othe
   const resource = (id: string, type: string, startdate = date, enddate = date) => ({ id, title: id, education_type: type, startdate, enddate });
   const queries: { table: string; filters: unknown[][] }[] = [];
   const records: Record<string, unknown[]> = {
-    work_record: [{ employee_id: "e1", work_date: date, employees: { name: "홍길동" } }, { employee_id: "e2", work_date: date, employees: { name: "김철수" } }],
+    work_record: [
+      { employee_id: "e1", work_date: date, employees: { name: "홍길동", role: "경비원", work_style: "1" } },
+      { employee_id: "e1", work_date: "2026-10-06", employees: { name: "홍길동", role: "경비원", work_style: "1" } },
+      { employee_id: "e2", work_date: "2026-10-06", employees: [{ name: "김철수", role: "미화원", work_style: "2" }] },
+    ],
     education_resources: [resource("d1", "일일"), resource("d2", "일일"), resource("q1", "분기"), resource("o1", "기타"), resource("o2", "기타"), resource("expired", "월간", "2026-01-01", "2026-10-06"), resource("future", "반기", "2026-10-08", "2026-12-31")],
     education_completions: [
       { employee_id: "e1", work_date: date, title: "d1", education_type: "일일" },
@@ -31,8 +35,15 @@ it("counts active resources and same-date completions by subject, including othe
   } } as never);
   const result = await loadDailyEducationAttendance(date);
   expect(result.resourceCounts).toEqual({ daily: 2, monthly: 0, quarterly: 1, semiannual: 0, other: 2 });
-  expect(result.rows.find((row) => row.employeeId === "e1")).toMatchObject({ daily: 1, quarterly: 1, other: 2 });
-  expect(result.rows.find((row) => row.employeeId === "e2")).toMatchObject({ daily: 1, quarterly: 0, other: 0 });
+  expect(result.rows).toHaveLength(2);
+  expect(result.rows.find((row) => row.employeeId === "e1")).toMatchObject({
+    daily: 1, quarterly: 1, other: 2, employeeRole: "경비원", workStyle: "격일근무", workDate: date,
+  });
+  expect(result.rows.find((row) => row.employeeId === "e2")).toMatchObject({
+    daily: 1, quarterly: 0, other: 0, employeeName: "김철수", employeeRole: "미화원", workStyle: "야간근무", workDate: "2026-10-06",
+  });
+  expect(queries.find((query) => query.table === "work_record")!.filters)
+    .toContainEqual(["select", "employee_id,work_date,employees!inner(name,role,work_style)"]);
   const resources = queries.find((query) => query.table === "education_resources")!;
   expect(resources.filters).toContainEqual(["lte", "startdate", date]);
   expect(resources.filters).toContainEqual(["gte", "enddate", date]);

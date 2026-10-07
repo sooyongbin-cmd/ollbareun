@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { employeeSummary } from "@/lib/employee-summary";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -30,18 +31,6 @@ function currentDate() {
   return new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
-function employeeSummary(row: AttendanceReportRow) {
-  const employeeRole = row.employeeRole || "-";
-  const role = employeeRole === "경비원"
-    ? "경비"
-    : employeeRole === "미화원"
-      ? "미화"
-      : employeeRole === "주차원"
-        ? "주차"
-        : employeeRole;
-  const workStyle = row.workStyle.endsWith("근무") ? row.workStyle.slice(0, -2) : row.workStyle;
-  return `${row.employeeName} (${role},${workStyle})`;
-}
 
 type DateTimeDisplay = {
   text: string;

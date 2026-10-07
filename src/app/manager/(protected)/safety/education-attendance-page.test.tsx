@@ -4,6 +4,24 @@ import EducationAttendancePage from "./education-attendance-page";
 import userEvent from "@testing-library/user-event";
 afterEach(() => vi.unstubAllGlobals());
 
+it("shows actual work dates after names and highlights only dates different from today", async () => {
+  const today = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+  const yesterday = new Date(new Date(`${today}T00:00:00Z`).getTime() - 86400000).toISOString().slice(0, 10);
+  vi.stubGlobal("fetch", vi.fn(async () => Response.json({
+    resourceCounts: { daily: 0, monthly: 0, quarterly: 0, semiannual: 0, other: 0 },
+    rows: [
+      { employeeId: "e1", employeeName: "심명호", employeeRole: "경비원", workStyle: "격일근무", workDate: yesterday },
+      { employeeId: "e2", employeeName: "김철수", employeeRole: "미화원", workStyle: "일반근무", workDate: today },
+    ],
+  })));
+  render(<EducationAttendancePage mode="daily" />);
+  await screen.findByText("심명호 (경비,격일)");
+  expect(screen.getAllByRole("columnheader").slice(0, 2).map((cell) => cell.textContent)).toEqual(["이름", "출근일"]);
+  expect(screen.getByText(yesterday)).toHaveClass("text-yellow-500");
+  expect(screen.getByText(today)).not.toHaveClass("text-yellow-500");
+  expect(screen.getByText("김철수 (미화,일반)")).toBeInTheDocument();
+});
+
 it("moves education reminders to the daily page and updates labels", async () => {
   vi.stubGlobal("fetch", vi.fn(async () => Response.json({ rows: [], summaryRows: [], detailRows: [] })));
   const daily = render(<EducationAttendancePage mode="daily" />);
@@ -31,12 +49,12 @@ it("registers the filtered list and shows count and delay from the server", asyn
   const fetchMock = vi.fn(async (url: RequestInfo | URL) => String(url).endsWith("/run")
     ? Response.json({ registeredCount: 1, delayMinutes: 7 })
     : Response.json({ resourceCounts: { daily: 1, monthly: 0, quarterly: 0, semiannual: 0, other: 0 }, rows: [
-      { employeeId: "e1", employeeName: "홍길동", daily: 0, monthly: 0, quarterly: 0, semiannual: 0, other: 0 },
-      { employeeId: "e2", employeeName: "김철수", daily: 0, monthly: 0, quarterly: 0, semiannual: 0, other: 0 },
+      { employeeId: "e1", employeeName: "홍길동", employeeRole: "경비원", workStyle: "격일근무", workDate: "2026-10-07", daily: 0, monthly: 0, quarterly: 0, semiannual: 0, other: 0 },
+      { employeeId: "e2", employeeName: "김철수", employeeRole: "미화원", workStyle: "일반근무", workDate: "2026-10-07", daily: 0, monthly: 0, quarterly: 0, semiannual: 0, other: 0 },
     ] }));
   vi.stubGlobal("fetch", fetchMock);
   render(<EducationAttendancePage mode="daily" />);
-  await screen.findByText("홍길동", { selector: "td" });
+  await screen.findByText("홍길동 (경비,격일)", { selector: "td" });
   await user.type(screen.getByLabelText("이름"), "홍길동");
   await user.click(screen.getByRole("button", { name: "교육알림" }));
   expect(await screen.findByText("1건 알림등록되었습니다. 7분 후에 알림이 전송될 예정입니다.")).toBeInTheDocument();
@@ -47,12 +65,12 @@ it("registers the filtered list and shows count and delay from the server", asyn
 it("shows subject totals, O for all complete, fractions otherwise and a dash for no subjects", async () => {
   vi.stubGlobal("fetch", vi.fn(async () => Response.json({
     resourceCounts: { daily: 2, monthly: 0, quarterly: 1, semiannual: 0, other: 2 },
-    rows: [{ employeeId: "e", employeeName: "홍길동", daily: 1, monthly: 0, quarterly: 1, semiannual: 0, other: 0 }],
+    rows: [{ employeeId: "e", employeeName: "홍길동", employeeRole: "경비원", workStyle: "격일근무", workDate: "2026-10-07", daily: 1, monthly: 0, quarterly: 1, semiannual: 0, other: 0 }],
   })));
   render(<EducationAttendancePage mode="daily" />);
-  const name = await screen.findByText("홍길동", { selector: "td" });
+  const name = await screen.findByText("홍길동 (경비,격일)", { selector: "td" });
   const row = name.closest("tr")!;
-  expect(within(row).getAllByRole("cell").map((cell) => cell.textContent)).toEqual(["홍길동", "1/2", "-", "1/1", "-", "0/2"]);
+  expect(within(row).getAllByRole("cell").map((cell) => cell.textContent)).toEqual(["홍길동 (경비,격일)", "2026-10-07", "1/2", "-", "1/1", "-", "0/2"]);
   for (const title of ["일일(2)", "월별(0)", "분기(1)", "반기(0)", "기타(2)"]) {
     expect(screen.getByRole("columnheader", { name: title })).toBeInTheDocument();
   }

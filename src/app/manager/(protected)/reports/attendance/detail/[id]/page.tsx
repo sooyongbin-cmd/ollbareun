@@ -19,8 +19,9 @@ const educationTypeLabels: Record<AttendanceEducationItem["educationType"], stri
   monthly: "월별",
   quarterly: "분기",
   semiannual: "반기",
+  other: "기타",
 };
-const educationTypeOrder: AttendanceEducationItem["educationType"][] = ["daily", "monthly", "quarterly", "semiannual"];
+const educationTypeOrder: AttendanceEducationItem["educationType"][] = ["daily", "monthly", "quarterly", "semiannual", "other"];
 
 export default function AttendanceDetailPage() {
   const { id } = useParams<{ id: string }>();

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import EducationResourceNewPage from "./page";
@@ -15,6 +15,20 @@ describe("education resource new page", () => {
     push.mockReset();
   });
 
+  it("requires both dates before sending a save request", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    render(<EducationResourceNewPage />);
+    fireEvent.change(screen.getByLabelText("제목"), { target: { value: "교육" } });
+    fireEvent.change(screen.getByLabelText("유튜브 링크"), { target: { value: "https://youtu.be/example" } });
+    fireEvent.click(screen.getByRole("button", { name: "저장" }));
+    expect(screen.getByText("시작일을 입력하세요.")).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("시작일"), { target: { value: "2026-10-07" } });
+    fireEvent.click(screen.getByRole("button", { name: "저장" }));
+    expect(screen.getByText("종료일을 입력하세요.")).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("saves a YouTube education resource and returns to resource management", async () => {
     const user = userEvent.setup();
     const fetch = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
@@ -22,7 +36,9 @@ describe("education resource new page", () => {
       expect(init?.body).toBeInstanceOf(FormData);
 
       const formData = init?.body as FormData;
-      expect(formData.get("educationType")).toBe("semiannual");
+      expect(formData.get("educationType")).toBe("other");
+      expect(formData.get("startdate")).toBe("2026-10-07");
+      expect(formData.get("enddate")).toBe("2026-10-31");
       expect(formData.get("title")).toBe("화재 안전 교육");
       expect(formData.get("youtubeLink")).toBe("https://www.youtube.com/watch?v=fireSafety");
 
@@ -39,9 +55,11 @@ describe("education resource new page", () => {
     render(<EducationResourceNewPage />);
 
     expect(screen.getByRole("radio", { name: "일일" })).toBeChecked();
-    await user.click(screen.getByRole("radio", { name: "반기" }));
+    await user.click(screen.getByRole("radio", { name: "기타" }));
     await user.type(screen.getByLabelText("제목"), "화재 안전 교육");
     await user.type(screen.getByLabelText("유튜브 링크"), "https://www.youtube.com/watch?v=fireSafety");
+    fireEvent.change(screen.getByLabelText("시작일"), { target: { value: "2026-10-07" } });
+    fireEvent.change(screen.getByLabelText("종료일"), { target: { value: "2026-10-31" } });
     await user.click(screen.getByRole("button", { name: "저장" }));
 
     expect(await screen.findByText("자료를 저장하였습니다.")).toBeInTheDocument();
@@ -66,6 +84,8 @@ describe("education resource new page", () => {
 
     await user.type(screen.getByLabelText("제목"), "화재 안전 교육");
     await user.type(screen.getByLabelText("유튜브 링크"), "https://www.youtube.com/watch?v=fireSafety");
+    fireEvent.change(screen.getByLabelText("시작일"), { target: { value: "2026-10-07" } });
+    fireEvent.change(screen.getByLabelText("종료일"), { target: { value: "2026-10-31" } });
     await user.click(screen.getByRole("button", { name: "저장" }));
 
     expect(screen.getByRole("button", { hidden: true, name: "저장" })).toBeDisabled();

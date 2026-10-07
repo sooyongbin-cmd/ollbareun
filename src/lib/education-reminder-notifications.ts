@@ -55,6 +55,7 @@ const educationTypeByKoreanName: Record<string, EducationType> = {
   "월간": "monthly",
   "분기": "quarterly",
   "반기": "semiannual",
+  "기타": "other",
 };
 
 const reminderJobBatchSize = 50;

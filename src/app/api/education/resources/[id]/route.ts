@@ -45,6 +45,8 @@ export async function PATCH(request: Request, { params }: RouteContext) {
         title: body.title,
         youtubeLink: body.youtubeLink,
         educationType: body.educationType,
+        startdate: body.startdate,
+        enddate: body.enddate,
       }, supabase),
     });
   } catch (error) {

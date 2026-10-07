@@ -1,6 +1,8 @@
 "use client";
 
 import EducationTypeRadio from "@/components/education-type-radio";
+import EducationResourceDates from "@/components/education-resource-dates";
+import { requireEducationResourceDates } from "@/lib/education-periods";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
@@ -33,7 +35,6 @@ export default function EducationResourceNewPage() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-  const [errorAlertMessage, setErrorAlertMessage] = useState("");
   const router = useRouter();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -44,7 +45,6 @@ export default function EducationResourceNewPage() {
     }
 
     setError("");
-    setErrorAlertMessage("");
 
     const sourceFormData = new FormData(event.currentTarget);
     const title = String(sourceFormData.get("title") ?? "").trim();
@@ -74,6 +74,14 @@ export default function EducationResourceNewPage() {
     }
 
     const formData = new FormData();
+    try {
+      const dates = requireEducationResourceDates(sourceFormData.get("startdate"), sourceFormData.get("enddate"));
+      formData.set("startdate", dates.startdate);
+      formData.set("enddate", dates.enddate);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "시작일과 종료일을 입력하세요.");
+      return;
+    }
     formData.set("title", title);
     formData.set("youtubeLink", youtubeLink);
     formData.set("educationType", String(sourceFormData.get("educationType") ?? ""));
@@ -87,11 +95,7 @@ export default function EducationResourceNewPage() {
         setError("저장 요청 시간이 초과되었습니다. 잠시 후 다시 시도하세요.");
       } else {
         const message = submitError instanceof Error ? submitError.message : "교재를 저장하지 못했습니다.";
-        if (message.startsWith("기존의 ") && message.endsWith(" 안전교육 자료가 있습니다.")) {
-          setErrorAlertMessage(message);
-        } else {
-          setError(message);
-        }
+        setError(message);
       }
     } finally {
       setIsSubmitting(false);
@@ -110,7 +114,10 @@ export default function EducationResourceNewPage() {
       <section className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
         <form className="space-y-6" noValidate onSubmit={handleSubmit}>
           <div className="space-y-4">
-            <EducationTypeRadio />
+            <div className="flex flex-wrap items-end gap-6">
+              <EducationTypeRadio disabled={isSubmitting} />
+              <EducationResourceDates disabled={isSubmitting} />
+            </div>
             <div className="space-y-2">
               <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="resource-title">
                 제목
@@ -165,13 +172,6 @@ export default function EducationResourceNewPage() {
       </section>
 
       <ProcessingModal isOpen={isSubmitting} message="저장처리중입니다..." />
-
-      <AlertModal
-        isOpen={Boolean(errorAlertMessage)}
-        onClose={() => setErrorAlertMessage("")}
-        title="오류"
-        description={errorAlertMessage}
-      />
 
       <AlertModal
         isOpen={Boolean(alertMessage)}

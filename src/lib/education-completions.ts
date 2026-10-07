@@ -26,12 +26,14 @@ const educationTypeByKoreanName: Record<string, EducationType> = {
   "월간": "monthly",
   "분기": "quarterly",
   "반기": "semiannual",
+  "기타": "other",
 };
 const koreanEducationTypeByType: Record<EducationType, string> = {
   daily: "일일",
   monthly: "월간",
   quarterly: "분기",
   semiannual: "반기",
+  other: "기타",
 };
 
 function throwIfError(error: { message?: string } | null) {
@@ -331,7 +333,7 @@ export async function loadEducationDays(params: URLSearchParams, supabase = getS
     if (f.type) query = query.eq("education_type", koreanEducationTypeByType[f.type]);
     return query.order("employee_id").order("work_date").order("id").range(from, to);
   });
-  const priority = { semiannual: 0, quarterly: 1, monthly: 2, daily: 3 } as const;
+  const priority = { semiannual: 0, quarterly: 1, monthly: 2, daily: 3, other: 4 } as const;
   const itemsByAttendance = new Map<string, EducationDayRow["items"]>();
   completions.forEach((completion) => {
     const educationType = educationTypeByKoreanName[completion.education_type];

@@ -1,8 +1,21 @@
-export const educationTypes = ["daily", "monthly", "quarterly", "semiannual"] as const;
+export const educationTypes = ["daily", "monthly", "quarterly", "semiannual", "other"] as const;
 export type EducationType = typeof educationTypes[number];
 export const educationTypeLabels: Record<EducationType, string> = {
-  daily: "일일", monthly: "월간", quarterly: "분기", semiannual: "반기",
+  daily: "일일", monthly: "월간", quarterly: "분기", semiannual: "반기", other: "기타",
 };
+
+export function requireEducationResourceDates(startValue: unknown, endValue: unknown) {
+  const requireDate = (value: unknown, label: string) => {
+    if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) throw new Error(`${label}을 입력하세요.`);
+    const parsed = new Date(`${value}T00:00:00Z`);
+    if (!Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== value) throw new Error(`올바른 ${label}을 입력하세요.`);
+    return value;
+  };
+  const startdate = requireDate(startValue, "시작일");
+  const enddate = requireDate(endValue, "종료일");
+  if (enddate < startdate) throw new Error("종료일은 시작일보다 빠를 수 없습니다.");
+  return { startdate, enddate };
+}
 
 export function requireEducationType(value: unknown): EducationType {
   if (!educationTypes.includes(value as EducationType)) throw new Error("안전교육구분을 선택하세요.");

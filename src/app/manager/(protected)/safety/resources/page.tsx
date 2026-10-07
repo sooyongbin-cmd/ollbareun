@@ -1,13 +1,13 @@
 "use client";
 
-import { educationTypeLabels, type EducationType } from "@/lib/education-periods";
+import { educationTypeLabels, educationTypes, type EducationType } from "@/lib/education-periods";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
-import { SortableHeader } from "@/components/sortable-header";
+
 
 type EducationResourceRow = {
   id: string;
@@ -15,22 +15,13 @@ type EducationResourceRow = {
   youtube_link: string;
   created_at: string;
   education_type: EducationType;
-};
-
-type EducationCompletionRow = { resource_id: string; completed_count: number };
-
-type EmployeeRow = {
-  id: string;
-  is_retired: boolean;
+  startdate: string;
+  enddate: string;
 };
 
 export default function EducationResourcesPage() {
   const [resources, setResources] = useState<EducationResourceRow[]>([]);
-  const [completions, setCompletions] = useState<EducationCompletionRow[]>([]);
-  const [employees, setEmployees] = useState<EmployeeRow[]>([]);
   const [query, setQuery] = useState("");
-  const [sortKey, setSortKey] = useState<"title" | "completions">("title");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -39,30 +30,10 @@ export default function EducationResourcesPage() {
 
     async function loadResources() {
       try {
-        const [resourcesResponse, completionsResponse, bootstrapResponse] = await Promise.all([
-          fetch("/api/education/resources"),
-          fetch("/api/education/completions?view=resources"),
-          fetch("/api/bootstrap"),
-        ]);
-        const resourcesPayload = await resourcesResponse.json();
-        const completionsPayload = await completionsResponse.json();
-        const bootstrapPayload = await bootstrapResponse.json();
-
-        if (!resourcesResponse.ok) {
-          throw new Error(resourcesPayload.error ?? "교육자료 목록을 불러오지 못했습니다.");
-        }
-        if (!completionsResponse.ok) {
-          throw new Error(completionsPayload.error ?? "교육이수 목록을 불러오지 못했습니다.");
-        }
-        if (!bootstrapResponse.ok) {
-          throw new Error(bootstrapPayload.error ?? "직원 목록을 불러오지 못했습니다.");
-        }
-
-        if (!ignore) {
-          setResources(resourcesPayload.resources ?? []);
-          setCompletions(completionsPayload.counts ?? []);
-          setEmployees(bootstrapPayload.employees ?? []);
-        }
+        const response = await fetch("/api/education/resources");
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error ?? "교육자료 목록을 불러오지 못했습니다.");
+        if (!ignore) setResources(payload.resources ?? []);
       } catch (loadError) {
         if (!ignore) {
           setError(loadError instanceof Error ? loadError.message : "교육자료 목록을 불러오지 못했습니다.");
@@ -91,40 +62,9 @@ export default function EducationResourcesPage() {
     return resources.filter((resource) => resource.title.toLowerCase().includes(normalizedQuery));
   }, [query, resources]);
 
-  const activeEmployeeIds = useMemo(() => {
-    return new Set(employees.filter((employee) => !employee.is_retired).map((employee) => employee.id));
-  }, [employees]);
-
-  const completedEmployeeCountByResourceId = useMemo(() => {
-    return new Map(completions.map((row) => [row.resource_id, row.completed_count]));
-  }, [completions]);
-
-  const sortedResources = useMemo(() => {
-    return [...filteredResources].sort((left, right) => {
-      if (sortKey === "title") {
-        return sortDirection === "asc"
-          ? left.title.localeCompare(right.title, "ko-KR")
-          : right.title.localeCompare(left.title, "ko-KR");
-      } else {
-        const leftCount = completedEmployeeCountByResourceId.get(left.id) ?? 0;
-        const rightCount = completedEmployeeCountByResourceId.get(right.id) ?? 0;
-        if (leftCount === rightCount) {
-          return left.title.localeCompare(right.title, "ko-KR");
-        }
-        return sortDirection === "asc" ? leftCount - rightCount : rightCount - leftCount;
-      }
-    });
-  }, [filteredResources, sortKey, sortDirection, completedEmployeeCountByResourceId]);
-
-  const handleSort = (key: "title" | "completions") => {
-    if (sortKey === key) {
-      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
-      setSortKey(key);
-      setSortDirection("asc");
-    }
-  };
-
+  const sortedResources = useMemo(() => [...filteredResources].sort((left, right) =>
+    educationTypes.indexOf(left.education_type) - educationTypes.indexOf(right.education_type)
+    || left.title.localeCompare(right.title, "ko-KR")), [filteredResources]);
   return (
     <section className="space-y-[1.5rem]">
       <header>
@@ -181,37 +121,23 @@ export default function EducationResourcesPage() {
             <Table className="w-full">
               <TableHeader>
                 <TableRow>
-                  <SortableHeader
-                    sortKey="title"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                    className="text-left"
-                  >
-                    제목
-                  </SortableHeader>
-                  <TableHead className="text-left">교육구분</TableHead>
-                  <SortableHeader
-                    sortKey="completions"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                    className="text-left"
-                  >
-                    이수현황
-                  </SortableHeader>
+                  <TableHead>교육구분</TableHead>
+                  <TableHead>제목</TableHead>
+                  <TableHead>시작일</TableHead>
+                  <TableHead>종료일</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {sortedResources.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={3} className="p-8 text-center text-muted-foreground italic">
+                    <TableCell data-responsive-empty colSpan={4} className="p-8 text-center text-muted-foreground italic">
                       조회 결과에 해당하는 교육자료가 없습니다.
                     </TableCell>
                   </TableRow>
                 ) : (
                   sortedResources.map((resource) => (
                     <TableRow key={resource.id} className="hover:bg-muted/40 transition-colors">
+                      <TableCell data-label="교육구분">{resource.education_type === "monthly" ? "월별" : educationTypeLabels[resource.education_type]}</TableCell>
                       <TableCell data-label="제목" className="font-semibold">
                         <Link
                           className="text-primary hover:underline"
@@ -220,15 +146,8 @@ export default function EducationResourcesPage() {
                           {resource.title}
                         </Link>
                       </TableCell>
-                      <TableCell data-label="교육구분" className="text-muted-foreground">{educationTypeLabels[resource.education_type]}</TableCell>
-                      <TableCell data-label="이수현황" className="font-semibold text-foreground/80">
-                        <Link
-                          className="text-primary hover:underline"
-                          href={`/manager/safety/completions/detail?resourceId=${encodeURIComponent(resource.id)}`}
-                        >
-                          {completedEmployeeCountByResourceId.get(resource.id) ?? 0}/{activeEmployeeIds.size}
-                        </Link>
-                      </TableCell>
+                      <TableCell data-label="시작일">{resource.startdate}</TableCell>
+                      <TableCell data-label="종료일">{resource.enddate}</TableCell>
                     </TableRow>
                   ))
                 )}

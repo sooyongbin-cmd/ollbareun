@@ -43,6 +43,8 @@ export async function POST(request: Request) {
         title: formData.get("title"),
         youtubeLink: formData.get("youtubeLink"),
         educationType: formData.get("educationType"),
+        startdate: formData.get("startdate"),
+        enddate: formData.get("enddate"),
       }, supabase),
     });
   } catch (error) {

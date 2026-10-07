@@ -31,7 +31,7 @@ describe("education resources route", () => {
         id: "resource-1",
         title: "화재 안전 교육",
         youtube_link: "https://www.youtube.com/watch?v=fireSafety",
-        created_at: "2026-05-27T00:00:00.000Z", education_type: "daily",
+        created_at: "2026-05-27T00:00:00.000Z", education_type: "daily", startdate: "2026-10-07", enddate: "2026-10-31",
       },
     ]);
 
@@ -43,7 +43,7 @@ describe("education resources route", () => {
           id: "resource-1",
           title: "화재 안전 교육",
           youtube_link: "https://www.youtube.com/watch?v=fireSafety",
-          created_at: "2026-05-27T00:00:00.000Z", education_type: "daily",
+          created_at: "2026-05-27T00:00:00.000Z", education_type: "daily", startdate: "2026-10-07", enddate: "2026-10-31",
         },
       ],
     });
@@ -65,10 +65,12 @@ describe("education resources route", () => {
       id: "resource-1",
       title: "화재 안전 교육",
       youtube_link: "https://www.youtube.com/watch?v=fireSafety",
-      created_at: "2026-05-27T00:00:00.000Z", education_type: "daily",
+      created_at: "2026-05-27T00:00:00.000Z", education_type: "daily", startdate: "2026-10-07", enddate: "2026-10-31",
     });
     const body = new FormData();
     body.set("educationType", "daily");
+    body.set("startdate", "2026-10-07");
+    body.set("enddate", "2026-10-31");
     body.set("title", "화재 안전 교육");
     body.set("youtubeLink", "https://www.youtube.com/watch?v=fireSafety");
 
@@ -78,7 +80,7 @@ describe("education resources route", () => {
     expect(createEducationResource).toHaveBeenCalledWith(
       {
         title: "화재 안전 교육",
-        youtubeLink: "https://www.youtube.com/watch?v=fireSafety", educationType: "daily",
+        youtubeLink: "https://www.youtube.com/watch?v=fireSafety", educationType: "daily", startdate: "2026-10-07", enddate: "2026-10-31",
       },
       {},
     );
@@ -87,7 +89,7 @@ describe("education resources route", () => {
         id: "resource-1",
         title: "화재 안전 교육",
         youtube_link: "https://www.youtube.com/watch?v=fireSafety",
-        created_at: "2026-05-27T00:00:00.000Z", education_type: "daily",
+        created_at: "2026-05-27T00:00:00.000Z", education_type: "daily", startdate: "2026-10-07", enddate: "2026-10-31",
       },
     });
   });
@@ -96,6 +98,8 @@ describe("education resources route", () => {
     vi.mocked(createEducationResource).mockRejectedValue(new DOMException("This operation was aborted", "AbortError"));
     const body = new FormData();
     body.set("educationType", "daily");
+    body.set("startdate", "2026-10-07");
+    body.set("enddate", "2026-10-31");
     body.set("title", "화재 안전 교육");
     body.set("youtubeLink", "https://www.youtube.com/watch?v=fireSafety");
 

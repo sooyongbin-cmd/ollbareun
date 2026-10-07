@@ -1,6 +1,8 @@
 "use client";
 
 import EducationTypeRadio from "@/components/education-type-radio";
+import EducationResourceDates from "@/components/education-resource-dates";
+import { requireEducationResourceDates } from "@/lib/education-periods";
 import type { EducationType } from "@/lib/education-periods";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +20,8 @@ type EducationResource = {
   title: string;
   youtube_link: string;
   education_type: EducationType;
+  startdate: string;
+  enddate: string;
 };
 
 type EducationResourceResponse = {
@@ -68,6 +72,8 @@ export default function EducationResourceSavePage() {
   const router = useRouter();
   const resourceId = params.id;
   const [educationType, setEducationType] = useState<EducationType>("daily");
+  const [startdate, setStartdate] = useState("");
+  const [enddate, setEnddate] = useState("");
   const [title, setTitle] = useState("");
   const [youtubeLink, setYoutubeLink] = useState("");
   const [loading, setLoading] = useState(Boolean(resourceId));
@@ -87,6 +93,8 @@ export default function EducationResourceSavePage() {
         if (!ignore) {
           setTitle(data.resource.title);
           setEducationType(data.resource.education_type);
+          setStartdate(data.resource.startdate);
+          setEnddate(data.resource.enddate);
           setYoutubeLink(data.resource.youtube_link);
         }
       } catch (loadError) {
@@ -133,11 +141,12 @@ export default function EducationResourceSavePage() {
     }
 
     try {
+      const dates = requireEducationResourceDates(startdate, enddate);
       setSaving(true);
       await fetchJson<EducationResourceResponse>(`/api/education/resources/${resourceId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: nextTitle, youtubeLink: nextYoutubeLink, educationType }),
+        body: JSON.stringify({ title: nextTitle, youtubeLink: nextYoutubeLink, educationType, ...dates }),
       });
 
       setAlertMessage("수정이 완료되었습니다.");
@@ -166,7 +175,6 @@ export default function EducationResourceSavePage() {
   return (
     <section className="space-y-[1.5rem]">
       <header>
-        <p className="text-[0.875rem] font-semibold text-muted-foreground uppercase">관리자 화면</p>
         <div className="space-y-3">
           <h1 className="text-[1.75rem] leading-[1.2]">교육자료 상세</h1>
           <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground max-w-[40rem]">
@@ -183,7 +191,10 @@ export default function EducationResourceSavePage() {
         ) : (
           <form className="space-y-6" noValidate onSubmit={handleSubmit}>
             <div className="space-y-4">
-              <EducationTypeRadio value={educationType} disabled />
+              <div className="flex flex-wrap items-end gap-6">
+                <EducationTypeRadio value={educationType} onChange={setEducationType} disabled={saving || deleting} />
+                <EducationResourceDates startdate={startdate} enddate={enddate} onStartChange={setStartdate} onEndChange={setEnddate} disabled={saving || deleting} />
+              </div>
               <div className="space-y-2">
                 <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="resource-title">
                   제목

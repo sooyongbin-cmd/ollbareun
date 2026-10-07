@@ -54,12 +54,8 @@ type CompletionDialogState = {
 };
 
 type EducationReminderExecutionResult = {
-  scheduledDate?: string;
-  scheduledTime?: string;
-  successCount?: number;
-  failedCount?: number;
-  unregisteredCount?: number;
-  failedEmployees?: { employeeId: string; employeeName: string; reason: string }[];
+  registeredCount: number;
+  delayMinutes: number;
 };
 
 function educationDisplayLabel(type: EducationType) {
@@ -145,19 +141,25 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
 
   const runEducationReminders = async () => {
     setRunDialogOpen(true);
-    setIsRunningReminder(true);
     setRunResult(null);
     setRunError("");
+    if (date !== currentKstDate()) {
+      setRunError("근무일을 오늘로 조회한 후 교육알림 처리해주세요.");
+      return;
+    }
+    setIsRunningReminder(true);
 
     try {
       const response = await fetch("/api/notifications/education-reminders/run", {
         method: "POST",
         cache: "no-store",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workDate: date, employeeIds: filteredDailyRows.map((row) => row.employeeId) }),
       });
       const payload = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw new Error(payload?.error ?? "교육알림 Edge Function 실행에 실패했습니다.");
+        throw new Error(payload?.error ?? "교육알림 등록에 실패했습니다.");
       }
 
       setRunResult(payload as EducationReminderExecutionResult);
@@ -172,19 +174,6 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
     if (isRunningReminder && !open) return;
     setRunDialogOpen(open);
   };
-
-  const runResultHasCounts = Boolean(
-    runResult
-      && (typeof runResult.successCount === "number"
-        || typeof runResult.failedCount === "number"
-        || typeof runResult.unregisteredCount === "number"),
-  );
-  const runResultHasNoPushes = Boolean(
-    runResult
-      && (runResult.successCount ?? 0) === 0
-      && (runResult.failedCount ?? 0) === 0
-      && (runResult.unregisteredCount ?? 0) === 0,
-  );
 
   const openCompletionDialog = (
     employeeId: string,
@@ -252,7 +241,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
     setCompletionDialog(null);
   };
 
-  const title = isDaily ? "일별교육이수" : "월별교육이수";
+  const title = isDaily ? "일일교육이수" : "월별교육이수";
 
   return (
     <section className="space-y-[1.5rem]">
@@ -269,7 +258,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
         aria-label={`${title} 조회`}
         className="rounded-xl border border-border/50 bg-muted/40 p-[1.5rem] md:p-[2rem]"
       >
-        <div className={`grid gap-4 md:items-end ${isDaily ? "md:grid-cols-[minmax(0,1fr)_12rem]" : "md:grid-cols-[minmax(0,1fr)_12rem_auto_auto]"}`}>
+        <div className="grid gap-4 md:items-end md:grid-cols-[minmax(0,1fr)_12rem_auto]">
           <div className="min-w-0 flex flex-col gap-2">
             <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor={`${mode}-education-name`}>
               이름
@@ -288,7 +277,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
           </div>
           <div className="min-w-0 flex flex-col gap-2">
             <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor={`${mode}-education-period`}>
-              {isDaily ? "출근일" : "조회년월"}
+              {isDaily ? "근무일" : "조회년월"}
             </label>
             <Input
               className="block w-full"
@@ -306,9 +295,9 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
               </p>
             </div>
           ) : null}
-          {!isDaily ? (
+          {isDaily ? (
             <div className="flex h-9 items-center justify-end">
-              <Button type="button" disabled={isRunningReminder} onClick={() => void runEducationReminders()}>
+              <Button type="button" disabled={isRunningReminder || loading || Boolean(error)} onClick={() => void runEducationReminders()}>
                 {isRunningReminder ? "실행 중…" : "교육알림"}
               </Button>
             </div>
@@ -318,7 +307,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
 
       {isDaily ? (
         <EducationAttendanceTable
-          ariaLabel="일별교육이수 목록"
+          ariaLabel="일일교육이수 목록"
           count={filteredDailyRows.length}
           loading={loading}
           error={error}
@@ -371,7 +360,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
             loading={loading}
             error={error}
             emptyMessage="조회년월에 등록된 교육이수 자료가 없습니다."
-            headers={["이름", "출근일", ...dailySubjects.map((subject) => subject.title)]}
+            headers={["이름", "근무일", ...dailySubjects.map((subject) => subject.title)]}
           >
             {filteredDetailRows.map((row, index) => {
               const previous = filteredDetailRows[index - 1];
@@ -379,7 +368,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
               return (
                 <TableRow key={`${row.employeeId}:${row.workDate}`} className="hover:bg-muted/40 transition-colors">
                   <TableCell data-label="이름" className="font-semibold">{showName ? row.employeeName : "-"}</TableCell>
-                  <TableCell data-label="출근일" className="whitespace-nowrap text-muted-foreground">{row.workDate}</TableCell>
+                  <TableCell data-label="근무일" className="whitespace-nowrap text-muted-foreground">{row.workDate}</TableCell>
                   {dailySubjects.map((subject) => {
                     const status = row.subjects.find((item) => item.resourceId === subject.id)?.isCompleted;
                     return <TableCell key={subject.id} data-label={subject.title}>{status == null ? "-" : <Mark completed={status}
@@ -397,58 +386,18 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
         <DialogContent className="dark:text-white">
           <DialogHeader>
             <DialogTitle>
-              {isRunningReminder ? "교육알림 실행 중" : runError ? "교육알림 실행 실패" : "교육알림 실행 결과"}
+              {isRunningReminder ? "교육알림 등록 중" : runError ? "교육알림 등록 실패" : "교육알림 등록 완료"}
             </DialogTitle>
             <DialogDescription>
-              {isRunningReminder
-                ? "기한이 지난 안전교육 예약 작업을 확인하고 있습니다."
-                : runError
-                  ? "Edge Function 실행 중 오류가 발생했습니다."
-                  : runResultHasNoPushes
-                    ? "실행은 완료됐지만 전송된 푸시가 없습니다. 기한이 지난 미이수 작업이 없을 수 있습니다."
-                    : "기한이 지난 안전교육 예약 작업의 푸시 전송 결과입니다."}
+              {isRunningReminder ? "조회 목록의 미이수 직원에게 교육알림을 등록하고 있습니다."
+                : runError ? "교육알림을 등록하지 못했습니다." : "교육알림 등록 결과입니다."}
             </DialogDescription>
           </DialogHeader>
-
-          {isRunningReminder ? (
-            <ManagerLoadingMessage />
-          ) : runError ? (
+          {isRunningReminder ? <ManagerLoadingMessage /> : runError ? (
             <p role="alert" className="text-sm text-destructive">{runError}</p>
           ) : runResult ? (
-            <div className="space-y-3">
-              {runResultHasCounts ? (
-                <dl className="grid grid-cols-3 gap-3 rounded-lg border bg-muted/30 p-4 text-center text-sm">
-                  <div>
-                    <dt className="text-muted-foreground">성공</dt>
-                    <dd className="mt-1 font-semibold">{runResult.successCount ?? 0}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-muted-foreground">실패</dt>
-                    <dd className="mt-1 font-semibold">{runResult.failedCount ?? 0}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-muted-foreground">구독 없음</dt>
-                    <dd className="mt-1 font-semibold">{runResult.unregisteredCount ?? 0}</dd>
-                  </div>
-                </dl>
-              ) : null}
-              {runResult.scheduledDate && runResult.scheduledTime ? (
-                <p className="text-xs text-muted-foreground">
-                  실행 시각: {runResult.scheduledDate} {runResult.scheduledTime}
-                </p>
-              ) : null}
-              {runResult.failedEmployees && runResult.failedEmployees.length > 0 ? (
-                <ul className="max-h-48 space-y-1 overflow-y-auto rounded-lg border p-3 text-sm">
-                  {runResult.failedEmployees.map((employee) => (
-                    <li key={employee.employeeId}>
-                      <span className="font-medium">{employee.employeeName}</span>: {employee.reason}
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-            </div>
+            <p className="text-sm">{runResult.registeredCount}건 알림등록되었습니다. {runResult.delayMinutes}분 후에 알림이 전송될 예정입니다.</p>
           ) : null}
-
           {!isRunningReminder ? (
             <DialogFooter>
               <Button type="button" onClick={() => setRunDialogOpen(false)}>확인</Button>
@@ -481,7 +430,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
             </DialogTitle>
             {completionDialog?.status === "confirm" ? (
               <DialogDescription>
-                이수일자는 {completionDialog.educationType === "daily" ? `출근일(${completionDialog.workDate})` : completionDialog.workDate} 입니다.
+                이수일자는 {completionDialog.educationType === "daily" ? `근무일(${completionDialog.workDate})` : completionDialog.workDate} 입니다.
               </DialogDescription>
             ) : completionDialog?.status === "saving" ? (
               <DialogDescription asChild>

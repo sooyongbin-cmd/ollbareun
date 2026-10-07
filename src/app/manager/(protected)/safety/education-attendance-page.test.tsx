@@ -1,8 +1,49 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import EducationAttendancePage from "./education-attendance-page";
 import userEvent from "@testing-library/user-event";
 afterEach(() => vi.unstubAllGlobals());
+
+it("moves education reminders to the daily page and updates labels", async () => {
+  vi.stubGlobal("fetch", vi.fn(async () => Response.json({ rows: [], summaryRows: [], detailRows: [] })));
+  const daily = render(<EducationAttendancePage mode="daily" />);
+  expect(screen.getByRole("heading", { name: "일일교육이수" })).toBeInTheDocument();
+  expect(screen.getByLabelText("근무일")).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "교육알림" })).toBeInTheDocument();
+  daily.unmount();
+  render(<EducationAttendancePage mode="monthly" />);
+  expect(screen.queryByRole("button", { name: "교육알림" })).not.toBeInTheDocument();
+});
+
+it("rejects a past work date in a modal without registering reminders", async () => {
+  const user = userEvent.setup();
+  const fetchMock = vi.fn<typeof fetch>(async () => Response.json({ rows: [] }));
+  vi.stubGlobal("fetch", fetchMock);
+  render(<EducationAttendancePage mode="daily" />);
+  fireEvent.change(screen.getByLabelText("근무일"), { target: { value: "2020-01-01" } });
+  await user.click(await screen.findByRole("button", { name: "교육알림" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent("근무일을 오늘로 조회한 후 교육알림 처리해주세요.");
+  expect(fetchMock.mock.calls.every(([url]) => !String(url).endsWith("/run"))).toBe(true);
+});
+
+it("registers the filtered list and shows count and delay from the server", async () => {
+  const user = userEvent.setup();
+  const fetchMock = vi.fn(async (url: RequestInfo | URL) => String(url).endsWith("/run")
+    ? Response.json({ registeredCount: 1, delayMinutes: 7 })
+    : Response.json({ resourceCounts: { daily: 1, monthly: 0, quarterly: 0, semiannual: 0, other: 0 }, rows: [
+      { employeeId: "e1", employeeName: "홍길동", daily: 0, monthly: 0, quarterly: 0, semiannual: 0, other: 0 },
+      { employeeId: "e2", employeeName: "김철수", daily: 0, monthly: 0, quarterly: 0, semiannual: 0, other: 0 },
+    ] }));
+  vi.stubGlobal("fetch", fetchMock);
+  render(<EducationAttendancePage mode="daily" />);
+  await screen.findByText("홍길동", { selector: "td" });
+  await user.type(screen.getByLabelText("이름"), "홍길동");
+  await user.click(screen.getByRole("button", { name: "교육알림" }));
+  expect(await screen.findByText("1건 알림등록되었습니다. 7분 후에 알림이 전송될 예정입니다.")).toBeInTheDocument();
+  expect(fetchMock).toHaveBeenCalledWith("/api/notifications/education-reminders/run", expect.objectContaining({
+    method: "POST", body: JSON.stringify({ workDate: (screen.getByLabelText("근무일") as HTMLInputElement).value, employeeIds: ["e1"] }),
+  }));
+});
 it("shows subject totals, O for all complete, fractions otherwise and a dash for no subjects", async () => {
   vi.stubGlobal("fetch", vi.fn(async () => Response.json({
     resourceCounts: { daily: 2, monthly: 0, quarterly: 1, semiannual: 0, other: 2 },

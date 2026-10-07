@@ -17,6 +17,9 @@ declare
 begin
   select * into fixture from reminder_attendance_fixture;
   if fixture.id is null then raise exception 'A work record fixture is required'; end if;
+  -- The clock-in trigger now requires at least one missing education resource.
+  insert into public.education_resources(title, youtube_link, education_type, startdate, enddate)
+  values ('delay-test-' || gen_random_uuid()::text, 'https://www.youtube.com/watch?v=abcdefghijk', '일일', fixture.work_date, fixture.work_date);
   truncate reminder_attendance_fixture;
   for scenario in select * from (values
     ('7', 7), ('45', 45), ('0', 0), (' 12 ', 12),

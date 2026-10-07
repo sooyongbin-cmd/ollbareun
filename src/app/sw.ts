@@ -126,6 +126,7 @@ async function openNotification(event: NotificationEvent) {
           try {
             manager.postMessage({
               type: "PUSH_NOTIFICATION_CLICKED",
+              url: targetUrl,
               title: event.notification.title,
               body: event.notification.body,
             }, [channel.port2]);

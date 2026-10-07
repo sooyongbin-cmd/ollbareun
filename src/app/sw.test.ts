@@ -56,7 +56,7 @@ describe("service worker push navigation", () => {
     const harness = clickHarness(false, [manager], offline);
     await harness.click();
     expect(manager.focus).toHaveBeenCalledOnce();
-    expect(manager.postMessage).toHaveBeenCalledWith({ type: "PUSH_NOTIFICATION_CLICKED", title: "교육 알림", body: "근무자 교육 미이수" }, expect.anything());
+    expect(manager.postMessage).toHaveBeenCalledWith({ type: "PUSH_NOTIFICATION_CLICKED", url: "https://app.test/guard/main/safety", title: "교육 알림", body: "근무자 교육 미이수" }, expect.anything());
     expect(harness.openWindow).not.toHaveBeenCalled();
   });
 

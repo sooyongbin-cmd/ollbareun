@@ -22,7 +22,7 @@ export async function getYearDataSummary(yearInput?: unknown): Promise<YearDataS
   const { data, error } = await supabase.rpc("list_data_management_years");
   throwError(error);
   const years = ((data ?? []) as { year: number }[]).map((row) => row.year);
-  const year = requestedYear != null && years.includes(requestedYear) ? requestedYear : years.at(-1) ?? null;
+  const year = requestedYear != null && years.includes(requestedYear) ? requestedYear : years[0] ?? null;
   if (year == null) return { years, year, counts: { ...emptyYearDataCounts } };
   const result = await supabase.rpc("get_year_data_counts", { p_year: year });
   throwError(result.error);

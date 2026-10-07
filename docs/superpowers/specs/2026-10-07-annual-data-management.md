@@ -2,7 +2,7 @@
 
 화면: `/manager/system/data-manage`. 시스템설정 바로 아래에 자료관리 메뉴를 배치한다.
 
-연도 선택지는 `work_record.work_date`의 연도를 DISTINCT 오름차순으로 조회한다. 첫 진입 시 가장 최근 연도를 선택한다.
+연도 선택지는 `work_record.work_date`의 연도를 DISTINCT 오름차순으로 조회한다. 첫 진입 시 가장 이른 연도를 선택한다.
 
 | 자료 | 테이블 | 연도 기준 |
 | --- | --- | --- |

@@ -1,10 +1,18 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getSupabaseAdmin } from "./supabase-admin";
-import { deleteYearData, requireDataYear, specialRemarkPhotoPath } from "./year-data-management";
+import { deleteYearData, getYearDataSummary, requireDataYear, specialRemarkPhotoPath } from "./year-data-management";
 
 vi.mock("./supabase-admin", () => ({ getSupabaseAdmin: vi.fn() }));
 
 describe("year data management", () => {
+  it.each([undefined, 2027, 2024])("selects the earliest year by default while preserving a valid selection (%s)", async (requestedYear) => {
+    const rpc = vi.fn().mockResolvedValueOnce({ data: [{ year: 2025 }, { year: 2026 }, { year: 2027 }], error: null })
+      .mockResolvedValueOnce({ data: {}, error: null });
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ rpc } as never);
+    const year = requestedYear === 2027 ? 2027 : 2025;
+    expect((await getYearDataSummary(requestedYear)).year).toBe(year);
+    expect(rpc).toHaveBeenLastCalledWith("get_year_data_counts", { p_year: year });
+  });
   afterEach(() => vi.unstubAllEnvs());
   it.each([null, "", "2026 or 1=1", 0, 10000, "2026.5"])("rejects unsafe year %s", (year) => {
     expect(() => requireDataYear(year)).toThrow();

@@ -339,7 +339,7 @@ async function retryReminderJob(
   if (!data?.length) throw new Error(`알림 재시도 상태를 갱신하지 못했습니다: ${job.work_record_id}`);
 }
 
-/** Process only attendance reminders whose 30-minute deadline has passed. */
+/** Process attendance reminders whose configured waiting period has passed. */
 export async function processDueEducationReminderJobs(): Promise<EducationReminderResult> {
   configureWebPush();
 

@@ -10,6 +10,10 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("system config form", () => {
+  it("places save before delete on the edit screen", () => {
+    render(<SystemConfigForm mode="edit" initialConfig={{ system_code: "S000001", parent_system_code: null, description: "대기시간", content: "30" }} />);
+    expect(screen.getAllByRole("button").map((button) => button.textContent)).toEqual(["저장", "삭제", "목록"]);
+  });
   it("hides system code and category fields while creating a config", () => {
     render(<SystemConfigForm mode="create" />);
 

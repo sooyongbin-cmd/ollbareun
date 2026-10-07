@@ -184,6 +184,9 @@ export async function updateSystemConfig(input: {
   const parent_system_code = optionalString(input.parentSystemCode);
   const description = optionalString(input.description);
   const content = requireString(input.content, "내용");
+  if (system_code === "S000001" && (!/^[0-9]{1,10}$/.test(content) || Number(content) > 2147483647)) {
+    throw new Error("교육 알림 대기시간은 0 이상의 정수(분)로 입력하세요.");
+  }
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("system_configs")

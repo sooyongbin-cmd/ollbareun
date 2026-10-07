@@ -124,7 +124,7 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
       </div>
 
       <div className="space-y-2">
-        <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" id="system-config-content-label">
+        <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" id="system-config-content-label" htmlFor={isThemeConfig ? undefined : "system-config-content"}>
           내용
         </label>
         {isThemeConfig ? (
@@ -157,14 +157,14 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
       {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p> : null}
 
       <div className="flex flex-col gap-3 md:flex-row md:justify-end">
+        <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" disabled={saving} type="submit">
+          저장
+        </Button>
         {mode === "edit" && !isThemeConfig ? (
           <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" disabled={saving} onClick={() => setDeleteConfirmOpen(true)} type="button" variant="outline">
             삭제
           </Button>
         ) : null}
-        <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" disabled={saving} type="submit">
-          저장
-        </Button>
         <Button
           className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:ml-auto"
           disabled={saving}

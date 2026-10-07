@@ -4,11 +4,36 @@ import {
   defaultKakaoOpenGraphMetadata,
   getKakaoOpenGraphMetadata,
   isSystemConfigEnabled,
+  updateSystemConfig,
 } from "./system-configs";
 
 vi.mock("./supabase-admin", () => ({
   getSupabaseAdmin: vi.fn(),
 }));
+
+describe("education reminder delay setting", () => {
+  it.each(["0", "7", "45"])("saves valid delay %s minutes", async (content) => {
+    const single = vi.fn().mockResolvedValue({ data: { system_code: "S000001", content }, error: null });
+    const update = vi.fn(() => ({ eq: vi.fn(() => ({ select: vi.fn(() => ({ single })) })) }));
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from: vi.fn(() => ({ update })) } as never);
+    await expect(updateSystemConfig({ systemCode: "S000001", content })).resolves.toMatchObject({ content });
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({ content }));
+  });
+
+  it("preserves text values for other system settings", async () => {
+    const single = vi.fn().mockResolvedValue({ data: { content: "admin@example.com" }, error: null });
+    const update = vi.fn(() => ({ eq: vi.fn(() => ({ select: vi.fn(() => ({ single })) })) }));
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from: vi.fn(() => ({ update })) } as never);
+    await expect(updateSystemConfig({ systemCode: "manager_email", content: "admin@example.com" })).resolves.toMatchObject({ content: "admin@example.com" });
+  });
+
+  it.each(["-1", "1.5", "abc", "2147483648"])("rejects invalid minutes %s before writing", async (content) => {
+    const from = vi.fn();
+    vi.mocked(getSupabaseAdmin).mockReturnValue({ from } as never);
+    await expect(updateSystemConfig({ systemCode: "S000001", content })).rejects.toThrow("0 이상의 정수");
+    expect(from).not.toHaveBeenCalled();
+  });
+});
 
 describe("Kakao Open Graph system configs", () => {
   const inFilter = vi.fn();

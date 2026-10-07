@@ -28,9 +28,14 @@ type SystemConfigFormProps = {
 export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFormProps) {
   const router = useRouter();
   const systemCode = initialConfig?.system_code ?? "";
+  const isNotificationWindowConfig = systemCode === "S000002";
   const parentSystemCode = initialConfig?.parent_system_code ?? "";
   const [description, setDescription] = useState(initialConfig?.description ?? "");
-  const [content, setContent] = useState(initialConfig?.content ?? "");
+  const [content, setContent] = useState(() =>
+    isNotificationWindowConfig
+      ? (initialConfig?.content.trim().toUpperCase() === "Y" ? "Y" : "N")
+      : initialConfig?.content ?? "",
+  );
   const [saving, setSaving] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [error, setError] = useState("");
@@ -124,7 +129,7 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
       </div>
 
       <div className="space-y-2">
-        <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" id="system-config-content-label" htmlFor={isThemeConfig ? undefined : "system-config-content"}>
+        <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" id="system-config-content-label" htmlFor={isThemeConfig || isNotificationWindowConfig ? undefined : "system-config-content"}>
           내용
         </label>
         {isThemeConfig ? (
@@ -144,6 +149,22 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
               </label>
             ))}
           </fieldset>
+        ) : isNotificationWindowConfig ? (
+          <div aria-labelledby="system-config-content-label" className="flex gap-3" role="group">
+            {(["Y", "N"] as const).map((value) => (
+              <Button
+                key={value}
+                aria-pressed={content === value}
+                className="min-h-10 min-w-20"
+                disabled={saving}
+                onClick={() => setContent(value)}
+                type="button"
+                variant={content === value ? "default" : "outline"}
+              >
+                {value}
+              </Button>
+            ))}
+          </div>
         ) : (
           <Textarea
             className="w-full min-h-[11.25rem] resize-y"

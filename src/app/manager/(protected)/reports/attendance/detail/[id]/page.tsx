@@ -244,10 +244,10 @@ export default function AttendanceDetailPage() {
         </section>
         <hr className="border-border/60" />
         <section aria-labelledby="attendance-leave-heading" className="space-y-4">
-          <h2 id="attendance-leave-heading" className="text-lg font-semibold">휴가신청</h2>
+          <h2 id="attendance-leave-heading" className="text-lg font-semibold">휴가처리</h2>
           <div className="flex flex-wrap items-end gap-4">
             <div className="flex h-9 items-center gap-3">
-              <span id="attendance-leave-toggle-label" className="text-sm font-medium">휴가신청</span>
+              <span id="attendance-leave-toggle-label" className="text-sm font-medium">휴가처리</span>
               <button
                 type="button"
                 role="switch"

@@ -64,7 +64,7 @@ describe("responsive data table contract", () => {
       0,
     );
 
-    expect(tableCount).toBe(25);
+    expect(tableCount).toBe(26);
   });
 
   it("marks the one-column safety table to suppress duplicate mobile labels", () => {

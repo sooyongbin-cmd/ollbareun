@@ -12,6 +12,7 @@ import {
   MapPinned,
   MessageSquareWarning,
   Settings,
+  Database,
   ShieldCheck,
   UserRoundCheck,
   Users,
@@ -78,6 +79,7 @@ export const managerNavigationGroups: ManagerNavigationGroup[] = [
     items: [
       { label: "관리자관리", href: "/manager/system/admin-users", icon: ShieldCheck },
       { label: "시스템설정", href: "/manager/system/configs", icon: Settings },
+      { label: "자료관리", href: "/manager/system/data-manage", icon: Database },
     ],
   },
 ];

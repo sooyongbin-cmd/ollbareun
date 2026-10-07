@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getManagerUserWithRole } from "@/lib/manager-auth";
 import { listAdminUsers, registerAdminUser } from "@/lib/admin-users";
+import { listAdminPushSubscriptions } from "@/lib/admin-push-subscriptions";
 
 export async function GET() {
   try {
@@ -9,8 +10,8 @@ export async function GET() {
       return NextResponse.json({ error: "인증 정보가 올바르지 않습니다." }, { status: 401 });
     }
 
-    const admins = await listAdminUsers();
-    return NextResponse.json({ admins });
+    const [admins, subscriptions] = await Promise.all([listAdminUsers(), listAdminPushSubscriptions()]);
+    return NextResponse.json({ admins, subscriptions, currentRole: authInfo.adminUser.role });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "관리자 목록을 불러오지 못했습니다." },

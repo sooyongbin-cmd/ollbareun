@@ -120,6 +120,8 @@ describe("guard special remarks page", () => {
     const body = JSON.parse(String(reportInit?.body));
     expect(body.photoDataUrls).toEqual(currentDataUrls);
     expect(body.photoDataUrl).toBe(currentDataUrls[0]);
+    expect(await screen.findByText("특이사항이 관리자에게 보고되었습니다.")).toBeInTheDocument();
+    expect(screen.queryByText(/푸시 전송 성공/)).not.toBeInTheDocument();
   });
 
   it("uses continuous speech recognition when special_001 is enabled", async () => {

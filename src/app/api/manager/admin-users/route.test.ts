@@ -12,6 +12,10 @@ vi.mock("@/lib/admin-users", () => ({
   registerAdminUser: vi.fn(),
 }));
 
+vi.mock("@/lib/admin-push-subscriptions", () => ({
+  listAdminPushSubscriptions: vi.fn().mockResolvedValue([]),
+}));
+
 describe("/api/manager/admin-users", () => {
   beforeEach(() => {
     vi.restoreAllMocks();

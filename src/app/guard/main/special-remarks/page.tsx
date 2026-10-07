@@ -409,7 +409,7 @@ export default function GuardSpecialRemarksPage() {
           );
         } else {
           setAlertMessage(
-            `특이사항 보고가 저장되었습니다. 푸시 전송 성공 ${delivery?.successCount ?? 0}건, 실패 ${delivery?.failedCount ?? 0}건, 미등록 관리자 ${delivery?.unregisteredCount ?? 0}명입니다.` + emailMessage,
+            "특이사항이 관리자에게 보고되었습니다.",
           );
         }
       } else {

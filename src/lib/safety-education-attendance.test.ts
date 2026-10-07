@@ -19,10 +19,12 @@ describe("monthly daily education attendance", () => {
       { employee_id: "employee-3", work_date: "2026-09-05", work_intime: null, employees: { name: "박길동" } },
     ];
     const dailyCompletions = [
-      { employee_id: "employee-1", work_date: "2026-09-03", education_type: "일일", completed_at: "2026-09-03T01:00:00Z" },
+      { employee_id: "employee-1", title: "일일1", work_date: "2026-09-03", education_type: "일일", completed_at: "2026-09-03T01:00:00Z" },
       { employee_id: "employee-2", work_date: "2026-09-03", education_type: "일일", completed_at: null },
     ];
     const resources = [
+      { id: "d1", title: "일일1", education_type: "일일", startdate: "2026-09-03", enddate: "2026-09-03" },
+      { id: "d2", title: "일일2", education_type: "일일", startdate: "2026-09-04", enddate: "2026-09-30" },
       { id: "q", title: "분기교재", education_type: "분기", startdate: "2026-09-01", enddate: "2026-09-01" },
       { id: "o1", title: "기타1", education_type: "기타", startdate: "2026-08-01", enddate: "2026-09-30" },
       { id: "o2", title: "기타2", education_type: "기타", startdate: "2026-08-01", enddate: "2026-09-30" },
@@ -93,7 +95,8 @@ describe("monthly daily education attendance", () => {
       && filters.some(([method, column, value]) => method === "eq" && column === "education_type" && value === "일일"));
     expect(completionQuery?.filters).toContainEqual(["in", "employee_id", ["employee-1", "employee-2"]]);
     expect(completionQuery?.filters).toContainEqual(["in", "work_date", ["2026-09-03", "2026-09-04"]]);
-    expect(completionQuery?.filters).toContainEqual(["not", "completed_at", "is", null]);
+    expect(result.dailySubjects).toEqual([{ id: "d1", title: "일일1" }, { id: "d2", title: "일일2" }]);
+    expect(result.detailRows.find((row) => row.employeeId === "employee-1" && row.workDate === "2026-09-03")?.subjects).toEqual([{ resourceId: "d1", isCompleted: true }, { resourceId: "d2", isCompleted: null }]);
 
     const periodQuery = queries.find(({ table, filters }) => table === "education_completions"
       && filters.some(([method, column]) => method === "eq" && column === "work_date"));

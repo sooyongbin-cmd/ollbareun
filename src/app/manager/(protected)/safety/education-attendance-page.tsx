@@ -48,6 +48,7 @@ type CompletionDialogState = {
   employeeName: string;
   educationType: EducationType;
   workDate: string;
+  resourceId?: string;
   status: "confirm" | "saving" | "success";
   error: string;
 };
@@ -74,6 +75,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
   const [resourceCounts, setResourceCounts] = useState<EducationResourceCounts>({ daily: 0, monthly: 0, quarterly: 0, semiannual: 0, other: 0 });
   const [monthlyRows, setMonthlyRows] = useState<MonthlyEducationSummaryRow[]>([]);
   const [detailRows, setDetailRows] = useState<MonthlyEducationDetailRow[]>([]);
+  const [dailySubjects, setDailySubjects] = useState<{ id: string; title: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isRunningReminder, setIsRunningReminder] = useState(false);
@@ -100,6 +102,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
         setResourceCounts(payload.resourceCounts ?? { daily: 0, monthly: 0, quarterly: 0, semiannual: 0, other: 0 });
         setMonthlyRows(payload.summaryRows ?? []);
         setDetailRows(payload.detailRows ?? []);
+        setDailySubjects(payload.dailySubjects ?? []);
       }
     } catch (loadError) {
       if (requestId !== requestIdRef.current) return;
@@ -139,8 +142,9 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
   const monthlyCompletionRate = useMemo(() => {
     const summaryCompleted = filteredMonthlyRows.reduce((count, row) =>
       count + monthlyEducationTypes.reduce((sum, type) => sum + row[type], 0), 0);
-    const dailyCompleted = filteredDetailRows.reduce((count, row) => count + Number(row.daily), 0);
-    const total = filteredMonthlyRows.length * monthlyEducationTypes.reduce((sum, type) => sum + resourceCounts[type], 0) + filteredDetailRows.length;
+    const dailyCompleted = filteredDetailRows.reduce((count, row) => count + row.subjects.filter((subject) => subject.isCompleted === true).length, 0);
+    const dailyTotal = filteredDetailRows.reduce((count, row) => count + row.subjects.filter((subject) => subject.isCompleted !== null).length, 0);
+    const total = filteredMonthlyRows.length * monthlyEducationTypes.reduce((sum, type) => sum + resourceCounts[type], 0) + dailyTotal;
     const completed = summaryCompleted + dailyCompleted;
     return { total, completed, percent: total ? Math.round((completed / total) * 100) : 0 };
   }, [filteredDetailRows, filteredMonthlyRows, resourceCounts]);
@@ -193,6 +197,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
     employeeName: string,
     educationType: EducationType,
     workDate = `${yearMonth}-01`,
+    resourceId?: string,
   ) => {
     if (isDaily || !/^\d{4}-(0[1-9]|1[0-2])$/.test(yearMonth)) return;
     if (!/^\d{4}-\d{2}-\d{2}$/.test(workDate) || workDate.slice(0, 7) !== yearMonth) return;
@@ -201,6 +206,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
       employeeName,
       educationType,
       workDate,
+      resourceId,
       status: "confirm",
       error: "",
     });
@@ -219,6 +225,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
           educationType: selected.educationType,
           yearMonth,
           workDate: selected.workDate,
+          ...(selected.resourceId ? { resourceId: selected.resourceId } : {}),
         }),
       });
       const payload = await response.json();
@@ -240,7 +247,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
     if (selected.educationType === "daily") {
       setDetailRows((current) => current.map((row) =>
         row.employeeId === selected.employeeId && row.workDate === selected.workDate
-          ? { ...row, daily: true }
+          ? { ...row, subjects: row.subjects.map((subject) => subject.resourceId === selected.resourceId ? { ...subject, isCompleted: true } : subject) }
           : row));
     } else {
       setMonthlyRows((current) => current.map((row) => {
@@ -363,7 +370,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
             loading={loading}
             error={error}
             emptyMessage="조회년월에 등록된 교육이수 자료가 없습니다."
-            headers={["이름", "출근일", "일일교육"]}
+            headers={["이름", "출근일", ...dailySubjects.map((subject) => subject.title)]}
           >
             {filteredDetailRows.map((row, index) => {
               const previous = filteredDetailRows[index - 1];
@@ -372,7 +379,12 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
                 <TableRow key={`${row.employeeId}:${row.workDate}`} className="hover:bg-muted/40 transition-colors">
                   <TableCell data-label="이름" className="font-semibold">{showName ? row.employeeName : "-"}</TableCell>
                   <TableCell data-label="출근일" className="whitespace-nowrap text-muted-foreground">{row.workDate}</TableCell>
-                  <TableCell data-label="일일교육"><Mark completed={row.daily} onClick={() => openCompletionDialog(row.employeeId, row.employeeName, "daily", row.workDate)} label={`${row.employeeName} 근무자 일일교육 미이수 처리 (${row.workDate})`} /></TableCell>
+                  {dailySubjects.map((subject) => {
+                    const status = row.subjects.find((item) => item.resourceId === subject.id)?.isCompleted;
+                    return <TableCell key={subject.id} data-label={subject.title}>{status == null ? "-" : <Mark completed={status}
+                      onClick={() => openCompletionDialog(row.employeeId, row.employeeName, "daily", row.workDate, subject.id)}
+                      label={`${row.employeeName} 근무자 ${subject.title} 미이수 처리 (${row.workDate})`} />}</TableCell>;
+                  })}
                 </TableRow>
               );
             })}

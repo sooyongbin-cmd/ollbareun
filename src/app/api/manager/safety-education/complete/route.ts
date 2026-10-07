@@ -31,12 +31,17 @@ export async function POST(request: Request) {
     const educationTypeLabel = educationTypeLabels[educationType];
     const supabase = getSupabaseAdmin();
 
-    const { data: resources, error: resourceError } = await supabase
+    let resourceQuery = supabase
       .from("education_resources")
       .select("title")
       .eq("education_type", educationTypeLabel)
       .lte("startdate", workDate)
       .gte("enddate", workDate);
+    if (body.resourceId !== undefined) {
+      if (typeof body.resourceId !== "string" || !body.resourceId.trim()) return Response.json({ error: "교육자료를 확인하세요." }, { status: 400 });
+      resourceQuery = resourceQuery.eq("id", body.resourceId);
+    }
+    const { data: resources, error: resourceError } = await resourceQuery;
     if (resourceError) throw new Error(resourceError.message);
     const titles = [...new Set((resources ?? []).map((resource) => resource.title).filter(Boolean))];
     if (!titles.length) {

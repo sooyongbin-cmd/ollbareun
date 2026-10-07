@@ -17,6 +17,30 @@ it("shows subject totals, O for all complete, fractions otherwise and a dash for
   }
 });
 
+it("renders daily subject columns and completes only the selected subject on its attendance date", async () => {
+  const user = userEvent.setup();
+  const month = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit" }).format(new Date());
+  const workDate = `${month}-03`;
+  const fetchMock = vi.fn(async () => Response.json({
+    resourceCounts: { daily: 0, monthly: 0, quarterly: 0, semiannual: 0, other: 0 }, summaryRows: [],
+    dailySubjects: [{ id: "d1", title: "일일1" }, { id: "d2", title: "일일2" }, { id: "d3", title: "일일3" }],
+    detailRows: [{ employeeId: "e", employeeName: "홍길동", workDate, subjects: [{ resourceId: "d1", isCompleted: true }, { resourceId: "d2", isCompleted: false }, { resourceId: "d3", isCompleted: null }] }],
+  }));
+  vi.stubGlobal("fetch", fetchMock);
+  render(<EducationAttendancePage mode="monthly" />);
+  const name = await screen.findByText("홍길동", { selector: "td" });
+  const row = name.closest("tr")!;
+  expect(within(row).getAllByRole("cell").map((cell) => cell.textContent)).toEqual(["홍길동", workDate, "O", "X", "-"]);
+  expect(screen.getByRole("columnheader", { name: "일일1" })).toBeInTheDocument();
+  expect(screen.getByRole("columnheader", { name: "일일2" })).toBeInTheDocument();
+  await user.click(screen.getByRole("button", { name: `홍길동 근무자 일일2 미이수 처리 (${workDate})` }));
+  await user.click(screen.getByRole("button", { name: "이수처리" }));
+  await screen.findByText("처리되었습니다.");
+  expect(fetchMock).toHaveBeenCalledWith("/api/manager/safety-education/complete", expect.objectContaining({ body: JSON.stringify({ employeeId: "e", educationType: "daily", yearMonth: month, workDate, resourceId: "d2" }) }));
+  await user.click(screen.getByRole("button", { name: "확인" }));
+  expect(within(row).getAllByRole("cell").map((cell) => cell.textContent)).toEqual(["홍길동", workDate, "O", "O", "-"]);
+});
+
 it("shows monthly subject totals, ratios, other and retains the completion action", async () => {
   const user = userEvent.setup();
   vi.stubGlobal("fetch", vi.fn(async () => Response.json({

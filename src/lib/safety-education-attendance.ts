@@ -15,7 +15,7 @@ type CompletionRecord = {
   employees?: { name: string } | { name: string }[] | null;
 };
 
-type EducationMark = "daily" | "monthly" | "quarterly" | "semiannual";
+
 
 export type DailyEducationAttendanceRow = {
   employeeId: string;
@@ -38,13 +38,7 @@ export type MonthlyEducationDetailRow = {
   employeeName: string;
   workDate: string;
   daily: boolean;
-};
-
-const educationMarkByLabel: Record<string, EducationMark | undefined> = {
-  "일일": "daily",
-  "월간": "monthly",
-  "분기": "quarterly",
-  "반기": "semiannual",
+  subjects: { resourceId: string; isCompleted: boolean | null }[];
 };
 
 function throwIfError(error: { message?: string } | null) {
@@ -116,16 +110,6 @@ function getWorkDateAttendanceQuery(dateFrom: string, dateToExclusive: string) {
     .order("work_date", { ascending: false })
     .order("employee_id", { ascending: true })
     .range(from, to);
-}
-
-function completedKeys(records: CompletionRecord[]) {
-  const keys = new Set<string>();
-  records.forEach((record) => {
-    if (!record.work_date || !record.completed_at) return;
-    const mark = educationMarkByLabel[record.education_type];
-    if (mark) keys.add(`${record.employee_id}:${record.work_date}:${mark}`);
-  });
-  return keys;
 }
 
 export async function loadDailyEducationAttendance(date = educationToday()): Promise<{
@@ -213,29 +197,36 @@ export async function loadMonthlyEducationAttendance(yearMonth: string) {
   const detailAttendanceRows = await readAll<AttendanceRecord>(getWorkDateAttendanceQuery(monthStart, nextMonth));
   const detailEmployeeIds = [...new Set(detailAttendanceRows.map((record) => record.employee_id))];
   const detailWorkDates = [...new Set(detailAttendanceRows.map((record) => record.work_date))];
-  let dailyDetailCompletions: CompletionRecord[] = [];
+  const dailySubjects = (await readAll<Resource>((from, to) => supabase.from("education_resources")
+    .select("id,title,education_type,startdate,enddate").eq("education_type", "일일")
+    .lt("startdate", nextMonth).gte("enddate", monthStart).order("title").order("id").range(from, to)))
+    .filter((resource) => resource.education_type === "일일" && resource.startdate < nextMonth && resource.enddate >= monthStart);
+  let dailyDetailCompletions: (CompletionRecord & { title: string })[] = [];
   if (detailEmployeeIds.length && detailWorkDates.length) {
     const supabase = getSupabaseAdmin();
-    dailyDetailCompletions = await readAll<CompletionRecord>((from, to) => supabase.from("education_completions")
-      .select("employee_id,work_date,education_type,completed_at")
+    dailyDetailCompletions = await readAll<CompletionRecord & { title: string }>((from, to) => supabase.from("education_completions")
+      .select("employee_id,work_date,title,education_type,completed_at")
       .in("employee_id", detailEmployeeIds)
       .in("work_date", detailWorkDates)
       .eq("education_type", "일일")
-      .not("completed_at", "is", null)
       .order("employee_id", { ascending: true })
       .order("work_date", { ascending: true })
       .range(from, to));
   }
 
-  const dailyDetailCompletionKeys = completedKeys(dailyDetailCompletions);
+  const dailyDetailCompletionKeys = new Set(dailyDetailCompletions.map((record) => JSON.stringify([record.employee_id, record.work_date, record.title, record.education_type])));
   const detailByEmployeeDay = new Map<string, MonthlyEducationDetailRow>();
   detailAttendanceRows.forEach((record) => {
     const key = `${record.employee_id}:${record.work_date}`;
+    const subjects = dailySubjects.map((resource) => ({ resourceId: resource.id,
+      isCompleted: isEducationResourceForDate(resource, record.work_date)
+        ? dailyDetailCompletionKeys.has(JSON.stringify([record.employee_id, record.work_date, resource.title, "일일"])) : null }));
     if (!detailByEmployeeDay.has(key)) detailByEmployeeDay.set(key, {
       employeeId: record.employee_id,
       employeeName: employeeName(record),
       workDate: record.work_date,
-      daily: dailyDetailCompletionKeys.has(`${record.employee_id}:${record.work_date}:daily`),
+      daily: subjects.some((subject) => subject.isCompleted !== null) && subjects.every((subject) => subject.isCompleted !== false),
+      subjects,
     });
   });
   const detailRows = [...detailByEmployeeDay.values()].sort((left, right) =>
@@ -243,5 +234,5 @@ export async function loadMonthlyEducationAttendance(yearMonth: string) {
       || left.workDate.localeCompare(right.workDate)
       || left.employeeId.localeCompare(right.employeeId));
 
-  return { summaryRows, detailRows, resourceCounts };
+  return { summaryRows, detailRows, resourceCounts, dailySubjects: dailySubjects.map(({ id, title }) => ({ id, title })) };
 }

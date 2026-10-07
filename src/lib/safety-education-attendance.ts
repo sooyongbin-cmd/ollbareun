@@ -1,5 +1,5 @@
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
-import { educationToday, type EducationType } from "@/lib/education-periods";
+import { educationToday, educationTypes, educationTypeLabels, isEducationResourceForDate, type EducationType } from "@/lib/education-periods";
 
 type AttendanceRecord = {
   employee_id: string;
@@ -20,13 +20,17 @@ type EducationMark = "daily" | "monthly" | "quarterly" | "semiannual";
 export type DailyEducationAttendanceRow = {
   employeeId: string;
   employeeName: string;
-  daily: boolean;
+} & Record<EducationType, number>;
+
+export type EducationResourceCounts = Record<EducationType, number>;
+
+export type MonthlyEducationSummaryRow = {
+  employeeId: string;
+  employeeName: string;
   monthly: boolean;
   quarterly: boolean;
   semiannual: boolean;
 };
-
-export type MonthlyEducationSummaryRow = Omit<DailyEducationAttendanceRow, "daily">;
 
 export type MonthlyEducationDetailRow = {
   employeeId: string;
@@ -143,72 +147,49 @@ function completedKeys(records: CompletionRecord[]) {
   return keys;
 }
 
-export async function loadDailyEducationAttendance(date = educationToday()): Promise<DailyEducationAttendanceRow[]> {
+export async function loadDailyEducationAttendance(date = educationToday()): Promise<{
+  rows: DailyEducationAttendanceRow[];
+  resourceCounts: EducationResourceCounts;
+}> {
   if (!isValidDate(date)) throw new Error("조회 날짜를 확인하세요.");
-
   const nextDate = new Date(`${date}T00:00:00.000Z`);
   nextDate.setUTCDate(nextDate.getUTCDate() + 1);
-  const nextDateValue = nextDate.toISOString().slice(0, 10);
-  const attendanceRows = await readAll<AttendanceRecord>(getAttendanceQuery(date, nextDateValue));
-  const datesByEmployee = new Map<string, Set<string>>();
-  const namesByEmployee = new Map<string, string>();
-  attendanceRows.forEach((record) => {
-    const dates = datesByEmployee.get(record.employee_id) ?? new Set<string>();
-    dates.add(record.work_date);
-    datesByEmployee.set(record.employee_id, dates);
-    namesByEmployee.set(record.employee_id, employeeName(record));
-  });
-
-  const employeeIds = [...datesByEmployee.keys()];
-  const workDates = [...new Set([...datesByEmployee.values()].flatMap((dates) => [...dates]))];
-  let dailyCompletions: CompletionRecord[] = [];
-  let periodCompletions: CompletionRecord[] = [];
-  if (employeeIds.length && workDates.length) {
-    const supabase = getSupabaseAdmin();
-    const periodStartDate = periodStart("semiannual", date.slice(0, 7));
-    [dailyCompletions, periodCompletions] = await Promise.all([
-      readAll<CompletionRecord>((from, to) => supabase.from("education_completions")
-        .select("employee_id,work_date,education_type,completed_at")
-        .in("employee_id", employeeIds)
-        .in("work_date", workDates)
-        .eq("education_type", "일일")
-        .order("employee_id", { ascending: true })
-        .order("work_date", { ascending: true })
-        .range(from, to)),
-      readAll<CompletionRecord>((from, to) => supabase.from("education_completions")
-        .select("employee_id,work_date,education_type,completed_at")
-        .in("employee_id", employeeIds)
-        .gte("work_date", periodStartDate)
-        .lte("work_date", date)
-        .in("education_type", ["월간", "분기", "반기"])
-        .order("employee_id", { ascending: true })
-        .order("work_date", { ascending: true })
-        .range(from, to)),
-    ]);
+  const supabase = getSupabaseAdmin();
+  type Resource = { id: string; title: string; education_type: string; startdate: string; enddate: string };
+  const [attendanceRows, resourceRows] = await Promise.all([
+    readAll<AttendanceRecord>(getAttendanceQuery(date, nextDate.toISOString().slice(0, 10))),
+    readAll<Resource>((from, to) => supabase.from("education_resources")
+      .select("id,title,education_type,startdate,enddate")
+      .lte("startdate", date).gte("enddate", date).order("id").range(from, to)),
+  ]);
+  const resources = resourceRows.filter((resource) => isEducationResourceForDate(resource, date));
+  const resourceCounts: EducationResourceCounts = { daily: 0, monthly: 0, quarterly: 0, semiannual: 0, other: 0 };
+  const resourcesByType = new Map<EducationType, Resource[]>();
+  for (const type of educationTypes) {
+    const matches = resources.filter((resource) => resource.education_type === educationTypeLabels[type]);
+    resourceCounts[type] = matches.length;
+    resourcesByType.set(type, matches);
   }
-
-  const completedDaily = completedKeys(dailyCompletions);
-  const periodMarksByEmployee = new Map<string, Set<EducationMark>>();
-  periodCompletions.forEach((record) => {
-    if (!record.work_date || !record.completed_at) return;
-    const mark = educationMarkByLabel[record.education_type];
-    if (!mark || record.work_date < periodStart(mark, date.slice(0, 7)) || record.work_date > date) return;
-    const marks = periodMarksByEmployee.get(record.employee_id) ?? new Set<EducationMark>();
-    marks.add(mark);
-    periodMarksByEmployee.set(record.employee_id, marks);
-  });
-
-  return employeeIds.map((id) => {
-    const dates = datesByEmployee.get(id) ?? new Set<string>();
-    return {
-      employeeId: id,
-      employeeName: namesByEmployee.get(id) ?? "",
-      daily: [...dates].some((workDate) => completedDaily.has(`${id}:${workDate}:daily`)),
-      monthly: periodMarksByEmployee.get(id)?.has("monthly") ?? false,
-      quarterly: periodMarksByEmployee.get(id)?.has("quarterly") ?? false,
-      semiannual: periodMarksByEmployee.get(id)?.has("semiannual") ?? false,
-    };
+  const namesByEmployee = new Map<string, string>();
+  attendanceRows.forEach((record) => namesByEmployee.set(record.employee_id, employeeName(record)));
+  const employeeIds = [...namesByEmployee.keys()];
+  const completions = employeeIds.length && resources.length
+    ? await readAll<CompletionRecord & { title: string }>((from, to) => supabase.from("education_completions")
+      .select("employee_id,work_date,title,education_type,completed_at")
+      .in("employee_id", employeeIds).eq("work_date", date)
+      .order("id").range(from, to))
+    : [];
+  const completed = new Set(completions.filter((record) => record.work_date === date)
+    .map((record) => JSON.stringify([record.employee_id, record.title, record.education_type])));
+  const rows = employeeIds.map((id): DailyEducationAttendanceRow => {
+    const counts: EducationResourceCounts = { daily: 0, monthly: 0, quarterly: 0, semiannual: 0, other: 0 };
+    for (const type of educationTypes) {
+      counts[type] = (resourcesByType.get(type) ?? []).filter((resource) =>
+        completed.has(JSON.stringify([id, resource.title, resource.education_type]))).length;
+    }
+    return { employeeId: id, employeeName: namesByEmployee.get(id) ?? "", ...counts };
   }).sort((left, right) => left.employeeName.localeCompare(right.employeeName, "ko-KR") || left.employeeId.localeCompare(right.employeeId));
+  return { rows, resourceCounts };
 }
 
 export async function loadMonthlyEducationAttendance(yearMonth: string) {

@@ -7,9 +7,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import ManagerLoadingMessage from "../manager-loading-message";
-import { educationTypeLabels, type EducationType } from "@/lib/education-periods";
+import { educationTypeLabels, educationTypes, type EducationType } from "@/lib/education-periods";
 import type {
   DailyEducationAttendanceRow,
+  EducationResourceCounts,
   MonthlyEducationDetailRow,
   MonthlyEducationSummaryRow,
 } from "@/lib/safety-education-attendance";
@@ -69,6 +70,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
   const [date, setDate] = useState(currentKstDate);
   const [yearMonth, setYearMonth] = useState(currentKstYearMonth);
   const [dailyRows, setDailyRows] = useState<DailyEducationAttendanceRow[]>([]);
+  const [resourceCounts, setResourceCounts] = useState<EducationResourceCounts>({ daily: 0, monthly: 0, quarterly: 0, semiannual: 0, other: 0 });
   const [monthlyRows, setMonthlyRows] = useState<MonthlyEducationSummaryRow[]>([]);
   const [detailRows, setDetailRows] = useState<MonthlyEducationDetailRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -92,6 +94,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
       if (requestId !== requestIdRef.current) return;
       if (isDaily) {
         setDailyRows(payload.rows ?? []);
+        setResourceCounts(payload.resourceCounts ?? { daily: 0, monthly: 0, quarterly: 0, semiannual: 0, other: 0 });
       } else {
         setMonthlyRows(payload.summaryRows ?? []);
         setDetailRows(payload.detailRows ?? []);
@@ -319,15 +322,16 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
           loading={loading}
           error={error}
           emptyMessage="조회 결과에 해당하는 근무자가 없습니다."
-          headers={["이름", "일일", "월별", "분기", "반기"]}
+          headers={["이름", ...educationTypes.map((type) => `${educationDisplayLabel(type)}(${resourceCounts[type]})`)]}
         >
           {filteredDailyRows.map((row) => (
             <TableRow key={row.employeeId} className="hover:bg-muted/40 transition-colors">
               <TableCell data-label="이름" className="font-semibold">{row.employeeName}</TableCell>
-              <TableCell data-label="일일"><Mark completed={row.daily} /></TableCell>
-              <TableCell data-label="월별"><Mark completed={row.monthly} /></TableCell>
-              <TableCell data-label="분기"><Mark completed={row.quarterly} /></TableCell>
-              <TableCell data-label="반기"><Mark completed={row.semiannual} /></TableCell>
+              {educationTypes.map((type) => <TableCell key={type} data-label={educationDisplayLabel(type)}>
+                <span className={resourceCounts[type] > 0 && row[type] < resourceCounts[type] ? "text-destructive" : "font-semibold text-muted-foreground"}>
+                  {resourceCounts[type] === 0 ? "-" : row[type] === resourceCounts[type] ? "O" : `${row[type]}/${resourceCounts[type]}`}
+                </span>
+              </TableCell>)}
             </TableRow>
           ))}
         </EducationAttendanceTable>

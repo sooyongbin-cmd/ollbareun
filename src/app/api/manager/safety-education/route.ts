@@ -10,7 +10,7 @@ export async function GET(request: Request) {
     const params = new URL(request.url).searchParams;
     const view = params.get("view");
     if (view === "daily") {
-      return Response.json({ rows: await loadDailyEducationAttendance(params.get("date") ?? undefined) });
+      return Response.json(await loadDailyEducationAttendance(params.get("date") ?? undefined));
     }
     if (view === "monthly") {
       const yearMonth = params.get("yearMonth") ?? "";

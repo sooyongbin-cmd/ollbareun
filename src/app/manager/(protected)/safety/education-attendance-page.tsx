@@ -287,7 +287,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
           </div>
           <div className="min-w-0 flex flex-col gap-2">
             <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor={`${mode}-education-period`}>
-              {isDaily ? "조회일" : "조회년월"}
+              {isDaily ? "출근일" : "조회년월"}
             </label>
             <Input
               className="block w-full"

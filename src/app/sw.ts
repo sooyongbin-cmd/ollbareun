@@ -9,7 +9,7 @@ declare global {
   }
 }
 
-declare const self: WorkerGlobalScope;
+declare const self: ServiceWorkerGlobalScope;
 
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
@@ -82,28 +82,70 @@ self.addEventListener("push", (event) => {
   }
 });
 
-// Custom notificationclick listener for handling redirect action
-self.addEventListener("notificationclick", (event) => {
-  event.notification.close();
-
+async function openNotification(event: NotificationEvent) {
   const notificationUrl = event.notification.data?.url || "/guard/main";
   const targetUrl = new URL(notificationUrl, self.location.origin).href;
+  // Notification destinations must stay within this application.
+  if (new URL(targetUrl).origin !== self.location.origin) return;
 
-  event.waitUntil(
-    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
-      // Check if there is already a window open with the dashboard url
-      for (let i = 0; i < windowClients.length; i++) {
-        const client = windowClients[i];
-        if (client.url === targetUrl && "focus" in client) {
-          return client.focus();
-        }
+  let openInNewWindow = false;
+  try {
+    const response = await fetch("/api/notifications/click-policy", {
+      cache: "no-store",
+      signal: AbortSignal.timeout(1500),
+    });
+    if (response.ok) {
+      openInNewWindow = (await response.json()).openInNewWindow === true;
+    }
+  } catch {
+    // An unavailable setting uses the configured default behavior (N).
+  }
+
+  if (!openInNewWindow) {
+    const windowClients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    const managers = windowClients.filter((client) => {
+      const url = new URL(client.url);
+      return url.origin === self.location.origin
+        && (url.pathname === "/manager" || url.pathname.startsWith("/manager/"))
+        && url.pathname !== "/manager/auth";
+    }).sort((a, b) => Number(b.focused) - Number(a.focused)
+      || Number(b.visibilityState === "visible") - Number(a.visibilityState === "visible"));
+    for (const manager of managers) {
+      try {
+        await manager.focus();
+        const delivered = await new Promise<boolean>((resolve) => {
+          const channel = new MessageChannel();
+          const finish = (received: boolean) => {
+            clearTimeout(timeout);
+            channel.port1.close();
+            channel.port2.close();
+            resolve(received);
+          };
+          const timeout = setTimeout(() => finish(false), 1000);
+          channel.port1.onmessage = () => finish(true);
+          try {
+            manager.postMessage({
+              type: "PUSH_NOTIFICATION_CLICKED",
+              title: event.notification.title,
+              body: event.notification.body,
+            }, [channel.port2]);
+          } catch {
+            finish(false);
+          }
+        });
+        if (delivered) return;
+      } catch {
+        // A closing or unfocusable window must not swallow the notification.
       }
-      // If not, open a new window
-      if (self.clients.openWindow) {
-        return self.clients.openWindow(targetUrl);
-      }
-    })
-  );
+    }
+  }
+  return self.clients.openWindow(targetUrl);
+}
+
+// Custom notificationclick listener for handling the system's window policy.
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil(openNotification(event));
 });
 
 serwist.addEventListeners();

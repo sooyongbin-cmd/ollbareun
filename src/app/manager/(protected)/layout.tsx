@@ -4,6 +4,7 @@ import ManagerSidebar from "./manager-sidebar";
 import ManagerHeader from "./manager-header";
 import ManagerInAppBrowserChecker from "../manager-in-app-browser-checker";
 import ManagerInstallPrompt from "../manager-install-prompt";
+import ManagerNotificationClick from "./manager-notification-click";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 // Protected manager pages depend on the request's auth cookie and render per request.
@@ -39,6 +40,7 @@ export default function ManagerLayout({
       </SidebarProvider>
       <ManagerInAppBrowserChecker />
       <ManagerInstallPrompt />
+      <ManagerNotificationClick />
     </div>
   );
 }

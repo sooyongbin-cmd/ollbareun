@@ -1,5 +1,5 @@
 import { listEducationCompletions, readAllEducationRows } from "./education-completions";
-import { educationPeriodStart, type EducationType } from "./education-periods";
+import { educationPeriodStart, isEducationResourceForDate, type EducationType } from "./education-periods";
 import webpush from "web-push";
 import { notificationBranding } from "./notification-branding";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
@@ -40,6 +40,8 @@ type EducationResourceSnapshot = {
   title: string;
   created_at: string;
   education_type: string;
+  startdate: string;
+  enddate: string;
 };
 
 type EducationCompletionSnapshot = {
@@ -259,7 +261,7 @@ export async function sendEducationReminderNotifications(
   };
 }
 
-function getMissingEducationCounts(jobs: EducationReminderJob[], resources: EducationResourceSnapshot[], completions: EducationCompletionSnapshot[]) {
+export function getMissingEducationCounts(jobs: EducationReminderJob[], resources: EducationResourceSnapshot[], completions: EducationCompletionSnapshot[]) {
   const completionDatesByResource = new Map<string, string[]>();
   completions.forEach((completion) => {
     if (!educationTypeByKoreanName[completion.education_type]) return;
@@ -273,6 +275,7 @@ function getMissingEducationCounts(jobs: EducationReminderJob[], resources: Educ
     const dateEnd = new Date(`${job.work_date}T23:59:59.999+09:00`).getTime();
     const availableResources = resources.filter((resource) => {
       return educationTypeByKoreanName[resource.education_type]
+        && isEducationResourceForDate(resource, job.work_date)
         && new Date(resource.created_at).getTime() <= dateEnd;
     });
 
@@ -282,6 +285,7 @@ function getMissingEducationCounts(jobs: EducationReminderJob[], resources: Educ
       const periodStart = educationPeriodStart(type, job.work_date);
       const key = `${job.employee_id}\u0000${resource.title}\u0000${resource.education_type}`;
       const completedInPeriod = (completionDatesByResource.get(key) ?? []).some((workDate) => {
+        if (type === "other") return true;
         return workDate >= periodStart && workDate <= job.work_date;
       });
       return count + (completedInPeriod ? 0 : 1);
@@ -373,7 +377,7 @@ export async function processDueEducationReminderJobs(): Promise<EducationRemind
       supabase.from("employees").select("id, name, is_retired").in("id", employeeIds),
       readAllEducationRows<EducationResourceSnapshot>((from, to) => supabase
         .from("education_resources")
-        .select("id,title,created_at,education_type")
+        .select("id,title,created_at,education_type,startdate,enddate")
         .order("title").order("id").range(from, to)),
       (async () => {
         const relevantTypes = ["일일", "월간", "분기", "반기"] as const;
@@ -389,8 +393,7 @@ export async function processDueEducationReminderJobs(): Promise<EducationRemind
           .from("education_completions")
           .select("id,employee_id,title,work_date,education_type")
           .in("employee_id", employeeIds)
-          .gte("work_date", minimumWorkDate)
-          .lte("work_date", maximumWorkDate)
+          .or(`education_type.eq.기타,and(work_date.gte.${minimumWorkDate},work_date.lte.${maximumWorkDate})`)
           .order("employee_id").order("work_date").order("id").range(from, to));
       })(),
     ]);

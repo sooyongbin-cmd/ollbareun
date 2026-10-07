@@ -460,7 +460,7 @@ export default function GuardSafetyEducationPage() {
         ) : listError ? (
           <p className={styles.error} role="alert">{listError}</p>
         ) : sortedResources.length === 0 ? (
-          <div className={`${styles.educationList} ${styles.emptyState}`}>
+          <div className={styles.emptyState}>
             <p>등록된 안전교육 자료가 없습니다.</p>
           </div>
         ) : (

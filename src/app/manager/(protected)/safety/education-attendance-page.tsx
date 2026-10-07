@@ -336,7 +336,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
               <TableCell data-label="이름" className="font-semibold">{row.employeeName}</TableCell>
               {educationTypes.map((type) => <TableCell key={type} data-label={educationDisplayLabel(type)}>
                 <span className={resourceCounts[type] > 0 && row[type] < resourceCounts[type] ? "text-destructive" : "font-semibold text-muted-foreground"}>
-                  {resourceCounts[type] === 0 ? "-" : row[type] === resourceCounts[type] ? "O" : `${row[type]}/${resourceCounts[type]}`}
+                  {resourceCounts[type] === 0 ? "-" : `${row[type]}/${resourceCounts[type]}`}
                 </span>
               </TableCell>)}
             </TableRow>

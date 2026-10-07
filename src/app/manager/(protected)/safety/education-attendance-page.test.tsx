@@ -11,7 +11,7 @@ it("shows subject totals, O for all complete, fractions otherwise and a dash for
   render(<EducationAttendancePage mode="daily" />);
   const name = await screen.findByText("홍길동", { selector: "td" });
   const row = name.closest("tr")!;
-  expect(within(row).getAllByRole("cell").map((cell) => cell.textContent)).toEqual(["홍길동", "1/2", "-", "O", "-", "0/2"]);
+  expect(within(row).getAllByRole("cell").map((cell) => cell.textContent)).toEqual(["홍길동", "1/2", "-", "1/1", "-", "0/2"]);
   for (const title of ["일일(2)", "월별(0)", "분기(1)", "반기(0)", "기타(2)"]) {
     expect(screen.getByRole("columnheader", { name: title })).toBeInTheDocument();
   }

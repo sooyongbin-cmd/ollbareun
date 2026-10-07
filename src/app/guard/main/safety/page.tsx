@@ -34,6 +34,8 @@ type GuardSession = {
   };
   attendance?: {
     work_date?: unknown;
+    work_intime?: string | null;
+    work_outtime?: string | null;
   } | null;
   scheduledAttendances?: GuardWorkSchedule[] | null;
 };
@@ -83,12 +85,15 @@ function currentKstDate() {
 }
 
 function readEducationWorkDate() {
+  const session = readStoredGuardSession<GuardSession>({ touch: true });
+  const selectedSchedule = selectGuardWorkSchedule(session?.scheduledAttendances ?? []);
+  if (selectedSchedule?.work_intime && !selectedSchedule.work_outtime && isWorkDate(selectedSchedule.work_date)) return selectedSchedule.work_date;
+  if (!selectedSchedule && session?.attendance?.work_intime && !session.attendance.work_outtime && isWorkDate(session.attendance.work_date)) return session.attendance.work_date;
   if (typeof window !== "undefined") {
     const queryWorkDate = new URLSearchParams(window.location.search).get("workDate");
     if (isWorkDate(queryWorkDate)) return queryWorkDate;
   }
 
-  const session = readStoredGuardSession<GuardSession>({ touch: true });
   const scheduledWorkDate = selectGuardWorkSchedule(session?.scheduledAttendances ?? [])?.work_date;
   if (isWorkDate(scheduledWorkDate)) return scheduledWorkDate;
   if (isWorkDate(session?.attendance?.work_date)) return session.attendance.work_date;
@@ -450,6 +455,7 @@ export default function GuardSafetyEducationPage() {
         <div className={styles.description}>
           <p className={styles.descriptionText}>
             필수 안전교육 영상을 시청하고 이수를 완료해 주세요. 리스트의 각 제목을 터치하면 시청하실 수 있습니다.
+            {workDate !== currentKstDate() ? ` (출근일 ${workDate} 기준)` : ""}
           </p>
         </div>
 

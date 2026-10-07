@@ -71,6 +71,14 @@ async function loadInitialYoutubeIframe() {
 }
 
 describe("guard safety education page", () => {
+  it("uses the actual clock-in date over the URL and explains a past attendance date", async () => {
+    window.history.replaceState({}, "", "/guard/main/safety?workDate=2026-05-25");
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify({ employee: { id: "employee-1" }, attendance: { work_date: "2026-05-26", work_intime: "2026-05-26T00:00:00Z", work_outtime: null } }));
+    render(<GuardSafetyEducationPage />);
+    await screen.findByText(`${fireTitle} (일일)`);
+    expect(fetch).toHaveBeenCalledWith("/api/education/resources?workDate=2026-05-26");
+    expect(screen.getByText(/출근일 2026-05-26 기준/)).toBeInTheDocument();
+  });
   it("filters by attendance date and orders all categories", async () => {
     const rows = [
       { id: "other", title: "기타교재", education_type: "other" },

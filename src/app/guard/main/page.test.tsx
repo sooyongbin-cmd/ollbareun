@@ -8,6 +8,13 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("guard main shortcuts", () => {
+  it("disables safety education before clock-in", () => {
+    window.localStorage.clear();
+    window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify({ attendance: { work_date: "2026-10-07", work_intime: null } }));
+    render(<GuardMainPage />);
+    expect(screen.getByRole("button", { name: "안전교육" })).toBeDisabled();
+    expect(screen.queryByRole("link", { name: "안전교육" })).not.toBeInTheDocument();
+  });
   it("uses the same destinations as the footer inspection links", () => {
     window.localStorage.clear();
     window.sessionStorage.setItem("ollbareun.guard.session", JSON.stringify({
@@ -19,7 +26,7 @@ describe("guard main shortcuts", () => {
         work_date: "2026-05-26",
         intime: "2026-05-26T00:00:00.000Z",
         outtime: "2026-05-26T09:00:00.000Z",
-        work_intime: null,
+        work_intime: "2026-05-26T00:00:00.000Z",
         work_outtime: null,
       }],
     }));

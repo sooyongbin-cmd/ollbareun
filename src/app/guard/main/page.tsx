@@ -10,7 +10,7 @@ import { readStoredGuardSessionSnapshot, subscribeToGuardSessionChange } from ".
 import { selectGuardWorkSchedule, type GuardWorkSchedule } from "@/lib/guard-work-schedule";
 
 type GuardSession = {
-  attendance?: { work_date?: string | null } | null;
+  attendance?: { work_date?: string | null; work_intime?: string | null; work_outtime?: string | null } | null;
   scheduledAttendances?: GuardWorkSchedule[] | null;
 };
 
@@ -38,7 +38,11 @@ export default function GuardMainPage() {
       return null;
     }
   }, [storedSession]);
-  const selectedWorkDate = selectGuardWorkSchedule(session?.scheduledAttendances ?? [])?.work_date
+  const selectedSchedule = selectGuardWorkSchedule(session?.scheduledAttendances ?? []);
+  const isClockedIn = selectedSchedule
+    ? Boolean(selectedSchedule.work_intime && !selectedSchedule.work_outtime)
+    : Boolean(session?.attendance?.work_intime && !session.attendance.work_outtime);
+  const selectedWorkDate = selectedSchedule?.work_date
     ?? session?.attendance?.work_date
     ?? currentKstDate();
 
@@ -47,9 +51,9 @@ export default function GuardMainPage() {
       <GuardWorksiteSection />
 
       <section aria-label="근무자 바로가기" className="guard-main-menu">
-        <Link className="guard-menu-button" href={`/guard/main/safety?workDate=${encodeURIComponent(selectedWorkDate)}`}>
+        {isClockedIn ? <Link className="guard-menu-button" href={`/guard/main/safety?workDate=${encodeURIComponent(selectedWorkDate)}`}>
           안전교육
-        </Link>
+        </Link> : <button aria-disabled="true" className="guard-menu-button" disabled type="button">안전교육</button>}
         <GuardPatrolLink />
         {hasWorkSchedule ? (
           <Link className="guard-menu-button" href="/guard/main/special-remarks">

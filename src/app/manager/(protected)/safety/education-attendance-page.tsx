@@ -16,6 +16,7 @@ import type {
 } from "@/lib/safety-education-attendance";
 
 type EducationAttendanceMode = "daily" | "monthly";
+const monthlyEducationTypes = ["monthly", "quarterly", "semiannual", "other"] as const;
 
 function currentKstDate() {
   return new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
@@ -96,6 +97,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
         setDailyRows(payload.rows ?? []);
         setResourceCounts(payload.resourceCounts ?? { daily: 0, monthly: 0, quarterly: 0, semiannual: 0, other: 0 });
       } else {
+        setResourceCounts(payload.resourceCounts ?? { daily: 0, monthly: 0, quarterly: 0, semiannual: 0, other: 0 });
         setMonthlyRows(payload.summaryRows ?? []);
         setDetailRows(payload.detailRows ?? []);
       }
@@ -136,12 +138,12 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
   }, [detailRows, name]);
   const monthlyCompletionRate = useMemo(() => {
     const summaryCompleted = filteredMonthlyRows.reduce((count, row) =>
-      count + Number(row.monthly) + Number(row.quarterly) + Number(row.semiannual), 0);
+      count + monthlyEducationTypes.reduce((sum, type) => sum + row[type], 0), 0);
     const dailyCompleted = filteredDetailRows.reduce((count, row) => count + Number(row.daily), 0);
-    const total = filteredMonthlyRows.length * 3 + filteredDetailRows.length;
+    const total = filteredMonthlyRows.length * monthlyEducationTypes.reduce((sum, type) => sum + resourceCounts[type], 0) + filteredDetailRows.length;
     const completed = summaryCompleted + dailyCompleted;
     return { total, completed, percent: total ? Math.round((completed / total) * 100) : 0 };
-  }, [filteredDetailRows, filteredMonthlyRows]);
+  }, [filteredDetailRows, filteredMonthlyRows, resourceCounts]);
 
   const runEducationReminders = async () => {
     setRunDialogOpen(true);
@@ -243,9 +245,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
     } else {
       setMonthlyRows((current) => current.map((row) => {
         if (row.employeeId !== selected.employeeId) return row;
-        if (selected.educationType === "monthly") return { ...row, monthly: true };
-        if (selected.educationType === "quarterly") return { ...row, quarterly: true };
-        return { ...row, semiannual: true };
+        return { ...row, [selected.educationType]: resourceCounts[selected.educationType] };
       }));
     }
     setCompletionDialog(null);
@@ -343,14 +343,17 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
             loading={loading}
             error={error}
             emptyMessage="조회 결과에 해당하는 근무자가 없습니다."
-            headers={["이름", "월별", "분기", "반기"]}
+            headers={["이름", ...monthlyEducationTypes.map((type) => `${educationDisplayLabel(type)}(${resourceCounts[type]})`)]}
           >
             {filteredMonthlyRows.map((row) => (
               <TableRow key={row.employeeId} className="hover:bg-muted/40 transition-colors">
                 <TableCell data-label="이름" className="font-semibold">{row.employeeName}</TableCell>
-                <TableCell data-label="월별"><Mark completed={row.monthly} onClick={() => openCompletionDialog(row.employeeId, row.employeeName, "monthly")} label={`${row.employeeName} 근무자 월별 교육 미이수 처리`} /></TableCell>
-                <TableCell data-label="분기"><Mark completed={row.quarterly} onClick={() => openCompletionDialog(row.employeeId, row.employeeName, "quarterly")} label={`${row.employeeName} 근무자 분기 교육 미이수 처리`} /></TableCell>
-                <TableCell data-label="반기"><Mark completed={row.semiannual} onClick={() => openCompletionDialog(row.employeeId, row.employeeName, "semiannual")} label={`${row.employeeName} 근무자 반기 교육 미이수 처리`} /></TableCell>
+                {monthlyEducationTypes.map((type) => <TableCell key={type} data-label={educationDisplayLabel(type)}>
+                  {resourceCounts[type] === 0 ? "-" : row[type] === resourceCounts[type] ? <span className="font-semibold text-muted-foreground">O</span> :
+                    <button type="button" className="cursor-pointer font-semibold text-destructive"
+                      aria-label={`${row.employeeName} 근무자 ${educationDisplayLabel(type)} 교육 미이수 처리`}
+                      onClick={() => openCompletionDialog(row.employeeId, row.employeeName, type)}>{row[type]}/{resourceCounts[type]}</button>}
+                </TableCell>)}
               </TableRow>
             ))}
           </EducationAttendanceTable>

@@ -34,7 +34,9 @@ export async function POST(request: Request) {
     const { data: resources, error: resourceError } = await supabase
       .from("education_resources")
       .select("title")
-      .eq("education_type", educationTypeLabel);
+      .eq("education_type", educationTypeLabel)
+      .lte("startdate", workDate)
+      .gte("enddate", workDate);
     if (resourceError) throw new Error(resourceError.message);
     const titles = [...new Set((resources ?? []).map((resource) => resource.title).filter(Boolean))];
     if (!titles.length) {

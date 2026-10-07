@@ -44,19 +44,26 @@ it("renders daily subject columns and completes only the selected subject on its
 it("shows monthly subject totals, ratios, other and retains the completion action", async () => {
   const user = userEvent.setup();
   vi.stubGlobal("fetch", vi.fn(async () => Response.json({
-    resourceCounts: { daily: 0, monthly: 0, quarterly: 1, semiannual: 0, other: 2 },
-    summaryRows: [{ employeeId: "e", employeeName: "홍길동", monthly: 0, quarterly: 1, semiannual: 0, other: 1 }], detailRows: [],
+    resourceCounts: { daily: 2, monthly: 0, quarterly: 1, semiannual: 0, other: 2 },
+    summaryRows: [{ employeeId: "e", employeeName: "홍길동", monthly: 0, quarterly: 1, semiannual: 0, other: 1 }],
+    detailRows: [
+      { employeeId: "e", employeeName: "", workDate: "2026-10-01", subjects: [{ resourceId: "d1", isCompleted: true }, { resourceId: "d2", isCompleted: null }] },
+      { employeeId: "e", employeeName: "", workDate: "2026-10-02", subjects: [{ resourceId: "d1", isCompleted: false }, { resourceId: "d2", isCompleted: false }] },
+    ],
   })));
   render(<EducationAttendancePage mode="monthly" />);
   const name = await screen.findByText("홍길동", { selector: "td" });
-  expect(within(name.closest("tr")!).getAllByRole("cell").map((cell) => cell.textContent)).toEqual(["홍길동", "-", "O", "-", "1/2"]);
+  expect(within(name.closest("tr")!).getAllByRole("cell").map((cell) => cell.textContent)).toEqual(["홍길동", "1/3", "-", "1/1", "-", "1/2"]);
+  expect(screen.getByRole("columnheader", { name: "일일(2)" })).toBeInTheDocument();
+  expect(screen.getByText("1/3")).toHaveClass("text-destructive");
   expect(screen.getByRole("columnheader", { name: "기타(2)" })).toBeInTheDocument();
-  expect(screen.getByText("2/3 67%")).toBeInTheDocument();
+  expect(screen.getByText("3/6 50%")).toBeInTheDocument();
   await user.click(screen.getByRole("button", { name: "홍길동 근무자 기타 교육 미이수 처리" }));
   expect(screen.getByRole("dialog")).toHaveTextContent("기타 교육을 이수처리할까요?");
   await user.click(screen.getByRole("button", { name: "이수처리" }));
   await screen.findByText("처리되었습니다.");
   await user.click(screen.getByRole("button", { name: "확인" }));
-  expect(within(name.closest("tr")!).getAllByRole("cell").map((cell) => cell.textContent)).toEqual(["홍길동", "-", "O", "-", "O"]);
-  expect(screen.getByText("3/3 100%")).toBeInTheDocument();
+  expect(within(name.closest("tr")!).getAllByRole("cell").map((cell) => cell.textContent)).toEqual(["홍길동", "1/3", "-", "1/1", "-", "2/2"]);
+  expect(screen.getByText("2/2")).not.toHaveClass("text-destructive");
+  expect(screen.getByText("4/6 67%")).toBeInTheDocument();
 });

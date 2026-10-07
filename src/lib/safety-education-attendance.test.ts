@@ -7,7 +7,7 @@ vi.mock("@/lib/supabase-admin", () => ({ getSupabaseAdmin: vi.fn() }));
 describe("monthly daily education attendance", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("counts active subjects and first-day completions while preserving daily attendance details", async () => {
+  it("counts active subjects and month-overlap completions while preserving daily attendance details", async () => {
     const summaryAttendance = [
       { employee_id: "employee-1", work_date: "2026-09-03", employees: { name: "홍길동" } },
       { employee_id: "employee-2", work_date: "2026-09-03", employees: { name: "김철수" } },
@@ -55,7 +55,7 @@ describe("monthly daily education attendance", () => {
           const isDailyCompletion = table === "education_completions"
             && query.filters.some(([method, column, value]) => method === "eq" && column === "education_type" && value === "일일");
           const isPeriodCompletion = table === "education_completions"
-            && query.filters.some(([method, column]) => method === "eq" && column === "work_date");
+            && query.filters.some(([method, column]) => method === "gte" && column === "work_date");
           const rows = isMonthlySummaryAttendance ? summaryAttendance
             : isMonthlyDetailAttendance
             ? detailAttendance.filter((record) => !query.filters.some(([method, column, operator, value]) =>
@@ -80,8 +80,8 @@ describe("monthly daily education attendance", () => {
     expect(result.detailRows.find((row) => row.employeeId === "employee-1" && row.workDate === "2026-09-03")?.daily).toBe(true);
     expect(result.detailRows.find((row) => row.employeeId === "employee-1" && row.workDate === "2026-09-04")?.daily).toBe(false);
     expect(result.detailRows.find((row) => row.employeeId === "employee-2" && row.workDate === "2026-09-03")?.daily).toBe(false);
-    expect(result.resourceCounts).toEqual({ daily: 0, monthly: 0, quarterly: 1, semiannual: 0, other: 2 });
-    expect(result.summaryRows.find((row) => row.employeeId === "employee-1")).toMatchObject({ quarterly: 1, semiannual: 0, other: 1 });
+    expect(result.resourceCounts).toEqual({ daily: 2, monthly: 0, quarterly: 1, semiannual: 1, other: 2 });
+    expect(result.summaryRows.find((row) => row.employeeId === "employee-1")).toMatchObject({ quarterly: 1, semiannual: 0, other: 2 });
     expect(result.summaryRows.find((row) => row.employeeId === "employee-2")).toMatchObject({ quarterly: 0, semiannual: 0, other: 0 });
 
     const detailQuery = queries.find(({ table, filters }) => table === "work_record"
@@ -99,10 +99,10 @@ describe("monthly daily education attendance", () => {
     expect(result.detailRows.find((row) => row.employeeId === "employee-1" && row.workDate === "2026-09-03")?.subjects).toEqual([{ resourceId: "d1", isCompleted: true }, { resourceId: "d2", isCompleted: null }]);
 
     const periodQuery = queries.find(({ table, filters }) => table === "education_completions"
-      && filters.some(([method, column]) => method === "eq" && column === "work_date"));
-    expect(periodQuery?.filters).toContainEqual(["eq", "work_date", "2026-09-01"]);
+      && filters.some(([method, column]) => method === "gte" && column === "work_date"));
+    expect(periodQuery?.filters).toContainEqual(["gte", "work_date", "2026-09-01"]);
     const resourceQuery = queries.find(({ table }) => table === "education_resources");
-    expect(resourceQuery?.filters).toContainEqual(["lte", "startdate", "2026-09-01"]);
+    expect(resourceQuery?.filters).toContainEqual(["lt", "startdate", "2026-10-01"]);
     expect(resourceQuery?.filters).toContainEqual(["gte", "enddate", "2026-09-01"]);
   });
 });

@@ -168,12 +168,12 @@ export async function loadMonthlyEducationAttendance(yearMonth: string) {
   type Resource = { id: string; title: string; education_type: string; startdate: string; enddate: string };
   const resources = (await readAll<Resource>((from, to) => supabase.from("education_resources")
     .select("id,title,education_type,startdate,enddate")
-    .lte("startdate", monthStart).gte("enddate", monthStart).order("id").range(from, to)))
-    .filter((resource) => isEducationResourceForDate(resource, monthStart));
+    .lt("startdate", nextMonth).gte("enddate", monthStart).order("id").range(from, to)))
+    .filter((resource) => resource.startdate < nextMonth && resource.enddate >= monthStart);
   const resourceCounts: EducationResourceCounts = { daily: 0, monthly: 0, quarterly: 0, semiannual: 0, other: 0 };
   const monthlyTypes = ["monthly", "quarterly", "semiannual", "other"] as const;
   const resourcesByType = new Map<EducationType, Resource[]>();
-  for (const type of monthlyTypes) {
+  for (const type of educationTypes) {
     const matches = resources.filter((resource) => resource.education_type === educationTypeLabels[type]);
     resourceCounts[type] = matches.length;
     resourcesByType.set(type, matches);
@@ -181,10 +181,10 @@ export async function loadMonthlyEducationAttendance(yearMonth: string) {
   const monthlyCompletions = employeeIds.length && resources.length
     ? await readAll<CompletionRecord & { title: string }>((from, to) => supabase.from("education_completions")
       .select("employee_id,work_date,title,education_type,completed_at")
-      .in("employee_id", employeeIds).eq("work_date", monthStart)
+      .in("employee_id", employeeIds).gte("work_date", monthStart).lt("work_date", nextMonth)
       .order("id").range(from, to))
     : [];
-  const completed = new Set(monthlyCompletions.filter((record) => record.work_date === monthStart)
+  const completed = new Set(monthlyCompletions.filter((record) => record.work_date !== null && record.work_date >= monthStart && record.work_date < nextMonth)
     .map((record) => JSON.stringify([record.employee_id, record.title, record.education_type])));
   const summaryRows = employeeIds.map((id): MonthlyEducationSummaryRow => {
     const counts = { monthly: 0, quarterly: 0, semiannual: 0, other: 0 };

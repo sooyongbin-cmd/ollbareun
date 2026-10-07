@@ -350,13 +350,19 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
             loading={loading}
             error={error}
             emptyMessage="조회 결과에 해당하는 근무자가 없습니다."
-            headers={["이름", ...monthlyEducationTypes.map((type) => `${educationDisplayLabel(type)}(${resourceCounts[type]})`)]}
+            headers={["이름", ...educationTypes.map((type) => `${educationDisplayLabel(type)}(${resourceCounts[type]})`)]}
           >
             {filteredMonthlyRows.map((row) => (
               <TableRow key={row.employeeId} className="hover:bg-muted/40 transition-colors">
                 <TableCell data-label="이름" className="font-semibold">{row.employeeName}</TableCell>
+                <TableCell data-label="일일">{(() => {
+                  const subjects = detailRows.filter((detail) => detail.employeeId === row.employeeId).flatMap((detail) => detail.subjects);
+                  const total = subjects.filter((subject) => subject.isCompleted !== null).length;
+                  const completed = subjects.filter((subject) => subject.isCompleted === true).length;
+                  return <span className={completed < total ? "font-semibold text-destructive" : "font-semibold text-muted-foreground"}>{total === 0 ? "-" : `${completed}/${total}`}</span>;
+                })()}</TableCell>
                 {monthlyEducationTypes.map((type) => <TableCell key={type} data-label={educationDisplayLabel(type)}>
-                  {resourceCounts[type] === 0 ? "-" : row[type] === resourceCounts[type] ? <span className="font-semibold text-muted-foreground">O</span> :
+                  {resourceCounts[type] === 0 ? "-" : row[type] === resourceCounts[type] ? <span className="font-semibold text-muted-foreground">{row[type]}/{resourceCounts[type]}</span> :
                     <button type="button" className="cursor-pointer font-semibold text-destructive"
                       aria-label={`${row.employeeName} 근무자 ${educationDisplayLabel(type)} 교육 미이수 처리`}
                       onClick={() => openCompletionDialog(row.employeeId, row.employeeName, type)}>{row[type]}/{resourceCounts[type]}</button>}

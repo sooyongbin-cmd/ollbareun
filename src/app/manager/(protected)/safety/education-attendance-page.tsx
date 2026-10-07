@@ -388,15 +388,17 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
       )}
 
       <Dialog open={runDialogOpen} onOpenChange={closeRunDialog}>
-        <DialogContent className="dark:text-white">
+        <DialogContent className="dark:text-white" {...(!isRunningReminder && !runError ? { "aria-describedby": undefined } : {})}>
           <DialogHeader>
             <DialogTitle>
               {isRunningReminder ? "교육알림 등록 중" : runError ? "교육알림 등록 실패" : "교육알림 등록 완료"}
             </DialogTitle>
-            <DialogDescription>
-              {isRunningReminder ? "조회 목록의 미이수 직원에게 교육알림을 등록하고 있습니다."
-                : runError ? "교육알림을 등록하지 못했습니다." : "교육알림 등록 결과입니다."}
-            </DialogDescription>
+            {isRunningReminder || runError ? (
+              <DialogDescription>
+                {isRunningReminder ? "조회 목록의 미이수 직원에게 교육알림을 등록하고 있습니다."
+                  : "교육알림을 등록하지 못했습니다."}
+              </DialogDescription>
+            ) : null}
           </DialogHeader>
           {isRunningReminder ? <ManagerLoadingMessage /> : runError ? (
             <p role="alert" className="text-sm text-destructive">{runError}</p>

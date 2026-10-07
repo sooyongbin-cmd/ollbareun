@@ -66,7 +66,7 @@ export default function AdminUsersPage() {
         <TableHeader><TableRow><TableHead>이메일</TableHead><TableHead>직군</TableHead><TableHead>최근접속일</TableHead><TableHead className="text-right">구독삭제</TableHead></TableRow></TableHeader>
         <TableBody>{rows.length === 0 ? <TableRow><TableCell data-responsive-empty colSpan={4}>등록된 관리자가 없습니다.</TableCell></TableRow> : rows.map((row, index) => (
           <TableRow key={row.subscription?.id ?? row.admin.id}>
-            <TableCell data-label="이메일">{index === 0 || rows[index - 1].admin.email !== row.admin.email ? row.admin.email : ""}</TableCell>
+            <TableCell data-label="이메일">{index === 0 || rows[index - 1].admin.email !== row.admin.email ? <Link className="text-primary underline underline-offset-4" href={`/manager/system/admin-users/save/${row.admin.id}`}>{row.admin.email}</Link> : ""}</TableCell>
             <TableCell data-label="직군">{row.admin.role === "super_admin" ? "최고 관리자" : "일반 관리자"}</TableCell>
             <TableCell data-label="최근접속일">{formatDateTime(row.subscription?.updated_at)}</TableCell>
             <TableCell data-label="구독삭제" className="text-right">{row.subscription ? <Button type="button" variant="outline" disabled={!isSuperAdmin || busy}

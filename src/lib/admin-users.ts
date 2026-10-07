@@ -83,7 +83,12 @@ export async function registerAdminUser(
 export async function updateAdminUserRole(
   id: string,
   newRole: "admin" | "super_admin",
+  emailInput?: string,
 ): Promise<AdminUserRow> {
+  const email = emailInput?.trim().toLowerCase();
+  if (emailInput !== undefined && (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
+    throw new Error("올바른 관리자 이메일을 입력해주세요.");
+  }
   const supabase = getSupabaseAdmin();
 
   // Find target user
@@ -118,6 +123,7 @@ export async function updateAdminUserRole(
     .from("admin_users")
     .update({
       role: newRole,
+      ...(email !== undefined ? { email } : {}),
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
@@ -126,6 +132,14 @@ export async function updateAdminUserRole(
 
   throwIfAdminError(error);
   return data as AdminUserRow;
+}
+
+export async function getAdminUser(id: string): Promise<AdminUserRow | null> {
+  const { data, error } = await getSupabaseAdmin().from("admin_users")
+    .select("id, user_id, email, role, created_by, first_login_at, created_at, updated_at")
+    .eq("id", id).maybeSingle();
+  throwIfAdminError(error);
+  return data as AdminUserRow | null;
 }
 
 export async function deleteAdminUser(id: string): Promise<void> {

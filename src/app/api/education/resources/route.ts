@@ -17,12 +17,12 @@ function getEducationResourceErrorMessage(error: unknown, fallback: string) {
   return fallback;
 }
 
-export async function GET(request?: Request) {
+export async function GET(request: Request) {
   try {
     // Guard safety education uses this read-only endpoint too. Keep writes
     // manager-only, but read through the server client so RLS cannot hide the
     // resources from a guard's custom (non-Supabase) session.
-    const workDate = request ? new URL(request.url).searchParams.get("workDate") : null;
+    const workDate = new URL(request.url).searchParams.get("workDate");
     return Response.json({ resources: workDate == null
       ? await listEducationResources(getSupabaseAdmin())
       : await listEducationResources(getSupabaseAdmin(), workDate) });

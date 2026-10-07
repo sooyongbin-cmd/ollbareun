@@ -35,7 +35,7 @@ describe("education resources route", () => {
       },
     ]);
 
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/education/resources"));
 
     await expect(response.json()).resolves.toEqual({
       resources: [
@@ -53,11 +53,20 @@ describe("education resources route", () => {
     vi.mocked(getManagerUser).mockResolvedValue(null);
     vi.mocked(listEducationResources).mockResolvedValue([]);
 
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/education/resources"));
 
     expect(response.status).toBe(200);
     expect(getManagerUser).not.toHaveBeenCalled();
     expect(listEducationResources).toHaveBeenCalledWith({});
+  });
+
+  it("passes the attendance date to the resource lookup", async () => {
+    vi.mocked(listEducationResources).mockResolvedValue([]);
+
+    const response = await GET(new Request("http://localhost/api/education/resources?workDate=2026-10-07"));
+
+    expect(response.status).toBe(200);
+    expect(listEducationResources).toHaveBeenCalledWith({}, "2026-10-07");
   });
 
   it("creates an education resource from a YouTube link", async () => {

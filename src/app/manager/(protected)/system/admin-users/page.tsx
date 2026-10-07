@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { buildAdminSubscriptionRows, type AdminSubscriptionRow } from "@/lib/admin-subscription-rows";
 import ManagerLoadingMessage from "../../manager-loading-message";
@@ -68,15 +67,7 @@ export default function AdminUsersPage() {
         <TableBody>{rows.length === 0 ? <TableRow><TableCell data-responsive-empty colSpan={4}>등록된 관리자가 없습니다.</TableCell></TableRow> : rows.map((row, index) => (
           <TableRow key={row.subscription?.id ?? row.admin.id}>
             <TableCell data-label="이메일">{index === 0 || rows[index - 1].admin.email !== row.admin.email ? row.admin.email : ""}</TableCell>
-            <TableCell data-label="직군">{isSuperAdmin ? <NativeSelect aria-label={`${row.admin.email} 직군`} value={row.admin.role} disabled={busy}
-              onChange={(event) => {
-                const role = event.target.value;
-                void runAction(() => fetch(`/api/manager/admin-users/${row.admin.id}`, {
-                  method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role }),
-                }));
-              }}>
-              <NativeSelectOption value="admin">일반 관리자</NativeSelectOption><NativeSelectOption value="super_admin">최고 관리자</NativeSelectOption>
-            </NativeSelect> : row.admin.role === "super_admin" ? "최고 관리자" : "일반 관리자"}</TableCell>
+            <TableCell data-label="직군">{row.admin.role === "super_admin" ? "최고 관리자" : "일반 관리자"}</TableCell>
             <TableCell data-label="최근접속일">{formatDateTime(row.subscription?.updated_at)}</TableCell>
             <TableCell data-label="구독삭제" className="text-right">{row.subscription ? <Button type="button" variant="outline" disabled={!isSuperAdmin || busy}
               aria-label={`${row.admin.email} ${formatDateTime(row.subscription.updated_at)} 구독삭제`} onClick={() => setDeleteTarget(row)}>삭제</Button> : "-"}</TableCell>

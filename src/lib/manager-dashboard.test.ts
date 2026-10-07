@@ -187,6 +187,7 @@ describe("manager dashboard data", () => {
       waitingEmployeesToday: 0,
       absentEmployeesToday: 0,
       lateEmployeesToday: 0,
+      educationCompleted: 1,
       educationUncompleted: 1,
       educationRate: 50,
       employeeRoleCounts: [

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { calculateMonthlyEducationSummary } from "@/lib/monthly-education-summary";
 import ManagerLoadingMessage from "../manager-loading-message";
 import { educationTypeLabels, educationTypes, type EducationType } from "@/lib/education-periods";
 import type {
@@ -17,7 +18,6 @@ import type {
 
 type EducationAttendanceMode = "daily" | "monthly";
 const monthlyEducationTypes = ["monthly", "quarterly", "semiannual", "other"] as const;
-
 function currentKstDate() {
   return new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
 }
@@ -139,15 +139,9 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
     const normalizedName = name.trim().toLocaleLowerCase("ko-KR");
     return detailRows.filter((row) => row.employeeName.toLocaleLowerCase("ko-KR").includes(normalizedName));
   }, [detailRows, name]);
-  const monthlyCompletionRate = useMemo(() => {
-    const summaryCompleted = filteredMonthlyRows.reduce((count, row) =>
-      count + monthlyEducationTypes.reduce((sum, type) => sum + row[type], 0), 0);
-    const dailyCompleted = filteredDetailRows.reduce((count, row) => count + row.subjects.filter((subject) => subject.isCompleted === true).length, 0);
-    const dailyTotal = filteredDetailRows.reduce((count, row) => count + row.subjects.filter((subject) => subject.isCompleted !== null).length, 0);
-    const total = filteredMonthlyRows.length * monthlyEducationTypes.reduce((sum, type) => sum + resourceCounts[type], 0) + dailyTotal;
-    const completed = summaryCompleted + dailyCompleted;
-    return { total, completed, percent: total ? Math.round((completed / total) * 100) : 0 };
-  }, [filteredDetailRows, filteredMonthlyRows, resourceCounts]);
+  const monthlyCompletionRate = useMemo(() =>
+    calculateMonthlyEducationSummary(filteredMonthlyRows, filteredDetailRows, resourceCounts),
+  [filteredDetailRows, filteredMonthlyRows, resourceCounts]);
 
   const runEducationReminders = async () => {
     setRunDialogOpen(true);

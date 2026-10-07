@@ -43,6 +43,7 @@ type DashboardPayload = {
     notClockedOutEmployeesToday: number;
     onLeaveEmployeesToday: number;
     attendanceRate: number;
+    educationCompleted: number;
     educationUncompleted: number;
     educationRate: number;
     employeeRoleCounts: { role: string; count: number }[];
@@ -86,6 +87,7 @@ const emptyDashboard: DashboardPayload = {
     notClockedOutEmployeesToday: 0,
     onLeaveEmployeesToday: 0,
     attendanceRate: 0,
+    educationCompleted: 0,
     educationUncompleted: 0,
     educationRate: 0,
     employeeRoleCounts: [],
@@ -323,8 +325,8 @@ export default function ManagerPage() {
     {
       label: "안전교육 월별이수율",
       value: `${data.summary.educationRate}%`,
-      description: `안전교육 미이수 ${data.summary.educationUncompleted}건`,
-      ariaLabel: `안전교육 월별이수율 ${data.summary.educationRate}% 안전교육 미이수 ${data.summary.educationUncompleted}건`,
+      description: `안전교육 이수 ${data.summary.educationCompleted}건 미이수 ${data.summary.educationUncompleted}건`,
+      ariaLabel: `안전교육 월별이수율 ${data.summary.educationRate}% 안전교육 이수 ${data.summary.educationCompleted}건 미이수 ${data.summary.educationUncompleted}건`,
       icon: GraduationCap,
       href: "/manager/safety/monthly_edu",
     },

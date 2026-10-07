@@ -12,6 +12,7 @@ const dashboardPayload = {
     absentEmployeesToday: 2,
     lateEmployeesToday: 1,
     attendanceRate: 40,
+    educationCompleted: 12,
     educationUncompleted: 3,
     educationRate: 80,
     employeeRoleCounts: [
@@ -98,6 +99,15 @@ describe("manager dashboard page", () => {
     );
   });
 
+  it("shows completed and uncompleted education counts in the monthly rate card", async () => {
+    render(<ManagerPage />);
+    const card = await screen.findByRole("link", {
+      name: "안전교육 월별이수율 80% 안전교육 이수 12건 미이수 3건",
+    });
+    expect(within(card).getByText("80%")).toBeInTheDocument();
+    expect(within(card).getByText("안전교육 이수 12건 미이수 3건")).toBeInTheDocument();
+  });
+
   it("renders four summary cards and both data tables", async () => {
     render(<ManagerPage />);
 
@@ -124,12 +134,12 @@ describe("manager dashboard page", () => {
     expect(within(roleCard).getByText("야간근무 3명")).toBeInTheDocument();
 
     const educationCard = within(summary).getByRole("link", {
-      name: "안전교육 이수율 80% 안전교육 미이수 3명",
+      name: "안전교육 월별이수율 80% 안전교육 이수 12건 미이수 3건",
     });
     expect(educationCard).toHaveAttribute("href", "/manager/safety/monthly_edu");
-    expect(within(educationCard).getByText("안전교육 이수율")).toBeInTheDocument();
+    expect(within(educationCard).getByText("안전교육 월별이수율")).toBeInTheDocument();
     expect(within(educationCard).getByText("80%")).toBeInTheDocument();
-    expect(within(educationCard).getByText("안전교육 미이수 3명")).toBeInTheDocument();
+    expect(within(educationCard).getByText("안전교육 이수 12건 미이수 3건")).toBeInTheDocument();
 
     const remarksCard = within(summary).getByRole("link", {
       name: "미처리 특이사항 4건 긴급 조치 요구됨",
@@ -211,7 +221,7 @@ describe("manager dashboard page", () => {
 
     render(<ManagerPage />);
 
-    expect(await screen.findByText("안전교육 이수율")).toBeInTheDocument();
+    expect(await screen.findByText("안전교육 월별이수율")).toBeInTheDocument();
     expect(within(screen.getByRole("region", { name: "운영 요약" })).getByText("0%")).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "최근 30일 운영 추이" })).not.toBeInTheDocument();
     expect(screen.getByText("등록된 인원 배정이 없습니다.")).toBeInTheDocument();

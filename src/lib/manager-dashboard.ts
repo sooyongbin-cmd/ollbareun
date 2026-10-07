@@ -1,3 +1,4 @@
+import { calculateMonthlyEducationSummary } from "./monthly-education-summary";
 import { loadMonthlyEducationAttendance } from "./safety-education-attendance";
 import { loadEmployeeRoles } from "./employee-roles";
 import { getSupabaseAdmin } from "./supabase-admin";
@@ -99,6 +100,7 @@ export type ManagerDashboardData = {
     notClockedOutEmployeesToday: number;
     onLeaveEmployeesToday: number;
     attendanceRate: number;
+    educationCompleted: number;
     educationUncompleted: number;
     educationRate: number;
     employeeRoleCounts: { role: string; count: number }[];
@@ -338,17 +340,18 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
         scheduledAssignmentKeysToday.has(`${assignment.employee_id}:${assignment.worksite_id}`),
     );
 
+  let educationCompleted: number;
   let educationUncompleted: number;
   let educationRate: number;
   if (input.monthlyEducationAttendance) {
-    const { summaryRows, detailRows } = input.monthlyEducationAttendance;
-    const educationTotal = summaryRows.length * 3 + detailRows.length;
-    const educationCompleted = summaryRows.reduce((count, row) =>
-      count + Number(row.monthly) + Number(row.quarterly) + Number(row.semiannual), 0)
-      + detailRows.reduce((count, row) => count + Number(row.daily), 0);
-    educationUncompleted = educationTotal - educationCompleted;
-    educationRate = percent(educationCompleted, educationTotal);
+    const { summaryRows, detailRows, resourceCounts } = input.monthlyEducationAttendance;
+    const totals = calculateMonthlyEducationSummary(summaryRows, detailRows, resourceCounts);
+    educationCompleted = totals.completed;
+    educationUncompleted = totals.total - totals.completed;
+    educationRate = totals.percent;
   } else {
+    educationCompleted = activeEmployees.filter((employee) => allResourceIds.length > 0
+      && allResourceIds.every((resourceId) => completedByEmployee.get(employee.id)?.has(resourceId))).length;
     educationUncompleted = allResourceIds.length === 0
       ? 0
       : activeEmployees.filter((employee) => {
@@ -544,6 +547,7 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       notClockedOutEmployeesToday,
       onLeaveEmployeesToday,
       attendanceRate,
+      educationCompleted,
       educationUncompleted,
       educationRate,
       employeeRoleCounts,

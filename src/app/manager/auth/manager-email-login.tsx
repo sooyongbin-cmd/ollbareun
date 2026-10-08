@@ -90,7 +90,7 @@ export default function ManagerEmailLogin({
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <main className="mx-auto flex min-h-screen w-full max-w-[26.25rem] flex-col justify-center px-6 py-16">
+      <main className="mx-auto flex min-h-screen w-full max-w-[26.25rem] flex-col justify-center py-16">
         <div className="space-y-8">
           <div className="space-y-3">
             <p className="text-[0.875rem] font-semibold text-primary">관리자 인증</p>

@@ -26,6 +26,6 @@
 
 @media (max-width: 360px) {
   .manager-page-content {
-    padding-inline: 0;
+    padding-inline: 5px;
   }
 }

@@ -129,7 +129,6 @@ export default function GuardInspectionPage() {
       <div className="max-w-[37.5rem] mx-auto space-y-6">
         <header>
           <h1 className="text-[2.25rem] font-semibold leading-[1.1]">현장점검</h1>
-          <p className="mt-2 text-[1.125rem] text-muted-foreground">현장 QR을 스캔한 뒤 촬영 버튼으로 점검을 저장합니다.</p>
         </header>
 
         <section className="bg-muted/40 rounded-xl p-[1.5rem] border border-border/50 space-y-5">

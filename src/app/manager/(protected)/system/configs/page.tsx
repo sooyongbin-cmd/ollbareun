@@ -62,9 +62,6 @@ export default function SystemConfigsPage() {
     <section className="space-y-[1.5rem]">
       <header>
         <h1 className="text-[1.75rem] leading-[1.2]">시스템설정</h1>
-        <p className="mt-2 max-w-[40rem] text-[0.875rem] font-normal leading-relaxed text-muted-foreground">
-          시스템에서 사용하는 코드와 내용을 관리합니다.
-        </p>
       </header>
 
       <section aria-label="시스템설정 조회" className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">

@@ -36,9 +36,6 @@ export default function OfflinePage() {
         <h1 className="text-[1.25rem] font-semibold text-foreground mb-2">
           인터넷 연결이 끊어졌습니다
         </h1>
-        <p className="text-[0.875rem] text-muted-foreground mb-6 leading-relaxed">
-          네트워크 연결 상태를 확인하고 아래의 {"'다시 시도'"} 버튼을 눌러주세요.
-        </p>
 
         <Button
           onClick={handleRetry}

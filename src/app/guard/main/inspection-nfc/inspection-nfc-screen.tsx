@@ -392,12 +392,6 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
             <p className={styles.progress}>{completedCount}/{totalCount}완료 ({completionPercentage}%)</p>
           </div>
 
-          <div className={styles.description}>
-            <p className={styles.descriptionText}>
-              미완료된 구역을 터치한 후 안내 팝업에 맞춰 NFC 스티커를 태깅하면 점검 기록을 저장합니다.
-            </p>
-          </div>
-
           <div className={styles.worksiteGuidance}>
             <div className={styles.worksiteLabel}>
               <p>
@@ -473,7 +467,6 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
       <div className="max-w-[37.5rem] mx-auto space-y-6">
         <header>
           <h1 className="text-[2.25rem] font-semibold leading-[1.1]">{title}</h1>
-          <p className="mt-2 text-[1.125rem] text-muted-foreground">NFC 스티커를 태그하면 점검 기록을 저장합니다.</p>
         </header>
 
         <section className="bg-muted/40 rounded-xl p-[1.5rem] border border-border/50 space-y-5">

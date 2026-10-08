@@ -452,12 +452,9 @@ export default function GuardSafetyEducationPage() {
           </p>
         </div>
 
-        <div className={styles.description}>
-          <p className={styles.descriptionText}>
-            필수 안전교육 영상을 시청하고 이수를 완료해 주세요. 리스트의 각 제목을 터치하면 시청하실 수 있습니다.
-            {workDate !== currentKstDate() ? ` (출근일 ${workDate} 기준)` : ""}
-          </p>
-        </div>
+        {workDate !== currentKstDate() ? (
+          <p className={styles.descriptionText}>출근일 {workDate} 기준</p>
+        ) : null}
 
         {loading ? (
           <div className={styles.educationList}>

@@ -109,11 +109,6 @@ export default function GuardLeavePage() {
         <div className={styles.headingRow}>
           <h1 className={styles.heading}>휴가신청</h1>
         </div>
-        <div className={styles.description}>
-          <p className={styles.descriptionText}>
-            휴가기간을 설정하고 신청하세요. 하루 휴가는 시작과 종료일이 같으면 됩니다.
-          </p>
-        </div>
         <div className={styles.educationList} aria-label="휴가신청 자료">
           {loading ? <LoadingBoard className={styles.loading} label="휴가구분을 불러오는 중입니다." /> : (
             <form ref={formRef} className="contents" onSubmit={(event) => { event.preventDefault(); requestConfirmation(); }}>

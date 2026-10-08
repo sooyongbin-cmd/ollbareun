@@ -429,7 +429,6 @@ export default function GuardSpecialRemarksPage() {
     <main className="guard-special-remarks-page">
       <section className="guard-special-remarks-intro-card">
         <h1>특이사항</h1>
-        <p>근무 중 특이사항을 작성하여 관리자에게 보고합니다.</p>
       </section>
 
       <section aria-label="특이사항 입력" className="guard-special-remarks-input-card">

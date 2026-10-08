@@ -116,9 +116,6 @@ export default function InspectionLogsPage() {
     <section className="space-y-[1.5rem]">
       <header>
         <h1 className="text-[1.75rem] leading-[1.2]">점검지점검현황</h1>
-        <p className="mt-2 max-w-[40rem] text-[0.875rem] font-normal leading-relaxed text-muted-foreground">
-          근무지별 점검지 점검 기록을 확인합니다.
-        </p>
       </header>
 
       <section

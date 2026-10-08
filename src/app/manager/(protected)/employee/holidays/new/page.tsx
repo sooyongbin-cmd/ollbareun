@@ -31,7 +31,7 @@ export default function HolidayNewPage() {
         <h1 className="text-[1.75rem] leading-[1.2]">휴일추가</h1>
       </header>
 
-      <section className="rounded-xl border border-border/50 bg-muted/40 p-[1.5rem] md:p-[2rem]">
+      <section className="manager-section rounded-xl border border-border/50 bg-muted/40">
         <form onSubmit={save} className="space-y-6">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">

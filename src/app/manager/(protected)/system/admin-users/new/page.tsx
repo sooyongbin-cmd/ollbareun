@@ -36,7 +36,7 @@ export default function NewAdminUserPage() {
   }
   return <section className="space-y-6">
     <h1 className="text-[1.75rem]">관리자등록</h1>
-    <form onSubmit={save} className="space-y-6 rounded-xl border border-border/50 bg-muted/40 p-8">
+    <form onSubmit={save} className="manager-section space-y-6 rounded-xl border border-border/50 bg-muted/40">
       <div className="space-y-2"><label htmlFor="admin-email">관리자이메일</label>
         <Input id="admin-email" type="email" required value={email} disabled={saving} onChange={(event) => setEmail(event.target.value)} /></div>
       <div className="space-y-2"><label htmlFor="admin-role">직군 설정</label>

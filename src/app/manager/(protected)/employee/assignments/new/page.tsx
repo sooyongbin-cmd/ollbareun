@@ -394,7 +394,7 @@ export default function AssignmentNewPage() {
         <h1 className="text-[1.75rem] leading-[1.2]">배정등록</h1>
       </header>
 
-      <section className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
+      <section className="manager-section bg-muted/40 rounded-xl border border-border/50">
         {loading ? (
           <ManagerLoadingMessage />
         ) : (
@@ -541,7 +541,7 @@ export default function AssignmentNewPage() {
       {existingAssignments.length > 0 && (
         <section
           aria-label="기존 배정 목록"
-          className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
+          className="manager-section bg-muted/40 rounded-xl border border-border/50"
         >
           <h2 className="text-lg font-semibold">근무기간 내 기존 배정 목록</h2>
           <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
@@ -584,7 +584,7 @@ export default function AssignmentNewPage() {
       {attendanceRecords.length > 0 && (
         <section
           aria-label="근무기간내 출근 이력"
-          className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
+          className="manager-section bg-muted/40 rounded-xl border border-border/50"
         >
           <h2 className="text-lg font-semibold">근무기간내 출근 이력</h2>
           <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">

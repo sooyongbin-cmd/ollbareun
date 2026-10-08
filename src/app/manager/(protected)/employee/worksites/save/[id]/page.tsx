@@ -219,7 +219,7 @@ export default function WorksiteSavePage() {
         </div>
       </header>
 
-      <section className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
+      <section className="manager-section bg-muted/40 rounded-xl border border-border/50">
         {loading ? (
           <ManagerLoadingMessage />
         ) : routeError ? (
@@ -298,7 +298,7 @@ export default function WorksiteSavePage() {
       </section>
 
       {!loading && !routeError ? (
-        <section aria-labelledby="worksite-assignment-history-title" className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
+        <section aria-labelledby="worksite-assignment-history-title" className="manager-section bg-muted/40 rounded-xl border border-border/50">
           <h2 id="worksite-assignment-history-title" className="text-[1.25rem] font-semibold">
             근무지배정 이력
           </h2>

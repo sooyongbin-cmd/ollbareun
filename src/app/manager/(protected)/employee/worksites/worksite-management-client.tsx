@@ -175,7 +175,7 @@ export default function WorksiteManagementClient() {
 
       <section
         aria-label="근무지 검색"
-        className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
+        className="manager-section bg-muted/40 rounded-xl border border-border/50"
       >
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="flex flex-1 flex-col gap-2">
@@ -207,7 +207,7 @@ export default function WorksiteManagementClient() {
 
       <section
         aria-label="근무지 목록"
-        className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
+        className="manager-section bg-muted/40 rounded-xl border border-border/50"
       >
         <div className="flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
           <span>조회 결과 {filteredWorksites.length}</span>

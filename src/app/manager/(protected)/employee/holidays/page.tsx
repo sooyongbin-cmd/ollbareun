@@ -82,7 +82,7 @@ export default function HolidaysPage() {
         </div>
       </header>
 
-      <section aria-label="공휴일 검색" className="rounded-xl border border-border/50 bg-muted/40 p-[1.5rem] md:p-[2rem]">
+      <section aria-label="공휴일 검색" className="manager-section rounded-xl border border-border/50 bg-muted/40">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="flex flex-1 flex-col gap-4 md:flex-row">
             <div className="flex-1 space-y-2">
@@ -113,7 +113,7 @@ export default function HolidaysPage() {
         {message && <p role="status" className="mt-6 rounded-md border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-primary text-center">{message}</p>}
       </section>
 
-      <section aria-label="공휴일 목록" className="rounded-xl border border-border/50 bg-muted/40 p-[1.5rem] md:p-[2rem]">
+      <section aria-label="공휴일 목록" className="manager-section rounded-xl border border-border/50 bg-muted/40">
         <div className="mt-4 flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
           <span>조회 결과 {rows.length}</span>
         </div>

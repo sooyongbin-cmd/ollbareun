@@ -115,7 +115,7 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
   }
 
   return (
-    <form className="bg-muted/40 rounded-xl p-[2rem] border border-border/50 space-y-5" onSubmit={handleSubmit}>
+    <form className="manager-section bg-muted/40 rounded-xl border border-border/50 space-y-5" onSubmit={handleSubmit}>
       <div className="space-y-2">
         <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="system-config-description">
           설명

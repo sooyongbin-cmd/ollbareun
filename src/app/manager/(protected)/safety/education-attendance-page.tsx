@@ -255,7 +255,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
 
       <section
         aria-label={`${title} 조회`}
-        className="rounded-xl border border-border/50 bg-muted/40 p-[1.5rem] md:p-[2rem]"
+        className="manager-section rounded-xl border border-border/50 bg-muted/40"
       >
         <div className="grid gap-4 md:items-end md:grid-cols-[minmax(0,1fr)_12rem_auto]">
           <div className="min-w-0 flex flex-col gap-2">
@@ -482,7 +482,7 @@ function EducationAttendanceTable({
   children: ReactNode;
 }) {
   return (
-    <section aria-label={ariaLabel} className="rounded-xl border border-border/50 bg-muted/40 p-[1.5rem] md:p-[2rem]">
+    <section aria-label={ariaLabel} className="manager-section rounded-xl border border-border/50 bg-muted/40">
       <div className="mb-4 flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
         <span>조회 결과 {count}</span>
       </div>

@@ -212,7 +212,7 @@ export default function AttendanceDetailPage() {
 
   return <section className="space-y-6">
     <header><h1 className="text-[1.75rem] leading-[1.2]">근태상세</h1></header>
-    <section className="rounded-xl border border-border/50 bg-muted/40 p-8">
+    <section className="manager-section rounded-xl border border-border/50 bg-muted/40">
       {loading ? <ManagerLoadingMessage /> : error && !record ? <p role="alert" className="text-destructive">{error}</p> : record ? <form className="space-y-6" onSubmit={submit}>
         <fieldset className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="근태 정보">
           {readOnlyFields.map((field) => <div className="space-y-2" key={field.id}>

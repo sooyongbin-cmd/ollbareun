@@ -86,7 +86,7 @@ export default function EducationReportPage() {
         <h1 className="text-[1.75rem] leading-[1.2]">교육이수자료</h1>
       </header>
 
-      <section aria-label="교육이수자료 조회" className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
+      <section aria-label="교육이수자료 조회" className="manager-section rounded-xl border border-border/50 bg-muted/40">
         <div className="grid gap-4 md:grid-cols-[10rem_auto_auto] md:items-end">
           <div className="space-y-2">
             <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="education-year">
@@ -115,7 +115,7 @@ export default function EducationReportPage() {
         </div>
       </section>
 
-      <section aria-label="교육이수자료 목록" className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
+      <section aria-label="교육이수자료 목록" className="manager-section rounded-xl border border-border/50 bg-muted/40">
         <div className="mb-4 flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
           <span>조회 결과 {rows.length}</span>
         </div>

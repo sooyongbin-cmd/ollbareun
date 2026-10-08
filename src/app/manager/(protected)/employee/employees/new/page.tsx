@@ -145,7 +145,7 @@ export default function EmployeeNewPage() {
         <h1 className="text-[1.75rem] leading-[1.2]">직원등록</h1>
       </header>
 
-      <section className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
+      <section className="manager-section bg-muted/40 rounded-xl border border-border/50">
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div className="grid gap-4 min-[768px]:grid-cols-2">

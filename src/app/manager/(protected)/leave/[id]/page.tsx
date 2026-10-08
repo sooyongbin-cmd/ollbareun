@@ -101,7 +101,7 @@ export default function LeaveDetailPage() {
         </div>
       </header>
 
-      <section className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
+      <section className="manager-section rounded-xl border border-border/50 bg-muted/40">
         {loading ? (
           <ManagerLoadingMessage />
         ) : routeError ? (

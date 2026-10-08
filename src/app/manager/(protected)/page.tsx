@@ -145,7 +145,7 @@ function DashboardSkeleton() {
       <span className="sr-only">대시보드를 불러오는 중입니다.</span>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }, (_, index) => (
-          <Card key={index} className="gap-4">
+          <Card key={index} className="manager-section gap-4">
             <CardHeader>
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-9 w-20" />
@@ -155,7 +155,7 @@ function DashboardSkeleton() {
       </div>
       <div className="grid gap-6 xl:grid-cols-2">
         {Array.from({ length: 2 }, (_, index) => (
-          <Card key={index}>
+          <Card className="manager-section" key={index}>
             <CardHeader>
               <Skeleton className="h-5 w-36" />
             </CardHeader>
@@ -180,7 +180,7 @@ type SummaryCard = {
 
 function DashboardSummaryCard({ card }: { card: SummaryCard }) {
   const content = (
-    <Card className="h-full gap-4 bg-gradient-to-t from-primary/[0.035] to-card transition-shadow group-hover:shadow-md">
+    <Card className="manager-section h-full gap-4 bg-gradient-to-t from-primary/[0.035] to-card transition-shadow group-hover:shadow-md">
       <CardHeader>
         <CardDescription>{card.label}</CardDescription>
         <CardTitle className="text-2xl tabular-nums md:text-3xl">{card.value}</CardTitle>
@@ -355,7 +355,7 @@ export default function ManagerPage() {
       </section>
 
       <div className="grid min-w-0 gap-6 xl:grid-cols-2">
-        <Card role="region" aria-label="금주 휴가현황" className="min-w-0">
+        <Card role="region" aria-label="금주 휴가현황" className="manager-section min-w-0">
         <CardHeader className="border-b">
           <CardTitle>
             <h2 className="flex items-center gap-2 text-base">
@@ -416,7 +416,7 @@ export default function ManagerPage() {
         </CardContent>
         </Card>
 
-        <Card role="region" aria-label="점검지 점검 현황" className="min-w-0">
+        <Card role="region" aria-label="점검지 점검 현황" className="manager-section min-w-0">
           <CardHeader className="border-b">
             <CardTitle>
               <h2 className="flex items-center gap-2 text-base">

@@ -180,7 +180,7 @@ export default function EducationResourceSavePage() {
         </div>
       </header>
 
-      <section className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
+      <section className="manager-section bg-muted/40 rounded-xl border border-border/50">
         {loading ? (
           <ManagerLoadingMessage />
         ) : routeError ? (

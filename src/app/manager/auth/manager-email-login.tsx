@@ -99,7 +99,7 @@ export default function ManagerEmailLogin({
             </h1>
           </div>
 
-          <form className="space-y-4" onSubmit={signInWithGoogle}>
+          <form className="manager-section space-y-4" onSubmit={signInWithGoogle}>
             {initialAdminSetupRequired ? (
               <div className="space-y-2">
                 <label className="text-[0.875rem] font-semibold text-muted-foreground" htmlFor="initial-admin-setup-code">

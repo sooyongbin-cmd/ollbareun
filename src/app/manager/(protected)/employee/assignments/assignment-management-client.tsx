@@ -168,7 +168,7 @@ export default function AssignmentManagementClient() {
 
       <section
         aria-label="배정 검색"
-        className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
+        className="manager-section bg-muted/40 rounded-xl border border-border/50"
       >
         <div className="grid gap-4 md:grid-cols-[repeat(3,minmax(0,1fr))_max-content] md:items-end">
           <div className="flex flex-col gap-2">
@@ -227,7 +227,7 @@ export default function AssignmentManagementClient() {
 
       <section
         aria-label="배정 목록"
-        className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
+        className="manager-section bg-muted/40 rounded-xl border border-border/50"
       >
         <div className="flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
           <span>조회 결과 {filteredAssignments.length}</span>

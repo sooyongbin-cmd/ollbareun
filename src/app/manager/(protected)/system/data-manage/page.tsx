@@ -78,7 +78,7 @@ export default function DataManagePage() {
   return (
     <section className="space-y-6">
       <header><h1 className="text-[1.75rem] leading-[1.2]">자료관리</h1></header>
-      <section aria-label="자료 조회" className="rounded-xl border border-border/50 bg-muted/40 p-6">
+      <section aria-label="자료 조회" className="manager-section rounded-xl border border-border/50 bg-muted/40">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="space-y-2">
             <label htmlFor="data-manage-year" className="block text-sm font-medium">연도</label>
@@ -93,7 +93,7 @@ export default function DataManagePage() {
         <p role="alert" className="text-sm text-destructive">{error}</p>
         <Button variant="outline" disabled={loading || deleting} onClick={() => void changeYear(summary.year ?? undefined)}>다시 조회</Button>
       </div> : null}
-      <section aria-label="자료 목록" className="rounded-xl border border-border/50 bg-muted/40 p-6">
+      <section aria-label="자료 목록" className="manager-section rounded-xl border border-border/50 bg-muted/40">
         {loading ? <p role="status">조회중입니다...</p> : <>
           <Table>
             <TableHeader><TableRow><TableHead>자료</TableHead><TableHead>테이블</TableHead><TableHead className="text-right">건수</TableHead></TableRow></TableHeader>

@@ -300,7 +300,7 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
         <h1 className="text-[1.75rem] leading-[1.2]">점검지 상세</h1>
       </header>
 
-      <section className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
+      <section className="manager-section bg-muted/40 rounded-xl border border-border/50">
         {loading ? (
           <ManagerLoadingMessage />
         ) : error && !savedSite ? (

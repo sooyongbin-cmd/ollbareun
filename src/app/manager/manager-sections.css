@@ -1,0 +1,31 @@
+/* Only containers explicitly marked as manager sections receive this padding. */
+.manager-section {
+  padding: 2rem;
+}
+
+/* Card sections own the outer padding instead of their header and content. */
+.manager-section > :is([data-slot="card-header"], [data-slot="card-content"], [data-slot="card-footer"]) {
+  padding: 0;
+}
+
+.manager-section > [data-slot="card-header"].border-b {
+  padding-bottom: 1rem;
+}
+
+@media (max-width: 1024px) {
+  .manager-section {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .manager-section {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .manager-section {
+    padding: 0.5rem;
+  }
+}

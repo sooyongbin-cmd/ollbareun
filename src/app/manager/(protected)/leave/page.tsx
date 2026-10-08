@@ -98,7 +98,7 @@ export default function LeavePage() {
         </div>
       </header>
 
-      <section aria-label="휴가 검색" className="rounded-xl border border-border/50 bg-muted/40 p-[1.5rem] md:p-[2rem]">
+      <section aria-label="휴가 검색" className="manager-section rounded-xl border border-border/50 bg-muted/40">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="flex flex-1 flex-col gap-2 md:max-w-[32rem]">
             <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="leave-name-search">
@@ -126,7 +126,7 @@ export default function LeavePage() {
         </div>
       </section>
 
-      <section aria-label="휴가 목록" className="rounded-xl border border-border/50 bg-muted/40 p-[1.5rem] md:p-[2rem]">
+      <section aria-label="휴가 목록" className="manager-section rounded-xl border border-border/50 bg-muted/40">
         <div className="mb-4 flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
           <span>조회 결과 {filteredRows.length}</span>
         </div>

@@ -56,10 +56,10 @@ export default function AdminUsersPage() {
     <header className="space-y-3">
       <h1 className="text-[1.75rem] leading-[1.2]">관리자관리</h1>
     </header>
-    <section className="rounded-xl border border-border/50 bg-muted/40 p-8">
+    <section className="manager-section rounded-xl border border-border/50 bg-muted/40">
       {isSuperAdmin && !busy ? <Button asChild><Link href="/manager/system/admin-users/new">관리자등록</Link></Button> : <Button disabled>관리자등록</Button>}
     </section>
-    <section className="rounded-xl border border-border/50 bg-muted/40 p-8">
+    <section className="manager-section rounded-xl border border-border/50 bg-muted/40">
       <div className="mb-4 text-right text-sm text-muted-foreground">조회 결과 {rows.length}</div>
       {loading ? <ManagerLoadingMessage /> : <Table>
         <TableHeader><TableRow><TableHead>이메일</TableHead><TableHead>직군</TableHead><TableHead>최근접속일</TableHead><TableHead className="text-right">구독삭제</TableHead></TableRow></TableHeader>

@@ -225,7 +225,7 @@ export default function AttendanceReportPage() {
         <h1 className="text-[1.75rem] leading-[1.2]">근태관리</h1>
       </header>
 
-      <section aria-label="근태내역 조회" className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
+      <section aria-label="근태내역 조회" className="manager-section rounded-xl border border-border/50 bg-muted/40">
         <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_12rem_auto] md:items-end">
           <div className="flex flex-col gap-2">
             <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor="attendance-employee-name">
@@ -263,7 +263,7 @@ export default function AttendanceReportPage() {
         </div>
       </section>
 
-      <section aria-label="근태내역 목록" className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
+      <section aria-label="근태내역 목록" className="manager-section rounded-xl border border-border/50 bg-muted/40">
         <div className="mb-4 flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
           <span>조회 결과 {rows.length}</span>
         </div>

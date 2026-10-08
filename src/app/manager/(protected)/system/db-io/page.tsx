@@ -208,7 +208,7 @@ export default function DatabaseIoPage() {
       {stats ? (
         <>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <Card className="gap-4 py-5">
+            <Card className="manager-section gap-4">
               <CardHeader className="px-5">
                 <CardDescription>추적 테이블</CardDescription>
                 <CardTitle className="text-2xl font-semibold tabular-nums">{formatNumber(summary.tableCount)}개</CardTitle>
@@ -220,7 +220,7 @@ export default function DatabaseIoPage() {
               </CardHeader>
             </Card>
 
-            <Card className="gap-4 py-5">
+            <Card className="manager-section gap-4">
               <CardHeader className="px-5">
                 <CardDescription>Read blocks</CardDescription>
                 <CardTitle className="text-2xl font-semibold tabular-nums">{formatNumber(summary.totalRead)}</CardTitle>
@@ -232,7 +232,7 @@ export default function DatabaseIoPage() {
               </CardHeader>
             </Card>
 
-            <Card className="gap-4 py-5">
+            <Card className="manager-section gap-4">
               <CardHeader className="px-5">
                 <CardDescription>전체 Cache hit rate</CardDescription>
                 <CardTitle className="text-2xl font-semibold tabular-nums">{formatPercent(summary.cacheHitRate)}</CardTitle>
@@ -244,7 +244,7 @@ export default function DatabaseIoPage() {
               </CardHeader>
             </Card>
 
-            <Card className="gap-4 py-5">
+            <Card className="manager-section gap-4">
               <CardHeader className="px-5">
                 <CardDescription>최다 Read 테이블</CardDescription>
                 <CardTitle className="truncate font-mono text-lg font-semibold">{summary.busiestTable}</CardTitle>
@@ -267,7 +267,7 @@ export default function DatabaseIoPage() {
             </Alert>
           ) : null}
 
-          <Card className="gap-0 overflow-hidden py-0">
+          <Card className="manager-section gap-0 overflow-hidden">
             <CardHeader className="border-b py-5">
               <div>
                 <CardTitle>테이블별 I/O</CardTitle>
@@ -321,7 +321,7 @@ export default function DatabaseIoPage() {
             </div>
           </Card>
 
-          <Card className="gap-0 overflow-hidden py-0">
+          <Card className="manager-section gap-0 overflow-hidden">
             <CardHeader className="border-b py-5">
               <div>
                 <CardTitle>쿼리별 I/O</CardTitle>

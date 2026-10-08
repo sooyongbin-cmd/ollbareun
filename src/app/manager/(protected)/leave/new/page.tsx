@@ -191,12 +191,12 @@ export default function LeaveNewPage() {
       </header>
 
       {loading ? (
-        <section className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
+        <section className="manager-section rounded-xl border border-border/50 bg-muted/40">
           <ManagerLoadingMessage />
         </section>
       ) : (
         <>
-          <section aria-label="입력" className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
+          <section aria-label="입력" className="manager-section rounded-xl border border-border/50 bg-muted/40">
             <h2 className="mb-6 text-lg font-semibold">입력</h2>
             <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="grid gap-4 md:grid-cols-2">
@@ -271,7 +271,7 @@ export default function LeaveNewPage() {
             {error ? <p role="alert" className="mt-6 text-[1rem] text-destructive">{error}</p> : null}
           </section>
 
-          <section aria-label="사원정보 및 근무예정" className="rounded-xl border border-border/50 bg-muted/40 p-[2rem]">
+          <section aria-label="사원정보 및 근무예정" className="manager-section rounded-xl border border-border/50 bg-muted/40">
             <div>
               {selectedEmployee ? (
                 <dl className="grid gap-4 rounded-lg border border-border bg-background p-4 sm:grid-cols-2">

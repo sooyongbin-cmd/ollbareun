@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ManagerThemeProvider from "./manager-theme-provider";
+import "./manager-sections.css";
 
 export const metadata: Metadata = {
   title: "주식회사 올바름",

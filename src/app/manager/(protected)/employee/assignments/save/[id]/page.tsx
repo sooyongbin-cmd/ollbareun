@@ -265,7 +265,7 @@ export default function AssignmentSavePage() {
         </div>
       </header>
 
-      <section className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
+      <section className="manager-section bg-muted/40 rounded-xl border border-border/50">
         {loading ? (
           <ManagerLoadingMessage />
         ) : error ? (
@@ -391,7 +391,7 @@ export default function AssignmentSavePage() {
       </section>
 
       {!loading && savedStartDate && savedEndDate ? (
-        <section className="space-y-4 rounded-xl border border-border/50 bg-muted/40 p-6">
+        <section className="manager-section space-y-4 rounded-xl border border-border/50 bg-muted/40">
           <h2 className="text-xl font-semibold">출근목록</h2>
           {attendanceHistoryLoading ? (
             <ManagerLoadingMessage />

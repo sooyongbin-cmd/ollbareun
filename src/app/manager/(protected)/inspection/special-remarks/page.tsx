@@ -92,7 +92,7 @@ export default function SpecialRemarksPage() {
         <h1 className="text-[1.75rem] leading-[1.2]">특이사항</h1>
       </header>
 
-      <section aria-label="특이사항 검색" className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
+      <section aria-label="특이사항 검색" className="manager-section bg-muted/40 rounded-xl border border-border/50">
         <div className="flex flex-col gap-4 md:flex-row md:items-end">
           <div className="space-y-2 w-full md:max-w-[15rem]">
             <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="special-remark-year">
@@ -121,7 +121,7 @@ export default function SpecialRemarksPage() {
         </div>
       </section>
 
-      <section aria-label="특이사항 목록" className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
+      <section aria-label="특이사항 목록" className="manager-section bg-muted/40 rounded-xl border border-border/50">
         <div className="mb-4 flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
           <span>조회 결과 {filteredReports.length}</span>
         </div>

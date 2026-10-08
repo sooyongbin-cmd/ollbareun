@@ -268,7 +268,7 @@ export default function EmployeeRosterPage() {
 
       <section
         aria-label="직원 검색"
-        className="rounded-xl border border-border/50 bg-muted/40 p-[1.5rem] md:p-[2rem]"
+        className="manager-section rounded-xl border border-border/50 bg-muted/40"
       >
         <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_max-content] md:items-end">
           <div className="flex flex-col gap-4 md:contents">
@@ -330,7 +330,7 @@ export default function EmployeeRosterPage() {
 
       <section
         aria-label="직원 목록"
-        className="rounded-xl border border-border/50 bg-muted/40 p-[1.5rem] md:p-[2rem]"
+        className="manager-section rounded-xl border border-border/50 bg-muted/40"
       >
         <div className="mt-4 flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
           <span>조회 결과 {filteredEmployees.length}</span>

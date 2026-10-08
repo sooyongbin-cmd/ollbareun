@@ -370,7 +370,7 @@ export default function EmployeeSavePage() {
         </div>
       </header>
 
-      <section className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">
+      <section className="manager-section bg-muted/40 rounded-xl border border-border/50">
         {loading ? (
           <ManagerLoadingMessage />
         ) : routeError ? (
@@ -506,7 +506,7 @@ export default function EmployeeSavePage() {
       {!loading && !routeError && educationCompletions.length > 0 ? (
         <section
           aria-label="교육이수"
-          className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
+          className="manager-section bg-muted/40 rounded-xl border border-border/50"
         >
           <h2 className="text-[1.25rem] font-semibold">교육이수</h2>
           <div className="mt-4 min-w-0 overflow-x-auto rounded-lg border border-border bg-background">
@@ -535,7 +535,7 @@ export default function EmployeeSavePage() {
       {!loading && !routeError && assignments.length > 0 ? (
         <section
           aria-label="근무지배정정보"
-          className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
+          className="manager-section bg-muted/40 rounded-xl border border-border/50"
         >
           <h2 className="text-[1.25rem] font-semibold">근무지배정정보</h2>
           <div className="mt-4 overflow-x-auto rounded-lg border border-border bg-background">
@@ -569,7 +569,7 @@ export default function EmployeeSavePage() {
       {!loading && !routeError && attendance.length > 0 ? (
         <section
           aria-label="출근현황"
-          className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
+          className="manager-section bg-muted/40 rounded-xl border border-border/50"
         >
           <h2 className="text-[1.25rem] font-semibold">출근현황</h2>
           <div className="mt-6 max-h-[31rem] min-w-0 overflow-auto rounded-lg border border-border bg-background">
@@ -611,7 +611,7 @@ export default function EmployeeSavePage() {
       {!loading && !routeError && leaves.length > 0 ? (
         <section
           aria-label="휴가정보"
-          className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
+          className="manager-section bg-muted/40 rounded-xl border border-border/50"
         >
           <h2 className="text-[1.25rem] font-semibold">휴가정보</h2>
           <div className="mt-6 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
@@ -638,7 +638,7 @@ export default function EmployeeSavePage() {
       {!loading && !routeError && inspectionLogs.length > 0 ? (
         <section
           aria-label="점검지점검"
-          className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
+          className="manager-section bg-muted/40 rounded-xl border border-border/50"
         >
           <h2 className="text-[1.25rem] font-semibold">점검지점검</h2>
           <div className="mt-6 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
@@ -667,7 +667,7 @@ export default function EmployeeSavePage() {
       {!loading && !routeError && specialRemarks.length > 0 ? (
         <section
           aria-label="특이사항"
-          className="bg-muted/40 rounded-xl p-[2rem] border border-border/50"
+          className="manager-section bg-muted/40 rounded-xl border border-border/50"
         >
           <h2 className="text-[1.25rem] font-semibold">특이사항</h2>
           <div className="mt-6 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">

@@ -112,7 +112,7 @@ export default function EducationHistoryTable() {
       <header>
         <h1 className="text-[1.75rem]">교육이수상세</h1>
       </header>
-      <form onSubmit={submit} aria-label="교육이수 검색" className="rounded-xl border border-border/50 bg-muted/40 p-6">
+      <form onSubmit={submit} aria-label="교육이수 검색" className="manager-section rounded-xl border border-border/50 bg-muted/40">
         <fieldset className="grid min-w-0 items-end gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <label className="space-y-2 text-sm">직원 이름<Input value={filters.name} onChange={(event) => update("name", event.target.value)} /></label>
           <label className="space-y-2 text-sm">시작일<Input type="date" value={filters.from} onChange={(event) => update("from", event.target.value)} /></label>
@@ -135,7 +135,7 @@ export default function EducationHistoryTable() {
       </form>
       {error ? <p role="alert" className="text-destructive">{error}</p> : loading ? <p role="status">교육이수 목록을 불러오는 중입니다.</p> : <>
         <p className="text-right text-sm text-muted-foreground">조회 결과 {total}건</p>
-        <div className="overflow-x-auto rounded-lg border border-border">
+        <div className="manager-section overflow-x-auto rounded-lg border border-border">
           <Table>
             <TableHeader><TableRow>
               {["근무자", "날짜", "안전교육", "교육구분", "이수여부", "완료일시"].map((heading) => <TableHead key={heading}>{heading}</TableHead>)}

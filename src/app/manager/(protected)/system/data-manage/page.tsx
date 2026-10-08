@@ -95,12 +95,14 @@ export default function DataManagePage() {
       </div> : null}
       <section aria-label="자료 목록" className="manager-section rounded-xl border border-border/50 bg-muted/40">
         {loading ? <p role="status">조회중입니다...</p> : <>
-          <Table>
-            <TableHeader><TableRow><TableHead>자료</TableHead><TableHead>테이블</TableHead><TableHead className="text-right">건수</TableHead></TableRow></TableHeader>
-            <TableBody>{yearDataTables.map(({ table, label }) => <TableRow key={table}>
-              <TableCell data-label="자료">{label}</TableCell><TableCell data-label="테이블">{table}</TableCell><TableCell data-label="건수" className="text-right tabular-nums">{summary.counts[table].toLocaleString("ko-KR")}</TableCell>
-            </TableRow>)}</TableBody>
-          </Table>
+          <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
+            <Table className="w-full">
+              <TableHeader><TableRow><TableHead>자료</TableHead><TableHead>테이블</TableHead><TableHead className="text-right">건수</TableHead></TableRow></TableHeader>
+              <TableBody>{yearDataTables.map(({ table, label }) => <TableRow key={table} className="hover:bg-muted/40 transition-colors">
+                <TableCell data-label="자료" className="font-semibold">{label}</TableCell><TableCell data-label="테이블" className="text-muted-foreground">{table}</TableCell><TableCell data-label="건수" className="text-right tabular-nums text-muted-foreground">{summary.counts[table].toLocaleString("ko-KR")}</TableCell>
+              </TableRow>)}</TableBody>
+            </Table>
+          </div>
           <p className="mt-4 text-sm text-muted-foreground">휴가는 시작일, 점검지는 점검일시, 특이사항은 보고일시(한국 시간)를 기준으로 조회합니다.</p>
         </>}
       </section>

@@ -95,6 +95,9 @@ export default function LeavePage() {
       <header>
         <div className="space-y-3">
           <h1 className="text-[1.75rem] leading-[1.2]">휴가관리</h1>
+          <p className="max-w-[40rem] text-[0.875rem] font-normal leading-relaxed text-muted-foreground">
+            직원별 휴가 신청 내역을 검색하고 관리합니다.
+          </p>
         </div>
       </header>
 

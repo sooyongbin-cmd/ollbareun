@@ -298,6 +298,9 @@ export default function InspectionSiteDetailPage({ params }: PageProps) {
     <section className="space-y-[1.5rem]">
       <header>
         <h1 className="text-[1.75rem] leading-[1.2]">점검지 상세</h1>
+        <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground mt-2 max-w-[40rem]">
+          점검지 정보를 수정하고 QR코드와 NFC URL을 생성합니다.
+        </p>
       </header>
 
       <section className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">

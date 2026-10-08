@@ -29,6 +29,9 @@ export default function HolidayNewPage() {
     <section className="space-y-[1.5rem]">
       <header>
         <h1 className="text-[1.75rem] leading-[1.2]">휴일추가</h1>
+        <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground mt-2 max-w-[37.5rem]">
+          날짜와 휴일명을 입력해 휴일을 등록합니다.
+        </p>
       </header>
 
       <section className="rounded-xl border border-border/50 bg-muted/40 p-[1.5rem] md:p-[2rem]">

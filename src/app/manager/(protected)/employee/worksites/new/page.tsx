@@ -109,6 +109,9 @@ export default function WorksiteNewPage() {
     <section className="space-y-[1.5rem]">
       <header>
         <h1 className="text-[1.75rem] leading-[1.2]">근무지등록</h1>
+        <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground mt-2 max-w-[37.5rem]">
+          근무지명, 주소, 실제 GPS정보, 허용 반경을 입력해 근무지를 등록합니다.
+        </p>
       </header>
 
       <section className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">

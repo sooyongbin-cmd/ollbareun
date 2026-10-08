@@ -222,6 +222,9 @@ export default function InspectionSitesPage() {
     <section className="space-y-[1.5rem]">
       <header>
         <h1 className="text-[1.75rem] leading-[1.2]">점검지관리</h1>
+        <p className="mt-2 max-w-[40rem] text-[0.875rem] font-normal leading-relaxed text-muted-foreground">
+          근무지별 점검지를 등록하고 점검 위치를 관리합니다.
+        </p>
       </header>
 
       <section

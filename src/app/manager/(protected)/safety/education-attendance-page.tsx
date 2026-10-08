@@ -250,6 +250,9 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
       <header>
         <div className="space-y-3">
           <h1 className="text-[1.75rem] leading-[1.2]">{title}</h1>
+          <p className="max-w-[40rem] text-[0.875rem] font-normal leading-relaxed text-muted-foreground">
+            {isDaily ? "조회일에 근무한 직원의 안전교육 이수 여부를 확인합니다." : "조회년월에 근무한 직원의 교육 이수 현황과 일일교육 기록을 확인합니다."}
+          </p>
         </div>
       </header>
 

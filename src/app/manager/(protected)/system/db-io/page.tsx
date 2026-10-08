@@ -188,6 +188,9 @@ export default function DatabaseIoPage() {
             </span>
             <h1 className="text-[1.75rem] leading-[1.2]">DB I/O</h1>
           </div>
+          <p className="max-w-[48rem] text-[0.875rem] font-normal leading-relaxed text-muted-foreground">
+            PostgreSQL 누적 통계로 테이블별 블록 읽기와 쿼리 실행 현황을 확인합니다. 물리 디스크 I/O와는 다를 수 있습니다.
+          </p>
         </div>
         <Button type="button" variant="outline" onClick={() => void loadStats()} disabled={loading}>
           <RefreshCw aria-hidden="true" className={loading ? "animate-spin" : ""} />

@@ -143,6 +143,9 @@ export default function EmployeeNewPage() {
     <section className="space-y-[1.5rem]">
       <header>
         <h1 className="text-[1.75rem] leading-[1.2]">직원등록</h1>
+        <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground mt-2 max-w-[37.5rem]">
+          직원 이름과 연락처를 입력해 등록합니다.
+        </p>
       </header>
 
       <section className="bg-muted/40 rounded-xl p-[2rem] border border-border/50">

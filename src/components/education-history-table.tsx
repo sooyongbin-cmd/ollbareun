@@ -111,6 +111,7 @@ export default function EducationHistoryTable() {
     <section className="space-y-6">
       <header>
         <h1 className="text-[1.75rem]">교육이수상세</h1>
+        <p className="mt-2 text-sm text-muted-foreground">한국시간 날짜별 교육 이력을 조회합니다. 지난 날짜의 미이수는 이후 이수하더라도 유지됩니다.</p>
       </header>
       <form onSubmit={submit} aria-label="교육이수 검색" className="rounded-xl border border-border/50 bg-muted/40 p-6">
         <fieldset className="grid min-w-0 items-end gap-4 sm:grid-cols-2 lg:grid-cols-4">

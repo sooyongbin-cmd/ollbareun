@@ -79,6 +79,9 @@ export default function HolidaysPage() {
       <header>
         <div className="space-y-3">
           <h1 className="text-[1.75rem] leading-[1.2]">공휴일관리</h1>
+          <p className="max-w-[40rem] text-[0.875rem] font-normal leading-relaxed text-muted-foreground">
+            국공휴일은 직원별 공휴일 설정을, 회사 지정 휴일은 휴무를 적용합니다. 구분이 없던 기존 휴일은 국공휴일로 표시되므로 필요하면 변경하세요. 변경한 휴일은 새 배정부터 반영됩니다.
+          </p>
         </div>
       </header>
 

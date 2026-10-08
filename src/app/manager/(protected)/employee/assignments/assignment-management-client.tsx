@@ -163,6 +163,9 @@ export default function AssignmentManagementClient() {
       <header>
         <div className="space-y-3">
           <h1 className="text-[1.75rem] leading-[1.2]">근무지배정</h1>
+          <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground max-w-[40rem]">
+            이름, 근무지, 날짜로 배정 현황을 확인하고 필요하면 수정합니다.
+          </p>
         </div>
       </header>
 

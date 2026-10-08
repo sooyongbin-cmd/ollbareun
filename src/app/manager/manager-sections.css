@@ -23,3 +23,9 @@
     padding: 1rem;
   }
 }
+
+@media (max-width: 360px) {
+  .manager-page-content {
+    padding-inline: 0;
+  }
+}

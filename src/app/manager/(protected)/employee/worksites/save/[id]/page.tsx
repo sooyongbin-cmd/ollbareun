@@ -213,7 +213,6 @@ export default function WorksiteSavePage() {
   return (
     <section className="space-y-[1.5rem]">
       <header>
-        <p className="text-[0.875rem] font-semibold text-muted-foreground uppercase">관리자 화면</p>
         <div className="space-y-3">
           <h1 className="text-[1.75rem] leading-[1.2]">근무지 상세</h1>
         </div>

@@ -177,9 +177,6 @@ export default function EducationResourceSavePage() {
       <header>
         <div className="space-y-3">
           <h1 className="text-[1.75rem] leading-[1.2]">교육자료 상세</h1>
-          <p className="text-[0.875rem] font-normal leading-relaxed text-muted-foreground max-w-[40rem]">
-            선택한 교육자료의 제목과 유튜브 링크를 수정할 수 있습니다.
-          </p>
         </div>
       </header>
 

@@ -55,7 +55,6 @@ export default function AdminUsersPage() {
   return <section className="space-y-6">
     <header className="space-y-3">
       <h1 className="text-[1.75rem] leading-[1.2]">관리자관리</h1>
-      <p className="text-sm text-muted-foreground">관리자를 등록하고 푸쉬구독 설정을 관리합니다.</p>
     </header>
     <section className="rounded-xl border border-border/50 bg-muted/40 p-8">
       {isSuperAdmin && !busy ? <Button asChild><Link href="/manager/system/admin-users/new">관리자등록</Link></Button> : <Button disabled>관리자등록</Button>}

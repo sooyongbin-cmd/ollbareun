@@ -187,9 +187,6 @@ export default function LeaveNewPage() {
         <p className="text-[0.875rem] font-semibold text-muted-foreground uppercase">관리자 화면</p>
         <div className="space-y-3">
           <h1 className="text-[1.75rem] leading-[1.2]">휴가신청</h1>
-          <p className="max-w-[40rem] text-[0.875rem] font-normal leading-relaxed text-muted-foreground">
-            직원의 휴가종류와 휴가기간을 입력해 신청합니다.
-          </p>
         </div>
       </header>
 

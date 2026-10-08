@@ -98,9 +98,6 @@ export default function LeaveDetailPage() {
         <p className="text-[0.875rem] font-semibold text-muted-foreground uppercase">관리자 화면</p>
         <div className="space-y-3">
           <h1 className="text-[1.75rem] leading-[1.2]">휴가상세</h1>
-          <p className="max-w-[40rem] text-[0.875rem] font-normal leading-relaxed text-muted-foreground">
-            선택한 휴가 정보를 확인하고 삭제합니다.
-          </p>
         </div>
       </header>
 

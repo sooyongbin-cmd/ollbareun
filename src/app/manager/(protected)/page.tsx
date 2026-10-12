@@ -423,7 +423,6 @@ export default function ManagerPage() {
                 점검지 점검 현황
               </h2>
             </CardTitle>
-            <CardDescription>오늘 근무지별 출근 인원과 점검지 점검 진행 현황을 표시합니다.</CardDescription>
           </CardHeader>
           <CardContent className="min-w-0 px-0">
             <div className="min-w-0 overflow-x-auto">

@@ -363,7 +363,6 @@ export default function ManagerPage() {
               금주 휴가현황
             </h2>
           </CardTitle>
-          <CardDescription>이번 주에 휴가 기간이 포함된 목록을 표시합니다.</CardDescription>
           <CardAction>
             <Link className="text-sm font-medium text-primary hover:underline" href="/manager/leave">
               전체보기

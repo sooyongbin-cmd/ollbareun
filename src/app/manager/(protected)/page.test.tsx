@@ -5,13 +5,11 @@ import ManagerPage from "./page";
 const dashboardPayload = {
   summary: {
     totalEmployees: 8,
-    scheduledEmployeesToday: 5,
     currentlyClockedIn: 3,
     onTimeEmployeesToday: 1,
     waitingEmployeesToday: 1,
     absentEmployeesToday: 2,
     lateEmployeesToday: 1,
-    attendanceRate: 40,
     educationCompleted: 12,
     educationUncompleted: 3,
     educationRate: 80,
@@ -108,6 +106,14 @@ describe("manager dashboard page", () => {
     expect(within(card).getByText("안전교육 이수 12건 미이수 3건")).toBeInTheDocument();
   });
 
+  it("shows only the total employee count in the attendance card footer", async () => {
+    render(<ManagerPage />);
+    const attendanceCard = await screen.findByRole("link", { name: /출근현황 대기/ });
+    expect(within(attendanceCard).getByText("총인원 8명")).toBeInTheDocument();
+    expect(attendanceCard).not.toHaveTextContent(/출근예정|출근율/);
+    expect(attendanceCard.getAttribute("aria-label")).not.toMatch(/출근예정|출근율/);
+  });
+
   it("renders four summary cards and both data tables", async () => {
     render(<ManagerPage />);
 
@@ -119,7 +125,9 @@ describe("manager dashboard page", () => {
     expect(within(attendanceCard).getByText("출근현황")).toBeInTheDocument();
     expect(within(attendanceCard).getByText("출근 1")).toBeInTheDocument();
     expect(within(attendanceCard).getByText("대기 1")).toBeInTheDocument();
-    expect(within(attendanceCard).getByText("총인원 8명 출근예정 5명 출근율 40%")).toBeInTheDocument();
+    expect(within(attendanceCard).getByText("총인원 8명")).toBeInTheDocument();
+    expect(attendanceCard).not.toHaveTextContent(/출근예정|출근율/);
+    expect(attendanceCard.getAttribute("aria-label")).not.toMatch(/출근예정|출근율/);
     expect(within(attendanceCard).getByText("결근 2")).toHaveClass("text-red-600");
     expect(within(attendanceCard).getByText("지각 1")).toHaveClass("text-pink-600");
     const roleCard = within(summary).getByRole("link", {

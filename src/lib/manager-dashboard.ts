@@ -89,7 +89,6 @@ type InspectionLogInput = {
 export type ManagerDashboardData = {
   summary: {
     totalEmployees: number;
-    scheduledEmployeesToday: number;
     currentlyClockedIn: number;
     onTimeEmployeesToday: number;
     waitingEmployeesToday: number;
@@ -99,7 +98,6 @@ export type ManagerDashboardData = {
     earlyLeaveEmployeesToday: number;
     notClockedOutEmployeesToday: number;
     onLeaveEmployeesToday: number;
-    attendanceRate: number;
     educationCompleted: number;
     educationUncompleted: number;
     educationRate: number;
@@ -266,9 +264,6 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       .filter((leave) => activeEmployeeIds.has(leave.employee_id) && leave.start_date <= today && leave.end_date >= today)
       .map((leave) => leave.employee_id),
   );
-  const scheduledEmployeeIdsToday = new Set(
-    summaryWorkRecords.filter((record) => record.intime_status !== "3").map((record) => record.employee_id),
-  );
   const scheduledTimes = new Map<string, string | null>();
   input.dailyAttendance.forEach((dailyAttendance) => {
     scheduledTimes.set(
@@ -319,13 +314,6 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
         break;
     }
   });
-  const attendanceRate = percent(
-    onTimeEmployeesToday + lateEmployeesToday,
-    Math.max(
-      scheduledEmployeeIdsToday.size,
-      onTimeEmployeesToday + waitingEmployeesToday + absentEmployeesToday + lateEmployeesToday,
-    ),
-  );
   const onLeaveEmployeesToday = new Set(
     (input.weeklyLeaves ?? [])
       .filter((leave) => activeEmployeeIds.has(leave.employee_id) && leave.start_date <= today && leave.end_date >= today)
@@ -536,7 +524,6 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
   return {
     summary: {
       totalEmployees: activeEmployees.length,
-      scheduledEmployeesToday: scheduledEmployeeIdsToday.size,
       currentlyClockedIn: todayAttendance.filter((record) => !record.work_outtime).length,
       onTimeEmployeesToday,
       waitingEmployeesToday,
@@ -546,7 +533,6 @@ export function buildManagerDashboardData(input: BuildManagerDashboardInput): Ma
       earlyLeaveEmployeesToday,
       notClockedOutEmployeesToday,
       onLeaveEmployeesToday,
-      attendanceRate,
       educationCompleted,
       educationUncompleted,
       educationRate,

@@ -32,7 +32,6 @@ import {
 type DashboardPayload = {
   summary: {
     totalEmployees: number;
-    scheduledEmployeesToday: number;
     currentlyClockedIn: number;
     onTimeEmployeesToday: number;
     waitingEmployeesToday: number;
@@ -42,7 +41,6 @@ type DashboardPayload = {
     earlyLeaveEmployeesToday: number;
     notClockedOutEmployeesToday: number;
     onLeaveEmployeesToday: number;
-    attendanceRate: number;
     educationCompleted: number;
     educationUncompleted: number;
     educationRate: number;
@@ -76,7 +74,6 @@ type DashboardPayload = {
 const emptyDashboard: DashboardPayload = {
   summary: {
     totalEmployees: 0,
-    scheduledEmployeesToday: 0,
     currentlyClockedIn: 0,
     onTimeEmployeesToday: 0,
     waitingEmployeesToday: 0,
@@ -86,7 +83,6 @@ const emptyDashboard: DashboardPayload = {
     earlyLeaveEmployeesToday: 0,
     notClockedOutEmployeesToday: 0,
     onLeaveEmployeesToday: 0,
-    attendanceRate: 0,
     educationCompleted: 0,
     educationUncompleted: 0,
     educationRate: 0,
@@ -290,8 +286,8 @@ export default function ManagerPage() {
           <span>휴가 {data.summary.onLeaveEmployeesToday}</span>
         </span>
       ),
-      description: `총인원 ${data.summary.totalEmployees}명 출근예정 ${data.summary.scheduledEmployeesToday}명 출근율 ${data.summary.attendanceRate}%`,
-      ariaLabel: `출근현황 대기 ${data.summary.waitingEmployeesToday} 출근 ${data.summary.onTimeEmployeesToday} 지각 ${data.summary.lateEmployeesToday} 결근 ${data.summary.absentEmployeesToday} 퇴근 ${data.summary.clockedOutEmployeesToday} 조퇴 ${data.summary.earlyLeaveEmployeesToday} 미퇴근 ${data.summary.notClockedOutEmployeesToday} 휴가 ${data.summary.onLeaveEmployeesToday} 총인원 ${data.summary.totalEmployees}명 출근예정 ${data.summary.scheduledEmployeesToday}명 출근율 ${data.summary.attendanceRate}%`,
+      description: `총인원 ${data.summary.totalEmployees}명`,
+      ariaLabel: `출근현황 대기 ${data.summary.waitingEmployeesToday} 출근 ${data.summary.onTimeEmployeesToday} 지각 ${data.summary.lateEmployeesToday} 결근 ${data.summary.absentEmployeesToday} 퇴근 ${data.summary.clockedOutEmployeesToday} 조퇴 ${data.summary.earlyLeaveEmployeesToday} 미퇴근 ${data.summary.notClockedOutEmployeesToday} 휴가 ${data.summary.onLeaveEmployeesToday} 총인원 ${data.summary.totalEmployees}명`,
       icon: Users,
       href: "/manager/reports/attendance",
     },

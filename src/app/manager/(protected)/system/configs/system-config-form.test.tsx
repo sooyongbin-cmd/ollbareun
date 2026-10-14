@@ -12,21 +12,28 @@ vi.mock("next/navigation", () => ({
 describe("system config form", () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  it.each(["", "N", "invalid"])("defaults notification window buttons to N for %s", (content) => {
+  it.each(["", "N", "invalid"])("defaults notification window checkbox to N for %s", (content) => {
     render(<SystemConfigForm mode="edit" initialConfig={{ system_code: "S000002", parent_system_code: null, description: "알림 새 창", content }} />);
     expect(screen.queryByRole("textbox", { name: "내용" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "N", pressed: true })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Y", pressed: false })).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "내용" })).not.toBeChecked();
+    expect(screen.getByText("N")).toBeInTheDocument();
   });
 
   it("preserves Y and saves the selected N only after clicking save", async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
     vi.stubGlobal("fetch", fetchMock);
     render(<SystemConfigForm mode="edit" initialConfig={{ system_code: "S000002", parent_system_code: null, description: "알림 새 창", content: "Y" }} />);
-    expect(screen.getByRole("button", { name: "Y", pressed: true })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "N" }));
+    const checkbox = screen.getByRole("checkbox", { name: "내용" });
+    expect(checkbox).toBeChecked();
+    expect(screen.getByText("Y")).toBeInTheDocument();
+    fireEvent.click(checkbox);
     expect(fetchMock).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "N", pressed: true })).toBeInTheDocument();
+    expect(checkbox).not.toBeChecked();
+    expect(screen.getByText("N")).toBeInTheDocument();
+    fireEvent.click(checkbox);
+    expect(checkbox).toBeChecked();
+    expect(screen.getByText("Y")).toBeInTheDocument();
+    fireEvent.click(checkbox);
     fireEvent.click(screen.getByRole("button", { name: "저장" }));
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     expect(fetchMock.mock.calls[0][0]).toBe("/api/system/configs/S000002");

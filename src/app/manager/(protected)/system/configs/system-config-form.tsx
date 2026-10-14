@@ -150,21 +150,18 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
             ))}
           </fieldset>
         ) : isNotificationWindowConfig ? (
-          <div aria-labelledby="system-config-content-label" className="flex gap-3" role="group">
-            {(["Y", "N"] as const).map((value) => (
-              <Button
-                key={value}
-                aria-pressed={content === value}
-                className="min-h-10 min-w-20"
-                disabled={saving}
-                onClick={() => setContent(value)}
-                type="button"
-                variant={content === value ? "default" : "outline"}
-              >
-                {value}
-              </Button>
-            ))}
-          </div>
+          <label className="flex min-h-10 w-fit cursor-pointer items-center gap-3 text-sm" htmlFor="system-config-content">
+            <input
+              aria-labelledby="system-config-content-label"
+              checked={content === "Y"}
+              className="size-5 accent-primary"
+              disabled={saving}
+              id="system-config-content"
+              onChange={(event) => setContent(event.target.checked ? "Y" : "N")}
+              type="checkbox"
+            />
+            <span aria-live="polite">{content}</span>
+          </label>
         ) : (
           <Textarea
             className="w-full min-h-[11.25rem] resize-y"

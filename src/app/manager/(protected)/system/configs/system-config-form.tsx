@@ -28,11 +28,11 @@ type SystemConfigFormProps = {
 export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFormProps) {
   const router = useRouter();
   const systemCode = initialConfig?.system_code ?? "";
-  const isNotificationWindowConfig = systemCode === "S000002";
+  const isBooleanConfig = systemCode === "S000002" || systemCode === "special_001";
   const parentSystemCode = initialConfig?.parent_system_code ?? "";
   const [description, setDescription] = useState(initialConfig?.description ?? "");
   const [content, setContent] = useState(() =>
-    isNotificationWindowConfig
+    isBooleanConfig
       ? (initialConfig?.content.trim().toUpperCase() === "Y" ? "Y" : "N")
       : initialConfig?.content ?? "",
   );
@@ -129,7 +129,7 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
       </div>
 
       <div className="space-y-2">
-        <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" id="system-config-content-label" htmlFor={isThemeConfig || isNotificationWindowConfig ? undefined : "system-config-content"}>
+        <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" id="system-config-content-label" htmlFor={isThemeConfig || isBooleanConfig ? undefined : "system-config-content"}>
           내용
         </label>
         {isThemeConfig ? (
@@ -149,7 +149,7 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
               </label>
             ))}
           </fieldset>
-        ) : isNotificationWindowConfig ? (
+        ) : isBooleanConfig ? (
           <label className="flex min-h-10 w-fit cursor-pointer items-center gap-3 text-sm" htmlFor="system-config-content">
             <input
               aria-labelledby="system-config-content-label"

@@ -306,7 +306,9 @@ describe("guard profile page", () => {
     render(<GuardProfilePage />);
     fireEvent.click(await screen.findByRole("button", { name: "내 정보 확인" }));
 
-    expect(await screen.findByRole("dialog", { name: "로그아웃 처리중입니다..." })).toBeInTheDocument();
+    const processingDialog = await screen.findByRole("dialog", { name: "처리 중" });
+    expect(processingDialog).toHaveTextContent("로그아웃처리중입니다...");
+    expect(within(processingDialog).queryByRole("button")).not.toBeInTheDocument();
     expect(screen.queryByText("경비원 정보를 찾을 수 없습니다. 다시 로그인하세요.")).not.toBeInTheDocument();
 
     await waitFor(() => expect(push).toHaveBeenCalledWith("/guard"));
@@ -319,7 +321,7 @@ describe("guard profile page", () => {
     expect(window.localStorage.getItem("ollbareun.guard.session")).toBeNull();
     expect(window.sessionStorage.getItem("ollbareun.guard.session")).toBeNull();
     expect(window.sessionStorage.getItem("ollbareun.guard.pushRegistration")).toBeNull();
-    expect(signOut).toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledWith("/api/guard/logout", { method: "POST" });
   });
 
   it("shows a session message when guard session is missing", () => {

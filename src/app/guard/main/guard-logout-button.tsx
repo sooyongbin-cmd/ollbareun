@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import AlertModal from "@/components/modals/alert-modal";
+import ProcessingModal from "@/components/modals/processing-modal";
 import { PowerIcon } from "@/components/icons/power-icon";
 import { clearStoredGuardSession, readStoredGuardSession } from "../guard-session-storage";
 import { getAppPushRegistration } from "@/lib/app-push-registration";
@@ -185,11 +185,9 @@ export default function GuardLogoutButton({
         ) : null}
         <span>{label}</span>
       </Button>
-      <AlertModal
+      <ProcessingModal
         isOpen={logoutStarted}
-        onClose={() => {}}
-        title="로그아웃 처리중입니다..."
-        description="잠시만 기다려주세요."
+        message="로그아웃처리중입니다..."
       />
     </>
   );

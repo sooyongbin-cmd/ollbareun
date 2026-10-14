@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
+import ConfirmModal from "@/components/modals/confirm-modal";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { LoaderCircle } from "lucide-react";
@@ -79,6 +79,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
   const [error, setError] = useState("");
   const [isRunningReminder, setIsRunningReminder] = useState(false);
   const [runDialogOpen, setRunDialogOpen] = useState(false);
+  const [reminderConfirmOpen, setReminderConfirmOpen] = useState(false);
   const [runResult, setRunResult] = useState<EducationReminderExecutionResult | null>(null);
   const [runError, setRunError] = useState("");
   const [completionDialog, setCompletionDialog] = useState<CompletionDialogState | null>(null);
@@ -298,9 +299,8 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
           ) : null}
           {isDaily ? (
             <div className="flex items-center justify-end">
-              <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2" type="button" disabled={isRunningReminder || loading || Boolean(error)} onClick={() => void runEducationReminders()}>
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2" type="button" disabled={isRunningReminder || loading || Boolean(error)} onClick={() => setReminderConfirmOpen(true)}>
                 <span>{isRunningReminder ? "실행 중…" : "교육알림"}</span>
-                <ArrowRightIcon size={18} />
               </Button>
             </div>
           ) : null}
@@ -386,6 +386,16 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
           </EducationAttendanceTable>
         </>
       )}
+
+      <ConfirmModal
+        isOpen={reminderConfirmOpen}
+        onClose={() => setReminderConfirmOpen(false)}
+        onConfirm={() => {
+          setReminderConfirmOpen(false);
+          void runEducationReminders();
+        }}
+        title="현재 조회된 직원중 미이수자에게 교육이수 알림을 보낼까요?"
+      />
 
       <Dialog open={runDialogOpen} onOpenChange={closeRunDialog}>
         <DialogContent className="dark:text-white" {...(!isRunningReminder && !runError ? { "aria-describedby": undefined } : {})}>

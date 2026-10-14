@@ -61,12 +61,12 @@ export default function AdminUsersPage() {
     <section className="manager-section rounded-xl border border-border/50 bg-muted/40">
       <div className="flex justify-end">
         {isSuperAdmin && !busy ? (
-          <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2" href="/manager/system/admin-users/new">
+          <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2" href="/manager/system/admin-users/new">
             <span>관리자등록</span>
             <ArrowRightIcon size={18} />
           </Link>
         ) : (
-          <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2" disabled>
+          <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2" disabled>
             <span>관리자등록</span>
             <ArrowRightIcon size={18} />
           </Button>

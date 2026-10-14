@@ -40,6 +40,7 @@ it("rejects a past work date in a modal without registering reminders", async ()
   render(<EducationAttendancePage mode="daily" />);
   fireEvent.change(screen.getByLabelText("근무일"), { target: { value: "2020-01-01" } });
   await user.click(await screen.findByRole("button", { name: "교육알림" }));
+  await user.click(screen.getByRole("button", { name: "예" }));
   expect(await screen.findByRole("alert")).toHaveTextContent("근무일을 오늘로 조회한 후 교육알림 처리해주세요.");
   expect(fetchMock.mock.calls.every(([url]) => !String(url).endsWith("/run"))).toBe(true);
 });
@@ -57,6 +58,12 @@ it("registers the filtered list and shows count and delay from the server", asyn
   await screen.findByText("홍길동 (경비,격일)", { selector: "td" });
   await user.type(screen.getByLabelText("이름"), "홍길동");
   await user.click(screen.getByRole("button", { name: "교육알림" }));
+  expect(screen.getByRole("alertdialog")).toHaveTextContent("현재 조회된 직원중 미이수자에게 교육이수 알림을 보낼까요?");
+  expect(fetchMock.mock.calls.every(([url]) => !String(url).endsWith("/run"))).toBe(true);
+  await user.click(screen.getByRole("button", { name: "아니오" }));
+  expect(fetchMock.mock.calls.every(([url]) => !String(url).endsWith("/run"))).toBe(true);
+  await user.click(screen.getByRole("button", { name: "교육알림" }));
+  await user.click(screen.getByRole("button", { name: "예" }));
   expect(await screen.findByText("1건 알림등록되었습니다. 7분 후에 알림이 전송될 예정입니다.")).toBeInTheDocument();
   expect(fetchMock).toHaveBeenCalledWith("/api/notifications/education-reminders/run", expect.objectContaining({
     method: "POST", body: JSON.stringify({ workDate: (screen.getByLabelText("근무일") as HTMLInputElement).value, employeeIds: ["e1"] }),

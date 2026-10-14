@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import type { UserResponse } from "@supabase/supabase-js";
 import { ChevronRight, LogOut, UserRound } from "lucide-react";
+import { DropdownMenu } from "radix-ui";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -72,28 +73,40 @@ export default function ManagerHeader() {
         <span className="truncate font-medium text-foreground">{current.item.label}</span>
       </nav>
 
-      {email ? (
-        <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <UserRound aria-hidden="true" className="size-3.5" />
-          </span>
-          <span className="hidden max-w-52 truncate md:inline">{email}</span>
-        </div>
-      ) : null}
-
-      <Button
-        type="button"
-        aria-label="로그아웃"
-        variant="ghost"
-        size="sm"
-        className="ml-auto gap-2"
-        disabled={isSigningOut}
-        onClick={handleSignOut}
-      >
-        <LogOut aria-hidden="true" className="size-4" />
-        <span className="hidden sm:inline">{isSigningOut ? "로그아웃 중" : "로그아웃"}</span>
-        <span className="sr-only sm:hidden">로그아웃</span>
-      </Button>
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger asChild>
+          <Button
+            type="button"
+            aria-label={email ? `${email} 사용자 메뉴` : "사용자 메뉴"}
+            variant="ghost"
+            size="sm"
+            className="ml-auto min-w-0 gap-2 text-xs text-muted-foreground"
+            disabled={isSigningOut}
+          >
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <UserRound aria-hidden="true" className="size-3.5" />
+            </span>
+            {email ? <span className="hidden max-w-52 truncate md:inline">{email}</span> : null}
+          </Button>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Portal>
+          <DropdownMenu.Content
+            align="end"
+            side="bottom"
+            sideOffset={8}
+            className="z-50 min-w-36 rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+          >
+            <DropdownMenu.Item
+              className="flex cursor-pointer items-center gap-2 rounded-sm px-3 py-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+              disabled={isSigningOut}
+              onSelect={() => void handleSignOut()}
+            >
+              <LogOut aria-hidden="true" className="size-4" />
+              <span>{isSigningOut ? "로그아웃 중" : "로그아웃"}</span>
+            </DropdownMenu.Item>
+          </DropdownMenu.Content>
+        </DropdownMenu.Portal>
+      </DropdownMenu.Root>
     </header>
   );
 }

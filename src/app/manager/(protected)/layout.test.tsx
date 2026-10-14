@@ -12,6 +12,7 @@ const authMocks = vi.hoisted(() => ({
 
 vi.mock("next/navigation", () => ({
   usePathname: () => navigationMock.pathname,
+  useRouter: () => ({ push: authMocks.replace }),
 }));
 
 vi.mock("@/lib/supabase-browser", () => ({
@@ -177,7 +178,13 @@ describe("manager layout", () => {
       </ManagerLayout>,
     );
 
-    await user.click(screen.getByRole("button", { name: "로그아웃" }));
+    expect(screen.queryByRole("menuitem", { name: "로그아웃" })).not.toBeInTheDocument();
+    await user.click(await screen.findByRole("button", { name: "admin@ollbareun.test 사용자 메뉴" }));
+    expect(authMocks.signOut).not.toHaveBeenCalled();
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("menuitem", { name: "로그아웃" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "admin@ollbareun.test 사용자 메뉴" }));
+    await user.click(screen.getByRole("menuitem", { name: "로그아웃" }));
 
     expect(authMocks.signOut).toHaveBeenCalledOnce();
     await waitFor(() => expect(authMocks.replace).toHaveBeenCalledWith("/manager/auth"));
@@ -237,6 +244,7 @@ describe("manager layout", () => {
     expect(Array.from(systemLinks ?? []).map((link) => link.textContent?.trim())).toEqual([
       "관리자관리",
       "시스템설정",
+      "자료관리",
     ]);
 
   });
@@ -267,7 +275,7 @@ describe("manager layout", () => {
 
     expect(screen.getByRole("link", { name: "근태관리" })).toHaveAttribute("data-active", "true");
     const breadcrumb = screen.getByRole("navigation", { name: "현재 위치" });
-    expect(within(breadcrumb).getByText("근태관리")).toBeInTheDocument();
+    expect(within(breadcrumb).getAllByText("근태관리")).toHaveLength(2);
   });
 
   it("shows the signed-in manager email in the header", async () => {

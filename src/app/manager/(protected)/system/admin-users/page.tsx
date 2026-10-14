@@ -1,5 +1,7 @@
 "use client";
 
+import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
+
 import Link from "next/link";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -57,7 +59,19 @@ export default function AdminUsersPage() {
       <h1 className="text-[1.75rem] leading-[1.2]">관리자관리</h1>
     </header>
     <section className="manager-section rounded-xl border border-border/50 bg-muted/40">
-      {isSuperAdmin && !busy ? <Button asChild><Link href="/manager/system/admin-users/new">관리자등록</Link></Button> : <Button disabled>관리자등록</Button>}
+      <div className="flex justify-end">
+        {isSuperAdmin && !busy ? (
+          <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2" href="/manager/system/admin-users/new">
+            <span>관리자등록</span>
+            <ArrowRightIcon size={18} />
+          </Link>
+        ) : (
+          <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2" disabled>
+            <span>관리자등록</span>
+            <ArrowRightIcon size={18} />
+          </Button>
+        )}
+      </div>
     </section>
     <section aria-label="관리자 목록" className="manager-section rounded-xl border border-border/50 bg-muted/40">
       <div className="mt-4 flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">

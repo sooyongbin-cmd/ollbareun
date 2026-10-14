@@ -1,5 +1,7 @@
 "use client";
 
+import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { isManagerThemeSystemCode, readManagerTheme } from "@/lib/manager-theme";
 import Link from "next/link";
@@ -66,8 +68,9 @@ export default function SystemConfigsPage() {
 
       <section aria-label="시스템설정 조회" className="manager-section bg-muted/40 rounded-xl border border-border/50">
         <div className="flex justify-end">
-          <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" href="/manager/system/configs/new">
-            등록
+          <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2" href="/manager/system/configs/new">
+            <span>등록</span>
+            <ArrowRightIcon size={18} />
           </Link>
         </div>
       </section>

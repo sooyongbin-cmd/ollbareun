@@ -1,5 +1,7 @@
 "use client";
 
+import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
+
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -295,9 +297,10 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
             </div>
           ) : null}
           {isDaily ? (
-            <div className="flex h-9 items-center justify-end">
-              <Button type="button" disabled={isRunningReminder || loading || Boolean(error)} onClick={() => void runEducationReminders()}>
-                {isRunningReminder ? "실행 중…" : "교육알림"}
+            <div className="flex items-center justify-end">
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2" type="button" disabled={isRunningReminder || loading || Boolean(error)} onClick={() => void runEducationReminders()}>
+                <span>{isRunningReminder ? "실행 중…" : "교육알림"}</span>
+                <ArrowRightIcon size={18} />
               </Button>
             </div>
           ) : null}

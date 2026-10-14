@@ -12,7 +12,7 @@ vi.mock("next/navigation", () => ({
 describe("system config form", () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  describe.each(["S000002", "special_001"])("boolean config %s", (systemCode) => {
+  describe.each(["S000002", "special_001", "USE_QR_CODE"])("boolean config %s", (systemCode) => {
     it.each(["", "N", "invalid"])("defaults checkbox to N for %s", (content) => {
       render(<SystemConfigForm mode="edit" initialConfig={{ system_code: systemCode, parent_system_code: null, description: "알림 새 창", content }} />);
       expect(screen.queryByRole("textbox", { name: "내용" })).not.toBeInTheDocument();

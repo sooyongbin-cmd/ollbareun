@@ -28,7 +28,7 @@ type SystemConfigFormProps = {
 export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFormProps) {
   const router = useRouter();
   const systemCode = initialConfig?.system_code ?? "";
-  const isBooleanConfig = systemCode === "S000002" || systemCode === "special_001";
+  const isBooleanConfig = ["S000002", "special_001", "USE_QR_CODE"].includes(systemCode);
   const parentSystemCode = initialConfig?.parent_system_code ?? "";
   const [description, setDescription] = useState(initialConfig?.description ?? "");
   const [content, setContent] = useState(() =>

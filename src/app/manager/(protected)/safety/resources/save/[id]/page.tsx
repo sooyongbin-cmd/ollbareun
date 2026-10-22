@@ -78,11 +78,12 @@ export default function EducationResourceSavePage() {
   const [youtubeLink, setYoutubeLink] = useState("");
   const [loading, setLoading] = useState(Boolean(resourceId));
   const [error, setError] = useState("");
+  const [loadError, setLoadError] = useState("");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const routeError = resourceId ? error : "교육자료 정보를 불러오지 못했습니다.";
+  const routeError = resourceId ? loadError : "교육자료 정보를 불러오지 못했습니다.";
 
   useEffect(() => {
     let ignore = false;
@@ -99,7 +100,7 @@ export default function EducationResourceSavePage() {
         }
       } catch (loadError) {
         if (!ignore) {
-          setError(loadError instanceof Error ? loadError.message : "교육자료 정보를 불러오지 못했습니다.");
+          setLoadError(loadError instanceof Error ? loadError.message : "교육자료 정보를 불러오지 못했습니다.");
         }
       } finally {
         if (!ignore) {

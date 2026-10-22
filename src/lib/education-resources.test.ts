@@ -21,6 +21,18 @@ describe("education resource category persistence", () => {
     expect(q.insert).toHaveBeenCalledWith(expect.objectContaining({ education_type: educationTypeLabels[type], startdate: input.startdate, enddate: input.enddate }));
     expect(q.update).toHaveBeenCalledWith(expect.objectContaining({ education_type: educationTypeLabels[type], startdate: input.startdate, enddate: input.enddate }));
   });
+  it("returns a clear overlap error for both registration and editing", async () => {
+    const query = {
+      insert: vi.fn().mockReturnThis(), update: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(), select: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: null, error: { code: "23P01", message: "conflicting key value violates exclusion constraint" } }),
+    };
+    const db = { from: vi.fn(() => query) };
+    const input = { id: "r", title: "교육", youtubeLink: "https://youtu.be/example", educationType: "daily", startdate: "2026-10-07", enddate: "2026-10-31" };
+    const message = "같은 안전교육구분의 기존 교재와 기간이 겹칩니다. 시작일과 종료일을 확인하세요.";
+    await expect(createEducationResource(input, db as never)).rejects.toThrow(message);
+    await expect(updateEducationResource(input, db as never)).rejects.toThrow(message);
+  });
   it("rejects invalid category before writing", async () => {
     const db = { from: vi.fn() };
     await expect(createEducationResource({ title: "교육", youtubeLink: "https://youtu.be/example", educationType: "annual" }, db as never)).rejects.toThrow("안전교육구분");

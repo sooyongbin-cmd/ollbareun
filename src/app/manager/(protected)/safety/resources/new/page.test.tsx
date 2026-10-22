@@ -109,4 +109,17 @@ describe("education resource new page", () => {
       expect(push).toHaveBeenCalledWith("/manager/safety/resources");
     });
   });
+  it("shows the period overlap error without navigating away", async () => {
+    const message = "같은 안전교육구분의 기존 교재와 기간이 겹칩니다. 시작일과 종료일을 확인하세요.";
+    vi.stubGlobal("fetch", vi.fn(async () => Response.json({ error: message }, { status: 400 })));
+    render(<EducationResourceNewPage />);
+    fireEvent.change(screen.getByLabelText("제목"), { target: { value: "교육" } });
+    fireEvent.change(screen.getByLabelText("유튜브 링크"), { target: { value: "https://youtu.be/example" } });
+    fireEvent.change(screen.getByLabelText("시작일"), { target: { value: "2026-10-07" } });
+    fireEvent.change(screen.getByLabelText("종료일"), { target: { value: "2026-10-31" } });
+    fireEvent.click(screen.getByRole("button", { name: "저장" }));
+    expect(await screen.findByText(message)).toBeInTheDocument();
+    expect(push).not.toHaveBeenCalled();
+  });
+
 });

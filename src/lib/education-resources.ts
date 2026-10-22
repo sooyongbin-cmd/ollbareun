@@ -65,6 +65,9 @@ function requireYoutubeLink(value: unknown) {
 
 function throwIfError(error: { message?: string; hint?: string; code?: string } | null) {
   if (error) {
+    if (error.code === "23P01") {
+      throw new Error("같은 안전교육구분의 기존 교재와 기간이 겹칩니다. 시작일과 종료일을 확인하세요.");
+    }
     const message =
       error.message?.trim() ||
       error.hint?.trim() ||

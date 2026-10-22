@@ -80,4 +80,19 @@ describe("education resource save page", () => {
     await user.click(screen.getByRole("button", { name: "확인" }));
     expect(push).toHaveBeenCalledWith("/manager/safety/resources");
   });
+  it("shows the period overlap error when saving changes", async () => {
+    const message = "같은 안전교육구분의 기존 교재와 기간이 겹칩니다. 시작일과 종료일을 확인하세요.";
+    vi.stubGlobal("fetch", vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      if (init?.method === "PATCH") return Response.json({ error: message }, { status: 400 });
+      return Response.json({ resource: { id: "resource-1", title: "교육", youtube_link: "https://youtu.be/example", education_type: "daily", startdate: "2026-10-07", enddate: "2026-10-31" } });
+    }));
+    render(<EducationResourceSavePage />);
+    await screen.findByDisplayValue("교육");
+    fireEvent.click(screen.getByRole("button", { name: "저장" }));
+    expect(await screen.findByText(message)).toBeInTheDocument();
+    expect(screen.getByLabelText("시작일")).toHaveValue("2026-10-07");
+    expect(screen.getByRole("button", { name: "저장" })).toBeEnabled();
+    expect(push).not.toHaveBeenCalled();
+  });
+
 });

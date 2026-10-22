@@ -1,3 +1,4 @@
+import { requireBirthdate } from "./employee-birthdate";
 import { saveAttendance } from "./attendance";
 import { validateScheduleRules, type ScheduleRule } from "./employee-schedule";
 import { canClockIn, canClockOut, canClockOutAtWorksite, normalizePhone } from "./phase1";
@@ -11,6 +12,7 @@ import { selectGuardWorkSchedule } from "./guard-work-schedule";
 export type EmployeeRow = {
   id: string;
   name: string;
+  birthdate?: string;
   phone: string;
   phone_normalized: string;
   is_retired: boolean;
@@ -255,10 +257,11 @@ function validateEmployeeSchedule(input: { work_style?: unknown; in_time?: unkno
 }
 
 export async function createEmployee(
-  input: { name: unknown; phone: unknown; role?: unknown; work_style?: unknown; in_time?: unknown; out_time?: unknown; has_weekend?: unknown; schedule_rules?: unknown },
+  input: { name: unknown; birthdate?: unknown; phone: unknown; role?: unknown; work_style?: unknown; in_time?: unknown; out_time?: unknown; has_weekend?: unknown; schedule_rules?: unknown },
   supabase: SupabaseClient = getSupabase(),
 ) {
   const name = requireString(input.name, "직원이름");
+  const birthdate = input.birthdate === undefined ? undefined : requireBirthdate(input.birthdate);
   const phone = requireString(input.phone, "연락처");
   const phone_normalized = normalizePhone(phone);
   const schedule = validateEmployeeSchedule(input);
@@ -282,11 +285,11 @@ export async function createEmployee(
   const rules = input.schedule_rules === undefined ? undefined : validateScheduleRules(input.schedule_rules, input.work_style);
   const { data, error } = rules !== undefined
     ? await supabase.rpc("save_employee_with_schedule", {
-      p_employee: { name, phone, phone_normalized, is_retired: false, retired_at: null, role, has_weekend: false, ...schedule },
+      p_employee: { name, ...(birthdate === undefined ? {} : { birthdate }), phone, phone_normalized, is_retired: false, retired_at: null, role, has_weekend: false, ...schedule },
       p_rules: rules,
     })
     : await supabase.from("employees").upsert(
-      { name, phone, phone_normalized, is_retired: false, retired_at: null, role, has_weekend: input.has_weekend !== false, ...schedule },
+      { name, ...(birthdate === undefined ? {} : { birthdate }), phone, phone_normalized, is_retired: false, retired_at: null, role, has_weekend: input.has_weekend !== false, ...schedule },
       { onConflict: "name,phone_normalized" },
     ).select("*").single();
 
@@ -400,6 +403,7 @@ export async function listAttendanceForEmployeeInPeriod(
 export async function updateEmployee(input: {
   id: unknown;
   name: unknown;
+  birthdate?: unknown;
   phone: unknown;
   is_retired: unknown;
   retired_at?: unknown;
@@ -412,6 +416,7 @@ export async function updateEmployee(input: {
 }, supabase: SupabaseClient = getSupabase()) {
   const id = requireString(input.id, "직원");
   const name = requireString(input.name, "직원이름");
+  const birthdate = input.birthdate === undefined ? undefined : requireBirthdate(input.birthdate);
   const phone = requireString(input.phone, "연락처");
   const phone_normalized = normalizePhone(phone);
   const is_retired =
@@ -438,7 +443,7 @@ export async function updateEmployee(input: {
   }
 
   const rules = input.schedule_rules === undefined ? undefined : validateScheduleRules(input.schedule_rules, input.work_style);
-  const values = { name, phone, phone_normalized, is_retired, retired_at,
+  const values = { name, ...(birthdate === undefined ? {} : { birthdate }), phone, phone_normalized, is_retired, retired_at,
     has_weekend: rules !== undefined ? false : input.has_weekend === true || input.has_weekend === "true" || input.has_weekend === 1,
     role, ...schedule };
   const { data, error } = rules !== undefined

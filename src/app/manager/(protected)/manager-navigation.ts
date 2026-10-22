@@ -53,6 +53,7 @@ export const managerNavigationGroups: ManagerNavigationGroup[] = [
     items: [
       { label: "근태관리", href: "/manager/reports/attendance", icon: FileClock },
       { label: "휴가관리", href: "/manager/leave", icon: CalendarDays },
+      { label: "근무자정보조회", href: "/manager/worker-information", icon: Users },
     ],
   },
   {

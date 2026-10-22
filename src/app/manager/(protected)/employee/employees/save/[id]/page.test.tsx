@@ -109,6 +109,7 @@ describe("employee save page", () => {
             employee: {
               id: "emp-1",
               name: "Alice",
+              birthdate: "1970-05-12",
               phone: "010-1234-5678",
               role: "경비원",
               work_style: "1",
@@ -127,6 +128,7 @@ describe("employee save page", () => {
           const body = JSON.parse(String(init.body));
           expect(body).toEqual({
             name: "Alice",
+            birthdate: "1980-02-29",
             phone: "01099998888",
             role: "경비원",
             work_style: "1",
@@ -227,6 +229,8 @@ describe("employee save page", () => {
 
     expect(screen.getByLabelText("직원이름")).toHaveAttribute("readonly");
     expect(screen.getByLabelText("직원이름")).toHaveValue("Alice");
+    await user.clear(screen.getByLabelText("생년월일"));
+    await user.type(screen.getByLabelText("생년월일"), "1980-02-29");
     await user.clear(screen.getByLabelText("연락처"));
     await user.type(screen.getByLabelText("연락처"), "01099998888");
     expect(screen.getByLabelText("연락처")).toHaveValue("010-9999-8888");
@@ -295,6 +299,24 @@ describe("employee save page", () => {
     expect(screen.queryByRole("region", { name: "휴가정보" })).not.toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "점검지점검" })).not.toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "특이사항" })).not.toBeInTheDocument();
+  });
+
+  it("loads and saves an edited birthdate", async () => {
+    const user = userEvent.setup();
+    render(<EmployeeSavePage />);
+    const birthdate = await screen.findByLabelText("생년월일");
+    expect(birthdate).toHaveValue("1970-05-12");
+    await user.clear(birthdate);
+    await user.type(birthdate, "1980-02-29");
+    await user.clear(screen.getByLabelText("연락처"));
+    await user.type(screen.getByLabelText("연락처"), "01099998888");
+    await user.click(screen.getByRole("checkbox", { name: "퇴직" }));
+    for (const day of ["토요일", "일요일", "공휴일"]) await user.selectOptions(screen.getByLabelText(`${day} 적용 방식`), "default");
+    await user.clear(screen.getByLabelText("퇴직일"));
+    await user.type(screen.getByLabelText("퇴직일"), "2020-04-03");
+    await user.click(screen.getByRole("button", { name: "저장" }));
+    await user.click(screen.getByRole("button", { name: "예" }));
+    expect(await screen.findByText("수정이 완료되었습니다.")).toBeInTheDocument();
   });
 
   it("returns to the list without saving", async () => {

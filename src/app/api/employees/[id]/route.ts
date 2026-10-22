@@ -117,6 +117,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
       employee: await updateEmployee({
         id,
         name: body.name,
+        birthdate: body.birthdate,
         phone: body.phone,
         is_retired: body.is_retired,
         retired_at: body.retired_at,

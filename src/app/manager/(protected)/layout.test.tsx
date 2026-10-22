@@ -215,6 +215,7 @@ describe("manager layout", () => {
     expect(Array.from(attendanceLinks ?? []).map((link) => link.textContent?.trim())).toEqual([
       "근태관리",
       "휴가관리",
+      "근무자정보조회",
     ]);
     expect(screen.queryByRole("link", { name: "출근현황" })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "휴가관리" })).toHaveAttribute("href", "/manager/leave");

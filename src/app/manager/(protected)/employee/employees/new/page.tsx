@@ -121,6 +121,7 @@ export default function EmployeeNewPage() {
     try {
       const result = await postJson<EmployeeResponse>("/api/employees", {
         name: data.get("name"),
+        birthdate: data.get("birthdate"),
         phone: phone.replace(/\D/g, ""),
         role,
         work_style: workStyle,
@@ -154,6 +155,10 @@ export default function EmployeeNewPage() {
                 직원이름
               </label>
               <Input className="w-full" id="employee-name" name="name" placeholder="직원 이름을 입력하세요." required />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-muted-foreground" htmlFor="employee-birthdate">생년월일</label>
+              <Input id="employee-birthdate" name="birthdate" type="date" required />
             </div>
             <div className="space-y-2">
               <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="employee-phone">

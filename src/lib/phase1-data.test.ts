@@ -134,9 +134,9 @@ describe("guard authentication data rules", () => {
     const rpc = vi.fn().mockResolvedValue({ data: { id: "emp-1", schedule_rules: rules }, error: null });
     const rolesQuery = employeeRolesQuery();
     const client = { from: vi.fn((table: string) => table === "system_configs" ? rolesQuery : query), rpc };
-    await createEmployee({ name: "홍길동", phone: "01012345678", work_style: "0", in_time: "07:00", out_time: "18:00", schedule_rules: rules }, client as never);
+    await createEmployee({ name: "홍길동", birthdate: "1975-06-15", phone: "01012345678", work_style: "0", in_time: "07:00", out_time: "18:00", schedule_rules: rules }, client as never);
     expect(rpc).toHaveBeenCalledWith("save_employee_with_schedule", {
-      p_employee: expect.objectContaining({ in_time: "07:00", out_time: 1080, has_weekend: false }), p_rules: rules,
+      p_employee: expect.objectContaining({ birthdate: "1975-06-15", in_time: "07:00", out_time: 1080, has_weekend: false }), p_rules: rules,
     });
     expect(client.from).toHaveBeenCalledTimes(2);
   });

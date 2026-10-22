@@ -21,6 +21,7 @@ import Link from "next/link";
 type Employee = {
   id: string;
   name: string;
+  birthdate: string;
   phone: string;
   work_style: "0" | "1" | "2";
   in_time: string;
@@ -205,6 +206,7 @@ export default function EmployeeSavePage() {
   const router = useRouter();
   const employeeId = params.id;
   const [name, setName] = useState("");
+  const [birthdate, setBirthdate] = useState("");
   const [phone, setPhone] = useState("");
   const [employeeRoles, setEmployeeRoles] = useState<string[]>([]);
   const [role, setRole] = useState("");
@@ -247,6 +249,7 @@ export default function EmployeeSavePage() {
         }
         if (!ignore) {
           setName(data.employee.name);
+          setBirthdate(data.employee.birthdate ?? "1966-01-01");
           setPhone(formatPhoneInput(data.employee.phone));
           setRole(data.employee.role);
           setEmployeeRoles(roles);
@@ -304,7 +307,7 @@ export default function EmployeeSavePage() {
       await fetchJson<EmployeeMutationResponse>(`/api/employees/${employeeId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone: phone.replace(/\D/g, ""), role, is_retired: isRetired, retired_at: retiredDate, work_style: workStyle, in_time: inTime, out_time: outTime, has_weekend: false, schedule_rules: scheduleRules }),
+        body: JSON.stringify({ name, birthdate, phone: phone.replace(/\D/g, ""), role, is_retired: isRetired, retired_at: retiredDate, work_style: workStyle, in_time: inTime, out_time: outTime, has_weekend: false, schedule_rules: scheduleRules }),
       });
 
       setSaveSuccessOpen(true);
@@ -390,6 +393,10 @@ export default function EmployeeSavePage() {
                     readOnly
                     required
                   />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-muted-foreground" htmlFor="employee-birthdate">생년월일</label>
+                  <Input id="employee-birthdate" name="birthdate" type="date" value={birthdate} onChange={(event) => setBirthdate(event.target.value)} required />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="employee-phone">

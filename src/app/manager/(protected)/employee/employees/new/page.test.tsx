@@ -55,6 +55,7 @@ describe("employee new page", () => {
         const body = JSON.parse(String(init?.body));
         expect(body).toMatchObject({
           name: "홍길동",
+          birthdate: "1975-06-15",
           phone: "01012345678",
           role: "사감",
           has_weekend: false,
@@ -75,6 +76,7 @@ describe("employee new page", () => {
     render(<EmployeeNewPage />);
 
     await user.type(screen.getByLabelText("직원이름"), "홍길동");
+    await user.type(screen.getByLabelText("생년월일"), "1975-06-15");
     await user.type(screen.getByLabelText("연락처"), "01012345678");
     expect(screen.getByLabelText("연락처")).toHaveValue("010-1234-5678");
     await screen.findByRole("option", { name: "사감" });
@@ -100,6 +102,7 @@ describe("employee new page", () => {
     render(<EmployeeNewPage />);
     await screen.findByRole("option", { name: "사감" });
     await user.type(screen.getByLabelText("직원이름"), "홍길동");
+    await user.type(screen.getByLabelText("생년월일"), "1975-06-15");
     await user.type(screen.getByLabelText("연락처"), "01012345678");
     await user.click(screen.getByRole("button", { name: "저장" }));
 

@@ -69,7 +69,7 @@ it("registers the filtered list and shows count and delay from the server", asyn
     method: "POST", body: JSON.stringify({ workDate: (screen.getByLabelText("근무일") as HTMLInputElement).value, employeeIds: ["e1"] }),
   }));
 });
-it("shows subject totals, O for all complete, fractions otherwise and a dash for no subjects", async () => {
+it("shows daily O/X marks, plain category headers and a dash for no subjects", async () => {
   vi.stubGlobal("fetch", vi.fn(async () => Response.json({
     resourceCounts: { daily: 2, monthly: 0, quarterly: 1, semiannual: 0, other: 2 },
     rows: [{ employeeId: "e", employeeName: "홍길동", employeeRole: "경비원", workStyle: "격일근무", workDate: "2026-10-07", daily: 1, monthly: 0, quarterly: 1, semiannual: 0, other: 0 }],
@@ -77,8 +77,10 @@ it("shows subject totals, O for all complete, fractions otherwise and a dash for
   render(<EducationAttendancePage mode="daily" />);
   const name = await screen.findByText("홍길동 (경비,격일)", { selector: "td" });
   const row = name.closest("tr")!;
-  expect(within(row).getAllByRole("cell").map((cell) => cell.textContent)).toEqual(["홍길동 (경비,격일)", "2026-10-07", "1/2", "-", "1/1", "-", "0/2"]);
-  for (const title of ["일일(2)", "월별(0)", "분기(1)", "반기(0)", "기타(2)"]) {
+  expect(within(row).getAllByRole("cell").map((cell) => cell.textContent)).toEqual(["홍길동 (경비,격일)", "2026-10-07", "O", "-", "O", "-", "X"]);
+  expect(within(row).getByText("X")).toHaveStyle({ color: "#dc2626" });
+  expect(within(row).getAllByText("O").every(mark => mark.classList.contains("text-foreground"))).toBe(true);
+  for (const title of ["일일", "월별", "분기", "반기", "연간"]) {
     expect(screen.getByRole("columnheader", { name: title })).toBeInTheDocument();
   }
 });
@@ -107,11 +109,11 @@ it("renders daily subject columns and completes only the selected subject on its
   expect(within(row).getAllByRole("cell").map((cell) => cell.textContent)).toEqual(["홍길동", workDate, "O", "O", "-"]);
 });
 
-it("shows monthly subject totals, ratios, other and retains the completion action", async () => {
+it("keeps the daily fraction and shows monthly O/X marks with the completion action", async () => {
   const user = userEvent.setup();
   vi.stubGlobal("fetch", vi.fn(async () => Response.json({
-    resourceCounts: { daily: 2, monthly: 0, quarterly: 1, semiannual: 0, other: 2 },
-    summaryRows: [{ employeeId: "e", employeeName: "홍길동", monthly: 0, quarterly: 1, semiannual: 0, other: 1 }],
+    resourceCounts: { daily: 2, monthly: 0, quarterly: 1, semiannual: 0, other: 1 },
+    summaryRows: [{ employeeId: "e", employeeName: "홍길동", monthly: 0, quarterly: 1, semiannual: 0, other: 0 }],
     detailRows: [
       { employeeId: "e", employeeName: "", workDate: "2026-10-01", subjects: [{ resourceId: "d1", isCompleted: true }, { resourceId: "d2", isCompleted: null }] },
       { employeeId: "e", employeeName: "", workDate: "2026-10-02", subjects: [{ resourceId: "d1", isCompleted: false }, { resourceId: "d2", isCompleted: false }] },
@@ -119,17 +121,18 @@ it("shows monthly subject totals, ratios, other and retains the completion actio
   })));
   render(<EducationAttendancePage mode="monthly" />);
   const name = await screen.findByText("홍길동", { selector: "td" });
-  expect(within(name.closest("tr")!).getAllByRole("cell").map((cell) => cell.textContent)).toEqual(["홍길동", "1/3", "-", "1/1", "-", "1/2"]);
-  expect(screen.getByRole("columnheader", { name: "일일(2)" })).toBeInTheDocument();
+  expect(within(name.closest("tr")!).getAllByRole("cell").map((cell) => cell.textContent)).toEqual(["홍길동", "1/3", "-", "O", "-", "X"]);
+  expect(screen.getByRole("columnheader", { name: "일일" })).toBeInTheDocument();
   expect(screen.getByText("1/3")).toHaveClass("text-destructive");
-  expect(screen.getByRole("columnheader", { name: "기타(2)" })).toBeInTheDocument();
-  expect(screen.getByText("3/6 50%")).toBeInTheDocument();
-  await user.click(screen.getByRole("button", { name: "홍길동 근무자 기타 교육 미이수 처리" }));
-  expect(screen.getByRole("dialog")).toHaveTextContent("기타 교육을 이수처리할까요?");
+  expect(screen.getByRole("columnheader", { name: "연간" })).toBeInTheDocument();
+  expect(screen.getByText("2/5 40%")).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "홍길동 근무자 연간 교육 미이수 처리" })).toHaveStyle({ color: "#dc2626" });
+  await user.click(screen.getByRole("button", { name: "홍길동 근무자 연간 교육 미이수 처리" }));
+  expect(screen.getByRole("dialog")).toHaveTextContent("연간 교육을 이수처리할까요?");
   await user.click(screen.getByRole("button", { name: "이수처리" }));
   await screen.findByText("처리되었습니다.");
   await user.click(screen.getByRole("button", { name: "확인" }));
-  expect(within(name.closest("tr")!).getAllByRole("cell").map((cell) => cell.textContent)).toEqual(["홍길동", "1/3", "-", "1/1", "-", "2/2"]);
-  expect(screen.getByText("2/2")).not.toHaveClass("text-destructive");
-  expect(screen.getByText("4/6 67%")).toBeInTheDocument();
+  expect(within(name.closest("tr")!).getAllByRole("cell").map((cell) => cell.textContent)).toEqual(["홍길동", "1/3", "-", "O", "-", "O"]);
+  expect(within(name.closest("tr")!).getAllByText("O").every(mark => mark.classList.contains("text-foreground"))).toBe(true);
+  expect(screen.getByText("3/5 60%")).toBeInTheDocument();
 });

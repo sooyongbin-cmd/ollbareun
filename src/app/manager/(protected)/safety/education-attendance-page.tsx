@@ -46,6 +46,12 @@ function Mark({ completed, onClick, label }: { completed: boolean; onClick?: () 
   return <span className={completed ? "font-semibold text-muted-foreground" : "text-destructive"}>{completed ? "O" : "X"}</span>;
 }
 
+function SummaryMark({ completed, onClick, label }: { completed: boolean; onClick?: () => void; label?: string }) {
+  if (completed) return <span className="font-semibold text-foreground">O</span>;
+  if (onClick) return <button type="button" aria-label={label} className="cursor-pointer text-left font-semibold text-destructive" style={{ color: "#dc2626" }} onClick={onClick}>X</button>;
+  return <span className="font-semibold text-destructive" style={{ color: "#dc2626" }}>X</span>;
+}
+
 type CompletionDialogState = {
   employeeId: string;
   employeeName: string;
@@ -62,7 +68,7 @@ type EducationReminderExecutionResult = {
 };
 
 function educationDisplayLabel(type: EducationType) {
-  return type === "monthly" ? "월별" : educationTypeLabels[type];
+  return type === "monthly" ? "월별" : type === "other" ? "연간" : educationTypeLabels[type];
 }
 
 export default function EducationAttendancePage({ mode }: { mode: EducationAttendanceMode }) {
@@ -314,7 +320,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
           loading={loading}
           error={error}
           emptyMessage="조회 결과에 해당하는 근무자가 없습니다."
-          headers={["이름", "출근일", ...educationTypes.map((type) => `${educationDisplayLabel(type)}(${resourceCounts[type]})`)]}
+          headers={["이름", "출근일", ...educationTypes.map(educationDisplayLabel)]}
         >
           {filteredDailyRows.map((row) => (
             <TableRow key={row.employeeId} className="hover:bg-muted/40 transition-colors">
@@ -323,9 +329,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
                 {row.workDate || "-"}
               </TableCell>
               {educationTypes.map((type) => <TableCell key={type} data-label={educationDisplayLabel(type)}>
-                <span className={resourceCounts[type] > 0 && row[type] < resourceCounts[type] ? "text-destructive" : "font-semibold text-muted-foreground"}>
-                  {resourceCounts[type] === 0 ? "-" : `${row[type]}/${resourceCounts[type]}`}
-                </span>
+                {resourceCounts[type] === 0 ? "-" : <SummaryMark completed={row[type] > 0} />}
               </TableCell>)}
             </TableRow>
           ))}
@@ -338,7 +342,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
             loading={loading}
             error={error}
             emptyMessage="조회 결과에 해당하는 근무자가 없습니다."
-            headers={["이름", ...educationTypes.map((type) => `${educationDisplayLabel(type)}(${resourceCounts[type]})`)]}
+            headers={["이름", ...educationTypes.map(educationDisplayLabel)]}
           >
             {filteredMonthlyRows.map((row) => (
               <TableRow key={row.employeeId} className="hover:bg-muted/40 transition-colors">
@@ -350,11 +354,9 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
                   return <span className={completed < total ? "font-semibold text-destructive" : "font-semibold text-muted-foreground"} style={completed < total ? { color: "#dc2626" } : undefined}>{total === 0 ? "-" : `${completed}/${total}`}</span>;
                 })()}</TableCell>
                 {monthlyEducationTypes.map((type) => <TableCell key={type} data-label={educationDisplayLabel(type)}>
-                  {resourceCounts[type] === 0 ? "-" : row[type] === resourceCounts[type] ? <span className="font-semibold text-muted-foreground">{row[type]}/{resourceCounts[type]}</span> :
-                    <button type="button" className="cursor-pointer text-left font-semibold text-destructive"
-                      style={{ color: "#dc2626" }}
-                      aria-label={`${row.employeeName} 근무자 ${educationDisplayLabel(type)} 교육 미이수 처리`}
-                      onClick={() => openCompletionDialog(row.employeeId, row.employeeName, type)}>{row[type]}/{resourceCounts[type]}</button>}
+                  {resourceCounts[type] === 0 ? "-" : <SummaryMark completed={row[type] > 0}
+                    label={`${row.employeeName} 근무자 ${educationDisplayLabel(type)} 교육 미이수 처리`}
+                    onClick={() => openCompletionDialog(row.employeeId, row.employeeName, type)} />}
                 </TableCell>)}
               </TableRow>
             ))}

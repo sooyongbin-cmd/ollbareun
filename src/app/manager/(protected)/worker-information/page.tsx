@@ -211,14 +211,9 @@ export default function WorkerInformationPage() {
                         data-label="안전교육(일일/월간/분기/반기/기타)"
                         className="min-w-64"
                       >
-                        {row.education.map((item) => (
-                          <span
-                            key={item.label}
-                            className="mr-3 inline-block whitespace-nowrap"
-                          >
-                            {item.label} {item.completed}/{item.total}
-                          </span>
-                        ))}
+                        {row.education
+                          .map((item) => `${item.completed}/${item.total}`)
+                          .join(" ")}
                       </TableCell>
                       <TableCell data-label="특이사항">{row.remarks}</TableCell>
                     </TableRow>

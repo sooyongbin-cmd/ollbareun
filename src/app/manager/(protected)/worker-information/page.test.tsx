@@ -60,7 +60,7 @@ describe("worker information page", () => {
     expect(
       screen.getByText("결근(2), 조퇴(1), 지각(0), 연차(0), 휴가(0)"),
     ).toBeInTheDocument();
-    expect(screen.getByText("일일 2/3")).toBeInTheDocument();
+    expect(screen.getByText("2/3")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "홍길동" })).toHaveAttribute(
       "href",
       "/manager/employee/employees/save/a",

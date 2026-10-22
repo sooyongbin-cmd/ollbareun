@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -43,7 +42,6 @@ export default function WorkerInformationPage() {
   const [start, setStart] = useState(
     () => `${educationToday().slice(0, 7)}-01`,
   );
-  const [period, setPeriod] = useState(() => ({ start, end }));
   const [rows, setRows] = useState<WorkerInformationRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -54,8 +52,11 @@ export default function WorkerInformationPage() {
       setError("");
       setRows([]);
       try {
+        if (!start || !end || start > end) {
+          throw new Error("조회 시작일과 종료일을 올바르게 입력하세요.");
+        }
         const response = await fetch(
-          `/api/manager/worker-information?${new URLSearchParams(period)}`,
+          `/api/manager/worker-information?${new URLSearchParams({ start, end })}`,
           { signal: controller.signal },
         );
         const data = await response.json();
@@ -73,11 +74,7 @@ export default function WorkerInformationPage() {
     }
     void load();
     return () => controller.abort();
-  }, [period]);
-  function search(event: FormEvent) {
-    event.preventDefault();
-    setPeriod({ start, end });
-  }
+  }, [start, end]);
   return (
     <section className="space-y-[1.5rem]">
       <header>
@@ -87,13 +84,10 @@ export default function WorkerInformationPage() {
         aria-label="근무자정보 검색"
         className="manager-section rounded-xl border border-border/50 bg-muted/40"
       >
-        <form
-          onSubmit={search}
-          className="grid items-end gap-4 md:grid-cols-[1fr_auto_1fr_auto]"
-        >
-          <div className="space-y-2">
+        <div className="grid max-w-[25rem] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-3">
+          <div className="min-w-0 space-y-2">
             <label
-              className="text-sm font-semibold text-muted-foreground"
+              className="block text-sm font-semibold text-muted-foreground"
               htmlFor="worker-start"
             >
               조회 시작일
@@ -107,10 +101,10 @@ export default function WorkerInformationPage() {
               onChange={(event) => setStart(event.target.value)}
             />
           </div>
-          <span aria-hidden="true">~</span>
-          <div className="space-y-2">
+          <span aria-hidden="true" className="flex h-9 items-center justify-center">~</span>
+          <div className="min-w-0 space-y-2">
             <label
-              className="text-sm font-semibold text-muted-foreground"
+              className="block text-sm font-semibold text-muted-foreground"
               htmlFor="worker-end"
             >
               조회 종료일
@@ -124,10 +118,7 @@ export default function WorkerInformationPage() {
               onChange={(event) => setEnd(event.target.value)}
             />
           </div>
-          <Button type="submit" disabled={loading}>
-            조회
-          </Button>
-        </form>
+        </div>
       </section>
       <section
         aria-label="근무자정보 목록"

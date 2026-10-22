@@ -21,7 +21,7 @@ describe("worker information page", () => {
     fireEvent.change(screen.getByLabelText("조회 종료일"), {
       target: { value: "2026-09-30" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "조회" }));
+    expect(screen.queryByRole("button", { name: "조회" })).not.toBeInTheDocument();
     await waitFor(() =>
       expect(fetch).toHaveBeenLastCalledWith(
         "/api/manager/worker-information?start=2026-09-01&end=2026-09-30",

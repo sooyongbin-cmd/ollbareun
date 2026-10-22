@@ -59,12 +59,12 @@ describe("education resource save page", () => {
     expect(await screen.findByRole("heading", { name: "교육자료 상세" })).toBeInTheDocument();
     expect(await screen.findByDisplayValue("화재 안전 교육")).toBeInTheDocument();
     expect(screen.getByDisplayValue("https://www.youtube.com/watch?v=fireSafety")).toBeInTheDocument();
-    for (const type of ["일일", "월간", "분기", "반기", "기타"]) {
+    for (const type of ["일일", "월간", "분기", "반기", "연간"]) {
       expect(screen.getByRole("radio", { name: type })).toBeEnabled();
     }
     expect(screen.getByRole("radio", { name: "일일" })).toBeChecked();
     expect(screen.queryByText("관리자 화면")).not.toBeInTheDocument();
-    await user.click(screen.getByRole("radio", { name: "기타" }));
+    await user.click(screen.getByRole("radio", { name: "연간" }));
     expect(screen.getByLabelText("시작일")).toHaveValue("2026-10-07");
     expect(screen.getByLabelText("종료일")).toHaveValue("2026-10-31");
     fireEvent.change(screen.getByLabelText("시작일"), { target: { value: "2026-10-08" } });

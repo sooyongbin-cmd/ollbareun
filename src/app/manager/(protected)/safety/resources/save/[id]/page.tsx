@@ -189,7 +189,7 @@ export default function EducationResourceSavePage() {
           <form className="space-y-6" noValidate onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div className="flex flex-wrap items-end gap-6">
-                <EducationTypeRadio value={educationType} onChange={setEducationType} disabled={saving || deleting} />
+                <EducationTypeRadio value={educationType} onChange={setEducationType} disabled={saving || deleting} labels={{ other: "연간" }} />
                 <EducationResourceDates startdate={startdate} enddate={enddate} onStartChange={setStartdate} onEndChange={setEnddate} disabled={saving || deleting} />
               </div>
               <div className="space-y-2">

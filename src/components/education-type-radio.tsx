@@ -1,6 +1,6 @@
 import { educationTypes, educationTypeLabels, type EducationType } from "@/lib/education-periods";
 
-export default function EducationTypeRadio({ value, onChange, disabled = false }: { value?: EducationType; onChange?: (value: EducationType) => void; disabled?: boolean }) {
+export default function EducationTypeRadio({ value, onChange, disabled = false, labels }: { value?: EducationType; onChange?: (value: EducationType) => void; disabled?: boolean; labels?: Partial<Record<EducationType, string>> }) {
   return <fieldset disabled={disabled} className={`space-y-3 ${disabled ? "opacity-60" : ""}`}>
     <legend className="text-sm font-semibold text-muted-foreground">안전교육구분</legend>
     <div className="flex flex-wrap gap-5">
@@ -9,7 +9,7 @@ export default function EducationTypeRadio({ value, onChange, disabled = false }
           checked={value === undefined ? undefined : value === type}
           defaultChecked={value === undefined ? type === "daily" : undefined}
           onChange={() => onChange?.(type)} className="size-4 accent-primary" />
-        {educationTypeLabels[type]}
+        {labels?.[type] ?? educationTypeLabels[type]}
       </label>)}
     </div>
   </fieldset>;

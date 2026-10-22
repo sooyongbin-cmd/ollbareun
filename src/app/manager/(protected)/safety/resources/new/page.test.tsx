@@ -55,7 +55,8 @@ describe("education resource new page", () => {
     render(<EducationResourceNewPage />);
 
     expect(screen.getByRole("radio", { name: "일일" })).toBeChecked();
-    await user.click(screen.getByRole("radio", { name: "기타" }));
+    expect(screen.queryByRole("radio", { name: "기타" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("radio", { name: "연간" }));
     await user.type(screen.getByLabelText("제목"), "화재 안전 교육");
     await user.type(screen.getByLabelText("유튜브 링크"), "https://www.youtube.com/watch?v=fireSafety");
     fireEvent.change(screen.getByLabelText("시작일"), { target: { value: "2026-10-07" } });

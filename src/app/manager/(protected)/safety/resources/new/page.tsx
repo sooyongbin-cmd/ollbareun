@@ -112,7 +112,7 @@ export default function EducationResourceNewPage() {
         <form className="space-y-6" noValidate onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div className="flex flex-wrap items-end gap-6">
-              <EducationTypeRadio disabled={isSubmitting} />
+              <EducationTypeRadio disabled={isSubmitting} labels={{ other: "연간" }} />
               <EducationResourceDates disabled={isSubmitting} />
             </div>
             <div className="space-y-2">

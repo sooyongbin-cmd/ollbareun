@@ -6,11 +6,17 @@ import ManagerLayout from "../../layout";
 import ManagerPage from "../../page";
 import EmployeeRosterPage from "./page";
 
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/manager/employee/employees",
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+}));
+
 const bootstrap = {
   employees: [
     {
       id: "emp-1",
       name: "Alice",
+      birthdate: "1966-01-02",
       phone: "010-1234-5678",
       phone_normalized: "01012345678",
       is_retired: false,
@@ -19,6 +25,7 @@ const bootstrap = {
     {
       id: "emp-2",
       name: "Bob",
+      birthdate: null,
       phone: "010-9999-8888",
       phone_normalized: "01099998888",
       is_retired: true,
@@ -45,17 +52,6 @@ const bootstrap = {
   summary: { totalEmployees: 2, currentlyClockedIn: 0 },
 };
 
-const educationResources = [
-  { id: "resource-1" },
-  { id: "resource-2" },
-];
-
-const educationCompletions = [
-  { employee_id: "emp-1", resource_id: "resource-1", is_completed: true },
-  { employee_id: "emp-1", resource_id: "resource-2", is_completed: true },
-  { employee_id: "emp-2", resource_id: "resource-1", is_completed: true },
-];
-
 function renderWithManagerLayout(ui: ReactElement) {
   return render(<ManagerLayout>{ui}</ManagerLayout>);
 }
@@ -69,12 +65,6 @@ describe("employee roster page", () => {
         const url = String(input);
         if (url.endsWith("/api/bootstrap")) {
           return Response.json(bootstrap);
-        }
-        if (url.endsWith("/api/education/resources")) {
-          return Response.json({ resources: educationResources });
-        }
-        if (url.endsWith("/api/education/completions")) {
-          return Response.json({ completions: educationCompletions });
         }
         if (url.endsWith("/api/employee-roles")) {
           return Response.json({ roles: ["경비원", "미화원", "주차원", "사감"] });
@@ -103,14 +93,13 @@ describe("employee roster page", () => {
     expect(screen.getByRole("columnheader", { name: "배정기간" })).toBeInTheDocument();
     expect(screen.queryByRole("columnheader", { name: "퇴직일" })).not.toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "출근" })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "교육" })).toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "교육" })).not.toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "생년월일" })).toBeInTheDocument();
+    expect(screen.getByText("1966-01-02")).toBeInTheDocument();
+    expect(fetch).not.toHaveBeenCalledWith("/api/education/resources");
+    expect(fetch).not.toHaveBeenCalledWith("/api/education/completions");
     const aliceRow = screen.getByRole("link", { name: "Alice" }).closest("tr") as HTMLElement;
     expect(within(aliceRow).getByText("출근")).toBeInTheDocument();
-    const completedEducationLink = within(aliceRow).getByRole("link", { name: "완료" });
-    expect(completedEducationLink).toHaveAttribute(
-      "href",
-      "/manager/safety/completions/detail?name=Alice",
-    );
     const assignmentPeriodLink = screen.getByRole("link", { name: "2026-05-01~2026-05-24" });
     expect(assignmentPeriodLink).toHaveAttribute("href", "/manager/employee/assignments/save/assign-1");
     expect(screen.queryByRole("link", { name: "Bob" })).not.toBeInTheDocument();
@@ -122,13 +111,11 @@ describe("employee roster page", () => {
     expect(screen.getByText("2020-04-03")).toBeInTheDocument();
     const bobRow = screen.getByRole("link", { name: "Bob" }).closest("tr");
     expect(bobRow).not.toBeNull();
-    const bobCells = within(bobRow as HTMLElement).getAllByRole("cell");
-    expect(bobCells[1]).toHaveTextContent("2020-04-03");
-    expect(bobCells[5]).toHaveTextContent("평일");
-    expect(bobCells[6]).toBeEmptyDOMElement();
-    expect(bobCells[7]).toBeEmptyDOMElement();
-    expect(bobCells[8]).toHaveTextContent("-");
-    expect(bobCells[9]).toHaveTextContent("1/2");
+    expect(bobRow?.querySelector('[data-label="퇴직일"]')).toHaveTextContent("2020-04-03");
+    expect(bobRow?.querySelector('[data-label="생년월일"]')).toHaveTextContent("-");
+    expect(bobRow?.querySelector('[data-label="근무지"]')).toBeEmptyDOMElement();
+    expect(bobRow?.querySelector('[data-label="배정기간"]')).toBeEmptyDOMElement();
+    expect(bobRow?.querySelector('[data-label="출근"]')).toHaveTextContent("-");
     expect(screen.queryByRole("link", { name: "Alice" })).not.toBeInTheDocument();
     await user.click(screen.getByRole("checkbox", { name: "퇴직" }));
     expect(screen.queryByRole("columnheader", { name: "퇴직일" })).not.toBeInTheDocument();
@@ -199,12 +186,6 @@ describe("employee roster page", () => {
       const url = String(input);
       if (url.endsWith("/api/bootstrap")) {
         return Response.json(extendedBootstrap);
-      }
-      if (url.endsWith("/api/education/resources")) {
-        return Response.json({ resources: educationResources });
-      }
-      if (url.endsWith("/api/education/completions")) {
-        return Response.json({ completions: educationCompletions });
       }
       if (url.endsWith("/api/employee-roles")) {
         return Response.json({ roles: ["경비원", "미화원", "주차원", "사감"] });

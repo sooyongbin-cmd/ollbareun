@@ -19,6 +19,7 @@ type EmployeeRow = {
   id: string;
   name: string;
   phone: string;
+  birthdate?: string | null;
   work_style: "0" | "1" | "2";
   phone_normalized: string;
   in_time?: string;
@@ -35,16 +36,6 @@ type AttendanceRow = {
   intime_status: "0" | "1" | "2" | "3";
 };
 
-type EducationResourceRow = {
-  id: string;
-};
-
-type EducationCompletionRow = {
-  employee_id: string;
-  resource_id: string;
-  is_completed: boolean;
-};
-
 type Bootstrap = {
   employees: EmployeeRow[];
   worksites: {
@@ -59,8 +50,6 @@ type Bootstrap = {
     end_date: string;
   }[];
   attendance: AttendanceRow[];
-  educationResources: EducationResourceRow[];
-  educationCompletions: EducationCompletionRow[];
   summary: {
     totalEmployees: number;
     currentlyClockedIn: number;
@@ -79,8 +68,6 @@ const emptyBootstrap: Bootstrap = {
   worksites: [],
   assignments: [],
   attendance: [],
-  educationResources: [],
-  educationCompletions: [],
   summary: {
     totalEmployees: 0,
     currentlyClockedIn: 0,
@@ -103,26 +90,14 @@ export default function EmployeeRosterPage() {
 
     async function loadBootstrap() {
       try {
-        const [bootstrapResponse, resourcesResponse, completionsResponse, roles] = await Promise.all([
+        const [bootstrapResponse, roles] = await Promise.all([
           fetch("/api/bootstrap"),
-          fetch("/api/education/resources"),
-          fetch("/api/education/completions"),
           fetchEmployeeRoles(),
         ]);
-        const [payload, resourcesPayload, completionsPayload] = await Promise.all([
-          bootstrapResponse.json(),
-          resourcesResponse.json(),
-          completionsResponse.json(),
-        ]);
+        const payload = await bootstrapResponse.json();
 
         if (!bootstrapResponse.ok) {
           throw new Error(payload.error ?? "직원 목록을 불러오지 못했습니다.");
-        }
-        if (!resourcesResponse.ok) {
-          throw new Error(resourcesPayload.error ?? "교육자료 목록을 불러오지 못했습니다.");
-        }
-        if (!completionsResponse.ok) {
-          throw new Error(completionsPayload.error ?? "교육이수 목록을 불러오지 못했습니다.");
         }
 
         if (!ignore) {
@@ -131,8 +106,6 @@ export default function EmployeeRosterPage() {
             worksites: payload.worksites ?? [],
             assignments: payload.assignments ?? [],
             attendance: payload.attendance ?? [],
-            educationResources: resourcesPayload.resources ?? [],
-            educationCompletions: completionsPayload.completions ?? [],
             summary: payload.summary ?? emptyBootstrap.summary,
           });
           setEmployeeRoles(roles);
@@ -201,27 +174,6 @@ export default function EmployeeRosterPage() {
       data.attendance.map((attendance) => [attendance.employee_id, statusLabels[attendance.intime_status]]),
     );
   }, [data.attendance]);
-
-  const completedEducationCountByEmployeeId = useMemo(() => {
-    const completedResourceIdsByEmployeeId = new Map<string, Set<string>>();
-
-    data.educationCompletions.forEach((completion) => {
-      if (!completion.is_completed) {
-        return;
-      }
-
-      const completedResourceIds = completedResourceIdsByEmployeeId.get(completion.employee_id) ?? new Set<string>();
-      completedResourceIds.add(completion.resource_id);
-      completedResourceIdsByEmployeeId.set(completion.employee_id, completedResourceIds);
-    });
-
-    return new Map(
-      Array.from(completedResourceIdsByEmployeeId.entries()).map(([employeeId, resourceIds]) => [
-        employeeId,
-        resourceIds.size,
-      ]),
-    );
-  }, [data.educationCompletions]);
 
   const sortedEmployees = useMemo(() => {
     return [...filteredEmployees].sort((left, right) => {
@@ -356,6 +308,7 @@ export default function EmployeeRosterPage() {
                   >
                     이름
                   </SortableHeader>
+                  <TableHead>생년월일</TableHead>
                   {showRetired ? <TableHead>퇴직일</TableHead> : null}
                   <SortableHeader
                     sortKey="phone"
@@ -388,7 +341,6 @@ export default function EmployeeRosterPage() {
                   </SortableHeader>
                   <TableHead>배정기간</TableHead>
                   <TableHead>출근</TableHead>
-                  <TableHead>교육</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -409,6 +361,7 @@ export default function EmployeeRosterPage() {
                           {employee.name}
                         </Link>
                       </TableCell>
+                      <TableCell data-label="생년월일" className="whitespace-nowrap text-muted-foreground">{employee.birthdate || "-"}</TableCell>
                       {showRetired ? (
                         <TableCell data-label="퇴직일" className="whitespace-nowrap text-muted-foreground">
                           {employee.retired_at?.slice(0, 10) ?? ""}
@@ -433,17 +386,6 @@ export default function EmployeeRosterPage() {
                       </TableCell>
                       <TableCell data-label="출근" className="whitespace-nowrap text-muted-foreground">
                         {attendanceStatusByEmployeeId.get(employee.id) ?? "-"}
-                      </TableCell>
-                      <TableCell data-label="교육" className="whitespace-nowrap">
-                        <Link
-                          className="font-semibold text-primary hover:underline"
-                          href={`/manager/safety/completions/detail?name=${encodeURIComponent(employee.name)}`}
-                        >
-                          {data.educationResources.length > 0 &&
-                          (completedEducationCountByEmployeeId.get(employee.id) ?? 0) >= data.educationResources.length
-                            ? "완료"
-                            : `${completedEducationCountByEmployeeId.get(employee.id) ?? 0}/${data.educationResources.length}`}
-                        </Link>
                       </TableCell>
                     </TableRow>
                   ))

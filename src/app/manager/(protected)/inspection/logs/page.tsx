@@ -1,5 +1,7 @@
 "use client";
 
+import ListResults from "@/components/list-results";
+
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useEffect, useState } from "react";
@@ -147,7 +149,7 @@ export default function InspectionLogsPage() {
         className="manager-section bg-muted/40 rounded-xl border border-border/50"
       >
         <div className="mb-4 flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
-          <span>조회 결과 {logs.length}</span>
+          <ListResults count={logs.length} disabled={loading || Boolean(error)} />
         </div>
 
         {loading ? (

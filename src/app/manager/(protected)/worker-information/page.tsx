@@ -1,5 +1,7 @@
 "use client";
 
+import ListResults from "@/components/list-results";
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
@@ -57,7 +59,7 @@ export default function WorkerInformationPage() {
         </div>
       </section>
       <section aria-label="월간근태 목록" className="manager-section rounded-xl border border-border/50 bg-muted/40">
-        <p className="text-right text-sm text-muted-foreground">조회 결과 {rows.length}</p>
+        <ListResults count={rows.length} disabled={loading || Boolean(error)} />
         {loading ? <ManagerLoadingMessage className="mt-6" /> : error ? (
           <p role="alert" className="mt-6 text-destructive">{error}</p>
         ) : (

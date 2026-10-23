@@ -1,5 +1,7 @@
 "use client";
 
+import ListResults from "@/components/list-results";
+
 import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -77,7 +79,7 @@ export default function SystemConfigsPage() {
 
       <section aria-label="시스템설정 목록" className="manager-section bg-muted/40 rounded-xl border border-border/50">
         <div className="mb-4 flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
-          <span>조회 결과 {configs.length}</span>
+          <ListResults count={configs.length} disabled={loading || Boolean(error)} />
         </div>
 
         {loading ? (

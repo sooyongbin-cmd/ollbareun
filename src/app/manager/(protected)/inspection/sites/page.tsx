@@ -1,5 +1,7 @@
 "use client";
 
+import ListResults from "@/components/list-results";
+
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
@@ -275,7 +277,7 @@ export default function InspectionSitesPage() {
         className="manager-section bg-muted/40 rounded-xl border border-border/50"
       >
         <div className="mb-4 flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
-          <span>조회 결과 {sites.length}</span>
+          <ListResults count={sites.length} disabled={loading || Boolean(error)} />
         </div>
 
         {loading ? (

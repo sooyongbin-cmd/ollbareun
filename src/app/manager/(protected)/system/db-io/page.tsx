@@ -1,5 +1,7 @@
 "use client";
 
+import ListResults from "@/components/list-results";
+
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -288,7 +290,8 @@ export default function DatabaseIoPage() {
                 </div>
               </CardAction>
             </CardHeader>
-            <CardContent className="p-0">
+            <CardContent className="p-0" data-list-export-root>
+              <div className="p-4"><ListResults count={tableStats.length} disabled={loading || Boolean(error)} /></div>
               <div className="overflow-x-auto">
                 <Table aria-label="테이블별 I/O 목록">
                   <TableHeader>
@@ -342,7 +345,8 @@ export default function DatabaseIoPage() {
                 </div>
               </CardAction>
             </CardHeader>
-            <CardContent className="p-0">
+            <CardContent className="p-0" data-list-export-root>
+              <div className="p-4"><ListResults count={queryStats.length} disabled={loading || Boolean(error)} /></div>
               <div className="overflow-x-auto">
                 <Table aria-label="쿼리별 I/O 목록">
                   <TableHeader>

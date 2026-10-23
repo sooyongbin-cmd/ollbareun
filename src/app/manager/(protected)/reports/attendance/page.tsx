@@ -1,15 +1,15 @@
 "use client";
 
+import ListResults from "@/components/list-results";
+
 import Link from "next/link";
 import type { AttendanceReportRow } from "@/lib/manager-reports";
-import { DateTimeRange, scheduledClockInDisplay, formatDateTimeSegment, scheduledClockInOut, clockInOut } from "@/components/attendance-time-display";
+import { DateTimeRange, scheduledClockInDisplay, formatDateTimeSegment } from "@/components/attendance-time-display";
 import { employeeSummary } from "@/lib/employee-summary";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useCallback, useEffect, useRef, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
-import { saveRowsAsXls } from "../export-xls";
 
 function currentDate() {
   return new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
@@ -22,6 +22,7 @@ export default function AttendanceReportPage() {
   const [employeeNamesLoading, setEmployeeNamesLoading] = useState(true);
   const [workDate, setWorkDate] = useState(currentDate());
   const [rows, setRows] = useState<AttendanceReportRow[]>([]);
+  const [appliedFilters, setAppliedFilters] = useState([{ label: "직원이름", value: "전체직원" }, { label: "출퇴근예정일", value: currentDate() }]);
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -78,6 +79,7 @@ export default function AttendanceReportPage() {
       }
       if (requestId !== searchRequestRef.current) return;
       setRows(payload.rows ?? []);
+      setAppliedFilters([{ label: "직원이름", value: employeeName.trim() || "전체직원" }, { label: "출퇴근예정일", value: workDate || "전체" }]);
     } catch (loadError) {
       if (requestId !== searchRequestRef.current) return;
       setRows([]);
@@ -97,21 +99,6 @@ export default function AttendanceReportPage() {
     return () => window.clearTimeout(timeoutId);
   }, [handleSearch]);
 
-  async function handleExport() {
-    const headers = ["이름", "근무지", "출퇴근예정", "출퇴근", "출근", "퇴근"];
-    await saveRowsAsXls({
-      fileName: `올바름_근태_${employeeName.trim() || "전체"}_${workDate || "전체기간"}`,
-      headers,
-      rows: rows.map((row) => [
-        employeeSummary(row),
-        row.worksiteName,
-        scheduledClockInOut(row, workDate),
-        clockInOut(row, workDate),
-        row.status,
-        row.outtimeLabel,
-      ]),
-    });
-  }
 
   return (
     <section className="space-y-[1.5rem]">
@@ -120,7 +107,7 @@ export default function AttendanceReportPage() {
       </header>
 
       <section aria-label="근태내역 조회" className="manager-section rounded-xl border border-border/50 bg-muted/40">
-        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_12rem_auto] md:items-end">
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_12rem] md:items-end">
           <div className="flex flex-col gap-2">
             <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor="attendance-employee-name">
               직원이름
@@ -151,15 +138,12 @@ export default function AttendanceReportPage() {
               onChange={(event) => setWorkDate(event.target.value)}
             />
           </div>
-          <Button className="h-9 min-h-9 px-4 py-0" type="button" onClick={handleExport} disabled={rows.length === 0}>
-            엑셀
-          </Button>
         </div>
       </section>
 
       <section aria-label="근태내역 목록" className="manager-section rounded-xl border border-border/50 bg-muted/40">
         <div className="mb-4 flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
-          <span>조회 결과 {rows.length}</span>
+          <ListResults count={rows.length} disabled={loading || Boolean(error) || appliedFilters[0].value !== (employeeName.trim() || "전체직원") || appliedFilters[1].value !== (workDate || "전체")} filters={appliedFilters} />
         </div>
 
         {loading ? (

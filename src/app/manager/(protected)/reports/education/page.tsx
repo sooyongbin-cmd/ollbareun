@@ -1,11 +1,12 @@
 "use client";
 
+import ListResults from "@/components/list-results";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useEffect, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
-import { saveRowsAsXls } from "../export-xls";
 
 type EducationReportRow = {
   employeeName: string;
@@ -72,13 +73,6 @@ export default function EducationReportPage() {
     };
   }, [year]);
 
-  async function handleExport() {
-    await saveRowsAsXls({
-      fileName: `올바름_교육_전체직원_${year}`,
-      headers: ["근무자", "교육이수건수/전체건수"],
-      rows: rows.map((row) => [row.employeeName, `${row.completedCount}/${row.totalCount}`]),
-    });
-  }
 
   return (
     <section className="space-y-[1.5rem]">
@@ -87,7 +81,7 @@ export default function EducationReportPage() {
       </header>
 
       <section aria-label="교육이수자료 조회" className="manager-section rounded-xl border border-border/50 bg-muted/40">
-        <div className="grid gap-4 md:grid-cols-[10rem_auto_auto] md:items-end">
+        <div className="grid gap-4 md:grid-cols-[10rem_auto] md:items-end">
           <div className="space-y-2">
             <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="education-year">
               연도
@@ -109,15 +103,12 @@ export default function EducationReportPage() {
           <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 h-[3rem]" type="button" onClick={() => loadRows(year)} disabled={loading} variant="outline">
             조회
           </Button>
-          <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 h-[3rem]" type="button" onClick={handleExport} disabled={rows.length === 0}>
-            엑셀
-          </Button>
         </div>
       </section>
 
       <section aria-label="교육이수자료 목록" className="manager-section rounded-xl border border-border/50 bg-muted/40">
         <div className="mb-4 flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
-          <span>조회 결과 {rows.length}</span>
+          <ListResults count={rows.length} disabled={loading || Boolean(error)} />
         </div>
 
         {loading ? (

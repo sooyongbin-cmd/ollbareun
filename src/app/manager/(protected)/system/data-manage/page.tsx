@@ -1,5 +1,7 @@
 "use client";
 
+import ListResults from "@/components/list-results";
+
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -94,6 +96,7 @@ export default function DataManagePage() {
         <Button variant="outline" disabled={loading || deleting} onClick={() => void changeYear(summary.year ?? undefined)}>다시 조회</Button>
       </div> : null}
       <section aria-label="자료 목록" className="manager-section rounded-xl border border-border/50 bg-muted/40">
+        <ListResults count={yearDataTables.length} disabled={loading || deleting || Boolean(error)} />
         {loading ? <p role="status">조회중입니다...</p> : <>
           <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
             <Table className="w-full">

@@ -1,5 +1,7 @@
 "use client";
 
+import ListResults from "@/components/list-results";
+
 import { useEffect, useMemo, useState, useSyncExternalStore, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -107,6 +109,28 @@ export default function EducationHistoryTable() {
     setReload((value) => value + 1);
   }
 
+  async function exportHistory() {
+    const all: EducationCompletionRow[] = [];
+    let expected = total;
+    for (let page = 1; ; page += 1) {
+      const params = new URLSearchParams({ ...active, view: "history", page: String(page) });
+      const response = await fetch(`/api/education/completions?${params}`);
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error ?? "교육이수 목록을 불러오지 못했습니다.");
+      if (page === 1) expected = payload.total ?? 0;
+      const records: EducationCompletionRow[] = payload.completions ?? [];
+      all.push(...records);
+      if (all.length >= expected) break;
+      if (!records.length) throw new Error("조회 자료가 변경되었습니다. 다시 조회한 뒤 다운로드하세요.");
+    }
+    return {
+      headers: ["근무자", "날짜", "안전교육", "교육구분", "이수여부", "완료일시"],
+      rows: all.map((record) => [record.employee_name, record.education_date ?? "날짜 미상", record.resource_title,
+        educationTypeLabels[record.education_type], record.is_completed ? "이수" : "미이수",
+        record.completed_at ? new Date(record.completed_at).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }) : "-"]),
+    };
+  }
+
   return (
     <section className="space-y-6">
       <header>
@@ -134,8 +158,15 @@ export default function EducationHistoryTable() {
         {(active.resourceId || active.employeeId) && <p className="mt-3 text-sm text-muted-foreground">선택한 교재 또는 직원의 이력을 조회 중입니다. ‘전체 이력’으로 조건을 해제할 수 있습니다.</p>}
       </form>
       {error ? <p role="alert" className="text-destructive">{error}</p> : loading ? <p role="status">교육이수 목록을 불러오는 중입니다.</p> : <>
-        <p className="text-right text-sm text-muted-foreground">조회 결과 {total}건</p>
         <div className="manager-section overflow-x-auto rounded-lg border border-border">
+          <ListResults count={total} getTable={exportHistory} filters={[
+            { label: "직원 이름", value: active.name || "전체" },
+            { label: "시작일", value: active.from || "전체" },
+            { label: "종료일", value: active.to || "전체" },
+            { label: "교육구분", value: educationTypeLabels[active.educationType as keyof typeof educationTypeLabels] || "전체" },
+            { label: "교재", value: active.resourceId ? resources.find((resource) => resource.id === active.resourceId)?.title || "선택한 교재" : "전체" },
+            ...(active.employeeId ? [{ label: "직원 ID", value: active.employeeId }] : []),
+          ]} />
           <Table>
             <TableHeader><TableRow>
               {["근무자", "날짜", "안전교육", "교육구분", "이수여부", "완료일시"].map((heading) => <TableHead key={heading}>{heading}</TableHead>)}

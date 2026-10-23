@@ -1,5 +1,7 @@
 "use client";
 
+import ListResults from "@/components/list-results";
+
 import { scheduleSummary, type ScheduleRule } from "@/lib/employee-schedule";
 
 import { Checkbox } from "@/components/ui/checkbox";
@@ -333,7 +335,7 @@ export default function EmployeeRosterPage() {
         className="manager-section rounded-xl border border-border/50 bg-muted/40"
       >
         <div className="mt-4 flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
-          <span>조회 결과 {filteredEmployees.length}</span>
+          <ListResults count={filteredEmployees.length} disabled={loading || Boolean(error)} />
         </div>
 
         {loading ? (

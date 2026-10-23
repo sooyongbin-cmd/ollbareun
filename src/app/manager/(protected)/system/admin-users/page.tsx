@@ -1,5 +1,7 @@
 "use client";
 
+import ListResults from "@/components/list-results";
+
 import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
 
 import Link from "next/link";
@@ -75,7 +77,7 @@ export default function AdminUsersPage() {
     </section>
     <section aria-label="관리자 목록" className="manager-section rounded-xl border border-border/50 bg-muted/40">
       <div className="mt-4 flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
-        <span>조회 결과 {rows.length}</span>
+        <ListResults count={rows.length} disabled={loading || Boolean(error)} />
       </div>
       {loading ? <ManagerLoadingMessage className="mt-6" /> : (
         <div className="mt-4 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">

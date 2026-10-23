@@ -1,5 +1,7 @@
 "use client";
 
+import ListResults from "@/components/list-results";
+
 import ConfirmModal from "@/components/modals/confirm-modal";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
@@ -499,7 +501,7 @@ function EducationAttendanceTable({
   return (
     <section aria-label={ariaLabel} className="manager-section rounded-xl border border-border/50 bg-muted/40">
       <div className="mb-4 flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
-        <span>조회 결과 {count}</span>
+        <ListResults count={count} disabled={loading || Boolean(error)} />
       </div>
       {loading ? (
         <ManagerLoadingMessage />

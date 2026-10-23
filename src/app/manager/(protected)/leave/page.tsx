@@ -1,5 +1,7 @@
 "use client";
 
+import ListResults from "@/components/list-results";
+
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
@@ -128,7 +130,7 @@ export default function LeavePage() {
 
       <section aria-label="휴가 목록" className="manager-section rounded-xl border border-border/50 bg-muted/40">
         <div className="mb-4 flex flex-wrap items-center justify-end gap-3 text-[0.875rem] font-normal text-muted-foreground">
-          <span>조회 결과 {filteredRows.length}</span>
+          <ListResults count={filteredRows.length} disabled={loading || Boolean(error)} />
         </div>
 
         {loading ? (

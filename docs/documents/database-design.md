@@ -84,7 +84,7 @@ auth.users 1 ── N manager_push_subscriptions
 1. 예정 행은 `intime_status = '0'`으로 생성한다.
 2. 출근 처리 시 `work_intime`이 `intime`보다 늦으면 `'1'`(지각), 그렇지 않으면 `'2'`(정상출근)을 저장한다.
 3. 퇴근 처리 시 `work_outtime`이 `outtime`보다 이르면 `outtime_status = '1'`(조퇴), 그렇지 않으면 `'2'`(퇴근)를 저장한다. 퇴근 여부만으로 `intime_status`를 `'3'`으로 변경하지 않는다.
-4. 휴가 신규 신청 시 해당 직원·기간의 기존 근태 행 중 `intime_status = '0'`인 행을 `'3'`(휴가)으로 변경한다. 신청 제한과 삭제 시 복원 규칙은 [운영 매뉴얼의 근무일별 출근상태와 휴가 반영](./operations-manual#_2-2-5-근무일별-출근상태와-휴가-반영)을 참고한다.
+4. 휴가 신규 신청 시 해당 직원·기간의 기존 근태 행 중 `intime_status = '0'`인 행을 `'3'`(휴가)으로 변경한다. 신청 제한과 삭제 시 복원 규칙은 [운영 매뉴얼의 근무일별 출근상태와 휴가 반영](./operations-manual#attendance-status-and-leave)을 참고한다.
 
 `work_outtime`은 `work_intime` 없이는 저장할 수 없으며, 일반 클라이언트에는 테이블 권한을 부여하지 않고 서버 `service_role`을 통해서만 접근한다.
 

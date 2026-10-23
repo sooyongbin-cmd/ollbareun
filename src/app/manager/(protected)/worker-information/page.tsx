@@ -2,7 +2,7 @@
 
 import ListResults from "@/components/list-results";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -20,10 +20,28 @@ function weekday(workDate: string) {
 }
 
 export default function WorkerInformationPage() {
+  const [worksiteQuery, setWorksiteQuery] = useState("");
+  const [worksiteNames, setWorksiteNames] = useState<string[]>([]);
+  const [worksiteError, setWorksiteError] = useState("");
   const [yearMonth, setYearMonth] = useState(() => educationToday().slice(0, 7));
   const [rows, setRows] = useState<AttendanceReportRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  useEffect(() => {
+    const controller = new AbortController();
+    async function loadWorksites() {
+      try {
+        const response = await fetch("/api/bootstrap", { signal: controller.signal });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error ?? "근무지 목록을 불러오지 못했습니다.");
+        if (!controller.signal.aborted) setWorksiteNames((payload.worksites ?? []).map((site: { name: string }) => site.name));
+      } catch (cause) {
+        if (!controller.signal.aborted) setWorksiteError(cause instanceof Error ? cause.message : "근무지 목록을 불러오지 못했습니다.");
+      }
+    }
+    void loadWorksites();
+    return () => controller.abort();
+  }, []);
   useEffect(() => {
     const controller = new AbortController();
     async function load() {
@@ -48,18 +66,35 @@ export default function WorkerInformationPage() {
     void load();
     return () => controller.abort();
   }, [yearMonth]);
+  const worksiteNameOptions = useMemo(() => Array.from(new Set([...worksiteNames, ...rows.map((row) => row.worksiteName)]))
+    .filter(Boolean).sort((left, right) => left.localeCompare(right, "ko-KR")), [worksiteNames, rows]);
+  const filteredRows = useMemo(() => {
+    const query = worksiteQuery.trim().toLowerCase();
+    return rows.filter((row) => row.worksiteName.toLowerCase().includes(query));
+  }, [rows, worksiteQuery]);
   return (
     <section className="space-y-[1.5rem]">
       <header><h1 className="text-[1.75rem] leading-[1.2]">월간근태</h1></header>
       <section aria-label="월간근태 검색" className="manager-section rounded-xl border border-border/50 bg-muted/40">
-        <div className="min-w-0 flex w-full flex-col gap-2 md:w-48">
-          <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor="monthly-attendance-period">조회년월</label>
-          <Input className="block w-full" id="monthly-attendance-period" type="month" value={yearMonth}
-            onChange={(event) => setYearMonth(event.target.value)} />
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_12rem] md:items-end">
+          <div className="min-w-0 flex flex-col gap-2">
+            <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor="monthly-attendance-worksite">근무지</label>
+            <Input className="block w-full" id="monthly-attendance-worksite" list="monthly-attendance-worksite-options"
+              value={worksiteQuery} onChange={(event) => setWorksiteQuery(event.target.value)} placeholder="근무지 이름을 입력하세요." />
+            <datalist id="monthly-attendance-worksite-options">
+              {worksiteNameOptions.map((name) => <option key={name} value={name} />)}
+            </datalist>
+          </div>
+          <div className="min-w-0 flex flex-col gap-2">
+            <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor="monthly-attendance-period">조회년월</label>
+            <Input className="block w-full" id="monthly-attendance-period" type="month" value={yearMonth}
+              onChange={(event) => setYearMonth(event.target.value)} />
+          </div>
         </div>
+        {worksiteError ? <p role="alert" className="mt-3 text-sm text-destructive">{worksiteError}</p> : null}
       </section>
       <section aria-label="월간근태 목록" className="manager-section rounded-xl border border-border/50 bg-muted/40">
-        <ListResults count={rows.length} disabled={loading || Boolean(error)} />
+        <ListResults count={filteredRows.length} disabled={loading || Boolean(error)} />
         {loading ? <ManagerLoadingMessage className="mt-6" /> : error ? (
           <p role="alert" className="mt-6 text-destructive">{error}</p>
         ) : (
@@ -69,21 +104,24 @@ export default function WorkerInformationPage() {
                 <TableHead key={column} className="whitespace-nowrap">{column}</TableHead>
               ))}</TableRow></TableHeader>
               <TableBody>
-                {rows.length === 0 ? (
+                {filteredRows.length === 0 ? (
                   <TableRow><TableCell colSpan={columns.length} data-responsive-empty className="p-8 text-center text-muted-foreground">
                     조회 결과에 해당하는 근태가 없습니다.
                   </TableCell></TableRow>
-                ) : rows.map((row, index) => (
+                ) : filteredRows.map((row, index) => (
                   <TableRow key={row.id}>
                     <TableCell data-label="근무지" data-export-value={row.worksiteName || "-"}>
-                      {index > 0 && rows[index - 1].worksiteName === row.worksiteName ? "" : row.worksiteName || "-"}
+                      {index > 0 && filteredRows[index - 1].worksiteName === row.worksiteName ? "" : row.worksiteName || "-"}
                     </TableCell>
                     <TableCell data-label="이름" data-export-value={employeeSummary(row)}>
-                      {index > 0 && rows[index - 1].worksiteName === row.worksiteName && employeeSummary(rows[index - 1]) === employeeSummary(row) ? null : <Link className="text-primary underline underline-offset-4 hover:text-primary/80" href={`/manager/reports/attendance/detail/${row.id}`}>
-                        {employeeSummary(row)}
-                      </Link>}
+                      {index > 0 && filteredRows[index - 1].worksiteName === row.worksiteName && employeeSummary(filteredRows[index - 1]) === employeeSummary(row) ? "" : employeeSummary(row)}
                     </TableCell>
-                    <TableCell data-label="출근예정일" className="whitespace-nowrap">{row.workDate} ({weekday(row.workDate)})</TableCell>
+                    <TableCell data-label="출근예정일" className="whitespace-nowrap">
+                      <Link className="text-primary underline underline-offset-4 hover:text-primary/80"
+                        aria-label={`${employeeSummary(row)} ${row.workDate} 근태 상세 보기`} href={`/manager/reports/attendance/detail/${row.id}`}>
+                        {row.workDate} ({weekday(row.workDate)})
+                      </Link>
+                    </TableCell>
                     <TableCell data-label="출퇴근예정">
                       <DateTimeRange start={scheduledClockInDisplay(row, row.workDate)}
                         end={formatDateTimeSegment(row.scheduledClockOut, row.workDate, row.workDate)} omitMissing />

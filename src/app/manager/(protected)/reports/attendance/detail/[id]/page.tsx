@@ -20,7 +20,7 @@ const educationTypeLabels: Record<AttendanceEducationItem["educationType"], stri
   monthly: "월별",
   quarterly: "분기",
   semiannual: "반기",
-  other: "기타",
+  other: "연간",
 };
 const educationTypeOrder: AttendanceEducationItem["educationType"][] = ["daily", "monthly", "quarterly", "semiannual", "other"];
 

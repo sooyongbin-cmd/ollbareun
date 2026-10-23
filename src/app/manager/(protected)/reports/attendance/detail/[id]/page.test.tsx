@@ -22,7 +22,7 @@ describe("attendance detail page", () => {
     render(<AttendanceDetailPage />);
     await screen.findByText("분기교재");
     const rows = screen.getAllByRole("row").slice(1);
-    expect(rows.map((row) => within(row).getAllByRole("cell")[0].textContent)).toEqual(["일일", "분기", "기타"]);
+    expect(rows.map((row) => within(row).getAllByRole("cell")[0].textContent)).toEqual(["일일", "분기", "연간"]);
     expect(within(rows[0]).queryByRole("button")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "분기교재 이수 처리" }));
     await waitFor(() => expect(screen.queryByRole("button", { name: "분기교재 이수 처리" })).not.toBeInTheDocument());

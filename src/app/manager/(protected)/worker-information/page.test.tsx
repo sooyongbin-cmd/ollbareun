@@ -32,11 +32,11 @@ describe("monthly attendance page", () => {
     render(<Page />);
     await screen.findByText("홍길동 (경비,격일)");
     expect(screen.getAllByRole("columnheader").map((cell) => cell.textContent)).toEqual([
-      "근무지", "이름", "출근예정일", "요일", "출퇴근예정", "출퇴근", "근태",
+      "근무지", "이름", "출근예정일", "출퇴근예정", "출퇴근", "근태",
     ]);
     const cells = within(screen.getAllByRole("row")[1]).getAllByRole("cell");
     expect(cells.map((cell) => cell.textContent)).toEqual([
-      "본사", "홍길동 (경비,격일)", "2026-10-23", "금", "22:00 ~ 2026-10-24 06:00", "21:55 ~ 2026-10-24 06:05", "출근 퇴근",
+      "본사", "홍길동 (경비,격일)", "2026-10-23 (금)", "22:00 ~ 2026-10-24 06:00", "21:55 ~ 2026-10-24 06:05", "출근 퇴근",
     ]);
     expect(screen.getByRole("link", { name: "홍길동 (경비,격일)" })).toHaveAttribute("href", "/manager/reports/attendance/detail/a");
     expect(screen.getByText("휴가")).toBeInTheDocument();

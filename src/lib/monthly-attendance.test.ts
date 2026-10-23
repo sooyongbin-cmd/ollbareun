@@ -33,3 +33,23 @@ it("rejects invalid months before accessing the database", async () => {
     await expect(loadMonthlyAttendance(month)).rejects.toThrow("조회년월을 확인하세요.");
   }
 });
+it("sorts by worksite, employee name and then work date ascending", async () => {
+  const attendance = [
+    { id: "d", employee_id: "kim", worksite_id: "last", work_date: "2026-10-01" },
+    { id: "c", employee_id: "hong", worksite_id: "first", work_date: "2026-10-01" },
+    { id: "b", employee_id: "kim", worksite_id: "first", work_date: "2026-10-02" },
+    { id: "a", employee_id: "kim", worksite_id: "first", work_date: "2026-10-01" },
+  ].map((row) => ({ ...row, work_intime: null, work_outtime: null }));
+  const data: Record<string, unknown[]> = {
+    work_record: attendance,
+    employees: [{ id: "hong", name: "홍길동" }, { id: "kim", name: "김철수" }],
+    worksites: [{ id: "last", name: "하늘" }, { id: "first", name: "가람" }],
+  };
+  vi.mocked(getSupabaseAdmin).mockReturnValue({ from: (table: string) => {
+    const builder: Record<string, unknown> = {};
+    for (const method of ["select", "gte", "lt", "order"]) builder[method] = () => builder;
+    builder.range = async () => ({ data: data[table], error: null });
+    return builder;
+  } } as never);
+  expect((await loadMonthlyAttendance("2026-10")).map((row) => row.id)).toEqual(["a", "b", "c", "d"]);
+});

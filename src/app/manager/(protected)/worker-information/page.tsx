@@ -12,7 +12,7 @@ import { employeeSummary } from "@/lib/employee-summary";
 import type { AttendanceReportRow } from "@/lib/manager-reports";
 import ManagerLoadingMessage from "../manager-loading-message";
 
-const columns = ["근무지", "이름", "출근예정일", "요일", "출퇴근예정", "출퇴근", "근태"];
+const columns = ["근무지", "이름", "출근예정일", "출퇴근예정", "출퇴근", "근태"];
 
 function weekday(workDate: string) {
   return new Intl.DateTimeFormat("ko-KR", { weekday: "short", timeZone: "Asia/Seoul" })
@@ -81,8 +81,7 @@ export default function WorkerInformationPage() {
                         {employeeSummary(row)}
                       </Link>
                     </TableCell>
-                    <TableCell data-label="출근예정일" className="whitespace-nowrap">{row.workDate}</TableCell>
-                    <TableCell data-label="요일">{weekday(row.workDate)}</TableCell>
+                    <TableCell data-label="출근예정일" className="whitespace-nowrap">{row.workDate} ({weekday(row.workDate)})</TableCell>
                     <TableCell data-label="출퇴근예정">
                       <DateTimeRange start={scheduledClockInDisplay(row, row.workDate)}
                         end={formatDateTimeSegment(row.scheduledClockOut, row.workDate, row.workDate)} omitMissing />

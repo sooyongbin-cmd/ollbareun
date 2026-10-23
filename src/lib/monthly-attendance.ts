@@ -22,5 +22,8 @@ export async function loadMonthlyAttendance(yearMonth: string) {
   const now = new Date();
   return [...new Set(attendance.map((record) => record.work_date))].sort().flatMap((workDate) =>
     buildAttendanceReport({ employeeName: "", workDate, employees, worksites,
-      attendance: attendance.filter((record) => record.work_date === workDate), now }));
+      attendance: attendance.filter((record) => record.work_date === workDate), now }))
+    .sort((left, right) => left.worksiteName.localeCompare(right.worksiteName, "ko-KR")
+      || left.employeeName.localeCompare(right.employeeName, "ko-KR")
+      || left.workDate.localeCompare(right.workDate));
 }

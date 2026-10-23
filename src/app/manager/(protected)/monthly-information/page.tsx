@@ -19,8 +19,14 @@ const educationColumns = [
 ] as const;
 const columns = ["근무지", "이름", "직군", "근무형태", "생년월일", "연락처", "출근예정일", "출퇴근예정", "출퇴근", "근태", ...educationColumns.map(({ label }) => label), "특이사항"];
 
+function formatPhone(phone?: string | null) {
+  const value = phone?.trim() || "-";
+  const digits = value.replace(/[\s-]/g, "");
+  return /^\d{11}$/.test(digits) ? digits.replace(/^(\d{3})(\d{4})(\d{4})$/, "$1-$2-$3") : value;
+}
+
 function employeeCells(row: MonthlyInformationRow) {
-  return [row.worksiteName || "-", row.employeeName, row.employeeRole || "-", row.workStyle || "-", row.employeeBirthdate || "-", row.employeePhone || "-"];
+  return [row.worksiteName || "-", row.employeeName, row.employeeRole || "-", row.workStyle || "-", row.employeeBirthdate || "-", formatPhone(row.employeePhone)];
 }
 
 function isIncompleteEducation(value: string) {

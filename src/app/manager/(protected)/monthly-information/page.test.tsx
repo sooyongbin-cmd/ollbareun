@@ -9,7 +9,7 @@ afterEach(() => vi.unstubAllGlobals());
 it("shows the copied monthly attendance screen under its new title with worksite search and detail links", async () => {
   vi.stubGlobal("fetch", vi.fn(async (url: string) => Response.json(url === "/api/bootstrap"
     ? { worksites: [{ name: "본사" }] }
-    : { rows: [{ id: "record-1", employeeName: "홍길동", employeeRole: "경비원", workStyle: "격일근무", employeeBirthdate: "1966-01-02", employeePhone: "010-1234-5678", worksiteName: "본사",
+    : { rows: [{ id: "record-1", employeeName: "홍길동", employeeRole: "경비원", workStyle: "격일근무", employeeBirthdate: "1966-01-02", employeePhone: "01012345678", worksiteName: "본사",
       workDate: "2026-10-23", scheduledClockIn: "18:00", scheduledClockOut: "2026-10-24 08:00",
       clockInDateTime: "-", clockOutDateTime: null, status: "대기", outtimeLabel: "",
       education: { daily: "09:05", monthly: "10:01", quarterly: "X", semiannual: "-", other: "00:05" },
@@ -24,6 +24,7 @@ it("shows the copied monthly attendance screen under its new title with worksite
   expect(screen.getAllByRole("columnheader").map((cell) => cell.textContent)).toEqual([
     "근무지", "이름", "직군", "근무형태", "생년월일", "연락처", "출근예정일", "출퇴근예정", "출퇴근", "근태", "일일", "월별", "분기", "반기", "연간", "특이사항",
   ]);
+  expect(screen.getByText("010-1234-5678")).toBeInTheDocument();
   expect(screen.getByText("09:05")).toBeInTheDocument();
   expect(screen.getByText("X")).toBeInTheDocument();
   expect(screen.getByText("출입문 파손....")).toBeInTheDocument();
@@ -67,7 +68,7 @@ it("hides all six identity cells only when all match the preceding visible row a
   const base = { employeeName: "홍길동", employeeRole: "경비원", workStyle: "격일근무", employeeBirthdate: "1966-01-02", employeePhone: "010-1234-5678", worksiteName: "본사",
     workDate: "2026-10-23", clockInDateTime: "-", clockOutDateTime: null, status: "대기", outtimeLabel: "",
     education: { daily: "X", monthly: "-", quarterly: "-", semiannual: "-", other: "-" }, remarks: [] };
-  const changes = [{}, {}, { worksiteName: "지사" }, { employeeName: "김철수" }, { employeeRole: "미화원" },
+  const changes = [{}, { employeePhone: "01012345678" }, { worksiteName: "지사" }, { employeeName: "김철수" }, { employeeRole: "미화원" },
     { workStyle: "일반근무" }, { employeeBirthdate: "1970-02-03" }, { employeePhone: "010-9999-8888" }];
   let current = base;
   const rows = changes.map((change, index) => {

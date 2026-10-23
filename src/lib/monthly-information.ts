@@ -53,13 +53,19 @@ export async function loadMonthlyInformation(yearMonth: string): Promise<Monthly
     items.push({ id: report.id, reportedAt: report.reported_at, content: report.content });
     remarksByEmployeeSiteDay.set(reportKey, items);
   }
-  return attendance.map((row) => ({
-    ...row,
-    education: {
-      ...(educationByEmployee.get(row.employeeId) ?? { monthly: "-", quarterly: "-", semiannual: "-", other: "-" }),
-      daily: row.status === "대기" || row.status === "결근" ? "-"
-        : dailyByEmployeeDay.get(JSON.stringify([row.employeeId, row.workDate])) ?? "X",
-    },
-    remarks: remarksByEmployeeSiteDay.get(key(row.employeeId, row.worksiteId, row.workDate)) ?? [],
-  }));
+  return attendance.map((row) => {
+    const hideEducation = row.status === "휴가" || row.status === "대기" || row.status === "결근";
+    const summary = educationByEmployee.get(row.employeeId);
+    return {
+      ...row,
+      education: {
+        monthly: summary?.monthly ?? "-",
+        quarterly: hideEducation ? "-" : summary?.quarterly ?? "-",
+        semiannual: hideEducation ? "-" : summary?.semiannual ?? "-",
+        other: hideEducation ? "-" : summary?.other ?? "-",
+        daily: hideEducation ? "-" : dailyByEmployeeDay.get(JSON.stringify([row.employeeId, row.workDate])) ?? "X",
+      },
+      remarks: remarksByEmployeeSiteDay.get(key(row.employeeId, row.worksiteId, row.workDate)) ?? [],
+    };
+  });
 }

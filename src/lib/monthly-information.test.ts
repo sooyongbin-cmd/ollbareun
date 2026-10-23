@@ -46,8 +46,8 @@ it("reuses monthly education counts and links remarks by employee ID, site ID an
   expect(loadMonthlyEducationAttendance).toHaveBeenCalledWith("2026-10");
   expect(listSpecialRemarkReports).toHaveBeenCalledWith({ yearMonth: "2026-10", includePhotos: false });
 });
-it("shows no daily education for waiting and absent rows, including a recorded completion", async () => {
-  vi.mocked(loadMonthlyAttendance).mockResolvedValue(["대기", "결근", "출근", "지각"].map((status, index) => ({
+it("hides daily and quarterly through annual education for leave, waiting and absent rows", async () => {
+  vi.mocked(loadMonthlyAttendance).mockResolvedValue(["휴가", "대기", "결근", "출근", "지각"].map((status, index) => ({
     id: String(index), employeeId: "e", workDate: "2026-10-23", status,
   } as MonthlyAttendanceRow)));
   vi.mocked(loadMonthlyEducationAttendance).mockResolvedValue({
@@ -59,8 +59,24 @@ it("shows no daily education for waiting and absent rows, including a recorded c
   });
   vi.mocked(listSpecialRemarkReports).mockResolvedValue([]);
   const rows = await loadMonthlyInformation("2026-10");
-  expect(rows.map((row) => row.education.daily)).toEqual(["-", "-", "09:05", "09:05"]);
-  expect(rows[2].education).toEqual({ daily: "09:05", monthly: "09:01", quarterly: "09:02", semiannual: "09:03", other: "09:04" });
+  expect(rows.map((row) => row.education.daily)).toEqual(["-", "-", "-", "09:05", "09:05"]);
+  for (const row of rows.slice(0, 3)) {
+    expect(row.education).toEqual({ daily: "-", monthly: "09:01", quarterly: "-", semiannual: "-", other: "-" });
+  }
+  expect(rows[3].education).toEqual({ daily: "09:05", monthly: "09:01", quarterly: "09:02", semiannual: "09:03", other: "09:04" });
+  vi.mocked(loadMonthlyEducationAttendance).mockResolvedValue({
+    resourceCounts: { daily: 1, monthly: 1, quarterly: 1, semiannual: 1, other: 1 }, dailySubjects: [],
+    summaryRows: [{ employeeId: "e", employeeName: "직원", monthly: 0, quarterly: 0, semiannual: 0, other: 0 }],
+    detailRows: [{ employeeId: "e", employeeName: "직원", workDate: "2026-10-23", daily: false,
+      subjects: [{ resourceId: "d", isCompleted: false }] }],
+  });
+  const incompleteRows = await loadMonthlyInformation("2026-10");
+  for (const row of incompleteRows.slice(0, 3)) {
+    expect(row.education).toEqual({ daily: "-", monthly: "X", quarterly: "-", semiannual: "-", other: "-" });
+  }
+  for (const row of incompleteRows.slice(3)) {
+    expect(row.education).toEqual({ daily: "X", monthly: "X", quarterly: "X", semiannual: "X", other: "X" });
+  }
 });
 it("rejects invalid months before any data query", async () => {
   await expect(loadMonthlyInformation("")).rejects.toThrow("조회년월을 확인하세요.");

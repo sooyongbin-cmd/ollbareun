@@ -1,69 +1,44 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Page from "./page";
 import { educationToday } from "@/lib/education-periods";
 
 afterEach(() => vi.unstubAllGlobals());
-describe("worker information page", () => {
-  it("defaults to the current Korean month and queries the selected period", async () => {
-    const fetch = vi.fn().mockResolvedValue(Response.json({ rows: [] }));
+describe("monthly attendance page", () => {
+  it("defaults to the current Korean month and queries the selected month", async () => {
+    const fetch = vi.fn().mockImplementation(() => Promise.resolve(Response.json({ rows: [] })));
     vi.stubGlobal("fetch", fetch);
     render(<Page />);
-    const today = educationToday();
-    expect(screen.getByLabelText("조회 시작일")).toHaveValue(
-      `${today.slice(0, 7)}-01`,
-    );
-    expect(screen.getByLabelText("조회 종료일")).toHaveValue(today);
-    await screen.findByText("조회 결과에 해당하는 근무자가 없습니다.");
-    fireEvent.change(screen.getByLabelText("조회 시작일"), {
-      target: { value: "2026-09-01" },
-    });
-    fireEvent.change(screen.getByLabelText("조회 종료일"), {
-      target: { value: "2026-09-30" },
-    });
-    expect(screen.queryByRole("button", { name: "조회" })).not.toBeInTheDocument();
-    await waitFor(() =>
-      expect(fetch).toHaveBeenLastCalledWith(
-        "/api/manager/worker-information?start=2026-09-01&end=2026-09-30",
-        expect.anything(),
-      ),
-    );
+    expect(screen.getByRole("heading", { name: "월간근태" })).toBeInTheDocument();
+    expect(screen.getByLabelText("조회년월")).toHaveValue(educationToday().slice(0, 7));
+    expect(screen.getByLabelText("조회년월")).toHaveAttribute("type", "month");
+    await screen.findByText("조회 결과에 해당하는 근태가 없습니다.");
+    fireEvent.change(screen.getByLabelText("조회년월"), { target: { value: "2026-09" } });
+    await waitFor(() => expect(fetch).toHaveBeenLastCalledWith(
+      "/api/manager/worker-information?yearMonth=2026-09", expect.anything(),
+    ));
+    expect(screen.queryByLabelText("조회 시작일")).not.toBeInTheDocument();
   });
-  it("renders dotted birthdates, attendance counts and education fractions", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi
-        .fn()
-        .mockResolvedValue(
-          Response.json({
-            rows: [
-              {
-                id: "a",
-                name: "홍길동",
-                birthdate: "1966-01-01",
-                phone: "01012345678",
-                role: "경비원",
-                worksite: "본사",
-                clockIn: "08:00",
-                clockOut: "18:00",
-                daysOff: "토요일",
-                attendance: { 결근: 2, 조퇴: 1, 지각: 0, 연차: 0, 휴가: 0 },
-                education: [{ label: "일일", completed: 2, total: 3 }],
-                remarks: 4,
-              },
-            ],
-          }),
-        ),
-    );
+  it("shows daily records with employee summary, overnight times and combined attendance statuses", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ rows: [{
+      id: "a", employeeName: "홍길동", employeeRole: "경비원", workStyle: "격일근무", worksiteName: "본사",
+      workDate: "2026-10-23", scheduledClockIn: "22:00", scheduledClockOut: "2026-10-24 06:00",
+      clockInDateTime: "2026-10-23 21:55", clockOutDateTime: "2026-10-24 06:05", status: "출근", outtimeLabel: "퇴근",
+    }, {
+      id: "b", employeeName: "김철수", employeeRole: "미화원", workStyle: "일반근무", worksiteName: "지사",
+      workDate: "2026-10-24", scheduledClockIn: "08:00", scheduledClockOut: "2026-10-24 18:00",
+      clockInDateTime: "-", clockOutDateTime: null, status: "휴가", outtimeLabel: "",
+    }] })));
     render(<Page />);
-    expect(await screen.findByText("1966.01.01")).toBeInTheDocument();
-    expect(
-      screen.getByText("결근(2), 조퇴(1), 지각(0), 연차(0), 휴가(0)"),
-    ).toBeInTheDocument();
-    expect(screen.getByText("2/3")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "홍길동" })).toHaveAttribute(
-      "href",
-      "/manager/employee/employees/save/a",
-    );
+    await screen.findByText("홍길동 (경비,격일)");
+    expect(screen.getAllByRole("columnheader").map((cell) => cell.textContent)).toEqual([
+      "근무지", "이름", "출근예정일", "요일", "출퇴근예정", "출퇴근", "근태",
+    ]);
+    const cells = within(screen.getAllByRole("row")[1]).getAllByRole("cell");
+    expect(cells.map((cell) => cell.textContent)).toEqual([
+      "본사", "홍길동 (경비,격일)", "2026-10-23", "금", "22:00 ~ 2026-10-24 06:00", "21:55 ~ 2026-10-24 06:05", "출근 퇴근",
+    ]);
+    expect(screen.getByRole("link", { name: "홍길동 (경비,격일)" })).toHaveAttribute("href", "/manager/reports/attendance/detail/a");
+    expect(screen.getByText("휴가")).toBeInTheDocument();
   });
 });

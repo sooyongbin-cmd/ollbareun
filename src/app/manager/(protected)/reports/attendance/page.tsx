@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import type { AttendanceReportRow } from "@/lib/manager-reports";
+import { DateTimeRange, scheduledClockInDisplay, formatDateTimeSegment, scheduledClockInOut, clockInOut } from "@/components/attendance-time-display";
 import { employeeSummary } from "@/lib/employee-summary";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,118 +11,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 import { saveRowsAsXls } from "../export-xls";
 
-type AttendanceReportRow = {
-  id: string;
-  workDate: string;
-  employeeName: string;
-  employeeRole: string;
-  workStyle: string;
-  worksiteName: string;
-  scheduledClockIn: string;
-  scheduledClockOut: string;
-  clockInDateTime: string;
-  clockOutDateTime: string | null;
-  intimeStatus: "0" | "1" | "2" | "3";
-  status: "결근" | "지각" | "출근" | "대기" | "휴가";
-  outtimeStatus: "0" | "1" | "2";
-  outtimeLabel: "" | "미퇴근" | "조퇴" | "퇴근";
-  isLate: boolean;
-};
-
 function currentDate() {
   return new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
-
-type DateTimeDisplay = {
-  text: string;
-  differsFromQueryDate: boolean;
-};
-
-function formatDateTimeSegment(value: string | null | undefined, queryDate: string, fallbackDate?: string): DateTimeDisplay {
-  if (!value || value === "-") {
-    return { text: "-", differsFromQueryDate: false };
-  }
-
-  const dateTime = value.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/);
-  if (dateTime) {
-    const differsFromQueryDate = Boolean(queryDate && dateTime[1] !== queryDate);
-    return {
-      text: queryDate && dateTime[1] === queryDate ? dateTime[2] : `${dateTime[1]} ${dateTime[2]}`,
-      differsFromQueryDate,
-    };
-  }
-
-  const time = value.match(/^(\d{2}:\d{2})$/);
-  if (time && fallbackDate) {
-    const differsFromQueryDate = Boolean(queryDate && fallbackDate !== queryDate);
-    return {
-      text: queryDate && fallbackDate === queryDate ? time[1] : `${fallbackDate} ${time[1]}`,
-      differsFromQueryDate,
-    };
-  }
-
-  return { text: value, differsFromQueryDate: false };
-}
-
-function formatDateTimeForQueryDate(value: string | null | undefined, queryDate: string, fallbackDate?: string) {
-  return formatDateTimeSegment(value, queryDate, fallbackDate).text;
-}
-
-function scheduledClockIn(row: AttendanceReportRow, queryDate: string) {
-  const value = row.scheduledClockIn === "-" ? "-" : `${row.workDate} ${row.scheduledClockIn}`;
-  return formatDateTimeForQueryDate(value, queryDate, row.workDate);
-}
-
-function scheduledClockInDisplay(row: AttendanceReportRow, queryDate: string) {
-  const value = row.scheduledClockIn === "-" ? "-" : `${row.workDate} ${row.scheduledClockIn}`;
-  return formatDateTimeSegment(value, queryDate, row.workDate);
-}
-
-function DateTimePart({ display }: { display: DateTimeDisplay }) {
-  return (
-    <span className={display.differsFromQueryDate ? "text-yellow-700 dark:text-yellow-300" : undefined}>
-      {display.text}
-    </span>
-  );
-}
-
-function DateTimeRange({
-  start,
-  end,
-  omitMissing = false,
-}: {
-  start: DateTimeDisplay;
-  end: DateTimeDisplay;
-  omitMissing?: boolean;
-}) {
-  if (omitMissing && start.text === "-") return <DateTimePart display={end} />;
-  if (omitMissing && end.text === "-") return <DateTimePart display={start} />;
-  if (start.text === "-" && end.text === "-") return "-";
-
-  return (
-    <>
-      <DateTimePart display={start} />
-      {" ~ "}
-      <DateTimePart display={end} />
-    </>
-  );
-}
-
-function scheduledClockInOut(row: AttendanceReportRow, queryDate: string) {
-  const clockIn = scheduledClockIn(row, queryDate);
-  const clockOut = formatDateTimeForQueryDate(row.scheduledClockOut, queryDate, row.workDate);
-  if (clockIn === "-") return clockOut;
-  if (clockOut === "-") return clockIn;
-  return `${clockIn} ~ ${clockOut}`;
-}
-
-function clockInOut(row: AttendanceReportRow, queryDate: string) {
-  const clockIn = formatDateTimeForQueryDate(row.clockInDateTime, queryDate, row.workDate);
-  const clockOut = formatDateTimeForQueryDate(row.clockOutDateTime, queryDate, row.workDate);
-  if (clockIn === "-" && clockOut === "-") return "-";
-  return `${clockIn} ~ ${clockOut}`;
-}
 
 export default function AttendanceReportPage() {
   const [employeeName, setEmployeeName] = useState("");

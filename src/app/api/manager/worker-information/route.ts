@@ -1,5 +1,5 @@
 import { getManagerUser } from "@/lib/manager-auth";
-import { loadWorkerInformation } from "@/lib/worker-information";
+import { loadMonthlyAttendance } from "@/lib/monthly-attendance";
 
 export async function GET(request: Request) {
   if (!(await getManagerUser()))
@@ -10,10 +10,7 @@ export async function GET(request: Request) {
   try {
     const params = new URL(request.url).searchParams;
     return Response.json({
-      rows: await loadWorkerInformation(
-        params.get("start") ?? "",
-        params.get("end") ?? "",
-      ),
+      rows: await loadMonthlyAttendance(params.get("yearMonth") ?? ""),
     });
   } catch (error) {
     return Response.json(
@@ -21,7 +18,7 @@ export async function GET(request: Request) {
         error:
           error instanceof Error
             ? error.message
-            : "근무자정보를 불러오지 못했습니다.",
+            : "월간근태를 불러오지 못했습니다.",
       },
       { status: 400 },
     );

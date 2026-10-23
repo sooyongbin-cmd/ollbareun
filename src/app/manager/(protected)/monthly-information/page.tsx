@@ -17,10 +17,10 @@ const educationColumns = [
   { key: "daily", label: "일일" }, { key: "monthly", label: "월별" }, { key: "quarterly", label: "분기" },
   { key: "semiannual", label: "반기" }, { key: "other", label: "연간" },
 ] as const;
-const columns = ["근무지", "이름", "직군", "근무형태", "생년월일", "출근예정일", "출퇴근예정", "출퇴근", "근태", ...educationColumns.map(({ label }) => label), "특이사항"];
+const columns = ["근무지", "이름", "직군", "근무형태", "생년월일", "연락처", "출근예정일", "출퇴근예정", "출퇴근", "근태", ...educationColumns.map(({ label }) => label), "특이사항"];
 
 function employeeCells(row: MonthlyInformationRow) {
-  return [row.worksiteName || "-", row.employeeName, row.employeeRole || "-", row.workStyle || "-", row.employeeBirthdate || "-"];
+  return [row.worksiteName || "-", row.employeeName, row.employeeRole || "-", row.workStyle || "-", row.employeeBirthdate || "-", row.employeePhone || "-"];
 }
 
 function isIncompleteEducation(value: string) {
@@ -145,7 +145,7 @@ export default function MonthlyInformationPage() {
                     <TableRow key={row.id}>
                       {values.map((value, column) => (
                         <TableCell key={columns[column]} data-label={columns[column]} data-export-value={value}
-                          className={column === 4 ? "whitespace-nowrap" : undefined}>
+                          className={column >= 4 ? "whitespace-nowrap" : undefined}>
                           {repeated ? "" : value}
                         </TableCell>
                       ))}

@@ -10,12 +10,19 @@ export type MonthlyInformationRow = MonthlyAttendanceRow & {
   remarks: MonthlyInformationRemark[];
 };
 
+function completionTime(value: string | null | undefined) {
+  if (!value || !Number.isFinite(Date.parse(value))) return "-";
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+  }).format(new Date(value));
+}
+
 /** Uses the monthly education screen's employee-level counts and applicable subjects. */
 export function buildMonthlyEducationOverview(input: Awaited<ReturnType<typeof loadMonthlyEducationAttendance>>) {
   const byEmployee = new Map<string, MonthlyInformationEducation>();
   for (const summary of input.summaryRows) {
     const status = (type: "monthly" | "quarterly" | "semiannual" | "other") =>
-      input.resourceCounts[type] === 0 ? "-" : summary[type] > 0 ? "O" : "X";
+      input.resourceCounts[type] === 0 ? "-" : summary[type] > 0 ? completionTime(summary.completedAt?.[type]) : "X";
     byEmployee.set(summary.employeeId, {
       daily: "-",
       monthly: status("monthly"), quarterly: status("quarterly"), semiannual: status("semiannual"), other: status("other"),
@@ -33,9 +40,7 @@ export async function loadMonthlyInformation(yearMonth: string): Promise<Monthly
   const dailyByEmployeeDay = new Map(education.detailRows.map((detail) => {
     const applicable = detail.subjects.some((subject) => subject.isCompleted !== null);
     const time = detail.dailyCompletedAt;
-    const value = !applicable ? "-" : !detail.daily ? "X" : time && Number.isFinite(Date.parse(time))
-      ? new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(time))
-      : "-";
+    const value = !applicable ? "-" : !detail.daily ? "X" : completionTime(time);
     return [JSON.stringify([detail.employeeId, detail.workDate]), value];
   }));
   const remarksByEmployeeSiteDay = new Map<string, MonthlyInformationRemark[]>();
@@ -52,7 +57,8 @@ export async function loadMonthlyInformation(yearMonth: string): Promise<Monthly
     ...row,
     education: {
       ...(educationByEmployee.get(row.employeeId) ?? { monthly: "-", quarterly: "-", semiannual: "-", other: "-" }),
-      daily: dailyByEmployeeDay.get(JSON.stringify([row.employeeId, row.workDate])) ?? "X",
+      daily: row.status === "대기" || row.status === "결근" ? "-"
+        : dailyByEmployeeDay.get(JSON.stringify([row.employeeId, row.workDate])) ?? "X",
     },
     remarks: remarksByEmployeeSiteDay.get(key(row.employeeId, row.worksiteId, row.workDate)) ?? [],
   }));

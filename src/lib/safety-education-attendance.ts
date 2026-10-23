@@ -36,6 +36,7 @@ export type MonthlyEducationSummaryRow = {
   quarterly: number;
   semiannual: number;
   other: number;
+  completedAt?: Partial<Record<Exclude<EducationType, "daily">, string | null>>;
 };
 
 export type MonthlyEducationDetailRow = {
@@ -211,15 +212,29 @@ export async function loadMonthlyEducationAttendance(yearMonth: string) {
       .in("employee_id", employeeIds).gte("work_date", monthStart).lt("work_date", nextMonth)
       .order("id").range(from, to))
     : [];
-  const completed = new Set(monthlyCompletions.filter((record) => record.work_date !== null && record.work_date >= monthStart && record.work_date < nextMonth)
-    .map((record) => JSON.stringify([record.employee_id, record.title, record.education_type])));
+  const completed = new Set<string>();
+  const completedAtBySubject = new Map<string, string>();
+  for (const record of monthlyCompletions) {
+    if (record.work_date === null || record.work_date < monthStart || record.work_date >= nextMonth) continue;
+    const key = JSON.stringify([record.employee_id, record.title, record.education_type]);
+    completed.add(key);
+    if (!record.completed_at || !Number.isFinite(Date.parse(record.completed_at))) continue;
+    const previous = completedAtBySubject.get(key);
+    if (!previous || Date.parse(record.completed_at) > Date.parse(previous)) completedAtBySubject.set(key, record.completed_at);
+  }
   const summaryRows = employeeIds.map((id): MonthlyEducationSummaryRow => {
     const counts = { monthly: 0, quarterly: 0, semiannual: 0, other: 0 };
+    const completedAt: NonNullable<MonthlyEducationSummaryRow["completedAt"]> = {};
     for (const type of monthlyTypes) {
       counts[type] = (resourcesByType.get(type) ?? []).filter((resource) =>
         completed.has(JSON.stringify([id, resource.title, resource.education_type]))).length;
+      const times = (resourcesByType.get(type) ?? []).flatMap((resource) => {
+        const time = completedAtBySubject.get(JSON.stringify([id, resource.title, resource.education_type]));
+        return time ? [time] : [];
+      });
+      completedAt[type] = times.length ? times.reduce((latest, time) => Date.parse(time) > Date.parse(latest) ? time : latest) : null;
     }
-    return { employeeId: id, employeeName: namesByEmployee.get(id) ?? "", ...counts };
+    return { employeeId: id, employeeName: namesByEmployee.get(id) ?? "", ...counts, completedAt };
   }).sort((left, right) => left.employeeName.localeCompare(right.employeeName, "ko-KR") || left.employeeId.localeCompare(right.employeeId));
   const detailAttendanceRows = await readAll<AttendanceRecord>(getWorkDateAttendanceQuery(monthStart, nextMonth));
   const detailEmployeeIds = [...new Set(detailAttendanceRows.map((record) => record.employee_id))];

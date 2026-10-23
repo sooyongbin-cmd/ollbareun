@@ -34,10 +34,12 @@ describe("monthly daily education attendance", () => {
       { id: "future", title: "반기", education_type: "반기", startdate: "2026-09-02", enddate: "2026-09-30" },
     ];
     const periodCompletions = [
-      { employee_id: "employee-1", title: "분기교재", work_date: "2026-09-01", education_type: "분기" },
-      { employee_id: "employee-1", title: "기타1", work_date: "2026-09-01", education_type: "기타" },
-      { employee_id: "employee-1", title: "기타1", work_date: "2026-09-01", education_type: "기타" },
-      { employee_id: "employee-1", title: "기타2", work_date: "2026-09-02", education_type: "기타" },
+      { employee_id: "employee-1", title: "기타1", work_date: "2026-09-01", education_type: "기타", completed_at: "2026-09-01T03:00:00Z" },
+      { employee_id: "employee-1", title: "무관한 교재", work_date: "2026-09-30", education_type: "기타", completed_at: "2026-09-30T03:00:00Z" },
+      { employee_id: "employee-1", title: "분기교재", work_date: "2026-09-01", education_type: "분기", completed_at: "2026-09-01T00:02:00Z" },
+      { employee_id: "employee-1", title: "기타1", work_date: "2026-09-01", education_type: "기타", completed_at: "2026-09-01T00:03:00Z" },
+      { employee_id: "employee-1", title: "기타1", work_date: "2026-09-01", education_type: "기타", completed_at: "2026-09-01T00:03:00Z" },
+      { employee_id: "employee-1", title: "기타2", work_date: "2026-09-02", education_type: "기타", completed_at: "2026-09-02T00:04:00Z" },
     ];
     const queries: { table: string; filters: [string, ...unknown[]][] }[] = [];
     vi.mocked(getSupabaseAdmin).mockReturnValue({
@@ -88,6 +90,13 @@ describe("monthly daily education attendance", () => {
     expect(result.resourceCounts).toEqual({ daily: 3, monthly: 0, quarterly: 1, semiannual: 1, other: 2 });
     expect(result.summaryRows.find((row) => row.employeeId === "employee-1")).toMatchObject({ quarterly: 1, semiannual: 0, other: 2 });
     expect(result.summaryRows.find((row) => row.employeeId === "employee-2")).toMatchObject({ quarterly: 0, semiannual: 0, other: 0 });
+
+    expect(result.summaryRows.find((row) => row.employeeId === "employee-1")?.completedAt).toEqual({
+      monthly: null, quarterly: "2026-09-01T00:02:00Z", semiannual: null, other: "2026-09-02T00:04:00Z",
+    });
+    expect(result.summaryRows.find((row) => row.employeeId === "employee-2")?.completedAt).toEqual({
+      monthly: null, quarterly: null, semiannual: null, other: null,
+    });
 
     const detailQuery = queries.find(({ table, filters }) => table === "work_record"
       && filters.some(([method]) => method === "gte"));

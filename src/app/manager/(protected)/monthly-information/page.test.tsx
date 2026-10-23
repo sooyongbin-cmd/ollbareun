@@ -12,7 +12,7 @@ it("shows the copied monthly attendance screen under its new title with worksite
     : { rows: [{ id: "record-1", employeeName: "홍길동", employeeRole: "경비원", workStyle: "격일근무", employeeBirthdate: "1966-01-02", worksiteName: "본사",
       workDate: "2026-10-23", scheduledClockIn: "18:00", scheduledClockOut: "2026-10-24 08:00",
       clockInDateTime: "-", clockOutDateTime: null, status: "대기", outtimeLabel: "",
-      education: { daily: "09:05", monthly: "O", quarterly: "X", semiannual: "-", other: "O" },
+      education: { daily: "09:05", monthly: "10:01", quarterly: "X", semiannual: "-", other: "00:05" },
       remarks: [{ id: "remark-1", reportedAt: "2026-10-23T09:00:00Z", content: "출입문 파손\n상세 내용" }] }] })));
   render(<MonthlyInformationPage />);
   expect(screen.getByRole("heading", { name: "월별현황" })).toBeInTheDocument();
@@ -30,7 +30,7 @@ it("shows the copied monthly attendance screen under its new title with worksite
   expect(screen.getByRole("link", { name: /2026\. 10\. 23/ })).toHaveAttribute("href", "/manager/inspection/special-remarks/remark-1");
   const exported = readListTable(screen.getByRole("region", { name: "월별현황 목록" }));
   expect(exported.rows[0].slice(0, 5)).toEqual(["본사", "홍길동", "경비원", "격일근무", "1966-01-02"]);
-  expect(exported.rows[0].slice(9, 14)).toEqual(["09:05", "O", "X", "-", "O"]);
+  expect(exported.rows[0].slice(9, 14)).toEqual(["09:05", "10:01", "X", "-", "00:05"]);
   expect(exported.rows[0][14]).toContain("출입문 파손....");
   fireEvent.change(screen.getByLabelText("근무지"), { target: { value: "없는근무지" } });
   expect(screen.getByText("조회 결과 0")).toBeInTheDocument();

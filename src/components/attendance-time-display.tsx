@@ -14,7 +14,7 @@ export function formatDateTimeSegment(value: string | null | undefined, queryDat
   if (dateTime) {
     const differsFromQueryDate = Boolean(queryDate && dateTime[1] !== queryDate);
     return {
-      text: queryDate && dateTime[1] === queryDate ? dateTime[2] : `${dateTime[1]} ${dateTime[2]}`,
+      text: queryDate && dateTime[1] === queryDate ? dateTime[2] : `${Number(dateTime[1].slice(-2))}일 ${dateTime[2]}`,
       differsFromQueryDate,
     };
   }
@@ -23,7 +23,7 @@ export function formatDateTimeSegment(value: string | null | undefined, queryDat
   if (time && fallbackDate) {
     const differsFromQueryDate = Boolean(queryDate && fallbackDate !== queryDate);
     return {
-      text: queryDate && fallbackDate === queryDate ? time[1] : `${fallbackDate} ${time[1]}`,
+      text: queryDate && fallbackDate === queryDate ? time[1] : `${Number(fallbackDate.slice(-2))}일 ${time[1]}`,
       differsFromQueryDate,
     };
   }

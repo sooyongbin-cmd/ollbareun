@@ -73,13 +73,15 @@ export default function WorkerInformationPage() {
                   <TableRow><TableCell colSpan={columns.length} data-responsive-empty className="p-8 text-center text-muted-foreground">
                     조회 결과에 해당하는 근태가 없습니다.
                   </TableCell></TableRow>
-                ) : rows.map((row) => (
+                ) : rows.map((row, index) => (
                   <TableRow key={row.id}>
-                    <TableCell data-label="근무지">{row.worksiteName || "-"}</TableCell>
-                    <TableCell data-label="이름">
-                      <Link className="text-primary underline underline-offset-4 hover:text-primary/80" href={`/manager/reports/attendance/detail/${row.id}`}>
+                    <TableCell data-label="근무지" data-export-value={row.worksiteName || "-"}>
+                      {index > 0 && rows[index - 1].worksiteName === row.worksiteName ? "" : row.worksiteName || "-"}
+                    </TableCell>
+                    <TableCell data-label="이름" data-export-value={employeeSummary(row)}>
+                      {index > 0 && rows[index - 1].worksiteName === row.worksiteName && employeeSummary(rows[index - 1]) === employeeSummary(row) ? null : <Link className="text-primary underline underline-offset-4 hover:text-primary/80" href={`/manager/reports/attendance/detail/${row.id}`}>
                         {employeeSummary(row)}
-                      </Link>
+                      </Link>}
                     </TableCell>
                     <TableCell data-label="출근예정일" className="whitespace-nowrap">{row.workDate} ({weekday(row.workDate)})</TableCell>
                     <TableCell data-label="출퇴근예정">

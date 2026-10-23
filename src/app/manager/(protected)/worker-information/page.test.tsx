@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Page from "./page";
+import { readListTable } from "@/lib/list-export";
 import { educationToday } from "@/lib/education-periods";
 
 afterEach(() => vi.unstubAllGlobals());
@@ -36,9 +37,30 @@ describe("monthly attendance page", () => {
     ]);
     const cells = within(screen.getAllByRole("row")[1]).getAllByRole("cell");
     expect(cells.map((cell) => cell.textContent)).toEqual([
-      "본사", "홍길동 (경비,격일)", "2026-10-23 (금)", "22:00 ~ 2026-10-24 06:00", "21:55 ~ 2026-10-24 06:05", "출근 퇴근",
+      "본사", "홍길동 (경비,격일)", "2026-10-23 (금)", "22:00 ~ 24일 06:00", "21:55 ~ 24일 06:05", "출근 퇴근",
     ]);
     expect(screen.getByRole("link", { name: "홍길동 (경비,격일)" })).toHaveAttribute("href", "/manager/reports/attendance/detail/a");
     expect(screen.getByText("휴가")).toBeInTheDocument();
   });
+  it("omits repeated site and employee values within a site while preserving complete Excel rows", async () => {
+    const base = { employeeName: "김철수", employeeRole: "경비원", workStyle: "격일근무", worksiteName: "가람",
+      scheduledClockIn: "18:00", scheduledClockOut: "2026-10-03 08:00", clockInDateTime: "-", clockOutDateTime: null,
+      status: "대기", outtimeLabel: "" };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ rows: [
+      { ...base, id: "a", workDate: "2026-10-01" },
+      { ...base, id: "b", workDate: "2026-10-02" },
+      { ...base, id: "c", workDate: "2026-10-02", employeeName: "홍길동" },
+      { ...base, id: "d", workDate: "2026-10-02", employeeName: "홍길동", worksiteName: "하늘" },
+    ] })));
+    render(<Page />);
+    await screen.findByText("김철수 (경비,격일)");
+    const rows = screen.getAllByRole("row").slice(1);
+    expect(rows.map((row) => within(row).getAllByRole("cell").slice(0, 2).map((cell) => cell.textContent))).toEqual([
+      ["가람", "김철수 (경비,격일)"], ["", ""], ["", "홍길동 (경비,격일)"], ["하늘", "홍길동 (경비,격일)"],
+    ]);
+    expect(within(rows[1]).getAllByRole("cell")[3]).toHaveTextContent("18:00 ~ 3일 08:00");
+    const exported = readListTable(screen.getByRole("region", { name: "월간근태 목록" }));
+    expect(exported.rows[1].slice(0, 2)).toEqual(["가람", "김철수 (경비,격일)"]);
+  });
+
 });

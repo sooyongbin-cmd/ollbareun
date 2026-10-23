@@ -38,6 +38,8 @@ export async function downloadListWorkbook(input: {
 }
 
 function displayText(element: Element) {
+  const exportValue = element.getAttribute("data-export-value");
+  if (exportValue !== null) return exportValue;
   const clone = element.cloneNode(true) as Element;
   clone.querySelectorAll("svg,script,style,[data-export-ignore]").forEach((node) => node.remove());
   clone.querySelectorAll("input,select,textarea").forEach((node, index) => {

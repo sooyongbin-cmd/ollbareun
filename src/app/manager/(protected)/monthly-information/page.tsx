@@ -19,6 +19,10 @@ const educationColumns = [
 ] as const;
 const columns = ["근무지", "이름", "직군", "근무형태", "생년월일", "출근예정일", "출퇴근예정", "출퇴근", "근태", ...educationColumns.map(({ label }) => label), "특이사항"];
 
+function employeeCells(row: MonthlyInformationRow) {
+  return [row.worksiteName || "-", row.employeeName, row.employeeRole || "-", row.workStyle || "-", row.employeeBirthdate || "-"];
+}
+
 function isIncompleteEducation(value: string) {
   return value === "X";
 }
@@ -133,48 +137,50 @@ export default function MonthlyInformationPage() {
                   <TableRow><TableCell colSpan={columns.length} data-responsive-empty className="p-8 text-center text-muted-foreground">
                     조회 결과에 해당하는 근태가 없습니다.
                   </TableCell></TableRow>
-                ) : filteredRows.map((row, index) => (
-                  <TableRow key={row.id}>
-                    <TableCell data-label="근무지" data-export-value={row.worksiteName || "-"}>
-                      {index > 0 && filteredRows[index - 1].worksiteName === row.worksiteName ? "" : row.worksiteName || "-"}
-                    </TableCell>
-                    <TableCell data-label="이름" data-export-value={row.employeeName}>
-                      {index > 0 && filteredRows[index - 1].worksiteName === row.worksiteName && employeeSummary(filteredRows[index - 1]) === employeeSummary(row) ? "" : row.employeeName}
-                    </TableCell>
-                    <TableCell data-label="직군">{row.employeeRole || "-"}</TableCell>
-                    <TableCell data-label="근무형태">{row.workStyle || "-"}</TableCell>
-                    <TableCell data-label="생년월일" className="whitespace-nowrap">{row.employeeBirthdate || "-"}</TableCell>
-                    <TableCell data-label="출근예정일" className="whitespace-nowrap">
-                      <Link className="text-primary underline underline-offset-4 hover:text-primary/80"
-                        aria-label={`${employeeSummary(row)} ${row.workDate} 근태 상세 보기`} href={`/manager/reports/attendance/detail/${row.id}`}>
-                        {row.workDate} ({weekday(row.workDate)})
-                      </Link>
-                    </TableCell>
-                    <TableCell data-label="출퇴근예정">
-                      <DateTimeRange start={scheduledClockInDisplay(row, row.workDate)}
-                        end={formatDateTimeSegment(row.scheduledClockOut, row.workDate, row.workDate)} omitMissing />
-                    </TableCell>
-                    <TableCell data-label="출퇴근">
-                      <DateTimeRange start={formatDateTimeSegment(row.clockInDateTime, row.workDate, row.workDate)}
-                        end={formatDateTimeSegment(row.clockOutDateTime, row.workDate, row.workDate)} />
-                    </TableCell>
-                    <TableCell data-label="근태">{[row.status, row.outtimeLabel].filter(Boolean).join(" ")}</TableCell>
-                    {educationColumns.map(({ key, label }) => <TableCell key={key} data-label={label}>
-                      <span className={isIncompleteEducation(row.education[key]) ? "font-semibold text-destructive" : (row.education[key] === "O" || /^\d{2}:\d{2}$/.test(row.education[key])) ? "font-semibold text-foreground" : "font-semibold text-muted-foreground"}>
-                        {row.education[key]}
-                      </span>
-                    </TableCell>)}
-                    <TableCell data-label="특이사항" className="min-w-64 max-w-96 whitespace-normal break-words align-top"
-                      data-export-value={row.remarks.map((remark) => `${formatSpecialRemarkDateTime(remark.reportedAt)} ${summarizeSpecialRemarkContent(remark.content)}`).join("\n") || "-"}>
-                      {row.remarks.length ? <div className="space-y-3">{row.remarks.map((remark) => <div key={remark.id}>
-                        <Link className="text-primary hover:underline" href={`/manager/inspection/special-remarks/${encodeURIComponent(remark.id)}`}>
-                          {formatSpecialRemarkDateTime(remark.reportedAt)}
+                ) : filteredRows.map((row, index) => {
+                  const values = employeeCells(row);
+                  const previousValues = index > 0 ? employeeCells(filteredRows[index - 1]) : null;
+                  const repeated = previousValues !== null && values.every((value, column) => value === previousValues[column]);
+                  return (
+                    <TableRow key={row.id}>
+                      {values.map((value, column) => (
+                        <TableCell key={columns[column]} data-label={columns[column]} data-export-value={value}
+                          className={column === 4 ? "whitespace-nowrap" : undefined}>
+                          {repeated ? "" : value}
+                        </TableCell>
+                      ))}
+                      <TableCell data-label="출근예정일" className="whitespace-nowrap">
+                        <Link className="text-primary underline underline-offset-4 hover:text-primary/80"
+                          aria-label={`${employeeSummary(row)} ${row.workDate} 근태 상세 보기`} href={`/manager/reports/attendance/detail/${row.id}`}>
+                          {row.workDate} ({weekday(row.workDate)})
                         </Link>
-                        <p>{summarizeSpecialRemarkContent(remark.content)}</p>
-                      </div>)}</div> : "-"}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                      <TableCell data-label="출퇴근예정">
+                        <DateTimeRange start={scheduledClockInDisplay(row, row.workDate)}
+                          end={formatDateTimeSegment(row.scheduledClockOut, row.workDate, row.workDate)} omitMissing />
+                      </TableCell>
+                      <TableCell data-label="출퇴근">
+                        <DateTimeRange start={formatDateTimeSegment(row.clockInDateTime, row.workDate, row.workDate)}
+                          end={formatDateTimeSegment(row.clockOutDateTime, row.workDate, row.workDate)} />
+                      </TableCell>
+                      <TableCell data-label="근태">{[row.status, row.outtimeLabel].filter(Boolean).join(" ")}</TableCell>
+                      {educationColumns.map(({ key, label }) => <TableCell key={key} data-label={label}>
+                        <span className={isIncompleteEducation(row.education[key]) ? "font-semibold text-destructive" : (row.education[key] === "O" || /^\d{2}:\d{2}$/.test(row.education[key])) ? "font-semibold text-foreground" : "font-semibold text-muted-foreground"}>
+                          {row.education[key]}
+                        </span>
+                      </TableCell>)}
+                      <TableCell data-label="특이사항" className="min-w-64 max-w-96 whitespace-normal break-words align-top"
+                        data-export-value={row.remarks.map((remark) => `${formatSpecialRemarkDateTime(remark.reportedAt)} ${summarizeSpecialRemarkContent(remark.content)}`).join("\n") || "-"}>
+                        {row.remarks.length ? <div className="space-y-3">{row.remarks.map((remark) => <div key={remark.id}>
+                          <Link className="text-primary hover:underline" href={`/manager/inspection/special-remarks/${encodeURIComponent(remark.id)}`}>
+                            {formatSpecialRemarkDateTime(remark.reportedAt)}
+                          </Link>
+                          <p>{summarizeSpecialRemarkContent(remark.content)}</p>
+                        </div>)}</div> : "-"}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>

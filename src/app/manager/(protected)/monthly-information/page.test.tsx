@@ -63,6 +63,30 @@ it("offers unique worker names and combines worker and worksite filters for rows
   fireEvent.change(screen.getByLabelText("근무자"), { target: { value: "" } });
   expect(readListTable(region).rows).toHaveLength(3);
 });
+it("hides all five identity cells only when all match the preceding visible row and preserves export", async () => {
+  const base = { employeeName: "홍길동", employeeRole: "경비원", workStyle: "격일근무", employeeBirthdate: "1966-01-02", worksiteName: "본사",
+    workDate: "2026-10-23", clockInDateTime: "-", clockOutDateTime: null, status: "대기", outtimeLabel: "",
+    education: { daily: "X", monthly: "-", quarterly: "-", semiannual: "-", other: "-" }, remarks: [] };
+  const changes = [{}, {}, { worksiteName: "지사" }, { employeeName: "김철수" }, { employeeRole: "미화원" },
+    { workStyle: "일반근무" }, { employeeBirthdate: "1970-02-03" }];
+  let current = base;
+  const rows = changes.map((change, index) => {
+    current = { ...current, ...change };
+    return { ...current, id: String(index) };
+  });
+  vi.stubGlobal("fetch", vi.fn(async (url: string) => Response.json(url === "/api/bootstrap" ? {} : { rows })));
+  render(<MonthlyInformationPage />);
+  await screen.findByText("조회 결과 7");
+  const region = screen.getByRole("region", { name: "월별현황 목록" });
+  const visibleValues = () => Array.from(region.querySelectorAll("tbody tr")).map((row) =>
+    Array.from(row.querySelectorAll("td")).slice(0, 5).map((cell) => cell.textContent));
+  expect(visibleValues()[0]).toEqual(["본사", "홍길동", "경비원", "격일근무", "1966-01-02"]);
+  expect(visibleValues()[1]).toEqual(["", "", "", "", ""]);
+  for (let index = 2; index < rows.length; index++) expect(visibleValues()[index]).not.toContain("");
+  expect(readListTable(region).rows[1].slice(0, 5)).toEqual(visibleValues()[0]);
+  fireEvent.change(screen.getByLabelText("근무지"), { target: { value: "지사" } });
+  expect(visibleValues()[0]).toEqual(["지사", "홍길동", "경비원", "격일근무", "1966-01-02"]);
+});
 it("resolves the overview menu and header title for the new route", () => {
   expect(findManagerNavigation("/manager/monthly-information")).toMatchObject({ group: null,
     item: { label: "월별현황", href: "/manager/monthly-information" } });

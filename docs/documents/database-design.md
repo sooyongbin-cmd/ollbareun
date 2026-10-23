@@ -75,16 +75,16 @@ auth.users 1 ── N manager_push_subscriptions
 | `outtime` | `timestamptz` | 가능 | 퇴근 예정일시 |
 | `work_intime` | `timestamptz` | 가능 | 실제 출근일시 |
 | `work_outtime` | `timestamptz` | 가능 | 실제 퇴근일시 |
-| `intime_status` | `text` | 불가 | `0` 결근, `1` 지각, `2` 정상출근, `3` 정상근무 |
-| `outtime_status` | `text` | 가능 | `4` 조기퇴근 |
+| `intime_status` | `text` | 불가 | `0` 미출근, `1` 지각, `2` 출근, `3` 휴가 |
+| `outtime_status` | `text` | 가능 | `0` 미퇴근, `1` 조퇴, `2` 퇴근 |
 | `created_at`, `updated_at` | `timestamptz` | 불가 | 생성·수정 시각 |
 
 상태는 다음 순서로 기록한다.
 
 1. 예정 행은 `intime_status = '0'`으로 생성한다.
 2. 출근 처리 시 `work_intime`이 `intime`보다 늦으면 `'1'`(지각), 그렇지 않으면 `'2'`(정상출근)을 저장한다.
-3. 예정 퇴근시각 이후 정상 퇴근하면 `intime_status = '3'`(정상근무)으로 변경한다.
-4. 예정 퇴근시각보다 일찍 퇴근하면 `outtime_status = '4'`(조기퇴근)를 저장하고 출근 상태는 유지한다.
+3. 퇴근 처리 시 `work_outtime`이 `outtime`보다 이르면 `outtime_status = '1'`(조퇴), 그렇지 않으면 `'2'`(퇴근)를 저장한다. 퇴근 여부만으로 `intime_status`를 `'3'`으로 변경하지 않는다.
+4. 휴가 신규 신청 시 해당 직원·기간의 기존 근태 행 중 `intime_status = '0'`인 행을 `'3'`(휴가)으로 변경한다. 신청 제한과 삭제 시 복원 규칙은 [운영 매뉴얼의 근무일별 출근상태와 휴가 반영](./operations-manual#_2-2-5-근무일별-출근상태와-휴가-반영)을 참고한다.
 
 `work_outtime`은 `work_intime` 없이는 저장할 수 없으며, 일반 클라이언트에는 테이블 권한을 부여하지 않고 서버 `service_role`을 통해서만 접근한다.
 
@@ -120,7 +120,7 @@ auth.users 1 ── N manager_push_subscriptions
 - 배정별 `in_time`, `out_time`이 없으면 직원 기본 시간을 사용한다. 시간 형식은 애플리케이션에서 `HH:mm[:ss]`로 검증한다.
 - `assignment_schedule_rules`는 배정별 요일·공휴일 근무 여부와 시각을 저장한다. `leave` 기간에 포함되는 예정 근무는 `work_record.intime_status = '3'`으로 표시한다.
 - 근무기록은 `(employee_id, work_date)` UNIQUE이며, `intime`·`outtime`은 예정 시각, `work_intime`·`work_outtime`은 실제 시각이다. `work_outtime`은 출근 시각 없이 저장할 수 없다.
-- `intime_status`는 `0` 미출근, `1` 지각, `2` 출근, `3` 휴가를 사용하고, 조기퇴근 시 `outtime_status = '4'`를 저장한다.
+- `intime_status`는 `0` 미출근, `1` 지각, `2` 출근, `3` 휴가를 사용하고, `outtime_status`는 `0` 미퇴근, `1` 조퇴, `2` 퇴근을 사용한다.
 - 근무지의 `gps_info`와 점검 이력의 `site_gps_info`는 객체이며 `latitude`·`longitude` 숫자 필드를 가져야 한다. 점검 현장 자체에는 주소나 GPS를 저장하지 않는다. 특이사항 보고의 `gps_info`는 애플리케이션에서 같은 형태로 정규화하지만 현재 DB CHECK는 없다.
 - `radius_meters`는 현재 애플리케이션에서 최소 1m로 보정하며 DB CHECK는 없다.
 - 교육 이수는 `is_completed = false`이면 `completed_at IS NULL`, `true`이면 `completed_at IS NOT NULL`이어야 한다.

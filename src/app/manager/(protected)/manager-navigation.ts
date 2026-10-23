@@ -36,6 +36,11 @@ export const dashboardNavigationItem: ManagerNavigationItem = {
   icon: LayoutDashboard,
 };
 
+export const overviewNavigationItems: ManagerNavigationItem[] = [
+  dashboardNavigationItem,
+  { label: "월별전체현황", href: "/manager/monthly-information", icon: CalendarDays },
+];
+
 export const managerNavigationGroups: ManagerNavigationGroup[] = [
   {
     label: "직원관리",
@@ -98,8 +103,9 @@ export function isManagerPathActive(pathname: string | null, href: string) {
 export function findManagerNavigation(pathname: string | null) {
   const currentPath = pathname ?? "/manager";
 
-  if (currentPath === dashboardNavigationItem.href) {
-    return { group: null, item: dashboardNavigationItem };
+  const overviewItem = overviewNavigationItems.find((item) => isManagerPathActive(currentPath, item.href));
+  if (overviewItem) {
+    return { group: null, item: overviewItem };
   }
 
   const matches = managerNavigationGroups.flatMap((group) =>

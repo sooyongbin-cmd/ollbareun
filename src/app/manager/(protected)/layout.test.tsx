@@ -225,6 +225,9 @@ describe("manager layout", () => {
     expect(screen.queryByRole("link", { name: "교육이수자료" })).not.toBeInTheDocument();
     expect(screen.getByText("시스템")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "대시보드" })).toHaveAttribute("href", "/manager");
+    const overviewLinks = screen.getByRole("link", { name: "대시보드" }).closest("[data-sidebar=group]")?.querySelectorAll("a");
+    expect(Array.from(overviewLinks ?? []).map((link) => link.textContent?.trim())).toEqual(["대시보드", "월별전체현황"]);
+    expect(screen.getByRole("link", { name: "월별전체현황" })).toHaveAttribute("href", "/manager/monthly-information");
     expect(screen.getByRole("link", { name: "교육자료관리" })).toHaveAttribute(
       "href",
       "/manager/safety/resources",

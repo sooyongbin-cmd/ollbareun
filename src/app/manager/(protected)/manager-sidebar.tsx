@@ -18,7 +18,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import {
-  dashboardNavigationItem,
+  overviewNavigationItems,
   findManagerNavigation,
   managerNavigationGroups,
 } from "./manager-navigation";
@@ -77,18 +77,20 @@ export default function ManagerSidebar() {
           <SidebarGroupLabel>개요</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={currentNavigation.item.href === dashboardNavigationItem.href}
-                  tooltip={dashboardNavigationItem.label}
-                >
-                  <Link href={dashboardNavigationItem.href} onClick={closeMobileMenu}>
-                    <dashboardNavigationItem.icon aria-hidden="true" />
-                    <span>{dashboardNavigationItem.label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {overviewNavigationItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={currentNavigation.item.href === item.href}
+                    tooltip={item.label}
+                  >
+                    <Link href={item.href} onClick={closeMobileMenu}>
+                      <item.icon aria-hidden="true" />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

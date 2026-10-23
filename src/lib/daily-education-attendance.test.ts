@@ -47,5 +47,51 @@ it("counts active resources and same-date completions by subject, including othe
   const resources = queries.find((query) => query.table === "education_resources")!;
   expect(resources.filters).toContainEqual(["lte", "startdate", date]);
   expect(resources.filters).toContainEqual(["gte", "enddate", date]);
-  expect(queries.find((query) => query.table === "education_completions")!.filters).toContainEqual(["eq", "work_date", date]);
+  expect(queries.find((query) => query.table === "education_completions")!.filters).toContainEqual(["gte", "work_date", date]);
+  expect(queries.find((query) => query.table === "education_completions")!.filters).toContainEqual(["lte", "work_date", date]);
+});
+
+it("carries period completions forward within each resource period without counting future or previous-period records", async () => {
+  const date = "2025-10-23";
+  const resources = [
+    { title: "日", education_type: "일일", startdate: "2025-10-01" },
+    { title: "月", education_type: "월간", startdate: "2025-10-01" },
+    { title: "季", education_type: "분기", startdate: "2025-10-01" },
+    { title: "半", education_type: "반기", startdate: "2025-07-01" },
+    { title: "연간안전교육1", education_type: "기타", startdate: "2025-10-01" },
+  ].map((resource) => ({ ...resource, id: resource.title, enddate: "2026-10-31" }));
+  const completions = [
+    ...resources.map((resource) => ({ employee_id: "e1", title: resource.title,
+      education_type: resource.education_type, work_date: resource.startdate })),
+    { employee_id: "e1", title: "연간안전교육1", education_type: "기타", work_date: "2025-10-01" },
+    { employee_id: "e1", title: "연간안전교육1", education_type: "기타", work_date: "2025-10-24" },
+    { employee_id: "e2", title: "연간안전교육1", education_type: "기타", work_date: "2025-09-30" },
+    { employee_id: "e2", title: "月", education_type: "월간", work_date: "2025-10-24" },
+    { employee_id: "e2", title: "연간안전교육1", education_type: "기타", work_date: null },
+    { employee_id: "e2", title: "다른 교재", education_type: "기타", work_date: date },
+  ];
+  const queries: { table: string; filters: unknown[][] }[] = [];
+  vi.mocked(getSupabaseAdmin).mockReturnValue({ from: (table: string) => {
+    const query = { table, filters: [] as unknown[][] };
+    queries.push(query);
+    const builder: Record<string, unknown> = {};
+    for (const method of ["select", "not", "or", "order", "lte", "gte", "in", "eq"]) {
+      builder[method] = (...args: unknown[]) => { query.filters.push([method, ...args]); return builder; };
+    }
+    builder.range = async () => ({ data: table === "work_record"
+      ? ["e1", "e2"].map((employee_id) => ({ employee_id, work_date: date, employees: { name: employee_id } }))
+      : table === "education_resources" ? resources : completions, error: null });
+    return builder;
+  } } as never);
+
+  const result = await loadDailyEducationAttendance(date);
+  expect(result.rows.find((row) => row.employeeId === "e1")).toMatchObject({
+    daily: 0, monthly: 1, quarterly: 1, semiannual: 1, other: 1,
+  });
+  expect(result.rows.find((row) => row.employeeId === "e2")).toMatchObject({
+    daily: 0, monthly: 0, quarterly: 0, semiannual: 0, other: 0,
+  });
+  const completionQuery = queries.find((query) => query.table === "education_completions")!;
+  expect(completionQuery.filters).toContainEqual(["gte", "work_date", "2025-07-01"]);
+  expect(completionQuery.filters).toContainEqual(["lte", "work_date", date]);
 });

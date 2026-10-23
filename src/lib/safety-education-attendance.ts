@@ -146,19 +146,30 @@ export async function loadDailyEducationAttendance(date = educationToday()): Pro
     if (!previous || record.work_date > previous.work_date) attendanceByEmployee.set(record.employee_id, record);
   });
   const employeeIds = [...attendanceByEmployee.keys()];
+  const completionStart = resources.reduce((start, resource) =>
+    resource.education_type !== educationTypeLabels.daily && resource.startdate < start ? resource.startdate : start, date);
   const completions = employeeIds.length && resources.length
     ? await readAll<CompletionRecord & { title: string }>((from, to) => supabase.from("education_completions")
       .select("employee_id,work_date,title,education_type,completed_at")
-      .in("employee_id", employeeIds).eq("work_date", date)
+      .in("employee_id", employeeIds).gte("work_date", completionStart).lte("work_date", date)
       .order("id").range(from, to))
     : [];
-  const completed = new Set(completions.filter((record) => record.work_date === date)
-    .map((record) => JSON.stringify([record.employee_id, record.title, record.education_type])));
+  const latestCompletionDates = new Map<string, string>();
+  for (const record of completions) {
+    if (!record.work_date || record.work_date > date) continue;
+    const key = JSON.stringify([record.employee_id, record.title, record.education_type]);
+    const previous = latestCompletionDates.get(key);
+    if (!previous || record.work_date > previous) latestCompletionDates.set(key, record.work_date);
+  }
   const rows = employeeIds.map((id): DailyEducationAttendanceRow => {
     const counts: EducationResourceCounts = { daily: 0, monthly: 0, quarterly: 0, semiannual: 0, other: 0 };
     for (const type of educationTypes) {
-      counts[type] = (resourcesByType.get(type) ?? []).filter((resource) =>
-        completed.has(JSON.stringify([id, resource.title, resource.education_type]))).length;
+      counts[type] = (resourcesByType.get(type) ?? []).filter((resource) => {
+        const completedDate = latestCompletionDates.get(JSON.stringify([id, resource.title, resource.education_type]));
+        return completedDate !== undefined && (type === "daily"
+          ? completedDate === date
+          : completedDate >= resource.startdate);
+      }).length;
     }
     const record = attendanceByEmployee.get(id)!;
     const employee = Array.isArray(record.employees) ? record.employees[0] : record.employees;

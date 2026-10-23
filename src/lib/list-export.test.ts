@@ -27,25 +27,30 @@ describe("common list Excel export", () => {
     page.innerHTML = '<label for="name">직원이름</label><input id="name" placeholder="전체직원"><label for="site">근무지</label><select id="site"><option value="uuid">본사</option></select><section id="list"><label>목록 수정<input value="수정"></label></section><div role="dialog"><label>비밀번호<input value="secret"></label></div>';
     expect(readListFilters(page, page.querySelector("#list")!)).toEqual([{ label: "직원이름", value: "전체직원" }, { label: "근무지", value: "본사" }]);
   });
-  it("uses Korean dates and increments names across repeated fallback downloads", async () => {
+  it("uses the Korean download date and time to the second", async () => {
+    vi.setSystemTime(new Date("2026-10-23T08:53:25Z"));
     vi.stubGlobal("URL", { createObjectURL: vi.fn(() => "blob:test"), revokeObjectURL: vi.fn() });
     const names: string[] = [];
     vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (this: HTMLAnchorElement) { names.push(this.download); });
     await downloadListWorkbook({ title: "근태관리", filters: [], getTable: () => table });
+    vi.setSystemTime(new Date("2026-10-23T08:53:26Z"));
     await downloadListWorkbook({ title: "근태관리", filters: [], getTable: () => table });
-    expect(names).toEqual(["근태관리_20261023_0001.xls", "근태관리_20261023_0002.xls"]);
+    expect(names).toEqual(["근태관리_20261023_175325.xls", "근태관리_20261023_175326.xls"]);
   });
-  it("checks actual files in the selected directory and never overwrites existing names", async () => {
-    const write = vi.fn(); const close = vi.fn();
-    const getFileHandle = vi.fn(async (name: string, options?: { create: boolean }) => {
-      if (!options?.create && !name.endsWith("0001.xls")) throw new DOMException("missing", "NotFoundError");
-      return { createWritable: async () => ({ write, close }) };
-    });
-    Object.defineProperty(window, "showDirectoryPicker", { configurable: true, value: vi.fn(async () => ({ getFileHandle })) });
+  it("downloads directly without directory access, stored counters or filename checks", async () => {
+    vi.stubGlobal("URL", { createObjectURL: vi.fn(() => "blob:test"), revokeObjectURL: vi.fn() });
+    let fileName = "";
+    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (this: HTMLAnchorElement) { fileName = this.download; });
+    const readStorage = vi.spyOn(Storage.prototype, "getItem");
+    const writeStorage = vi.spyOn(Storage.prototype, "setItem");
+    const picker = vi.fn();
+    Object.defineProperty(window, "showDirectoryPicker", { configurable: true, value: picker });
     try {
       await downloadListWorkbook({ title: "직원관리", filters: [], getTable: () => table });
-      expect(getFileHandle).toHaveBeenCalledWith("직원관리_20261023_0002.xls", { create: true });
-      expect(write).toHaveBeenCalledWith(expect.any(Blob)); expect(close).toHaveBeenCalledOnce();
+      expect(fileName).toBe("직원관리_20261023_010000.xls");
+      expect(picker).not.toHaveBeenCalled();
+      expect(readStorage).not.toHaveBeenCalled();
+      expect(writeStorage).not.toHaveBeenCalled();
     } finally { Reflect.deleteProperty(window, "showDirectoryPicker"); }
   });
   it("does not download partial data when gathering all pages fails", async () => {

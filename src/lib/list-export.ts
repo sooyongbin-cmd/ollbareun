@@ -2,15 +2,6 @@
 
 export type ExportTable = { headers: string[]; rows: (string | number)[][] };
 export type ExportFilter = { label: string; value: string };
-type DirectoryHandle = {
-  getFileHandle: (name: string, options?: { create: boolean }) => Promise<{
-    createWritable: () => Promise<{ write: (blob: Blob) => Promise<void>; close: () => Promise<void> }>;
-  }>;
-};
-type ExportWindow = Window & { showDirectoryPicker?: (options: { id: string; mode: "readwrite" }) => Promise<DirectoryHandle> };
-
-const sessionSequences = new Map<string, number>();
-
 const escape = (value: string | number) => String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;")
   .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
@@ -26,52 +17,24 @@ export async function downloadListWorkbook(input: {
   filters: ExportFilter[];
   getTable: () => ExportTable | Promise<ExportTable>;
 }) {
-  // Choose a directory while the click still has user activation. Where supported,
-  // inspect real files in that directory and skip existing names without overwriting.
-  const directory = await (window as ExportWindow).showDirectoryPicker?.({ id: "manager-excel", mode: "readwrite" });
   const table = await input.getTable();
   if (!table.rows.length) throw new Error("다운로드할 자료가 없습니다.");
   const blob = new Blob(["\ufeff", buildListWorkbook(input.title, input.filters, table)], { type: "application/vnd.ms-excel;charset=utf-8" });
-  const date = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date()).replaceAll("-", "");
+  const timestamp = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString();
+  const date = timestamp.slice(0, 10).replaceAll("-", "");
+  const time = timestamp.slice(11, 19).replaceAll(":", "");
   const title = input.title.replace(/[\\/:*?"<>|\u0000-\u001f]/g, "_");
-  const prefix = `${title}_${date}`;
-  const key = `list-export:${prefix}`;
-  const save = async () => {
-    let sequence = 0;
-    try { sequence = Number(localStorage.getItem(key)) || 0; } catch { /* Storage can be unavailable in private browsers. */ }
-    if (!Number.isSafeInteger(sequence) || sequence < 0) sequence = 0;
-    sequence = Math.max(sequence, sessionSequences.get(key) ?? 0);
-    let fileName: string;
-    do {
-      sequence += 1;
-      fileName = `${prefix}_${String(sequence).padStart(4, "0")}.xls`;
-      if (!directory) break;
-      try { await directory.getFileHandle(fileName); }
-      catch (error) {
-        if (error instanceof DOMException && error.name === "NotFoundError") break;
-        throw error;
-      }
-    } while (true);
-    if (directory) {
-      const handle = await directory.getFileHandle(fileName, { create: true });
-      const writable = await handle.createWritable();
-      await writable.write(blob);
-      await writable.close();
-    } else {
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = fileName;
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-    }
-    sessionSequences.set(key, sequence);
-    try { localStorage.setItem(key, String(sequence)); } catch { /* The browser still saves the file when storage is disabled. */ }
-  };
-  if (navigator.locks) await navigator.locks.request(key, save);
-  else await save();
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `${title}_${date}_${time}.xls`;
+  try {
+    document.body.appendChild(anchor);
+    anchor.click();
+  } finally {
+    anchor.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
 }
 
 function displayText(element: Element) {

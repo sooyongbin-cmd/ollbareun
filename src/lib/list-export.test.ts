@@ -1,21 +1,34 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import ExcelJS from "exceljs";
 import { buildListWorkbook, downloadListWorkbook, readListFilters, readListTable } from "./list-export";
 
-beforeEach(() => { localStorage.clear(); vi.useFakeTimers(); vi.setSystemTime(new Date("2026-10-22T16:00:00Z")); });
+beforeEach(() => { localStorage.clear(); vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date("2026-10-22T16:00:00Z")); });
 afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); vi.unstubAllGlobals(); document.body.innerHTML = ""; });
 const table = { headers: ["이름", "근태"], rows: [["홍길동", "출근 퇴근"]] };
 
 describe("common list Excel export", () => {
-  it("writes title, each filter, headers and escaped text rows in that order", () => {
-    const html = buildListWorkbook("근태관리", [{ label: "직원이름", value: "전체직원" }, { label: "출퇴근예정일", value: "2026-10-23" }], table);
-    const root = document.createElement("div"); root.innerHTML = html;
-    expect(Array.from(root.querySelectorAll("tr")).map((row) => row.textContent)).toEqual([
-      "근태관리", "직원이름 : 전체직원", "출퇴근예정일 : 2026-10-23", "이름근태", "홍길동출근 퇴근",
+  it("creates a real XLSX workbook with title, filters, headers and rows in order", async () => {
+    const buffer = await buildListWorkbook("근태관리", [{ label: "직원이름", value: "전체직원" }, { label: "출퇴근예정일", value: "2026-10-23" }], table);
+    expect(Array.from(new Uint8Array(buffer).slice(0, 4))).toEqual([0x50, 0x4b, 0x03, 0x04]);
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(buffer);
+    const sheet = workbook.getWorksheet("조회결과")!;
+    expect([1, 2, 3, 4, 5].map((row) => sheet.getCell(row, 1).value)).toEqual([
+      "근태관리", "직원이름 : 전체직원", "출퇴근예정일 : 2026-10-23", "이름", "홍길동",
     ]);
-    const escaped = buildListWorkbook("<script>", [], { headers: ["코드"], rows: [["00123"], ["=HYPERLINK(\"bad\")"]] });
-    expect(escaped).toContain("&lt;script&gt;");
-    expect(escaped).toContain("mso-number-format");
-    expect(escaped).toContain("00123");
+    expect(sheet.getCell(4, 2).value).toBe("근태");
+    expect(sheet.getCell(5, 2).value).toBe("출근 퇴근");
+  });
+  it("preserves leading zeros, special characters and formula-like values as text", async () => {
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(await buildListWorkbook("<근태&교육>", [], { headers: ["코드", "건수"], rows: [["00123", 2], ['=HYPERLINK("bad")', 0], ["<script>&내용", 1]] }));
+    const sheet = workbook.worksheets[0];
+    expect(sheet.getCell("A1").value).toBe("<근태&교육>");
+    expect(sheet.getCell("A3").value).toBe("00123");
+    expect(sheet.getCell("B3").value).toBe(2);
+    expect(sheet.getCell("A4").type).toBe(ExcelJS.ValueType.String);
+    expect(sheet.getCell("A4").value).toBe('=HYPERLINK("bad")');
+    expect(sheet.getCell("A5").value).toBe("<script>&내용");
   });
   it("reads only the enclosing list's columns and exports visible values, selected options and O/X", () => {
     const root = document.createElement("div");
@@ -35,7 +48,7 @@ describe("common list Excel export", () => {
     await downloadListWorkbook({ title: "근태관리", filters: [], getTable: () => table });
     vi.setSystemTime(new Date("2026-10-23T08:53:26Z"));
     await downloadListWorkbook({ title: "근태관리", filters: [], getTable: () => table });
-    expect(names).toEqual(["근태관리_20261023_175325.xls", "근태관리_20261023_175326.xls"]);
+    expect(names).toEqual(["근태관리_20261023_175325.xlsx", "근태관리_20261023_175326.xlsx"]);
   });
   it("downloads directly without directory access, stored counters or filename checks", async () => {
     vi.stubGlobal("URL", { createObjectURL: vi.fn(() => "blob:test"), revokeObjectURL: vi.fn() });
@@ -47,7 +60,7 @@ describe("common list Excel export", () => {
     Object.defineProperty(window, "showDirectoryPicker", { configurable: true, value: picker });
     try {
       await downloadListWorkbook({ title: "직원관리", filters: [], getTable: () => table });
-      expect(fileName).toBe("직원관리_20261023_010000.xls");
+      expect(fileName).toBe("직원관리_20261023_010000.xlsx");
       expect(picker).not.toHaveBeenCalled();
       expect(readStorage).not.toHaveBeenCalled();
       expect(writeStorage).not.toHaveBeenCalled();

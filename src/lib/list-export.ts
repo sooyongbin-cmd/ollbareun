@@ -2,14 +2,18 @@
 
 export type ExportTable = { headers: string[]; rows: (string | number)[][] };
 export type ExportFilter = { label: string; value: string };
-const escape = (value: string | number) => String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;")
-  .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const workbookMimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-export function buildListWorkbook(title: string, filters: ExportFilter[], table: ExportTable) {
-  const textCell = (value: string | number) => `<td style="mso-number-format:'\\@';white-space:pre-wrap">${escape(value)}</td>`;
-  const rows = [[title], ...filters.map(({ label, value }) => [`${label} : ${value}`]), table.headers, ...table.rows];
-  return `<!doctype html><html><head><meta charset="utf-8" /></head><body><table>${rows.map((row) =>
-    `<tr>${row.map(textCell).join("")}</tr>`).join("")}</table></body></html>`;
+export async function buildListWorkbook(title: string, filters: ExportFilter[], table: ExportTable): Promise<ArrayBuffer> {
+  const { default: ExcelJS } = await import("exceljs");
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet("조회결과");
+  sheet.addRows([[title], ...filters.map(({ label, value }) => [`${label} : ${value}`]), table.headers, ...table.rows]);
+  sheet.columns = table.headers.map(() => ({ width: 24 }));
+  sheet.getRow(1).font = { bold: true, size: 16 };
+  sheet.getRow(filters.length + 2).font = { bold: true };
+  const buffer = await workbook.xlsx.writeBuffer();
+  return new Uint8Array(buffer).buffer;
 }
 
 export async function downloadListWorkbook(input: {
@@ -19,7 +23,7 @@ export async function downloadListWorkbook(input: {
 }) {
   const table = await input.getTable();
   if (!table.rows.length) throw new Error("다운로드할 자료가 없습니다.");
-  const blob = new Blob(["\ufeff", buildListWorkbook(input.title, input.filters, table)], { type: "application/vnd.ms-excel;charset=utf-8" });
+  const blob = new Blob([await buildListWorkbook(input.title, input.filters, table)], { type: workbookMimeType });
   const timestamp = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString();
   const date = timestamp.slice(0, 10).replaceAll("-", "");
   const time = timestamp.slice(11, 19).replaceAll(":", "");
@@ -27,7 +31,7 @@ export async function downloadListWorkbook(input: {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = `${title}_${date}_${time}.xls`;
+  anchor.download = `${title}_${date}_${time}.xlsx`;
   try {
     document.body.appendChild(anchor);
     anchor.click();

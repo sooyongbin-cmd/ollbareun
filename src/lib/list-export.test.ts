@@ -13,22 +13,25 @@ describe("common list Excel export", () => {
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(buffer);
     const sheet = workbook.getWorksheet("조회결과")!;
-    expect([1, 2, 3, 4, 5].map((row) => sheet.getCell(row, 1).value)).toEqual([
-      "근태관리", "직원이름 : 전체직원", "출퇴근예정일 : 2026-10-23", "이름", "홍길동",
+    expect([1, 2, 3, 4, 5, 6, 7].map((row) => sheet.getCell(row, 1).value)).toEqual([
+      "근태관리", null, "직원이름 : 전체직원", "출퇴근예정일 : 2026-10-23", null, "이름", "홍길동",
     ]);
-    expect(sheet.getCell(4, 2).value).toBe("근태");
-    expect(sheet.getCell(5, 2).value).toBe("출근 퇴근");
+    expect(sheet.getCell(6, 2).value).toBe("근태");
+    expect(sheet.getCell(7, 2).value).toBe("출근 퇴근");
+    expect(sheet.getRow(6).font.bold).toBe(true);
   });
   it("preserves leading zeros, special characters and formula-like values as text", async () => {
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(await buildListWorkbook("<근태&교육>", [], { headers: ["코드", "건수"], rows: [["00123", 2], ['=HYPERLINK("bad")', 0], ["<script>&내용", 1]] }));
     const sheet = workbook.worksheets[0];
     expect(sheet.getCell("A1").value).toBe("<근태&교육>");
-    expect(sheet.getCell("A3").value).toBe("00123");
-    expect(sheet.getCell("B3").value).toBe(2);
-    expect(sheet.getCell("A4").type).toBe(ExcelJS.ValueType.String);
-    expect(sheet.getCell("A4").value).toBe('=HYPERLINK("bad")');
-    expect(sheet.getCell("A5").value).toBe("<script>&내용");
+    expect(sheet.getCell("A2").value).toBeNull();
+    expect(sheet.getCell("A3").value).toBe("코드");
+    expect(sheet.getCell("A4").value).toBe("00123");
+    expect(sheet.getCell("B4").value).toBe(2);
+    expect(sheet.getCell("A5").type).toBe(ExcelJS.ValueType.String);
+    expect(sheet.getCell("A5").value).toBe('=HYPERLINK("bad")');
+    expect(sheet.getCell("A6").value).toBe("<script>&내용");
   });
   it("reads only the enclosing list's columns and exports visible values, selected options and O/X", () => {
     const root = document.createElement("div");

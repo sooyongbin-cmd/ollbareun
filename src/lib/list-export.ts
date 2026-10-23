@@ -8,10 +8,11 @@ export async function buildListWorkbook(title: string, filters: ExportFilter[], 
   const { default: ExcelJS } = await import("exceljs");
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet("조회결과");
-  sheet.addRows([[title], ...filters.map(({ label, value }) => [`${label} : ${value}`]), table.headers, ...table.rows]);
+  sheet.addRows([[title], [], ...filters.map(({ label, value }) => [`${label} : ${value}`]),
+    ...(filters.length ? [[]] : []), table.headers, ...table.rows]);
   sheet.columns = table.headers.map(() => ({ width: 24 }));
   sheet.getRow(1).font = { bold: true, size: 16 };
-  sheet.getRow(filters.length + 2).font = { bold: true };
+  sheet.getRow(filters.length ? filters.length + 4 : 3).font = { bold: true };
   const buffer = await workbook.xlsx.writeBuffer();
   return new Uint8Array(buffer).buffer;
 }

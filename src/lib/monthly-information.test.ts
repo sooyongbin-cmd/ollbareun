@@ -25,7 +25,7 @@ it("reuses monthly education counts and links remarks by employee ID, site ID an
     detailRows: [
       { employeeId: "e1", employeeName: "동명이인", workDate: "2026-10-23", daily: false,
         subjects: [{ resourceId: "s1", isCompleted: true }, { resourceId: "s2", isCompleted: false }, { resourceId: "s3", isCompleted: null }] },
-      { employeeId: "e1", employeeName: "동명이인", workDate: "2026-10-24", daily: true, subjects: [{ resourceId: "s1", isCompleted: true }] },
+      { employeeId: "e1", employeeName: "동명이인", workDate: "2026-10-24", daily: true, dailyCompletedAt: "2026-10-24T00:05:00Z", subjects: [{ resourceId: "s1", isCompleted: true }] },
     ],
   });
   const report = (id: string, employee_id: string | null, worksite_id: string, reported_at: string) => ({
@@ -37,10 +37,10 @@ it("reuses monthly education counts and links remarks by employee ID, site ID an
     report("r5", "e1", "w1", "2026-10-24T01:00:00Z"), report("unknown", null, "w1", "2026-10-23T12:00:00Z"),
   ]);
   const rows = await loadMonthlyInformation("2026-10");
-  expect(rows[0].education).toEqual({ daily: "2/3", monthly: "O", quarterly: "X", semiannual: "-", other: "O" });
-  expect(rows[1].education).toEqual(rows[0].education);
-  expect(rows[2].education).toEqual({ daily: "-", monthly: "X", quarterly: "X", semiannual: "-", other: "X" });
-  expect(rows[4].education).toEqual({ daily: "-", monthly: "-", quarterly: "-", semiannual: "-", other: "-" });
+  expect(rows[0].education).toEqual({ daily: "X", monthly: "O", quarterly: "X", semiannual: "-", other: "O" });
+  expect(rows[1].education).toEqual({ ...rows[0].education, daily: "09:05" });
+  expect(rows[2].education).toEqual({ daily: "X", monthly: "X", quarterly: "X", semiannual: "-", other: "X" });
+  expect(rows[4].education).toEqual({ daily: "X", monthly: "-", quarterly: "-", semiannual: "-", other: "-" });
   expect(rows.map((row) => row.remarks.map((remark) => remark.id))).toEqual([["r1", "r2"], ["r5"], ["r3"], ["r4"], []]);
   expect(loadMonthlyAttendance).toHaveBeenCalledWith("2026-10");
   expect(loadMonthlyEducationAttendance).toHaveBeenCalledWith("2026-10");

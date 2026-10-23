@@ -19,10 +19,13 @@ describe("monthly daily education attendance", () => {
       { employee_id: "employee-3", work_date: "2026-09-05", work_intime: null, employees: { name: "박길동" } },
     ];
     const dailyCompletions = [
+      { employee_id: "employee-1", title: "일일1", work_date: "2026-09-03", education_type: "일일", completed_at: "2026-09-03T01:15:00Z" },
+      { employee_id: "employee-1", title: "일일3", work_date: "2026-09-03", education_type: "일일", completed_at: "2026-09-03T00:30:00Z" },
       { employee_id: "employee-1", title: "일일1", work_date: "2026-09-03", education_type: "일일", completed_at: "2026-09-03T01:00:00Z" },
       { employee_id: "employee-2", work_date: "2026-09-03", education_type: "일일", completed_at: null },
     ];
     const resources = [
+      { id: "d3", title: "일일3", education_type: "일일", startdate: "2026-09-03", enddate: "2026-09-03" },
       { id: "d1", title: "일일1", education_type: "일일", startdate: "2026-09-03", enddate: "2026-09-03" },
       { id: "d2", title: "일일2", education_type: "일일", startdate: "2026-09-04", enddate: "2026-09-30" },
       { id: "q", title: "분기교재", education_type: "분기", startdate: "2026-09-01", enddate: "2026-09-01" },
@@ -80,7 +83,9 @@ describe("monthly daily education attendance", () => {
     expect(result.detailRows.find((row) => row.employeeId === "employee-1" && row.workDate === "2026-09-03")?.daily).toBe(true);
     expect(result.detailRows.find((row) => row.employeeId === "employee-1" && row.workDate === "2026-09-04")?.daily).toBe(false);
     expect(result.detailRows.find((row) => row.employeeId === "employee-2" && row.workDate === "2026-09-03")?.daily).toBe(false);
-    expect(result.resourceCounts).toEqual({ daily: 2, monthly: 0, quarterly: 1, semiannual: 1, other: 2 });
+    expect(result.detailRows.find((row) => row.employeeId === "employee-1" && row.workDate === "2026-09-03")?.dailyCompletedAt).toBe("2026-09-03T01:15:00Z");
+    expect(result.detailRows.find((row) => row.employeeId === "employee-1" && row.workDate === "2026-09-04")?.dailyCompletedAt).toBeNull();
+    expect(result.resourceCounts).toEqual({ daily: 3, monthly: 0, quarterly: 1, semiannual: 1, other: 2 });
     expect(result.summaryRows.find((row) => row.employeeId === "employee-1")).toMatchObject({ quarterly: 1, semiannual: 0, other: 2 });
     expect(result.summaryRows.find((row) => row.employeeId === "employee-2")).toMatchObject({ quarterly: 0, semiannual: 0, other: 0 });
 
@@ -95,8 +100,8 @@ describe("monthly daily education attendance", () => {
       && filters.some(([method, column, value]) => method === "eq" && column === "education_type" && value === "일일"));
     expect(completionQuery?.filters).toContainEqual(["in", "employee_id", ["employee-1", "employee-2"]]);
     expect(completionQuery?.filters).toContainEqual(["in", "work_date", ["2026-09-03", "2026-09-04"]]);
-    expect(result.dailySubjects).toEqual([{ id: "d1", title: "일일1" }, { id: "d2", title: "일일2" }]);
-    expect(result.detailRows.find((row) => row.employeeId === "employee-1" && row.workDate === "2026-09-03")?.subjects).toEqual([{ resourceId: "d1", isCompleted: true }, { resourceId: "d2", isCompleted: null }]);
+    expect(result.dailySubjects).toEqual([{ id: "d3", title: "일일3" }, { id: "d1", title: "일일1" }, { id: "d2", title: "일일2" }]);
+    expect(result.detailRows.find((row) => row.employeeId === "employee-1" && row.workDate === "2026-09-03")?.subjects).toEqual([{ resourceId: "d3", isCompleted: true }, { resourceId: "d1", isCompleted: true }, { resourceId: "d2", isCompleted: null }]);
 
     const periodQuery = queries.find(({ table, filters }) => table === "education_completions"
       && filters.some(([method, column]) => method === "gte" && column === "work_date"));

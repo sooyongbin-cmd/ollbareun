@@ -43,6 +43,7 @@ export type MonthlyEducationDetailRow = {
   employeeName: string;
   workDate: string;
   daily: boolean;
+  dailyCompletedAt?: string | null;
   subjects: { resourceId: string; isCompleted: boolean | null }[];
 };
 
@@ -241,17 +242,31 @@ export async function loadMonthlyEducationAttendance(yearMonth: string) {
   }
 
   const dailyDetailCompletionKeys = new Set(dailyDetailCompletions.map((record) => JSON.stringify([record.employee_id, record.work_date, record.title, record.education_type])));
+  const completedAtByKey = new Map<string, string>();
+  for (const record of dailyDetailCompletions) {
+    if (!record.completed_at || !Number.isFinite(Date.parse(record.completed_at))) continue;
+    const key = JSON.stringify([record.employee_id, record.work_date, record.title, record.education_type]);
+    const previous = completedAtByKey.get(key);
+    if (!previous || Date.parse(record.completed_at) > Date.parse(previous)) completedAtByKey.set(key, record.completed_at);
+  }
   const detailByEmployeeDay = new Map<string, MonthlyEducationDetailRow>();
   detailAttendanceRows.forEach((record) => {
     const key = `${record.employee_id}:${record.work_date}`;
     const subjects = dailySubjects.map((resource) => ({ resourceId: resource.id,
       isCompleted: isEducationResourceForDate(resource, record.work_date)
         ? dailyDetailCompletionKeys.has(JSON.stringify([record.employee_id, record.work_date, resource.title, "일일"])) : null }));
+    const applicableSubjects = dailySubjects.filter((resource) => isEducationResourceForDate(resource, record.work_date));
+    const completedTimes = applicableSubjects.map((resource) =>
+      completedAtByKey.get(JSON.stringify([record.employee_id, record.work_date, resource.title, "일일"])));
+    const validTimes = completedTimes.filter((time): time is string => time !== undefined);
+    const dailyCompletedAt = validTimes.length > 0 && validTimes.length === completedTimes.length
+      ? validTimes.reduce((latest, time) => Date.parse(time) > Date.parse(latest) ? time : latest) : null;
     if (!detailByEmployeeDay.has(key)) detailByEmployeeDay.set(key, {
       employeeId: record.employee_id,
       employeeName: employeeName(record),
       workDate: record.work_date,
       daily: subjects.some((subject) => subject.isCompleted !== null) && subjects.every((subject) => subject.isCompleted !== false),
+      dailyCompletedAt,
       subjects,
     });
   });

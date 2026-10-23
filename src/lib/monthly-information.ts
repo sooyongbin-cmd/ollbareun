@@ -12,22 +12,12 @@ export type MonthlyInformationRow = MonthlyAttendanceRow & {
 
 /** Uses the monthly education screen's employee-level counts and applicable subjects. */
 export function buildMonthlyEducationOverview(input: Awaited<ReturnType<typeof loadMonthlyEducationAttendance>>) {
-  const dailyByEmployee = new Map<string, { completed: number; total: number }>();
-  for (const detail of input.detailRows) {
-    const counts = dailyByEmployee.get(detail.employeeId) ?? { completed: 0, total: 0 };
-    for (const subject of detail.subjects) {
-      if (subject.isCompleted !== null) counts.total += 1;
-      if (subject.isCompleted === true) counts.completed += 1;
-    }
-    dailyByEmployee.set(detail.employeeId, counts);
-  }
   const byEmployee = new Map<string, MonthlyInformationEducation>();
   for (const summary of input.summaryRows) {
-    const daily = dailyByEmployee.get(summary.employeeId);
     const status = (type: "monthly" | "quarterly" | "semiannual" | "other") =>
       input.resourceCounts[type] === 0 ? "-" : summary[type] > 0 ? "O" : "X";
     byEmployee.set(summary.employeeId, {
-      daily: daily?.total ? `${daily.completed}/${daily.total}` : "-",
+      daily: "-",
       monthly: status("monthly"), quarterly: status("quarterly"), semiannual: status("semiannual"), other: status("other"),
     });
   }
@@ -40,6 +30,14 @@ export async function loadMonthlyInformation(yearMonth: string): Promise<Monthly
     loadMonthlyAttendance(yearMonth), loadMonthlyEducationAttendance(yearMonth), listSpecialRemarkReports({ yearMonth, includePhotos: false }),
   ]);
   const educationByEmployee = buildMonthlyEducationOverview(education);
+  const dailyByEmployeeDay = new Map(education.detailRows.map((detail) => {
+    const applicable = detail.subjects.some((subject) => subject.isCompleted !== null);
+    const time = detail.dailyCompletedAt;
+    const value = !applicable ? "-" : !detail.daily ? "X" : time && Number.isFinite(Date.parse(time))
+      ? new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(time))
+      : "-";
+    return [JSON.stringify([detail.employeeId, detail.workDate]), value];
+  }));
   const remarksByEmployeeSiteDay = new Map<string, MonthlyInformationRemark[]>();
   const kstDate = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" });
   const key = (employeeId: string, worksiteId: string | null, date: string) => JSON.stringify([employeeId, worksiteId, date]);
@@ -52,7 +50,10 @@ export async function loadMonthlyInformation(yearMonth: string): Promise<Monthly
   }
   return attendance.map((row) => ({
     ...row,
-    education: educationByEmployee.get(row.employeeId) ?? { daily: "-", monthly: "-", quarterly: "-", semiannual: "-", other: "-" },
+    education: {
+      ...(educationByEmployee.get(row.employeeId) ?? { monthly: "-", quarterly: "-", semiannual: "-", other: "-" }),
+      daily: dailyByEmployeeDay.get(JSON.stringify([row.employeeId, row.workDate])) ?? "X",
+    },
     remarks: remarksByEmployeeSiteDay.get(key(row.employeeId, row.worksiteId, row.workDate)) ?? [],
   }));
 }

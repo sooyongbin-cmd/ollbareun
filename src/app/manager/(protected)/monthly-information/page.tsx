@@ -20,9 +20,7 @@ const educationColumns = [
 const columns = ["근무지", "이름", "직군", "근무형태", "생년월일", "출근예정일", "출퇴근예정", "출퇴근", "근태", ...educationColumns.map(({ label }) => label), "특이사항"];
 
 function isIncompleteEducation(value: string) {
-  if (value === "X") return true;
-  const [completed, total] = value.split("/").map(Number);
-  return completed < total;
+  return value === "X";
 }
 
 function weekday(workDate: string) {
@@ -162,7 +160,7 @@ export default function MonthlyInformationPage() {
                     </TableCell>
                     <TableCell data-label="근태">{[row.status, row.outtimeLabel].filter(Boolean).join(" ")}</TableCell>
                     {educationColumns.map(({ key, label }) => <TableCell key={key} data-label={label}>
-                      <span className={isIncompleteEducation(row.education[key]) ? "font-semibold text-destructive" : row.education[key] === "O" ? "font-semibold text-foreground" : "font-semibold text-muted-foreground"}>
+                      <span className={isIncompleteEducation(row.education[key]) ? "font-semibold text-destructive" : (row.education[key] === "O" || /^\d{2}:\d{2}$/.test(row.education[key])) ? "font-semibold text-foreground" : "font-semibold text-muted-foreground"}>
                         {row.education[key]}
                       </span>
                     </TableCell>)}

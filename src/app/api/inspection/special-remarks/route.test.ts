@@ -17,13 +17,13 @@ describe("GET /api/inspection/special-remarks", () => {
     vi.mocked(getManagerUser).mockResolvedValue({ id: "manager-1" } as never);
   });
 
-  it("passes the optional year filter to the report loader", async () => {
+  it("passes the selected month filter to the report loader", async () => {
     vi.mocked(listSpecialRemarkReports).mockResolvedValue([{ id: "report-1" }] as never);
 
-    const response = await GET(new Request("http://localhost/api/inspection/special-remarks?year=2026"));
+    const response = await GET(new Request("http://localhost/api/inspection/special-remarks?yearMonth=2026-10"));
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({ reports: [{ id: "report-1" }] });
-    expect(listSpecialRemarkReports).toHaveBeenCalledWith({ year: "2026" });
+    expect(listSpecialRemarkReports).toHaveBeenCalledWith({ yearMonth: "2026-10" });
   });
 });

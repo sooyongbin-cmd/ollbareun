@@ -15,6 +15,8 @@ export type SpecialRemarkReportRow = {
   worksite_id: string | null;
   employee_id: string | null;
   employee_name: string;
+  employee_role?: string;
+  work_style?: "0" | "1" | "2" | null;
   worksite_name: string;
   content: string;
   photo_url: string | null;
@@ -503,21 +505,30 @@ export async function sendSpecialRemarkReportEmail(report: SpecialRemarkReportRo
   }
 }
 
-export async function listSpecialRemarkReports(input: { year?: unknown } = {}) {
-  const year = typeof input.year === "string" ? input.year.trim() : "";
+export async function listSpecialRemarkReports(input: { yearMonth?: unknown } = {}) {
+  const yearMonth = typeof input.yearMonth === "string" ? input.yearMonth.trim() : "";
+  if (yearMonth && !/^\d{4}-(0[1-9]|1[0-2])$/.test(yearMonth)) throw new Error("조회년월을 확인하세요.");
   const supabase = getSupabaseAdmin();
-  let query = supabase.from("inspection_special_reports").select("*").order("reported_at", { ascending: false });
+  let query = supabase.from("inspection_special_reports").select("*,employees(role,work_style)").order("reported_at", { ascending: true });
 
-  if (year) {
-    if (!/^\d{4}$/.test(year)) {
-      throw new Error("조회연도는 4자리 숫자로 입력하세요.");
-    }
-    query = query.gte("reported_at", `${year}-01-01T00:00:00+09:00`).lt("reported_at", `${Number(year) + 1}-01-01T00:00:00+09:00`);
+  if (yearMonth) {
+    const start = `${yearMonth}-01`;
+    const next = new Date(`${start}T00:00:00Z`);
+    next.setUTCMonth(next.getUTCMonth() + 1);
+    query = query.gte("reported_at", `${start}T00:00:00+09:00`)
+      .lt("reported_at", `${next.toISOString().slice(0, 10)}T00:00:00+09:00`);
   }
 
   const { data, error } = await query;
   throwIfError(error);
-  return Promise.all((data ?? []).map((report) => withSignedPhotoUrls(report as SpecialRemarkReportRow)));
+  type ReportWithEmployee = SpecialRemarkReportRow & {
+    employees?: { role: string | null; work_style: "0" | "1" | "2" | null } | null;
+  };
+  const reports = await Promise.all(((data ?? []) as ReportWithEmployee[]).map(({ employees, ...report }) =>
+    withSignedPhotoUrls({ ...report, employee_role: employees?.role ?? "-", work_style: employees?.work_style ?? null })));
+  return reports.sort((left, right) => left.worksite_name.localeCompare(right.worksite_name, "ko-KR")
+    || left.employee_name.localeCompare(right.employee_name, "ko-KR")
+    || new Date(left.reported_at).getTime() - new Date(right.reported_at).getTime());
 }
 
 export async function completeSpecialRemarkReport(idInput: unknown) {

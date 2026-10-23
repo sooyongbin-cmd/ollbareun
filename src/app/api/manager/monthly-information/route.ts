@@ -7,6 +7,6 @@ export async function GET(request: Request) {
     const yearMonth = new URL(request.url).searchParams.get("yearMonth") ?? "";
     return Response.json({ rows: await loadMonthlyInformation(yearMonth) });
   } catch (cause) {
-    return Response.json({ error: cause instanceof Error ? cause.message : "월별전체현황을 불러오지 못했습니다." }, { status: 400 });
+    return Response.json({ error: cause instanceof Error ? cause.message : "월별현황을 불러오지 못했습니다." }, { status: 400 });
   }
 }

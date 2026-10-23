@@ -78,6 +78,7 @@ export default function EmployeeRosterPage() {
   const [data, setData] = useState<Bootstrap>(emptyBootstrap);
   const [nameQuery, setNameQuery] = useState("");
   const [roleQuery, setRoleQuery] = useState("");
+  const [worksiteQuery, setWorksiteQuery] = useState("");
   const [employeeRoles, setEmployeeRoles] = useState<string[]>([]);
   const [showRetired, setShowRetired] = useState(false);
   const [sortKey, setSortKey] = useState<"name" | "phone" | "role" | "worksite">("name");
@@ -138,8 +139,23 @@ export default function EmployeeRosterPage() {
     );
   }, [availableEmployees]);
 
+  const worksiteById = useMemo(() => {
+    return new Map(data.worksites.map((worksite) => [worksite.id, worksite.name]));
+  }, [data.worksites]);
+
+  const assignmentByEmployeeId = useMemo(() => {
+    return new Map(data.assignments.map((assignment) => [assignment.employee_id, assignment]));
+  }, [data.assignments]);
+
+  const worksiteNameOptions = useMemo(() => {
+    return Array.from(new Set(data.worksites.map((worksite) => worksite.name))).sort((left, right) =>
+      left.localeCompare(right, "ko-KR"),
+    );
+  }, [data.worksites]);
+
   const filteredEmployees = useMemo(() => {
     const normalizedNameQuery = nameQuery.trim().toLowerCase();
+    const normalizedWorksiteQuery = worksiteQuery.trim().toLowerCase();
 
     return availableEmployees.filter((employee) => {
       if (normalizedNameQuery && !employee.name.toLowerCase().includes(normalizedNameQuery)) {
@@ -150,17 +166,14 @@ export default function EmployeeRosterPage() {
         return false;
       }
 
+      const worksiteName = worksiteById.get(assignmentByEmployeeId.get(employee.id)?.worksite_id ?? "") ?? "";
+      if (normalizedWorksiteQuery && !worksiteName.toLowerCase().includes(normalizedWorksiteQuery)) {
+        return false;
+      }
+
       return true;
     });
-  }, [availableEmployees, nameQuery, roleQuery]);
-
-  const worksiteById = useMemo(() => {
-    return new Map(data.worksites.map((worksite) => [worksite.id, worksite.name]));
-  }, [data.worksites]);
-
-  const assignmentByEmployeeId = useMemo(() => {
-    return new Map(data.assignments.map((assignment) => [assignment.employee_id, assignment]));
-  }, [data.assignments]);
+  }, [availableEmployees, nameQuery, roleQuery, worksiteQuery, worksiteById, assignmentByEmployeeId]);
 
   const attendanceStatusByEmployeeId = useMemo(() => {
     const statusLabels: Record<AttendanceRow["intime_status"], string> = {
@@ -224,7 +237,7 @@ export default function EmployeeRosterPage() {
         aria-label="직원 검색"
         className="manager-section rounded-xl border border-border/50 bg-muted/40"
       >
-        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_max-content] md:items-end">
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto_max-content] md:items-end">
           <div className="flex flex-col gap-4 md:contents">
             <div className="min-w-0 flex flex-col gap-2">
               <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor="employee-roster-name-search">
@@ -258,6 +271,22 @@ export default function EmployeeRosterPage() {
                 ))}
               </NativeSelect>
             </div>
+            <div className="min-w-0 flex flex-col gap-2">
+              <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor="employee-roster-worksite-search">
+                근무지
+              </label>
+              <Input
+                className="block w-full"
+                id="employee-roster-worksite-search"
+                list="employee-roster-worksite-options"
+                placeholder="전체 근무지"
+                value={worksiteQuery}
+                onChange={(event) => setWorksiteQuery(event.target.value)}
+              />
+              <datalist id="employee-roster-worksite-options">
+                {worksiteNameOptions.map((name) => <option key={name} value={name} />)}
+              </datalist>
+            </div>
           </div>
 
           <label className="flex h-9 items-center gap-2 whitespace-nowrap text-[0.875rem] font-semibold text-foreground/80">
@@ -267,6 +296,7 @@ export default function EmployeeRosterPage() {
                 setShowRetired(checked === true);
                 setNameQuery("");
                 setRoleQuery("");
+                setWorksiteQuery("");
               }}
             />
             퇴직

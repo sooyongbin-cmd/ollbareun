@@ -145,6 +145,34 @@ describe("employee roster page", () => {
     expect(listSection).toContainElement(screen.getByRole("table"));
   });
 
+  it("filters by worksite together with name and role", async () => {
+    const user = userEvent.setup();
+    renderWithManagerLayout(<EmployeeRosterPage />);
+    await screen.findByRole("link", { name: "Alice" });
+
+    const worksiteInput = screen.getByRole("combobox", { name: "근무지" });
+    expect(worksiteInput).toHaveAttribute("list", "employee-roster-worksite-options");
+    expect(document.querySelector("#employee-roster-worksite-options option")).toHaveAttribute("value", "본사");
+
+    await user.type(worksiteInput, " 본 ");
+    await user.type(screen.getByRole("combobox", { name: "이름" }), "Alice");
+    await user.selectOptions(screen.getByRole("combobox", { name: "직군" }), "경비원");
+    expect(screen.getByRole("link", { name: "Alice" })).toBeInTheDocument();
+
+    await user.selectOptions(screen.getByRole("combobox", { name: "직군" }), "미화원");
+    expect(screen.queryByRole("link", { name: "Alice" })).not.toBeInTheDocument();
+    await user.selectOptions(screen.getByRole("combobox", { name: "직군" }), "경비원");
+    await user.clear(worksiteInput);
+    await user.type(worksiteInput, "없는 근무지");
+    expect(screen.queryByRole("link", { name: "Alice" })).not.toBeInTheDocument();
+    await user.clear(worksiteInput);
+    expect(screen.getByRole("link", { name: "Alice" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("checkbox", { name: "퇴직" }));
+    expect(worksiteInput).toHaveValue("");
+    expect(screen.getByRole("link", { name: "Bob" })).toBeInTheDocument();
+  });
+
   it("links the employee name to the edit page", async () => {
     renderWithManagerLayout(<EmployeeRosterPage />);
 

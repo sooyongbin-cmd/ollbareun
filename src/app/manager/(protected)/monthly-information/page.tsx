@@ -33,6 +33,8 @@ function weekday(workDate: string) {
 export default function MonthlyInformationPage() {
   const [worksiteQuery, setWorksiteQuery] = useState("");
   const [worksiteNames, setWorksiteNames] = useState<string[]>([]);
+  const [employeeQuery, setEmployeeQuery] = useState("");
+  const [employeeNames, setEmployeeNames] = useState<string[]>([]);
   const [worksiteError, setWorksiteError] = useState("");
   const [yearMonth, setYearMonth] = useState(() => educationToday().slice(0, 7));
   const [rows, setRows] = useState<MonthlyInformationRow[]>([]);
@@ -45,7 +47,10 @@ export default function MonthlyInformationPage() {
         const response = await fetch("/api/bootstrap", { signal: controller.signal });
         const payload = await response.json();
         if (!response.ok) throw new Error(payload.error ?? "근무지 목록을 불러오지 못했습니다.");
-        if (!controller.signal.aborted) setWorksiteNames((payload.worksites ?? []).map((site: { name: string }) => site.name));
+        if (!controller.signal.aborted) {
+          setWorksiteNames((payload.worksites ?? []).map((site: { name: string }) => site.name));
+          setEmployeeNames((payload.employees ?? []).map((employee: { name: string }) => employee.name));
+        }
       } catch (cause) {
         if (!controller.signal.aborted) setWorksiteError(cause instanceof Error ? cause.message : "근무지 목록을 불러오지 못했습니다.");
       }
@@ -79,21 +84,32 @@ export default function MonthlyInformationPage() {
   }, [yearMonth]);
   const worksiteNameOptions = useMemo(() => Array.from(new Set([...worksiteNames, ...rows.map((row) => row.worksiteName)]))
     .filter(Boolean).sort((left, right) => left.localeCompare(right, "ko-KR")), [worksiteNames, rows]);
+  const employeeNameOptions = useMemo(() => Array.from(new Set([...employeeNames, ...rows.map((row) => row.employeeName)]))
+    .filter(Boolean).sort((left, right) => left.localeCompare(right, "ko-KR")), [employeeNames, rows]);
   const filteredRows = useMemo(() => {
     const query = worksiteQuery.trim().toLowerCase();
-    return rows.filter((row) => row.worksiteName.toLowerCase().includes(query));
-  }, [rows, worksiteQuery]);
+    const nameQuery = employeeQuery.trim().toLowerCase();
+    return rows.filter((row) => row.worksiteName.toLowerCase().includes(query) && row.employeeName.toLowerCase().includes(nameQuery));
+  }, [rows, worksiteQuery, employeeQuery]);
   return (
     <section className="space-y-[1.5rem]">
       <header><h1 className="text-[1.75rem] leading-[1.2]">월별현황</h1></header>
       <section aria-label="월별현황 검색" className="manager-section rounded-xl border border-border/50 bg-muted/40">
-        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_12rem] md:items-end">
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_12rem] md:items-end">
           <div className="min-w-0 flex flex-col gap-2">
             <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor="monthly-information-worksite">근무지</label>
             <Input className="block w-full" id="monthly-information-worksite" list="monthly-information-worksite-options"
               value={worksiteQuery} onChange={(event) => setWorksiteQuery(event.target.value)} placeholder="근무지 이름을 입력하세요." />
             <datalist id="monthly-information-worksite-options">
               {worksiteNameOptions.map((name) => <option key={name} value={name} />)}
+            </datalist>
+          </div>
+          <div className="min-w-0 flex flex-col gap-2">
+            <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor="monthly-information-employee">근무자</label>
+            <Input className="block w-full" id="monthly-information-employee" list="monthly-information-employee-options"
+              value={employeeQuery} onChange={(event) => setEmployeeQuery(event.target.value)} placeholder="이름을 입력하세요." />
+            <datalist id="monthly-information-employee-options">
+              {employeeNameOptions.map((name) => <option key={name} value={name} />)}
             </datalist>
           </div>
           <div className="min-w-0 flex flex-col gap-2">

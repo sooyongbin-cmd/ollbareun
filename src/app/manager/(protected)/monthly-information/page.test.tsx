@@ -34,6 +34,34 @@ it("shows the copied monthly attendance screen under its new title with worksite
   fireEvent.change(screen.getByLabelText("근무지"), { target: { value: "없는근무지" } });
   expect(screen.getByText("조회 결과 0")).toBeInTheDocument();
 });
+it("offers unique worker names and combines worker and worksite filters for rows and export", async () => {
+  const base = { employeeRole: "경비원", workStyle: "격일근무", workDate: "2026-10-23",
+    scheduledClockIn: "18:00", scheduledClockOut: "2026-10-24 08:00", clockInDateTime: "-", clockOutDateTime: null,
+    status: "대기", outtimeLabel: "", education: { daily: "-", monthly: "-", quarterly: "-", semiannual: "-", other: "-" }, remarks: [] };
+  vi.stubGlobal("fetch", vi.fn(async (url: string) => Response.json(url === "/api/bootstrap"
+    ? { worksites: [{ name: "본사" }, { name: "지사" }], employees: [{ name: "홍길동" }, { name: "김철수" }, { name: "홍길동" }, { name: "조민수" }] }
+    : { rows: [
+      { ...base, id: "a", employeeName: "홍길동", worksiteName: "본사" },
+      { ...base, id: "b", employeeName: "김철수", worksiteName: "본사" },
+      { ...base, id: "c", employeeName: "홍길동", worksiteName: "지사" },
+    ] })));
+  render(<MonthlyInformationPage />);
+  await screen.findByText("조회 결과 3");
+  expect(screen.getByLabelText("근무자")).toHaveAttribute("list", "monthly-information-employee-options");
+  expect(Array.from(document.querySelectorAll("#monthly-information-employee-options option")).map((option) => option.getAttribute("value")))
+    .toEqual(["김철수", "조민수", "홍길동"]);
+  const region = screen.getByRole("region", { name: "월별현황 목록" });
+  fireEvent.change(screen.getByLabelText("근무지"), { target: { value: "본사" } });
+  fireEvent.change(screen.getByLabelText("근무자"), { target: { value: " 길 " } });
+  expect(screen.getByText("조회 결과 1")).toBeInTheDocument();
+  expect(readListTable(region).rows[0].slice(0, 2)).toEqual(["본사", "홍길동 (경비,격일)"]);
+  fireEvent.change(screen.getByLabelText("근무지"), { target: { value: "" } });
+  expect(screen.getByText("조회 결과 2")).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText("근무자"), { target: { value: "없는이름" } });
+  expect(screen.getByText("조회 결과 0")).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText("근무자"), { target: { value: "" } });
+  expect(readListTable(region).rows).toHaveLength(3);
+});
 it("resolves the overview menu and header title for the new route", () => {
   expect(findManagerNavigation("/manager/monthly-information")).toMatchObject({ group: null,
     item: { label: "월별현황", href: "/manager/monthly-information" } });

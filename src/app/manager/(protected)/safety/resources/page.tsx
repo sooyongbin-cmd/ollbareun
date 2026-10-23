@@ -8,6 +8,11 @@ import { useEffect, useMemo, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
 
+const resourceEducationTypeLabels: Record<EducationType, string> = {
+  ...educationTypeLabels,
+  monthly: "월별",
+  other: "연간",
+};
 
 type EducationResourceRow = {
   id: string;
@@ -134,7 +139,7 @@ export default function EducationResourcesPage() {
                 ) : (
                   sortedResources.map((resource) => (
                     <TableRow key={resource.id} className="hover:bg-muted/40 transition-colors">
-                      <TableCell data-label="교육구분">{resource.education_type === "monthly" ? "월별" : educationTypeLabels[resource.education_type]}</TableCell>
+                      <TableCell data-label="교육구분">{resourceEducationTypeLabels[resource.education_type]}</TableCell>
                       <TableCell data-label="제목" className="font-semibold">
                         <Link
                           className="text-primary hover:underline"

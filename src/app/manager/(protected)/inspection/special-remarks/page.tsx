@@ -1,6 +1,7 @@
 "use client";
 
 import ListResults from "@/components/list-results";
+import { formatSpecialRemarkDateTime, summarizeSpecialRemarkContent } from "@/lib/special-remark-display";
 
 import { educationToday } from "@/lib/education-periods";
 import { employeeSummary } from "@/lib/employee-summary";
@@ -22,27 +23,6 @@ type SpecialRemarkReport = {
   photo_urls?: string[] | null;
   processing_status: "Y" | "N";
 };
-
-function formatDateTime(value: string) {
-  if (!value) {
-    return "";
-  }
-
-  return new Intl.DateTimeFormat("ko-KR", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZone: "Asia/Seoul",
-  }).format(new Date(value));
-}
-
-function summarizeContent(content: string) {
-  const firstLine = content.split(/\r?\n/)[0]?.trim() ?? "";
-  return `${firstLine}....`;
-}
 
 function getFirstPhotoUrl(report: Pick<SpecialRemarkReport, "photo_url" | "photo_urls">) {
   return report.photo_urls?.[0] ?? report.photo_url;
@@ -161,14 +141,14 @@ export default function SpecialRemarksPage() {
                           className="text-primary font-semibold hover:opacity-80"
                           href={`/manager/inspection/special-remarks/${encodeURIComponent(report.id)}`}
                         >
-                          {formatDateTime(report.reported_at)}
+                          {formatSpecialRemarkDateTime(report.reported_at)}
                         </Link>
                       </TableCell>
                       <TableCell
                         data-label="특이사항내용"
                         className="max-w-[26.25rem] min-w-0 whitespace-normal break-words [overflow-wrap:anywhere] align-top"
                       >
-                        {summarizeContent(report.content)}
+                        {summarizeSpecialRemarkContent(report.content)}
                       </TableCell>
                       <TableCell data-label="첨부사진">
                         {getFirstPhotoUrl(report) ? (

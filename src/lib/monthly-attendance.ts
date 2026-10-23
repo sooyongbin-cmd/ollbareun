@@ -1,8 +1,10 @@
-import { buildAttendanceReport } from "./manager-reports";
+import { buildAttendanceReport, type AttendanceReportRow } from "./manager-reports";
 import { getSupabaseAdmin } from "./supabase-admin";
 import { readAllEducationRows } from "./education-completions";
 
-export async function loadMonthlyAttendance(yearMonth: string) {
+export type MonthlyAttendanceRow = AttendanceReportRow & { employeeId: string; worksiteId: string | null };
+
+export async function loadMonthlyAttendance(yearMonth: string): Promise<MonthlyAttendanceRow[]> {
   if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(yearMonth)) throw new Error("조회년월을 확인하세요.");
   const start = `${yearMonth}-01`;
   const next = new Date(`${start}T00:00:00Z`);
@@ -20,9 +22,11 @@ export async function loadMonthlyAttendance(yearMonth: string) {
       .select("id,name").order("id").range(from, to)),
   ]);
   const now = new Date();
+  const attendanceById = new Map(attendance.map((record) => [record.id, record]));
   return [...new Set(attendance.map((record) => record.work_date))].sort().flatMap((workDate) =>
     buildAttendanceReport({ employeeName: "", workDate, employees, worksites,
       attendance: attendance.filter((record) => record.work_date === workDate), now }))
+    .map((row) => ({ ...row, employeeId: attendanceById.get(row.id)!.employee_id, worksiteId: attendanceById.get(row.id)!.worksite_id ?? null }))
     .sort((left, right) => left.worksiteName.localeCompare(right.worksiteName, "ko-KR")
       || left.employeeName.localeCompare(right.employeeName, "ko-KR")
       || left.workDate.localeCompare(right.workDate));

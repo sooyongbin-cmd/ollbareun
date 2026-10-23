@@ -9,10 +9,21 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DateTimeRange, scheduledClockInDisplay, formatDateTimeSegment } from "@/components/attendance-time-display";
 import { educationToday } from "@/lib/education-periods";
 import { employeeSummary } from "@/lib/employee-summary";
-import type { AttendanceReportRow } from "@/lib/manager-reports";
+import type { MonthlyInformationRow } from "@/lib/monthly-information";
+import { formatSpecialRemarkDateTime, summarizeSpecialRemarkContent } from "@/lib/special-remark-display";
 import ManagerLoadingMessage from "../manager-loading-message";
 
-const columns = ["근무지", "이름", "출근예정일", "출퇴근예정", "출퇴근", "근태"];
+const educationColumns = [
+  { key: "daily", label: "일일" }, { key: "monthly", label: "월별" }, { key: "quarterly", label: "분기" },
+  { key: "semiannual", label: "반기" }, { key: "other", label: "연간" },
+] as const;
+const columns = ["근무지", "이름", "출근예정일", "출퇴근예정", "출퇴근", "근태", ...educationColumns.map(({ label }) => label), "특이사항"];
+
+function isIncompleteEducation(value: string) {
+  if (value === "X") return true;
+  const [completed, total] = value.split("/").map(Number);
+  return completed < total;
+}
 
 function weekday(workDate: string) {
   return new Intl.DateTimeFormat("ko-KR", { weekday: "short", timeZone: "Asia/Seoul" })
@@ -24,7 +35,7 @@ export default function MonthlyInformationPage() {
   const [worksiteNames, setWorksiteNames] = useState<string[]>([]);
   const [worksiteError, setWorksiteError] = useState("");
   const [yearMonth, setYearMonth] = useState(() => educationToday().slice(0, 7));
-  const [rows, setRows] = useState<AttendanceReportRow[]>([]);
+  const [rows, setRows] = useState<MonthlyInformationRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   useEffect(() => {
@@ -51,11 +62,11 @@ export default function MonthlyInformationPage() {
       try {
         if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(yearMonth)) throw new Error("조회년월을 확인하세요.");
         const response = await fetch(
-          `/api/manager/worker-information?${new URLSearchParams({ yearMonth })}`,
+          `/api/manager/monthly-information?${new URLSearchParams({ yearMonth })}`,
           { signal: controller.signal },
         );
         const data = await response.json();
-        if (!response.ok) throw new Error(data.error ?? "월별전체현황를 불러오지 못했습니다.");
+        if (!response.ok) throw new Error(data.error ?? "월별전체현황을 불러오지 못했습니다.");
         if (!controller.signal.aborted) setRows(data.rows ?? []);
       } catch (error) {
         if (!controller.signal.aborted) setError(error instanceof Error ? error.message : "조회에 실패했습니다.");
@@ -131,6 +142,20 @@ export default function MonthlyInformationPage() {
                         end={formatDateTimeSegment(row.clockOutDateTime, row.workDate, row.workDate)} />
                     </TableCell>
                     <TableCell data-label="근태">{[row.status, row.outtimeLabel].filter(Boolean).join(" ")}</TableCell>
+                    {educationColumns.map(({ key, label }) => <TableCell key={key} data-label={label}>
+                      <span className={isIncompleteEducation(row.education[key]) ? "font-semibold text-destructive" : row.education[key] === "O" ? "font-semibold text-foreground" : "font-semibold text-muted-foreground"}>
+                        {row.education[key]}
+                      </span>
+                    </TableCell>)}
+                    <TableCell data-label="특이사항" className="min-w-64 max-w-96 whitespace-normal break-words align-top"
+                      data-export-value={row.remarks.map((remark) => `${formatSpecialRemarkDateTime(remark.reportedAt)} ${summarizeSpecialRemarkContent(remark.content)}`).join("\n") || "-"}>
+                      {row.remarks.length ? <div className="space-y-3">{row.remarks.map((remark) => <div key={remark.id}>
+                        <Link className="text-primary hover:underline" href={`/manager/inspection/special-remarks/${encodeURIComponent(remark.id)}`}>
+                          {formatSpecialRemarkDateTime(remark.reportedAt)}
+                        </Link>
+                        <p>{summarizeSpecialRemarkContent(remark.content)}</p>
+                      </div>)}</div> : "-"}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

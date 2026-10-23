@@ -505,7 +505,7 @@ export async function sendSpecialRemarkReportEmail(report: SpecialRemarkReportRo
   }
 }
 
-export async function listSpecialRemarkReports(input: { yearMonth?: unknown } = {}) {
+export async function listSpecialRemarkReports(input: { yearMonth?: unknown; includePhotos?: boolean } = {}) {
   const yearMonth = typeof input.yearMonth === "string" ? input.yearMonth.trim() : "";
   if (yearMonth && !/^\d{4}-(0[1-9]|1[0-2])$/.test(yearMonth)) throw new Error("조회년월을 확인하세요.");
   const supabase = getSupabaseAdmin();
@@ -524,8 +524,10 @@ export async function listSpecialRemarkReports(input: { yearMonth?: unknown } = 
   type ReportWithEmployee = SpecialRemarkReportRow & {
     employees?: { role: string | null; work_style: "0" | "1" | "2" | null } | null;
   };
-  const reports = await Promise.all(((data ?? []) as ReportWithEmployee[]).map(({ employees, ...report }) =>
-    withSignedPhotoUrls({ ...report, employee_role: employees?.role ?? "-", work_style: employees?.work_style ?? null })));
+  const reports = await Promise.all(((data ?? []) as ReportWithEmployee[]).map(({ employees, ...report }) => {
+    const row = { ...report, employee_role: employees?.role ?? "-", work_style: employees?.work_style ?? null };
+    return input.includePhotos === false ? normalizeReportPhotoUrls(row) : withSignedPhotoUrls(row);
+  }));
   return reports.sort((left, right) => left.worksite_name.localeCompare(right.worksite_name, "ko-KR")
     || left.employee_name.localeCompare(right.employee_name, "ko-KR")
     || new Date(left.reported_at).getTime() - new Date(right.reported_at).getTime());

@@ -293,6 +293,18 @@ describe("special remark report photo access", () => {
     expect(reports[0]?.photo_url).toContain("/storage/v1/object/sign/special-remarks/");
   });
 
+  it("skips photo URL signing when only report text is requested", async () => {
+    const photoUrl = "https://example.supabase.co/storage/v1/object/public/special-remarks/employee-1/photo.jpg";
+    const query = { order: vi.fn(async () => ({ data: [{ id: "report-1", photo_url: photoUrl }], error: null })) };
+    select.mockReturnValue(query);
+    from.mockReturnValue({ select });
+
+    const reports = await listSpecialRemarkReports({ includePhotos: false });
+
+    expect(reports[0].photo_url).toBe(photoUrl);
+    expect(createSignedUrl).not.toHaveBeenCalled();
+  });
+
   it("returns a signed URL for a private-bucket photo in the detail", async () => {
     selectEq.mockReturnValue({
       single: vi.fn(async () => ({

@@ -17,7 +17,7 @@ const educationColumns = [
   { key: "daily", label: "일일" }, { key: "monthly", label: "월별" }, { key: "quarterly", label: "분기" },
   { key: "semiannual", label: "반기" }, { key: "other", label: "연간" },
 ] as const;
-const columns = ["근무지", "이름", "출근예정일", "출퇴근예정", "출퇴근", "근태", ...educationColumns.map(({ label }) => label), "특이사항"];
+const columns = ["근무지", "이름", "직군", "근무형태", "생년월일", "출근예정일", "출퇴근예정", "출퇴근", "근태", ...educationColumns.map(({ label }) => label), "특이사항"];
 
 function isIncompleteEducation(value: string) {
   if (value === "X") return true;
@@ -140,9 +140,12 @@ export default function MonthlyInformationPage() {
                     <TableCell data-label="근무지" data-export-value={row.worksiteName || "-"}>
                       {index > 0 && filteredRows[index - 1].worksiteName === row.worksiteName ? "" : row.worksiteName || "-"}
                     </TableCell>
-                    <TableCell data-label="이름" data-export-value={employeeSummary(row)}>
-                      {index > 0 && filteredRows[index - 1].worksiteName === row.worksiteName && employeeSummary(filteredRows[index - 1]) === employeeSummary(row) ? "" : employeeSummary(row)}
+                    <TableCell data-label="이름" data-export-value={row.employeeName}>
+                      {index > 0 && filteredRows[index - 1].worksiteName === row.worksiteName && employeeSummary(filteredRows[index - 1]) === employeeSummary(row) ? "" : row.employeeName}
                     </TableCell>
+                    <TableCell data-label="직군">{row.employeeRole || "-"}</TableCell>
+                    <TableCell data-label="근무형태">{row.workStyle || "-"}</TableCell>
+                    <TableCell data-label="생년월일" className="whitespace-nowrap">{row.employeeBirthdate || "-"}</TableCell>
                     <TableCell data-label="출근예정일" className="whitespace-nowrap">
                       <Link className="text-primary underline underline-offset-4 hover:text-primary/80"
                         aria-label={`${employeeSummary(row)} ${row.workDate} 근태 상세 보기`} href={`/manager/reports/attendance/detail/${row.id}`}>

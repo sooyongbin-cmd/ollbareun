@@ -18,15 +18,15 @@ it("selects a complete leap month by work_date and reuses attendance statuses wi
       return builder;
     };
     builder.range = async () => ({ data: table === "work_record" ? records : table === "employees"
-      ? [{ id: "e", name: "홍길동", role: "경비원", work_style: "1" }] : [{ id: "w", name: "본사" }], error: null });
+      ? [{ id: "e", name: "홍길동", role: "경비원", work_style: "1", birthdate: "1966-01-02" }] : [{ id: "w", name: "본사" }], error: null });
     return builder;
   } } as never);
   const result = await loadMonthlyAttendance("2024-02");
   expect(filters).toContainEqual(["gte", "work_date", "2024-02-01"]);
   expect(filters).toContainEqual(["lt", "work_date", "2024-03-01"]);
   expect(result).toHaveLength(2);
-  expect(result[0]).toMatchObject({ id: "a", status: "지각", outtimeLabel: "조퇴", scheduledClockOut: "2024-02-29 06:00", worksiteName: "본사" });
-  expect(result[1]).toMatchObject({ id: "b", status: "휴가", outtimeLabel: "" });
+  expect(result[0]).toMatchObject({ id: "a", employeeBirthdate: "1966-01-02", status: "지각", outtimeLabel: "조퇴", scheduledClockOut: "2024-02-29 06:00", worksiteName: "본사" });
+  expect(result[1]).toMatchObject({ id: "b", employeeBirthdate: "1966-01-02", status: "휴가", outtimeLabel: "" });
 });
 it("rejects invalid months before accessing the database", async () => {
   for (const month of ["", "2026-13", "2026-00", "2026-1"]) {

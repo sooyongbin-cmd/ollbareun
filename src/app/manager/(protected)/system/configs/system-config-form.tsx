@@ -1,5 +1,7 @@
 "use client";
 
+import type { RegistrationFormProps } from "@/components/modals/registration-modal";
+
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
@@ -15,7 +17,7 @@ import ProcessingModal from "@/components/modals/processing-modal";
 
 const managerThemeOptions = ["light", "dark", "system"] as const;
 
-type SystemConfigFormProps = {
+type SystemConfigFormProps = RegistrationFormProps & {
   mode: "create" | "edit";
   initialConfig?: {
     system_code: string;
@@ -25,7 +27,7 @@ type SystemConfigFormProps = {
   };
 };
 
-export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFormProps) {
+export default function SystemConfigForm({ mode, initialConfig, modal = false, onClose, onSaved }: SystemConfigFormProps) {
   const router = useRouter();
   const systemCode = initialConfig?.system_code ?? "";
   const isBooleanConfig = ["S000002", "special_001", "USE_QR_CODE"].includes(systemCode);
@@ -56,6 +58,10 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
       if (isThemeConfig) {
         const theme = saveManagerThemeLocally(content);
         notifyManagerThemeChange(theme);
+        if (onSaved) {
+          onSaved();
+          return;
+        }
         router.push("/manager/system/configs");
         router.refresh();
         return;
@@ -79,6 +85,10 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
         throw new Error(payload.error ?? "시스템설정을 저장하지 못했습니다.");
       }
 
+      if (onSaved) {
+        onSaved();
+        return;
+      }
       router.push("/manager/system/configs");
       router.refresh();
     } catch (saveError) {
@@ -105,6 +115,10 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
         throw new Error(payload.error ?? "시스템설정을 삭제하지 못했습니다.");
       }
 
+      if (onSaved) {
+        onSaved();
+        return;
+      }
       router.push("/manager/system/configs");
       router.refresh();
     } catch (deleteError) {
@@ -186,11 +200,11 @@ export default function SystemConfigForm({ mode, initialConfig }: SystemConfigFo
         <Button
           className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:ml-auto"
           disabled={saving}
-          onClick={() => router.push("/manager/system/configs")}
+          onClick={() => onClose ? onClose() : router.push("/manager/system/configs")}
           type="button"
           variant="outline"
         >
-          목록
+          {modal ? "닫기" : "목록"}
         </Button>
       </div>
       <ConfirmModal

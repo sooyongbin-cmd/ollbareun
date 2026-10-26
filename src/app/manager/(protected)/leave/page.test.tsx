@@ -49,6 +49,6 @@ describe("leave page", () => {
     expect(screen.getByText("2026-05-01 ~ 2026-06-30")).toBeInTheDocument();
     await user.type(screen.getByLabelText("이름"), "김철수");
     await waitFor(() => expect(screen.getByText("조회 결과에 해당하는 휴가가 없습니다.")).toBeInTheDocument());
-    expect(screen.getByRole("link", { name: "휴가신청" })).toHaveAttribute("href", "/manager/leave/new");
+    expect(screen.getByRole("button", { name: "휴가신청" })).toBeInTheDocument();
   });
 });

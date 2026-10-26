@@ -1,5 +1,7 @@
 "use client";
 
+import type { RegistrationFormProps } from "@/components/modals/registration-modal";
+
 import { EmployeeScheduleFields } from "@/components/employee-schedule-fields";
 import { legacyScheduleRules, type ScheduleRule } from "@/lib/employee-schedule";
 import { fetchEmployeeRoles } from "@/lib/employee-roles";
@@ -58,11 +60,7 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
   return payload as T;
 }
 
-export default function EmployeeRegistrationForm({ onClose, onCreated, modal = false }: {
-  onClose: () => void;
-  onCreated?: () => void;
-  modal?: boolean;
-}) {
+export default function EmployeeRegistrationForm({ onClose, onSaved, modal = false }: RegistrationFormProps) {
   const [phone, setPhone] = useState("");
   const [employeeRoles, setEmployeeRoles] = useState<string[]>([]);
   const [role, setRole] = useState("");
@@ -135,7 +133,6 @@ export default function EmployeeRegistrationForm({ onClose, onCreated, modal = f
         schedule_rules: scheduleRules,
       });
 
-      onCreated?.();
       setCreatedEmployeeId(result.employee.id);
       setSuccessMessage(`직원이름(${result.employee.name}) 연락처(${formatPhoneNumber(result.employee.phone)}) 직군(${result.employee.role}) 등록완료`);
     } catch (submitError) {
@@ -267,7 +264,7 @@ export default function EmployeeRegistrationForm({ onClose, onCreated, modal = f
               aria-label="닫기"
               className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:ml-auto w-full md:w-auto"
               type="button"
-              onClick={onClose}
+              onClick={() => onClose ? onClose() : router.push("/manager/employee/employees")}
               disabled={saving}
               variant="outline"
             >
@@ -285,7 +282,9 @@ export default function EmployeeRegistrationForm({ onClose, onCreated, modal = f
         isOpen={Boolean(successMessage)}
         onClose={() => {
           setSuccessMessage("");
-          onClose();
+          if (onSaved) onSaved();
+          else if (onClose) onClose();
+          else router.push("/manager/employee/employees");
         }}
         secondaryButtonLabel={createdEmployeeId ? "배정등록" : undefined}
         onSecondaryButtonClick={createdEmployeeId ? () => {

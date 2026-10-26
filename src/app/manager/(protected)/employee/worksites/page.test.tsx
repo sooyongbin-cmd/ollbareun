@@ -7,6 +7,7 @@ import ManagerPage from "../../page";
 import WorksiteManagementPage from "./page";
 
 vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
   useSearchParams: () => new URLSearchParams(),
   usePathname: () => "/manager/employee/worksites",
 }));
@@ -62,10 +63,7 @@ describe("worksite management page", () => {
     renderWithManagerLayout(<WorksiteManagementPage />);
 
     expect(await screen.findByRole("heading", { name: "근무지관리" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "근무지 등록" })).toHaveAttribute(
-      "href",
-      "/manager/employee/worksites/new",
-    );
+    expect(screen.getByRole("button", { name: "근무지 등록" })).toBeInTheDocument();
     expect(screen.getByLabelText("근무지")).toHaveAttribute("placeholder", "근무지 이름을 입력하세요.");
     expect(screen.getByLabelText("근무지")).toHaveAttribute("list", "worksite-search-options");
     expect(Array.from(document.querySelectorAll<HTMLOptionElement>("#worksite-search-options option")).map((option) => option.value)).toEqual(["본사", "서울지점"]);
@@ -99,7 +97,7 @@ describe("worksite management page", () => {
     const listSection = await screen.findByRole("region", { name: "근무지 목록" });
 
     expect(searchSection).toContainElement(screen.getByLabelText("근무지"));
-    expect(searchSection).toContainElement(screen.getByRole("link", { name: "근무지 등록" }));
+    expect(searchSection).toContainElement(screen.getByRole("button", { name: "근무지 등록" }));
     expect(within(listSection).queryByText("전체 근무지 2")).not.toBeInTheDocument();
     expect(listSection).toContainElement(screen.getByText("조회 결과 2"));
     expect(listSection).toContainElement(screen.getByRole("table"));

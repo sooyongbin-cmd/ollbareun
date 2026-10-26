@@ -13,7 +13,7 @@ it("shows each subscription, hides repeated emails and deletes only after confir
   render(<AdminUsersPage />);
   await screen.findAllByRole("button", { name: /a@example.com.*구독삭제/ });
   expect(screen.getAllByText("a@example.com")).toHaveLength(1);
-  expect(screen.getByRole("link", { name: "관리자등록" })).toHaveAttribute("href", "/manager/system/admin-users/new");
+  expect(screen.getByRole("button", { name: "관리자등록" })).toBeInTheDocument();
   const deletes = screen.getAllByRole("button", { name: /구독삭제/ });
   await user.click(deletes[0]);
   expect(screen.getByText(/삭제하시면 푸시알림을 받을 수 없습니다/)).toBeInTheDocument();

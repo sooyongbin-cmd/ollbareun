@@ -1,9 +1,11 @@
 "use client";
 
+import RegistrationModal from "@/components/modals/registration-modal";
+import dynamic from "next/dynamic";
+
 import ListResults from "@/components/list-results";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,7 +17,10 @@ import ManagerLoadingMessage from "../../manager-loading-message";
 
 type Holiday = { id: string; holiday_date: string; name: string | null; selected: "Y" | "N"; holiday_type?: "public" | "custom" };
 const actionClass = "inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full gap-2 text-center md:w-auto";
+const RegistrationForm = dynamic(() => import("./new/registration-form"));
+
 export default function HolidaysPage() {
+  const [registrationVersion, setRegistrationVersion] = useState(0);
   const [year, setYear] = useState(() => new Intl.DateTimeFormat("en", { year: "numeric", timeZone: "Asia/Seoul" }).format(new Date()));
   const [rows, setRows] = useState<Holiday[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +45,7 @@ export default function HolidaysPage() {
       } finally { if (!controller.signal.aborted) setLoading(false); }
     }, 300);
     return () => { clearTimeout(timer); controller.abort(); };
-  }, [year, revision, valid]);
+  }, [year, revision, valid, registrationVersion]);
   async function importYear() {
     if (!confirmYear || busy) return;
     const target = confirmYear;
@@ -105,10 +110,17 @@ export default function HolidaysPage() {
             <span>{busy ? "공휴일 가져오는 중..." : "공휴일가져오기"}</span>
             <ArrowRightIcon size={18} />
           </Button>
-          <Link href="/manager/employee/holidays/new" className={actionClass}>
+          <RegistrationModal
+            title="휴일추가"
+            form={RegistrationForm}
+            onSaved={() => {
+              setError("");
+              setLoading(valid);
+              setRegistrationVersion((version) => version + 1);
+            }} className={actionClass}>
             <span>휴일추가</span>
             <ArrowRightIcon size={18} />
-          </Link>
+          </RegistrationModal>
         </div>
         {!valid && <p role="alert" className="mt-6 rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive text-center">연도는 1900~9998 사이로 입력해주세요.</p>}
         {error && <p role="alert" className="mt-6 whitespace-pre-wrap break-words rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive text-left">{error}</p>}

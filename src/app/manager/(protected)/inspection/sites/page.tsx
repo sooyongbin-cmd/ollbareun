@@ -1,5 +1,8 @@
 "use client";
 
+import RegistrationModal from "@/components/modals/registration-modal";
+import dynamic from "next/dynamic";
+
 import ListResults from "@/components/list-results";
 
 import { Input } from "@/components/ui/input";
@@ -82,7 +85,10 @@ function formatInspectionTime(value?: string) {
   return values.hour && values.minute ? `${values.hour}:${values.minute}` : "";
 }
 
+const RegistrationForm = dynamic(() => import("./new/registration-form"));
+
 export default function InspectionSitesPage() {
+  const [registrationVersion, setRegistrationVersion] = useState(0);
   const searchParams = useSearchParams();
   const requestedWorksiteId = searchParams?.get("worksiteId") ?? "";
   const previousRequestedWorksiteId = useRef(requestedWorksiteId);
@@ -166,7 +172,7 @@ export default function InspectionSitesPage() {
       ignore = true;
       window.clearTimeout(timeoutId);
     };
-  }, [query, worksiteFilter, worksiteNameFilter]);
+  }, [query, worksiteFilter, worksiteNameFilter, registrationVersion]);
 
   useEffect(() => {
     if (previousRequestedWorksiteId.current === requestedWorksiteId) {
@@ -264,10 +270,17 @@ export default function InspectionSitesPage() {
             </datalist>
           </div>
           <div className="flex gap-3">
-            <Link className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 gap-2 whitespace-nowrap" href="/manager/inspection/sites/new">
+            <RegistrationModal
+            title="점검지 등록"
+            form={RegistrationForm}
+            onSaved={() => {
+              setError("");
+              setLoading(true);
+              setRegistrationVersion((version) => version + 1);
+            }} className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 gap-2 whitespace-nowrap">
               <span>점검지 등록</span>
               <ArrowRightIcon size={18} />
-            </Link>
+            </RegistrationModal>
           </div>
         </div>
       </section>

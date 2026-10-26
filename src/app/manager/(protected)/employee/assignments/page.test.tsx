@@ -63,10 +63,7 @@ describe("assignment management page", () => {
     renderWithManagerLayout(<AssignmentManagementPage />);
 
     expect(await screen.findByRole("heading", { name: "근무지배정" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "배정등록" })).toHaveAttribute(
-      "href",
-      "/manager/employee/assignments/new",
-    );
+    expect(screen.getByRole("button", { name: "배정등록" })).toBeInTheDocument();
     expect(screen.getAllByRole("columnheader").map((header) => header.textContent?.trim())).toEqual([
       "이름",
       "직군",
@@ -79,6 +76,7 @@ describe("assignment management page", () => {
     expect(employeeLink).toHaveAttribute("href", "/manager/employee/assignments/save/assign-1");
     const row = employeeLink.closest("tr");
     expect(row).not.toBeNull();
+    if (!row) throw new Error("배정 행을 찾지 못했습니다.");
     expect(within(row as HTMLElement).getByText("2026-05-21 ~ 2026-05-23")).toBeInTheDocument();
     expect(within(row).getByText("경비원")).toBeInTheDocument();
     expect(within(row).getByText("일반근무")).toBeInTheDocument();
@@ -87,11 +85,11 @@ describe("assignment management page", () => {
     expect(screen.getByRole("combobox", { name: "이름" })).toHaveValue("");
     expect(screen.getByRole("combobox", { name: "이름" })).toHaveAttribute("placeholder", "이름을 입력하세요.");
     expect(screen.getByRole("combobox", { name: "이름" })).toHaveAttribute("list", "assignment-name-search-options");
-    expect(Array.from(document.querySelectorAll<HTMLOptionElement>("#assignment-name-search-options option")).map((option) => option.value)).toEqual(["홍길동", "이영희", "김철수"]);
+    expect(Array.from(document.querySelectorAll<HTMLOptionElement>("#assignment-name-search-options option")).map((option) => option.value)).toEqual(["김철수", "이영희", "홍길동"]);
     expect(screen.getByRole("combobox", { name: "근무지" })).toHaveValue("");
     expect(screen.getByRole("combobox", { name: "근무지" })).toHaveAttribute("placeholder", "근무지 이름을 입력하세요.");
     expect(screen.getByRole("combobox", { name: "근무지" })).toHaveAttribute("list", "assignment-worksite-search-options");
-    expect(Array.from(document.querySelectorAll<HTMLOptionElement>("#assignment-worksite-search-options option")).map((option) => option.value)).toEqual(["서울지점", "부산지점", "본사"]);
+    expect(Array.from(document.querySelectorAll<HTMLOptionElement>("#assignment-worksite-search-options option")).map((option) => option.value)).toEqual(["본사", "부산지점", "서울지점"]);
 
     await user.type(screen.getByLabelText("날짜"), "2026-05-22");
     expect(await screen.findByRole("link", { name: "홍길동" })).toBeInTheDocument();
@@ -118,7 +116,7 @@ describe("assignment management page", () => {
     expect(searchSection).toContainElement(screen.getByLabelText("날짜"));
     expect(searchSection).toContainElement(screen.getByLabelText("근무지"));
     expect(searchSection).toContainElement(screen.getByLabelText("이름"));
-    expect(searchSection).toContainElement(screen.getByRole("link", { name: "배정등록" }));
+    expect(searchSection).toContainElement(screen.getByRole("button", { name: "배정등록" }));
     expect(within(listSection).queryByText("전체 배정 2")).not.toBeInTheDocument();
     expect(listSection).toContainElement(screen.getByText("조회 결과 2"));
     expect(listSection).toContainElement(screen.getByRole("table"));

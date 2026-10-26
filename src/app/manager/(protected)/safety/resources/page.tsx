@@ -1,5 +1,8 @@
 "use client";
 
+import RegistrationModal from "@/components/modals/registration-modal";
+import dynamic from "next/dynamic";
+
 import ListResults from "@/components/list-results";
 
 import { educationTypeLabels, educationTypes, type EducationType } from "@/lib/education-periods";
@@ -26,7 +29,10 @@ type EducationResourceRow = {
   enddate: string;
 };
 
+const RegistrationForm = dynamic(() => import("./new/registration-form"));
+
 export default function EducationResourcesPage() {
+  const [registrationVersion, setRegistrationVersion] = useState(0);
   const [resources, setResources] = useState<EducationResourceRow[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -57,7 +63,7 @@ export default function EducationResourcesPage() {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [registrationVersion]);
 
   const filteredResources = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -98,13 +104,19 @@ export default function EducationResourcesPage() {
             />
           </div>
 
-          <Link
+          <RegistrationModal
+            title="교재등록"
+            form={RegistrationForm}
+            onSaved={() => {
+              setError("");
+              setLoading(true);
+              setRegistrationVersion((version) => version + 1);
+            }}
             className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2"
-            href="/manager/safety/resources/new"
           >
             <span>교재등록</span>
             <ArrowRightIcon size={18} />
-          </Link>
+          </RegistrationModal>
         </div>
       </section>
 

@@ -1,5 +1,8 @@
 "use client";
 
+import RegistrationModal from "@/components/modals/registration-modal";
+import dynamic from "next/dynamic";
+
 import ListResults from "@/components/list-results";
 
 import { Input } from "@/components/ui/input";
@@ -35,7 +38,10 @@ const emptyBootstrap: Bootstrap = {
   inspectionSiteCounts: {},
 };
 
+const RegistrationForm = dynamic(() => import("./new/registration-form"));
+
 export default function WorksiteManagementClient() {
+  const [registrationVersion, setRegistrationVersion] = useState(0);
   const searchParams = useSearchParams();
   const initialQuery = searchParams?.get("worksite") ?? "";
   const [data, setData] = useState<Bootstrap>(emptyBootstrap);
@@ -109,7 +115,7 @@ export default function WorksiteManagementClient() {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [registrationVersion]);
 
   const worksiteCounts = useMemo(() => {
     return data.assignments.reduce<Record<string, number>>((counts, assignment) => {
@@ -197,13 +203,19 @@ export default function WorksiteManagementClient() {
             </datalist>
           </div>
 
-          <Link
+          <RegistrationModal
+            title="근무지등록"
+            form={RegistrationForm}
+            onSaved={() => {
+              setError("");
+              setLoading(true);
+              setRegistrationVersion((version) => version + 1);
+            }}
             className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2"
-            href="/manager/employee/worksites/new"
           >
             <span>근무지 등록</span>
             <ArrowRightIcon size={18} />
-          </Link>
+          </RegistrationModal>
         </div>
       </section>
 

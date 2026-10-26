@@ -1,5 +1,8 @@
 "use client";
 
+import RegistrationModal from "@/components/modals/registration-modal";
+import dynamic from "next/dynamic";
+
 import ListResults from "@/components/list-results";
 
 import { Input } from "@/components/ui/input";
@@ -51,7 +54,10 @@ function formatWorkStyle(workStyle: AssignmentRow["employee_work_style"]) {
   return "근무형태 없음";
 }
 
+const RegistrationForm = dynamic(() => import("./new/registration-form"));
+
 export default function AssignmentManagementClient() {
+  const [registrationVersion, setRegistrationVersion] = useState(0);
   const searchParams = useSearchParams();
   const initialWorksite = searchParams?.get("worksite") ?? "";
   const [assignments, setAssignments] = useState<AssignmentRow[]>([]);
@@ -104,7 +110,7 @@ export default function AssignmentManagementClient() {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [registrationVersion]);
 
   const filteredAssignments = useMemo(() => {
     const normalizedDate = dateQuery.trim();
@@ -217,13 +223,19 @@ export default function AssignmentManagementClient() {
               onChange={(event) => setDateQuery(event.target.value)}
             />
           </div>
-          <Link
+          <RegistrationModal
+            title="배정등록"
+            form={RegistrationForm}
+            onSaved={() => {
+              setError("");
+              setLoading(true);
+              setRegistrationVersion((version) => version + 1);
+            }}
             className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-primary px-4 text-center text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:w-auto"
-            href="/manager/employee/assignments/new"
           >
             <span>배정등록</span>
             <ArrowRightIcon size={18} />
-          </Link>
+          </RegistrationModal>
         </div>
       </section>
 

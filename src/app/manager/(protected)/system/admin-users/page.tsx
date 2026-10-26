@@ -1,5 +1,8 @@
 "use client";
 
+import RegistrationModal from "@/components/modals/registration-modal";
+import dynamic from "next/dynamic";
+
 import ListResults from "@/components/list-results";
 
 import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
@@ -17,7 +20,10 @@ function formatDateTime(value?: string) {
   return value ? new Date(value).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }) : "-";
 }
 
+const RegistrationForm = dynamic(() => import("./new/registration-form"));
+
 export default function AdminUsersPage() {
+  const [registrationVersion, setRegistrationVersion] = useState(0);
   const [rows, setRows] = useState<AdminSubscriptionRow[]>([]);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -36,7 +42,7 @@ export default function AdminUsersPage() {
   useEffect(() => {
     void Promise.resolve().then(loadAdmins).catch((err) => setError(err instanceof Error ? err.message : "조회에 실패했습니다."))
       .finally(() => setLoading(false));
-  }, [loadAdmins]);
+  }, [loadAdmins, registrationVersion]);
 
   async function runAction(action: () => Promise<Response>) {
     if (busyRef.current) return;
@@ -63,10 +69,17 @@ export default function AdminUsersPage() {
     <section className="manager-section rounded-xl border border-border/50 bg-muted/40">
       <div className="flex justify-end">
         {isSuperAdmin && !busy ? (
-          <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2" href="/manager/system/admin-users/new">
+          <RegistrationModal
+            title="관리자등록"
+            form={RegistrationForm}
+            onSaved={() => {
+              setError("");
+              setLoading(true);
+              setRegistrationVersion((version) => version + 1);
+            }} className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2">
             <span>관리자등록</span>
             <ArrowRightIcon size={18} />
-          </Link>
+          </RegistrationModal>
         ) : (
           <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2" disabled>
             <span>관리자등록</span>

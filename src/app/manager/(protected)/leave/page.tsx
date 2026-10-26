@@ -1,5 +1,8 @@
 "use client";
 
+import RegistrationModal from "@/components/modals/registration-modal";
+import dynamic from "next/dynamic";
+
 import ListResults from "@/components/list-results";
 
 import Link from "next/link";
@@ -45,7 +48,10 @@ async function fetchJson<T>(url: string): Promise<T> {
   return payload as T;
 }
 
+const RegistrationForm = dynamic(() => import("./new/registration-form"));
+
 export default function LeavePage() {
+  const [registrationVersion, setRegistrationVersion] = useState(0);
   const [nameQuery, setNameQuery] = useState("");
   const [employeeNames, setEmployeeNames] = useState<string[]>([]);
   const [rows, setRows] = useState<LeaveRow[]>([]);
@@ -85,7 +91,7 @@ export default function LeavePage() {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [registrationVersion]);
 
   const filteredRows = useMemo(() => {
     const query = nameQuery.trim().toLowerCase();
@@ -118,13 +124,19 @@ export default function LeavePage() {
               {employeeNames.map((name) => <option key={name} value={name} />)}
             </datalist>
           </div>
-          <Link
+          <RegistrationModal
+            title="휴가신청"
+            form={RegistrationForm}
+            onSaved={() => {
+              setError("");
+              setLoading(true);
+              setRegistrationVersion((version) => version + 1);
+            }}
             className="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto"
-            href="/manager/leave/new"
           >
             <span>휴가신청</span>
             <ArrowRightIcon size={18} />
-          </Link>
+          </RegistrationModal>
         </div>
       </section>
 

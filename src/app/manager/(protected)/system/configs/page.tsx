@@ -1,5 +1,8 @@
 "use client";
 
+import RegistrationModal from "@/components/modals/registration-modal";
+import dynamic from "next/dynamic";
+
 import ListResults from "@/components/list-results";
 
 import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
@@ -32,7 +35,10 @@ async function fetchConfigs() {
   );
 }
 
+const RegistrationForm = dynamic(() => import("./new/registration-form"));
+
 export default function SystemConfigsPage() {
+  const [registrationVersion, setRegistrationVersion] = useState(0);
   const [configs, setConfigs] = useState<SystemConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -60,7 +66,7 @@ export default function SystemConfigsPage() {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [registrationVersion]);
 
   return (
     <section className="space-y-[1.5rem]">
@@ -70,10 +76,17 @@ export default function SystemConfigsPage() {
 
       <section aria-label="시스템설정 조회" className="manager-section bg-muted/40 rounded-xl border border-border/50">
         <div className="flex justify-end">
-          <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2" href="/manager/system/configs/new">
+          <RegistrationModal
+            title="시스템설정 등록"
+            form={RegistrationForm}
+            onSaved={() => {
+              setError("");
+              setLoading(true);
+              setRegistrationVersion((version) => version + 1);
+            }} className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2">
             <span>등록</span>
             <ArrowRightIcon size={18} />
-          </Link>
+          </RegistrationModal>
         </div>
       </section>
 

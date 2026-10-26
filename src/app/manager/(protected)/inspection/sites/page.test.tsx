@@ -50,10 +50,7 @@ describe("inspection sites page", () => {
     expect(screen.getByRole("heading", { name: "점검지관리" })).toBeInTheDocument();
     expect(screen.getByLabelText("근무지")).toHaveAttribute("list", "inspection-worksite-options");
     expect(screen.getByLabelText("점검지")).toHaveAttribute("list", "inspection-site-options");
-    expect(screen.getByRole("link", { name: "점검지 등록" })).toHaveAttribute(
-      "href",
-      "/manager/inspection/sites/new",
-    );
+    expect(screen.getByRole("button", { name: "점검지 등록" })).toBeInTheDocument();
 
     await waitFor(() => {
       expect(document.querySelector('#inspection-worksite-options option[value="Worksite"]')).not.toBeNull();

@@ -1,0 +1,193 @@
+"use client";
+
+import type { RegistrationFormProps } from "@/components/modals/registration-modal";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { SaveIcon } from "@/components/icons/save-icon";
+import AlertModal from "@/components/modals/alert-modal";
+import ProcessingModal from "@/components/modals/processing-modal";
+
+type Worksite = {
+  id: string;
+  name: string;
+};
+
+async function postJson<T>(url: string, body: unknown): Promise<T> {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const payload = await response.json();
+
+  if (!response.ok) {
+    throw new Error(payload.error ?? "요청을 처리하지 못했습니다.");
+  }
+
+  return payload as T;
+}
+
+export default function InspectionSiteNewPage({ modal = false, onClose, onSaved }: RegistrationFormProps) {
+  const router = useRouter();
+  const [worksites, setWorksites] = useState<Worksite[]>([]);
+  const [worksiteId, setWorksiteId] = useState("");
+  const [siteName, setSiteName] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const selectedWorksite = useMemo(
+    () => worksites.find((worksite) => worksite.id === worksiteId) ?? null,
+    [worksiteId, worksites],
+  );
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadWorksites() {
+      try {
+        const response = await fetch("/api/bootstrap");
+        const payload = await response.json();
+
+        if (!response.ok) {
+          throw new Error(payload.error ?? "근무지 목록을 불러오지 못했습니다.");
+        }
+
+        if (!ignore) {
+          const nextWorksites = (payload.worksites ?? []) as Worksite[];
+          const requestedWorksiteId = new URLSearchParams(window.location.search).get("worksiteId");
+          const requestedWorksite = nextWorksites.find((worksite) => worksite.id === requestedWorksiteId);
+
+          setWorksites(nextWorksites);
+          setWorksiteId(requestedWorksite?.id ?? nextWorksites[0]?.id ?? "");
+          if (requestedWorksite) {
+            setSiteName(requestedWorksite.name);
+          }
+        }
+      } catch (loadError) {
+        if (!ignore) {
+          setError(loadError instanceof Error ? loadError.message : "근무지 목록을 불러오지 못했습니다.");
+        }
+      }
+    }
+
+    void loadWorksites();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+
+    setSaving(true);
+    try {
+      await postJson("/api/inspection/sites", {
+        worksiteId,
+        name: siteName,
+      });
+      setAlertMessage("점검지가 저장되었습니다.");
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "점검지를 등록하지 못했습니다.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function handleAlertClose() {
+    setAlertMessage("");
+    if (onSaved) {
+      onSaved();
+      return;
+    }
+    router.push("/manager/inspection/sites");
+    router.refresh();
+  }
+
+  return (
+    <section className="space-y-[1.5rem]">
+      {!modal ? <header>
+        <h1 className="text-[1.75rem] leading-[1.2]">점검지 등록</h1>
+      </header> : null}
+
+      <section className="manager-section bg-muted/40 rounded-xl border border-border/50">
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="inspection-worksite">
+                근무지
+              </label>
+              <NativeSelect
+                className="w-full"
+                id="inspection-worksite"
+                value={worksiteId}
+                onChange={(event) => setWorksiteId(event.target.value)}
+                required
+              >
+                {worksites.length === 0 ? <NativeSelectOption value="">근무지 없음</NativeSelectOption> : null}
+                {worksites.map((worksite) => (
+                  <NativeSelectOption key={worksite.id} value={worksite.id}>
+                    {worksite.name}
+                  </NativeSelectOption>
+                ))}
+              </NativeSelect>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="inspection-site-name">
+                점검지명
+              </label>
+              <Input
+                className="w-full"
+                id="inspection-site-name"
+                name="name"
+                value={siteName}
+                onChange={(event) => setSiteName(event.target.value)}
+                placeholder="점검지 이름을 입력하세요."
+                required
+              />
+            </div>
+
+          </div>
+
+          <div className="flex flex-col gap-3 md:flex-row">
+            <Button
+              aria-label="저장"
+              className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center md:w-auto"
+              disabled={saving || !selectedWorksite}
+              type="submit"
+            >
+              <SaveIcon size={20} />
+            </Button>
+            <Button
+              aria-label={modal ? "닫기" : "목록"}
+              className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:ml-auto w-full justify-center md:w-auto"
+              onClick={() => onClose ? onClose() : router.push("/manager/inspection/sites")}
+              type="button"
+              variant="outline"
+            >
+              {modal ? "닫기" : "목록"}
+            </Button>
+          </div>
+        </form>
+
+        {error ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mt-6 text-center">{error}</p> : null}
+      </section>
+
+      <ProcessingModal isOpen={saving} message="저장처리중입니다..." />
+
+      <AlertModal
+        isOpen={Boolean(alertMessage)}
+        onClose={handleAlertClose}
+        title="알림"
+        description={alertMessage}
+      />
+    </section>
+  );
+}

@@ -26,7 +26,7 @@ describe("system configs page", () => {
     render(<SystemConfigsPage />);
 
     expect(await screen.findByRole("heading", { name: "시스템설정" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "등록" })).toHaveAttribute("href", "/manager/system/configs/new");
+    expect(screen.getByRole("button", { name: "등록" })).toBeInTheDocument();
     expect(screen.getAllByRole("columnheader").map((header) => header.textContent)).toEqual([
       "설명",
       "내용",

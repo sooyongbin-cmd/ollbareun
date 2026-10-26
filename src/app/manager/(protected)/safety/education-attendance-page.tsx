@@ -73,10 +73,10 @@ function educationDisplayLabel(type: EducationType) {
   return type === "monthly" ? "월별" : type === "other" ? "연간" : educationTypeLabels[type];
 }
 
-export default function EducationAttendancePage({ mode, initialName = "", initialWorkDate }: { mode: EducationAttendanceMode; initialName?: string; initialWorkDate?: string }) {
+export default function EducationAttendancePage({ mode }: { mode: EducationAttendanceMode }) {
   const isDaily = mode === "daily";
-  const [name, setName] = useState(initialName);
-  const [date, setDate] = useState(() => initialWorkDate || currentKstDate());
+  const [name, setName] = useState("");
+  const [date, setDate] = useState(currentKstDate);
   const [yearMonth, setYearMonth] = useState(currentKstYearMonth);
   const [dailyRows, setDailyRows] = useState<DailyEducationAttendanceRow[]>([]);
   const [resourceCounts, setResourceCounts] = useState<EducationResourceCounts>({ daily: 0, monthly: 0, quarterly: 0, semiannual: 0, other: 0 });

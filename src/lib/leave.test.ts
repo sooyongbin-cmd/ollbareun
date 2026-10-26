@@ -113,3 +113,27 @@ describe("leave data", () => {
     await expect(createLeave({ employeeId: "emp-1", leaveType: "월차", startDate: "2026-06-03", endDate: "2026-06-01" }, {} as never)).rejects.toThrow("종료일은 시작일보다 빠를 수 없습니다.");
   });
 });
+
+it("projects one registered leave with only its employee and overlapping assignment", async () => {
+  const calls: unknown[][] = [];
+  const data: Record<string, unknown[]> = {
+    leave: [{ id: "new", employee_id: "e1", leave_type: "연차", start_date: "2026-10-01", end_date: "2026-10-02" }],
+    employees: [{ id: "e1", name: "직원1", role: "경비원", work_style: "0" }],
+    work_assignments: [{ employee_id: "e1", worksite_id: "site", start_date: "2026-09-01", end_date: "2026-10-31" }],
+    worksites: [{ id: "site", name: "본사" }],
+  };
+  const client = { from: (table: string) => {
+    const builder: Record<string, unknown> = {};
+    for (const method of ["select", "eq", "gte", "lte", "in"]) builder[method] = (...args: unknown[]) => {
+      calls.push([table, method, ...args]); return builder;
+    };
+    builder.then = (resolve: (value: unknown) => unknown) => Promise.resolve({ data: data[table], error: null }).then(resolve);
+    return builder;
+  } };
+  expect(await listLeaves({ id: "new" }, client as never)).toMatchObject([{ id: "new", employeeName: "직원1", employeeRole: "경비원", worksiteName: "본사", assignmentStartDate: "2026-09-01" }]);
+  expect(calls).toContainEqual(["leave", "eq", "id", "new"]);
+  expect(calls).toContainEqual(["employees", "eq", "id", "e1"]);
+  expect(calls).toContainEqual(["work_assignments", "eq", "employee_id", "e1"]);
+  expect(calls).toContainEqual(["work_assignments", "lte", "start_date", "2026-10-02"]);
+  expect(calls).toContainEqual(["worksites", "in", "id", ["site"]]);
+});

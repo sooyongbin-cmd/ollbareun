@@ -1,5 +1,6 @@
 "use client";
 
+import type { DetailData } from "@/lib/detail-changes";
 import type { RegistrationFormProps } from "@/components/modals/registration-modal";
 
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
 
 export default function InspectionSiteNewPage({ modal = false, onClose, onSaved }: RegistrationFormProps) {
   const router = useRouter();
+  const [createdRecord, setCreatedRecord] = useState<DetailData | null>(null);
   const [worksites, setWorksites] = useState<Worksite[]>([]);
   const [worksiteId, setWorksiteId] = useState("");
   const [siteName, setSiteName] = useState("");
@@ -88,10 +90,11 @@ export default function InspectionSiteNewPage({ modal = false, onClose, onSaved 
 
     setSaving(true);
     try {
-      await postJson("/api/inspection/sites", {
+      const result = await postJson<{ site: DetailData }>("/api/inspection/sites", {
         worksiteId,
         name: siteName,
       });
+      setCreatedRecord({ ...result.site, worksite_name: worksites.find((item) => item.id === worksiteId)?.name });
       setAlertMessage("점검지가 저장되었습니다.");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "점검지를 등록하지 못했습니다.");
@@ -102,8 +105,8 @@ export default function InspectionSiteNewPage({ modal = false, onClose, onSaved 
 
   function handleAlertClose() {
     setAlertMessage("");
-    if (onSaved) {
-      onSaved();
+    if (onSaved && createdRecord) {
+      onSaved({ record: createdRecord });
       return;
     }
     router.push("/manager/inspection/sites");

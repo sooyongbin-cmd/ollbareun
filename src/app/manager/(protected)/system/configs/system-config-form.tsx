@@ -88,7 +88,7 @@ export default function SystemConfigForm({ mode, initialConfig, modal = false, o
         return;
       }
       if (onSaved) {
-        onSaved();
+        onSaved(payload.config);
         return;
       }
       router.push("/manager/system/configs");

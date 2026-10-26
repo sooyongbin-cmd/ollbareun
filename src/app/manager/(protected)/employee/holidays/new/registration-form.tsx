@@ -25,7 +25,7 @@ export default function HolidayNewPage({ modal = false, onClose, onSaved }: Regi
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       if (onSaved) {
-        onSaved();
+        onSaved({ record: data.holiday });
         return;
       }
       router.push("/manager/employee/holidays");

@@ -29,7 +29,7 @@ export default function NewAdminUserPage({ modal = false, onClose, onSaved }: Re
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "관리자 등록에 실패했습니다.");
       if (onSaved) {
-        onSaved();
+        onSaved({ record: payload.admin });
         return;
       }
       router.push("/manager/system/admin-users");

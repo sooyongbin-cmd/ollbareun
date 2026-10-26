@@ -1,5 +1,6 @@
 "use client";
 
+import type { DetailData } from "@/lib/detail-changes";
 import type { RegistrationFormProps } from "@/components/modals/registration-modal";
 
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,7 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
 }
 
 export default function WorksiteNewPage({ modal = false, onClose, onSaved }: RegistrationFormProps) {
+  const [createdRecord, setCreatedRecord] = useState<DetailData | null>(null);
   const [error, setError] = useState("");
   const [address, setAddress] = useState("");
   const [gpsInfo, setGpsInfo] = useState<GpsInfo | null>(null);
@@ -98,6 +100,7 @@ export default function WorksiteNewPage({ modal = false, onClose, onSaved }: Reg
         radiusMeters: data.get("radiusMeters"),
       });
 
+      setCreatedRecord(result.worksite);
       setCreatedWorksiteId(result.worksite.id);
       setAlertMessage("자료를 저장하였습니다.");
     } catch (submitError) {
@@ -188,8 +191,8 @@ export default function WorksiteNewPage({ modal = false, onClose, onSaved }: Reg
         isOpen={Boolean(alertMessage)}
         onClose={() => {
           setAlertMessage("");
-          if (onSaved) {
-            onSaved();
+          if (onSaved && createdRecord) {
+            onSaved({ record: createdRecord });
             return;
           }
           router.push("/manager/employee/worksites");

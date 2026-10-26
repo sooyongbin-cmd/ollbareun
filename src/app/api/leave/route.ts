@@ -1,3 +1,4 @@
+import { optionalDetailId } from "@/lib/detail-query";
 import { createLeave, listLeaves } from "@/lib/leave";
 import { getManagerUser } from "@/lib/manager-auth";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
@@ -9,7 +10,8 @@ export async function GET(request: Request) {
     }
 
     const url = new URL(request.url);
-    return Response.json({ leaves: await listLeaves({ employeeName: url.searchParams.get("employeeName") ?? "" }, getSupabaseAdmin()) });
+    const id = optionalDetailId(url.searchParams, "id");
+    return Response.json({ leaves: await listLeaves({ ...(id ? { id } : {}), employeeName: url.searchParams.get("employeeName") ?? "" }, getSupabaseAdmin()) });
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "휴가 목록을 불러오지 못했습니다." },

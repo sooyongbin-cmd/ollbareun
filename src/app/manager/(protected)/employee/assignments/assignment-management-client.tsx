@@ -1,5 +1,8 @@
 "use client";
 
+import { fetchDetailJson, PartialUpdateStatus, usePartialDetailUpdate } from "@/components/modals/partial-detail-update";
+import { addRegisteredRow, type RegistrationResult } from "@/lib/registration-result";
+
 import { applyDetailChanges, type DetailChange } from "@/lib/detail-changes";
 
 import DetailModalLink from "@/components/modals/detail-modal-link";
@@ -18,6 +21,7 @@ import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
 import { SortableHeader } from "@/components/sortable-header";
 
 type AssignmentRow = {
+  employee_id?: string;
   id: string;
   start_date: string;
   end_date: string;
@@ -60,7 +64,6 @@ function formatWorkStyle(workStyle: AssignmentRow["employee_work_style"]) {
 const RegistrationForm = dynamic(() => import("./new/registration-form"));
 
 export default function AssignmentManagementClient() {
-  const [registrationVersion, setRegistrationVersion] = useState(0);
   const searchParams = useSearchParams();
   const initialWorksite = searchParams?.get("worksite") ?? "";
   const [assignments, setAssignments] = useState<AssignmentRow[]>([]);
@@ -90,6 +93,32 @@ export default function AssignmentManagementClient() {
     setAssignments((rows) => applyDetailChanges(rows, changes, "assignment"));
   }
 
+  const registration = usePartialDetailUpdate(async (changes, commit) => {
+    const updates = await Promise.all(changes.map(async (change) => {
+      const scope = change.assignmentScope;
+      if (!scope) return { record: change.data!, scope, rows: [] as AssignmentRow[] };
+      const payload = await fetchDetailJson<{ assignments: AssignmentRow[] }>(`/api/assignments?${new URLSearchParams(scope)}`);
+      const labels = { employee_name: change.data?.employee_name, employee_role: change.data?.employee_role, employee_work_style: change.data?.employee_work_style };
+      return { record: change.data!, scope, rows: payload.assignments.map((row) => ({ ...labels, ...row })) as AssignmentRow[] };
+    }));
+    commit(() => setAssignments((rows) => {
+      let next = rows;
+      for (const update of updates) {
+        if (update.scope) {
+          const scope = update.scope;
+          next = next.filter((row) => !(row.employee_id === scope.employeeId && row.start_date <= scope.endDate && row.end_date >= scope.startDate));
+          for (const row of update.rows) next = addRegisteredRow(next, row);
+        }
+        next = addRegisteredRow(next, update.record);
+      }
+      return next;
+    }));
+  });
+  function registerRow({ record, assignmentScope }: RegistrationResult) {
+    setError("");
+    registration.onSaved([{ entity: "assignment", id: String(record.id), action: "upsert", data: record, assignmentScope }]);
+  }
+
   useEffect(() => {
     let ignore = false;
 
@@ -117,7 +146,7 @@ export default function AssignmentManagementClient() {
     return () => {
       ignore = true;
     };
-  }, [registrationVersion]);
+  }, []);
 
   const filteredAssignments = useMemo(() => {
     const normalizedDate = dateQuery.trim();
@@ -175,6 +204,7 @@ export default function AssignmentManagementClient() {
 
   return (
     <section className="space-y-[1.5rem]">
+      <PartialUpdateStatus {...registration} />
       <header>
         <div className="space-y-3">
           <h1 className="text-[1.75rem] leading-[1.2]">근무지배정</h1>
@@ -231,13 +261,10 @@ export default function AssignmentManagementClient() {
             />
           </div>
           <RegistrationModal
+            disabled={loading}
             title="배정등록"
             form={RegistrationForm}
-            onSaved={() => {
-              setError("");
-              setLoading(true);
-              setRegistrationVersion((version) => version + 1);
-            }}
+            onSaved={registerRow}
             className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-primary px-4 text-center text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:w-auto"
           >
             <span>배정등록</span>

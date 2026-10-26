@@ -1,5 +1,7 @@
 "use client";
 
+import { addRegisteredRow, type RegistrationResult } from "@/lib/registration-result";
+
 import { applyDetailChanges, type DetailChange } from "@/lib/detail-changes";
 
 import DetailModalLink from "@/components/modals/detail-modal-link";
@@ -91,10 +93,10 @@ function formatInspectionTime(value?: string) {
 const RegistrationForm = dynamic(() => import("./new/registration-form"));
 
 export default function InspectionSitesPage() {
-  const [registrationVersion, setRegistrationVersion] = useState(0);
   const searchParams = useSearchParams();
   const requestedWorksiteId = searchParams?.get("worksiteId") ?? "";
   const previousRequestedWorksiteId = useRef(requestedWorksiteId);
+  const siteRequest = useRef(0);
   const [query, setQuery] = useState("");
   const [worksiteFilter, setWorksiteFilter] = useState(requestedWorksiteId);
   const [worksiteNameFilter, setWorksiteNameFilter] = useState("");
@@ -117,6 +119,17 @@ export default function InspectionSitesPage() {
 
   function applyChanges(changes: DetailChange[]) {
     setSites((rows) => sortInspectionSites(applyDetailChanges(rows, changes, "site").filter((row) =>
+      (!query.trim() || row.name.toLocaleLowerCase("ko-KR").includes(query.trim().toLocaleLowerCase("ko-KR")))
+      && (!worksiteFilter || row.worksite_id === worksiteFilter)
+      && (worksiteFilter || !worksiteNameFilter.trim() || row.worksite_name.toLocaleLowerCase("ko-KR").includes(worksiteNameFilter.trim().toLocaleLowerCase("ko-KR"))),
+    )));
+  }
+
+  function registerRow({ record }: RegistrationResult) {
+    siteRequest.current++;
+    setError("");
+    setLoading(false);
+    setSites((rows) => sortInspectionSites(addRegisteredRow(rows, record).filter((row) =>
       (!query.trim() || row.name.toLocaleLowerCase("ko-KR").includes(query.trim().toLocaleLowerCase("ko-KR")))
       && (!worksiteFilter || row.worksite_id === worksiteFilter)
       && (worksiteFilter || !worksiteNameFilter.trim() || row.worksite_name.toLocaleLowerCase("ko-KR").includes(worksiteNameFilter.trim().toLocaleLowerCase("ko-KR"))),
@@ -158,22 +171,24 @@ export default function InspectionSitesPage() {
   useEffect(() => {
     let ignore = false;
 
+    const request = ++siteRequest.current;
     const timeoutId = window.setTimeout(() => {
+      if (request !== siteRequest.current) return;
       setLoading(true);
       setError("");
       fetchSites(query, worksiteFilter, worksiteNameFilter)
         .then((nextSites) => {
-          if (!ignore) {
+          if (!ignore && request === siteRequest.current) {
             setSites(sortInspectionSites(nextSites));
           }
         })
         .catch((loadError) => {
-          if (!ignore) {
+          if (!ignore && request === siteRequest.current) {
             setError(loadError instanceof Error ? loadError.message : "점검지 목록을 불러오지 못했습니다.");
           }
         })
         .finally(() => {
-          if (!ignore) {
+          if (!ignore && request === siteRequest.current) {
             setLoading(false);
           }
         });
@@ -183,7 +198,7 @@ export default function InspectionSitesPage() {
       ignore = true;
       window.clearTimeout(timeoutId);
     };
-  }, [query, worksiteFilter, worksiteNameFilter, registrationVersion]);
+  }, [query, worksiteFilter, worksiteNameFilter]);
 
   useEffect(() => {
     if (previousRequestedWorksiteId.current === requestedWorksiteId) {
@@ -199,6 +214,7 @@ export default function InspectionSitesPage() {
   }, [requestedWorksiteId, worksites]);
 
   function handleWorksiteChange(value: string) {
+    setLoading(true);
     setWorksiteQuery(value);
     const normalizedWorksiteQuery = value.trim();
     const matchingWorksite = worksites.find(
@@ -273,7 +289,7 @@ export default function InspectionSitesPage() {
               id="site-search"
               list="inspection-site-options"
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => { setLoading(true); setQuery(event.target.value); }}
               placeholder="점검지를 입력하세요."
             />
             <datalist id="inspection-site-options">
@@ -282,13 +298,10 @@ export default function InspectionSitesPage() {
           </div>
           <div className="flex gap-3">
             <RegistrationModal
+            disabled={loading}
             title="점검지 등록"
             form={RegistrationForm}
-            onSaved={() => {
-              setError("");
-              setLoading(true);
-              setRegistrationVersion((version) => version + 1);
-            }} className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 gap-2 whitespace-nowrap">
+            onSaved={registerRow} className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 gap-2 whitespace-nowrap">
               <span>점검지 등록</span>
               <ArrowRightIcon size={18} />
             </RegistrationModal>

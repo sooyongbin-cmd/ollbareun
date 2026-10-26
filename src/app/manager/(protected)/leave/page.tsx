@@ -1,5 +1,8 @@
 "use client";
 
+import { fetchDetailJson, PartialUpdateStatus, usePartialDetailUpdate } from "@/components/modals/partial-detail-update";
+import { addRegisteredRow, type RegistrationResult } from "@/lib/registration-result";
+
 import { applyDetailChanges, type DetailChange } from "@/lib/detail-changes";
 
 import DetailModalLink from "@/components/modals/detail-modal-link";
@@ -54,7 +57,6 @@ async function fetchJson<T>(url: string): Promise<T> {
 const RegistrationForm = dynamic(() => import("./new/registration-form"));
 
 export default function LeavePage() {
-  const [registrationVersion, setRegistrationVersion] = useState(0);
   const [nameQuery, setNameQuery] = useState("");
   const [employeeNames, setEmployeeNames] = useState<string[]>([]);
   const [rows, setRows] = useState<LeaveRow[]>([]);
@@ -63,6 +65,18 @@ export default function LeavePage() {
 
   function applyChanges(changes: DetailChange[]) {
     setRows((rows) => applyDetailChanges(rows, changes, "leave"));
+  }
+
+  const registration = usePartialDetailUpdate(async (changes, commit) => {
+    const created = (await Promise.all(changes.map(async (change) =>
+      (await fetchDetailJson<{ leaves: LeaveRow[] }>(`/api/leave?${new URLSearchParams({ id: change.id })}`)).leaves,
+    ))).flat();
+    commit(() => setRows((rows) => created.reduce((next, row) => addRegisteredRow(next, row), rows)
+      .sort((left, right) => right.startDate.localeCompare(left.startDate))));
+  });
+  function registerRow({ record }: RegistrationResult) {
+    setError("");
+    registration.onSaved([{ entity: "leave", id: String(record.id), action: "upsert", data: record }]);
   }
 
   useEffect(() => {
@@ -98,7 +112,7 @@ export default function LeavePage() {
     return () => {
       ignore = true;
     };
-  }, [registrationVersion]);
+  }, []);
 
   const filteredRows = useMemo(() => {
     const query = nameQuery.trim().toLowerCase();
@@ -107,6 +121,7 @@ export default function LeavePage() {
 
   return (
     <section className="space-y-[1.5rem]">
+      <PartialUpdateStatus {...registration} />
       <header>
         <div className="space-y-3">
           <h1 className="text-[1.75rem] leading-[1.2]">휴가관리</h1>
@@ -132,13 +147,10 @@ export default function LeavePage() {
             </datalist>
           </div>
           <RegistrationModal
+            disabled={loading}
             title="휴가신청"
             form={RegistrationForm}
-            onSaved={() => {
-              setError("");
-              setLoading(true);
-              setRegistrationVersion((version) => version + 1);
-            }}
+            onSaved={registerRow}
             className="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto"
           >
             <span>휴가신청</span>

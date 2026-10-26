@@ -1,5 +1,7 @@
 "use client";
 
+import { addRegisteredRow, type RegistrationResult } from "@/lib/registration-result";
+
 import { type DetailChange } from "@/lib/detail-changes";
 
 import DetailModalLink from "@/components/modals/detail-modal-link";
@@ -41,7 +43,6 @@ async function fetchConfigs() {
 const RegistrationForm = dynamic(() => import("./new/registration-form"));
 
 export default function SystemConfigsPage() {
-  const [registrationVersion, setRegistrationVersion] = useState(0);
   const [configs, setConfigs] = useState<SystemConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -52,6 +53,12 @@ export default function SystemConfigsPage() {
       if (change?.action === "delete") return [];
       return [change?.data ? { ...row, ...change.data } : row];
     }).sort((left, right) => (left.description ?? "").localeCompare(right.description ?? "", "ko-KR")));
+  }
+
+  function registerRow({ record }: RegistrationResult) {
+    setError("");
+    setConfigs((rows) => addRegisteredRow(rows, record, "system_code")
+      .sort((left, right) => (left.description ?? "").localeCompare(right.description ?? "", "ko-KR")));
   }
 
   useEffect(() => {
@@ -77,7 +84,7 @@ export default function SystemConfigsPage() {
     return () => {
       ignore = true;
     };
-  }, [registrationVersion]);
+  }, []);
 
   return (
     <section className="space-y-[1.5rem]">
@@ -88,13 +95,10 @@ export default function SystemConfigsPage() {
       <section aria-label="시스템설정 조회" className="manager-section bg-muted/40 rounded-xl border border-border/50">
         <div className="flex justify-end">
           <RegistrationModal
+            disabled={loading}
             title="시스템설정 등록"
             form={RegistrationForm}
-            onSaved={() => {
-              setError("");
-              setLoading(true);
-              setRegistrationVersion((version) => version + 1);
-            }} className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2">
+            onSaved={registerRow} className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2">
             <span>등록</span>
             <ArrowRightIcon size={18} />
           </RegistrationModal>

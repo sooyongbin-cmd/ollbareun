@@ -1,5 +1,6 @@
 "use client";
 
+import type { DetailData } from "@/lib/detail-changes";
 import type { RegistrationFormProps } from "@/components/modals/registration-modal";
 
 import EducationTypeRadio from "@/components/education-type-radio";
@@ -34,6 +35,7 @@ async function postResource(formData: FormData) {
 }
 
 export default function EducationResourceNewPage({ modal = false, onClose, onSaved }: RegistrationFormProps) {
+  const [createdRecord, setCreatedRecord] = useState<DetailData | null>(null);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
@@ -90,7 +92,8 @@ export default function EducationResourceNewPage({ modal = false, onClose, onSav
 
     try {
       setIsSubmitting(true);
-      await postResource(formData);
+      const result = await postResource(formData);
+      setCreatedRecord(result.resource);
       setAlertMessage("자료를 저장하였습니다.");
     } catch (submitError) {
       if (submitError instanceof DOMException && submitError.name === "AbortError") {
@@ -176,8 +179,8 @@ export default function EducationResourceNewPage({ modal = false, onClose, onSav
         isOpen={Boolean(alertMessage)}
         onClose={() => {
           setAlertMessage("");
-          if (onSaved) {
-            onSaved();
+          if (onSaved && createdRecord) {
+            onSaved({ record: createdRecord });
             return;
           }
           router.push("/manager/safety/resources");

@@ -1,6 +1,6 @@
 import { getManagerUser } from "@/lib/manager-auth";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
-import { holidayDate, holidayName, holidayYear, insertHolidays } from "@/lib/public-holidays";
+import { holidayDate, holidayName, holidayYear, insertHolidayRecords } from "@/lib/public-holidays";
 
 export async function GET(request: Request) {
   if (!(await getManagerUser())) return Response.json({ error: "관리자 로그인이 필요합니다." }, { status: 401 });
@@ -17,9 +17,9 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     if (body.holiday_type !== undefined && !["public", "custom"].includes(body.holiday_type)) throw new Error("휴일 구분이 올바르지 않습니다.");
-    const inserted = await insertHolidays([{ holiday_date: holidayDate(body.holiday_date), name: holidayName(body.name), selected: "Y", holiday_type: body.holiday_type ?? "custom" }]);
-    if (!inserted) return Response.json({ error: "이미 등록된 날짜입니다." }, { status: 409 });
-    return Response.json({ inserted }, { status: 201 });
+    const holidays = await insertHolidayRecords([{ holiday_date: holidayDate(body.holiday_date), name: holidayName(body.name), selected: "Y", holiday_type: body.holiday_type ?? "custom" }]);
+    if (!holidays.length) return Response.json({ error: "이미 등록된 날짜입니다." }, { status: 409 });
+    return Response.json({ inserted: holidays.length, holiday: holidays[0] }, { status: 201 });
   } catch (error) { return failure(error); }
 }
 export async function PATCH(request: Request) {

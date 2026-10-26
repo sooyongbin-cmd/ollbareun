@@ -139,7 +139,7 @@ describe("employee roster page", () => {
       if (url.endsWith("/api/employee-roles")) return Response.json({ roles: ["경비원"] });
       if (url.endsWith("/api/employees")) {
         created = true;
-        return Response.json({ employee: { id: "emp-3", name: "신규직원", phone: "01011112222", role: "경비원" } });
+        return Response.json({ employee: { ...bootstrap.employees[0], id: "emp-3", name: "신규직원", phone: "01011112222", role: "경비원" } });
       }
       return Response.json({ ...bootstrap, employees: created
         ? [...bootstrap.employees, { ...bootstrap.employees[0], id: "emp-3", name: "신규직원" }]
@@ -147,6 +147,9 @@ describe("employee roster page", () => {
     }));
     renderWithManagerLayout(<EmployeeRosterPage />);
     await screen.findByRole("link", { name: "Alice" });
+    const table = screen.getByRole("table");
+    const scroll = table.parentElement!;
+    scroll.scrollLeft = 120;
     await user.click(screen.getByRole("button", { name: "직원 등록" }));
     const dialog = await screen.findByRole("dialog", { name: "직원등록" });
     await user.type(within(dialog).getByLabelText("직원이름"), "신규직원");
@@ -156,6 +159,9 @@ describe("employee roster page", () => {
     await user.click(await screen.findByRole("button", { name: "확인" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(await screen.findByRole("link", { name: "신규직원" })).toBeInTheDocument();
+    expect(screen.getByRole("table")).toBe(table);
+    expect(scroll.scrollLeft).toBe(120);
+    expect(vi.mocked(fetch).mock.calls.filter(([url]) => String(url) === "/api/bootstrap")).toHaveLength(1);
   });
 
   it("separates employee search controls from the employee list section", async () => {

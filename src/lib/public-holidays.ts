@@ -26,6 +26,18 @@ export async function insertHolidays(rows: { holiday_date: string; name: string 
   return data?.length ?? 0;
 }
 
+export type StoredHoliday = { id: string; holiday_date: string; name: string | null; selected: string; holiday_type: "public" | "custom" };
+
+/** Return persisted IDs for single-record registration without reloading the year's holidays. */
+export async function insertHolidayRecords(rows: Parameters<typeof insertHolidays>[0]): Promise<StoredHoliday[]> {
+  if (!rows.length) return [];
+  const { data, error } = await getSupabaseAdmin().from("public_holidays")
+    .upsert(rows.map(row => ({ ...row, holiday_type: row.holiday_type ?? "public" })), { onConflict: "holiday_date", ignoreDuplicates: true })
+    .select("id,holiday_date,name,selected,holiday_type");
+  if (error) throw new Error("휴일을 저장하지 못했습니다.");
+  return (data ?? []) as StoredHoliday[];
+}
+
 type HolidayItem = { locdate: string | number; dateName: string; isHoliday: string };
 
 const HOLIDAY_API_ENDPOINT = "https://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo";

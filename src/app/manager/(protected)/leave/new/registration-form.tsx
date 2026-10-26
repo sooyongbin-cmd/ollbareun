@@ -1,5 +1,6 @@
 "use client";
 
+import type { DetailData } from "@/lib/detail-changes";
 import type { RegistrationFormProps } from "@/components/modals/registration-modal";
 
 import { useRouter } from "next/navigation";
@@ -65,6 +66,7 @@ function formatScheduledTime(value: string | null) {
 
 export default function LeaveNewPage({ modal = false, onClose, onSaved }: RegistrationFormProps) {
   const router = useRouter();
+  const [createdRecord, setCreatedRecord] = useState<DetailData | null>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [leaveTypes, setLeaveTypes] = useState<string[]>([]);
   const [employeeId, setEmployeeId] = useState("");
@@ -165,11 +167,12 @@ export default function LeaveNewPage({ modal = false, onClose, onSaved }: Regist
     setErrorModalMessage("");
 
     try {
-      await fetchJson<{ leave: { id: string } }>("/api/leave", {
+      const result = await fetchJson<{ leave: DetailData }>("/api/leave", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ employeeId, leaveType, startDate, endDate }),
       });
+      setCreatedRecord(result.leave);
       setSuccessMessage("휴가가 신청되었습니다.");
     } catch (submitError) {
       const message = submitError instanceof Error ? submitError.message : "휴가를 신청하지 못했습니다.";
@@ -352,8 +355,8 @@ export default function LeaveNewPage({ modal = false, onClose, onSaved }: Regist
         isOpen={Boolean(successMessage)}
         onClose={() => {
           setSuccessMessage("");
-          if (onSaved) {
-            onSaved();
+          if (onSaved && createdRecord) {
+            onSaved({ record: createdRecord });
             return;
           }
           router.push("/manager/leave");

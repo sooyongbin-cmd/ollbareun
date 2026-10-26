@@ -1,5 +1,7 @@
 "use client";
 
+import { addRegisteredRow, type RegistrationResult } from "@/lib/registration-result";
+
 import RegistrationModal from "@/components/modals/registration-modal";
 import dynamic from "next/dynamic";
 
@@ -20,7 +22,6 @@ const actionClass = "inline-flex min-h-10 items-center justify-center rounded-md
 const RegistrationForm = dynamic(() => import("./new/registration-form"));
 
 export default function HolidaysPage() {
-  const [registrationVersion, setRegistrationVersion] = useState(0);
   const [year, setYear] = useState(() => new Intl.DateTimeFormat("en", { year: "numeric", timeZone: "Asia/Seoul" }).format(new Date()));
   const [rows, setRows] = useState<Holiday[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,6 +32,12 @@ export default function HolidaysPage() {
   const [message, setMessage] = useState("");
   const [revision, setRevision] = useState(0);
   const valid = /^\d{4}$/.test(year) && Number(year) >= 1900 && Number(year) <= 9998;
+  function registerRow({ record }: RegistrationResult) {
+    setError("");
+    if (typeof record.holiday_date !== "string" || !record.holiday_date.startsWith(`${year}-`)) return;
+    setRows((rows) => addRegisteredRow(rows, record).sort((left, right) => left.holiday_date.localeCompare(right.holiday_date)));
+  }
+
   useEffect(() => {
     const controller = new AbortController();
     if (!valid) return () => controller.abort();
@@ -45,7 +52,7 @@ export default function HolidaysPage() {
       } finally { if (!controller.signal.aborted) setLoading(false); }
     }, 300);
     return () => { clearTimeout(timer); controller.abort(); };
-  }, [year, revision, valid, registrationVersion]);
+  }, [year, revision, valid]);
   async function importYear() {
     if (!confirmYear || busy) return;
     const target = confirmYear;
@@ -110,13 +117,10 @@ export default function HolidaysPage() {
             <span>{busy ? "공휴일 가져오는 중..." : "공휴일가져오기"}</span>
           </Button>
           <RegistrationModal
+            disabled={loading}
             title="휴일추가"
             form={RegistrationForm}
-            onSaved={() => {
-              setError("");
-              setLoading(valid);
-              setRegistrationVersion((version) => version + 1);
-            }} className={actionClass}>
+            onSaved={registerRow} className={actionClass}>
             <span>휴일추가</span>
             <ArrowRightIcon size={18} />
           </RegistrationModal>

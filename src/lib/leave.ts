@@ -135,10 +135,28 @@ function toLeaveRecord(
 }
 
 export async function listLeaves(
-  input: { employeeName?: unknown } = {},
+  input: { employeeName?: unknown; id?: string } = {},
   supabase: SupabaseClient = getSupabaseAdmin(),
 ) {
   const employeeNameQuery = typeof input.employeeName === "string" ? input.employeeName.trim().toLowerCase() : "";
+  if (input.id) {
+    const result = await supabase.from("leave").select("id,employee_id,leave_type,start_date,end_date").eq("id", input.id);
+    throwIfError(result.error);
+    const leave = result.data?.[0];
+    if (!leave) return [];
+    const [employees, assignments] = await Promise.all([
+      supabase.from("employees").select("id,name,role,work_style").eq("id", leave.employee_id),
+      supabase.from("work_assignments").select("employee_id,worksite_id,start_date,end_date").eq("employee_id", leave.employee_id)
+        .lte("start_date", leave.end_date).gte("end_date", leave.start_date),
+    ]);
+    throwIfError(employees.error);
+    throwIfError(assignments.error);
+    const siteIds = [...new Set((assignments.data ?? []).map((row) => row.worksite_id))];
+    const sites = siteIds.length ? await supabase.from("worksites").select("id,name").in("id", siteIds) : { data: [], error: null };
+    throwIfError(sites.error);
+    return [toLeaveListRow(leave, new Map((employees.data ?? []).map((row) => [row.id, row])),
+      new Map((sites.data ?? []).map((row) => [row.id, row.name])), assignments.data ?? [])];
+  }
   const [leaveResult, employeesResult, assignmentsResult, worksitesResult] = await Promise.all([
     supabase
       .from("leave")

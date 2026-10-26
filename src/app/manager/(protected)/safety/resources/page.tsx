@@ -1,5 +1,7 @@
 "use client";
 
+import { addRegisteredRow, type RegistrationResult } from "@/lib/registration-result";
+
 import { applyDetailChanges, type DetailChange } from "@/lib/detail-changes";
 
 import DetailModalLink from "@/components/modals/detail-modal-link";
@@ -35,7 +37,6 @@ type EducationResourceRow = {
 const RegistrationForm = dynamic(() => import("./new/registration-form"));
 
 export default function EducationResourcesPage() {
-  const [registrationVersion, setRegistrationVersion] = useState(0);
   const [resources, setResources] = useState<EducationResourceRow[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -43,6 +44,11 @@ export default function EducationResourcesPage() {
 
   function applyChanges(changes: DetailChange[]) {
     setResources((rows) => applyDetailChanges(rows, changes, "resource"));
+  }
+
+  function registerRow({ record }: RegistrationResult) {
+    setError("");
+    setResources((rows) => addRegisteredRow(rows, record));
   }
 
   useEffect(() => {
@@ -70,7 +76,7 @@ export default function EducationResourcesPage() {
     return () => {
       ignore = true;
     };
-  }, [registrationVersion]);
+  }, []);
 
   const filteredResources = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -112,13 +118,10 @@ export default function EducationResourcesPage() {
           </div>
 
           <RegistrationModal
+            disabled={loading}
             title="교재등록"
             form={RegistrationForm}
-            onSaved={() => {
-              setError("");
-              setLoading(true);
-              setRegistrationVersion((version) => version + 1);
-            }}
+            onSaved={registerRow}
             className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2"
           >
             <span>교재등록</span>

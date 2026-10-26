@@ -1,5 +1,7 @@
 "use client";
 
+import { addRegisteredRow, type RegistrationResult } from "@/lib/registration-result";
+
 import { applyDetailChanges, type DetailChange } from "@/lib/detail-changes";
 
 import DetailModalLink from "@/components/modals/detail-modal-link";
@@ -82,7 +84,6 @@ const emptyBootstrap: Bootstrap = {
 };
 
 export default function EmployeeRosterPage() {
-  const [refreshVersion, setRefreshVersion] = useState(0);
   const [data, setData] = useState<Bootstrap>(emptyBootstrap);
   const [nameQuery, setNameQuery] = useState("");
   const [roleQuery, setRoleQuery] = useState("");
@@ -107,6 +108,11 @@ export default function EmployeeRosterPage() {
         }),
       };
     });
+  }
+
+  function registerRow({ record }: RegistrationResult) {
+    setError("");
+    setData((current) => ({ ...current, employees: addRegisteredRow(current.employees, record) }));
   }
 
   useEffect(() => {
@@ -150,7 +156,7 @@ export default function EmployeeRosterPage() {
     return () => {
       ignore = true;
     };
-  }, [refreshVersion]);
+  }, []);
 
   const availableEmployees = useMemo(() => {
     return data.employees.filter((e) => e.is_retired === showRetired);
@@ -326,13 +332,10 @@ export default function EmployeeRosterPage() {
           </label>
 
           <RegistrationModal
+            disabled={loading}
             title="직원등록"
             form={EmployeeRegistrationForm}
-            onSaved={() => {
-              setError("");
-              setLoading(true);
-              setRefreshVersion((version) => version + 1);
-            }}
+            onSaved={registerRow}
             className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-primary px-4 text-center text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:w-auto"
           >
             <span>직원 등록</span>

@@ -1,5 +1,7 @@
 "use client";
 
+import type { RegistrationResult } from "@/lib/registration-result";
+import type { DetailData } from "@/lib/detail-changes";
 import type { RegistrationFormProps } from "@/components/modals/registration-modal";
 
 import { EmployeeScheduleFields } from "@/components/employee-schedule-fields";
@@ -24,14 +26,12 @@ import ProcessingModal from "@/components/modals/processing-modal";
 import type { AssignmentConflict } from "@/lib/phase1-data";
 
 type Bootstrap = {
-  employees: { id: string; name: string; is_retired: boolean; work_style: "0" | "1" | "2"; in_time: string; out_time: number; has_weekend?: boolean; schedule_rules_enabled?: boolean; schedule_rules?: ScheduleRule[] }[];
+  employees: { id: string; name: string; role?: string; is_retired: boolean; work_style: "0" | "1" | "2"; in_time: string; out_time: number; has_weekend?: boolean; schedule_rules_enabled?: boolean; schedule_rules?: ScheduleRule[] }[];
   worksites: { id: string; name: string }[];
 };
 
 type AssignmentResponse = {
-  assignment: {
-    id: string;
-  };
+  assignment: DetailData & { id: string };
   adjustedAssignments: {
     oldStartDate: string;
     oldEndDate: string;
@@ -185,6 +185,7 @@ function assignmentPeriod(startDate: string, endDate: string) {
 }
 
 export default function AssignmentNewPage({ modal = false, onClose, onSaved }: RegistrationFormProps) {
+  const [createdResult, setCreatedResult] = useState<RegistrationResult | null>(null);
   const [startDate, setStartDate] = useState(todayDate);
   const [endDate, setEndDate] = useState(() => defaultEndDate(startDate));
   const [inTime, setInTime] = useState("08:00");
@@ -344,6 +345,16 @@ export default function AssignmentNewPage({ modal = false, onClose, onSaved }: R
 
       setPendingConflict(null);
       setCreatedAssignmentId(result.assignment.id);
+      const selectedEmployee = data.employees.find((item) => item.id === body.employeeId);
+      const periods = result.adjustedAssignments ?? [];
+      setCreatedResult({ record: { ...result.assignment,
+        employee_name: selectedEmployee?.name, employee_role: selectedEmployee?.role,
+        employee_work_style: selectedEmployee?.work_style,
+        worksite_name: data.worksites.find((item) => item.id === body.worksiteId)?.name },
+        ...(periods.length ? { assignmentScope: { employeeId: String(body.employeeId),
+          startDate: [String(body.startDate), ...periods.map((item) => item.oldStartDate)].sort()[0],
+          endDate: [String(body.endDate), ...periods.map((item) => item.oldEndDate)].sort().at(-1)! } } : {}),
+      });
       const adjustmentMessages = (result.adjustedAssignments ?? []).map((adjustment) => {
         const previousPeriod = assignmentPeriod(adjustment.oldStartDate, adjustment.oldEndDate);
         if (!adjustment.newPeriods.length) {
@@ -643,8 +654,8 @@ export default function AssignmentNewPage({ modal = false, onClose, onSaved }: R
         isOpen={Boolean(alertMessage)}
         onClose={() => {
           setAlertMessage("");
-          if (onSaved) {
-            onSaved();
+          if (onSaved && createdResult) {
+            onSaved(createdResult);
             return;
           }
           router.push(createdAssignmentId

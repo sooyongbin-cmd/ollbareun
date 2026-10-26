@@ -1,5 +1,6 @@
 "use client";
 
+import type { DetailData } from "@/lib/detail-changes";
 import type { RegistrationFormProps } from "@/components/modals/registration-modal";
 
 import { EmployeeScheduleFields } from "@/components/employee-schedule-fields";
@@ -61,6 +62,7 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
 }
 
 export default function EmployeeRegistrationForm({ onClose, onSaved, modal = false }: RegistrationFormProps) {
+  const [createdRecord, setCreatedRecord] = useState<DetailData | null>(null);
   const [phone, setPhone] = useState("");
   const [employeeRoles, setEmployeeRoles] = useState<string[]>([]);
   const [role, setRole] = useState("");
@@ -133,6 +135,7 @@ export default function EmployeeRegistrationForm({ onClose, onSaved, modal = fal
         schedule_rules: scheduleRules,
       });
 
+      setCreatedRecord(result.employee);
       setCreatedEmployeeId(result.employee.id);
       setSuccessMessage(`직원이름(${result.employee.name}) 연락처(${formatPhoneNumber(result.employee.phone)}) 직군(${result.employee.role}) 등록완료`);
     } catch (submitError) {
@@ -282,7 +285,7 @@ export default function EmployeeRegistrationForm({ onClose, onSaved, modal = fal
         isOpen={Boolean(successMessage)}
         onClose={() => {
           setSuccessMessage("");
-          if (onSaved) onSaved();
+          if (onSaved && createdRecord) onSaved({ record: createdRecord });
           else if (onClose) onClose();
           else router.push("/manager/employee/employees");
         }}

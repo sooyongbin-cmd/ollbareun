@@ -1,3 +1,5 @@
+import type { AssignmentRegistrationScope } from "./registration-result";
+
 export type DetailEntity = "employee" | "worksite" | "assignment" | "site" | "resource" | "leave" | "remark" | "attendance" | "admin" | "config";
 export type DetailData = Record<string, unknown>;
 export type DetailChange = {
@@ -6,6 +8,7 @@ export type DetailChange = {
   action: "upsert" | "delete" | "invalidate";
   data?: DetailData;
   employeeId?: string;
+  assignmentScope?: AssignmentRegistrationScope;
 };
 
 export function collectDetailChanges(previous: DetailChange[], incoming: DetailChange[]): DetailChange[] {

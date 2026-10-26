@@ -1,5 +1,7 @@
 "use client";
 
+import { type RegistrationResult } from "@/lib/registration-result";
+
 import { type DetailChange } from "@/lib/detail-changes";
 
 import DetailModalLink from "@/components/modals/detail-modal-link";
@@ -26,7 +28,6 @@ function formatDateTime(value?: string) {
 const RegistrationForm = dynamic(() => import("./new/registration-form"));
 
 export default function AdminUsersPage() {
-  const [registrationVersion, setRegistrationVersion] = useState(0);
   const [rows, setRows] = useState<AdminSubscriptionRow[]>([]);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -53,10 +54,21 @@ export default function AdminUsersPage() {
     if (currentRole) setIsSuperAdmin(currentRole === "super_admin");
   }
 
+  function registerRow({ record }: RegistrationResult) {
+    setError("");
+    setRows((rows) => {
+      const matches = rows.some((row) => row.admin.id === record.id);
+      const next = matches ? rows.map((row) => row.admin.id === record.id ? { ...row, admin: { ...row.admin, ...record } } : row)
+        : [...rows, { admin: record as unknown as AdminSubscriptionRow["admin"], subscription: null }];
+      return next.sort((left, right) => left.admin.email.localeCompare(right.admin.email)
+        || (left.subscription ? Date.parse(left.subscription.updated_at) : 0) - (right.subscription ? Date.parse(right.subscription.updated_at) : 0));
+    });
+  }
+
   useEffect(() => {
     void Promise.resolve().then(loadAdmins).catch((err) => setError(err instanceof Error ? err.message : "조회에 실패했습니다."))
       .finally(() => setLoading(false));
-  }, [loadAdmins, registrationVersion]);
+  }, [loadAdmins]);
 
   async function runAction(action: () => Promise<Response>) {
     if (busyRef.current) return;
@@ -84,13 +96,10 @@ export default function AdminUsersPage() {
       <div className="flex justify-end">
         {isSuperAdmin && !busy ? (
           <RegistrationModal
+            disabled={loading}
             title="관리자등록"
             form={RegistrationForm}
-            onSaved={() => {
-              setError("");
-              setLoading(true);
-              setRegistrationVersion((version) => version + 1);
-            }} className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2">
+            onSaved={registerRow} className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2">
             <span>관리자등록</span>
             <ArrowRightIcon size={18} />
           </RegistrationModal>

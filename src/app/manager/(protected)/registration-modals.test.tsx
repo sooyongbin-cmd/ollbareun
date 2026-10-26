@@ -59,7 +59,7 @@ it("refreshes configurations after saving while staying on the list", async () =
     if (init?.method === "POST") {
       saved = true;
       expect(JSON.parse(String(init.body))).toEqual({ description: "새 설정", content: "내용" });
-      return Response.json({});
+      return Response.json({ config: { system_code: "new", description: "새 설정", content: "내용" } });
     }
     return Response.json({ configs: saved ? [{ system_code: "new", description: "새 설정", content: "내용" }] : [] });
   }));
@@ -70,6 +70,7 @@ it("refreshes configurations after saving while staying on the list", async () =
   await user.type(within(dialog).getByLabelText("내용"), "내용");
   await user.click(within(dialog).getByRole("button", { name: "저장" }));
   expect(await screen.findByRole("link", { name: "새 설정" })).toBeInTheDocument();
+  expect(vi.mocked(fetch).mock.calls.filter(([, init]) => !init?.method)).toHaveLength(1);
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   expect(push).not.toHaveBeenCalled();
 });
@@ -95,19 +96,21 @@ it("refreshes holidays after saving without changing the selected year", async (
   vi.stubGlobal("fetch", vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
     if (init?.method === "POST") {
       saved = true;
-      return Response.json({ inserted: 1 });
+      return Response.json({ inserted: 1, holiday: { id: "holiday-1", holiday_date: "2026-10-03", name: "신규휴일", selected: "Y", holiday_type: "custom" } });
     }
     return Response.json({ holidays: saved ? [{ id: "holiday-1", holiday_date: "2026-10-03", name: "신규휴일", selected: "Y" }] : [] });
   }));
   render(<Holidays />);
   const year = screen.getByLabelText("연도");
   const selectedYear = (year as HTMLInputElement).value;
+  await waitFor(() => expect(screen.getByRole("button", { name: "휴일추가" })).toBeEnabled());
   await user.click(screen.getByRole("button", { name: "휴일추가" }));
   const dialog = await screen.findByRole("dialog", { name: "휴일추가" });
   await user.type(await within(dialog).findByLabelText("휴일명"), "신규휴일");
   await user.type(within(dialog).getByLabelText("날짜"), `${selectedYear}-10-03`);
   await user.click(within(dialog).getByRole("button", { name: "저장" }));
   expect(await screen.findByText("신규휴일")).toBeInTheDocument();
+  expect(vi.mocked(fetch).mock.calls.filter(([, init]) => !init?.method)).toHaveLength(1);
   expect(year).toHaveValue(Number(selectedYear));
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   expect(push).not.toHaveBeenCalled();
@@ -119,7 +122,7 @@ it("refreshes administrators after saving from an authorized list", async () => 
   vi.stubGlobal("fetch", vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
     if (init?.method === "POST") {
       saved = true;
-      return Response.json({});
+      return Response.json({ admin: { id: "admin-1", email: "new@example.com", role: "admin", user_id: null } });
     }
     return Response.json({ currentRole: "super_admin", subscriptions: [], admins: saved
       ? [{ id: "admin-1", email: "new@example.com", role: "admin" }] : [] });
@@ -131,6 +134,7 @@ it("refreshes administrators after saving from an authorized list", async () => 
   await user.type(await within(dialog).findByLabelText("관리자이메일"), "new@example.com");
   await user.click(within(dialog).getByRole("button", { name: "저장" }));
   expect(await screen.findByRole("link", { name: "new@example.com" })).toBeInTheDocument();
+  expect(vi.mocked(fetch).mock.calls.filter(([, init]) => !init?.method)).toHaveLength(1);
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   expect(push).not.toHaveBeenCalled();
 });

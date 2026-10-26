@@ -1,5 +1,7 @@
 "use client";
 
+import { addRegisteredRow, type RegistrationResult } from "@/lib/registration-result";
+
 import { applyDetailChanges, type DetailChange } from "@/lib/detail-changes";
 
 import DetailModalLink from "@/components/modals/detail-modal-link";
@@ -44,7 +46,6 @@ const emptyBootstrap: Bootstrap = {
 const RegistrationForm = dynamic(() => import("./new/registration-form"));
 
 export default function WorksiteManagementClient() {
-  const [registrationVersion, setRegistrationVersion] = useState(0);
   const searchParams = useSearchParams();
   const initialQuery = searchParams?.get("worksite") ?? "";
   const [data, setData] = useState<Bootstrap>(emptyBootstrap);
@@ -55,6 +56,11 @@ export default function WorksiteManagementClient() {
   const [error, setError] = useState("");
   function applyChanges(changes: DetailChange[]) {
     setData((current) => ({ ...current, worksites: applyDetailChanges(current.worksites, changes, "worksite") }));
+  }
+
+  function registerRow({ record }: RegistrationResult) {
+    setError("");
+    setData((current) => ({ ...current, worksites: addRegisteredRow(current.worksites, record) }));
   }
 
   useEffect(() => {
@@ -92,7 +98,7 @@ export default function WorksiteManagementClient() {
     return () => {
       ignore = true;
     };
-  }, [registrationVersion]);
+  }, []);
 
   const worksiteCounts = useMemo(() => {
     return data.assignments.reduce<Record<string, number>>((counts, assignment) => {
@@ -181,13 +187,10 @@ export default function WorksiteManagementClient() {
           </div>
 
           <RegistrationModal
+            disabled={loading}
             title="근무지등록"
             form={RegistrationForm}
-            onSaved={() => {
-              setError("");
-              setLoading(true);
-              setRegistrationVersion((version) => version + 1);
-            }}
+            onSaved={registerRow}
             className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full text-center md:w-auto gap-2"
           >
             <span>근무지 등록</span>

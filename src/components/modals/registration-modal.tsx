@@ -1,26 +1,29 @@
 "use client";
 
+import type { RegistrationResult } from "@/lib/registration-result";
+
 import { useState, type ComponentType, type ReactNode } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export type RegistrationFormProps = {
   modal?: boolean;
   onClose?: () => void;
-  onSaved?: () => void;
+  onSaved?: (result: RegistrationResult) => void;
 };
 
-export default function RegistrationModal({ title, className, children, form: Form, onSaved }: {
+export default function RegistrationModal({ title, className, children, form: Form, onSaved, disabled = false }: {
   title: string;
+  disabled?: boolean;
   className?: string;
   children: ReactNode;
   form: ComponentType<RegistrationFormProps>;
-  onSaved: () => void;
+  onSaved: (result: RegistrationResult) => void;
 }) {
   const [open, setOpen] = useState(false);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button type="button" className={className}>{children}</button>
+        <button type="button" className={className} disabled={disabled}>{children}</button>
       </DialogTrigger>
       <DialogContent
         className="max-h-[90dvh] overflow-y-auto sm:max-w-4xl"
@@ -29,9 +32,9 @@ export default function RegistrationModal({ title, className, children, form: Fo
         onPointerDownOutside={(event) => event.preventDefault()}
       >
         <DialogTitle className="text-[1.75rem] leading-[1.2]">{title}</DialogTitle>
-        <Form modal onClose={() => setOpen(false)} onSaved={() => {
+        <Form modal onClose={() => setOpen(false)} onSaved={(result) => {
           setOpen(false);
-          onSaved();
+          onSaved(result);
         }} />
       </DialogContent>
     </Dialog>

@@ -2,6 +2,8 @@
 
 import { fetchDetailJson, PartialUpdateStatus, usePartialDetailUpdate } from "@/components/modals/partial-detail-update";
 
+import Link from "next/link";
+
 import DetailModalLink from "@/components/modals/detail-modal-link";
 
 import ListResults from "@/components/list-results";
@@ -200,7 +202,11 @@ export default function MonthlyInformationPage() {
                       <TableCell data-label="근태">{[row.status, row.outtimeLabel].filter(Boolean).join(" ")}</TableCell>
                       {educationColumns.map(({ key, label }) => <TableCell key={key} data-label={label}>
                         <span className={isIncompleteEducation(row.education[key]) ? "font-semibold text-destructive" : (row.education[key] === "O" || /^\d{2}:\d{2}$/.test(row.education[key])) ? "font-semibold text-foreground" : "font-semibold text-muted-foreground"}>
-                          {row.education[key]}
+                          {/^\d{2}:\d{2}$/.test(row.education[key]) ? <Link
+                            className="text-primary underline underline-offset-4 hover:text-primary/80"
+                            href={`/manager/safety/daily_edu?${new URLSearchParams({ name: row.employeeName, workDate: row.workDate })}`}>
+                            {row.education[key]}
+                          </Link> : row.education[key]}
                         </span>
                       </TableCell>)}
                       <TableCell data-label="특이사항" className="min-w-64 max-w-96 whitespace-normal break-words align-top"

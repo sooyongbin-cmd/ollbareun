@@ -25,7 +25,14 @@ it("shows the copied monthly attendance screen under its new title with worksite
     "근무지", "이름", "직군", "근무형태", "생년월일", "연락처", "출근예정일", "출퇴근예정", "출퇴근", "근태", "일일", "월별", "분기", "반기", "연간", "특이사항",
   ]);
   expect(screen.getByText("010-1234-5678")).toBeInTheDocument();
-  expect(screen.getByText("09:05")).toBeInTheDocument();
+  for (const time of ["09:05", "10:01", "00:05"]) {
+    const link = screen.getByRole("link", { name: time });
+    const url = new URL(link.getAttribute("href")!, "http://localhost");
+    expect(url.pathname).toBe("/manager/safety/daily_edu");
+    expect(url.searchParams.get("name")).toBe("홍길동");
+    expect(url.searchParams.get("workDate")).toBe("2026-10-23");
+  }
+  expect(screen.getByText("X").closest("a")).toBeNull();
   expect(screen.getByText("X")).toBeInTheDocument();
   expect(screen.getByText("출입문 파손....")).toBeInTheDocument();
   expect(screen.getByRole("link", { name: /2026\. 10\. 23/ })).toHaveAttribute("href", "/manager/inspection/special-remarks/remark-1");

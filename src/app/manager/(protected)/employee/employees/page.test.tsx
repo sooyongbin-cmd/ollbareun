@@ -131,7 +131,7 @@ describe("employee roster page", () => {
     expect(screen.getByLabelText("이름")).toHaveValue("Alice");
   });
 
-  it("refreshes the roster after saving registration and closes on confirmation", async () => {
+  it("keeps registration open on confirmation and inserts only on close", async () => {
     const user = userEvent.setup();
     let created = false;
     vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
@@ -157,6 +157,10 @@ describe("employee roster page", () => {
     await user.type(within(dialog).getByLabelText("연락처"), "01011112222");
     await user.click(within(dialog).getByRole("button", { name: "저장" }));
     await user.click(await screen.findByRole("button", { name: "확인" }));
+    expect(screen.getByRole("dialog", { name: "직원등록" })).toBe(dialog);
+    expect(within(dialog).getByLabelText("직원이름")).toHaveValue("신규직원");
+    expect(screen.queryByRole("link", { name: "신규직원" })).not.toBeInTheDocument();
+    await user.click(within(dialog).getByRole("button", { name: "닫기" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(await screen.findByRole("link", { name: "신규직원" })).toBeInTheDocument();
     expect(screen.getByRole("table")).toBe(table);

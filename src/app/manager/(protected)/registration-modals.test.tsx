@@ -69,6 +69,9 @@ it("refreshes configurations after saving while staying on the list", async () =
   await user.type(await within(dialog).findByLabelText("설명"), "새 설정");
   await user.type(within(dialog).getByLabelText("내용"), "내용");
   await user.click(within(dialog).getByRole("button", { name: "저장" }));
+  await waitFor(() => expect(within(dialog).getByRole("button", { name: "저장" })).toBeEnabled());
+  expect(dialog).toBeInTheDocument();
+  await user.click(within(dialog).getByRole("button", { name: "닫기" }));
   expect(await screen.findByRole("link", { name: "새 설정" })).toBeInTheDocument();
   expect(vi.mocked(fetch).mock.calls.filter(([, init]) => !init?.method)).toHaveLength(1);
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -109,6 +112,9 @@ it("refreshes holidays after saving without changing the selected year", async (
   await user.type(await within(dialog).findByLabelText("휴일명"), "신규휴일");
   await user.type(within(dialog).getByLabelText("날짜"), `${selectedYear}-10-03`);
   await user.click(within(dialog).getByRole("button", { name: "저장" }));
+  await waitFor(() => expect(within(dialog).getByRole("button", { name: "저장" })).toBeEnabled());
+  expect(dialog).toBeInTheDocument();
+  await user.click(within(dialog).getByRole("button", { name: "닫기" }));
   expect(await screen.findByText("신규휴일")).toBeInTheDocument();
   expect(vi.mocked(fetch).mock.calls.filter(([, init]) => !init?.method)).toHaveLength(1);
   expect(year).toHaveValue(Number(selectedYear));
@@ -133,6 +139,9 @@ it("refreshes administrators after saving from an authorized list", async () => 
   const dialog = await screen.findByRole("dialog", { name: "관리자등록" });
   await user.type(await within(dialog).findByLabelText("관리자이메일"), "new@example.com");
   await user.click(within(dialog).getByRole("button", { name: "저장" }));
+  await waitFor(() => expect(within(dialog).getByRole("button", { name: "저장" })).toBeEnabled());
+  expect(dialog).toBeInTheDocument();
+  await user.click(within(dialog).getByRole("button", { name: "닫기" }));
   expect(await screen.findByRole("link", { name: "new@example.com" })).toBeInTheDocument();
   expect(vi.mocked(fetch).mock.calls.filter(([, init]) => !init?.method)).toHaveLength(1);
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();

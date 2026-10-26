@@ -2,7 +2,7 @@
 
 import type { RegistrationResult } from "@/lib/registration-result";
 
-import { useState, type ComponentType, type ReactNode } from "react";
+import { useRef, useState, type ComponentType, type ReactNode } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export type RegistrationFormProps = {
@@ -20,8 +20,15 @@ export default function RegistrationModal({ title, className, children, form: Fo
   onSaved: (result: RegistrationResult) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const pending = useRef<RegistrationResult[]>([]);
+  function close() {
+    setOpen(false);
+    const results = pending.current;
+    pending.current = [];
+    results.forEach((result) => onSaved(result));
+  }
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(next) => { if (next) setOpen(true); else close(); }}>
       <DialogTrigger asChild>
         <button type="button" className={className} disabled={disabled}>{children}</button>
       </DialogTrigger>
@@ -32,9 +39,8 @@ export default function RegistrationModal({ title, className, children, form: Fo
         onPointerDownOutside={(event) => event.preventDefault()}
       >
         <DialogTitle className="text-[1.75rem] leading-[1.2]">{title}</DialogTitle>
-        <Form modal onClose={() => setOpen(false)} onSaved={(result) => {
-          setOpen(false);
-          onSaved(result);
+        <Form modal onClose={close} onSaved={(result) => {
+          pending.current.push(result);
         }} />
       </DialogContent>
     </Dialog>

@@ -25,6 +25,7 @@ export default function HolidayNewPage({ modal = false, onClose, onSaved }: Regi
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       if (onSaved) {
+        setBusy(false);
         onSaved({ record: data.holiday });
         return;
       }

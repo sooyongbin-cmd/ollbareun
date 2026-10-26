@@ -79,10 +79,7 @@ describe("employee roster page", () => {
     renderWithManagerLayout(<EmployeeRosterPage />);
 
     expect(await screen.findByRole("heading", { name: "직원관리" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "직원 등록" })).toHaveAttribute(
-      "href",
-      "/manager/employee/employees/new",
-    );
+    expect(screen.getByRole("button", { name: "직원 등록" })).toBeInTheDocument();
     expect(await screen.findByRole("link", { name: "Alice" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Alice" })).toHaveAttribute(
       "href",
@@ -121,6 +118,46 @@ describe("employee roster page", () => {
     expect(screen.queryByRole("columnheader", { name: "퇴직일" })).not.toBeInTheDocument();
   });
 
+  it("opens registration in a modal and preserves search when closed", async () => {
+    const user = userEvent.setup();
+    renderWithManagerLayout(<EmployeeRosterPage />);
+    await screen.findByRole("link", { name: "Alice" });
+    await user.type(screen.getByLabelText("이름"), "Alice");
+    await user.click(screen.getByRole("button", { name: "직원 등록" }));
+    const dialog = await screen.findByRole("dialog", { name: "직원등록" });
+    expect(within(dialog).getByLabelText("직원이름")).toBeInTheDocument();
+    await user.click(within(dialog).getByRole("button", { name: "닫기" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("이름")).toHaveValue("Alice");
+  });
+
+  it("refreshes the roster after saving registration and closes on confirmation", async () => {
+    const user = userEvent.setup();
+    let created = false;
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.endsWith("/api/employee-roles")) return Response.json({ roles: ["경비원"] });
+      if (url.endsWith("/api/employees")) {
+        created = true;
+        return Response.json({ employee: { id: "emp-3", name: "신규직원", phone: "01011112222", role: "경비원" } });
+      }
+      return Response.json({ ...bootstrap, employees: created
+        ? [...bootstrap.employees, { ...bootstrap.employees[0], id: "emp-3", name: "신규직원" }]
+        : bootstrap.employees });
+    }));
+    renderWithManagerLayout(<EmployeeRosterPage />);
+    await screen.findByRole("link", { name: "Alice" });
+    await user.click(screen.getByRole("button", { name: "직원 등록" }));
+    const dialog = await screen.findByRole("dialog", { name: "직원등록" });
+    await user.type(within(dialog).getByLabelText("직원이름"), "신규직원");
+    await user.type(within(dialog).getByLabelText("생년월일"), "1975-06-15");
+    await user.type(within(dialog).getByLabelText("연락처"), "01011112222");
+    await user.click(within(dialog).getByRole("button", { name: "저장" }));
+    await user.click(await screen.findByRole("button", { name: "확인" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: "신규직원" })).toBeInTheDocument();
+  });
+
   it("separates employee search controls from the employee list section", async () => {
     renderWithManagerLayout(<EmployeeRosterPage />);
 
@@ -138,7 +175,7 @@ describe("employee roster page", () => {
     ]);
     expect(searchSection).toContainElement(screen.getByRole("checkbox", { name: "퇴직" }));
     expect(screen.getByRole("checkbox", { name: "퇴직" })).not.toBeChecked();
-    expect(searchSection).toContainElement(screen.getByRole("link", { name: "직원 등록" }));
+    expect(searchSection).toContainElement(screen.getByRole("button", { name: "직원 등록" }));
     expect(within(listSection).queryByRole("heading", { name: "직원 목록" })).not.toBeInTheDocument();
     expect(within(listSection).queryByText("전체 직원 1")).not.toBeInTheDocument();
     expect(listSection).toContainElement(screen.getByText("조회 결과 1"));

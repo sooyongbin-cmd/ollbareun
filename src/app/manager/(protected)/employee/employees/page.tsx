@@ -1,5 +1,8 @@
 "use client";
 
+import EmployeeRegistrationForm from "./employee-registration-form";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+
 import ListResults from "@/components/list-results";
 
 import { scheduleSummary, type ScheduleRule } from "@/lib/employee-schedule";
@@ -75,6 +78,8 @@ const emptyBootstrap: Bootstrap = {
 };
 
 export default function EmployeeRosterPage() {
+  const [registrationOpen, setRegistrationOpen] = useState(false);
+  const [refreshVersion, setRefreshVersion] = useState(0);
   const [data, setData] = useState<Bootstrap>(emptyBootstrap);
   const [nameQuery, setNameQuery] = useState("");
   const [roleQuery, setRoleQuery] = useState("");
@@ -127,7 +132,7 @@ export default function EmployeeRosterPage() {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [refreshVersion]);
 
   const availableEmployees = useMemo(() => {
     return data.employees.filter((e) => e.is_retired === showRetired);
@@ -302,13 +307,29 @@ export default function EmployeeRosterPage() {
             퇴직
           </label>
 
-          <Link
-            className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-primary px-4 text-center text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:w-auto"
-            href="/manager/employee/employees/new"
-          >
-            <span>직원 등록</span>
-            <ArrowRightIcon size={18} />
-          </Link>
+          <Dialog open={registrationOpen} onOpenChange={setRegistrationOpen}>
+            <DialogTrigger asChild>
+              <button
+                type="button"
+                className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-primary px-4 text-center text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:w-auto"
+              >
+                <span>직원 등록</span>
+                <ArrowRightIcon size={18} />
+              </button>
+            </DialogTrigger>
+            <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-4xl" aria-describedby={undefined} showCloseButton={false} onPointerDownOutside={(event) => event.preventDefault()}>
+              <DialogTitle className="text-[1.75rem] leading-[1.2]">직원등록</DialogTitle>
+              <EmployeeRegistrationForm
+                modal
+                onClose={() => setRegistrationOpen(false)}
+                onCreated={() => {
+                  setError("");
+                  setLoading(true);
+                  setRefreshVersion((version) => version + 1);
+                }}
+              />
+            </DialogContent>
+          </Dialog>
         </div>
       </section>
 

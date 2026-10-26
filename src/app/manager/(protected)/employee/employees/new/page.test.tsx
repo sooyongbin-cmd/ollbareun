@@ -39,8 +39,8 @@ describe("employee new page", () => {
     const options = Array.from(roleSelect.options).map((opt) => opt.value);
     expect(options).toEqual(["경비원", "미화원", "주차원", "사감"]);
     expect(workStyleSelect.value).toBe("0");
-    expect(screen.getByLabelText("출근")).toHaveValue("08:00");
-    expect(screen.getByLabelText("퇴근")).toHaveValue("18:00");
+    expect(screen.getByLabelText("출근 시각")).toHaveValue("08");
+    expect(screen.getByLabelText("퇴근 시각")).toHaveValue("06");
     expect(screen.getByLabelText("토요일 적용 방식")).toHaveValue("off");
   });
 

@@ -23,22 +23,21 @@ describe("worksite management page", () => {
       "fetch",
       vi.fn(async (input: RequestInfo | URL) => {
         const url = String(input);
-        if (url.startsWith("/api/kakao/reverse-geocode?")) {
-          return Response.json({ address: url.includes("lat=37.5&") ? "서울특별시 본사 주소" : "서울특별시 지점 주소" });
-        }
         if (url.endsWith("/api/bootstrap")) {
           return Response.json({
             worksites: [
               {
                 id: "work-1",
                 name: "본사",
+                address: "서울특별시 본사 저장 주소",
                 gps_info: { latitude: 37.5, longitude: 127.0 },
                 radius_meters: 100,
               },
               {
                 id: "work-2",
                 name: "서울지점",
-                gps_info: { latitude: 37.45, longitude: 126.97 },
+                address: "서울특별시 지점 저장 주소",
+                gps_info: null,
                 radius_meters: 120,
               },
             ],
@@ -81,7 +80,9 @@ describe("worksite management page", () => {
     expect(screen.getByRole("columnheader", { name: "주소" })).toBeInTheDocument();
     expect(screen.queryByRole("columnheader", { name: "위도" })).not.toBeInTheDocument();
     expect(screen.queryByRole("columnheader", { name: "경도" })).not.toBeInTheDocument();
-    expect(await screen.findByText("서울특별시 본사 주소")).toBeInTheDocument();
+    expect(screen.getByText("서울특별시 본사 저장 주소")).toBeInTheDocument();
+    expect(screen.getByText("서울특별시 지점 저장 주소")).toBeInTheDocument();
+    expect(vi.mocked(fetch).mock.calls.some(([input]) => String(input).startsWith("/api/kakao/reverse-geocode"))).toBe(false);
     expect(screen.queryByText("37.500000, 127.000000")).not.toBeInTheDocument();
     expect(screen.getByText("100m")).toBeInTheDocument();
 

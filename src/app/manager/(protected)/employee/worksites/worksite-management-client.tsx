@@ -1,5 +1,7 @@
 "use client";
 
+import DetailModalLink from "@/components/modals/detail-modal-link";
+
 import RegistrationModal from "@/components/modals/registration-modal";
 import dynamic from "next/dynamic";
 
@@ -249,12 +251,12 @@ export default function WorksiteManagementClient() {
                     return (
                       <TableRow key={worksite.id} className="hover:bg-muted/40 transition-colors">
                         <TableCell data-label="근무지" className="font-semibold">
-                          <Link
+                          <DetailModalLink onSaved={() => { setError(""); setLoading(true); setRegistrationVersion((version) => version + 1); }}
                             className="text-primary hover:underline"
                             href={`/manager/employee/worksites/save/${worksite.id}`}
                           >
                             {worksite.name}
-                          </Link>
+                          </DetailModalLink>
                         </TableCell>
                         <TableCell data-label="점검지" className="text-center">
                           {(data.inspectionSiteCounts[worksite.id] ?? 0) > 0 ? (

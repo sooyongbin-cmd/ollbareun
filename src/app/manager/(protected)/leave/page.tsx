@@ -1,11 +1,12 @@
 "use client";
 
+import DetailModalLink from "@/components/modals/detail-modal-link";
+
 import RegistrationModal from "@/components/modals/registration-modal";
 import dynamic from "next/dynamic";
 
 import ListResults from "@/components/list-results";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
 import { Input } from "@/components/ui/input";
@@ -174,9 +175,9 @@ export default function LeavePage() {
                   filteredRows.map((row) => (
                     <TableRow key={row.id} className="hover:bg-muted/40 transition-colors">
                       <TableCell data-label="이름" className="font-semibold">
-                        <Link className="text-primary hover:underline" href={`/manager/leave/${row.id}`}>
+                        <DetailModalLink onSaved={() => { setError(""); setLoading(true); setRegistrationVersion((version) => version + 1); }} className="text-primary hover:underline" href={`/manager/leave/${row.id}`}>
                           {row.employeeName}
-                        </Link>
+                        </DetailModalLink>
                       </TableCell>
                       <TableCell data-label="직군" className="text-muted-foreground">{row.employeeRole}</TableCell>
                       <TableCell data-label="근무형태" className="text-muted-foreground">{row.workStyle}</TableCell>

@@ -1,8 +1,9 @@
 "use client";
 
+import DetailModalLink from "@/components/modals/detail-modal-link";
+
 import ListResults from "@/components/list-results";
 
-import Link from "next/link";
 import type { AttendanceReportRow } from "@/lib/manager-reports";
 import { DateTimeRange, scheduledClockInDisplay, formatDateTimeSegment } from "@/components/attendance-time-display";
 import { employeeSummary } from "@/lib/employee-summary";
@@ -174,9 +175,9 @@ export default function AttendanceReportPage() {
                   rows.map((row) => (
                     <TableRow key={row.id}>
                       <TableCell data-label="이름">
-                        <Link href={`/manager/reports/attendance/detail/${row.id}`} className="text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" aria-label={`${employeeSummary(row)} 근태 상세 보기`}>
+                        <DetailModalLink onSaved={() => { void handleSearch(); }} href={`/manager/reports/attendance/detail/${row.id}`} className="text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" aria-label={`${employeeSummary(row)} 근태 상세 보기`}>
                           {employeeSummary(row)}
-                        </Link>
+                        </DetailModalLink>
                       </TableCell>
                       <TableCell data-label="근무지">{row.worksiteName ?? "-"}</TableCell>
                       <TableCell data-label="출퇴근예정">

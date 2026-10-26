@@ -1,5 +1,7 @@
 "use client";
 
+import DetailModalLink from "@/components/modals/detail-modal-link";
+
 import RegistrationModal from "@/components/modals/registration-modal";
 import dynamic from "next/dynamic";
 
@@ -8,7 +10,6 @@ import ListResults from "@/components/list-results";
 import { educationTypeLabels, educationTypes, type EducationType } from "@/lib/education-periods";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
@@ -155,12 +156,12 @@ export default function EducationResourcesPage() {
                     <TableRow key={resource.id} className="hover:bg-muted/40 transition-colors">
                       <TableCell data-label="교육구분">{resourceEducationTypeLabels[resource.education_type]}</TableCell>
                       <TableCell data-label="제목" className="font-semibold">
-                        <Link
+                        <DetailModalLink onSaved={() => { setError(""); setLoading(true); setRegistrationVersion((version) => version + 1); }}
                           className="text-primary hover:underline"
                           href={`/manager/safety/resources/save/${resource.id}`}
                         >
                           {resource.title}
-                        </Link>
+                        </DetailModalLink>
                       </TableCell>
                       <TableCell data-label="시작일">{resource.startdate}</TableCell>
                       <TableCell data-label="종료일">{resource.enddate}</TableCell>

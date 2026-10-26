@@ -1,5 +1,7 @@
 "use client";
 
+import DetailModalLink from "@/components/modals/detail-modal-link";
+
 import RegistrationModal from "@/components/modals/registration-modal";
 import dynamic from "next/dynamic";
 
@@ -7,7 +9,6 @@ import ListResults from "@/components/list-results";
 
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
@@ -298,12 +299,12 @@ export default function AssignmentManagementClient() {
                   sortedAssignments.map((assignment) => (
                     <TableRow key={assignment.id}>
                       <TableCell data-label="이름" className="text-muted-foreground">
-                        <Link
+                        <DetailModalLink onSaved={() => { setError(""); setLoading(true); setRegistrationVersion((version) => version + 1); }}
                           className="font-semibold text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"
                           href={`/manager/employee/assignments/save/${assignment.id}`}
                         >
                           {assignment.employee_name}
-                        </Link>
+                        </DetailModalLink>
                       </TableCell>
                       <TableCell data-label="직군" className="text-muted-foreground">{assignment.employee_role ?? "직군 없음"}</TableCell>
                       <TableCell data-label="근무형태" className="whitespace-nowrap text-muted-foreground">

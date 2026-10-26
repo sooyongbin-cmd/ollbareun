@@ -1,5 +1,7 @@
 "use client";
 
+import DetailModalLink from "@/components/modals/detail-modal-link";
+
 import RegistrationModal from "@/components/modals/registration-modal";
 import dynamic from "next/dynamic";
 
@@ -7,7 +9,6 @@ import ListResults from "@/components/list-results";
 
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type DragEvent } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
@@ -335,7 +336,7 @@ export default function InspectionSitesPage() {
                       <TableCell data-label="근무지">{site.worksite_name}</TableCell>
                       <TableCell data-label="순서">{site.sort_order ?? ""}</TableCell>
                       <TableCell data-label="점검지명" className="font-semibold" onDragOver={(event) => event.preventDefault()}>
-                        <Link className="text-primary hover:underline" href={`/manager/inspection/sites/${site.id}`}>
+                        <DetailModalLink onSaved={() => setRegistrationVersion((version) => version + 1)} className="text-primary hover:underline" href={`/manager/inspection/sites/${site.id}`}>
                           <span
                             draggable={!reordering}
                             onDragStart={(event) => {
@@ -349,7 +350,7 @@ export default function InspectionSitesPage() {
                           >
                             {site.name}
                           </span>
-                        </Link>
+                        </DetailModalLink>
                       </TableCell>
                       <TableCell data-label="점검시각">{formatInspectionTime(site.today_inspection?.inspected_at)}</TableCell>
                       <TableCell data-label="점검자">{site.today_inspection?.employee_name ?? ""}</TableCell>

@@ -1,8 +1,9 @@
 "use client";
 
+import DetailModalLink from "@/components/modals/detail-modal-link";
+
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import Link from "next/link";
 
 export type DailyAttendance = { id?: string; work_date: string; intime: string | null; outtime: string | null };
 
@@ -13,6 +14,7 @@ type Props = {
   currentMonth: string;
   holidays?: Set<string>;
   onMonthChange: (month: string) => void;
+  onSaved?: () => void;
 };
 
 const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
@@ -53,6 +55,7 @@ export default function AssignmentAttendanceCalendar({
   currentMonth,
   holidays = new Set<string>(),
   onMonthChange,
+  onSaved,
 }: Props) {
   const timesByDate = new Map<string, { intime: string[]; outtime: string[] }>();
   const attendanceIdByDate = new Map<string, string>();
@@ -156,14 +159,14 @@ export default function AssignmentAttendanceCalendar({
                 );
 
                 return attendanceId && withinAssignment ? (
-                  <Link
+                  <DetailModalLink onSaved={onSaved}
                     aria-label={`${date} 근태상세 보기`}
                     className={className}
                     href={`/manager/reports/attendance/detail/${encodeURIComponent(attendanceId)}`}
                     key={date}
                   >
                     {contents}
-                  </Link>
+                  </DetailModalLink>
                 ) : (
                   <div aria-label={`${date} 근태자료 없음`} className={className} key={date}>
                     {contents}

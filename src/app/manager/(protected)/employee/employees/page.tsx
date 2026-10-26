@@ -1,5 +1,7 @@
 "use client";
 
+import DetailModalLink from "@/components/modals/detail-modal-link";
+
 import EmployeeRegistrationForm from "./employee-registration-form";
 import RegistrationModal from "@/components/modals/registration-modal";
 
@@ -11,7 +13,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
@@ -394,12 +395,12 @@ export default function EmployeeRosterPage() {
                   sortedEmployees.map((employee) => (
                     <TableRow key={employee.id} className="hover:bg-muted/40 transition-colors">
                       <TableCell data-label="이름" className="font-semibold">
-                        <Link
+                        <DetailModalLink onSaved={() => { setError(""); setLoading(true); setRefreshVersion((version) => version + 1); }}
                           className="text-primary hover:underline"
                           href={`/manager/employee/employees/save/${employee.id}`}
                         >
                           {employee.name}
-                        </Link>
+                        </DetailModalLink>
                       </TableCell>
                       <TableCell data-label="생년월일" className="whitespace-nowrap text-muted-foreground">{employee.birthdate || "-"}</TableCell>
                       {showRetired ? (
@@ -416,12 +417,12 @@ export default function EmployeeRosterPage() {
                       </TableCell>
                       <TableCell data-label="배정기간" className="whitespace-nowrap text-muted-foreground">
                         {assignmentByEmployeeId.has(employee.id) ? (
-                          <Link
+                          <DetailModalLink onSaved={() => { setError(""); setLoading(true); setRefreshVersion((version) => version + 1); }}
                             className="text-primary hover:underline"
                             href={`/manager/employee/assignments/save/${assignmentByEmployeeId.get(employee.id)?.id}`}
                           >
                             {`${assignmentByEmployeeId.get(employee.id)?.start_date}~${assignmentByEmployeeId.get(employee.id)?.end_date}`}
-                          </Link>
+                          </DetailModalLink>
                         ) : ""}
                       </TableCell>
                       <TableCell data-label="출근" className="whitespace-nowrap text-muted-foreground">

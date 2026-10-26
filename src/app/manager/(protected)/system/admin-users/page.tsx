@@ -1,5 +1,7 @@
 "use client";
 
+import DetailModalLink from "@/components/modals/detail-modal-link";
+
 import RegistrationModal from "@/components/modals/registration-modal";
 import dynamic from "next/dynamic";
 
@@ -7,7 +9,6 @@ import ListResults from "@/components/list-results";
 
 import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
 
-import Link from "next/link";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -98,7 +99,7 @@ export default function AdminUsersPage() {
             <TableHeader><TableRow><TableHead>이메일</TableHead><TableHead>직군</TableHead><TableHead>최근접속일</TableHead><TableHead className="text-right">구독삭제</TableHead></TableRow></TableHeader>
             <TableBody>{rows.length === 0 ? <TableRow><TableCell data-responsive-empty colSpan={4} className="p-8 text-center text-muted-foreground italic">등록된 관리자가 없습니다.</TableCell></TableRow> : rows.map((row, index) => (
               <TableRow key={row.subscription?.id ?? row.admin.id} className="hover:bg-muted/40 transition-colors">
-                <TableCell data-label="이메일" className="font-semibold">{index === 0 || rows[index - 1].admin.email !== row.admin.email ? <Link className="text-primary hover:underline" href={`/manager/system/admin-users/save/${row.admin.id}`}>{row.admin.email}</Link> : ""}</TableCell>
+                <TableCell data-label="이메일" className="font-semibold">{index === 0 || rows[index - 1].admin.email !== row.admin.email ? <DetailModalLink onSaved={() => { setError(""); setLoading(true); setRegistrationVersion((version) => version + 1); }} className="text-primary hover:underline" href={`/manager/system/admin-users/save/${row.admin.id}`}>{row.admin.email}</DetailModalLink> : ""}</TableCell>
                 <TableCell data-label="직군" className="text-muted-foreground">{row.admin.role === "super_admin" ? "최고 관리자" : "일반 관리자"}</TableCell>
                 <TableCell data-label="최근접속일" className="whitespace-nowrap text-muted-foreground">{formatDateTime(row.subscription?.updated_at)}</TableCell>
                 <TableCell data-label="구독삭제" className="text-right">{row.subscription ? <Button type="button" variant="outline" disabled={!isSuperAdmin || busy}

@@ -1,5 +1,7 @@
 "use client";
 
+import DetailModalLink from "@/components/modals/detail-modal-link";
+
 import RegistrationModal from "@/components/modals/registration-modal";
 import dynamic from "next/dynamic";
 
@@ -9,7 +11,6 @@ import { ArrowRightIcon } from "@/components/icons/arrow-right-icon";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { isManagerThemeSystemCode, readManagerTheme } from "@/lib/manager-theme";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 
@@ -119,9 +120,9 @@ export default function SystemConfigsPage() {
                   configs.map((config) => (
                     <TableRow key={config.system_code} className="hover:bg-muted/40 transition-colors">
                       <TableCell data-label="설명" className="max-w-[22.5rem] whitespace-pre-wrap font-semibold">
-                        <Link className="text-primary hover:opacity-80" href={`/manager/system/configs/${encodeURIComponent(config.system_code)}`}>
+                        <DetailModalLink onSaved={() => { setError(""); setLoading(true); setRegistrationVersion((version) => version + 1); }} className="text-primary hover:opacity-80" href={`/manager/system/configs/${encodeURIComponent(config.system_code)}`}>
                           {config.description ?? "-"}
-                        </Link>
+                        </DetailModalLink>
                       </TableCell>
                       <TableCell data-label="내용" className="max-w-[32.5rem] whitespace-pre-wrap">{config.content}</TableCell>
                     </TableRow>

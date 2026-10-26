@@ -1,9 +1,10 @@
 "use client";
 
+import DetailModalLink from "@/components/modals/detail-modal-link";
+
 import ListResults from "@/components/list-results";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DateTimeRange, scheduledClockInDisplay, formatDateTimeSegment } from "@/components/attendance-time-display";
@@ -20,6 +21,7 @@ function weekday(workDate: string) {
 }
 
 export default function WorkerInformationPage() {
+  const [detailVersion, setDetailVersion] = useState(0);
   const [worksiteQuery, setWorksiteQuery] = useState("");
   const [worksiteNames, setWorksiteNames] = useState<string[]>([]);
   const [worksiteError, setWorksiteError] = useState("");
@@ -65,7 +67,7 @@ export default function WorkerInformationPage() {
     }
     void load();
     return () => controller.abort();
-  }, [yearMonth]);
+  }, [yearMonth, detailVersion]);
   const worksiteNameOptions = useMemo(() => Array.from(new Set([...worksiteNames, ...rows.map((row) => row.worksiteName)]))
     .filter(Boolean).sort((left, right) => left.localeCompare(right, "ko-KR")), [worksiteNames, rows]);
   const filteredRows = useMemo(() => {
@@ -117,10 +119,10 @@ export default function WorkerInformationPage() {
                       {index > 0 && filteredRows[index - 1].worksiteName === row.worksiteName && employeeSummary(filteredRows[index - 1]) === employeeSummary(row) ? "" : employeeSummary(row)}
                     </TableCell>
                     <TableCell data-label="출근예정일" className="whitespace-nowrap">
-                      <Link className="text-primary underline underline-offset-4 hover:text-primary/80"
+                      <DetailModalLink onSaved={() => setDetailVersion((version) => version + 1)} className="text-primary underline underline-offset-4 hover:text-primary/80"
                         aria-label={`${employeeSummary(row)} ${row.workDate} 근태 상세 보기`} href={`/manager/reports/attendance/detail/${row.id}`}>
                         {row.workDate} ({weekday(row.workDate)})
-                      </Link>
+                      </DetailModalLink>
                     </TableCell>
                     <TableCell data-label="출퇴근예정">
                       <DateTimeRange start={scheduledClockInDisplay(row, row.workDate)}

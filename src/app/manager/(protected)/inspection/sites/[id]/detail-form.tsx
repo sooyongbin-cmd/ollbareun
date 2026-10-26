@@ -1,0 +1,499 @@
+"use client";
+
+import type { DetailViewProps } from "@/components/modals/detail-modal-link";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useRouter } from "next/navigation";
+import { useEffect, useState, type FormEvent } from "react";
+import { buildInspectionQrPayload, type InspectionSiteRow } from "@/lib/inspection";
+import ManagerLoadingMessage from "../../../manager-loading-message";
+import AlertModal from "@/components/modals/alert-modal";
+import ProcessingModal from "@/components/modals/processing-modal";
+import ConfirmModal from "@/components/modals/confirm-modal";
+import { SaveIcon } from "@/components/icons/save-icon";
+import { saveInspectionQrImage } from "../../save-inspection-qr";
+
+declare global {
+  interface NDEFReadingEvent {
+    message: {
+      records: Array<{ recordType: string; data?: DataView | string }>;
+    };
+  }
+
+  interface NDEFReader {
+    write(
+      message: string | { records: Array<{ recordType: string; data: string }> },
+      options?: { signal: AbortSignal }
+    ): Promise<void>;
+    scan(options?: { signal: AbortSignal }): Promise<void>;
+    onreading: ((event: NDEFReadingEvent) => void) | null;
+    onreadingerror: (() => void) | null;
+  }
+  interface Window {
+    NDEFReader?: new () => NDEFReader;
+  }
+}
+
+type PageProps = {
+  params?: Promise<{ id: string }>;
+};
+
+type Worksite = {
+  id: string;
+  name: string;
+};
+
+async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(url, init);
+  const payload = await response.json();
+
+  if (!response.ok) {
+    throw new Error(payload.error ?? "요청을 처리하지 못했습니다.");
+  }
+
+  return payload as T;
+}
+
+async function fetchQrCodeEnabled() {
+  try {
+    const payload = await fetchJson<{ config?: { content?: string } }>(
+      "/api/system/configs/USE_QR_CODE",
+    );
+    return payload.config?.content?.trim().toUpperCase() === "Y";
+  } catch {
+    return false;
+  }
+}
+
+function buildNfcUrl(siteId: string) {
+  return `${window.location.host}/guard/main/inspection-nfc?s=${encodeURIComponent(siteId)}`;
+}
+
+export default function InspectionSiteDetailPage({ params, recordId, modal = false, onClose, onSaved }: PageProps & DetailViewProps) {
+  const router = useRouter();
+  const [siteId, setSiteId] = useState("");
+  const [worksites, setWorksites] = useState<Worksite[]>([]);
+  const [worksiteId, setWorksiteId] = useState("");
+  const [siteName, setSiteName] = useState("");
+  const [savedSite, setSavedSite] = useState<InspectionSiteRow | null>(null);
+  const [useQrCode, setUseQrCode] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [printing, setPrinting] = useState(false);
+  const [error, setError] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [shouldReturnToList, setShouldReturnToList] = useState(false);
+  const [nfcUrl, setNfcUrl] = useState("");
+  const [copyMessage, setCopyMessage] = useState("");
+  const [isWritingNfc, setIsWritingNfc] = useState(false);
+  const [nfcWriteStatus, setNfcWriteStatus] = useState<"" | "scanning" | "success" | "error">("");
+  const [nfcWriteError, setNfcWriteError] = useState("");
+  const [nfcAbortController, setNfcAbortController] = useState<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (nfcAbortController) {
+        nfcAbortController.abort();
+      }
+    };
+  }, [nfcAbortController]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadSite() {
+      try {
+        const { id } = recordId ? { id: recordId } : await params!;
+        const [sitePayload, bootstrapPayload, qrCodeEnabled] = await Promise.all([
+          fetchJson<{ site: InspectionSiteRow }>(`/api/inspection/sites/${encodeURIComponent(id)}`),
+          fetchJson<{ worksites?: Worksite[] }>("/api/bootstrap"),
+          fetchQrCodeEnabled(),
+        ]);
+
+        if (!ignore) {
+          const nextSite = sitePayload.site;
+          setSiteId(id);
+          setSavedSite(nextSite);
+          setWorksites(bootstrapPayload.worksites ?? []);
+          setWorksiteId(nextSite.worksite_id);
+          setSiteName(nextSite.name);
+          setUseQrCode(qrCodeEnabled);
+        }
+      } catch (loadError) {
+        if (!ignore) {
+          setError(loadError instanceof Error ? loadError.message : "점검지 정보를 불러오지 못했습니다.");
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadSite();
+
+    return () => {
+      ignore = true;
+    };
+  }, [params, recordId]);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+
+    setSaving(true);
+    try {
+      const payload = await fetchJson<{ site: InspectionSiteRow }>(
+        `/api/inspection/sites/${encodeURIComponent(siteId)}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ worksiteId, sortOrder: savedSite?.sort_order ?? 1, name: siteName }),
+        },
+      );
+      setSavedSite(payload.site);
+      setShouldReturnToList(true);
+      setAlertMessage("점검지가 저장되었습니다.");
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "점검지를 저장하지 못했습니다.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!siteId || deleting) {
+      return;
+    }
+
+    setDeleting(true);
+    setError("");
+    try {
+      await fetchJson<{ success: boolean }>(`/api/inspection/sites/${encodeURIComponent(siteId)}`, {
+        method: "DELETE",
+      });
+      setShouldReturnToList(true);
+      setAlertMessage("점검지가 삭제되었습니다.");
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : "점검지를 삭제하지 못했습니다.");
+    } finally {
+      setDeleting(false);
+      setDeleteConfirmOpen(false);
+    }
+  }
+
+  async function handleQrPrint() {
+    if (!savedSite) {
+      return;
+    }
+
+    setPrinting(true);
+    setError("");
+    try {
+      await saveInspectionQrImage({
+        payload: buildInspectionQrPayload(savedSite),
+        worksiteName: savedSite.worksite_name,
+        siteName: savedSite.name,
+        fileName: `올바름_점검지점검_${savedSite.worksite_name}_${savedSite.name}`,
+      });
+    } catch (printError) {
+      setError(printError instanceof Error ? printError.message : "QR 파일을 저장하지 못했습니다.");
+    } finally {
+      setPrinting(false);
+    }
+  }
+
+  function handleNfcUrl() {
+    if (!siteId) {
+      return;
+    }
+    setCopyMessage("");
+    setNfcUrl(buildNfcUrl(siteId));
+  }
+
+  async function handleCopyNfcUrl() {
+    await navigator.clipboard.writeText(nfcUrl);
+    setCopyMessage("복사되었습니다.");
+  }
+
+  async function handleWriteNfc() {
+    if (typeof window === "undefined") return;
+
+    setNfcWriteError("");
+    setNfcWriteStatus("scanning");
+    setIsWritingNfc(true);
+
+    if (!window.NDEFReader) {
+      setNfcWriteStatus("error");
+      setNfcWriteError("이 브라우저/기기는 NFC 쓰기 기능을 지원하지 않습니다. (Android Chrome 등을 사용해 주세요.)");
+      return;
+    }
+
+    const controller = new AbortController();
+    setNfcAbortController(controller);
+
+    try {
+      const NDEFReader = window.NDEFReader;
+      const ndef = new NDEFReader();
+
+      const protocol = window.location.protocol ? `${window.location.protocol}//` : "https://";
+      const fullUrl = nfcUrl.startsWith("http://") || nfcUrl.startsWith("https://")
+        ? nfcUrl
+        : `${protocol}${nfcUrl}`;
+
+      await ndef.write(
+        {
+          records: [
+            {
+              recordType: "url",
+              data: fullUrl,
+            },
+          ],
+        },
+        { signal: controller.signal },
+      );
+
+      setNfcWriteStatus("success");
+      setTimeout(() => {
+        setIsWritingNfc(false);
+        setNfcUrl("");
+        setNfcWriteStatus("");
+      }, 1500);
+    } catch (err: unknown) {
+      const errorName = err && typeof err === "object" && "name" in err ? (err as { name: string }).name : "";
+      const errorMessage = err && typeof err === "object" && "message" in err ? String((err as { message: unknown }).message) : "NFC 카드 쓰기 중 오류가 발생했습니다.";
+
+      if (errorName !== "AbortError") {
+        setNfcWriteStatus("error");
+        setNfcWriteError(errorMessage || "NFC 카드 쓰기 중 오류가 발생했습니다.");
+      }
+    } finally {
+      setNfcAbortController(null);
+    }
+  }
+
+  function handleCancelNfcWrite() {
+    if (nfcAbortController) {
+      nfcAbortController.abort();
+    }
+    setIsWritingNfc(false);
+    setNfcWriteStatus("");
+    setNfcWriteError("");
+  }
+
+  function handleAlertClose() {
+    setAlertMessage("");
+    if (shouldReturnToList) {
+      setShouldReturnToList(false);
+      if (onSaved) {
+        onSaved();
+        return;
+      }
+      router.push("/manager/inspection/sites");
+      router.refresh();
+    }
+  }
+
+  return (
+    <section className="space-y-[1.5rem]">
+      {!modal ? <header>
+        <h1 className="text-[1.75rem] leading-[1.2]">점검지 상세</h1>
+      </header> : null}
+
+      <section className="manager-section bg-muted/40 rounded-xl border border-border/50">
+        {loading ? (
+          <ManagerLoadingMessage />
+        ) : error && !savedSite ? (
+          <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive text-center">{error}</p>
+        ) : (
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="inspection-worksite">
+                  근무지
+                </label>
+                <NativeSelect
+                  className="w-full"
+                  id="inspection-worksite"
+                  value={worksiteId}
+                  onChange={(event) => setWorksiteId(event.target.value)}
+                  required
+                >
+                  {worksites.length === 0 ? <NativeSelectOption value="">근무지 없음</NativeSelectOption> : null}
+                  {worksites.map((worksite) => (
+                    <NativeSelectOption key={worksite.id} value={worksite.id}>
+                      {worksite.name}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="inspection-site-name">
+                  점검지명
+                </label>
+                <Input
+                  className="w-full"
+                  id="inspection-site-name"
+                  name="name"
+                  value={siteName}
+                  onChange={(event) => setSiteName(event.target.value)}
+                  required
+                />
+              </div>
+
+            </div>
+
+            <div className="flex flex-col gap-3 md:flex-row">
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center md:w-auto" disabled={saving} type="submit">
+                <SaveIcon size={20} />
+                <span>저장</span>
+              </Button>
+              {useQrCode ? (
+                <Button
+                  className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center md:w-auto"
+                  disabled={printing || !savedSite}
+                  onClick={handleQrPrint}
+                  type="button"
+                  variant="outline"
+                >
+                  QR코드
+                </Button>
+              ) : null}
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center md:w-auto" onClick={handleNfcUrl} type="button" variant="outline">
+                NFC(URL)
+              </Button>
+              <Button
+                className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full justify-center md:w-auto"
+                disabled={saving || deleting}
+                onClick={() => setDeleteConfirmOpen(true)}
+                type="button"
+                variant="outline"
+              >
+                삭제
+              </Button>
+              <Button
+                className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 md:ml-auto w-full justify-center md:w-auto"
+                onClick={() => onClose ? onClose() : router.push("/manager/inspection/sites")}
+                type="button"
+                variant="outline"
+              >
+                {modal ? "닫기" : "목록"}
+              </Button>
+            </div>
+          </form>
+        )}
+
+        {error && savedSite ? <p className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive mt-6 text-center">{error}</p> : null}
+      </section>
+
+      <ConfirmModal
+        isOpen={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        onConfirm={handleDelete}
+        title="점검지를 삭제하시겠습니까?"
+        description="삭제하면 현재 점검지 자료가 완전히 제거됩니다."
+        loading={deleting}
+        loadingLabel="삭제처리중입니다..."
+      />
+      <ProcessingModal isOpen={saving} message="저장처리중입니다..." />
+
+      <AlertModal
+        isOpen={Boolean(alertMessage)}
+        onClose={handleAlertClose}
+        title="알림"
+        description={alertMessage}
+      />
+
+      <Dialog open={Boolean(nfcUrl)} onOpenChange={(open) => !open && setNfcUrl("")}>
+        <DialogContent className="max-w-[35rem]">
+          <DialogHeader>
+            <DialogTitle>NFC(URL)</DialogTitle>
+            <DialogDescription>NFC Tools의 URL 레코드에 아래 주소를 붙여넣으세요.</DialogDescription>
+          </DialogHeader>
+            <Textarea className="w-full mt-4 min-h-[7rem]" readOnly value={nfcUrl} />
+            {copyMessage ? <p className="mt-3 text-[0.875rem] font-semibold text-primary">{copyMessage}</p> : null}
+            <div className="mt-6 flex flex-col gap-3 md:flex-row">
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 flex-1" onClick={handleCopyNfcUrl} type="button">
+                복사
+              </Button>
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 flex-1" onClick={handleWriteNfc} type="button" variant="outline">
+                NFC 쓰기
+              </Button>
+              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 flex-1" onClick={() => setNfcUrl("")} type="button" variant="outline">
+                닫기
+              </Button>
+            </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isWritingNfc} onOpenChange={(open) => !open && handleCancelNfcWrite()}>
+        <DialogContent className="max-w-[30rem] text-center" showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>NFC 카드 쓰기</DialogTitle>
+            <DialogDescription>상태 안내에 따라 NFC 카드를 기기에 가까이 대어주세요.</DialogDescription>
+          </DialogHeader>
+            
+            {nfcWriteStatus === "scanning" && (
+              <div className="mt-6 space-y-4">
+                <div className="mx-auto h-12 w-12 animate-pulse rounded-full bg-primary/20 flex items-center justify-center text-primary text-[1.5rem]">
+                  📡
+                </div>
+                <p className="text-[1rem] text-muted-foreground leading-relaxed">
+                  NFC 카드(스티커)를 디바이스 뒷면이나<br />NFC 리더기 근처에 대어 주세요.
+                </p>
+                <p className="text-[0.8125rem] text-muted-foreground animate-pulse">
+                  인식 대기 중...
+                </p>
+              </div>
+            )}
+
+            {nfcWriteStatus === "success" && (
+              <div className="mt-6 space-y-4">
+                <div className="mx-auto h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[1.5rem]">
+                  ✓
+                </div>
+                <p className="text-[1rem] font-semibold text-primary">
+                  NFC 쓰기 완료!
+                </p>
+                <p className="text-[0.875rem] text-muted-foreground">
+                  성공적으로 작성되었습니다. 창을 닫습니다.
+                </p>
+              </div>
+            )}
+
+            {nfcWriteStatus === "error" && (
+              <div className="mt-6 space-y-4">
+                <div className="mx-auto h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center text-destructive text-[1.5rem]">
+                  ⚠
+                </div>
+                <p className="text-[1rem] font-semibold text-destructive">
+                  NFC 쓰기 실패
+                </p>
+                <p className="text-[0.875rem] text-muted-foreground leading-relaxed px-2">
+                  {nfcWriteError}
+                </p>
+              </div>
+            )}
+
+            <div className="mt-8">
+              <Button
+                className="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"
+                onClick={handleCancelNfcWrite}
+                type="button"
+                variant="outline"
+              >
+                {nfcWriteStatus === "success" ? "닫기" : "취소"}
+              </Button>
+            </div>
+        </DialogContent>
+      </Dialog>
+    </section>
+  );
+}

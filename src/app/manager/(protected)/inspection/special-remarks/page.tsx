@@ -1,5 +1,7 @@
 "use client";
 
+import DetailModalLink from "@/components/modals/detail-modal-link";
+
 import ListResults from "@/components/list-results";
 import { formatSpecialRemarkDateTime, summarizeSpecialRemarkContent } from "@/lib/special-remark-display";
 
@@ -7,7 +9,6 @@ import { educationToday } from "@/lib/education-periods";
 import { employeeSummary } from "@/lib/employee-summary";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 
@@ -41,6 +42,7 @@ async function fetchReports(yearMonth: string) {
 }
 
 export default function SpecialRemarksPage() {
+  const [detailVersion, setDetailVersion] = useState(0);
   const [yearMonth, setYearMonth] = useState(() => educationToday().slice(0, 7));
   const [completed, setCompleted] = useState(false);
   const [reports, setReports] = useState<SpecialRemarkReport[]>([]);
@@ -66,7 +68,7 @@ export default function SpecialRemarksPage() {
     }
     void loadReports();
     return () => { ignore = true; };
-  }, [yearMonth]);
+  }, [yearMonth, detailVersion]);
 
   return (
     <section className="space-y-[1.5rem]">
@@ -137,12 +139,12 @@ export default function SpecialRemarksPage() {
                       <TableCell data-label="이름">{employeeSummary({ employeeName: report.employee_name, employeeRole: report.employee_role,
                         workStyle: report.work_style === "0" ? "일반근무" : report.work_style === "1" ? "격일근무" : report.work_style === "2" ? "야간근무" : "-" })}</TableCell>
                       <TableCell data-label="점검일시">
-                        <Link
+                        <DetailModalLink onSaved={() => setDetailVersion((version) => version + 1)}
                           className="text-primary font-semibold hover:opacity-80"
                           href={`/manager/inspection/special-remarks/${encodeURIComponent(report.id)}`}
                         >
                           {formatSpecialRemarkDateTime(report.reported_at)}
-                        </Link>
+                        </DetailModalLink>
                       </TableCell>
                       <TableCell
                         data-label="특이사항내용"

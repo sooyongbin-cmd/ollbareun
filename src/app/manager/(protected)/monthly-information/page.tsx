@@ -1,9 +1,10 @@
 "use client";
 
+import DetailModalLink from "@/components/modals/detail-modal-link";
+
 import ListResults from "@/components/list-results";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DateTimeRange, scheduledClockInDisplay, formatDateTimeSegment } from "@/components/attendance-time-display";
@@ -39,6 +40,7 @@ function weekday(workDate: string) {
 }
 
 export default function MonthlyInformationPage() {
+  const [detailVersion, setDetailVersion] = useState(0);
   const [worksiteQuery, setWorksiteQuery] = useState("");
   const [worksiteNames, setWorksiteNames] = useState<string[]>([]);
   const [employeeQuery, setEmployeeQuery] = useState("");
@@ -89,7 +91,7 @@ export default function MonthlyInformationPage() {
     }
     void load();
     return () => controller.abort();
-  }, [yearMonth]);
+  }, [yearMonth, detailVersion]);
   const worksiteNameOptions = useMemo(() => Array.from(new Set([...worksiteNames, ...rows.map((row) => row.worksiteName)]))
     .filter(Boolean).sort((left, right) => left.localeCompare(right, "ko-KR")), [worksiteNames, rows]);
   const employeeNameOptions = useMemo(() => Array.from(new Set([...employeeNames, ...rows.map((row) => row.employeeName)]))
@@ -156,10 +158,10 @@ export default function MonthlyInformationPage() {
                         </TableCell>
                       ))}
                       <TableCell data-label="출근예정일" className="whitespace-nowrap">
-                        <Link className="text-primary underline underline-offset-4 hover:text-primary/80"
+                        <DetailModalLink onSaved={() => setDetailVersion((version) => version + 1)} className="text-primary underline underline-offset-4 hover:text-primary/80"
                           aria-label={`${employeeSummary(row)} ${row.workDate} 근태 상세 보기`} href={`/manager/reports/attendance/detail/${row.id}`}>
                           {row.workDate} ({weekday(row.workDate)})
-                        </Link>
+                        </DetailModalLink>
                       </TableCell>
                       <TableCell data-label="출퇴근예정">
                         <DateTimeRange start={scheduledClockInDisplay(row, row.workDate)}
@@ -178,9 +180,9 @@ export default function MonthlyInformationPage() {
                       <TableCell data-label="특이사항" className="min-w-64 max-w-96 whitespace-normal break-words align-top"
                         data-export-value={row.remarks.map((remark) => `${formatSpecialRemarkDateTime(remark.reportedAt)} ${summarizeSpecialRemarkContent(remark.content)}`).join("\n") || "-"}>
                         {row.remarks.length ? <div className="space-y-3">{row.remarks.map((remark) => <div key={remark.id}>
-                          <Link className="text-primary hover:underline" href={`/manager/inspection/special-remarks/${encodeURIComponent(remark.id)}`}>
+                          <DetailModalLink onSaved={() => setDetailVersion((version) => version + 1)} className="text-primary hover:underline" href={`/manager/inspection/special-remarks/${encodeURIComponent(remark.id)}`}>
                             {formatSpecialRemarkDateTime(remark.reportedAt)}
-                          </Link>
+                          </DetailModalLink>
                           <p>{summarizeSpecialRemarkContent(remark.content)}</p>
                         </div>)}</div> : "-"}
                       </TableCell>

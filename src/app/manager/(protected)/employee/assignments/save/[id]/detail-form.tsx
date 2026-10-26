@@ -89,7 +89,7 @@ async function deleteRequest(url: string): Promise<void> {
   }
 }
 
-export default function AssignmentSavePage({ recordId, modal = false, onClose, onSaved, onChanged }: DetailViewProps) {
+export default function AssignmentSavePage({ recordId, modal = false, onClose, onSaved, onDeleted, onChanged }: DetailViewProps) {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const assignmentId = recordId ?? params?.id;
@@ -114,6 +114,7 @@ export default function AssignmentSavePage({ recordId, modal = false, onClose, o
   const [errorAlertMessage, setErrorAlertMessage] = useState("");
   const [errorAlertTitle, setErrorAlertTitle] = useState("저장 오류");
   const [alertMessage, setAlertMessage] = useState("");
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -244,6 +245,7 @@ export default function AssignmentSavePage({ recordId, modal = false, onClose, o
         }),
       });
 
+      onSaved?.();
       setAlertMessage("자료가 저장되었습니다.");
     } catch (submitError) {
       setErrorAlertTitle("저장 오류");
@@ -260,6 +262,7 @@ export default function AssignmentSavePage({ recordId, modal = false, onClose, o
 
     try {
       await deleteRequest(`/api/assignments/${assignmentId}`);
+      setDeleteSuccess(true);
       setAlertMessage("자료가 삭제되었습니다.");
     } catch (deleteError) {
       setErrorAlertTitle("삭제 오류");
@@ -458,8 +461,9 @@ export default function AssignmentSavePage({ recordId, modal = false, onClose, o
         isOpen={Boolean(alertMessage)}
         onClose={() => {
           setAlertMessage("");
-          if (onSaved) {
-            onSaved();
+          if (!deleteSuccess) return;
+          if (onDeleted) {
+            onDeleted();
             return;
           }
           router.push("/manager/employee/assignments");

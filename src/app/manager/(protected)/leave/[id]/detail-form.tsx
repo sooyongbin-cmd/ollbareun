@@ -36,7 +36,7 @@ async function deleteRequest(url: string) {
   }
 }
 
-export default function LeaveDetailPage({ recordId, modal = false, onClose, onSaved }: DetailViewProps) {
+export default function LeaveDetailPage({ recordId, modal = false, onClose, onDeleted }: DetailViewProps) {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const leaveId = recordId ?? params?.id;
@@ -83,8 +83,8 @@ export default function LeaveDetailPage({ recordId, modal = false, onClose, onSa
     setError("");
     try {
       await deleteRequest(`/api/leave/${leaveId}`);
-      if (onSaved) {
-        onSaved();
+      if (onDeleted) {
+        onDeleted();
         return;
       }
       router.push("/manager/leave");

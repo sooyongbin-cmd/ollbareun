@@ -61,7 +61,7 @@ describe("worksite save page", () => {
     );
   });
 
-  it("saves worksite changes and returns to management", async () => {
+  it("saves worksite changes and stays on the detail screen", async () => {
     const user = userEvent.setup();
 
     render(<WorksiteSavePage />);
@@ -82,7 +82,7 @@ describe("worksite save page", () => {
 
     expect(await screen.findByText("자료가 저장되었습니다.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "확인" }));
-    expect(push).toHaveBeenCalledWith("/manager/employee/worksites");
+    expect(push).not.toHaveBeenCalled();
   });
 
   it("confirms and deletes the worksite", async () => {
@@ -100,7 +100,7 @@ describe("worksite save page", () => {
     expect(push).toHaveBeenCalledWith("/manager/employee/worksites");
   });
 
-  it("shows the assignment deletion error in a modal and returns to the list", async () => {
+  it("shows the assignment deletion error and stays on the detail screen", async () => {
     const user = userEvent.setup();
     vi.stubGlobal(
       "fetch",
@@ -135,6 +135,6 @@ describe("worksite save page", () => {
     expect(push).not.toHaveBeenCalled();
 
     await user.click(screen.getByRole("button", { name: "확인" }));
-    expect(push).toHaveBeenCalledWith("/manager/employee/worksites");
+    expect(push).not.toHaveBeenCalled();
   });
 });

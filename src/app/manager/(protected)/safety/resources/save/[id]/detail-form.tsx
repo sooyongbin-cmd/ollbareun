@@ -69,7 +69,7 @@ function getYoutubeLinkError(youtubeLink: string) {
   return "";
 }
 
-export default function EducationResourceSavePage({ recordId, modal = false, onClose, onSaved }: DetailViewProps) {
+export default function EducationResourceSavePage({ recordId, modal = false, onClose, onSaved, onDeleted }: DetailViewProps) {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const resourceId = recordId ?? params?.id;
@@ -83,6 +83,7 @@ export default function EducationResourceSavePage({ recordId, modal = false, onC
   const [loadError, setLoadError] = useState("");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const routeError = resourceId ? loadError : "교육자료 정보를 불러오지 못했습니다.";
@@ -152,6 +153,7 @@ export default function EducationResourceSavePage({ recordId, modal = false, onC
         body: JSON.stringify({ title: nextTitle, youtubeLink: nextYoutubeLink, educationType, ...dates }),
       });
 
+      onSaved?.();
       setAlertMessage("수정이 완료되었습니다.");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "교육자료 정보를 저장하지 못했습니다.");
@@ -166,6 +168,7 @@ export default function EducationResourceSavePage({ recordId, modal = false, onC
 
     try {
       await deleteRequest(`/api/education/resources/${resourceId}`);
+      setDeleteSuccess(true);
       setAlertMessage("자료가 삭제되었습니다.");
     } catch (deleteError) {
       setError(deleteError instanceof Error ? deleteError.message : "교육자료를 삭제하지 못했습니다.");
@@ -270,8 +273,9 @@ export default function EducationResourceSavePage({ recordId, modal = false, onC
         isOpen={Boolean(alertMessage)}
         onClose={() => {
           setAlertMessage("");
-          if (onSaved) {
-            onSaved();
+          if (!deleteSuccess) return;
+          if (onDeleted) {
+            onDeleted();
             return;
           }
           router.push("/manager/safety/resources");

@@ -251,7 +251,7 @@ describe("employee save page", () => {
 
     expect(await screen.findByText("수정이 완료되었습니다.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "확인" }));
-    expect(push).toHaveBeenCalledWith("/manager/employee/employees");
+    expect(push).not.toHaveBeenCalled();
   });
 
   it("does not render the assignment section when the employee has no assignments", async () => {

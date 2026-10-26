@@ -122,7 +122,7 @@ describe("assignment save page", () => {
 
     expect(await screen.findByText("자료가 저장되었습니다.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "확인" }));
-    expect(push).toHaveBeenCalledWith("/manager/employee/assignments");
+    expect(push).not.toHaveBeenCalled();
   });
 
   it("confirms and deletes the assignment", async () => {

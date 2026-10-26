@@ -21,7 +21,8 @@ it("loads and saves edited email and role", async () => {
   await user.selectOptions(screen.getByLabelText("직군"), "super_admin");
   expect(screen.getByRole("button", { name: "목록" })).toHaveClass("ml-auto");
   await user.click(screen.getByRole("button", { name: "저장" }));
-  await waitFor(() => expect(push).toHaveBeenCalledWith("/manager/system/admin-users"));
+  await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/manager/admin-users/a", expect.objectContaining({ method: "PATCH" })));
+  expect(push).not.toHaveBeenCalled();
   expect(fetchMock).toHaveBeenCalledWith("/api/manager/admin-users/a", expect.objectContaining({ method: "PATCH", body: JSON.stringify({ email: "b@example.com", role: "super_admin" }) }));
 });
 it("deletes only after confirmation", async () => {

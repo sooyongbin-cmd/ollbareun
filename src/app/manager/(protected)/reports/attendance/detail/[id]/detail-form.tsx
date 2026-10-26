@@ -26,7 +26,7 @@ const educationTypeLabels: Record<AttendanceEducationItem["educationType"], stri
 };
 const educationTypeOrder: AttendanceEducationItem["educationType"][] = ["daily", "monthly", "quarterly", "semiannual", "other"];
 
-export default function AttendanceDetailPage({ recordId, modal = false, onClose, onSaved, onChanged }: DetailViewProps) {
+export default function AttendanceDetailPage({ recordId, modal = false, onClose, onSaved, onDeleted, onChanged }: DetailViewProps) {
   const params = useParams<{ id: string }>();
   const id = recordId ?? params?.id;
   const router = useRouter();
@@ -142,6 +142,7 @@ export default function AttendanceDetailPage({ recordId, modal = false, onClose,
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "근태 기록을 저장하지 못했습니다.");
       setConfirmOpen(false);
+      onSaved?.();
       setSuccessOpen(true);
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : "근태 기록을 저장하지 못했습니다.");
@@ -210,9 +211,24 @@ export default function AttendanceDetailPage({ recordId, modal = false, onClose,
       setCompletingResourceId(null);
     }
   }
+  async function refreshSavedRecord() {
+    try {
+      const response = await fetch(`/api/manager/reports/attendance/${id}`);
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error ?? "저장된 근태 기록을 불러오지 못했습니다.");
+      setRecord(payload.attendance);
+      setEducation(payload.education ?? []);
+      setClockInDateTime(toDateTimeLocal(payload.attendance.clockInDateTime));
+      setClockOutDateTime(toDateTimeLocal(payload.attendance.clockOutDateTime));
+      setLeaveRequested(false);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "저장된 근태 기록을 불러오지 못했습니다.");
+    }
+  }
+
   function returnToList() {
-    if (onSaved) {
-      onSaved();
+    if (onDeleted) {
+      onDeleted();
       return;
     }
     router.push("/manager/reports/attendance");
@@ -302,7 +318,7 @@ export default function AttendanceDetailPage({ recordId, modal = false, onClose,
     <ConfirmModal isOpen={deleteConfirmOpen} onClose={() => { if (!deleting) setDeleteConfirmOpen(false); }} onConfirm={confirmInitialDelete} title="자료를 삭제하시겠습니까?" description="삭제한 자료는 복구할 수 없습니다." loading={deleting} loadingLabel="삭제 중입니다..." />
     <ConfirmModal isOpen={clockedInDeleteConfirmOpen} onClose={() => { if (!deleting) setClockedInDeleteConfirmOpen(false); }} onConfirm={confirmDelete} title="출근처리된 자료입니다. 그래도 삭제하시겠습니까?" description="삭제한 자료는 복구할 수 없습니다." loading={deleting} loadingLabel="삭제 중입니다..." />
     <AlertModal isOpen={Boolean(errorAlert)} onClose={() => setErrorAlert("")} title="오류" description={errorAlert} />
-    <AlertModal isOpen={successOpen} onClose={() => { setSuccessOpen(false); returnToList(); }} title="알림"
+    <AlertModal isOpen={successOpen} onClose={() => { setSuccessOpen(false); void refreshSavedRecord(); }} title="알림"
       description={leaveRequested ? "휴가 신청이 완료되었습니다." : "근태 정보가 저장되었습니다."} />
     <AlertModal isOpen={deleteSuccessOpen} onClose={() => { setDeleteSuccessOpen(false); returnToList(); }} title="알림" description="자료가 삭제되었습니다" />
   </section>;

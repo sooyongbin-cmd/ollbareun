@@ -74,7 +74,7 @@ function formatAssignmentPeriod(assignment: WorksiteAssignment) {
     : `${assignment.start_date} ~ ${assignment.end_date}`;
 }
 
-export default function WorksiteSavePage({ recordId, modal = false, onClose, onSaved }: DetailViewProps) {
+export default function WorksiteSavePage({ recordId, modal = false, onClose, onSaved, onDeleted }: DetailViewProps) {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const worksiteId = recordId ?? params?.id;
@@ -86,6 +86,7 @@ export default function WorksiteSavePage({ recordId, modal = false, onClose, onS
   const [error, setError] = useState("");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
   const [alertTitle, setAlertTitle] = useState("알림");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -186,6 +187,7 @@ export default function WorksiteSavePage({ recordId, modal = false, onClose, onS
         body: JSON.stringify({ name, address, gpsInfo, radiusMeters }),
       });
 
+      onSaved?.();
       setAlertMessage("자료가 저장되었습니다.");
       setAlertTitle("알림");
     } catch (submitError) {
@@ -201,6 +203,7 @@ export default function WorksiteSavePage({ recordId, modal = false, onClose, onS
 
     try {
       await deleteRequest(`/api/worksites/${worksiteId}`);
+      setDeleteSuccess(true);
       setAlertMessage("자료가 삭제되었습니다.");
       setAlertTitle("알림");
     } catch (deleteError) {
@@ -361,8 +364,9 @@ export default function WorksiteSavePage({ recordId, modal = false, onClose, onS
         isOpen={Boolean(alertMessage)}
         onClose={() => {
           setAlertMessage("");
-          if (onSaved) {
-            onSaved();
+          if (!deleteSuccess) return;
+          if (onDeleted) {
+            onDeleted();
             return;
           }
           router.push("/manager/employee/worksites");

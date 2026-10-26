@@ -19,6 +19,7 @@ const managerThemeOptions = ["light", "dark", "system"] as const;
 
 type SystemConfigFormProps = RegistrationFormProps & {
   mode: "create" | "edit";
+  onDeleted?: () => void;
   initialConfig?: {
     system_code: string;
     parent_system_code: string | null;
@@ -27,7 +28,7 @@ type SystemConfigFormProps = RegistrationFormProps & {
   };
 };
 
-export default function SystemConfigForm({ mode, initialConfig, modal = false, onClose, onSaved }: SystemConfigFormProps) {
+export default function SystemConfigForm({ mode, initialConfig, modal = false, onClose, onSaved, onDeleted }: SystemConfigFormProps) {
   const router = useRouter();
   const systemCode = initialConfig?.system_code ?? "";
   const isBooleanConfig = ["S000002", "special_001", "USE_QR_CODE"].includes(systemCode);
@@ -58,12 +59,7 @@ export default function SystemConfigForm({ mode, initialConfig, modal = false, o
       if (isThemeConfig) {
         const theme = saveManagerThemeLocally(content);
         notifyManagerThemeChange(theme);
-        if (onSaved) {
-          onSaved();
-          return;
-        }
-        router.push("/manager/system/configs");
-        router.refresh();
+        onSaved?.();
         return;
       }
 
@@ -85,6 +81,10 @@ export default function SystemConfigForm({ mode, initialConfig, modal = false, o
         throw new Error(payload.error ?? "시스템설정을 저장하지 못했습니다.");
       }
 
+      if (mode === "edit") {
+        onSaved?.();
+        return;
+      }
       if (onSaved) {
         onSaved();
         return;
@@ -115,8 +115,8 @@ export default function SystemConfigForm({ mode, initialConfig, modal = false, o
         throw new Error(payload.error ?? "시스템설정을 삭제하지 못했습니다.");
       }
 
-      if (onSaved) {
-        onSaved();
+      if (onDeleted) {
+        onDeleted();
         return;
       }
       router.push("/manager/system/configs");

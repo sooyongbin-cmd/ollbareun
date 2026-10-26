@@ -54,7 +54,7 @@ async function fetchReport(id: string) {
   return payload.report as SpecialRemarkReport;
 }
 
-export default function SpecialRemarkDetailPage({ params, recordId, modal = false, onClose, onSaved }: PageProps & DetailViewProps) {
+export default function SpecialRemarkDetailPage({ params, recordId, modal = false, onClose, onSaved, onDeleted }: PageProps & DetailViewProps) {
   const router = useRouter();
   const [reportId, setReportId] = useState("");
   const [report, setReport] = useState<SpecialRemarkReport | null>(null);
@@ -144,12 +144,7 @@ export default function SpecialRemarkDetailPage({ params, recordId, modal = fals
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "처리상태를 변경하지 못했습니다.");
       setReport(payload.report);
-      if (onSaved) {
-        onSaved();
-        return;
-      }
-      router.push("/manager/inspection/special-remarks");
-      router.refresh();
+      onSaved?.();
     } catch (completionError) {
       setError(completionError instanceof Error ? completionError.message : "처리상태를 변경하지 못했습니다.");
     } finally {
@@ -174,8 +169,8 @@ export default function SpecialRemarkDetailPage({ params, recordId, modal = fals
         throw new Error(payload.error ?? "특이사항을 삭제하지 못했습니다.");
       }
 
-      if (onSaved) {
-        onSaved();
+      if (onDeleted) {
+        onDeleted();
         return;
       }
       router.push("/manager/inspection/special-remarks");

@@ -10,6 +10,7 @@ export type DetailViewProps = {
   modal?: boolean;
   onClose?: () => void;
   onSaved?: () => void;
+  onDeleted?: () => void;
   onChanged?: () => void;
 };
 
@@ -72,7 +73,7 @@ export default function DetailModalLink({ href, children, onSaved, onClick, ...l
         >
           <DialogTitle className="text-[1.75rem] leading-[1.2]">{match.title}</DialogTitle>
           <ParentDetailChanged.Provider value={() => { changed.current = true; }}>
-            <View recordId={recordId} modal onClose={close} onChanged={() => { changed.current = true; }} onSaved={() => {
+            <View recordId={recordId} modal onClose={close} onChanged={() => { changed.current = true; }} onSaved={() => { changed.current = true; }} onDeleted={() => {
               changed.current = true;
               close();
             }} />

@@ -204,7 +204,7 @@ function formatPhoneInput(value: string) {
   return digits;
 }
 
-export default function EmployeeSavePage({ recordId, modal = false, onClose, onSaved, onChanged }: DetailViewProps) {
+export default function EmployeeSavePage({ recordId, modal = false, onClose, onSaved, onDeleted, onChanged }: DetailViewProps) {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const employeeId = recordId ?? params?.id;
@@ -323,6 +323,7 @@ export default function EmployeeSavePage({ recordId, modal = false, onClose, onS
         body: JSON.stringify({ name, birthdate, phone: phone.replace(/\D/g, ""), role, is_retired: isRetired, retired_at: retiredDate, work_style: workStyle, in_time: inTime, out_time: outTime, has_weekend: false, schedule_rules: scheduleRules }),
       });
 
+      onSaved?.();
       setSaveSuccessOpen(true);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "직원 정보를 저장하지 못했습니다.");
@@ -338,8 +339,8 @@ export default function EmployeeSavePage({ recordId, modal = false, onClose, onS
 
     try {
       await deleteRequest(`/api/employees/${employeeId}`);
-      if (onSaved) {
-        onSaved();
+      if (onDeleted) {
+        onDeleted();
         return;
       }
       router.push("/manager/employee/employees");
@@ -745,14 +746,7 @@ export default function EmployeeSavePage({ recordId, modal = false, onClose, onS
 
       <AlertModal
         isOpen={saveSuccessOpen}
-        onClose={() => {
-          setSaveSuccessOpen(false);
-          if (onSaved) {
-            onSaved();
-            return;
-          }
-          router.push("/manager/employee/employees");
-        }}
+        onClose={() => setSaveSuccessOpen(false)}
         title="알림"
         description="수정이 완료되었습니다."
       />

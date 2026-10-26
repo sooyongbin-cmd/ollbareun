@@ -82,7 +82,7 @@ describe("inspection site detail page", () => {
     );
   });
 
-  it("hides address and GPS and returns to the list after save confirmation", async () => {
+  it("hides address and GPS and stays on details after save confirmation", async () => {
     const user = userEvent.setup();
     render(<InspectionSiteDetailPage params={Promise.resolve({ id: "site-1" })} />);
 
@@ -96,8 +96,8 @@ describe("inspection site detail page", () => {
 
     await user.click(screen.getByRole("button", { name: "확인" }));
 
-    expect(push).toHaveBeenCalledWith("/manager/inspection/sites");
-    expect(refresh).toHaveBeenCalled();
+    expect(push).not.toHaveBeenCalled();
+    expect(refresh).not.toHaveBeenCalled();
   });
 
   it("prints QR and copies the protocol-free short NFC URL", async () => {

@@ -73,7 +73,7 @@ function buildNfcUrl(siteId: string) {
   return `${window.location.host}/guard/main/inspection-nfc?s=${encodeURIComponent(siteId)}`;
 }
 
-export default function InspectionSiteDetailPage({ params, recordId, modal = false, onClose, onSaved }: PageProps & DetailViewProps) {
+export default function InspectionSiteDetailPage({ params, recordId, modal = false, onClose, onSaved, onDeleted }: PageProps & DetailViewProps) {
   const router = useRouter();
   const [siteId, setSiteId] = useState("");
   const [worksites, setWorksites] = useState<Worksite[]>([]);
@@ -88,7 +88,7 @@ export default function InspectionSiteDetailPage({ params, recordId, modal = fal
   const [printing, setPrinting] = useState(false);
   const [error, setError] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
-  const [shouldReturnToList, setShouldReturnToList] = useState(false);
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
   const [nfcUrl, setNfcUrl] = useState("");
   const [copyMessage, setCopyMessage] = useState("");
   const [isWritingNfc, setIsWritingNfc] = useState(false);
@@ -158,7 +158,7 @@ export default function InspectionSiteDetailPage({ params, recordId, modal = fal
         },
       );
       setSavedSite(payload.site);
-      setShouldReturnToList(true);
+      onSaved?.();
       setAlertMessage("점검지가 저장되었습니다.");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "점검지를 저장하지 못했습니다.");
@@ -178,7 +178,7 @@ export default function InspectionSiteDetailPage({ params, recordId, modal = fal
       await fetchJson<{ success: boolean }>(`/api/inspection/sites/${encodeURIComponent(siteId)}`, {
         method: "DELETE",
       });
-      setShouldReturnToList(true);
+      setDeleteSuccess(true);
       setAlertMessage("점검지가 삭제되었습니다.");
     } catch (deleteError) {
       setError(deleteError instanceof Error ? deleteError.message : "점검지를 삭제하지 못했습니다.");
@@ -289,10 +289,10 @@ export default function InspectionSiteDetailPage({ params, recordId, modal = fal
 
   function handleAlertClose() {
     setAlertMessage("");
-    if (shouldReturnToList) {
-      setShouldReturnToList(false);
-      if (onSaved) {
-        onSaved();
+    if (deleteSuccess) {
+      setDeleteSuccess(false);
+      if (onDeleted) {
+        onDeleted();
         return;
       }
       router.push("/manager/inspection/sites");

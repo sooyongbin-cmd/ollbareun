@@ -1,4 +1,4 @@
-import { render, screen, within, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
 import DetailModalLink from "./detail-modal-link";
@@ -66,7 +66,7 @@ it.each([
   expect(onSaved).not.toHaveBeenCalled();
 });
 
-it("saves an employee from the filtered roster and refreshes it without navigation", async () => {
+it("keeps employee details open after saving and refreshes the filtered roster on close", async () => {
   const user = userEvent.setup();
   let phone = employee.phone;
   vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -88,6 +88,9 @@ it("saves an employee from the filtered roster and refreshes it without navigati
   await user.click(within(dialog).getByRole("button", { name: "저장" }));
   await user.click(await screen.findByRole("button", { name: "예" }));
   await user.click(await screen.findByRole("button", { name: "확인" }));
+  expect(screen.getByRole("dialog", { name: "직원 상세" })).toBeInTheDocument();
+  expect(phoneInput).toHaveValue("010-9999-8888");
+  await user.click(within(dialog).getByRole("button", { name: "닫기" }));
   expect(await screen.findByText("010-9999-8888")).toBeInTheDocument();
   expect(screen.getByLabelText("이름")).toHaveValue("홍");
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -141,6 +144,9 @@ it("edits the local theme through the modal without a server mutation", async ()
   const dialog = await screen.findByRole("dialog", { name: "시스템설정 상세" });
   await user.click(await within(dialog).findByRole("radio", { name: "dark" }));
   await user.click(within(dialog).getByRole("button", { name: "저장" }));
+  expect(screen.getByRole("dialog", { name: "시스템설정 상세" })).toBeInTheDocument();
+  expect(onSaved).not.toHaveBeenCalled();
+  await user.click(within(dialog).getByRole("button", { name: "닫기" }));
   expect(onSaved).toHaveBeenCalledTimes(1);
   expect(vi.mocked(fetch).mock.calls.every(([, init]) => !init?.method || init.method === "GET")).toBe(true);
   expect(push).not.toHaveBeenCalled();
@@ -196,4 +202,78 @@ it("refreshes nested assignment rows while preserving unsaved employee inputs", 
   await user.click(within(employeeDialog).getByRole("button", { name: "닫기" }));
   expect(onSaved).toHaveBeenCalledTimes(1);
   expect(push).not.toHaveBeenCalled();
+});
+
+it.each([
+  ["employee/worksites/save", "근무지 상세", "/api/worksites/record-1", true],
+  ["employee/assignments/save", "근무지배정 상세", "/api/assignments/record-1", true],
+  ["inspection/sites", "점검지 상세", "/api/inspection/sites/record-1", true],
+  ["safety/resources/save", "교육자료 상세", "/api/education/resources/record-1", true],
+  ["system/admin-users/save", "관리자 상세", "/api/manager/admin-users/record-1", false],
+  ["system/configs", "시스템설정 상세", "/api/system/configs/record-1", false],
+  ["reports/attendance/detail", "근태상세", "/api/manager/reports/attendance/record-1", true],
+])("keeps %s open after save confirmation, then refreshes the list on close", async (path, title, endpoint, hasNotice) => {
+  const user = userEvent.setup();
+  const onSaved = vi.fn();
+  render(<DetailModalLink href={`/manager/${path}/record-1`} onSaved={onSaved}>상세</DetailModalLink>);
+  await user.click(screen.getByRole("link", { name: "상세" }));
+  const dialog = await screen.findByRole("dialog", { name: title });
+  const save = await within(dialog).findByRole("button", { name: "저장" });
+  await waitFor(() => expect(save).toBeEnabled());
+  if (path === "reports/attendance/detail") {
+    fireEvent.change(within(dialog).getByLabelText("출근일시"), { target: { value: "2026-10-01T08:00" } });
+  }
+  await user.click(save);
+  if (path === "reports/attendance/detail") await user.click(await screen.findByRole("button", { name: "예" }));
+  await waitFor(() => expect(vi.mocked(fetch).mock.calls.some(([url, init]) => String(url) === endpoint && init?.method === "PATCH")).toBe(true));
+  if (hasNotice) await user.click(await screen.findByRole("button", { name: "확인" }));
+  expect(screen.getByRole("dialog", { name: title })).toBeInTheDocument();
+  expect(onSaved).not.toHaveBeenCalled();
+  expect(push).not.toHaveBeenCalled();
+  await user.click(within(dialog).getByRole("button", { name: "닫기" }));
+  expect(onSaved).toHaveBeenCalledTimes(1);
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+});
+
+it.each([
+  ["employee/worksites/save", "근무지 상세", true],
+  ["inspection/sites", "점검지 상세", true],
+  ["safety/resources/save", "교육자료 상세", true],
+  ["system/admin-users/save", "관리자 상세", false],
+  ["system/configs", "시스템설정 상세", false],
+])("still closes %s after confirmed deletion", async (path, title, hasNotice) => {
+  const user = userEvent.setup();
+  const onSaved = vi.fn();
+  render(<DetailModalLink href={`/manager/${path}/record-1`} onSaved={onSaved}>상세</DetailModalLink>);
+  await user.click(screen.getByRole("link", { name: "상세" }));
+  const dialog = await screen.findByRole("dialog", { name: title });
+  await user.click(await within(dialog).findByRole("button", { name: "삭제" }));
+  await user.click(await screen.findByRole("button", { name: "예" }));
+  if (hasNotice) await user.click(await screen.findByRole("button", { name: "확인" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  expect(onSaved).toHaveBeenCalledTimes(1);
+  expect(push).not.toHaveBeenCalled();
+});
+
+it("keeps a completed special remark open and shows its new status", async () => {
+  const user = userEvent.setup();
+  const onSaved = vi.fn();
+  const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+  vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const payload = mockPayload(String(input));
+    return Response.json(init?.method === "PATCH" ? { report: { ...payload.report, processing_status: "Y" } } : payload);
+  }));
+  try {
+    render(<DetailModalLink href="/manager/inspection/special-remarks/record-1" onSaved={onSaved}>특이사항</DetailModalLink>);
+    await user.click(screen.getByRole("link", { name: "특이사항" }));
+    const dialog = await screen.findByRole("dialog", { name: "특이사항 상세" });
+    await user.click(await within(dialog).findByRole("button", { name: "처리완료" }));
+    expect(await within(dialog).findByText("처리완료", { selector: "p" })).toBeInTheDocument();
+    expect(onSaved).not.toHaveBeenCalled();
+    expect(push).not.toHaveBeenCalled();
+    await user.click(within(dialog).getByRole("button", { name: "닫기" }));
+    expect(onSaved).toHaveBeenCalledTimes(1);
+  } finally {
+    confirm.mockRestore();
+  }
 });

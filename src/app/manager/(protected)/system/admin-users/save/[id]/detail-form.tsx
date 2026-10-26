@@ -12,7 +12,7 @@ import ProcessingModal from "@/components/modals/processing-modal";
 import AlertModal from "@/components/modals/alert-modal";
 import ManagerLoadingMessage from "../../../../manager-loading-message";
 
-export default function AdminUserDetailPage({ recordId, modal = false, onClose, onSaved }: DetailViewProps) {
+export default function AdminUserDetailPage({ recordId, modal = false, onClose, onSaved, onDeleted }: DetailViewProps) {
   const params = useParams<{ id: string }>();
   const id = recordId ?? params?.id;
   const router = useRouter();
@@ -51,8 +51,12 @@ export default function AdminUserDetailPage({ recordId, modal = false, onClose, 
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "처리에 실패했습니다.");
-      if (onSaved) {
-        onSaved();
+      if (method === "PATCH") {
+        onSaved?.();
+        return;
+      }
+      if (onDeleted) {
+        onDeleted();
         return;
       }
       router.push("/manager/system/admin-users");

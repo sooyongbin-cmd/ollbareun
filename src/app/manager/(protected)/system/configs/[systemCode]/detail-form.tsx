@@ -8,7 +8,7 @@ import ManagerLoadingMessage from "../../../manager-loading-message";
 
 type Config = NonNullable<ComponentProps<typeof SystemConfigForm>["initialConfig"]>;
 
-export default function SystemConfigDetail({ recordId, onClose, onSaved }: DetailViewProps) {
+export default function SystemConfigDetail({ recordId, onClose, onSaved, onDeleted }: DetailViewProps) {
   const [config, setConfig] = useState<Config | null>(null);
   const [error, setError] = useState("");
   useEffect(() => {
@@ -32,6 +32,6 @@ export default function SystemConfigDetail({ recordId, onClose, onSaved }: Detai
     return () => controller.abort();
   }, [recordId]);
   return error ? <p role="alert" className="text-destructive">{error}</p> : config
-    ? <SystemConfigForm mode="edit" initialConfig={config} modal onClose={onClose} onSaved={onSaved} />
+    ? <SystemConfigForm mode="edit" initialConfig={config} modal onClose={onClose} onSaved={onSaved} onDeleted={onDeleted} />
     : <ManagerLoadingMessage />;
 }

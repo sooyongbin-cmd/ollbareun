@@ -78,7 +78,7 @@ describe("education resource save page", () => {
 
     expect(await screen.findByText("수정이 완료되었습니다.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "확인" }));
-    expect(push).toHaveBeenCalledWith("/manager/safety/resources");
+    expect(push).not.toHaveBeenCalled();
   });
   it("shows the period overlap error when saving changes", async () => {
     const message = "같은 안전교육구분의 기존 교재와 기간이 겹칩니다. 시작일과 종료일을 확인하세요.";

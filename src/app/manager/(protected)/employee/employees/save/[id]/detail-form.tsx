@@ -10,6 +10,7 @@ import { employeeScheduleRules, legacyScheduleRules, type ScheduleRule } from "@
 import { fetchEmployeeRoles } from "@/lib/employee-roles";
 
 import { Button } from "@/components/ui/button";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
@@ -379,7 +380,7 @@ export default function EmployeeSavePage({ recordId, modal = false, onClose, onS
   }
 
   return (
-    <section className="space-y-[1.5rem]">
+    <section className="min-w-0 max-w-full space-y-[1.5rem]">
       {!modal ? <header>
         <p className="text-[0.875rem] font-semibold text-muted-foreground uppercase">관리자 화면</p>
         <div className="space-y-3">
@@ -387,7 +388,7 @@ export default function EmployeeSavePage({ recordId, modal = false, onClose, onS
         </div>
       </header> : null}
 
-      <section className="manager-section bg-muted/40 rounded-xl border border-border/50">
+      <section className="manager-section min-w-0 max-w-full bg-muted/40 rounded-xl border border-border/50">
         {loading ? (
           <ManagerLoadingMessage />
         ) : routeError ? (
@@ -395,7 +396,7 @@ export default function EmployeeSavePage({ recordId, modal = false, onClose, onS
         ) : (
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="employee-name">
                     직원이름
@@ -425,7 +426,7 @@ export default function EmployeeSavePage({ recordId, modal = false, onClose, onS
                   />
                 </div>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="employee-role">
                     직군
@@ -451,7 +452,7 @@ export default function EmployeeSavePage({ recordId, modal = false, onClose, onS
                   </NativeSelect>
                 </div>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <label htmlFor="employee-in-time" className="text-sm font-semibold text-muted-foreground">출근</label>
                   <Input id="employee-in-time" type="time" value={inTime} onChange={(event) => setInTime(event.target.value)} required />
@@ -495,7 +496,7 @@ export default function EmployeeSavePage({ recordId, modal = false, onClose, onS
               </div>
             </div>
 
-            <div className="flex gap-3 [&>button]:w-auto">
+            <div className="flex flex-wrap gap-3 [&>button]:w-auto">
               <Button aria-label="저장" className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto" type="submit">
                 <SaveIcon size={20} />
               </Button>
@@ -527,28 +528,28 @@ export default function EmployeeSavePage({ recordId, modal = false, onClose, onS
       {!loading && !routeError && educationCompletions.length > 0 ? (
         <section
           aria-label="교육이수"
-          className="manager-section bg-muted/40 rounded-xl border border-border/50"
+          className="manager-section min-w-0 max-w-full bg-muted/40 rounded-xl border border-border/50"
         >
           <h2 className="text-[1.25rem] font-semibold">교육이수</h2>
-          <div className="mt-4 min-w-0 overflow-x-auto rounded-lg border border-border bg-background">
-            <table className="w-full min-w-[24rem] text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="px-4 py-3 text-left font-semibold">교육제목</th>
-                  <th className="px-4 py-3 text-left font-semibold">이수</th>
-                </tr>
-              </thead>
-              <tbody>
+          <div className="mt-4 min-w-0 overflow-x-auto max-md:overflow-visible rounded-lg border border-border bg-background">
+            <Table className="w-full min-w-[24rem] text-sm">
+              <TableHeader>
+                <TableRow className="border-b border-border">
+                  <TableHead className="px-4 py-3 text-left font-semibold">교육제목</TableHead>
+                  <TableHead className="px-4 py-3 text-left font-semibold">이수</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {educationCompletions.map((completion) => (
-                  <tr className="border-b border-border last:border-b-0" key={completion.resource_id}>
-                    <td className="px-4 py-3 font-semibold">{completion.resource_title}</td>
-                    <td className={`px-4 py-3 font-semibold ${completion.is_completed ? "text-primary" : "text-muted-foreground"}`}>
+                  <TableRow className="border-b border-border last:border-b-0" key={completion.resource_id}>
+                    <TableCell data-label="교육제목" className="px-4 py-3 font-semibold">{completion.resource_title}</TableCell>
+                    <TableCell data-label="이수" className={`px-4 py-3 font-semibold ${completion.is_completed ? "text-primary" : "text-muted-foreground"}`}>
                       {completion.is_completed ? "이수" : "미이수"}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </section>
       ) : null}
@@ -556,33 +557,33 @@ export default function EmployeeSavePage({ recordId, modal = false, onClose, onS
       {!loading && !routeError && assignments.length > 0 ? (
         <section
           aria-label="근무지배정정보"
-          className="manager-section bg-muted/40 rounded-xl border border-border/50"
+          className="manager-section min-w-0 max-w-full bg-muted/40 rounded-xl border border-border/50"
         >
           <h2 className="text-[1.25rem] font-semibold">근무지배정정보</h2>
-          <div className="mt-4 overflow-x-auto rounded-lg border border-border bg-background">
-            <table className="w-full min-w-[32rem] text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="px-4 py-3 text-left font-semibold">근무지</th>
-                  <th className="px-4 py-3 text-left font-semibold">근무기간</th>
-                </tr>
-              </thead>
-              <tbody>
+          <div className="mt-4 overflow-x-auto max-md:overflow-visible rounded-lg border border-border bg-background">
+            <Table className="w-full min-w-[32rem] text-sm">
+              <TableHeader>
+                <TableRow className="border-b border-border">
+                  <TableHead className="px-4 py-3 text-left font-semibold">근무지</TableHead>
+                  <TableHead className="px-4 py-3 text-left font-semibold">근무기간</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {assignments.map((assignment) => (
-                  <tr className="border-b border-border last:border-b-0" key={assignment.id}>
-                    <td className="px-4 py-3 font-semibold">{assignment.worksite_name}</td>
-                    <td className="px-4 py-3 font-semibold tabular-nums">
+                  <TableRow className="border-b border-border last:border-b-0" key={assignment.id}>
+                    <TableCell data-label="근무지" className="px-4 py-3 font-semibold">{assignment.worksite_name}</TableCell>
+                    <TableCell data-label="근무기간" className="px-4 py-3 font-semibold tabular-nums">
                       <DetailModalLink onSaved={refreshAssignments}
                         href={`/manager/employee/assignments/save/${assignment.id}`}
                         className="text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"
                       >
                         {formatAssignmentPeriod(assignment)}
                       </DetailModalLink>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </section>
       ) : null}
@@ -590,41 +591,41 @@ export default function EmployeeSavePage({ recordId, modal = false, onClose, onS
       {!loading && !routeError && attendance.length > 0 ? (
         <section
           aria-label="출근현황"
-          className="manager-section bg-muted/40 rounded-xl border border-border/50"
+          className="manager-section min-w-0 max-w-full bg-muted/40 rounded-xl border border-border/50"
         >
           <h2 className="text-[1.25rem] font-semibold">출근현황</h2>
-          <div className="mt-6 max-h-[31rem] min-w-0 overflow-auto rounded-lg border border-border bg-background">
-            <table className="w-full min-w-[58rem] text-sm">
-              <thead className="sticky top-0 z-10 bg-background">
-                <tr className="border-b border-border">
-                  <th className="px-4 py-3 text-left font-semibold">근무지</th>
-                  <th className="px-4 py-3 text-left font-semibold">출근일</th>
-                  <th className="px-4 py-3 text-left font-semibold">출근예정</th>
-                  <th className="px-4 py-3 text-left font-semibold">퇴근예정</th>
-                  <th className="px-4 py-3 text-left font-semibold">출근일시</th>
-                  <th className="px-4 py-3 text-left font-semibold">퇴근일시</th>
-                  <th className="px-4 py-3 text-left font-semibold">상태</th>
-                </tr>
-              </thead>
-              <tbody>
+          <div className="mt-6 max-h-[31rem] min-w-0 overflow-auto max-md:max-h-none max-md:overflow-visible rounded-lg border border-border bg-background">
+            <Table className="w-full min-w-[58rem] text-sm">
+              <TableHeader className="sticky top-0 z-10 bg-background">
+                <TableRow className="border-b border-border">
+                  <TableHead className="px-4 py-3 text-left font-semibold">근무지</TableHead>
+                  <TableHead className="px-4 py-3 text-left font-semibold">출근일</TableHead>
+                  <TableHead className="px-4 py-3 text-left font-semibold">출근예정</TableHead>
+                  <TableHead className="px-4 py-3 text-left font-semibold">퇴근예정</TableHead>
+                  <TableHead className="px-4 py-3 text-left font-semibold">출근일시</TableHead>
+                  <TableHead className="px-4 py-3 text-left font-semibold">퇴근일시</TableHead>
+                  <TableHead className="px-4 py-3 text-left font-semibold">상태</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {[...attendance]
                   .sort((left, right) =>
                     left.worksite_name.localeCompare(right.worksite_name, "ko-KR")
                     || left.work_date.localeCompare(right.work_date),
                   )
                   .map((record) => (
-                    <tr className="border-b border-border last:border-b-0" key={record.id}>
-                      <td className="px-4 py-3 font-semibold">{record.worksite_name}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{record.work_date}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{formatTime(record.intime)}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{formatScheduledTime(record.outtime, record.work_date)}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{formatDateTime(record.work_intime)}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{formatDateTime(record.work_outtime)}</td>
-                      <td className="px-4 py-3">{getRecordStatus(record)}</td>
-                    </tr>
+                    <TableRow className="border-b border-border last:border-b-0" key={record.id}>
+                      <TableCell data-label="근무지" className="px-4 py-3 font-semibold">{record.worksite_name}</TableCell>
+                      <TableCell data-label="출근일" className="px-4 py-3 text-muted-foreground">{record.work_date}</TableCell>
+                      <TableCell data-label="출근예정" className="px-4 py-3 text-muted-foreground">{formatTime(record.intime)}</TableCell>
+                      <TableCell data-label="퇴근예정" className="px-4 py-3 text-muted-foreground">{formatScheduledTime(record.outtime, record.work_date)}</TableCell>
+                      <TableCell data-label="출근일시" className="px-4 py-3 text-muted-foreground">{formatDateTime(record.work_intime)}</TableCell>
+                      <TableCell data-label="퇴근일시" className="px-4 py-3 text-muted-foreground">{formatDateTime(record.work_outtime)}</TableCell>
+                      <TableCell data-label="상태" className="px-4 py-3">{getRecordStatus(record)}</TableCell>
+                    </TableRow>
                   ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </section>
       ) : null}
@@ -632,26 +633,26 @@ export default function EmployeeSavePage({ recordId, modal = false, onClose, onS
       {!loading && !routeError && leaves.length > 0 ? (
         <section
           aria-label="휴가정보"
-          className="manager-section bg-muted/40 rounded-xl border border-border/50"
+          className="manager-section min-w-0 max-w-full bg-muted/40 rounded-xl border border-border/50"
         >
           <h2 className="text-[1.25rem] font-semibold">휴가정보</h2>
-          <div className="mt-6 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
-            <table className="w-full min-w-[32rem] text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="px-4 py-3 text-left font-semibold">휴가종류</th>
-                  <th className="px-4 py-3 text-left font-semibold">휴가기간</th>
-                </tr>
-              </thead>
-              <tbody>
+          <div className="mt-6 min-w-0 overflow-x-auto overflow-y-hidden max-md:overflow-visible rounded-lg border border-border bg-background">
+            <Table className="w-full min-w-[32rem] text-sm">
+              <TableHeader>
+                <TableRow className="border-b border-border">
+                  <TableHead className="px-4 py-3 text-left font-semibold">휴가종류</TableHead>
+                  <TableHead className="px-4 py-3 text-left font-semibold">휴가기간</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {leaves.map((leave) => (
-                  <tr className="border-b border-border last:border-b-0" key={leave.id}>
-                    <td className="px-4 py-3 font-semibold">{leave.leave_type}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{formatLeavePeriod(leave)}</td>
-                  </tr>
+                  <TableRow className="border-b border-border last:border-b-0" key={leave.id}>
+                    <TableCell data-label="휴가종류" className="px-4 py-3 font-semibold">{leave.leave_type}</TableCell>
+                    <TableCell data-label="휴가기간" className="px-4 py-3 text-muted-foreground">{formatLeavePeriod(leave)}</TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </section>
       ) : null}
@@ -659,28 +660,28 @@ export default function EmployeeSavePage({ recordId, modal = false, onClose, onS
       {!loading && !routeError && inspectionLogs.length > 0 ? (
         <section
           aria-label="점검지점검"
-          className="manager-section bg-muted/40 rounded-xl border border-border/50"
+          className="manager-section min-w-0 max-w-full bg-muted/40 rounded-xl border border-border/50"
         >
           <h2 className="text-[1.25rem] font-semibold">점검지점검</h2>
-          <div className="mt-6 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
-            <table className="w-full min-w-[42rem] text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="px-4 py-3 text-left font-semibold">점검일자</th>
-                  <th className="px-4 py-3 text-left font-semibold">점검지명</th>
-                  <th className="px-4 py-3 text-left font-semibold">근무지</th>
-                </tr>
-              </thead>
-              <tbody>
+          <div className="mt-6 min-w-0 overflow-x-auto overflow-y-hidden max-md:overflow-visible rounded-lg border border-border bg-background">
+            <Table className="w-full min-w-[42rem] text-sm">
+              <TableHeader>
+                <TableRow className="border-b border-border">
+                  <TableHead className="px-4 py-3 text-left font-semibold">점검일자</TableHead>
+                  <TableHead className="px-4 py-3 text-left font-semibold">점검지명</TableHead>
+                  <TableHead className="px-4 py-3 text-left font-semibold">근무지</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {inspectionLogs.map((log) => (
-                  <tr className="border-b border-border last:border-b-0" key={log.id}>
-                    <td className="px-4 py-3 text-muted-foreground">{formatDateTime(log.inspected_at)}</td>
-                    <td className="px-4 py-3 font-semibold">{log.site_name}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{log.worksite_name}</td>
-                  </tr>
+                  <TableRow className="border-b border-border last:border-b-0" key={log.id}>
+                    <TableCell data-label="점검일자" className="px-4 py-3 text-muted-foreground">{formatDateTime(log.inspected_at)}</TableCell>
+                    <TableCell data-label="점검지명" className="px-4 py-3 font-semibold">{log.site_name}</TableCell>
+                    <TableCell data-label="근무지" className="px-4 py-3 text-muted-foreground">{log.worksite_name}</TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </section>
       ) : null}
@@ -688,26 +689,26 @@ export default function EmployeeSavePage({ recordId, modal = false, onClose, onS
       {!loading && !routeError && specialRemarks.length > 0 ? (
         <section
           aria-label="특이사항"
-          className="manager-section bg-muted/40 rounded-xl border border-border/50"
+          className="manager-section min-w-0 max-w-full bg-muted/40 rounded-xl border border-border/50"
         >
           <h2 className="text-[1.25rem] font-semibold">특이사항</h2>
-          <div className="mt-6 min-w-0 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-background">
-            <table className="w-full min-w-[42rem] text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="px-4 py-3 text-left font-semibold">점검일시</th>
-                  <th className="px-4 py-3 text-left font-semibold">특이사항내용</th>
-                </tr>
-              </thead>
-              <tbody>
+          <div className="mt-6 min-w-0 overflow-x-auto overflow-y-hidden max-md:overflow-visible rounded-lg border border-border bg-background">
+            <Table className="w-full min-w-[42rem] text-sm">
+              <TableHeader>
+                <TableRow className="border-b border-border">
+                  <TableHead className="px-4 py-3 text-left font-semibold">점검일시</TableHead>
+                  <TableHead className="px-4 py-3 text-left font-semibold">특이사항내용</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {specialRemarks.map((remark) => (
-                  <tr className="border-b border-border last:border-b-0" key={remark.id}>
-                    <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDateTime(remark.reported_at)}</td>
-                    <td className="max-w-[36rem] truncate px-4 py-3" title={remark.content}>{summarizeRemark(remark.content)}</td>
-                  </tr>
+                  <TableRow className="border-b border-border last:border-b-0" key={remark.id}>
+                    <TableCell data-label="점검일시" className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDateTime(remark.reported_at)}</TableCell>
+                    <TableCell data-label="특이사항내용" className="max-w-[36rem] truncate px-4 py-3 max-md:whitespace-normal max-md:overflow-visible" title={remark.content}>{summarizeRemark(remark.content)}</TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </section>
       ) : null}

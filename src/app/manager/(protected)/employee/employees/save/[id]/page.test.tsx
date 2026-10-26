@@ -163,6 +163,19 @@ describe("employee save page", () => {
     );
   });
 
+  it("labels every related record field for the mobile card layout", async () => {
+    render(<EmployeeSavePage />);
+    await screen.findByDisplayValue("Alice");
+    for (const name of ["교육이수", "근무지배정정보", "출근현황", "휴가정보", "점검지점검", "특이사항"]) {
+      const region = await screen.findByRole("region", { name });
+      const headings = within(region).getAllByRole("columnheader").map((cell) => cell.textContent);
+      for (const row of region.querySelectorAll("tbody tr")) {
+        expect(Array.from(row.querySelectorAll("td")).map((cell) => cell.getAttribute("data-label"))).toEqual(headings);
+      }
+    }
+    expect(screen.getByRole("link", { name: /2026-05-21/ })).toHaveAttribute("href", "/manager/employee/assignments/save/assignment-1");
+  });
+
   it("loads an employee and saves the edited data", async () => {
     const user = userEvent.setup();
 
@@ -171,11 +184,11 @@ describe("employee save page", () => {
     expect(await screen.findByRole("heading", { name: "직원 상세" })).toBeInTheDocument();
     expect(await screen.findByDisplayValue("Alice")).toBeInTheDocument();
     expect(screen.getByDisplayValue("010-1234-5678")).toBeInTheDocument();
-    expect(screen.getByLabelText("직원이름").closest("div.grid")).toHaveClass("sm:grid-cols-2");
+    expect(screen.getByLabelText("직원이름").closest("div.grid")).toHaveClass("md:grid-cols-2");
     expect(screen.getByLabelText("연락처").closest("div.grid")).toBe(
       screen.getByLabelText("직원이름").closest("div.grid"),
     );
-    expect(screen.getByLabelText("직군").closest("div.grid")).toHaveClass("sm:grid-cols-2");
+    expect(screen.getByLabelText("직군").closest("div.grid")).toHaveClass("md:grid-cols-2");
     expect(Array.from((screen.getByLabelText("직군") as HTMLSelectElement).options).map((option) => option.value)).toEqual([
       "경비원", "미화원", "주차원", "사감",
     ]);

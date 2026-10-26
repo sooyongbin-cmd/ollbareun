@@ -76,7 +76,7 @@ export default function DetailModalLink({ href, children, onSaved, onClick, ...l
       }}>{children}</Link>
       <Dialog open={open} onOpenChange={(nextOpen) => { if (!nextOpen) close(); }}>
         <DialogContent
-          className="max-h-[90dvh] overflow-y-auto sm:max-w-6xl"
+          className="max-h-[90dvh] min-w-0 grid-cols-[minmax(0,1fr)] overflow-y-auto sm:max-w-6xl"
           aria-describedby={undefined}
           onPointerDownOutside={(event) => event.preventDefault()}
           onCloseAutoFocus={(event) => {

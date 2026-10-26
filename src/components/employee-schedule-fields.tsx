@@ -10,7 +10,7 @@ export function EmployeeScheduleFields({ rules, onChange, inTime, outTime, workS
   inTime: string; outTime: string; workStyle: string;
 }) {
   return (
-    <fieldset className="space-y-3 rounded-lg border p-4">
+    <fieldset className="min-w-0 space-y-3 rounded-lg border p-4">
       <legend className="px-2 text-sm font-semibold">요일·공휴일별 설정</legend>
       <fieldset className="space-y-2">
         <legend className="mb-2 text-sm font-semibold">휴무일 (복수 선택)</legend>
@@ -30,7 +30,7 @@ export function EmployeeScheduleFields({ rules, onChange, inTime, outTime, workS
         const mode = !rule ? "default" : rule.is_working_day ? "custom" : "off";
         const update = (value: ScheduleRule | null) => onChange([...rules.filter((item) => item.day_type !== day), ...(value ? [value] : [])]);
         return (
-          <div key={day} className="grid items-center gap-2 sm:grid-cols-[5rem_1.3fr_1fr_1fr]">
+          <div key={day} className="grid items-center gap-2 md:grid-cols-[5rem_minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)]">
             <span className="text-sm font-medium">{scheduleDayLabels[day]}</span>
             <NativeSelect aria-label={`${scheduleDayLabels[day]} 적용 방식`} value={mode} onChange={(event) => {
               const next = event.target.value;
@@ -51,7 +51,7 @@ export function EmployeeScheduleFields({ rules, onChange, inTime, outTime, workS
                   const value = event.target.value;
                   update({ ...rule, out_time: /^\d{2}:[0-5]\d$/.test(value) ? Number(value.slice(0, 2)) * 60 + Number(value.slice(3, 5)) : null });
                 }} />
-            </> : <span className="text-sm text-muted-foreground sm:col-span-2">{mode === "off" ? "휴무" : `${inTime} ~ ${outTime}`}</span>}
+            </> : <span className="text-sm text-muted-foreground md:col-span-2">{mode === "off" ? "휴무" : `${inTime} ~ ${outTime}`}</span>}
           </div>
         );
       })}

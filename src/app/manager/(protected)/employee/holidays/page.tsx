@@ -108,7 +108,6 @@ export default function HolidaysPage() {
           </div>
           <Button className={actionClass} disabled={!valid || busy || !!saving} onClick={() => setConfirmYear(year)}>
             <span>{busy ? "공휴일 가져오는 중..." : "공휴일가져오기"}</span>
-            <ArrowRightIcon size={18} />
           </Button>
           <RegistrationModal
             title="휴일추가"

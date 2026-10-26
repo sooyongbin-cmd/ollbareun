@@ -147,13 +147,13 @@ export default function EducationResourceSavePage({ recordId, modal = false, onC
     try {
       const dates = requireEducationResourceDates(startdate, enddate);
       setSaving(true);
-      await fetchJson<EducationResourceResponse>(`/api/education/resources/${resourceId}`, {
+      const saved = await fetchJson<EducationResourceResponse>(`/api/education/resources/${resourceId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title: nextTitle, youtubeLink: nextYoutubeLink, educationType, ...dates }),
       });
 
-      onSaved?.();
+      onSaved?.(saved.resource);
       setAlertMessage("수정이 완료되었습니다.");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "교육자료 정보를 저장하지 못했습니다.");

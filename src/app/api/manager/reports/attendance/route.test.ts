@@ -80,3 +80,13 @@ describe("/api/manager/reports/attendance", () => {
     });
   });
 });
+
+it("supports an attendance-scoped refresh and rejects an empty ID", async () => {
+  vi.mocked(getManagerUser).mockResolvedValue({ id: "manager" } as never);
+  vi.mocked(loadAttendanceReport).mockResolvedValue([]);
+  expect((await GET(new Request("http://localhost/api/manager/reports/attendance?attendanceId=a1&workDate=2026-10-01"))).status).toBe(200);
+  expect(loadAttendanceReport).toHaveBeenCalledWith({ employeeName: "", workDate: "2026-10-01", attendanceId: "a1" });
+  vi.mocked(loadAttendanceReport).mockClear();
+  expect((await GET(new Request("http://localhost/api/manager/reports/attendance?attendanceId="))).status).toBe(400);
+  expect(loadAttendanceReport).not.toHaveBeenCalled();
+});

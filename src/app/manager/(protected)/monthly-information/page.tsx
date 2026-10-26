@@ -1,5 +1,7 @@
 "use client";
 
+import { fetchDetailJson, PartialUpdateStatus, usePartialDetailUpdate } from "@/components/modals/partial-detail-update";
+
 import DetailModalLink from "@/components/modals/detail-modal-link";
 
 import ListResults from "@/components/list-results";
@@ -40,7 +42,6 @@ function weekday(workDate: string) {
 }
 
 export default function MonthlyInformationPage() {
-  const [detailVersion, setDetailVersion] = useState(0);
   const [worksiteQuery, setWorksiteQuery] = useState("");
   const [worksiteNames, setWorksiteNames] = useState<string[]>([]);
   const [employeeQuery, setEmployeeQuery] = useState("");
@@ -50,6 +51,30 @@ export default function MonthlyInformationPage() {
   const [rows, setRows] = useState<MonthlyInformationRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const partial = usePartialDetailUpdate(async (changes, commit) => {
+    const affected = new Set(changes.filter((change) => change.entity === "attendance").map((change) =>
+      change.employeeId ?? rows.find((row) => row.id === change.id)?.employeeId).filter((id): id is string => Boolean(id)));
+    if (changes.some((change) => change.entity === "attendance" && !change.employeeId && !rows.some((row) => row.id === change.id))) throw new Error("변경된 근태의 직원 정보를 확인하지 못했습니다.");
+    const refreshed = (await Promise.all([...affected].map(async (employeeId) =>
+      (await fetchDetailJson<{ rows: MonthlyInformationRow[] }>(`/api/manager/monthly-information?${new URLSearchParams({ yearMonth, employeeId })}`)).rows,
+    ))).flat();
+    commit(() => setRows((current) => {
+      const next = [...current.filter((row) => !affected.has(row.employeeId)), ...refreshed];
+      for (let index = 0; index < next.length; index++) {
+        const row = next[index];
+        const relevant = changes.filter((change) => change.entity === "remark" && row.remarks.some((remark) => remark.id === change.id));
+        if (relevant.length) next[index] = { ...row, remarks: row.remarks.flatMap((remark) => {
+          const change = relevant.find((item) => item.id === remark.id);
+          if (change?.action === "delete") return [];
+          return [{ ...remark, ...(typeof change?.data?.content === "string" ? { content: change.data.content } : {}),
+            ...(typeof change?.data?.reported_at === "string" ? { reportedAt: change.data.reported_at } : {}) }];
+        }) };
+      }
+      return next.sort((left, right) => left.worksiteName.localeCompare(right.worksiteName, "ko-KR")
+        || left.employeeName.localeCompare(right.employeeName, "ko-KR") || left.workDate.localeCompare(right.workDate));
+    }));
+  }, yearMonth);
+
   useEffect(() => {
     const controller = new AbortController();
     async function loadWorksites() {
@@ -91,7 +116,7 @@ export default function MonthlyInformationPage() {
     }
     void load();
     return () => controller.abort();
-  }, [yearMonth, detailVersion]);
+  }, [yearMonth]);
   const worksiteNameOptions = useMemo(() => Array.from(new Set([...worksiteNames, ...rows.map((row) => row.worksiteName)]))
     .filter(Boolean).sort((left, right) => left.localeCompare(right, "ko-KR")), [worksiteNames, rows]);
   const employeeNameOptions = useMemo(() => Array.from(new Set([...employeeNames, ...rows.map((row) => row.employeeName)]))
@@ -103,6 +128,7 @@ export default function MonthlyInformationPage() {
   }, [rows, worksiteQuery, employeeQuery]);
   return (
     <section className="space-y-[1.5rem]">
+      <PartialUpdateStatus {...partial} />
       <header><h1 className="text-[1.75rem] leading-[1.2]">월별현황</h1></header>
       <section aria-label="월별현황 검색" className="manager-section rounded-xl border border-border/50 bg-muted/40">
         <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_12rem] md:items-end">
@@ -158,7 +184,7 @@ export default function MonthlyInformationPage() {
                         </TableCell>
                       ))}
                       <TableCell data-label="출근예정일" className="whitespace-nowrap">
-                        <DetailModalLink onSaved={() => setDetailVersion((version) => version + 1)} className="text-primary underline underline-offset-4 hover:text-primary/80"
+                        <DetailModalLink onSaved={partial.onSaved} className="text-primary underline underline-offset-4 hover:text-primary/80"
                           aria-label={`${employeeSummary(row)} ${row.workDate} 근태 상세 보기`} href={`/manager/reports/attendance/detail/${row.id}`}>
                           {row.workDate} ({weekday(row.workDate)})
                         </DetailModalLink>
@@ -180,7 +206,7 @@ export default function MonthlyInformationPage() {
                       <TableCell data-label="특이사항" className="min-w-64 max-w-96 whitespace-normal break-words align-top"
                         data-export-value={row.remarks.map((remark) => `${formatSpecialRemarkDateTime(remark.reportedAt)} ${summarizeSpecialRemarkContent(remark.content)}`).join("\n") || "-"}>
                         {row.remarks.length ? <div className="space-y-3">{row.remarks.map((remark) => <div key={remark.id}>
-                          <DetailModalLink onSaved={() => setDetailVersion((version) => version + 1)} className="text-primary hover:underline" href={`/manager/inspection/special-remarks/${encodeURIComponent(remark.id)}`}>
+                          <DetailModalLink onSaved={partial.onSaved} className="text-primary hover:underline" href={`/manager/inspection/special-remarks/${encodeURIComponent(remark.id)}`}>
                             {formatSpecialRemarkDateTime(remark.reportedAt)}
                           </DetailModalLink>
                           <p>{summarizeSpecialRemarkContent(remark.content)}</p>

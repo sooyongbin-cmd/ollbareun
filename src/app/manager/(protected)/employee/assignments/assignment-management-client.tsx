@@ -1,5 +1,7 @@
 "use client";
 
+import { applyDetailChanges, type DetailChange } from "@/lib/detail-changes";
+
 import DetailModalLink from "@/components/modals/detail-modal-link";
 
 import RegistrationModal from "@/components/modals/registration-modal";
@@ -83,6 +85,10 @@ export default function AssignmentManagementClient() {
       left.localeCompare(right, "ko-KR"),
     );
   }, [worksiteNames]);
+
+  function applyChanges(changes: DetailChange[]) {
+    setAssignments((rows) => applyDetailChanges(rows, changes, "assignment"));
+  }
 
   useEffect(() => {
     let ignore = false;
@@ -299,7 +305,7 @@ export default function AssignmentManagementClient() {
                   sortedAssignments.map((assignment) => (
                     <TableRow key={assignment.id}>
                       <TableCell data-label="이름" className="text-muted-foreground">
-                        <DetailModalLink onSaved={() => { setError(""); setLoading(true); setRegistrationVersion((version) => version + 1); }}
+                        <DetailModalLink onSaved={applyChanges}
                           className="font-semibold text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"
                           href={`/manager/employee/assignments/save/${assignment.id}`}
                         >

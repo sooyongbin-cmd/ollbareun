@@ -1,3 +1,4 @@
+import { optionalDetailId } from "@/lib/detail-query";
 import { getManagerUser } from "@/lib/manager-auth";
 import { loadMonthlyAttendance } from "@/lib/monthly-attendance";
 
@@ -9,8 +10,9 @@ export async function GET(request: Request) {
     );
   try {
     const params = new URL(request.url).searchParams;
+    const employeeId = optionalDetailId(params, "employeeId");
     return Response.json({
-      rows: await loadMonthlyAttendance(params.get("yearMonth") ?? ""),
+      rows: await (employeeId ? loadMonthlyAttendance(params.get("yearMonth") ?? "", employeeId) : loadMonthlyAttendance(params.get("yearMonth") ?? "")),
     });
   } catch (error) {
     return Response.json(

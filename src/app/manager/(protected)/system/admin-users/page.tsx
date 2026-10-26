@@ -1,5 +1,7 @@
 "use client";
 
+import { type DetailChange } from "@/lib/detail-changes";
+
 import DetailModalLink from "@/components/modals/detail-modal-link";
 
 import RegistrationModal from "@/components/modals/registration-modal";
@@ -40,6 +42,17 @@ export default function AdminUsersPage() {
     setRows(buildAdminSubscriptionRows(payload.admins ?? [], payload.subscriptions ?? []));
     setIsSuperAdmin(payload.currentRole === "super_admin");
   }, []);
+  function applyChanges(changes: DetailChange[]) {
+    setRows((rows) => rows.flatMap((row) => {
+      const change = changes.find((item) => item.entity === "admin" && item.id === row.admin.id);
+      if (change?.action === "delete") return [];
+      return [change?.data ? { ...row, admin: { ...row.admin, ...change.data } } : row];
+    }).sort((left, right) => left.admin.email.localeCompare(right.admin.email)
+      || (left.subscription ? Date.parse(left.subscription.updated_at) : 0) - (right.subscription ? Date.parse(right.subscription.updated_at) : 0)));
+    const currentRole = changes.flatMap((change) => change.data?.currentRole ? [change.data.currentRole] : []).at(-1);
+    if (currentRole) setIsSuperAdmin(currentRole === "super_admin");
+  }
+
   useEffect(() => {
     void Promise.resolve().then(loadAdmins).catch((err) => setError(err instanceof Error ? err.message : "조회에 실패했습니다."))
       .finally(() => setLoading(false));
@@ -99,7 +112,7 @@ export default function AdminUsersPage() {
             <TableHeader><TableRow><TableHead>이메일</TableHead><TableHead>직군</TableHead><TableHead>최근접속일</TableHead><TableHead className="text-right">구독삭제</TableHead></TableRow></TableHeader>
             <TableBody>{rows.length === 0 ? <TableRow><TableCell data-responsive-empty colSpan={4} className="p-8 text-center text-muted-foreground italic">등록된 관리자가 없습니다.</TableCell></TableRow> : rows.map((row, index) => (
               <TableRow key={row.subscription?.id ?? row.admin.id} className="hover:bg-muted/40 transition-colors">
-                <TableCell data-label="이메일" className="font-semibold">{index === 0 || rows[index - 1].admin.email !== row.admin.email ? <DetailModalLink onSaved={() => { setError(""); setLoading(true); setRegistrationVersion((version) => version + 1); }} className="text-primary hover:underline" href={`/manager/system/admin-users/save/${row.admin.id}`}>{row.admin.email}</DetailModalLink> : ""}</TableCell>
+                <TableCell data-label="이메일" className="font-semibold">{index === 0 || rows[index - 1].admin.email !== row.admin.email ? <DetailModalLink onSaved={applyChanges} className="text-primary hover:underline" href={`/manager/system/admin-users/save/${row.admin.id}`}>{row.admin.email}</DetailModalLink> : ""}</TableCell>
                 <TableCell data-label="직군" className="text-muted-foreground">{row.admin.role === "super_admin" ? "최고 관리자" : "일반 관리자"}</TableCell>
                 <TableCell data-label="최근접속일" className="whitespace-nowrap text-muted-foreground">{formatDateTime(row.subscription?.updated_at)}</TableCell>
                 <TableCell data-label="구독삭제" className="text-right">{row.subscription ? <Button type="button" variant="outline" disabled={!isSuperAdmin || busy}

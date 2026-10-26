@@ -1,5 +1,7 @@
 "use client";
 
+import { fetchDetailJson, PartialUpdateStatus, usePartialDetailUpdate } from "@/components/modals/partial-detail-update";
+
 import DetailModalLink from "@/components/modals/detail-modal-link";
 
 import ListResults from "@/components/list-results";
@@ -10,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DateTimeRange, scheduledClockInDisplay, formatDateTimeSegment } from "@/components/attendance-time-display";
 import { educationToday } from "@/lib/education-periods";
 import { employeeSummary } from "@/lib/employee-summary";
-import type { AttendanceReportRow } from "@/lib/manager-reports";
+import type { MonthlyAttendanceRow } from "@/lib/monthly-attendance";
 import ManagerLoadingMessage from "../manager-loading-message";
 
 const columns = ["근무지", "이름", "출근예정일", "출퇴근예정", "출퇴근", "근태"];
@@ -21,14 +23,28 @@ function weekday(workDate: string) {
 }
 
 export default function WorkerInformationPage() {
-  const [detailVersion, setDetailVersion] = useState(0);
   const [worksiteQuery, setWorksiteQuery] = useState("");
   const [worksiteNames, setWorksiteNames] = useState<string[]>([]);
   const [worksiteError, setWorksiteError] = useState("");
   const [yearMonth, setYearMonth] = useState(() => educationToday().slice(0, 7));
-  const [rows, setRows] = useState<AttendanceReportRow[]>([]);
+  const [rows, setRows] = useState<MonthlyAttendanceRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const partial = usePartialDetailUpdate(async (changes, commit) => {
+    const affected = new Set(changes.filter((change) => change.entity === "attendance").map((change) =>
+      change.employeeId ?? rows.find((row) => row.id === change.id)?.employeeId).filter((id): id is string => Boolean(id)));
+    if (changes.some((change) => change.entity === "attendance" && !change.employeeId && !rows.some((row) => row.id === change.id))) throw new Error("변경된 근태의 직원 정보를 확인하지 못했습니다.");
+    const refreshed = (await Promise.all([...affected].map(async (employeeId) =>
+      (await fetchDetailJson<{ rows: MonthlyAttendanceRow[] }>(`/api/manager/worker-information?${new URLSearchParams({ yearMonth, employeeId })}`)).rows,
+    ))).flat();
+    commit(() => setRows((current) => {
+      const next = [...current.filter((row) => !affected.has(row.employeeId)), ...refreshed];
+
+      return next.sort((left, right) => left.worksiteName.localeCompare(right.worksiteName, "ko-KR")
+        || left.employeeName.localeCompare(right.employeeName, "ko-KR") || left.workDate.localeCompare(right.workDate));
+    }));
+  }, yearMonth);
+
   useEffect(() => {
     const controller = new AbortController();
     async function loadWorksites() {
@@ -67,7 +83,7 @@ export default function WorkerInformationPage() {
     }
     void load();
     return () => controller.abort();
-  }, [yearMonth, detailVersion]);
+  }, [yearMonth]);
   const worksiteNameOptions = useMemo(() => Array.from(new Set([...worksiteNames, ...rows.map((row) => row.worksiteName)]))
     .filter(Boolean).sort((left, right) => left.localeCompare(right, "ko-KR")), [worksiteNames, rows]);
   const filteredRows = useMemo(() => {
@@ -76,6 +92,7 @@ export default function WorkerInformationPage() {
   }, [rows, worksiteQuery]);
   return (
     <section className="space-y-[1.5rem]">
+      <PartialUpdateStatus {...partial} />
       <header><h1 className="text-[1.75rem] leading-[1.2]">월간근태</h1></header>
       <section aria-label="월간근태 검색" className="manager-section rounded-xl border border-border/50 bg-muted/40">
         <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_12rem] md:items-end">
@@ -119,7 +136,7 @@ export default function WorkerInformationPage() {
                       {index > 0 && filteredRows[index - 1].worksiteName === row.worksiteName && employeeSummary(filteredRows[index - 1]) === employeeSummary(row) ? "" : employeeSummary(row)}
                     </TableCell>
                     <TableCell data-label="출근예정일" className="whitespace-nowrap">
-                      <DetailModalLink onSaved={() => setDetailVersion((version) => version + 1)} className="text-primary underline underline-offset-4 hover:text-primary/80"
+                      <DetailModalLink onSaved={partial.onSaved} className="text-primary underline underline-offset-4 hover:text-primary/80"
                         aria-label={`${employeeSummary(row)} ${row.workDate} 근태 상세 보기`} href={`/manager/reports/attendance/detail/${row.id}`}>
                         {row.workDate} ({weekday(row.workDate)})
                       </DetailModalLink>

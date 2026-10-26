@@ -31,10 +31,10 @@ export function buildMonthlyEducationOverview(input: Awaited<ReturnType<typeof l
   return byEmployee;
 }
 
-export async function loadMonthlyInformation(yearMonth: string): Promise<MonthlyInformationRow[]> {
+export async function loadMonthlyInformation(yearMonth: string, employeeId?: string): Promise<MonthlyInformationRow[]> {
   if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(yearMonth)) throw new Error("조회년월을 확인하세요.");
   const [attendance, education, reports] = await Promise.all([
-    loadMonthlyAttendance(yearMonth), loadMonthlyEducationAttendance(yearMonth), listSpecialRemarkReports({ yearMonth, includePhotos: false }),
+    (employeeId ? loadMonthlyAttendance(yearMonth, employeeId) : loadMonthlyAttendance(yearMonth)), (employeeId ? loadMonthlyEducationAttendance(yearMonth, employeeId) : loadMonthlyEducationAttendance(yearMonth)), listSpecialRemarkReports({ yearMonth, includePhotos: false, ...(employeeId ? { employeeId } : {}) }),
   ]);
   const educationByEmployee = buildMonthlyEducationOverview(education);
   const dailyByEmployeeDay = new Map(education.detailRows.map((detail) => {

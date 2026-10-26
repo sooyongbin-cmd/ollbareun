@@ -94,29 +94,33 @@ function employeeName(record: AttendanceRecord | CompletionRecord) {
   return employee?.name ?? "";
 }
 
-function getAttendanceQuery(dateFrom: string, dateToExclusive: string) {
+function getAttendanceQuery(dateFrom: string, dateToExclusive: string, employeeId?: string) {
   const start = kstDateTime(dateFrom);
   const end = kstDateTime(dateToExclusive);
   const supabase = getSupabaseAdmin();
-  return (from: number, to: number) => supabase.from("work_record")
+  return (from: number, to: number) => {
+    const query = supabase.from("work_record")
     .select("employee_id,work_date,employees!inner(name,role,work_style)")
     .not("work_intime", "is", null)
     .or(`and(work_intime.gte.${start},work_intime.lt.${end}),and(outtime.gte.${start},outtime.lt.${end})`)
     .order("work_date", { ascending: true })
-    .order("employee_id", { ascending: true })
-    .range(from, to);
+    .order("employee_id", { ascending: true });
+    return (employeeId ? query.eq("employee_id", employeeId) : query).range(from, to);
+  };
 }
 
-function getWorkDateAttendanceQuery(dateFrom: string, dateToExclusive: string) {
+function getWorkDateAttendanceQuery(dateFrom: string, dateToExclusive: string, employeeId?: string) {
   const supabase = getSupabaseAdmin();
-  return (from: number, to: number) => supabase.from("work_record")
+  return (from: number, to: number) => {
+    const query = supabase.from("work_record")
     .select("employee_id,work_date,employees!inner(name)")
     .gte("work_date", dateFrom)
     .lt("work_date", dateToExclusive)
     .not("work_intime", "is", null)
     .order("work_date", { ascending: false })
-    .order("employee_id", { ascending: true })
-    .range(from, to);
+    .order("employee_id", { ascending: true });
+    return (employeeId ? query.eq("employee_id", employeeId) : query).range(from, to);
+  };
 }
 
 export async function loadDailyEducationAttendance(date = educationToday()): Promise<{
@@ -185,9 +189,9 @@ export async function loadDailyEducationAttendance(date = educationToday()): Pro
   return { rows, resourceCounts };
 }
 
-export async function loadMonthlyEducationAttendance(yearMonth: string) {
+export async function loadMonthlyEducationAttendance(yearMonth: string, employeeId?: string) {
   const { from: monthStart, nextMonth } = monthBounds(yearMonth);
-  const attendanceRows = await readAll<AttendanceRecord>(getAttendanceQuery(monthStart, nextMonth));
+  const attendanceRows = await readAll<AttendanceRecord>(getAttendanceQuery(monthStart, nextMonth, employeeId));
   const namesByEmployee = new Map<string, string>();
   attendanceRows.forEach((record) => namesByEmployee.set(record.employee_id, employeeName(record)));
   const employeeIds = [...namesByEmployee.keys()];
@@ -236,7 +240,7 @@ export async function loadMonthlyEducationAttendance(yearMonth: string) {
     }
     return { employeeId: id, employeeName: namesByEmployee.get(id) ?? "", ...counts, completedAt };
   }).sort((left, right) => left.employeeName.localeCompare(right.employeeName, "ko-KR") || left.employeeId.localeCompare(right.employeeId));
-  const detailAttendanceRows = await readAll<AttendanceRecord>(getWorkDateAttendanceQuery(monthStart, nextMonth));
+  const detailAttendanceRows = await readAll<AttendanceRecord>(getWorkDateAttendanceQuery(monthStart, nextMonth, employeeId));
   const detailEmployeeIds = [...new Set(detailAttendanceRows.map((record) => record.employee_id))];
   const detailWorkDates = [...new Set(detailAttendanceRows.map((record) => record.work_date))];
   const dailySubjects = (await readAll<Resource>((from, to) => supabase.from("education_resources")

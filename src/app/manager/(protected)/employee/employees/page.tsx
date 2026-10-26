@@ -1,5 +1,7 @@
 "use client";
 
+import { applyDetailChanges, type DetailChange } from "@/lib/detail-changes";
+
 import DetailModalLink from "@/components/modals/detail-modal-link";
 
 import EmployeeRegistrationForm from "./employee-registration-form";
@@ -36,6 +38,7 @@ type EmployeeRow = {
 };
 
 type AttendanceRow = {
+  id?: string;
   employee_id: string;
   intime_status: "0" | "1" | "2" | "3";
 };
@@ -90,6 +93,21 @@ export default function EmployeeRosterPage() {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  function applyChanges(changes: DetailChange[]) {
+    setData((current) => {
+      const deleted = new Set(changes.filter((change) => change.entity === "employee" && change.action === "delete").map((change) => change.id));
+      return { ...current,
+        employees: applyDetailChanges(current.employees, changes, "employee"),
+        assignments: applyDetailChanges(current.assignments, changes, "assignment").filter((row) => !deleted.has(row.employee_id)),
+        attendance: current.attendance.filter((row) => !deleted.has(row.employee_id)).flatMap((row) => {
+          const change = changes.find((item) => item.entity === "attendance" && item.id === row.id);
+          if (change?.action === "delete") return [];
+          return change?.data?.intimeStatus ? [{ ...row, intime_status: change.data.intimeStatus as AttendanceRow["intime_status"] }] : [row];
+        }),
+      };
+    });
+  }
 
   useEffect(() => {
     let ignore = false;
@@ -395,7 +413,7 @@ export default function EmployeeRosterPage() {
                   sortedEmployees.map((employee) => (
                     <TableRow key={employee.id} className="hover:bg-muted/40 transition-colors">
                       <TableCell data-label="이름" className="font-semibold">
-                        <DetailModalLink onSaved={() => { setError(""); setLoading(true); setRefreshVersion((version) => version + 1); }}
+                        <DetailModalLink onSaved={applyChanges}
                           className="text-primary hover:underline"
                           href={`/manager/employee/employees/save/${employee.id}`}
                         >
@@ -417,7 +435,7 @@ export default function EmployeeRosterPage() {
                       </TableCell>
                       <TableCell data-label="배정기간" className="whitespace-nowrap text-muted-foreground">
                         {assignmentByEmployeeId.has(employee.id) ? (
-                          <DetailModalLink onSaved={() => { setError(""); setLoading(true); setRefreshVersion((version) => version + 1); }}
+                          <DetailModalLink onSaved={applyChanges}
                             className="text-primary hover:underline"
                             href={`/manager/employee/assignments/save/${assignmentByEmployeeId.get(employee.id)?.id}`}
                           >

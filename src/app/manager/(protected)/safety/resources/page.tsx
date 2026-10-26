@@ -1,5 +1,7 @@
 "use client";
 
+import { applyDetailChanges, type DetailChange } from "@/lib/detail-changes";
+
 import DetailModalLink from "@/components/modals/detail-modal-link";
 
 import RegistrationModal from "@/components/modals/registration-modal";
@@ -38,6 +40,10 @@ export default function EducationResourcesPage() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  function applyChanges(changes: DetailChange[]) {
+    setResources((rows) => applyDetailChanges(rows, changes, "resource"));
+  }
 
   useEffect(() => {
     let ignore = false;
@@ -156,7 +162,7 @@ export default function EducationResourcesPage() {
                     <TableRow key={resource.id} className="hover:bg-muted/40 transition-colors">
                       <TableCell data-label="교육구분">{resourceEducationTypeLabels[resource.education_type]}</TableCell>
                       <TableCell data-label="제목" className="font-semibold">
-                        <DetailModalLink onSaved={() => { setError(""); setLoading(true); setRegistrationVersion((version) => version + 1); }}
+                        <DetailModalLink onSaved={applyChanges}
                           className="text-primary hover:underline"
                           href={`/manager/safety/resources/save/${resource.id}`}
                         >

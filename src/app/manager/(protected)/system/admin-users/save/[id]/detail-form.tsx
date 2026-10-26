@@ -52,7 +52,7 @@ export default function AdminUserDetailPage({ recordId, modal = false, onClose, 
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "처리에 실패했습니다.");
       if (method === "PATCH") {
-        onSaved?.();
+        onSaved?.({ ...payload.admin, ...(payload.currentRole ? { currentRole: payload.currentRole } : {}) });
         return;
       }
       if (onDeleted) {

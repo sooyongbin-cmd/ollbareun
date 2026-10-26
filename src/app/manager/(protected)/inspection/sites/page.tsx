@@ -1,5 +1,7 @@
 "use client";
 
+import { applyDetailChanges, type DetailChange } from "@/lib/detail-changes";
+
 import DetailModalLink from "@/components/modals/detail-modal-link";
 
 import RegistrationModal from "@/components/modals/registration-modal";
@@ -112,6 +114,14 @@ export default function InspectionSitesPage() {
     () => Array.from(new Set(sites.map((site) => site.name))).sort((left, right) => left.localeCompare(right, "ko-KR")),
     [sites],
   );
+
+  function applyChanges(changes: DetailChange[]) {
+    setSites((rows) => sortInspectionSites(applyDetailChanges(rows, changes, "site").filter((row) =>
+      (!query.trim() || row.name.toLocaleLowerCase("ko-KR").includes(query.trim().toLocaleLowerCase("ko-KR")))
+      && (!worksiteFilter || row.worksite_id === worksiteFilter)
+      && (worksiteFilter || !worksiteNameFilter.trim() || row.worksite_name.toLocaleLowerCase("ko-KR").includes(worksiteNameFilter.trim().toLocaleLowerCase("ko-KR"))),
+    )));
+  }
 
   useEffect(() => {
     let ignore = false;
@@ -336,7 +346,7 @@ export default function InspectionSitesPage() {
                       <TableCell data-label="근무지">{site.worksite_name}</TableCell>
                       <TableCell data-label="순서">{site.sort_order ?? ""}</TableCell>
                       <TableCell data-label="점검지명" className="font-semibold" onDragOver={(event) => event.preventDefault()}>
-                        <DetailModalLink onSaved={() => setRegistrationVersion((version) => version + 1)} className="text-primary hover:underline" href={`/manager/inspection/sites/${site.id}`}>
+                        <DetailModalLink onSaved={applyChanges} className="text-primary hover:underline" href={`/manager/inspection/sites/${site.id}`}>
                           <span
                             draggable={!reordering}
                             onDragStart={(event) => {

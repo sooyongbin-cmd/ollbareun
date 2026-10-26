@@ -1,5 +1,7 @@
 "use client";
 
+import { applyDetailChanges, type DetailChange } from "@/lib/detail-changes";
+
 import DetailModalLink from "@/components/modals/detail-modal-link";
 
 import RegistrationModal from "@/components/modals/registration-modal";
@@ -51,6 +53,10 @@ export default function WorksiteManagementClient() {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  function applyChanges(changes: DetailChange[]) {
+    setData((current) => ({ ...current, worksites: applyDetailChanges(current.worksites, changes, "worksite") }));
+  }
+
   useEffect(() => {
     let ignore = false;
 
@@ -251,7 +257,7 @@ export default function WorksiteManagementClient() {
                     return (
                       <TableRow key={worksite.id} className="hover:bg-muted/40 transition-colors">
                         <TableCell data-label="근무지" className="font-semibold">
-                          <DetailModalLink onSaved={() => { setError(""); setLoading(true); setRegistrationVersion((version) => version + 1); }}
+                          <DetailModalLink onSaved={applyChanges}
                             className="text-primary hover:underline"
                             href={`/manager/employee/worksites/save/${worksite.id}`}
                           >

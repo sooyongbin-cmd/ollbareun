@@ -1,5 +1,7 @@
 "use client";
 
+import type { DetailChange } from "@/lib/detail-changes";
+import { fetchDetailJson, PartialUpdateStatus, usePartialDetailUpdate } from "@/components/modals/partial-detail-update";
 import type { DetailViewProps } from "@/components/modals/detail-modal-link";
 
 import { scheduleSummary, type ScheduleRule } from "@/lib/employee-schedule";
@@ -31,6 +33,8 @@ type Assignment = {
 type Employee = {
   id: string;
   name: string;
+  role?: string;
+  work_style?: string;
 };
 
 type Worksite = {
@@ -212,20 +216,24 @@ export default function AssignmentSavePage({ recordId, modal = false, onClose, o
     };
   }, [assignmentId]);
 
-  async function refreshAttendance() {
-    onChanged?.();
-    try {
+  const partial = usePartialDetailUpdate(async (changes: DetailChange[], commit) => {
+    onChanged?.(changes);
+    const updates = await Promise.all(changes.filter((change) => change.entity === "attendance").map(async (change) => {
+      if (change.action === "delete") return { id: change.id, daily: [] as DailyAttendance[], history: [] as AttendanceHistory[] };
+      const query = new URLSearchParams({ attendanceId: change.id });
       const [daily, history] = await Promise.all([
-        fetchJson<{ dailyAttendance: DailyAttendance[] }>(`/api/manager/assignments/${assignmentId}/daily-attendance`),
-        fetchJson<AttendanceHistoryResponse>(`/api/manager/assignments/${assignmentId}/attendance-history`),
+        fetchDetailJson<{ dailyAttendance: DailyAttendance[] }>(`/api/manager/assignments/${assignmentId}/daily-attendance?${query}`),
+        fetchDetailJson<AttendanceHistoryResponse>(`/api/manager/assignments/${assignmentId}/attendance-history?${query}`),
       ]);
-      setDailyAttendance(daily.dailyAttendance ?? []);
-      setAttendanceHistory(history.attendances ?? []);
-      setAttendanceHistoryError("");
-    } catch (cause) {
-      setAttendanceHistoryError(cause instanceof Error ? cause.message : "출근 목록을 불러오지 못했습니다.");
-    }
-  }
+      return { id: change.id, daily: daily.dailyAttendance, history: history.attendances };
+    }));
+    commit(() => {
+      const ids = new Set(updates.map((update) => update.id));
+      setDailyAttendance((rows) => [...rows.filter((row) => !row.id || !ids.has(row.id)), ...updates.flatMap((update) => update.daily)]);
+      setAttendanceHistory((rows) => [...rows.filter((row) => !ids.has(row.id)), ...updates.flatMap((update) => update.history)]
+        .sort((left, right) => right.work_date.localeCompare(left.work_date)));
+    });
+  }, String(assignmentId));
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -234,7 +242,7 @@ export default function AssignmentSavePage({ recordId, modal = false, onClose, o
     setError("");
 
     try {
-      await fetchJson<AssignmentResponse>(`/api/assignments/${assignmentId}`, {
+      const saved = await fetchJson<AssignmentResponse>(`/api/assignments/${assignmentId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -245,7 +253,10 @@ export default function AssignmentSavePage({ recordId, modal = false, onClose, o
         }),
       });
 
-      onSaved?.();
+      const employee = employees.find((item) => item.id === saved.assignment.employee_id);
+      onSaved?.({ ...saved.assignment, employee_name: employee?.name,
+        employee_role: employee?.role, employee_work_style: employee?.work_style,
+        worksite_name: worksites.find((item) => item.id === saved.assignment.worksite_id)?.name });
       setAlertMessage("자료가 저장되었습니다.");
     } catch (submitError) {
       setErrorAlertTitle("저장 오류");
@@ -278,6 +289,7 @@ export default function AssignmentSavePage({ recordId, modal = false, onClose, o
 
   return (
     <section className="space-y-[1.5rem]">
+      <PartialUpdateStatus {...partial} />
       {!modal ? <header>
         <p className="text-[0.875rem] font-semibold text-muted-foreground uppercase">관리자 화면</p>
         <div className="space-y-3">
@@ -405,7 +417,7 @@ export default function AssignmentSavePage({ recordId, modal = false, onClose, o
             holidays={holidays}
             endDate={savedEndDate}
             onMonthChange={setCurrentMonth}
-            onSaved={() => { void refreshAttendance(); }}
+            onSaved={partial.onSaved}
             startDate={savedStartDate}
           />
         ) : null}

@@ -1,5 +1,7 @@
 "use client";
 
+import { applyDetailChanges, type DetailChange } from "@/lib/detail-changes";
+
 import DetailModalLink from "@/components/modals/detail-modal-link";
 
 import ListResults from "@/components/list-results";
@@ -42,13 +44,16 @@ async function fetchReports(yearMonth: string) {
 }
 
 export default function SpecialRemarksPage() {
-  const [detailVersion, setDetailVersion] = useState(0);
   const [yearMonth, setYearMonth] = useState(() => educationToday().slice(0, 7));
   const [completed, setCompleted] = useState(false);
   const [reports, setReports] = useState<SpecialRemarkReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const filteredReports = reports.filter((report) => (report.processing_status === "Y") === completed);
+
+  function applyChanges(changes: DetailChange[]) {
+    setReports((rows) => applyDetailChanges(rows, changes, "remark"));
+  }
 
   useEffect(() => {
     let ignore = false;
@@ -68,7 +73,7 @@ export default function SpecialRemarksPage() {
     }
     void loadReports();
     return () => { ignore = true; };
-  }, [yearMonth, detailVersion]);
+  }, [yearMonth]);
 
   return (
     <section className="space-y-[1.5rem]">
@@ -139,7 +144,7 @@ export default function SpecialRemarksPage() {
                       <TableCell data-label="이름">{employeeSummary({ employeeName: report.employee_name, employeeRole: report.employee_role,
                         workStyle: report.work_style === "0" ? "일반근무" : report.work_style === "1" ? "격일근무" : report.work_style === "2" ? "야간근무" : "-" })}</TableCell>
                       <TableCell data-label="점검일시">
-                        <DetailModalLink onSaved={() => setDetailVersion((version) => version + 1)}
+                        <DetailModalLink onSaved={applyChanges}
                           className="text-primary font-semibold hover:opacity-80"
                           href={`/manager/inspection/special-remarks/${encodeURIComponent(report.id)}`}
                         >

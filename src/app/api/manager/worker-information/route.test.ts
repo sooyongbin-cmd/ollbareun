@@ -44,3 +44,13 @@ describe("worker information API", () => {
     ).toBe(400);
   });
 });
+
+it("supports an employee-scoped refresh without broadening an empty ID", async () => {
+  vi.mocked(getManagerUser).mockResolvedValue({ id: "manager" } as never);
+  vi.mocked(loadMonthlyAttendance).mockResolvedValue([]);
+  expect((await GET(new Request("http://localhost/api/manager/worker-information?yearMonth=2026-10&employeeId=e1"))).status).toBe(200);
+  expect(loadMonthlyAttendance).toHaveBeenCalledWith("2026-10", "e1");
+  vi.mocked(loadMonthlyAttendance).mockClear();
+  expect((await GET(new Request("http://localhost/api/manager/worker-information?yearMonth=2026-10&employeeId="))).status).toBe(400);
+  expect(loadMonthlyAttendance).not.toHaveBeenCalled();
+});

@@ -1,5 +1,6 @@
 "use client";
 
+import type { DetailChange } from "@/lib/detail-changes";
 import DetailModalLink from "@/components/modals/detail-modal-link";
 
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ type Props = {
   currentMonth: string;
   holidays?: Set<string>;
   onMonthChange: (month: string) => void;
-  onSaved?: () => void;
+  onSaved?: (changes: DetailChange[]) => void;
 };
 
 const weekDays = ["일", "월", "화", "수", "목", "금", "토"];

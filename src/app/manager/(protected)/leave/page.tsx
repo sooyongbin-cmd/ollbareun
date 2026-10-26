@@ -1,5 +1,7 @@
 "use client";
 
+import { applyDetailChanges, type DetailChange } from "@/lib/detail-changes";
+
 import DetailModalLink from "@/components/modals/detail-modal-link";
 
 import RegistrationModal from "@/components/modals/registration-modal";
@@ -58,6 +60,10 @@ export default function LeavePage() {
   const [rows, setRows] = useState<LeaveRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  function applyChanges(changes: DetailChange[]) {
+    setRows((rows) => applyDetailChanges(rows, changes, "leave"));
+  }
 
   useEffect(() => {
     let ignore = false;
@@ -175,7 +181,7 @@ export default function LeavePage() {
                   filteredRows.map((row) => (
                     <TableRow key={row.id} className="hover:bg-muted/40 transition-colors">
                       <TableCell data-label="이름" className="font-semibold">
-                        <DetailModalLink onSaved={() => { setError(""); setLoading(true); setRegistrationVersion((version) => version + 1); }} className="text-primary hover:underline" href={`/manager/leave/${row.id}`}>
+                        <DetailModalLink onSaved={applyChanges} className="text-primary hover:underline" href={`/manager/leave/${row.id}`}>
                           {row.employeeName}
                         </DetailModalLink>
                       </TableCell>

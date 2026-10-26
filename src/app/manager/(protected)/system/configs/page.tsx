@@ -1,5 +1,7 @@
 "use client";
 
+import { type DetailChange } from "@/lib/detail-changes";
+
 import DetailModalLink from "@/components/modals/detail-modal-link";
 
 import RegistrationModal from "@/components/modals/registration-modal";
@@ -43,6 +45,14 @@ export default function SystemConfigsPage() {
   const [configs, setConfigs] = useState<SystemConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  function applyChanges(changes: DetailChange[]) {
+    setConfigs((rows) => rows.flatMap((row) => {
+      const change = changes.find((item) => item.entity === "config" && item.id === row.system_code);
+      if (change?.action === "delete") return [];
+      return [change?.data ? { ...row, ...change.data } : row];
+    }).sort((left, right) => (left.description ?? "").localeCompare(right.description ?? "", "ko-KR")));
+  }
 
   useEffect(() => {
     let ignore = false;
@@ -120,7 +130,7 @@ export default function SystemConfigsPage() {
                   configs.map((config) => (
                     <TableRow key={config.system_code} className="hover:bg-muted/40 transition-colors">
                       <TableCell data-label="설명" className="max-w-[22.5rem] whitespace-pre-wrap font-semibold">
-                        <DetailModalLink onSaved={() => { setError(""); setLoading(true); setRegistrationVersion((version) => version + 1); }} className="text-primary hover:opacity-80" href={`/manager/system/configs/${encodeURIComponent(config.system_code)}`}>
+                        <DetailModalLink onSaved={applyChanges} className="text-primary hover:opacity-80" href={`/manager/system/configs/${encodeURIComponent(config.system_code)}`}>
                           {config.description ?? "-"}
                         </DetailModalLink>
                       </TableCell>

@@ -417,18 +417,38 @@ export function buildEducationReport(input: {
     .map((employee) => ({ employeeName: employee.name, ...(counts.get(employee.id) ?? { completedCount: 0, totalCount: 0 }) }));
 }
 
-export async function loadAttendanceReport(input: { employeeName: string; workDate: string }) {
+export async function loadAttendanceReport(input: { employeeName: string; workDate: string; attendanceId?: string }) {
   if (input.workDate) assertDate(input.workDate);
   const supabase = getSupabaseAdmin();
   let workRecordQuery = supabase
     .from("work_record")
     .select("id,employee_id,worksite_id,work_date,intime,outtime,work_intime,work_outtime,intime_status,outtime_status");
+  if (input.attendanceId) workRecordQuery = workRecordQuery.eq("id", input.attendanceId);
   if (input.workDate) {
     const dayStart = new Date(`${input.workDate}T00:00:00+09:00`);
     const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
     workRecordQuery = workRecordQuery.or(
       `work_date.eq.${input.workDate},and(outtime.gte.${dayStart.toISOString()},outtime.lt.${dayEnd.toISOString()})`,
     );
+  }
+  if (input.attendanceId) {
+    const records = await workRecordQuery.order("work_date", { ascending: true });
+    throwIfError(records.error);
+    const attendance = records.data ?? [];
+    if (!attendance.length) return [];
+    const employeeIds = [...new Set(attendance.map((record) => record.employee_id))];
+    const siteIds = [...new Set(attendance.map((record) => record.worksite_id).filter(Boolean))];
+    const [employees, sites, assignments] = await Promise.all([
+      supabase.from("employees").select("id,name,role,work_style").in("id", employeeIds).ilike("name", `%${input.employeeName.trim()}%`),
+      siteIds.length ? supabase.from("worksites").select("id,name").in("id", siteIds) : Promise.resolve({ data: [], error: null }),
+      supabase.from("work_assignments").select("id,employee_id,worksite_id").in("employee_id", employeeIds),
+    ]);
+    throwIfError(employees.error);
+    throwIfError(sites.error);
+    throwIfError(assignments.error);
+    return buildAttendanceReport({ employeeName: input.employeeName, workDate: input.workDate || attendance[0].work_date,
+      employees: employees.data ?? [], attendance, worksites: sites.data ?? [], assignments: assignments.data ?? [],
+      dailyAttendance: attendance, now: new Date() });
   }
   const [employeesResult, workRecordResult, worksitesResult, assignmentsResult] = await Promise.all([
     supabase.from("employees").select("id,name,role,work_style").ilike("name", `%${input.employeeName.trim()}%`),

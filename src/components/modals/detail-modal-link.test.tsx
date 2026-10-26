@@ -80,6 +80,9 @@ it("keeps employee details open after saving and refreshes the filtered roster o
   render(<EmployeeRoster />);
   await screen.findByRole("link", { name: "홍길동" });
   await user.type(screen.getByLabelText("이름"), "홍");
+  const table = screen.getByRole("table");
+  const scroll = table.parentElement!;
+  scroll.scrollLeft = 120;
   await user.click(screen.getByRole("link", { name: "홍길동" }));
   const dialog = await screen.findByRole("dialog", { name: "직원 상세" });
   const phoneInput = await within(dialog).findByLabelText("연락처");
@@ -92,7 +95,10 @@ it("keeps employee details open after saving and refreshes the filtered roster o
   expect(phoneInput).toHaveValue("010-9999-8888");
   await user.click(within(dialog).getByRole("button", { name: "닫기" }));
   expect(await screen.findByText("010-9999-8888")).toBeInTheDocument();
+  expect(vi.mocked(fetch).mock.calls.filter(([url]) => String(url) === "/api/bootstrap")).toHaveLength(1);
   expect(screen.getByLabelText("이름")).toHaveValue("홍");
+  expect(screen.getByRole("table")).toBe(table);
+  expect(scroll.scrollLeft).toBe(120);
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   expect(push).not.toHaveBeenCalled();
 });
@@ -198,6 +204,7 @@ it("refreshes nested assignment rows while preserving unsaved employee inputs", 
   await user.click(await screen.findByRole("button", { name: "확인" }));
   await waitFor(() => expect(within(employeeDialog).queryByRole("region", { name: "근무지배정정보" })).not.toBeInTheDocument());
   expect(phone).toHaveValue("010-9999-8888");
+  expect(vi.mocked(fetch).mock.calls.filter(([url, init]) => String(url) === "/api/employees/record-1" && !init?.method)).toHaveLength(1);
   expect(onSaved).not.toHaveBeenCalled();
   await user.click(within(employeeDialog).getByRole("button", { name: "닫기" }));
   expect(onSaved).toHaveBeenCalledTimes(1);
@@ -276,4 +283,25 @@ it("keeps a completed special remark open and shows its new status", async () =>
   } finally {
     confirm.mockRestore();
   }
+});
+
+it("removes a retired employee from the active filter without a full query", async () => {
+  const user = userEvent.setup();
+  vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    if (url === "/api/bootstrap") return Response.json({ ...mockPayload(url), employees: [employee, { ...employee, id: "other", name: "다른직원" }] });
+    if (url === "/api/employees/record-1" && init?.method === "PATCH") return Response.json({ employee: { ...employee, is_retired: true, retired_at: "2026-10-26" } });
+    return Response.json(mockPayload(url));
+  }));
+  render(<EmployeeRoster />);
+  await user.click(await screen.findByRole("link", { name: "홍길동" }));
+  const dialog = await screen.findByRole("dialog", { name: "직원 상세" });
+  await user.click(await within(dialog).findByRole("checkbox", { name: "퇴직" }));
+  await user.click(within(dialog).getByRole("button", { name: "저장" }));
+  await user.click(await screen.findByRole("button", { name: "예" }));
+  await user.click(await screen.findByRole("button", { name: "확인" }));
+  await user.click(within(dialog).getByRole("button", { name: "닫기" }));
+  expect(screen.queryByRole("link", { name: "홍길동" })).not.toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "다른직원" })).toBeInTheDocument();
+  expect(vi.mocked(fetch).mock.calls.filter(([url]) => String(url) === "/api/bootstrap")).toHaveLength(1);
 });

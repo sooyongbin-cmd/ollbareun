@@ -142,7 +142,7 @@ export default function AttendanceDetailPage({ recordId, modal = false, onClose,
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "근태 기록을 저장하지 못했습니다.");
       setConfirmOpen(false);
-      onSaved?.();
+      onSaved?.({ ...(payload.attendance ?? record), employeeId: record?.employeeId });
       setSuccessOpen(true);
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : "근태 기록을 저장하지 못했습니다.");
@@ -202,7 +202,7 @@ export default function AttendanceDetailPage({ recordId, modal = false, onClose,
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error ?? "교육이수 처리에 실패했습니다.");
-      onChanged?.();
+      onChanged?.([{ entity: "attendance", id: String(id), action: "invalidate", employeeId: record.employeeId }]);
       setEducation((items) => items.map((item) => item.resourceId === resourceId ? { ...item, isCompleted: true } : item));
     } catch (cause) {
       setErrorAlert(cause instanceof Error ? cause.message : "교육이수 처리에 실패했습니다.");
@@ -228,7 +228,7 @@ export default function AttendanceDetailPage({ recordId, modal = false, onClose,
 
   function returnToList() {
     if (onDeleted) {
-      onDeleted();
+      onDeleted(record ? { ...record } : undefined);
       return;
     }
     router.push("/manager/reports/attendance");

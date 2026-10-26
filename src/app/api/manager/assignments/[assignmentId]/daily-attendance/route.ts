@@ -1,12 +1,14 @@
+import { optionalDetailId } from "@/lib/detail-query";
 import { getManagerUser } from "@/lib/manager-auth";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
-export async function GET(_: Request, { params }: { params: Promise<{ assignmentId: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ assignmentId: string }> }) {
   try {
     if (!await getManagerUser()) {
       return Response.json({ error: "관리자 인증이 필요합니다." }, { status: 401 });
     }
     const { assignmentId } = await params;
+    const attendanceId = optionalDetailId(new URL(request.url).searchParams, "attendanceId");
     const supabase = getSupabaseAdmin();
     const { data: assignment, error: assignmentError } = await supabase
       .from("work_assignments")
@@ -15,7 +17,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ assignment
       .single();
     if (assignmentError) throw new Error(assignmentError.message);
 
-    const { data, error } = await supabase
+    let query = supabase
       .from("work_record")
       .select("id,work_date,intime,outtime")
       .eq("employee_id", assignment.employee_id)
@@ -23,6 +25,8 @@ export async function GET(_: Request, { params }: { params: Promise<{ assignment
       .gte("work_date", assignment.start_date)
       .lte("work_date", assignment.end_date)
       .order("work_date");
+    if (attendanceId) query = query.eq("id", attendanceId);
+    const { data, error } = await query;
     if (error) throw new Error(error.message);
     return Response.json({ dailyAttendance: data ?? [] });
   } catch (error) {

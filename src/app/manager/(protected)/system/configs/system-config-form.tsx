@@ -1,5 +1,6 @@
 "use client";
 
+import type { DetailData } from "@/lib/detail-changes";
 import type { RegistrationFormProps } from "@/components/modals/registration-modal";
 
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,8 @@ import ProcessingModal from "@/components/modals/processing-modal";
 
 const managerThemeOptions = ["light", "dark", "system"] as const;
 
-type SystemConfigFormProps = RegistrationFormProps & {
+type SystemConfigFormProps = Omit<RegistrationFormProps, "onSaved"> & {
+  onSaved?: (data?: DetailData) => void;
   mode: "create" | "edit";
   onDeleted?: () => void;
   initialConfig?: {
@@ -59,7 +61,7 @@ export default function SystemConfigForm({ mode, initialConfig, modal = false, o
       if (isThemeConfig) {
         const theme = saveManagerThemeLocally(content);
         notifyManagerThemeChange(theme);
-        onSaved?.();
+        onSaved?.({ ...initialConfig, system_code: systemCode, content: theme, description });
         return;
       }
 
@@ -82,7 +84,7 @@ export default function SystemConfigForm({ mode, initialConfig, modal = false, o
       }
 
       if (mode === "edit") {
-        onSaved?.();
+        onSaved?.(payload.config);
         return;
       }
       if (onSaved) {

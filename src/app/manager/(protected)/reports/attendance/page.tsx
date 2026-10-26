@@ -1,5 +1,7 @@
 "use client";
 
+import { fetchDetailJson, PartialUpdateStatus, usePartialDetailUpdate } from "@/components/modals/partial-detail-update";
+
 import DetailModalLink from "@/components/modals/detail-modal-link";
 
 import ListResults from "@/components/list-results";
@@ -28,6 +30,19 @@ export default function AttendanceReportPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const searchRequestRef = useRef(0);
+
+  const partial = usePartialDetailUpdate(async (changes, commit) => {
+    const updates = await Promise.all(changes.filter((change) => change.entity === "attendance").map(async (change) => ({
+      id: change.id,
+      rows: change.action === "delete" ? [] : (await fetchDetailJson<{ rows: AttendanceReportRow[] }>(
+        `/api/manager/reports/attendance?${new URLSearchParams({ attendanceId: change.id, employeeName: employeeName.trim(), workDate })}`,
+      )).rows,
+    })));
+    commit(() => setRows((current) => current.flatMap((row) => {
+      const update = updates.find((item) => item.id === row.id);
+      return update ? update.rows.filter((item) => item.id === row.id) : [row];
+    })));
+  }, JSON.stringify([employeeName, workDate]));
 
   useEffect(() => {
     let ignore = false;
@@ -103,6 +118,7 @@ export default function AttendanceReportPage() {
 
   return (
     <section className="space-y-[1.5rem]">
+      <PartialUpdateStatus {...partial} />
       <header>
         <h1 className="text-[1.75rem] leading-[1.2]">근태관리</h1>
       </header>
@@ -175,7 +191,7 @@ export default function AttendanceReportPage() {
                   rows.map((row) => (
                     <TableRow key={row.id}>
                       <TableCell data-label="이름">
-                        <DetailModalLink onSaved={() => { void handleSearch(); }} href={`/manager/reports/attendance/detail/${row.id}`} className="text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" aria-label={`${employeeSummary(row)} 근태 상세 보기`}>
+                        <DetailModalLink onSaved={partial.onSaved} href={`/manager/reports/attendance/detail/${row.id}`} className="text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50" aria-label={`${employeeSummary(row)} 근태 상세 보기`}>
                           {employeeSummary(row)}
                         </DetailModalLink>
                       </TableCell>

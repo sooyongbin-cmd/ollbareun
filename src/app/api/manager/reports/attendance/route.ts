@@ -1,3 +1,4 @@
+import { optionalDetailId } from "@/lib/detail-query";
 import { loadAttendanceReport, updateAttendanceRecord } from "@/lib/manager-reports";
 import { getManagerUser } from "@/lib/manager-auth";
 
@@ -11,7 +12,8 @@ export async function GET(request: Request) {
     const employeeName = url.searchParams.get("employeeName") ?? "";
     const workDate = url.searchParams.get("workDate") ?? "";
 
-    return Response.json({ rows: await loadAttendanceReport({ employeeName, workDate }) });
+    const attendanceId = optionalDetailId(url.searchParams, "attendanceId");
+    return Response.json({ rows: await loadAttendanceReport({ employeeName, workDate, ...(attendanceId ? { attendanceId } : {}) }) });
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "근태내역을 불러오지 못했습니다." },

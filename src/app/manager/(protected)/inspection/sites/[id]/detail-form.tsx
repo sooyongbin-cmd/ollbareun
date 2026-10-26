@@ -158,7 +158,7 @@ export default function InspectionSiteDetailPage({ params, recordId, modal = fal
         },
       );
       setSavedSite(payload.site);
-      onSaved?.();
+      onSaved?.({ ...payload.site, worksite_name: worksites.find((item) => item.id === payload.site.worksite_id)?.name });
       setAlertMessage("점검지가 저장되었습니다.");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "점검지를 저장하지 못했습니다.");

@@ -144,7 +144,7 @@ export default function SpecialRemarkDetailPage({ params, recordId, modal = fals
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "처리상태를 변경하지 못했습니다.");
       setReport(payload.report);
-      onSaved?.();
+      onSaved?.(payload.report);
     } catch (completionError) {
       setError(completionError instanceof Error ? completionError.message : "처리상태를 변경하지 못했습니다.");
     } finally {

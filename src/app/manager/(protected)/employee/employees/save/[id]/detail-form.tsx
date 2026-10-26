@@ -2,6 +2,7 @@
 
 import DetailModalLink from "@/components/modals/detail-modal-link";
 
+import { applyDetailChanges, type DetailChange } from "@/lib/detail-changes";
 import type { DetailViewProps } from "@/components/modals/detail-modal-link";
 
 import { EmployeeScheduleFields } from "@/components/employee-schedule-fields";
@@ -301,14 +302,9 @@ export default function EmployeeSavePage({ recordId, modal = false, onClose, onS
     setSaveConfirmOpen(true);
   }
 
-  async function refreshAssignments() {
-    onChanged?.();
-    try {
-      const payload = await fetchJson<EmployeeResponse>(`/api/employees/${employeeId}`);
-      setAssignments(payload.assignments ?? []);
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "근무지배정정보를 불러오지 못했습니다.");
-    }
+  function refreshAssignments(changes: DetailChange[]) {
+    onChanged?.(changes);
+    setAssignments((rows) => applyDetailChanges(rows, changes, "assignment"));
   }
 
   async function handleSave() {
@@ -317,13 +313,13 @@ export default function EmployeeSavePage({ recordId, modal = false, onClose, onS
     setError("");
 
     try {
-      await fetchJson<EmployeeMutationResponse>(`/api/employees/${employeeId}`, {
+      const saved = await fetchJson<EmployeeMutationResponse>(`/api/employees/${employeeId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, birthdate, phone: phone.replace(/\D/g, ""), role, is_retired: isRetired, retired_at: retiredDate, work_style: workStyle, in_time: inTime, out_time: outTime, has_weekend: false, schedule_rules: scheduleRules }),
       });
 
-      onSaved?.();
+      onSaved?.(saved.employee);
       setSaveSuccessOpen(true);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "직원 정보를 저장하지 못했습니다.");
@@ -576,7 +572,7 @@ export default function EmployeeSavePage({ recordId, modal = false, onClose, onS
                   <tr className="border-b border-border last:border-b-0" key={assignment.id}>
                     <td className="px-4 py-3 font-semibold">{assignment.worksite_name}</td>
                     <td className="px-4 py-3 font-semibold tabular-nums">
-                      <DetailModalLink onSaved={() => { void refreshAssignments(); }}
+                      <DetailModalLink onSaved={refreshAssignments}
                         href={`/manager/employee/assignments/save/${assignment.id}`}
                         className="text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50"
                       >

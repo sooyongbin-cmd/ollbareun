@@ -181,13 +181,13 @@ export default function WorksiteSavePage({ recordId, modal = false, onClose, onS
     }
 
     try {
-      await fetchJson<WorksiteResponse>(`/api/worksites/${worksiteId}`, {
+      const saved = await fetchJson<WorksiteResponse>(`/api/worksites/${worksiteId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, address, gpsInfo, radiusMeters }),
       });
 
-      onSaved?.();
+      onSaved?.(saved.worksite);
       setAlertMessage("자료가 저장되었습니다.");
       setAlertTitle("알림");
     } catch (submitError) {

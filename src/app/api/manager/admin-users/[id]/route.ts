@@ -44,7 +44,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     const updated = body.email === undefined
       ? await updateAdminUserRole(id, role)
       : await updateAdminUserRole(id, role, body.email);
-    return NextResponse.json({ admin: updated });
+    return NextResponse.json({ admin: updated, currentRole: authInfo.adminUser.id === id ? updated.role : authInfo.adminUser.role });
   } catch (error) {
     const status = error && typeof error === "object" && "status" in error && typeof error.status === "number" ? error.status : 400;
     return NextResponse.json(

@@ -505,11 +505,13 @@ export async function sendSpecialRemarkReportEmail(report: SpecialRemarkReportRo
   }
 }
 
-export async function listSpecialRemarkReports(input: { yearMonth?: unknown; includePhotos?: boolean } = {}) {
+export async function listSpecialRemarkReports(input: { yearMonth?: unknown; includePhotos?: boolean; employeeId?: string } = {}) {
   const yearMonth = typeof input.yearMonth === "string" ? input.yearMonth.trim() : "";
   if (yearMonth && !/^\d{4}-(0[1-9]|1[0-2])$/.test(yearMonth)) throw new Error("조회년월을 확인하세요.");
   const supabase = getSupabaseAdmin();
   let query = supabase.from("inspection_special_reports").select("*,employees(role,work_style)").order("reported_at", { ascending: true });
+
+  if (input.employeeId) query = query.eq("employee_id", input.employeeId);
 
   if (yearMonth) {
     const start = `${yearMonth}-01`;

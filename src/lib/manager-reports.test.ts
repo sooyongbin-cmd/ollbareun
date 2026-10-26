@@ -354,3 +354,22 @@ describe("manager reports", () => {
     ).rejects.toThrow("출근일시를 올바르게 입력하세요.");
   });
 });
+
+it("limits a partial attendance query and all joins to the requested record", async () => {
+  const calls: unknown[][] = [];
+  vi.mocked(getSupabaseAdmin).mockReturnValue({ from: (table: string) => {
+    const builder: Record<string, unknown> = {};
+    for (const method of ["select", "eq", "in", "ilike", "order"]) builder[method] = (...args: unknown[]) => {
+      calls.push([table, method, ...args]); return builder;
+    };
+    const data = table === "work_record" ? [{ id: "record", employee_id: "employee", worksite_id: "site", work_date: "2026-10-01", work_intime: null, work_outtime: null }]
+      : table === "employees" ? [{ id: "employee", name: "직원" }] : table === "worksites" ? [{ id: "site", name: "본사" }] : [];
+    builder.then = (resolve: (result: unknown) => unknown) => Promise.resolve({ data, error: null }).then(resolve);
+    return builder;
+  } } as never);
+  expect(await loadAttendanceReport({ employeeName: "", workDate: "", attendanceId: "record" })).toHaveLength(1);
+  expect(calls).toContainEqual(["work_record", "eq", "id", "record"]);
+  expect(calls).toContainEqual(["employees", "in", "id", ["employee"]]);
+  expect(calls).toContainEqual(["worksites", "in", "id", ["site"]]);
+  expect(calls).toContainEqual(["work_assignments", "in", "employee_id", ["employee"]]);
+});

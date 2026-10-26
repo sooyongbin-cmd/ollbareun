@@ -55,3 +55,20 @@ it("sorts by worksite, employee name and then work date ascending", async () => 
   expect(rows.map((row) => row.id)).toEqual(["a", "b", "c", "d"]);
   expect(rows.every((row) => row.employeePhone === null)).toBe(true);
 });
+
+it("restricts partial monthly refreshes at the database query", async () => {
+  const calls: unknown[][] = [];
+  vi.mocked(getSupabaseAdmin).mockReturnValue({ from: (table: string) => {
+    const builder: Record<string, unknown> = {};
+    for (const method of ["select", "gte", "lt", "order", "eq", "in"]) builder[method] = (...args: unknown[]) => {
+      calls.push([table, method, ...args]); return builder;
+    };
+    builder.range = async () => ({ data: table === "work_record" ? [{ id: "record", employee_id: "e1", worksite_id: "site", work_date: "2026-10-01", work_intime: null, work_outtime: null }]
+      : table === "employees" ? [{ id: "e1", name: "직원1" }] : [{ id: "site", name: "본사" }], error: null });
+    return builder;
+  } } as never);
+  expect(await loadMonthlyAttendance("2026-10", "e1")).toHaveLength(1);
+  expect(calls).toContainEqual(["work_record", "eq", "employee_id", "e1"]);
+  expect(calls).toContainEqual(["employees", "eq", "id", "e1"]);
+  expect(calls).toContainEqual(["worksites", "in", "id", ["site"]]);
+});

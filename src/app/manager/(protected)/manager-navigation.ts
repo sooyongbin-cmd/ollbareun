@@ -38,7 +38,7 @@ export const dashboardNavigationItem: ManagerNavigationItem = {
 
 export const overviewNavigationItems: ManagerNavigationItem[] = [
   dashboardNavigationItem,
-  { label: "월별현황", href: "/manager/monthly-information", icon: CalendarDays },
+  { label: "월별상세현황", href: "/manager/monthly-information", icon: CalendarDays },
 ];
 
 export const managerNavigationGroups: ManagerNavigationGroup[] = [

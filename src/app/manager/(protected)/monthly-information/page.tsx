@@ -106,7 +106,7 @@ export default function MonthlyInformationPage() {
           { signal: controller.signal },
         );
         const data = await response.json();
-        if (!response.ok) throw new Error(data.error ?? "월별현황을 불러오지 못했습니다.");
+        if (!response.ok) throw new Error(data.error ?? "월별상세현황을 불러오지 못했습니다.");
         if (!controller.signal.aborted) setRows(data.rows ?? []);
       } catch (error) {
         if (!controller.signal.aborted) setError(error instanceof Error ? error.message : "조회에 실패했습니다.");
@@ -129,8 +129,8 @@ export default function MonthlyInformationPage() {
   return (
     <section className="space-y-[1.5rem]">
       <PartialUpdateStatus {...partial} />
-      <header><h1 className="text-[1.75rem] leading-[1.2]">월별현황</h1></header>
-      <section aria-label="월별현황 검색" className="manager-section rounded-xl border border-border/50 bg-muted/40">
+      <header><h1 className="text-[1.75rem] leading-[1.2]">월별상세현황</h1></header>
+      <section aria-label="월별상세현황 검색" className="manager-section rounded-xl border border-border/50 bg-muted/40">
         <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_12rem] md:items-end">
           <div className="min-w-0 flex flex-col gap-2">
             <label className="ml-1 block text-[0.875rem] font-semibold text-muted-foreground" htmlFor="monthly-information-worksite">근무지</label>
@@ -156,7 +156,7 @@ export default function MonthlyInformationPage() {
         </div>
         {worksiteError ? <p role="alert" className="mt-3 text-sm text-destructive">{worksiteError}</p> : null}
       </section>
-      <section aria-label="월별현황 목록" className="manager-section rounded-xl border border-border/50 bg-muted/40">
+      <section aria-label="월별상세현황 목록" className="manager-section rounded-xl border border-border/50 bg-muted/40">
         <ListResults count={filteredRows.length} disabled={loading || Boolean(error)} />
         {loading ? <ManagerLoadingMessage className="mt-6" /> : error ? (
           <p role="alert" className="mt-6 text-destructive">{error}</p>

@@ -157,7 +157,7 @@ body {
 }
 
 .dark :is([data-slot="alert-dialog-title"], [data-slot="dialog-title"], [data-slot="sheet-title"]) {
-  color: #f5f5f7;
+  color: var(--muted-foreground);
 }
 
 /* Typography Defaults */
@@ -231,7 +231,7 @@ h1, h2, h3, h4, h5, h6 {
 html[data-manager-theme="dark"] {
   color-scheme: dark;
   --background: #0a0a0b;
-  --foreground: #f5f5f7;
+  --foreground: var(--muted-foreground);
   --card: #18181b;
   --card-foreground: #f5f5f7;
   --popover: #18181b;
@@ -267,7 +267,7 @@ html[data-manager-theme="dark"] {
   .manager-theme[data-theme="system"] {
     color-scheme: dark;
     --background: #0a0a0b;
-    --foreground: #f5f5f7;
+    --foreground: var(--muted-foreground);
     --card: #18181b;
     --card-foreground: #f5f5f7;
     --popover: #18181b;

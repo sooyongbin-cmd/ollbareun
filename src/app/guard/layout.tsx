@@ -24,7 +24,7 @@ export async function generateMetadata(
   const parentMetadata = await parent;
 
   return {
-    title: "주식회사 올바름",
+    title: "�ֽ�ȸ�� �ùٸ�",
     manifest: "/guard/manifest.webmanifest",
     icons: { icon: "/icons/logo_only_color.svg", apple: "/icons/logo_only_color-180.png" },
     openGraph: {
@@ -49,6 +49,9 @@ export default async function GuardLayout({
   return (
     <GuardZoomScope>
       {children}
+      <footer className="px-4 py-4 text-center text-sm text-muted-foreground">
+        <a href="/privacy-policy">��������ó����ħ</a>
+      </footer>
       <GuardInstallPrompt />
       <InAppBrowserChecker />
     </GuardZoomScope>

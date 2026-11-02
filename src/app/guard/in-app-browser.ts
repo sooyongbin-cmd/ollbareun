@@ -8,7 +8,10 @@ import {
 export { isInAppBrowserUserAgent, isCurrentInAppBrowser };
 
 export function isStandaloneGuardApp() {
-  return isStandaloneApp();
+  // TWA referrer identifies the launch surface, never an authentication decision.
+  const isWorkerTwa = typeof document !== "undefined"
+    && document.referrer === "android-app://com.olbareum.worker";
+  return isStandaloneApp() || isWorkerTwa;
 }
 
 export async function openGuardInDefaultBrowser() {

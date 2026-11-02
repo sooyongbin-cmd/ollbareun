@@ -1,0 +1,51 @@
+plugins { id 'com.android.application' }
+
+def signingValues = ['TWA_KEYSTORE_PATH', 'TWA_KEYSTORE_PASSWORD', 'TWA_KEY_ALIAS', 'TWA_KEY_PASSWORD']
+def hasReleaseSigning = signingValues.every { System.getenv(it) }
+def releaseVersionCode = providers.gradleProperty('versionCode').getOrElse('1').toInteger()
+def releaseVersionName = providers.gradleProperty('versionName').getOrElse('1.0.0')
+
+android {
+    namespace 'com.olbareum.worker'
+    compileSdk 36
+    defaultConfig {
+        applicationId 'com.olbareum.worker'
+        minSdk 23
+        targetSdk 36
+        versionCode releaseVersionCode
+        versionName releaseVersionName
+    }
+    signingConfigs {
+        if (hasReleaseSigning) {
+            release {
+                storeFile file(System.getenv('TWA_KEYSTORE_PATH'))
+                storePassword System.getenv('TWA_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('TWA_KEY_ALIAS')
+                keyPassword System.getenv('TWA_KEY_PASSWORD')
+            }
+        }
+    }
+    buildTypes {
+        release {
+            if (hasReleaseSigning) signingConfig signingConfigs.release
+            minifyEnabled false
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    lint { abortOnError true }
+}
+
+tasks.configureEach {
+    if (name == 'bundleRelease' || name == 'assembleRelease') {
+        doFirst {
+            if (!hasReleaseSigning) throw new GradleException('Release signing requires all four TWA_* signing environment variables. Never use a debug key for Play.')
+        }
+    }
+}
+
+dependencies {
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.6.2'
+}

@@ -51,6 +51,11 @@ describe("guard login page", () => {
     render(<GuardPage />);
 
     expect(await screen.findByRole("button", { name: "로그인" })).toBeInTheDocument();
+    expect(screen.getByLabelText("ID")).toHaveAttribute("name", "ID");
+    expect(screen.getByLabelText("비밀번호")).toHaveAttribute("name", "PW");
+    expect(screen.getByLabelText("비밀번호")).toHaveAttribute("type", "password");
+    expect(screen.queryByLabelText("이름")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("연락처")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "경비원 인증" })).not.toBeInTheDocument();
     const resultSection = (await screen.findByText("처리 내역 없음")).closest("section");
     expect(resultSection).toHaveAttribute("hidden");
@@ -83,9 +88,9 @@ describe("guard login page", () => {
 
     render(<GuardPage />);
 
-    fireEvent.change(await screen.findByLabelText("이름"), { target: { value: "홍길동" } });
-    fireEvent.change(screen.getByLabelText("연락처"), { target: { value: "01000000000" } });
-    expect(screen.getByLabelText("연락처")).toHaveValue("010-0000-0000");
+    fireEvent.change(await screen.findByLabelText("ID"), { target: { value: "홍길동" } });
+    fireEvent.change(screen.getByLabelText("비밀번호"), { target: { value: "01000000000" } });
+    expect(screen.getByLabelText("비밀번호")).toHaveValue("01000000000");
     fireEvent.click(screen.getByRole("button", { name: "로그인" }));
 
     expect(await screen.findByText("로그인 요청을 전송하고 있습니다.")).toBeInTheDocument();
@@ -180,8 +185,8 @@ describe("guard login page", () => {
     render(<GuardPage />);
 
     await waitFor(() => {
-      expect(screen.queryByLabelText("이름")).not.toBeInTheDocument();
-      expect(screen.queryByLabelText("연락처")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("ID")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("비밀번호")).not.toBeInTheDocument();
       expect(screen.queryByRole("button", { name: "로그인" })).not.toBeInTheDocument();
       expect(screen.queryByText("로그아웃 Push 처리 결과")).not.toBeInTheDocument();
     });

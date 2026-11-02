@@ -173,7 +173,7 @@ function getSessionText(status: LogoutPushResult["session"]) {
 export default function GuardPage() {
   const router = useRouter();
   const [savedGuardName, setSavedGuardName] = useState(readStoredGuardName);
-  const [phone, setPhone] = useState("");
+  const [pw, setPw] = useState("");
   const [logoutPushResult] = useState(readLogoutPushResult);
   const [errorMessage, setErrorMessage] = useState("");
   const [launchState, setLaunchState] = useState<GuardLaunchState>("checking");
@@ -247,8 +247,8 @@ export default function GuardPage() {
       setIsGuardLoginPending(true);
       setGuardLoginProgress("로그인 요청을 전송하고 있습니다.");
       const session = await postJson<GuardSession>("/api/guard/auth", {
-        name: form.get("name"),
-        phone: phone.replace(/\D/g, ""),
+        name: form.get("ID"),
+        phone: pw.replace(/\D/g, ""),
       });
 
       setGuardLoginProgress("근무자 정보를 확인했습니다.");
@@ -298,37 +298,34 @@ export default function GuardPage() {
               <form className="w-full space-y-6" onSubmit={handleGuardAuth}>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="guard-name">
-                      이름
+                    <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="guard-ID">
+                      ID
                     </label>
                     <Input
                       className="w-full"
                       defaultValue={savedGuardName}
-                      id="guard-name"
+                      id="guard-ID"
                       key={savedGuardName}
-                      name="name"
-                      placeholder="이름을 입력하세요."
+                      name="ID"
+                      placeholder="ID를 입력하세요."
+                      autoComplete="username"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="guard-phone">
-                      연락처
+                    <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="guard-PW">
+                      비밀번호
                     </label>
                     <Input
                       className="w-full"
-                      id="guard-phone"
-                      name="phone"
-                      placeholder="010-0000-0000"
-                      value={phone}
+                      id="guard-PW"
+                      name="PW"
+                      placeholder="비밀번호를 입력하세요."
+                      type="password"
+                      autoComplete="current-password"
+                      value={pw}
                       onChange={(event) => {
-                        const digits = event.target.value.replace(/\D/g, "").slice(0, 11);
-                        const formatted = digits.length > 7
-                          ? `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`
-                          : digits.length > 3
-                            ? `${digits.slice(0, 3)}-${digits.slice(3)}`
-                            : digits;
-                        setPhone(formatted);
+                        setPw(event.target.value);
                       }}
                       required
                     />

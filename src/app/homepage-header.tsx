@@ -27,6 +27,7 @@ const menuColumns = [
       ["운영 체계", "/services#operation"],
       ["근로자 파견", "/services#dispatch"],
       ["건물·시설물 종합 관리", "/services#facility"],
+      ["주거 개선", "/services#housing"],
       ["방역·소독", "/services#disinfection"],
     ],
   },
@@ -48,6 +49,7 @@ const mobileMenuItems = {
     ["운영 체계", "/services#operation"],
     ["근로자 파견", "/services#dispatch"],
     ["건물·시설물 종합 관리", "/services#facility"],
+    ["주거 개선", "/services#housing"],
     ["방역·소독", "/services#disinfection"],
   ],
   clients: [

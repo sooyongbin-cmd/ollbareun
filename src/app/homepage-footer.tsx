@@ -21,6 +21,7 @@ export default function HomepageFooter() {
             <strong>서비스</strong>
             <Link href="/services#dispatch">근로자 파견</Link>
             <Link href="/services#facility">시설물 관리</Link>
+            <Link href="/services#housing">주거 개선</Link>
             <Link href="/services#disinfection">방역소독</Link>
           </div>
           <div>

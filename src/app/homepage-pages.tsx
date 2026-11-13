@@ -6,6 +6,8 @@ import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 
 import styles from "./page.module.css";
 import HomepageContactMap from "./homepage-contact-map";
 import HomepageFooter from "./homepage-footer";
+import HomepageQualifications from "./homepage-qualifications";
+import additions from "./homepage-additions.module.css";
 import { useHomepageCompanyAddress, useHomepageMapCoordinates } from "./homepage-company-address";
 
 type ServiceItem = {
@@ -200,6 +202,33 @@ const facilityItems = [
     text: "차량 입·출입 상황 및 주차장 안전과 내부 주차 질서를 확립합니다.",
     image: "/homepage/archive/facility-parking.svg",
   },
+];
+
+const housingItems = [
+  {
+    title: "페인트 도소매",
+    image: "paint",
+    text: "건축법상 의무화된 내화페인트 적용부터 항바이러스 무기질 도료, 셀프 인테리어 친환경 제품까지 완벽하게 도소매 및 맞춤 컨설팅을 제공합니다.",
+    details: ["건축용 도료 도소매", "친환경 도료 사용", "전문 상담 및 시공 연계"],
+  },
+  {
+    title: "인테리어 공사",
+    image: "interior",
+    text: "노후주택 개보수와 친환경 페인트 컨설팅, 취약계층 맞춤형 일자리 교육을 유기적으로 결합하여 모두가 안심할 수 있는 건강하고 안전한 주거 환경을 조성합니다.",
+    details: ["상업공간·주거공간 인테리어", "공간개선 및 실내환경 조성", "맞춤형 디자인 및 시공"],
+  },
+  {
+    title: "도장 공사",
+    image: "painting",
+    text: "건축법상 의무화된 내화페인트 적용부터 항바이러스 무기질 도료, 셀프 인테리어 친환경 제품까지 완벽하게 도소매 및 맞춤 컨설팅을 제공합니다.",
+    details: ["건축물 내·외부도장", "시멘트, 금속, 목재 등 특수구조물 도공", "내구성·내후성이 우수한 전문 도료 시공"],
+  },
+];
+
+const disinfectionItems = [
+  { title: "건물 내·외부 방역", text: "빌딩, 관공서, 학교, 사업장 내·외부 맞춤 방역 및 해충, 바이러스 차단" },
+  { title: "감염병 예방관리", text: "법정 감염병 예방 소독 및 다중이용시설 집중 바이러스 살균 케어" },
+  { title: "전문 장비 및 인증 약품", text: "환경부 승인 안전성 검증 약품과 초저용량(ULV) 분무 전문 장비 사용" },
 ];
 
 const socialValues = [
@@ -748,6 +777,8 @@ export function AboutPage() {
         </div>
       </section>
 
+      <HomepageQualifications />
+
       <section id="values" className={styles.values}>
         <div className={styles.valuesInner}>
           <SectionHeading
@@ -977,7 +1008,31 @@ export function ServicesPage() {
         </div>
       </section>
 
-      <section id="disinfection" className={`${styles.section} ${styles.detailSection} ${styles.disinfectionSection}`}>
+      <section id="housing" className={`${styles.section} ${styles.detailSection} ${styles.dispatchSection} ${additions.housingSection}`}>
+        <div className={styles.serviceSectionInner}>
+          <SectionHeading
+            eyebrow="Housing Improvement"
+            title={<b>주거 개선</b>}
+            description={<>공간의 가치를 높이는<br />전문적인 시공 서비스를 제공합니다.</>}
+          />
+          <div className={`${styles.detailBanner} ${additions.housingBanner}`}>
+            <Image src="/homepage/housing/banner.webp" alt="친환경 페인트로 실내 벽면을 시공하는 전문가" fill sizes="(max-width: 768px) 100vw, 1182px" />
+          </div>
+          <h3 className={styles.detailMessage}>친환경 페인트 도소매와 맞춤형 인테리어,<br />전문 도장 공사까지 원스톱으로 해결합니다.</h3>
+          <div className={additions.housingGrid}>
+            {housingItems.map(({ title, image, text, details }) => (
+              <article key={title}>
+                <h3>{title}</h3>
+                <Image src={`/homepage/housing/${image}.webp`} alt={title} width={397} height={221} sizes="(max-width: 768px) 100vw, 380px" />
+                <p>{text}</p>
+                <ul>{details.map((detail) => <li key={detail}>{detail}</li>)}</ul>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="disinfection" className={`${styles.section} ${styles.detailSection} ${styles.disinfectionSection} ${additions.disinfectionSection}`}>
         <div className={styles.serviceSectionInner}>
           <SectionHeading
             eyebrow="Certified Disinfection"
@@ -1007,6 +1062,15 @@ export function ServicesPage() {
               <br />
               방역프로세스를 독자 수행중입니다
             </p>
+          </div>
+          <div className={additions.disinfectionGrid}>
+            {disinfectionItems.map(({ title, text }, index) => (
+              <article key={title}>
+                <Image src={`/homepage/disinfection-icon-${index + 1}.svg`} alt="" width={46} height={46} aria-hidden="true" />
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>

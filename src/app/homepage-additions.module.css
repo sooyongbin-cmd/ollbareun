@@ -201,8 +201,8 @@ section.disinfectionSection {
   position: fixed;
   inset: 0;
   z-index: 200;
-  /* 80% transparent, as requested. */
-  background: rgb(0 0 0 / 20%);
+  /* 20% transparent: keep the document prominent over the page. */
+  background: rgb(0 0 0 / 80%);
 }
 
 .certificateModal {
@@ -221,8 +221,20 @@ section.disinfectionSection {
   cursor: pointer;
 }
 
+.modalImageViewport {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
 .modalImageButton {
-  max-width: 100%;
+  flex: 0 0 auto;
+  align-self: flex-start;
+  width: calc(min(calc(100vw - 112px), calc((100dvh - 128px) * 886 / 1253)) * var(--certificate-zoom, 1));
+  max-width: none;
+  margin: auto;
   padding: 0;
   border: 0;
   background: #fff;
@@ -232,20 +244,21 @@ section.disinfectionSection {
 
 .modalImageButton img {
   display: block;
-  width: auto;
+  width: 100%;
   height: auto;
-  max-width: 100%;
-  max-height: calc(100dvh - 128px);
+  max-width: none;
   object-fit: contain;
 }
 
 .modalCounter,
 .modalClose,
 .modalPrevious,
-.modalNext {
+.modalNext,
+.modalZoomIn,
+.modalZoomOut {
   position: absolute;
   color: #fff;
-  background: #333;
+  background: transparent;
   border: 0;
   border-radius: 6px;
   font-size: 24px;
@@ -257,6 +270,19 @@ section.disinfectionSection {
 .modalClose { top: 16px; right: 20px; width: 44px; }
 .modalPrevious { left: 8px; width: 44px; }
 .modalNext { right: 8px; width: 44px; }
+.modalZoomIn { top: 16px; right: 76px; }
+.modalZoomOut { top: 16px; right: 132px; }
+.modalPrevious, .modalNext, .modalZoomIn, .modalZoomOut {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  place-items: center;
+}
+.modalPrevious img, .modalNext img, .modalZoomIn img, .modalZoomOut img {
+  filter: invert(1);
+}
+.modalZoomIn:disabled, .modalZoomOut:disabled { opacity: 0.35; cursor: default; }
 .srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 @media (max-width: 1024px) {

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Dialog } from "radix-ui";
-import { useRef, useState } from "react";
+import { useRef, useState, type CSSProperties } from "react";
 import styles from "./homepage-additions.module.css";
 
 export const qualifications = [
@@ -19,11 +19,15 @@ export const qualifications = [
 
 export default function HomepageQualifications() {
   const [selected, setSelected] = useState<number | null>(null);
+  const [zoom, setZoom] = useState(1);
   const opener = useRef<HTMLButtonElement | null>(null);
   const certificate = selected === null ? null : qualifications[selected];
-  const move = (direction: number) => setSelected((current) =>
-    current === null ? null : (current + direction + qualifications.length) % qualifications.length,
-  );
+  const move = (direction: number) => {
+    setZoom(1);
+    setSelected((current) =>
+      current === null ? null : (current + direction + qualifications.length) % qualifications.length,
+    );
+  };
 
   return (
     <section id="qualifications" className={styles.qualifications} aria-labelledby="qualifications-title">
@@ -43,7 +47,7 @@ export default function HomepageQualifications() {
                     className={styles.certificateButton}
                     aria-label={`${name} 확대 보기`}
                     tabIndex={copy === 1 ? -1 : 0}
-                    onClick={(event) => { opener.current = event.currentTarget; setSelected(index); }}
+                    onClick={(event) => { opener.current = event.currentTarget; setZoom(1); setSelected(index); }}
                   >
                     <Image src={src} alt={name} width={212} height={300} sizes="(max-width: 640px) 140px, 212px" />
                   </button>
@@ -66,14 +70,26 @@ export default function HomepageQualifications() {
           >
             <Dialog.Title className={styles.srOnly}>{certificate?.name} 확대 보기</Dialog.Title>
             <span className={styles.modalCounter} aria-live="polite">{selected === null ? 0 : selected + 1} / {qualifications.length}</span>
+            <button type="button" className={styles.modalZoomOut} aria-label="자격증 축소" disabled={zoom <= 0.5} onClick={() => setZoom((current) => Math.max(0.5, current - 0.25))}>
+              <Image src="/homepage/fontawesome/magnifying-glass-minus.svg" alt="" width={18} height={18} aria-hidden="true" />
+            </button>
+            <button type="button" className={styles.modalZoomIn} aria-label="자격증 확대" disabled={zoom >= 3} onClick={() => setZoom((current) => Math.min(3, current + 0.25))}>
+              <Image src="/homepage/fontawesome/magnifying-glass-plus.svg" alt="" width={18} height={18} aria-hidden="true" />
+            </button>
             <Dialog.Close className={styles.modalClose} aria-label="자격증 모달 닫기">×</Dialog.Close>
-            <button type="button" className={styles.modalPrevious} aria-label="이전 자격증" onClick={() => move(-1)}>←</button>
-            {certificate ? (
-              <Dialog.Close className={styles.modalImageButton} aria-label={`${certificate.name} 이미지 닫기`}>
-                <Image src={certificate.src} alt={certificate.name} width={886} height={1253} sizes="(max-width: 640px) 80vw, 70vh" />
-              </Dialog.Close>
-            ) : null}
-            <button type="button" className={styles.modalNext} aria-label="다음 자격증" onClick={() => move(1)}>→</button>
+            <button type="button" className={styles.modalPrevious} aria-label="이전 자격증" onClick={() => move(-1)}>
+              <Image src="/homepage/fontawesome/circle-arrow-left.svg" alt="" width={28} height={28} aria-hidden="true" />
+            </button>
+            <div className={styles.modalImageViewport} style={{ "--certificate-zoom": zoom } as CSSProperties} onClick={(event) => { if (event.target === event.currentTarget) setSelected(null); }}>
+              {certificate ? (
+                <Dialog.Close className={styles.modalImageButton} aria-label={`${certificate.name} 이미지 닫기`}>
+                  <Image src={certificate.src} alt={certificate.name} width={886} height={1253} sizes="(max-width: 640px) 100vw, 1500px" />
+                </Dialog.Close>
+              ) : null}
+            </div>
+            <button type="button" className={styles.modalNext} aria-label="다음 자격증" onClick={() => move(1)}>
+              <Image src="/homepage/fontawesome/circle-arrow-right.svg" alt="" width={28} height={28} aria-hidden="true" />
+            </button>
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>

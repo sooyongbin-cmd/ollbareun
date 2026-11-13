@@ -291,18 +291,15 @@ section.disinfectionSection {
 }
 
 @media (max-width: 1024px) {
+  .housingSection .housingGrid { grid-template-columns: 1fr; gap: 40px; }
   .housingGrid h3 { font-size: 23px; }
   .housingGrid p, .housingGrid ul, .disinfectionGrid p { font-size: 16px; }
   .disinfectionGrid article { padding: 24px 18px; }
   .disinfectionGrid h3 { font-size: 20px; }
 }
 
-@media (min-width: 769px) and (max-width: 1024px) {
-  .housingGrid ul { font-size: 13px; }
-}
-
 @media (max-width: 768px) {
-  .housingSection .housingGrid, .disinfectionGrid { grid-template-columns: 1fr; gap: 40px; }
+  .disinfectionGrid { grid-template-columns: 1fr; gap: 40px; }
   .housingGrid h3 { margin-bottom: 20px; }
   .housingGrid p { margin: 20px 0; }
   .disinfectionGrid article { padding: 28px; }

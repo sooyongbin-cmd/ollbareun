@@ -1023,7 +1023,7 @@ export function ServicesPage() {
             {housingItems.map(({ title, image, text, details }) => (
               <article key={title}>
                 <h3>{title}</h3>
-                <Image src={`/homepage/housing/${image}.webp`} alt={title} width={397} height={221} sizes="(max-width: 768px) 100vw, 380px" />
+                <Image src={`/homepage/housing/${image}.webp`} alt={title} width={397} height={221} sizes="(max-width: 1024px) 100vw, 380px" />
                 <p>{text}</p>
                 <ul>{details.map((detail) => <li key={detail}>{detail}</li>)}</ul>
               </article>

@@ -45,10 +45,10 @@ describe("homepage back to top button", () => {
     expect(container.querySelector("video")).not.toBeInTheDocument();
   });
 
-  it("uses the supplied certificate SVGs", () => {
+  it("uses the current certificate images from the qualification gallery", () => {
     const { container } = render(<MainPage />);
 
-    for (const filename of ["lc_1.svg", "lc_2.svg", "lc_3.svg"]) {
+    for (const filename of ["certificate-figma-1.png", "certificate-figma-2.png", "certificate-figma-3.png"]) {
       expect(container.querySelector(`img[src*="${filename}"]`)).toBeInTheDocument();
     }
   });

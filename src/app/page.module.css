@@ -5890,6 +5890,13 @@
     pointer-events: auto;
   }
 
+  /* Five service links: 56px vertical padding + 105px text + 80px gaps. */
+  .megaMenuOpen:has(.megaMenuColumnActive a[href="/services#housing"]),
+  .megaMenuInner:has(.megaMenuColumnActive a[href="/services#housing"]),
+  .megaMenuColumnActive:has(a[href="/services#housing"]) {
+    height: 241px;
+  }
+
   .megaMenuColumn a {
     font-size: 16px;
     line-height: 21px;

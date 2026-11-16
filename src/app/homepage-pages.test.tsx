@@ -45,10 +45,10 @@ describe("homepage back to top button", () => {
     expect(container.querySelector("video")).not.toBeInTheDocument();
   });
 
-  it("uses the current certificate images from the qualification gallery", () => {
+  it("uses the updated certificate images in the trust section", () => {
     const { container } = render(<MainPage />);
 
-    for (const filename of ["certificate-figma-1.png", "certificate-figma-2.png", "certificate-figma-3.png"]) {
+    for (const filename of ["certificate-women-owned.jpg", "certificate-gimhae-airport-customs.jpg", "certificate-social-enterprise.jpg"]) {
       expect(container.querySelector(`img[src*="${filename}"]`)).toBeInTheDocument();
     }
   });

@@ -250,6 +250,14 @@ section.disinfectionSection {
   object-fit: contain;
 }
 
+/* PDF page 3: the certificate occupies 741.07 / 1336.41 of the viewport height.
+ * Keep the existing fitted size on mobile and retain the zoom multiplier. */
+@media (min-width: 769px) {
+  .modalImageButton {
+    width: calc(min(calc(100vw - 112px), calc(55.45dvh * 886 / 1253)) * var(--certificate-zoom, 1));
+  }
+}
+
 .modalCounter,
 .modalClose,
 .modalPrevious,

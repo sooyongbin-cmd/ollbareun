@@ -10,6 +10,7 @@
 6. [근무지배정](#manager-employee-assignments)
 7. [공휴일관리](#manager-employee-holidays)
 8. [근태관리](#manager-reports-attendance)
+9. [휴가관리](#manager-leave)
 
 ## 1. 관리자인증 {#manager-auth}
 
@@ -224,3 +225,19 @@
 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
 [근태관리 화면 열기](https://ollbareun.vercel.app/manager/reports/attendance)
+
+## 9. 휴가관리 {#manager-leave}
+
+![휴가관리 조회창과 목록](./images/manager-leave-guide.jpg)
+
+등록된 휴가 내역을 조회하고 직원의 휴가를 신청하는 화면입니다.
+
+| 구분 | 항목 | 설명 |
+| --- | --- | --- |
+| 조회 조건 | 이름 | 직원 이름을 입력해 목록을 좁힙니다. |
+| 표시 내용 | 조회 결과 | 이름, 직군, 근무형태, 휴가종류, 휴가기간, 근무지, 배정기간을 표시합니다. |
+| 화면 링크 | 직원 이름 | 해당 휴가 기록의 상세를 엽니다. |
+| 버튼 | 휴가신청 | 휴가 등록 창을 엽니다. |
+| 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
+
+[휴가관리 화면 열기](https://ollbareun.vercel.app/manager/leave)

@@ -15,6 +15,7 @@
 11. [점검지관리](#manager-inspection-sites)
 12. [점검지점검현황](#manager-inspection-logs)
 13. [특이사항](#manager-inspection-special-remarks)
+14. [교육자료관리](#manager-safety-resources)
 
 ## 1. 관리자인증 {#manager-auth}
 
@@ -306,3 +307,19 @@
 | 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
 [특이사항 화면 열기](https://ollbareun.vercel.app/manager/inspection/special-remarks)
+
+## 14. 교육자료관리 {#manager-safety-resources}
+
+![교육자료관리 조회창과 목록](./images/manager-safety-resources-guide.jpg)
+
+안전교육에 사용할 교재와 적용 기간을 관리하는 화면입니다.
+
+| 구분 | 항목 | 설명 |
+| --- | --- | --- |
+| 조회 조건 | 제목 | 교육자료 제목을 입력해 목록을 좁힙니다. |
+| 표시 내용 | 조회 결과 | 교육구분, 제목, 시작일과 종료일을 표시합니다. |
+| 화면 링크 | 제목 | 선택한 교육자료 상세를 엽니다. |
+| 버튼 | 교재등록 | 신규 교육자료 등록 창을 엽니다. |
+| 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
+
+[교육자료관리 화면 열기](https://ollbareun.vercel.app/manager/safety/resources)

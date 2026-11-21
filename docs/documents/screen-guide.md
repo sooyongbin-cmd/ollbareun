@@ -11,6 +11,7 @@
 7. [공휴일관리](#manager-employee-holidays)
 8. [근태관리](#manager-reports-attendance)
 9. [휴가관리](#manager-leave)
+10. [월간근태](#manager-worker-information)
 
 ## 1. 관리자인증 {#manager-auth}
 
@@ -241,3 +242,19 @@
 | 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
 [휴가관리 화면 열기](https://ollbareun.vercel.app/manager/leave)
+
+## 10. 월간근태 {#manager-worker-information}
+
+![월간근태 조회창과 목록](./images/manager-worker-information-guide.jpg)
+
+근무지별 직원의 한 달 출퇴근 기록을 조회하는 화면입니다.
+
+| 구분 | 항목 | 설명 |
+| --- | --- | --- |
+| 조회 조건 | 근무지 | 근무지 이름으로 목록을 좁힙니다. |
+| 조회 조건 | 조회년월 | 조회할 연도와 월을 선택합니다. |
+| 표시 내용 | 조회 결과 | 근무지, 직원 이름, 출근예정일, 예정·실제 출퇴근 시각과 근태 상태를 표시합니다. |
+| 화면 링크 | 출근예정일 | 해당 날짜의 근태 기록 상세를 엽니다. |
+| 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
+
+[월간근태 화면 열기](https://ollbareun.vercel.app/manager/worker-information)

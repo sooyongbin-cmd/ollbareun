@@ -15,6 +15,7 @@
    - [7-1. 휴일추가](#manager-holiday-register)
 8. [근태관리](#manager-reports-attendance)
 9. [휴가관리](#manager-leave)
+   - [9-1. 휴가신청](#manager-leave-register)
 10. [월간근태](#manager-worker-information)
 11. [점검지관리](#manager-inspection-sites)
 12. [점검지점검현황](#manager-inspection-logs)
@@ -304,10 +305,21 @@
 | 조회 조건 | 이름 | 직원 이름을 입력해 목록을 좁힙니다. |
 | 표시 내용 | 조회 결과 | 이름, 직군, 근무형태, 휴가종류, 휴가기간, 근무지, 배정기간을 표시합니다. |
 | 화면 링크 | 직원 이름 | 해당 휴가 기록의 상세를 엽니다. |
-| 버튼 | 휴가신청 | 휴가 등록 창을 엽니다. |
+| 버튼 | [휴가신청](#manager-leave-register) | 휴가 등록 창을 엽니다. |
 | 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
 [휴가관리 화면 열기](https://ollbareun.vercel.app/manager/leave)
+
+### 9-1. 휴가신청 {#manager-leave-register}
+
+**휴가관리** 화면에서 **휴가신청** 버튼을 누르면 열립니다.
+
+| 항목 | 입력 또는 동작 |
+| --- | --- |
+| 직원·휴가종류 | 대상 직원과 등록된 휴가종류를 선택합니다. |
+| 시작일·종료일 | 휴가 기간을 지정합니다. 이미 신청한 휴가 기간과 겹치면 안내가 표시됩니다. |
+| 저장 | 입력 내용을 확인하고 등록합니다. |
+| 닫기 | 등록 창을 닫습니다. |
 
 ## 10. 월간근태 {#manager-worker-information}
 

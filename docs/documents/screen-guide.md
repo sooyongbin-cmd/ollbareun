@@ -12,6 +12,7 @@
 6. [근무지배정](#manager-employee-assignments)
    - [6-1. 배정등록](#manager-assignment-register)
 7. [공휴일관리](#manager-employee-holidays)
+   - [7-1. 휴일추가](#manager-holiday-register)
 8. [근태관리](#manager-reports-attendance)
 9. [휴가관리](#manager-leave)
 10. [월간근태](#manager-worker-information)
@@ -245,12 +246,24 @@
 | 항목 | 기능 |
 | --- | --- |
 | 공휴일가져오기 | 확인 후 선택한 연도의 공휴일 정보를 가져옵니다. 이미 등록된 날짜는 건너뜁니다. |
-| 휴일추가 | 새로운 휴일을 직접 등록하는 창을 엽니다. |
+| [휴일추가](#manager-holiday-register) | 새로운 휴일을 직접 등록하는 창을 엽니다. |
 | 휴일 구분 | 국공휴일 또는 회사 지정 휴일로 변경합니다. |
 | 선택 | 해당 날짜의 휴일 적용 여부를 바꿉니다. |
 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
 [공휴일관리 화면 열기](https://ollbareun.vercel.app/manager/employee/holidays)
+
+### 7-1. 휴일추가 {#manager-holiday-register}
+
+**공휴일관리** 화면에서 **휴일추가** 버튼을 누르면 열립니다.
+
+| 항목 | 입력 또는 동작 |
+| --- | --- |
+| 휴일명·날짜 | 목록에 표시할 이름과 휴일 날짜를 입력합니다. |
+| 휴일 구분 | 회사 지정 휴일(휴무)과 국공휴일(직원별 공휴일 설정 적용) 중 선택합니다. |
+| 휴일 적용 | 추가한 날짜는 휴일로 선택된 상태로 등록됩니다. |
+| 저장 | 입력 내용을 확인하고 등록합니다. |
+| 닫기 | 등록 창을 닫습니다. |
 
 ## 8. 근태관리 {#manager-reports-attendance}
 

@@ -12,6 +12,7 @@
 8. [근태관리](#manager-reports-attendance)
 9. [휴가관리](#manager-leave)
 10. [월간근태](#manager-worker-information)
+11. [점검지관리](#manager-inspection-sites)
 
 ## 1. 관리자인증 {#manager-auth}
 
@@ -258,3 +259,19 @@
 | 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
 [월간근태 화면 열기](https://ollbareun.vercel.app/manager/worker-information)
+
+## 11. 점검지관리 {#manager-inspection-sites}
+
+![점검지관리 조회창과 목록](./images/manager-inspection-sites-guide.jpg)
+
+근무지에 등록된 점검지를 조회하고 새 점검지를 등록하는 화면입니다.
+
+| 구분 | 항목 | 설명 |
+| --- | --- | --- |
+| 조회 조건 | 근무지, 점검지 | 근무지 이름이나 점검지 이름으로 목록을 좁힙니다. |
+| 표시 내용 | 조회 결과 | 근무지, 점검 순서, 점검지명, 점검시각, 점검자와 직군을 표시합니다. |
+| 화면 링크 | 점검지명 | 해당 점검지 상세를 엽니다. |
+| 버튼 | 점검지 등록 | 새 점검지 등록 창을 엽니다. |
+| 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
+
+[점검지관리 화면 열기](https://ollbareun.vercel.app/manager/inspection/sites)

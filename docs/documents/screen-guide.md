@@ -8,6 +8,7 @@
 4. [직원관리](#manager-employee-employees)
 5. [근무지관리](#manager-employee-worksites)
 6. [근무지배정](#manager-employee-assignments)
+7. [공휴일관리](#manager-employee-holidays)
 
 ## 1. 관리자인증 {#manager-auth}
 
@@ -169,3 +170,28 @@
 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
 [근무지배정 화면 열기](https://ollbareun.vercel.app/manager/employee/assignments)
+
+## 7. 공휴일관리 {#manager-employee-holidays}
+
+![공휴일관리 조회 조건과 공휴일 목록](./images/manager-employee-holidays-guide.jpg)
+
+연도별 공휴일과 회사 지정 휴일을 조회하고 적용할 휴일을 관리하는 화면입니다.
+
+### 조회 조건과 표시 내용
+
+| 항목 | 설명 |
+| --- | --- |
+| 연도 | 조회할 연도를 입력합니다. |
+| 조회 결과 | 공휴일 날짜, 휴일명, 휴일 구분과 선택 여부를 표시합니다. |
+
+### 버튼과 조작
+
+| 항목 | 기능 |
+| --- | --- |
+| 공휴일가져오기 | 확인 후 선택한 연도의 공휴일 정보를 가져옵니다. 이미 등록된 날짜는 건너뜁니다. |
+| 휴일추가 | 새로운 휴일을 직접 등록하는 창을 엽니다. |
+| 휴일 구분 | 국공휴일 또는 회사 지정 휴일로 변경합니다. |
+| 선택 | 해당 날짜의 휴일 적용 여부를 바꿉니다. |
+| 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
+
+[공휴일관리 화면 열기](https://ollbareun.vercel.app/manager/employee/holidays)

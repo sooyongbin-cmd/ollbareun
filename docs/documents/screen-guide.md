@@ -17,6 +17,7 @@
 13. [특이사항](#manager-inspection-special-remarks)
 14. [교육자료관리](#manager-safety-resources)
 15. [일일교육이수](#manager-safety-daily-edu)
+16. [월별교육이수](#manager-safety-monthly-edu)
 
 ## 1. 관리자인증 {#manager-auth}
 
@@ -339,3 +340,19 @@
 | 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
 [일일교육이수 화면 열기](https://ollbareun.vercel.app/manager/safety/daily_edu)
+
+## 16. 월별교육이수 {#manager-safety-monthly-edu}
+
+![월별교육이수 조회창과 목록](./images/manager-safety-monthly-edu-guide.jpg)
+
+월별 안전교육 이수 요약과 일일교육 기록을 함께 확인하는 화면입니다.
+
+| 구분 | 항목 | 설명 |
+| --- | --- | --- |
+| 조회 조건 | 이름, 조회년월 | 직원 이름과 조회할 연도·월을 지정합니다. |
+| 표시 내용 | 월별 이수 요약 | 직원별 일일교육 이수 건수와 월별·분기·반기·연간 교육 이수 여부를 표시합니다. |
+| 표시 내용 | 일일교육 기록 | 직원별 근무일과 교재별 이수 여부를 표시합니다. |
+| 버튼과 조작 | 미이수 표시 | 조작 가능한 미이수 표시를 누르면 해당 기록을 이수 처리하는 확인 창을 엽니다. |
+| 버튼 | 엑셀 | 각 표의 조회 결과를 별도로 내려받습니다. |
+
+[월별교육이수 화면 열기](https://ollbareun.vercel.app/manager/safety/monthly_edu)

@@ -28,6 +28,7 @@
 17. [관리자관리](#manager-system-admin-users)
    - [17-1. 관리자등록](#manager-admin-register)
 18. [시스템설정](#manager-system-configs)
+   - [18-1. 시스템설정 등록](#manager-config-register)
 19. [자료관리](#manager-system-data-manage)
 
 ## 1. 관리자인증 {#manager-auth}
@@ -493,10 +494,21 @@
 | --- | --- | --- |
 | 표시 내용 | 설정 목록 | 등록된 설정의 설명과 내용을 표시합니다. |
 | 화면 링크 | 설명 | 해당 시스템 설정 상세를 엽니다. |
-| 버튼 | 등록 | 새 설정 등록 창을 엽니다. |
+| 버튼 | [등록](#manager-config-register) | 새 설정 등록 창을 엽니다. |
 | 버튼 | 엑셀 | 현재 설정 목록을 엑셀 파일로 내려받습니다. |
 
 [시스템설정 화면 열기](https://ollbareun.vercel.app/manager/system/configs)
+
+### 18-1. 시스템설정 등록 {#manager-config-register}
+
+**시스템설정** 화면에서 **등록** 버튼을 누르면 열립니다.
+
+| 항목 | 입력 또는 동작 |
+| --- | --- |
+| 설명 | 설정의 용도나 이름을 입력합니다. |
+| 내용 | 새 설정에 사용할 값을 입력합니다. |
+| 저장 | 입력 내용을 확인하고 등록합니다. |
+| 닫기 | 등록 창을 닫습니다. |
 
 ## 19. 자료관리 {#manager-system-data-manage}
 

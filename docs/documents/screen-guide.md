@@ -10,6 +10,7 @@
 5. [근무지관리](#manager-employee-worksites)
    - [5-1. 근무지등록](#manager-worksite-register)
 6. [근무지배정](#manager-employee-assignments)
+   - [6-1. 배정등록](#manager-assignment-register)
 7. [공휴일관리](#manager-employee-holidays)
 8. [근태관리](#manager-reports-attendance)
 9. [휴가관리](#manager-leave)
@@ -206,11 +207,25 @@
 
 | 버튼 | 기능 |
 | --- | --- |
-| 배정등록 | 새 근무지 배정 등록 창을 엽니다. |
+| [배정등록](#manager-assignment-register) | 새 근무지 배정 등록 창을 엽니다. |
 | 정렬 화살표 | 이름, 근무지 또는 날짜를 기준으로 정렬 방향을 바꿉니다. |
 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
 [근무지배정 화면 열기](https://ollbareun.vercel.app/manager/employee/assignments)
+
+### 6-1. 배정등록 {#manager-assignment-register}
+
+**근무지배정** 화면에서 **배정등록** 버튼을 누르면 열립니다.
+
+| 항목 | 입력 또는 동작 |
+| --- | --- |
+| 이름·근무지 | 배정할 직원과 근무지를 선택합니다. |
+| 근무기간 | 시작일과 종료일을 지정합니다. |
+| 근무형태·출근·퇴근 | 배정 기간에 적용할 근무형태와 출퇴근 시각을 설정합니다. |
+| 요일·공휴일별 설정 | 근무형태에 따라 휴무일과 요일별 근무 규칙을 설정합니다. |
+| 기존 배정·출근 이력 | 선택 기간에 해당하는 이력이 있으면 아래 목록에서 확인합니다. 배정 기간이 겹치면 저장 과정에서 중복 안내를 확인합니다. |
+| 배정등록 | 입력 내용을 확인하고 등록합니다. |
+| 닫기 | 등록 창을 닫습니다. |
 
 ## 7. 공휴일관리 {#manager-employee-holidays}
 

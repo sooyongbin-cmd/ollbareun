@@ -18,6 +18,7 @@
    - [9-1. 휴가신청](#manager-leave-register)
 10. [월간근태](#manager-worker-information)
 11. [점검지관리](#manager-inspection-sites)
+   - [11-1. 점검지 등록](#manager-inspection-register)
 12. [점검지점검현황](#manager-inspection-logs)
 13. [특이사항](#manager-inspection-special-remarks)
 14. [교육자료관리](#manager-safety-resources)
@@ -348,10 +349,21 @@
 | 조회 조건 | 근무지, 점검지 | 근무지 이름이나 점검지 이름으로 목록을 좁힙니다. |
 | 표시 내용 | 조회 결과 | 근무지, 점검 순서, 점검지명, 점검시각, 점검자와 직군을 표시합니다. |
 | 화면 링크 | 점검지명 | 해당 점검지 상세를 엽니다. |
-| 버튼 | 점검지 등록 | 새 점검지 등록 창을 엽니다. |
+| 버튼 | [점검지 등록](#manager-inspection-register) | 새 점검지 등록 창을 엽니다. |
 | 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
 [점검지관리 화면 열기](https://ollbareun.vercel.app/manager/inspection/sites)
+
+### 11-1. 점검지 등록 {#manager-inspection-register}
+
+**점검지관리** 화면에서 **점검지 등록** 버튼을 누르면 열립니다.
+
+| 항목 | 입력 또는 동작 |
+| --- | --- |
+| 근무지 | 점검지를 등록할 근무지를 선택합니다. |
+| 점검지명 | 목록에 표시할 점검지 이름을 입력합니다. |
+| 저장 | 입력 내용을 확인하고 등록합니다. |
+| 닫기 | 등록 창을 닫습니다. |
 
 ## 12. 점검지점검현황 {#manager-inspection-logs}
 

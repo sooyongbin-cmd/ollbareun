@@ -20,6 +20,7 @@
 16. [월별교육이수](#manager-safety-monthly-edu)
 17. [관리자관리](#manager-system-admin-users)
 18. [시스템설정](#manager-system-configs)
+19. [자료관리](#manager-system-data-manage)
 
 ## 1. 관리자인증 {#manager-auth}
 
@@ -389,3 +390,19 @@
 | 버튼 | 엑셀 | 현재 설정 목록을 엑셀 파일로 내려받습니다. |
 
 [시스템설정 화면 열기](https://ollbareun.vercel.app/manager/system/configs)
+
+## 19. 자료관리 {#manager-system-data-manage}
+
+![자료관리 조회창과 목록](./images/manager-system-data-manage-guide.jpg)
+
+연도별 자료를 조회하고 선택한 연도의 자료를 정리하는 화면입니다.
+
+| 구분 | 항목 | 설명 |
+| --- | --- | --- |
+| 조회 조건 | 연도 | 조회할 자료의 연도를 선택합니다. |
+| 표시 내용 | 조회 결과 | 근태, 휴가, 공휴일, 교육, 점검지, 특이사항의 테이블과 건수를 표시합니다. |
+| 버튼 | 자료삭제 | 선택한 연도의 자료를 삭제하는 두 단계 확인 창을 엽니다. 삭제한 자료는 복구할 수 없습니다. |
+| 버튼 | 다시 조회 | 조회 오류가 발생했을 때 다시 불러옵니다. |
+| 버튼 | 엑셀 | 조회 결과를 엑셀 파일로 내려받습니다. |
+
+[자료관리 화면 열기](https://ollbareun.vercel.app/manager/system/data-manage)

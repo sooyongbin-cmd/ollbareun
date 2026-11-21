@@ -369,6 +369,8 @@
 
 ### 11-1. 점검지 등록 {#manager-inspection-register}
 
+![등록 모달 입력 화면](./images/modal-inspection.jpg)
+
 **점검지관리** 화면에서 **점검지 등록** 버튼을 누르면 열립니다.
 
 | 항목 | 입력 또는 동작 |

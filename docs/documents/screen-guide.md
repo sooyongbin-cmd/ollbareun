@@ -22,6 +22,7 @@
 12. [점검지점검현황](#manager-inspection-logs)
 13. [특이사항](#manager-inspection-special-remarks)
 14. [교육자료관리](#manager-safety-resources)
+   - [14-1. 교재등록](#manager-resource-register)
 15. [일일교육이수](#manager-safety-daily-edu)
 16. [월별교육이수](#manager-safety-monthly-edu)
 17. [관리자관리](#manager-system-admin-users)
@@ -405,10 +406,23 @@
 | 조회 조건 | 제목 | 교육자료 제목을 입력해 목록을 좁힙니다. |
 | 표시 내용 | 조회 결과 | 교육구분, 제목, 시작일과 종료일을 표시합니다. |
 | 화면 링크 | 제목 | 선택한 교육자료 상세를 엽니다. |
-| 버튼 | 교재등록 | 신규 교육자료 등록 창을 엽니다. |
+| 버튼 | [교재등록](#manager-resource-register) | 신규 교육자료 등록 창을 엽니다. |
 | 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
 [교육자료관리 화면 열기](https://ollbareun.vercel.app/manager/safety/resources)
+
+### 14-1. 교재등록 {#manager-resource-register}
+
+**교육자료관리** 화면에서 **교재등록** 버튼을 누르면 열립니다.
+
+| 항목 | 입력 또는 동작 |
+| --- | --- |
+| 교육구분 | 일일, 월별, 분기, 반기, 연간 중 교육 주기를 선택합니다. |
+| 시작일·종료일 | 교재 적용 기간을 지정합니다. |
+| 제목 | 교육자료 제목을 입력합니다. |
+| 유튜브 링크 | 근무자가 시청할 유튜브 영상 주소를 입력합니다. |
+| 저장 | 입력 내용을 확인하고 등록합니다. |
+| 닫기 | 등록 창을 닫습니다. |
 
 ## 15. 일일교육이수 {#manager-safety-daily-edu}
 

@@ -62,7 +62,7 @@
 
 ## 3. 월별상세현황 {#manager-monthly-information}
 
-![월별상세현황 화면 상단](./images/manager-monthly-information-guide.jpg)
+![월별상세현황 조회 조건과 결과 목록 일부](./images/manager-monthly-information-guide.jpg)
 
 근무지와 직원 기본정보, 출퇴근 예정·실제 시각, 근태 상태, 교육 이수 및 특이사항을 한 표에서 확인합니다.
 

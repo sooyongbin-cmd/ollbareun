@@ -19,6 +19,7 @@
 15. [일일교육이수](#manager-safety-daily-edu)
 16. [월별교육이수](#manager-safety-monthly-edu)
 17. [관리자관리](#manager-system-admin-users)
+18. [시스템설정](#manager-system-configs)
 
 ## 1. 관리자인증 {#manager-auth}
 
@@ -373,3 +374,18 @@
 | 버튼 | 엑셀 | 관리자 목록을 엑셀 파일로 내려받습니다. |
 
 [관리자관리 화면 열기](https://ollbareun.vercel.app/manager/system/admin-users)
+
+## 18. 시스템설정 {#manager-system-configs}
+
+![시스템설정 조회창과 목록](./images/manager-system-configs-guide.jpg)
+
+시스템 설정을 조회하고 등록하는 화면입니다. 공개 캡처에서는 개별 설정값을 가렸습니다.
+
+| 구분 | 항목 | 설명 |
+| --- | --- | --- |
+| 표시 내용 | 설정 목록 | 등록된 설정의 설명과 내용을 표시합니다. |
+| 화면 링크 | 설명 | 해당 시스템 설정 상세를 엽니다. |
+| 버튼 | 등록 | 새 설정 등록 창을 엽니다. |
+| 버튼 | 엑셀 | 현재 설정 목록을 엑셀 파일로 내려받습니다. |
+
+[시스템설정 화면 열기](https://ollbareun.vercel.app/manager/system/configs)

@@ -6,6 +6,7 @@
 2. [대시보드](#manager-dashboard)
 3. [월별상세현황](#manager-monthly-information)
 4. [직원관리](#manager-employee-employees)
+5. [근무지관리](#manager-employee-worksites)
 
 ## 1. 관리자인증 {#manager-auth}
 
@@ -105,3 +106,34 @@
 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
 [직원관리 화면 열기](https://ollbareun.vercel.app/manager/employee/employees)
+
+## 5. 근무지관리 {#manager-employee-worksites}
+
+![근무지관리 조회 조건과 근무지 목록](./images/manager-employee-worksites-guide.jpg)
+
+등록된 근무지를 조회하고 주소, 출퇴근 허용반경과 인원 배정 현황을 확인하는 화면입니다.
+
+### 조회 조건과 표시 내용
+
+| 항목 | 설명 |
+| --- | --- |
+| 근무지 | 이름을 입력해 목록을 좁힙니다. |
+| 조회 결과 | 근무지 이름, 점검지 수, 배정인원수, 주소와 출퇴근 허용반경을 표시합니다. |
+
+### 화면 링크
+
+| 항목 | 기능 |
+| --- | --- |
+| 근무지 이름 | 근무지 상세를 엽니다. |
+| 점검지 수 | 해당 근무지의 점검지관리 화면으로 이동합니다. |
+| 배정인원수 | 해당 근무지의 근무지배정 화면으로 이동합니다. |
+
+### 버튼
+
+| 버튼 | 기능 |
+| --- | --- |
+| 근무지 등록 | 새 근무지 등록 창을 엽니다. |
+| 정렬 화살표 | 근무지, 배정인원수 또는 허용반경을 기준으로 정렬 방향을 바꿉니다. |
+| 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
+
+[근무지관리 화면 열기](https://ollbareun.vercel.app/manager/employee/worksites)

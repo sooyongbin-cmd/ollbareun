@@ -13,6 +13,7 @@
 9. [휴가관리](#manager-leave)
 10. [월간근태](#manager-worker-information)
 11. [점검지관리](#manager-inspection-sites)
+12. [점검지점검현황](#manager-inspection-logs)
 
 ## 1. 관리자인증 {#manager-auth}
 
@@ -275,3 +276,17 @@
 | 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
 [점검지관리 화면 열기](https://ollbareun.vercel.app/manager/inspection/sites)
+
+## 12. 점검지점검현황 {#manager-inspection-logs}
+
+![점검지점검현황 조회창과 목록](./images/manager-inspection-logs-guide.jpg)
+
+근무지별로 기록된 점검 이력을 조회하는 화면입니다.
+
+| 구분 | 항목 | 설명 |
+| --- | --- | --- |
+| 조회 조건 | 근무지 | 특정 근무지를 선택하거나 전체를 조회합니다. |
+| 표시 내용 | 조회 결과 | 점검일자, 근무지, 점검지명, 점검자와 직군을 표시합니다. |
+| 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
+
+[점검지점검현황 화면 열기](https://ollbareun.vercel.app/manager/inspection/logs)

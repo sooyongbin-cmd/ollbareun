@@ -14,6 +14,7 @@
 10. [월간근태](#manager-worker-information)
 11. [점검지관리](#manager-inspection-sites)
 12. [점검지점검현황](#manager-inspection-logs)
+13. [특이사항](#manager-inspection-special-remarks)
 
 ## 1. 관리자인증 {#manager-auth}
 
@@ -290,3 +291,18 @@
 | 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
 [점검지점검현황 화면 열기](https://ollbareun.vercel.app/manager/inspection/logs)
+
+## 13. 특이사항 {#manager-inspection-special-remarks}
+
+![특이사항 조회창과 목록](./images/manager-inspection-special-remarks-guide.jpg)
+
+근무 중 보고된 특이사항과 처리 상태를 확인하는 화면입니다.
+
+| 구분 | 항목 | 설명 |
+| --- | --- | --- |
+| 조회 조건 | 조회년월, 처리완료 | 조회할 월과 처리 상태를 선택합니다. |
+| 표시 내용 | 조회 결과 | 근무지, 보고자, 점검일시, 내용, 첨부사진과 처리 상태를 표시합니다. |
+| 화면 링크 | 점검일시 | 보고 상세에서 전체 내용과 사진을 확인하고 미처리 건을 처리완료로 바꿀 수 있습니다. |
+| 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
+
+[특이사항 화면 열기](https://ollbareun.vercel.app/manager/inspection/special-remarks)

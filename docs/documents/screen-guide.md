@@ -132,6 +132,8 @@
 
 ### 4-1. 직원등록 {#manager-employee-register}
 
+![등록 모달 입력 화면](./images/modal-employee.jpg)
+
 **직원관리** 화면에서 **직원 등록** 버튼을 누르면 열립니다.
 
 | 항목 | 입력 또는 동작 |

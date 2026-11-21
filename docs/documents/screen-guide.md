@@ -225,6 +225,8 @@
 
 ### 6-1. 배정등록 {#manager-assignment-register}
 
+![등록 모달 입력 화면](./images/modal-assignment.jpg)
+
 **근무지배정** 화면에서 **배정등록** 버튼을 누르면 열립니다.
 
 | 항목 | 입력 또는 동작 |

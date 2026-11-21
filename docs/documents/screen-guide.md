@@ -8,6 +8,7 @@
 4. [직원관리](#manager-employee-employees)
    - [4-1. 직원등록](#manager-employee-register)
 5. [근무지관리](#manager-employee-worksites)
+   - [5-1. 근무지등록](#manager-worksite-register)
 6. [근무지배정](#manager-employee-assignments)
 7. [공휴일관리](#manager-employee-holidays)
 8. [근태관리](#manager-reports-attendance)
@@ -161,11 +162,24 @@
 
 | 버튼 | 기능 |
 | --- | --- |
-| 근무지 등록 | 새 근무지 등록 창을 엽니다. |
+| [근무지 등록](#manager-worksite-register) | 새 근무지 등록 창을 엽니다. |
 | 정렬 화살표 | 근무지, 배정인원수 또는 허용반경을 기준으로 정렬 방향을 바꿉니다. |
 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
 [근무지관리 화면 열기](https://ollbareun.vercel.app/manager/employee/worksites)
+
+### 5-1. 근무지등록 {#manager-worksite-register}
+
+**근무지관리** 화면에서 **근무지 등록** 버튼을 누르면 열립니다.
+
+| 항목 | 입력 또는 동작 |
+| --- | --- |
+| 근무지 이름 | 목록에 표시할 근무지 이름을 입력합니다. |
+| 주소 검색 | 주소를 검색해 선택합니다. 선택한 주소의 위치 좌표가 함께 설정됩니다. |
+| 허용반경 | 출퇴근을 허용할 거리 범위를 미터 단위로 입력합니다. |
+| 현장등록 | 저장 완료 안내에서 새 근무지의 현장등록으로 이어갈 수 있습니다. |
+| 저장 | 입력 내용을 확인하고 등록합니다. |
+| 닫기 | 등록 창을 닫습니다. |
 
 ## 6. 근무지배정 {#manager-employee-assignments}
 

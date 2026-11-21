@@ -18,6 +18,7 @@
 14. [교육자료관리](#manager-safety-resources)
 15. [일일교육이수](#manager-safety-daily-edu)
 16. [월별교육이수](#manager-safety-monthly-edu)
+17. [관리자관리](#manager-system-admin-users)
 
 ## 1. 관리자인증 {#manager-auth}
 
@@ -356,3 +357,19 @@
 | 버튼 | 엑셀 | 각 표의 조회 결과를 별도로 내려받습니다. |
 
 [월별교육이수 화면 열기](https://ollbareun.vercel.app/manager/safety/monthly_edu)
+
+## 17. 관리자관리 {#manager-system-admin-users}
+
+![관리자관리 조회창과 목록](./images/manager-system-admin-users-guide.jpg)
+
+관리자 계정과 푸시 알림 구독을 관리하는 화면입니다. 공개 캡처에서는 계정 행을 가렸습니다.
+
+| 구분 | 항목 | 설명 |
+| --- | --- | --- |
+| 표시 내용 | 관리자 목록 | 등록된 관리자의 이메일, 직군, 최근접속일과 구독 삭제 항목을 표시합니다. |
+| 화면 링크 | 이메일 | 해당 관리자 계정의 상세를 엽니다. |
+| 버튼 | 관리자등록 | 신규 관리자 등록 창을 엽니다. |
+| 버튼 | 삭제 | 권한이 있는 관리자가 해당 기기의 알림 구독을 삭제합니다. |
+| 버튼 | 엑셀 | 관리자 목록을 엑셀 파일로 내려받습니다. |
+
+[관리자관리 화면 열기](https://ollbareun.vercel.app/manager/system/admin-users)

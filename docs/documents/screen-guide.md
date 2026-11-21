@@ -266,6 +266,8 @@
 
 ### 7-1. 휴일추가 {#manager-holiday-register}
 
+![등록 모달 입력 화면](./images/modal-holiday.jpg)
+
 **공휴일관리** 화면에서 **휴일추가** 버튼을 누르면 열립니다.
 
 | 항목 | 입력 또는 동작 |

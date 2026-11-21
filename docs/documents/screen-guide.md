@@ -45,7 +45,7 @@
 
 ## 1. 관리자인증 {#manager-auth}
 
-![관리자 Google 인증 화면과 하단의 올바름 관리자 설치 안내](./images/manager-auth-guide.jpg)
+![로그아웃 후 표시되는 관리자 Google 인증 화면](./images/manager-auth-guide.jpg)
 
 관리자 페이지에 들어가기 전에 Google 계정으로 본인 확인을 하는 화면입니다. 관리자 권한이 등록된 Google 계정으로 인증하면 관리자 메인 화면으로 이동합니다. 등록되지 않은 계정으로 인증하면 관리자 권한이 없다는 안내가 표시됩니다.
 

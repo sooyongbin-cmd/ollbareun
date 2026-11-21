@@ -179,6 +179,8 @@
 
 ### 5-1. 근무지등록 {#manager-worksite-register}
 
+![등록 모달 입력 화면](./images/modal-worksite.jpg)
+
 **근무지관리** 화면에서 **근무지 등록** 버튼을 누르면 열립니다.
 
 | 항목 | 입력 또는 동작 |

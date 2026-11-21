@@ -12,3 +12,4 @@
 6. [테스트 계획서](./test-plan.html)
 7. [배포 가이드](./deployment-guide.html)
 8. [운영 매뉴얼](./operations-manual.html)
+9. [화면설명서](./screen-guide.html)

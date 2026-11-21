@@ -3,7 +3,8 @@
 ## 목차
 
 1. [관리자인증](#manager-auth)
-2. [관리자 메인 화면](#manager-dashboard)
+2. [대시보드](#manager-dashboard)
+3. [월별상세현황](#manager-monthly-information)
 
 ## 1. 관리자인증 {#manager-auth}
 
@@ -18,7 +19,7 @@
 
 [관리자 인증 화면 열기](https://www.olbareum.com/manager/auth?next=%2Fmanager)
 
-## 2. 관리자 메인 화면 {#manager-dashboard}
+## 2. 대시보드 {#manager-dashboard}
 
 ![관리자 대시보드 상단의 운영 요약과 왼쪽 메뉴](./images/manager-dashboard-guide.jpg)
 
@@ -58,3 +59,15 @@
 | 로그아웃 | 현재 관리자 세션을 종료합니다. |
 
 [관리자 메인 화면 열기](https://ollbareun.vercel.app/manager)
+
+## 3. 월별상세현황 {#manager-monthly-information}
+
+![월별상세현황 화면 상단](./images/manager-monthly-information-guide.jpg)
+
+근무지와 직원 기본정보, 출퇴근 예정·실제 시각, 근태 상태, 교육 이수 및 특이사항을 한 표에서 확인합니다.
+
+- **조회 조건** 근무지, 근무자, 조회년월.
+- **화면 링크** 출근예정일은 근태 상세를, 특이사항 링크는 해당 보고 상세를 엽니다.
+- **버튼과 조작** 엑셀은 조회 결과를 내려받습니다.
+
+[월별상세현황 화면 열기](https://ollbareun.vercel.app/manager/monthly-information)

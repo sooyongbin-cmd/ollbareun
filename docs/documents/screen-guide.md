@@ -26,6 +26,7 @@
 15. [일일교육이수](#manager-safety-daily-edu)
 16. [월별교육이수](#manager-safety-monthly-edu)
 17. [관리자관리](#manager-system-admin-users)
+   - [17-1. 관리자등록](#manager-admin-register)
 18. [시스템설정](#manager-system-configs)
 19. [자료관리](#manager-system-data-manage)
 
@@ -465,11 +466,22 @@
 | --- | --- | --- |
 | 표시 내용 | 관리자 목록 | 등록된 관리자의 이메일, 직군, 최근접속일과 구독 삭제 항목을 표시합니다. |
 | 화면 링크 | 이메일 | 해당 관리자 계정의 상세를 엽니다. |
-| 버튼 | 관리자등록 | 신규 관리자 등록 창을 엽니다. |
+| 버튼 | [관리자등록](#manager-admin-register) | 신규 관리자 등록 창을 엽니다. |
 | 버튼 | 삭제 | 권한이 있는 관리자가 해당 기기의 알림 구독을 삭제합니다. |
 | 버튼 | 엑셀 | 관리자 목록을 엑셀 파일로 내려받습니다. |
 
 [관리자관리 화면 열기](https://ollbareun.vercel.app/manager/system/admin-users)
+
+### 17-1. 관리자등록 {#manager-admin-register}
+
+**관리자관리** 화면에서 **관리자등록** 버튼을 누르면 열립니다.
+
+| 항목 | 입력 또는 동작 |
+| --- | --- |
+| 관리자이메일 | 관리자 인증에 사용할 Google 계정 이메일을 입력합니다. |
+| 직군 설정 | 일반 관리자 또는 최고 관리자를 선택합니다. |
+| 저장 | 입력 내용을 확인하고 등록합니다. |
+| 닫기 | 등록 창을 닫습니다. |
 
 ## 18. 시스템설정 {#manager-system-configs}
 

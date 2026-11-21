@@ -6,6 +6,7 @@
 2. [대시보드](#manager-dashboard)
 3. [월별상세현황](#manager-monthly-information)
 4. [직원관리](#manager-employee-employees)
+   - [4-1. 직원등록](#manager-employee-register)
 5. [근무지관리](#manager-employee-worksites)
 6. [근무지배정](#manager-employee-assignments)
 7. [공휴일관리](#manager-employee-holidays)
@@ -115,11 +116,25 @@
 
 | 버튼 | 기능 |
 | --- | --- |
-| 직원 등록 | 신규 직원 등록 창을 엽니다. |
+| [직원 등록](#manager-employee-register) | 신규 직원 등록 창을 엽니다. |
 | 정렬 화살표 | 이름, 연락처, 직군 또는 근무지를 기준으로 정렬 방향을 바꿉니다. |
 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
 [직원관리 화면 열기](https://ollbareun.vercel.app/manager/employee/employees)
+
+### 4-1. 직원등록 {#manager-employee-register}
+
+**직원관리** 화면에서 **직원 등록** 버튼을 누르면 열립니다.
+
+| 항목 | 입력 또는 동작 |
+| --- | --- |
+| 직원이름, 생년월일, 연락처 | 직원의 기본정보를 입력합니다. |
+| 직군 | 등록된 직군 중 해당 직군을 선택합니다. |
+| 근무형태 | 일반근무, 격일근무, 야간근무 중 선택합니다. |
+| 출근·퇴근 | 오전·오후와 시각을 선택합니다. 격일·야간근무는 익일 퇴근을 지정할 수 있습니다. |
+| 근무 일정 | 근무형태에 맞춰 화면에 표시되는 일정 규칙을 설정합니다. |
+| 저장 | 입력 내용을 확인하고 등록합니다. |
+| 닫기 | 등록 창을 닫습니다. |
 
 ## 5. 근무지관리 {#manager-employee-worksites}
 

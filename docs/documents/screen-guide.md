@@ -7,6 +7,7 @@
 3. [월별상세현황](#manager-monthly-information)
 4. [직원관리](#manager-employee-employees)
 5. [근무지관리](#manager-employee-worksites)
+6. [근무지배정](#manager-employee-assignments)
 
 ## 1. 관리자인증 {#manager-auth}
 
@@ -137,3 +138,34 @@
 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
 [근무지관리 화면 열기](https://ollbareun.vercel.app/manager/employee/worksites)
+
+## 6. 근무지배정 {#manager-employee-assignments}
+
+![근무지배정 조회 조건과 배정 목록](./images/manager-employee-assignments-guide.jpg)
+
+직원별 근무지 배정과 배정기간을 조회하고 새 배정을 등록하는 화면입니다.
+
+### 조회 조건과 표시 내용
+
+| 항목 | 설명 |
+| --- | --- |
+| 이름 | 직원 이름으로 목록을 좁힙니다. |
+| 근무지 | 근무지 이름으로 목록을 좁힙니다. |
+| 날짜 | 선택한 날짜가 배정기간에 포함되는 항목을 조회합니다. |
+| 조회 결과 | 직원 이름, 직군, 근무형태, 근무지와 배정기간을 표시합니다. |
+
+### 화면 링크
+
+| 항목 | 기능 |
+| --- | --- |
+| 직원 이름 | 해당 직원의 근무지 배정 상세를 엽니다. |
+
+### 버튼
+
+| 버튼 | 기능 |
+| --- | --- |
+| 배정등록 | 새 근무지 배정 등록 창을 엽니다. |
+| 정렬 화살표 | 이름, 근무지 또는 날짜를 기준으로 정렬 방향을 바꿉니다. |
+| 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
+
+[근무지배정 화면 열기](https://ollbareun.vercel.app/manager/employee/assignments)

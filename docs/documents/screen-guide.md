@@ -16,6 +16,7 @@
 12. [점검지점검현황](#manager-inspection-logs)
 13. [특이사항](#manager-inspection-special-remarks)
 14. [교육자료관리](#manager-safety-resources)
+15. [일일교육이수](#manager-safety-daily-edu)
 
 ## 1. 관리자인증 {#manager-auth}
 
@@ -323,3 +324,18 @@
 | 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
 [교육자료관리 화면 열기](https://ollbareun.vercel.app/manager/safety/resources)
+
+## 15. 일일교육이수 {#manager-safety-daily-edu}
+
+![일일교육이수 조회창과 목록](./images/manager-safety-daily-edu-guide.jpg)
+
+근무일별 안전교육 이수 여부를 확인하는 화면입니다.
+
+| 구분 | 항목 | 설명 |
+| --- | --- | --- |
+| 조회 조건 | 이름, 근무일 | 직원 이름과 조회할 근무일을 지정합니다. |
+| 표시 내용 | 조회 결과 | 직원 이름, 출근일, 일일·월별·분기·반기·연간 교육 이수 여부를 표시합니다. |
+| 버튼 | 교육알림 | 오늘 근무일로 조회한 목록에서 미이수자에게 알림을 보낼지 확인하는 창을 엽니다. |
+| 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
+
+[일일교육이수 화면 열기](https://ollbareun.vercel.app/manager/safety/daily_edu)

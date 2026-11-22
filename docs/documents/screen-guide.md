@@ -1,4 +1,4 @@
-# 화면설명서
+# 올바름 관리자화면 설명서
 
 ## 목차
 
@@ -54,13 +54,11 @@
 | Google로 관리자 로그인 | Google 로그인으로 이동합니다. 관리자 권한이 등록된 Google 계정을 선택해 인증합니다. |
 | 설치 | 하단에 **올바름 관리자 설치** 안내가 표시될 때 사용할 수 있습니다. 브라우저의 설치 확인창을 열어 관리자 앱 아이콘을 기기에 추가할 수 있습니다. |
 
-[관리자 인증 화면 열기](https://www.olbareum.com/manager/auth?next=%2Fmanager)
-
 ## 2. 대시보드 {#manager-dashboard}
 
 ![관리자 대시보드의 운영 요약, 금주 휴가현황과 점검지 점검 현황](./images/manager-dashboard-guide.jpg)
 
-관리자 로그인 후 처음 표시되는 대시보드입니다. 출퇴근, 재직 인원, 안전교육, 특이사항과 휴가·점검 현황을 한눈에 확인할 수 있습니다. 캡처는 운영 요약과 하단 현황을 보여 줍니다. 화면의 수치는 테스트 데이터이며 근무지명은 가렸습니다.
+관리자 로그인 후 처음 표시되는 대시보드입니다. 출퇴근, 재직 인원, 안전교육, 특이사항과 휴가·점검 현황을 한눈에 확인할 수 있습니다.
 
 ### 조회 기준과 표시 내용
 
@@ -95,13 +93,11 @@
 | 사용자 메뉴 | 화면 오른쪽 위의 계정 아이콘을 누르면 **로그아웃** 항목이 열립니다. |
 | 로그아웃 | 현재 관리자 세션을 종료합니다. |
 
-[관리자 메인 화면 열기](https://ollbareun.vercel.app/manager)
-
 ## 3. 월별상세현황 {#manager-monthly-information}
 
 ![월별상세현황의 조회 조건과 근무일별 결과 목록](./images/manager-monthly-information-guide.jpg)
 
-선택한 월의 근태, 안전교육 이수 여부와 특이사항을 근무자별로 확인하는 화면입니다. 캡처의 결과 목록에서는 근무지명, 이름, 생년월일과 연락처를 가렸습니다.
+선택한 월의 근태, 안전교육 이수 여부와 특이사항을 근무자별로 확인하는 화면입니다.
 
 ### 조회 조건
 
@@ -126,8 +122,6 @@
 | 출근예정일 | 해당 근무일의 근태 기록을 모달로 엽니다. |
 | 특이사항 링크 | 보고가 있는 경우 해당 특이사항을 모달로 엽니다. |
 | 엑셀 | 현재 조회 조건에 맞는 결과를 엑셀 파일로 내려받습니다. |
-
-[월별상세현황 화면 열기](https://ollbareun.vercel.app/manager/monthly-information)
 
 ## 4. 직원관리 {#manager-employee-employees}
 
@@ -160,8 +154,6 @@
 | 정렬 화살표 | 이름, 연락처, 직군 또는 근무지를 기준으로 정렬 방향을 바꿉니다. |
 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
-[직원관리 화면 열기](https://ollbareun.vercel.app/manager/employee/employees)
-
 ### 4-1. 직원등록 {#manager-employee-register}
 
 ![등록 모달 입력 화면](./images/modal-employee.jpg)
@@ -182,7 +174,7 @@
 
 ![직원상세 모달 캡처](./images/detail-employee.jpg)
 
-직원 목록의 이름을 누릅니다. 캡처에서는 개별 기록의 값과 위치 등 식별 정보를 가렸습니다.
+직원 목록의 이름을 누릅니다.
 
 | 항목 | 설명 |
 | --- | --- |
@@ -195,7 +187,7 @@
 
 ![근무지배정 상세 모달 캡처](./images/detail-assignment.jpg)
 
-직원 목록의 배정기간을 누릅니다. 직원상세의 근무지배정정보에서도 열 수 있습니다. 캡처에서는 개별 기록의 값과 위치 등 식별 정보를 가렸습니다.
+직원 목록의 배정기간을 누릅니다. 직원상세의 근무지배정정보에서도 열 수 있습니다.
 
 | 항목 | 설명 |
 | --- | --- |
@@ -233,8 +225,6 @@
 | 정렬 화살표 | 근무지, 배정인원수 또는 허용반경을 기준으로 정렬 방향을 바꿉니다. |
 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
-[근무지관리 화면 열기](https://ollbareun.vercel.app/manager/employee/worksites)
-
 ### 5-1. 근무지등록 {#manager-worksite-register}
 
 ![등록 모달 입력 화면](./images/modal-worksite.jpg)
@@ -254,7 +244,7 @@
 
 ![근무지 상세 모달 캡처](./images/detail-worksite.jpg)
 
-근무지 목록의 근무지 이름을 누릅니다. 캡처에서는 개별 기록의 값과 위치 등 식별 정보를 가렸습니다.
+근무지 목록의 근무지 이름을 누릅니다.
 
 | 항목 | 설명 |
 | --- | --- |
@@ -292,8 +282,6 @@
 | 정렬 화살표 | 이름, 근무지 또는 날짜를 기준으로 정렬 방향을 바꿉니다. |
 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
-[근무지배정 화면 열기](https://ollbareun.vercel.app/manager/employee/assignments)
-
 ### 6-1. 배정등록 {#manager-assignment-register}
 
 ![등록 모달 입력 화면](./images/modal-assignment.jpg)
@@ -314,7 +302,7 @@
 
 ![근무지배정 상세 모달 캡처](./images/detail-assignment.jpg)
 
-배정 목록의 직원 이름을 누릅니다. 캡처에서는 개별 기록의 값과 위치 등 식별 정보를 가렸습니다.
+배정 목록의 직원 이름을 누릅니다.
 
 | 항목 | 설명 |
 | --- | --- |
@@ -345,8 +333,6 @@
 | 휴일 구분 | 국공휴일 또는 회사 지정 휴일로 변경합니다. |
 | 선택 | 해당 날짜의 휴일 적용 여부를 바꿉니다. |
 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
-
-[공휴일관리 화면 열기](https://ollbareun.vercel.app/manager/employee/holidays)
 
 ### 7-1. 휴일추가 {#manager-holiday-register}
 
@@ -388,13 +374,11 @@
 | --- | --- |
 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
-[근태관리 화면 열기](https://ollbareun.vercel.app/manager/reports/attendance)
-
 ### 8-1. 근태상세 {#manager-8-attendance-detail}
 
 ![근태상세 모달 캡처](./images/detail-attendance.jpg)
 
-근태 목록의 직원 이름을 누릅니다. 캡처에서는 개별 기록의 값과 위치 등 식별 정보를 가렸습니다.
+근태 목록의 직원 이름을 누릅니다.
 
 | 항목 | 설명 |
 | --- | --- |
@@ -417,8 +401,6 @@
 | 버튼 | [휴가신청](#manager-leave-register) | 휴가 등록 창을 엽니다. |
 | 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
-[휴가관리 화면 열기](https://ollbareun.vercel.app/manager/leave)
-
 ### 9-1. 휴가신청 {#manager-leave-register}
 
 ![등록 모달 입력 화면](./images/modal-leave.jpg)
@@ -436,7 +418,7 @@
 
 ![휴가상세 모달 캡처](./images/detail-leave.jpg)
 
-휴가 목록의 직원 이름을 누릅니다. 캡처에서는 개별 기록의 값과 위치 등 식별 정보를 가렸습니다.
+휴가 목록의 직원 이름을 누릅니다.
 
 | 항목 | 설명 |
 | --- | --- |
@@ -458,13 +440,11 @@
 | 화면 링크 | [출근예정일](#manager-10-attendance-detail) | 해당 날짜의 근태 기록 상세를 엽니다. |
 | 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
-[월간근태 화면 열기](https://ollbareun.vercel.app/manager/worker-information)
-
 ### 10-1. 근태상세 {#manager-10-attendance-detail}
 
 ![근태상세 모달 캡처](./images/detail-attendance.jpg)
 
-월간근태 목록의 출근예정일을 누릅니다. 캡처에서는 개별 기록의 값과 위치 등 식별 정보를 가렸습니다.
+월간근태 목록의 출근예정일을 누릅니다.
 
 | 항목 | 설명 |
 | --- | --- |
@@ -487,8 +467,6 @@
 | 버튼 | [점검지 등록](#manager-inspection-register) | 새 점검지 등록 창을 엽니다. |
 | 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
-[점검지관리 화면 열기](https://ollbareun.vercel.app/manager/inspection/sites)
-
 ### 11-1. 점검지 등록 {#manager-inspection-register}
 
 ![등록 모달 입력 화면](./images/modal-inspection.jpg)
@@ -506,7 +484,7 @@
 
 ![점검지 상세 모달 캡처](./images/detail-inspection.jpg)
 
-점검지 목록의 점검지명을 누릅니다. 캡처에서는 개별 기록의 값과 위치 등 식별 정보를 가렸습니다.
+점검지 목록의 점검지명을 누릅니다.
 
 | 항목 | 설명 |
 | --- | --- |
@@ -527,8 +505,6 @@
 | 표시 내용 | 조회 결과 | 점검일자, 근무지, 점검지명, 점검자와 직군을 표시합니다. |
 | 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
-[점검지점검현황 화면 열기](https://ollbareun.vercel.app/manager/inspection/logs)
-
 ## 13. 특이사항 {#manager-inspection-special-remarks}
 
 ![특이사항 조회창과 목록](./images/manager-inspection-special-remarks-guide.jpg)
@@ -542,13 +518,11 @@
 | 화면 링크 | [점검일시](#manager-13-remark-detail) | 보고 상세에서 전체 내용과 사진을 확인하고 미처리 건을 처리완료로 바꿀 수 있습니다. |
 | 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
-[특이사항 화면 열기](https://ollbareun.vercel.app/manager/inspection/special-remarks)
-
 ### 13-1. 특이사항 상세 {#manager-13-remark-detail}
 
 ![특이사항 상세 모달 캡처](./images/detail-remark.jpg)
 
-특이사항 목록의 점검일시를 누릅니다. 캡처에서는 개별 기록의 값과 위치 등 식별 정보를 가렸습니다.
+특이사항 목록의 점검일시를 누릅니다.
 
 | 항목 | 설명 |
 | --- | --- |
@@ -571,8 +545,6 @@
 | 버튼 | [교재등록](#manager-resource-register) | 신규 교육자료 등록 창을 엽니다. |
 | 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
-[교육자료관리 화면 열기](https://ollbareun.vercel.app/manager/safety/resources)
-
 ### 14-1. 교재등록 {#manager-resource-register}
 
 ![등록 모달 입력 화면](./images/modal-resource.jpg)
@@ -592,7 +564,7 @@
 
 ![교육자료 상세 모달 캡처](./images/detail-resource.jpg)
 
-교육자료 목록의 제목을 누릅니다. 캡처에서는 개별 기록의 값과 위치 등 식별 정보를 가렸습니다.
+교육자료 목록의 제목을 누릅니다.
 
 | 항목 | 설명 |
 | --- | --- |
@@ -614,8 +586,6 @@
 | 버튼 | 교육알림 | 오늘 근무일로 조회한 목록에서 미이수자에게 알림을 보낼지 확인하는 창을 엽니다. |
 | 버튼 | 엑셀 | 현재 조회 결과를 엑셀 파일로 내려받습니다. |
 
-[일일교육이수 화면 열기](https://ollbareun.vercel.app/manager/safety/daily_edu)
-
 ## 16. 월별교육이수 {#manager-safety-monthly-edu}
 
 ![월별교육이수 조회창과 목록](./images/manager-safety-monthly-edu-guide.jpg)
@@ -630,13 +600,11 @@
 | 버튼과 조작 | 미이수 표시 | 조작 가능한 미이수 표시를 누르면 해당 기록을 이수 처리하는 확인 창을 엽니다. |
 | 버튼 | 엑셀 | 각 표의 조회 결과를 별도로 내려받습니다. |
 
-[월별교육이수 화면 열기](https://ollbareun.vercel.app/manager/safety/monthly_edu)
-
 ## 17. 관리자관리 {#manager-system-admin-users}
 
 ![관리자관리 조회창과 목록](./images/manager-system-admin-users-guide.jpg)
 
-관리자 계정과 푸시 알림 구독을 관리하는 화면입니다. 공개 캡처에서는 계정 행을 가렸습니다.
+관리자 계정과 푸시 알림 구독을 관리하는 화면입니다.
 
 | 구분 | 항목 | 설명 |
 | --- | --- | --- |
@@ -645,8 +613,6 @@
 | 버튼 | [관리자등록](#manager-admin-register) | 신규 관리자 등록 창을 엽니다. |
 | 버튼 | 삭제 | 권한이 있는 관리자가 해당 기기의 알림 구독을 삭제합니다. |
 | 버튼 | 엑셀 | 관리자 목록을 엑셀 파일로 내려받습니다. |
-
-[관리자관리 화면 열기](https://ollbareun.vercel.app/manager/system/admin-users)
 
 ### 17-1. 관리자등록 {#manager-admin-register}
 
@@ -665,7 +631,7 @@
 
 ![관리자 상세 모달 캡처](./images/detail-admin.jpg)
 
-관리자 목록의 이메일을 누릅니다. 캡처에서는 개별 기록의 값과 위치 등 식별 정보를 가렸습니다.
+관리자 목록의 이메일을 누릅니다.
 
 | 항목 | 설명 |
 | --- | --- |
@@ -677,7 +643,7 @@
 
 ![시스템설정 조회창과 목록](./images/manager-system-configs-guide.jpg)
 
-시스템 설정을 조회하고 등록하는 화면입니다. 공개 캡처에서는 개별 설정값을 가렸습니다.
+시스템 설정을 조회하고 등록하는 화면입니다.
 
 | 구분 | 항목 | [설명](#manager-18-config-detail) |
 | --- | --- | --- |
@@ -685,8 +651,6 @@
 | 화면 링크 | 설명 | 해당 시스템 설정 상세를 엽니다. |
 | 버튼 | [등록](#manager-config-register) | 새 설정 등록 창을 엽니다. |
 | 버튼 | 엑셀 | 현재 설정 목록을 엑셀 파일로 내려받습니다. |
-
-[시스템설정 화면 열기](https://ollbareun.vercel.app/manager/system/configs)
 
 ### 18-1. 시스템설정 등록 {#manager-config-register}
 
@@ -705,7 +669,7 @@
 
 ![시스템설정 상세 모달 캡처](./images/detail-config.jpg)
 
-설정 목록의 설명을 누릅니다. 캡처에서는 개별 기록의 값과 위치 등 식별 정보를 가렸습니다.
+설정 목록의 설명을 누릅니다.
 
 | 항목 | 설명 |
 | --- | --- |
@@ -726,5 +690,3 @@
 | 버튼 | 자료삭제 | 선택한 연도의 자료를 삭제하는 두 단계 확인 창을 엽니다. 삭제한 자료는 복구할 수 없습니다. |
 | 버튼 | 다시 조회 | 조회 오류가 발생했을 때 다시 불러옵니다. |
 | 버튼 | 엑셀 | 조회 결과를 엑셀 파일로 내려받습니다. |
-
-[자료관리 화면 열기](https://ollbareun.vercel.app/manager/system/data-manage)

@@ -119,6 +119,7 @@ async function educationStatusForDate(employeeId: string, date: string, supabase
     completed_at: string | null;
   };
 
+  const yearStart = `${date.slice(0, 4)}-01-01`;
   const [resources, completions] = await Promise.all([
     readAllEducationRows<Resource>((from, to) => supabase.from("education_resources")
       .select("id,title,youtube_link,created_at,education_type,startdate,enddate")
@@ -129,7 +130,7 @@ async function educationStatusForDate(employeeId: string, date: string, supabase
         .select("id,employee_id,title,work_date,education_type,completed_at")
         .eq("employee_id", employeeId);
       const byDate = includePeriodCompletions
-        ? query.gte("work_date", educationPeriodStart("semiannual", date)).lte("work_date", date)
+        ? query.gte("work_date", yearStart).lte("work_date", date)
         : query.eq("work_date", date);
       return byDate.order("work_date", { ascending: false }).order("completed_at", { ascending: false }).order("id").range(from, to);
     }),
@@ -149,8 +150,8 @@ async function educationStatusForDate(employeeId: string, date: string, supabase
     const educationType = educationTypeByKoreanName[completion.education_type];
     if (!educationType) continue;
     if (completion.employee_id !== employeeId || completion.work_date > date) continue;
-    const periodStart = includePeriodCompletions && educationType !== "other"
-      ? educationPeriodStart(educationType, date)
+    const periodStart = includePeriodCompletions
+      ? (educationType === "other" ? yearStart : educationPeriodStart(educationType, date))
       : date;
     if (completion.work_date < periodStart) continue;
     for (const resource of matchingResources) {

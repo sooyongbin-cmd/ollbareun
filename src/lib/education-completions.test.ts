@@ -58,17 +58,20 @@ describe("period education", () => {
     }]);
     expect(supabase.rpc).not.toHaveBeenCalled();
   });
-  it("counts an earlier quarterly completion without carrying over daily or prior-quarter records", async () => {
+  it("counts earlier quarterly and annual completions within their periods", async () => {
     const workDate = "2026-10-16";
     const completedAt = "2026-11-22T13:14:39Z";
     const resources = [
       { id: "quarter", title: "분기교육", education_type: "분기" },
       { id: "previous", title: "지난 분기 교육", education_type: "분기" },
       { id: "daily", title: "일일교육", education_type: "일일" },
+      { id: "annual", title: "연간교육", education_type: "기타" },
+      { id: "last-year", title: "이전 연도 교육", education_type: "기타" },
     ];
     const completions = resources.map(({ id, title, education_type }) => ({
       id, title, education_type, employee_id: "employee-1",
-      work_date: id === "previous" ? "2026-09-30" : "2026-10-07", completed_at: completedAt,
+      work_date: ({ previous: "2026-09-30", annual: "2026-02-01", "last-year": "2025-12-31" } as Record<string, string>)[id] ?? "2026-10-07",
+      completed_at: completedAt,
     }));
     const supabase = {
       from: vi.fn((table: string) => ({
@@ -76,7 +79,7 @@ describe("period education", () => {
         eq: vi.fn().mockReturnThis(), gte: vi.fn().mockReturnThis(), lte: vi.fn().mockReturnThis(),
         range: vi.fn().mockResolvedValue({
           data: table === "education_resources"
-            ? resources.map((resource) => ({ ...resource, startdate: "2026-06-07", enddate: "2027-10-07" }))
+            ? resources.map((resource) => ({ ...resource, startdate: "2025-06-07", enddate: "2027-10-07" }))
             : completions,
           error: null,
         }),
@@ -88,6 +91,8 @@ describe("period education", () => {
       expect.objectContaining({ resourceId: "quarter", isCompleted: true, completedAt }),
       expect.objectContaining({ resourceId: "previous", isCompleted: false }),
       expect.objectContaining({ resourceId: "daily", isCompleted: false }),
+      expect.objectContaining({ resourceId: "annual", isCompleted: true, completedAt }),
+      expect.objectContaining({ resourceId: "last-year", isCompleted: false }),
     ]));
   });
   it("creates a completion row with the snapshot title and supplied work date", async () => {

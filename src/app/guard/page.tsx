@@ -7,8 +7,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { GpsInfo } from "@/lib/gps";
 import AlertModal from "@/components/modals/alert-modal";
-import { isCurrentInAppBrowser, isStandaloneGuardApp } from "./in-app-browser";
-import InAppBrowserGuide from "./in-app-browser-guide";
+import { isCurrentGuardChrome, isStandaloneGuardApp } from "./in-app-browser";
 import GuardBrowserGate from "./guard-browser-gate";
 import {
   hasActiveStoredGuardSession,
@@ -69,7 +68,7 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform?: string }>;
 };
 
-type GuardLaunchState = "checking" | "in-app" | "standalone" | "installable-browser" | "browser-installed-or-unavailable";
+type GuardLaunchState = "checking" | "login" | "installable-browser" | "browser-installed-or-unavailable";
 
 const guardNameStorageKey = "ollbareun.guard.name";
 const guardLogoutPushResultStorageKey = "ollbareun.guard.logout.pushResult";
@@ -183,17 +182,9 @@ export default function GuardPage() {
   const [sessionCheckComplete, setSessionCheckComplete] = useState(false);
 
   useEffect(() => {
-    if (isCurrentInAppBrowser()) {
+    if (isStandaloneGuardApp() || !isCurrentGuardChrome()) {
       const timer = setTimeout(() => {
-        setLaunchState("in-app");
-      }, 0);
-
-      return () => clearTimeout(timer);
-    }
-
-    if (isStandaloneGuardApp()) {
-      const timer = setTimeout(() => {
-        setLaunchState("standalone");
+        setLaunchState("login");
       }, 0);
 
       return () => clearTimeout(timer);
@@ -273,8 +264,6 @@ export default function GuardPage() {
   return (
     <main className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/20">
       <div className="mx-auto flex min-h-screen w-full max-w-[37.5rem] flex-col justify-center gap-6 px-5 py-10">
-        {launchState === "in-app" && <InAppBrowserGuide />}
-
         {(launchState === "installable-browser" || launchState === "browser-installed-or-unavailable") && (
           <GuardBrowserGate
             installPrompt={installPrompt}
@@ -285,7 +274,7 @@ export default function GuardPage() {
           />
         )}
 
-        {launchState === "standalone" && (
+        {launchState === "login" && (
           <>
             <section
               aria-label="근무자 로그인"

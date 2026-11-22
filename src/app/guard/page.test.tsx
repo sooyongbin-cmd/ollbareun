@@ -167,44 +167,18 @@ describe("guard login page", () => {
     expect(resultSection).toHaveAttribute("hidden");
   });
 
-  it("shows an inline default browser guide in in-app browsers", async () => {
-    setUserAgent("Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/110.0.0.0 Mobile Safari/537.36 KAKAOTALK/9.8.5");
+  it.each([
+    "Mozilla/5.0 (iPhone) Version/17.6 Mobile Safari/604.1",
+    "Mozilla/5.0 (Android 13) Chrome/110.0 Mobile Safari/537.36 SamsungBrowser/24.0",
+    "Mozilla/5.0 (Android 13; wv) Chrome/110.0 Mobile Safari/537.36 KAKAOTALK/9.8.5",
+  ])("shows login directly in a non-Chrome browser (%s)", async (userAgent) => {
+    setUserAgent(userAgent);
     setStandaloneMode(false);
-    window.sessionStorage.setItem(
-      "ollbareun.guard.logout.pushResult",
-      JSON.stringify({
-        completedAt: "2026-06-02T09:00:00.000Z",
-        employeeId: "employee-1",
-        endpoint: "https://push.example.test/subscription-1",
-        browserSubscription: "removed",
-        serverSubscription: "removed",
-        session: "removed",
-      }),
-    );
-
     render(<GuardPage />);
 
-    await waitFor(() => {
-      expect(screen.queryByLabelText("ID")).not.toBeInTheDocument();
-      expect(screen.queryByLabelText("비밀번호")).not.toBeInTheDocument();
-      expect(screen.queryByRole("button", { name: "로그인" })).not.toBeInTheDocument();
-      expect(screen.queryByText("로그아웃 Push 처리 결과")).not.toBeInTheDocument();
-    });
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(await screen.findByRole("heading", { name: "기본 브라우저로 열기 안내" })).toBeInTheDocument();
-    expect(await screen.findByRole("button", { name: "기본 브라우저로 열기" })).toBeInTheDocument();
-  });
-
-  it("opens the default browser from the inline guide on Android", async () => {
-    setUserAgent("Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/110.0.0.0 Mobile Safari/537.36 KAKAOTALK/9.8.5");
-    setStandaloneMode(false);
-
-    render(<GuardPage />);
-
-    const actionButton = await screen.findByRole("button", { name: "기본 브라우저로 열기" });
-    fireEvent.click(actionButton);
-
-    expect(window.location.href).toBe("intent://localhost:3000/guard#Intent;scheme=https;end");
+    expect(await screen.findByRole("button", { name: "로그인" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "홈화면 아이콘 설치" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "홈화면 아이콘에서 실행해 주세요" })).not.toBeInTheDocument();
   });
 
   it("shows an install section in an installable browser", async () => {

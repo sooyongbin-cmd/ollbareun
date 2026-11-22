@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { GpsInfo } from "@/lib/gps";
 import AlertModal from "@/components/modals/alert-modal";
-import { isCurrentGuardChrome, isStandaloneGuardApp } from "./in-app-browser";
+import { isCurrentGuardChromeOrEdge, isStandaloneGuardApp } from "./in-app-browser";
 import GuardBrowserGate from "./guard-browser-gate";
 import {
   hasActiveStoredGuardSession,
@@ -182,7 +182,7 @@ export default function GuardPage() {
   const [sessionCheckComplete, setSessionCheckComplete] = useState(false);
 
   useEffect(() => {
-    if (isStandaloneGuardApp() || !isCurrentGuardChrome()) {
+    if (isStandaloneGuardApp() || !isCurrentGuardChromeOrEdge()) {
       const timer = setTimeout(() => {
         setLaunchState("login");
       }, 0);

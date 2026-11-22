@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import { isCurrentGuardChrome, isStandaloneGuardApp } from "./in-app-browser";
+import { isCurrentGuardChromeOrEdge, isStandaloneGuardApp } from "./in-app-browser";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -14,7 +14,7 @@ export default function GuardInstallPrompt() {
   const [hidden, setHidden] = useState(isStandaloneGuardApp);
 
   useEffect(() => {
-    if (window.location.pathname === "/guard" || !isCurrentGuardChrome()) {
+    if (window.location.pathname === "/guard" || !isCurrentGuardChromeOrEdge()) {
       return;
     }
 

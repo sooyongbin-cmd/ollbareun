@@ -18,12 +18,12 @@ export async function openGuardInDefaultBrowser() {
   return openInDefaultBrowser("/guard");
 }
 
-export function isCurrentGuardChrome() {
+export function isCurrentGuardChromeOrEdge() {
   if (typeof navigator === "undefined") return false;
 
   const ua = navigator.userAgent;
-  return /\b(?:Chrome|CriOS)\//i.test(ua)
-    && !/\b(?:SamsungBrowser|Edg(?:A|iOS)?|OPR|Opera|Vivaldi|YaBrowser|Whale|DuckDuckGo|Brave)\//i.test(ua)
+  return /\b(?:Chrome|CriOS|Edg(?:A|iOS)?)\//i.test(ua)
+    && !/\b(?:SamsungBrowser|OPR|Opera|Vivaldi|YaBrowser|Whale|DuckDuckGo|Brave)\//i.test(ua)
     && !/;\s*wv\b/i.test(ua)
     && !isCurrentInAppBrowser();
 }

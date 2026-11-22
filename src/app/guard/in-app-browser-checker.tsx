@@ -1,14 +1,14 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { isCurrentGuardChrome, isStandaloneGuardApp } from "./in-app-browser";
+import { isCurrentGuardChromeOrEdge, isStandaloneGuardApp } from "./in-app-browser";
 
 function subscribe() {
   return () => {};
 }
 
 function shouldShowNotice() {
-  return !isStandaloneGuardApp() && !isCurrentGuardChrome();
+  return !isStandaloneGuardApp() && !isCurrentGuardChromeOrEdge();
 }
 
 function getChromePlatform() {

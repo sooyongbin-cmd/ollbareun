@@ -14,8 +14,13 @@ describe("guard Chrome notice", () => {
     vi.restoreAllMocks();
   });
 
-  it("hides the notice in Chrome", () => {
-    vi.spyOn(navigator, "userAgent", "get").mockReturnValue("Android Chrome/157.0");
+  it.each([
+    "Android Chrome/157.0",
+    "Windows Chrome/157.0 Edg/157.0",
+    "Android Chrome/157.0 EdgA/157.0",
+    "iPhone EdgiOS/157.0 Safari/604.1",
+  ])("hides the notice in Chrome or Edge (%s)", (userAgent) => {
+    vi.spyOn(navigator, "userAgent", "get").mockReturnValue(userAgent);
     render(<InAppBrowserChecker />);
     expect(screen.queryByText("크롬브라우져에서 실행해주세요.")).not.toBeInTheDocument();
   });

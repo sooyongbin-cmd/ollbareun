@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { currentEducationStatus, loadEducationDays, markEducationCompletion, parseEducationFilters, readAllEducationRows } from "./education-completions";
+import { attendanceEducationStatus, currentEducationStatus, loadEducationDays, markEducationCompletion, parseEducationFilters, readAllEducationRows } from "./education-completions";
 import { educationToday, educationPeriodStart, requireEducationType } from "./education-periods";
 import { saveAttendance } from "./attendance";
 
@@ -57,6 +57,38 @@ describe("period education", () => {
       education_type: "daily", is_completed: true, id: "completion-1",
     }]);
     expect(supabase.rpc).not.toHaveBeenCalled();
+  });
+  it("counts an earlier quarterly completion without carrying over daily or prior-quarter records", async () => {
+    const workDate = "2026-10-16";
+    const completedAt = "2026-11-22T13:14:39Z";
+    const resources = [
+      { id: "quarter", title: "분기교육", education_type: "분기" },
+      { id: "previous", title: "지난 분기 교육", education_type: "분기" },
+      { id: "daily", title: "일일교육", education_type: "일일" },
+    ];
+    const completions = resources.map(({ id, title, education_type }) => ({
+      id, title, education_type, employee_id: "employee-1",
+      work_date: id === "previous" ? "2026-09-30" : "2026-10-07", completed_at: completedAt,
+    }));
+    const supabase = {
+      from: vi.fn((table: string) => ({
+        select: vi.fn().mockReturnThis(), order: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(), gte: vi.fn().mockReturnThis(), lte: vi.fn().mockReturnThis(),
+        range: vi.fn().mockResolvedValue({
+          data: table === "education_resources"
+            ? resources.map((resource) => ({ ...resource, startdate: "2026-06-07", enddate: "2027-10-07" }))
+            : completions,
+          error: null,
+        }),
+      })),
+    };
+
+    const items = await attendanceEducationStatus("employee-1", workDate, supabase as never);
+    expect(items).toEqual(expect.arrayContaining([
+      expect.objectContaining({ resourceId: "quarter", isCompleted: true, completedAt }),
+      expect.objectContaining({ resourceId: "previous", isCompleted: false }),
+      expect.objectContaining({ resourceId: "daily", isCompleted: false }),
+    ]));
   });
   it("creates a completion row with the snapshot title and supplied work date", async () => {
     const today = "2026-05-26";

@@ -100,7 +100,7 @@ export async function listEducationCompletions(supabase: SupabaseClient = getSup
   return [...current.values()];
 }
 
-async function educationStatusForDate(employeeId: string, date: string, supabase: SupabaseClient) {
+async function educationStatusForDate(employeeId: string, date: string, supabase: SupabaseClient, includePeriodCompletions = false) {
   type Resource = {
     id: string;
     title: string;
@@ -124,11 +124,15 @@ async function educationStatusForDate(employeeId: string, date: string, supabase
       .select("id,title,youtube_link,created_at,education_type,startdate,enddate")
       .lte("startdate", date).gte("enddate", date)
       .order("title").order("id").range(from, to)),
-    readAllEducationRows<Completion>((from, to) => supabase.from("education_completions")
-      .select("id,employee_id,title,work_date,education_type,completed_at")
-      .eq("employee_id", employeeId)
-      .eq("work_date", date)
-      .order("work_date", { ascending: false }).order("completed_at", { ascending: false }).range(from, to)),
+    readAllEducationRows<Completion>((from, to) => {
+      const query = supabase.from("education_completions")
+        .select("id,employee_id,title,work_date,education_type,completed_at")
+        .eq("employee_id", employeeId);
+      const byDate = includePeriodCompletions
+        ? query.gte("work_date", educationPeriodStart("semiannual", date)).lte("work_date", date)
+        : query.eq("work_date", date);
+      return byDate.order("work_date", { ascending: false }).order("completed_at", { ascending: false }).order("id").range(from, to);
+    }),
   ]);
 
   const resourcesBySnapshot = new Map<string, Resource[]>();
@@ -144,8 +148,13 @@ async function educationStatusForDate(employeeId: string, date: string, supabase
     if (!matchingResources?.length || !completion.work_date) continue;
     const educationType = educationTypeByKoreanName[completion.education_type];
     if (!educationType) continue;
-    if (completion.work_date !== date || completion.employee_id !== employeeId) continue;
+    if (completion.employee_id !== employeeId || completion.work_date > date) continue;
+    const periodStart = includePeriodCompletions && educationType !== "other"
+      ? educationPeriodStart(educationType, date)
+      : date;
+    if (completion.work_date < periodStart) continue;
     for (const resource of matchingResources) {
+      if (!isEducationResourceForDate(resource, completion.work_date)) continue;
       if (!latestCompletionByResource.has(resource.id)) latestCompletionByResource.set(resource.id, completion);
     }
   }
@@ -202,7 +211,7 @@ export async function attendanceEducationStatus(
     throw new Error("출근 날짜를 확인할 수 없습니다.");
   }
 
-  const rows = await educationStatusForDate(employeeId, workDate, supabase);
+  const rows = await educationStatusForDate(employeeId, workDate, supabase, true);
   return rows.map((row) => ({
     resourceId: row.resource_id,
     title: row.resource_title,

@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /guard
+Disallow: /manager
+Disallow: /api
+
+Sitemap: https://www.olbareum.com/sitemap.xml

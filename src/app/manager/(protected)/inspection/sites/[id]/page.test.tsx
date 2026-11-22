@@ -100,17 +100,18 @@ describe("inspection site detail page", () => {
     expect(refresh).not.toHaveBeenCalled();
   });
 
-  it("prints QR and copies the protocol-free short NFC URL", async () => {
+  it("prints QR and directly opens NFC writing with a read-only URL", async () => {
     const user = userEvent.setup();
     render(<InspectionSiteDetailPage params={Promise.resolve({ id: "site-1" })} />);
 
     expect(await screen.findByDisplayValue("Gate")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "NFC(URL)" }));
-    const nfcUrl = "localhost:3000/guard/main/inspection-nfc?s=site-1";
+    const nfcUrl = `${window.location.origin}/guard/main/inspection-nfc?s=site-1`;
     expect(await screen.findByDisplayValue(nfcUrl)).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "복사" }));
-    expect(await screen.findByText("복사되었습니다.")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "닫기" }));
+    expect(screen.getByRole("dialog", { name: "NFC 카드 쓰기" })).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "NFC URL" })).toHaveAttribute("readonly");
+    expect(screen.queryByRole("button", { name: "NFC 쓰기" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "취소" }));
 
     const originalCreateElement = document.createElement.bind(document);
     const anchor = originalCreateElement("a");
@@ -156,11 +157,7 @@ describe("inspection site detail page", () => {
 
     expect(await screen.findByDisplayValue("Gate")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "NFC(URL)" }));
-    
-    const writeBtn = screen.getByRole("button", { name: "NFC 쓰기" });
-    expect(writeBtn).toBeInTheDocument();
 
-    await user.click(writeBtn);
     expect(await screen.findByText(/지원하지 않습니다/)).toBeInTheDocument();
   });
 
@@ -178,7 +175,6 @@ describe("inspection site detail page", () => {
     expect(await screen.findByDisplayValue("Gate")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "NFC(URL)" }));
-    await user.click(screen.getByRole("button", { name: "NFC 쓰기" }));
 
     expect(screen.getByText("NFC 카드 쓰기")).toBeInTheDocument();
     expect(screen.getByText("인식 대기 중...")).toBeInTheDocument();
@@ -189,7 +185,7 @@ describe("inspection site detail page", () => {
       records: [
         {
           recordType: "url",
-          data: expect.stringContaining("localhost:3000/guard/main/inspection-nfc?s=site-1"),
+          data: `${window.location.origin}/guard/main/inspection-nfc?s=site-1`,
         },
       ],
     });
@@ -213,7 +209,6 @@ describe("inspection site detail page", () => {
     expect(await screen.findByDisplayValue("Gate")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "NFC(URL)" }));
-    await user.click(screen.getByRole("button", { name: "NFC 쓰기" }));
 
     expect(await screen.findByText("NFC 쓰기 실패")).toBeInTheDocument();
     expect(screen.getByText("Tag connection lost")).toBeInTheDocument();

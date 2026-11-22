@@ -70,7 +70,7 @@ async function fetchQrCodeEnabled() {
 }
 
 function buildNfcUrl(siteId: string) {
-  return `${window.location.host}/guard/main/inspection-nfc?s=${encodeURIComponent(siteId)}`;
+  return `${window.location.origin}/guard/main/inspection-nfc?s=${encodeURIComponent(siteId)}`;
 }
 
 export default function InspectionSiteDetailPage({ params, recordId, modal = false, onClose, onSaved, onDeleted }: PageProps & DetailViewProps) {
@@ -90,7 +90,6 @@ export default function InspectionSiteDetailPage({ params, recordId, modal = fal
   const [alertMessage, setAlertMessage] = useState("");
   const [deleteSuccess, setDeleteSuccess] = useState(false);
   const [nfcUrl, setNfcUrl] = useState("");
-  const [copyMessage, setCopyMessage] = useState("");
   const [isWritingNfc, setIsWritingNfc] = useState(false);
   const [nfcWriteStatus, setNfcWriteStatus] = useState<"" | "scanning" | "success" | "error">("");
   const [nfcWriteError, setNfcWriteError] = useState("");
@@ -210,19 +209,15 @@ export default function InspectionSiteDetailPage({ params, recordId, modal = fal
   }
 
   function handleNfcUrl() {
-    if (!siteId) {
+    if (!siteId || isWritingNfc) {
       return;
     }
-    setCopyMessage("");
-    setNfcUrl(buildNfcUrl(siteId));
+    const url = buildNfcUrl(siteId);
+    setNfcUrl(url);
+    void handleWriteNfc(url);
   }
 
-  async function handleCopyNfcUrl() {
-    await navigator.clipboard.writeText(nfcUrl);
-    setCopyMessage("복사되었습니다.");
-  }
-
-  async function handleWriteNfc() {
+  async function handleWriteNfc(url: string) {
     if (typeof window === "undefined") return;
 
     setNfcWriteError("");
@@ -242,17 +237,12 @@ export default function InspectionSiteDetailPage({ params, recordId, modal = fal
       const NDEFReader = window.NDEFReader;
       const ndef = new NDEFReader();
 
-      const protocol = window.location.protocol ? `${window.location.protocol}//` : "https://";
-      const fullUrl = nfcUrl.startsWith("http://") || nfcUrl.startsWith("https://")
-        ? nfcUrl
-        : `${protocol}${nfcUrl}`;
-
       await ndef.write(
         {
           records: [
             {
               recordType: "url",
-              data: fullUrl,
+              data: url,
             },
           ],
         },
@@ -283,6 +273,7 @@ export default function InspectionSiteDetailPage({ params, recordId, modal = fal
       nfcAbortController.abort();
     }
     setIsWritingNfc(false);
+    setNfcUrl("");
     setNfcWriteStatus("");
     setNfcWriteError("");
   }
@@ -411,35 +402,17 @@ export default function InspectionSiteDetailPage({ params, recordId, modal = fal
         description={alertMessage}
       />
 
-      <Dialog open={Boolean(nfcUrl)} onOpenChange={(open) => !open && setNfcUrl("")}>
-        <DialogContent className="max-w-[35rem]">
-          <DialogHeader>
-            <DialogTitle>NFC(URL)</DialogTitle>
-            <DialogDescription>NFC Tools의 URL 레코드에 아래 주소를 붙여넣으세요.</DialogDescription>
-          </DialogHeader>
-            <Textarea className="w-full mt-4 min-h-[7rem]" readOnly value={nfcUrl} />
-            {copyMessage ? <p className="mt-3 text-[0.875rem] font-semibold text-primary">{copyMessage}</p> : null}
-            <div className="mt-6 flex flex-col gap-3 md:flex-row">
-              <Button className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 flex-1" onClick={handleCopyNfcUrl} type="button">
-                복사
-              </Button>
-              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 flex-1" onClick={handleWriteNfc} type="button" variant="outline">
-                NFC 쓰기
-              </Button>
-              <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 flex-1" onClick={() => setNfcUrl("")} type="button" variant="outline">
-                닫기
-              </Button>
-            </div>
-        </DialogContent>
-      </Dialog>
-
       <Dialog open={isWritingNfc} onOpenChange={(open) => !open && handleCancelNfcWrite()}>
         <DialogContent className="max-w-[30rem] text-center" showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>NFC 카드 쓰기</DialogTitle>
             <DialogDescription>상태 안내에 따라 NFC 카드를 기기에 가까이 대어주세요.</DialogDescription>
           </DialogHeader>
-            
+            <div className="mt-4 space-y-2 text-left">
+              <label className="text-sm font-medium" htmlFor="inspection-nfc-url">NFC URL</label>
+              <Textarea id="inspection-nfc-url" className="w-full min-h-[7rem] break-all" readOnly value={nfcUrl} />
+            </div>
+
             {nfcWriteStatus === "scanning" && (
               <div className="mt-6 space-y-4">
                 <div className="mx-auto h-12 w-12 animate-pulse rounded-full bg-primary/20 flex items-center justify-center text-primary text-[1.5rem]">

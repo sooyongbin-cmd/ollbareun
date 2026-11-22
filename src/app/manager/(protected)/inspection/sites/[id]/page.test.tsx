@@ -105,7 +105,7 @@ describe("inspection site detail page", () => {
     render(<InspectionSiteDetailPage params={Promise.resolve({ id: "site-1" })} />);
 
     expect(await screen.findByDisplayValue("Gate")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "NFC(URL)" }));
+    await user.click(screen.getByRole("button", { name: "NFC 쓰기" }));
     const nfcUrl = `${window.location.origin}/guard/main/inspection-nfc?s=site-1`;
     expect(await screen.findByDisplayValue(nfcUrl)).toBeInTheDocument();
     expect(screen.getByRole("dialog", { name: "NFC 카드 쓰기" })).toBeInTheDocument();
@@ -156,7 +156,7 @@ describe("inspection site detail page", () => {
     render(<InspectionSiteDetailPage params={Promise.resolve({ id: "site-1" })} />);
 
     expect(await screen.findByDisplayValue("Gate")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "NFC(URL)" }));
+    await user.click(screen.getByRole("button", { name: "NFC 쓰기" }));
 
     expect(await screen.findByText(/지원하지 않습니다/)).toBeInTheDocument();
   });
@@ -174,7 +174,7 @@ describe("inspection site detail page", () => {
     render(<InspectionSiteDetailPage params={Promise.resolve({ id: "site-1" })} />);
     expect(await screen.findByDisplayValue("Gate")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "NFC(URL)" }));
+    await user.click(screen.getByRole("button", { name: "NFC 쓰기" }));
 
     expect(screen.getByText("NFC 카드 쓰기")).toBeInTheDocument();
     expect(screen.getByText("인식 대기 중...")).toBeInTheDocument();
@@ -208,7 +208,7 @@ describe("inspection site detail page", () => {
     render(<InspectionSiteDetailPage params={Promise.resolve({ id: "site-1" })} />);
     expect(await screen.findByDisplayValue("Gate")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "NFC(URL)" }));
+    await user.click(screen.getByRole("button", { name: "NFC 쓰기" }));
 
     expect(await screen.findByText("NFC 쓰기 실패")).toBeInTheDocument();
     expect(screen.getByText("Tag connection lost")).toBeInTheDocument();

@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 import withSerwistInit from "@serwist/next";
 
 const nextConfig: NextConfig = {
+  // Keep the web app manifest in the initial HTML head for installation discovery.
+  htmlLimitedBots: /.*/,
   async redirects() {
     return [
       {

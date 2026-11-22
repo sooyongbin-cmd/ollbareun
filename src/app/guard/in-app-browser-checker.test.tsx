@@ -16,17 +16,18 @@ describe("guard Chrome notice", () => {
 
   it.each([
     "Android Chrome/157.0",
+    "Android Chrome/157.0 SamsungBrowser/30.0",
     "Windows Chrome/157.0 Edg/157.0",
     "Android Chrome/157.0 EdgA/157.0",
     "iPhone EdgiOS/157.0 Safari/604.1",
-  ])("hides the notice in Chrome or Edge (%s)", (userAgent) => {
+  ])("hides the notice in supported install browsers (%s)", (userAgent) => {
     vi.spyOn(navigator, "userAgent", "get").mockReturnValue(userAgent);
     render(<InAppBrowserChecker />);
     expect(screen.queryByText("크롬브라우져에서 실행해주세요.")).not.toBeInTheDocument();
   });
 
   it.each([
-    ["Android Chrome/157.0 SamsungBrowser/30.0", "intent://www.olbareum.com/guard/main/safety?tab=daily#details#Intent;scheme=https;package=com.android.chrome;end"],
+    ["Android Chrome/157.0 OPR/80.0", "intent://www.olbareum.com/guard/main/safety?tab=daily#details#Intent;scheme=https;package=com.android.chrome;end"],
     ["iPhone Version/17.6 Safari/604.1", "googlechromes://www.olbareum.com/guard/main/safety?tab=daily#details"],
   ])("opens the current guard address in Chrome from %s", (userAgent, target) => {
     vi.spyOn(navigator, "userAgent", "get").mockReturnValue(userAgent);

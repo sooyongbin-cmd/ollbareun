@@ -169,9 +169,8 @@ describe("guard login page", () => {
 
   it.each([
     "Mozilla/5.0 (iPhone) Version/17.6 Mobile Safari/604.1",
-    "Mozilla/5.0 (Android 13) Chrome/110.0 Mobile Safari/537.36 SamsungBrowser/24.0",
     "Mozilla/5.0 (Android 13; wv) Chrome/110.0 Mobile Safari/537.36 KAKAOTALK/9.8.5",
-  ])("shows login directly in a non-Chrome browser (%s)", async (userAgent) => {
+  ])("shows login directly in a browser outside the install flow (%s)", async (userAgent) => {
     setUserAgent(userAgent);
     setStandaloneMode(false);
     render(<GuardPage />);

@@ -93,8 +93,8 @@ describe("guard inspection NFC page", () => {
           site: {
             id: "site-1",
             worksite_id: "work-1",
-            worksite_name: "蹂몄궗",
-            name: "?뺣Ц",
+            worksite_name: "본사",
+            name: "정문",
           },
         });
       }
@@ -233,12 +233,15 @@ describe("guard inspection NFC page", () => {
       });
     });
 
+    expect(await screen.findByText("NFC 태그 자료를 읽었습니다. 처리 중입니다.")).toBeInTheDocument();
+
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
         "/api/inspection/logs",
         expect.objectContaining({ method: "POST" }),
       );
     });
+    expect(await screen.findByText("NFC 태그 처리가 완료되었습니다.")).toBeInTheDocument();
   });
 
   it("shows guidance when Web NFC is not supported", async () => {

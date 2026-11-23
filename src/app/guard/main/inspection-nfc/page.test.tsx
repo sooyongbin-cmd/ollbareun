@@ -126,6 +126,22 @@ describe("guard inspection NFC page", () => {
     });
   });
 
+  it("shows a site lookup error instead of remaining on the NFC read status", async () => {
+    const fetch = vi.fn(async (input: RequestInfo | URL) => {
+      if (String(input).endsWith("/api/inspection/sites/site-1")) {
+        return Response.json({ error: "배정된 근무지의 점검지만 조회할 수 있습니다." }, { status: 403 });
+      }
+      return Response.json({}, { status: 404 });
+    });
+    vi.stubGlobal("fetch", fetch);
+    window.history.pushState({}, "", "/guard/main/inspection-nfc?s=site-1");
+
+    render(<GuardInspectionNfcPage />);
+
+    expect(await screen.findByText("배정된 근무지의 점검지만 조회할 수 있습니다.")).toBeInTheDocument();
+    expect(screen.queryByText("NFC 태그 자료를 읽었습니다. 처리 중입니다.")).not.toBeInTheDocument();
+  });
+
   it("removes the initial site query parameter and reloads after confirming a successful save", async () => {
     const reload = vi.spyOn(window.history, "go").mockImplementation(() => undefined);
     const fetch = vi.fn(async (input: RequestInfo | URL) => {

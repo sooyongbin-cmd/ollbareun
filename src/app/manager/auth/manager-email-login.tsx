@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import ManagerInAppBrowserChecker from "../manager-in-app-browser-checker";
 import ManagerInstallPrompt from "../manager-install-prompt";
@@ -28,6 +28,16 @@ function createCallbackUrl(setup?: "initial_admin") {
   return redirectTo.toString();
 }
 
+function getBrowserName(userAgent: string) {
+  if (/edg\//i.test(userAgent)) return "Edge";
+  if (/opr\//i.test(userAgent) || /opera/i.test(userAgent)) return "Opera";
+  if (/samsungbrowser/i.test(userAgent)) return "Samsung Internet";
+  if (/firefox\//i.test(userAgent)) return "Firefox";
+  if (/crios\//i.test(userAgent) || /chrome\//i.test(userAgent)) return "Chrome";
+  if (/safari\//i.test(userAgent)) return "Safari";
+  return "브라우저";
+}
+
 export default function ManagerEmailLogin({
   initialAdminSetupRequired = false,
   errorParam,
@@ -47,6 +57,11 @@ export default function ManagerEmailLogin({
     return "";
   });
   const [isSending, setIsSending] = useState(false);
+  const [browserName, setBrowserName] = useState("");
+
+  useEffect(() => {
+    setBrowserName(getBrowserName(navigator.userAgent));
+  }, []);
 
   async function signInWithGoogle(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -97,6 +112,9 @@ export default function ManagerEmailLogin({
             <h1 className="text-[1.75rem] leading-[1.2]">
               {initialAdminSetupRequired ? "최초 관리자 등록" : "관리자 Google 인증"}
             </h1>
+            {!initialAdminSetupRequired && browserName ? (
+              <p className="text-[10px] leading-tight text-muted-foreground">({browserName})</p>
+            ) : null}
           </div>
 
           <form className="manager-section space-y-4" onSubmit={signInWithGoogle}>

@@ -3,6 +3,7 @@ import {
   getKakaoOpenGraphMetadata,
 } from "@/lib/system-configs";
 import type { Metadata, ResolvingMetadata } from "next";
+import GuardBrowserInfo from "./guard-browser-info";
 import GuardInstallPrompt from "./guard-install-prompt";
 import InAppBrowserChecker from "./in-app-browser-checker";
 import GuardZoomScope from "./guard-zoom-scope";
@@ -50,9 +51,7 @@ export default async function GuardLayout({
     <GuardZoomScope>
       <InAppBrowserChecker />
       {children}
-      <footer className="px-4 py-4 text-center text-sm text-muted-foreground">
-        <a href="/privacy-policy">개인정보처리방침</a>
-      </footer>
+      <GuardBrowserInfo />
       <GuardInstallPrompt />
     </GuardZoomScope>
   );

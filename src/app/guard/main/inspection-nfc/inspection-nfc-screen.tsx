@@ -304,13 +304,20 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
 
   const saveInspectionSource = useCallback(
     async (source: InspectionSource) => {
-      if (source.type === "payload") {
-        await saveInspectionPayload(source.value);
-        return;
-      }
+      try {
+        if (source.type === "payload") {
+          await saveInspectionPayload(source.value);
+          return;
+        }
 
-      const payload = await fetchInspectionSitePayload(source.value);
-      await saveInspectionPayload(payload);
+        setStatus("NFC 태그 자료를 읽었습니다. 처리 중입니다.");
+        setError("");
+        const payload = await fetchInspectionSitePayload(source.value);
+        await saveInspectionPayload(payload);
+      } catch (saveError) {
+        setStatus("NFC 태그 처리가 완료되지 않았습니다.");
+        setError(saveError instanceof Error ? saveError.message : "점검 위치 정보를 불러오지 못했습니다.");
+      }
     },
     [saveInspectionPayload],
   );

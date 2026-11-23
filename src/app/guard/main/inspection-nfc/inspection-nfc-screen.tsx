@@ -14,120 +14,87 @@ import { readStoredGuardSession, readStoredGuardSessionSnapshot, subscribeToGuar
 import styles from "./page.module.css";
 
 type GuardSession = {
-  employee?: {
-    id?: string;
-    name?: string;
-    role?: string;
-  };
+  employee?: { id?: string; name?: string; role?: string };
   worksite?: { id?: string; name?: string };
 };
 
-type NfcRecord = {
-  recordType?: string;
-  data?: ArrayBuffer | ArrayBufferView | string | null;
-};
-
-type NfcReadingEvent = {
-  message?: {
-    records?: NfcRecord[];
-  };
-};
-
-type NfcReader = {
+type NfcWindow = Window & { NDEFReader?: new () => NDEFReaderLike };
+type NDEFReaderLike = {
   scan: () => Promise<void>;
-  onreading: ((event: NfcReadingEvent) => void) | null;
-  onreadingerror?: (() => void) | null;
+  onreading: ((event: unknown) => void) | null;
+  onreadingerror: (() => void) | null;
 };
-
-type NfcWindow = Window &
-  typeof globalThis & {
-    NDEFReader?: new () => NfcReader;
-  };
-
-type InspectionSource =
-  | { type: "payload"; value: string }
-  | { type: "site"; value: string };
-
-type InspectionPresentation = "legacy" | "work";
-
-type GuardInspectionNfcScreenProps = {
-  presentation?: InspectionPresentation;
+type NdefRecordLike = {
+  recordType?: string;
+  data?: unknown;
+  encoding?: string;
 };
+type InspectionSource = { type: "payload"; value: unknown } | { type: "site-id"; value: string };
 
-async function postInspectionLog(input: {
-  employeeId: string;
-  employeeName: string;
-  qrPayload: InspectionQrPayload;
-}) {
-  const response = await fetch("/api/inspection/logs", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(input),
-  });
-  const payload = await response.json();
-
-  if (!response.ok) {
-    throw new Error(payload.error ?? "현장점검을 저장하지 못했습니다.");
-  }
-
-  return payload;
+interface GuardInspectionNfcScreenProps {
+  presentation?: "legacy" | "work";
 }
 
-async function fetchInspectionSitePayload(siteId: string) {
-  const response = await fetch(`/api/inspection/sites/${encodeURIComponent(siteId)}`);
-  const payload = await response.json();
+const TODAY_INSPECTION_LOGS_LIMIT = 100;
 
-  if (!response.ok) {
-    throw new Error(payload.error ?? "점검 위치 정보를 불러오지 못했습니다.");
-  }
-
-  return buildInspectionQrPayload(payload.site as InspectionSiteRow);
-}
-
-function decodeRecordData(data: NfcRecord["data"]) {
+function decodeRecordText(record: NdefRecordLike) {
+  const data = record.data;
   if (typeof data === "string") {
     return data;
   }
 
-  if (ArrayBuffer.isView(data)) {
-    return new TextDecoder().decode(new Uint8Array(data.buffer, data.byteOffset, data.byteLength));
+  if (data instanceof ArrayBuffer) {
+    return new TextDecoder(record.encoding || "utf-8").decode(data);
   }
 
-  if (data && typeof data === "object" && "byteLength" in data) {
-    return new TextDecoder().decode(data as ArrayBuffer);
+  if (ArrayBuffer.isView(data)) {
+    return new TextDecoder(record.encoding || "utf-8").decode(data);
   }
 
   return "";
 }
 
-function extractSourceFromText(value: string): InspectionSource {
-  const trimmed = value.trim();
+function toInspectionPayloadFromSite(site: InspectionSiteRow): InspectionQrPayload {
+  return buildInspectionQrPayload(site);
+}
 
+function parseInspectionSourceText(value: string): InspectionSource | null {
   try {
-    const url = new URL(trimmed, window.location.origin);
-    const payload = url.searchParams.get("payload");
-    if (payload) {
-      return { type: "payload", value: payload };
-    }
-
-    const siteId = url.searchParams.get("s");
-    if (siteId) {
-      return { type: "site", value: siteId };
-    }
-
-    return { type: "payload", value: trimmed };
+    return { type: "payload", value: JSON.parse(value) as unknown };
   } catch {
-    return { type: "payload", value: trimmed };
+    const match = value.match(/[?&]payload=([^&]+)/);
+    if (match) {
+      try {
+        return { type: "payload", value: JSON.parse(decodeURIComponent(match[1])) as unknown };
+      } catch {
+        return null;
+      }
+    }
+    const siteId = value.match(/[?&]s=([^&]+)/)?.[1];
+    return siteId ? { type: "site-id", value: decodeURIComponent(siteId) } : null;
   }
 }
 
-function extractSourceFromReading(event: NfcReadingEvent) {
-  const records = event.message?.records ?? [];
+function extractSourceFromReading(event: unknown): InspectionSource | null {
+  if (!event || typeof event !== "object" || !("message" in event)) {
+    return null;
+  }
 
+  const message = (event as { message?: { records?: NdefRecordLike[] } }).message;
+  const records = message?.records ?? [];
   for (const record of records) {
-    const text = decodeRecordData(record.data);
-    if (text) {
-      return extractSourceFromText(text);
+    if (record.recordType === "url") {
+      const urlText = decodeRecordText(record);
+      const source = parseInspectionSourceText(urlText);
+      if (source) {
+        return source;
+      }
+    }
+    if (record.recordType === "text") {
+      const source = parseInspectionSourceText(decodeRecordText(record));
+      if (source) {
+        return source;
+      }
     }
   }
 
@@ -135,29 +102,21 @@ function extractSourceFromReading(event: NfcReadingEvent) {
 }
 
 function getInitialSourceFromUrl(): InspectionSource | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  const params = new URL(window.location.href).searchParams;
-  const payload = params.get("payload");
+  const url = new URL(window.location.href);
+  const payload = url.searchParams.get("payload");
   if (payload) {
-    return { type: "payload", value: payload };
+    try {
+      return { type: "payload", value: JSON.parse(payload) as unknown };
+    } catch {
+      return { type: "payload", value: payload };
+    }
   }
 
-  const siteId = params.get("s");
-  if (siteId) {
-    return { type: "site", value: siteId };
-  }
-
-  return null;
+  const siteId = url.searchParams.get("s");
+  return siteId ? { type: "site-id", value: siteId } : null;
 }
 
 function clearInitialSourceFromUrl() {
-  if (typeof window === "undefined") {
-    return;
-  }
-
   const url = new URL(window.location.href);
   if (!url.searchParams.has("payload") && !url.searchParams.has("s")) {
     return;
@@ -180,6 +139,36 @@ function formatCompletionTime(value: string) {
     hour12: false,
     timeZone: "Asia/Seoul",
   }).format(date)}`;
+}
+
+async function postInspectionLog(input: {
+  employeeId: string;
+  employeeName: string;
+  qrPayload: InspectionQrPayload;
+}) {
+  const response = await fetch("/api/inspection/logs", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      employeeId: input.employeeId,
+      employeeName: input.employeeName,
+      inspectionSiteId: input.qrPayload.siteId,
+      qrPayload: input.qrPayload,
+    }),
+  });
+  const payload = (await response.json()) as { error?: string };
+  if (!response.ok) {
+    throw new Error(payload.error ?? "현장점검을 저장하지 못했습니다.");
+  }
+}
+
+async function fetchInspectionSitePayload(siteId: string) {
+  const response = await fetch(`/api/inspection/sites/${encodeURIComponent(siteId)}`);
+  const payload = (await response.json()) as { site?: InspectionSiteRow; error?: string };
+  if (!response.ok || !payload.site) {
+    throw new Error(payload.error ?? "점검 위치 정보를 불러오지 못했습니다.");
+  }
+  return toInspectionPayloadFromSite(payload.site);
 }
 
 export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspectionNfcScreenProps) {
@@ -285,11 +274,12 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
       handledPayloadRef.current = payloadKey;
       setSaving(true);
       setError("");
+      setStatus("NFC 태그 자료를 읽었습니다.");
 
       try {
         const parsed = parseInspectionQrPayload(rawPayload);
         setNfcPayload(parsed);
-        setStatus("NFC 태그가 인식되었습니다.");
+        setStatus("NFC 태그 자료를 읽었습니다. 처리 중입니다.");
         await postInspectionLog({
           employeeId,
           employeeName,
@@ -299,9 +289,11 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
         setSavedSites((sites) => sites.includes(savedSiteKey) ? sites : [...sites, savedSiteKey]);
         setSavedSiteTimes((times) => ({ ...times, [savedSiteKey]: formatCompletionTime(new Date().toISOString()) }));
         clearInitialSourceFromUrl();
+        setStatus("NFC 태그 처리가 완료되었습니다.");
         setAlertMessage("NFC 태그 점검이 저장되었습니다.");
       } catch (saveError) {
         handledPayloadRef.current = "";
+        setStatus("NFC 태그 처리가 완료되지 않았습니다.");
         setError(saveError instanceof Error ? saveError.message : "NFC 태그 점검을 저장하지 못했습니다.");
       } finally {
         setSaving(false);
@@ -356,6 +348,7 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
         setError("NFC 태그 내용을 읽을 수 없습니다.");
         return;
       }
+      setStatus("NFC 태그 자료를 읽었습니다.");
       void saveInspectionSource(source);
     };
     reader.onreadingerror = () => {
@@ -364,7 +357,7 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
 
     reader
       .scan()
-      .then(() => setStatus("NFC 태그를 가까이 대세요."))
+      .then(() => setStatus("화면이 켜진 상태에서 태그에 가까이 대주세요."))
       .catch((scanError) => {
         setStatus("NFC 태그 읽기를 시작하지 못했습니다.");
         setError(scanError instanceof Error ? scanError.message : "NFC 태그 읽기를 시작하지 못했습니다.");
@@ -407,12 +400,10 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
             </div>
             <div className={styles.worksiteNotice}>
               <p>✓ 휴대폰 케이스에 교통카드나 다른 카드가<br /> 있으면 인식이 안 될 수 있습니다.</p>
-              <p>✓ 화면이 켜진 상태에서 태그에 가까이 대주세요.</p>
+              <p aria-live="polite" className={error ? styles.error : undefined} role={error ? "alert" : "status"}>
+                {error || (saving ? "NFC 태그 자료를 읽었습니다. 처리 중입니다." : status)}
+              </p>
             </div>
-          </div>
-
-          <div aria-live="polite" className={error ? styles.error : styles.visuallyHidden} role={error ? "alert" : undefined}>
-            {error || (saving ? "저장 중..." : status)}
           </div>
 
           <div aria-label="NFC 체크포인트 목록" className={styles.checkpointList}>

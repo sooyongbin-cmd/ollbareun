@@ -193,12 +193,12 @@ export default function GuardPage() {
     function handleBeforeInstallPrompt(event: Event) {
       event.preventDefault();
       setInstallPrompt(event as BeforeInstallPromptEvent);
-      setLaunchState("installable-browser");
+      setLaunchState((state) => state === "login" ? state : "installable-browser");
     }
 
     function handleAppInstalled() {
       setInstallPrompt(null);
-      setLaunchState("browser-installed-or-unavailable");
+      setLaunchState((state) => state === "login" ? state : "browser-installed-or-unavailable");
     }
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -267,6 +267,7 @@ export default function GuardPage() {
         {(launchState === "installable-browser" || launchState === "browser-installed-or-unavailable") && (
           <GuardBrowserGate
             installPrompt={installPrompt}
+            onContinueToLogin={() => setLaunchState("login")}
             onInstalled={() => {
               setInstallPrompt(null);
               setLaunchState("browser-installed-or-unavailable");

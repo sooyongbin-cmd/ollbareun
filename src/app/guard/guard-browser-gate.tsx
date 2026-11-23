@@ -11,9 +11,10 @@ type BeforeInstallPromptEvent = Event & {
 type GuardBrowserGateProps = {
   installPrompt: BeforeInstallPromptEvent | null;
   onInstalled: () => void;
+  onContinueToLogin: () => void;
 };
 
-export default function GuardBrowserGate({ installPrompt, onInstalled }: GuardBrowserGateProps) {
+export default function GuardBrowserGate({ installPrompt, onInstalled, onContinueToLogin }: GuardBrowserGateProps) {
   async function handleInstall() {
     if (!installPrompt) {
       return;
@@ -62,6 +63,11 @@ export default function GuardBrowserGate({ installPrompt, onInstalled }: GuardBr
             이미 설치되어 있다면 휴대폰 홈화면의 올바름 근무자 아이콘을 눌러 로그인해 주세요.
           </p>
         </div>
+      </div>
+      <div className="mt-5 border-t border-border/40 pt-4">
+        <Button className="min-h-10 w-full" type="button" onClick={onContinueToLogin}>
+          로그인 화면으로 이동
+        </Button>
       </div>
     </section>
   );

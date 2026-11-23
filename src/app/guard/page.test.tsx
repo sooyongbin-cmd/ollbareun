@@ -213,5 +213,11 @@ describe("guard login page", () => {
     expect(await screen.findByRole("heading", { name: "홈화면 아이콘에서 실행해 주세요" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "로그인" })).not.toBeInTheDocument();
     expect(screen.queryByText("로그아웃 Push 처리 결과")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "로그인 화면으로 이동" }));
+    expect(await screen.findByRole("button", { name: "로그인" })).toBeInTheDocument();
+
+    fireEvent(window, new Event("beforeinstallprompt"));
+    expect(screen.getByRole("button", { name: "로그인" })).toBeInTheDocument();
   });
 });

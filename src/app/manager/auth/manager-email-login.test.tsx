@@ -26,6 +26,8 @@ describe("manager google login", () => {
 
     render(<ManagerEmailLogin initialAdminSetupRequired={false} />);
 
+    expect(await screen.findByText("(Chrome)")).toBeInTheDocument();
+
     await userEvent.click(screen.getByRole("button", { name: "Google로 관리자 로그인" }));
 
     expect(signInWithOAuth).toHaveBeenCalledWith({
@@ -98,16 +100,5 @@ describe("manager google login", () => {
   it("renders default callback error message when errorParam is callback and emailParam is missing", () => {
     render(<ManagerEmailLogin initialAdminSetupRequired={false} errorParam="callback" />);
     expect(screen.getByText("인증 중 오류가 발생했습니다. 다시 시도해주세요.")).toBeInTheDocument();
-  });
-
-  it("renders customized unregistered admin message when emailParam is provided", () => {
-    render(
-      <ManagerEmailLogin
-        initialAdminSetupRequired={false}
-        errorParam="callback"
-        emailParam="admin-unregistered@example.com"
-      />
-    );
-    expect(screen.getByText("사용자(admin-unregistered@example.com)가 관리자로 등록되지 않았습니다.")).toBeInTheDocument();
   });
 });

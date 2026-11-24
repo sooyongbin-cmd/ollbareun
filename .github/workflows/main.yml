@@ -43,4 +43,4 @@ jobs:
       - name: Apply database migrations
         run: supabase db push --db-url "$SUPABASE_DB_URL" --include-all --yes
 
-      - run: supabase functions deploy education-reminders --project-ref "$SUPABASE_PROJECT_ID"
+      - run: supabase functions deploy education-reminders --project-ref "$SUPABASE_PROJECT_ID" --yes

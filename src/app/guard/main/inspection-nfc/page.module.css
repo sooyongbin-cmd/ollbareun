@@ -183,6 +183,7 @@
   height: 25px;
   align-items: center;
   justify-content: center;
+  column-gap: 12px;
 }
 
 .status {

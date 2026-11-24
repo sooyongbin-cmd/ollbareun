@@ -259,6 +259,8 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
   const [alertMessage, setAlertMessage] = useState("");
   const [showAppRequired, setShowAppRequired] = useState(false);
   const [isAppContext, setIsAppContext] = useState<boolean | null>(null);
+  const [resumeScanAfterUrl, setResumeScanAfterUrl] = useState(false);
+  const pendingUrlScanRef = useRef(false);
   const handledPayloadRef = useRef("");
   const workScanOpenRef = useRef(false);
 
@@ -347,17 +349,19 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
       return;
     }
 
-    const initialSource = getInitialSourceFromUrl();
+    const initialSource = resumeScanAfterUrl ? null : getInitialSourceFromUrl();
     if (initialSource) {
       if (!isAppContext) {
         setShowAppRequired(true);
         return;
       }
 
+      pendingUrlScanRef.current = true;
+      let cancelled = false;
       queueMicrotask(() => {
-        void saveInspectionSource(initialSource);
+        if (!cancelled) void saveInspectionSource(initialSource);
       });
-      return;
+      return () => { cancelled = true; };
     }
 
     const nfcWindow = window as NfcWindow;
@@ -398,7 +402,22 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
         setStatus("NFC 태그 읽기를 시작하지 못했습니다.");
         setError(scanError instanceof Error ? scanError.message : "NFC 태그 읽기를 시작하지 못했습니다.");
       });
-  }, [isAppContext, saveInspectionSource]);
+  }, [isAppContext, resumeScanAfterUrl, saveInspectionSource]);
+
+  function closeWorkScan() {
+    setAlertMessage("");
+    setError("");
+    setStatus("NFC 태그를 가까이 대세요.");
+    handledPayloadRef.current = "";
+    workScanOpenRef.current = false;
+    setWorkScanOpen(false);
+
+    if (pendingUrlScanRef.current) {
+      pendingUrlScanRef.current = false;
+      clearInitialSourceFromUrl();
+      setResumeScanAfterUrl(true);
+    }
+  }
 
   function handleSuccessAlertClose() {
     setAlertMessage("");
@@ -490,12 +509,9 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
             {!saving && (
               <DialogFooter className="flex-row justify-end">
                 {alertMessage ? (
-                  <Button type="button" onClick={handleSuccessAlertClose}>완료</Button>
+                  <Button type="button" onClick={closeWorkScan}>완료</Button>
                 ) : (
-                  <Button type="button" onClick={() => {
-                    workScanOpenRef.current = false;
-                    setWorkScanOpen(false);
-                  }}>닫기</Button>
+                  <Button type="button" onClick={closeWorkScan}>닫기</Button>
                 )}
               </DialogFooter>
             )}

@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import GuardWorkPage from "./page";
@@ -81,5 +81,59 @@ describe("guard work page", () => {
     const completedCard = await screen.findByRole("article", { name: "정문 체크 완료" });
     expect(within(completedCard).getByText("체크 완료")).toBeInTheDocument();
     expect(screen.getByRole("article", { name: "후문 미완료" })).toBeInTheDocument();
+  });
+
+  it("keeps the loaded list and handles another tag after closing the success dialog", async () => {
+    let readTag: ((event: unknown) => void) | undefined;
+    vi.stubGlobal("NDEFReader", class {
+      set onreading(handler: (event: unknown) => void) { readTag = handler; }
+      onreadingerror = null;
+      scan = vi.fn(async () => {});
+    });
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url === "/api/inspection/sites") {
+        return Response.json({ sites: [
+          { id: "site-1", name: "정문", worksite_id: "work-1" },
+          { id: "site-2", name: "후문", worksite_id: "work-1" },
+        ] });
+      }
+      if (url === "/api/inspection/logs?worksiteId=work-1") {
+        return Response.json({ logs: [] });
+      }
+      if (url === "/api/inspection/sites/site-1") {
+        return Response.json({ site: { id: "site-1", worksite_id: "work-1", worksite_name: "본사", name: "정문" } });
+      }
+      if (url === "/api/inspection/logs" && init?.method === "POST") {
+        const count = fetchMock.mock.calls.filter(([, options]) => options?.method === "POST").length;
+        return count === 1
+          ? Response.json({ log: {} })
+          : Response.json({ error: "오늘 이미 점검을 완료한 점검지입니다." }, { status: 400 });
+      }
+      return Response.json({}, { status: 404 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const reload = vi.spyOn(window.history, "go").mockImplementation(() => {});
+
+    render(<GuardWorkPage />);
+    await screen.findByRole("article", { name: "정문 미완료" });
+    const tagEvent = { message: { records: [{
+      recordType: "url",
+      data: "https://www.olbareum.com/guard/main/inspection-nfc?s=site-1",
+    }] } };
+    expect(readTag).toBeDefined();
+    act(() => readTag?.(tagEvent));
+    fireEvent.click(await screen.findByRole("button", { name: "완료", exact: true }));
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.getByRole("article", { name: "정문 체크 완료" })).toBeInTheDocument();
+    expect(screen.getByRole("article", { name: "후문 미완료" })).toBeInTheDocument();
+    expect(screen.getByText("1/2완료 (50%)")).toBeInTheDocument();
+    expect(reload).not.toHaveBeenCalled();
+
+    act(() => readTag?.(tagEvent));
+    expect(await screen.findByText("오늘 이미 점검을 완료한 점검지입니다.")).toBeInTheDocument();
+    expect(fetchMock.mock.calls.filter(([url]) => url === "/api/inspection/sites")).toHaveLength(1);
+    expect(fetchMock.mock.calls.filter(([url]) => url === "/api/inspection/logs?worksiteId=work-1")).toHaveLength(1);
   });
 });

@@ -123,7 +123,7 @@ describe("guard work page", () => {
     }] } };
     expect(readTag).toBeDefined();
     act(() => readTag?.(tagEvent));
-    fireEvent.click(await screen.findByRole("button", { name: "완료", exact: true }));
+    fireEvent.click(await screen.findByRole("button", { name: /^완료$/ }));
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(screen.getByRole("article", { name: "정문 체크 완료" })).toBeInTheDocument();

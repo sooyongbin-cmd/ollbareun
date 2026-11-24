@@ -25,9 +25,10 @@ export function useGuardScheduleAvailability() {
   const schedules = session?.scheduledAttendances ?? [];
   const selectedSchedule = selectGuardWorkSchedule(schedules);
   const action = getGuardWorkAction(selectedSchedule);
+  const isLeave = selectedSchedule?.intime_status === "3";
 
   return {
-    hasWorkSchedule: schedules.length > 0,
-    canAccessAttendance: action === "clock-in" || action === "clock-out",
+    hasWorkSchedule: selectedSchedule !== null && !isLeave,
+    canAccessAttendance: !isLeave && (action === "clock-in" || action === "clock-out"),
   };
 }

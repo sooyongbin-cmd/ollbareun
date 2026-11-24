@@ -169,7 +169,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Guard-only readable font and viewport scale */
 /* Radix renders guard dialogs under body, outside the guard layout. */
-body:has(.guard-zoom-scope) :is([data-slot="dialog-content"], [data-slot="alert-dialog-content"]) {
+body:has(.guard-zoom-scope) :is([data-slot="dialog-content"], [data-slot="alert-dialog-content"]):not([data-guard-education-dialog]) {
   --dialog-horizontal-gutter: 20px;
   width: calc(100% - var(--dialog-horizontal-gutter));
 }

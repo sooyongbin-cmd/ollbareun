@@ -125,6 +125,9 @@ export default function GuardSpecialRemarksPage() {
   const speechRestartTimerRef = useRef<number | null>(null);
   const pendingSpeechRef = useRef("");
   const photoIdRef = useRef(0);
+  const [sites, setSites] = useState<Array<{ id: string; name: string }> | null>(null);
+  const [inspectionSiteId, setInspectionSiteId] = useState("");
+  const [siteError, setSiteError] = useState("");
   const [content, setContent] = useState("");
   const [photos, setPhotos] = useState<CapturedPhoto[]>([]);
   const [cameraStatus, setCameraStatus] = useState("카메라를 준비하고 있습니다.");
@@ -134,6 +137,35 @@ export default function GuardSpecialRemarksPage() {
   const [error, setError] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const saving = savingProvider !== null;
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const worksiteId = readStoredGuardSession<GuardSession>()?.worksite?.id;
+    const preselectedId = new URLSearchParams(window.location.search).get("inspectionSiteId");
+    async function loadSites() {
+      try {
+        if (!worksiteId) throw new Error("배정된 근무지가 없습니다.");
+        const response = await fetch(`/api/inspection/sites?worksiteId=${encodeURIComponent(worksiteId)}`, {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error ?? "점검지 목록을 불러오지 못했습니다.");
+        if (controller.signal.aborted) return;
+        const options: Array<{ id: string; name: string }> = payload.sites;
+        setSites(options);
+        if (preselectedId && options.some((site) => site.id === preselectedId)) {
+          setInspectionSiteId(preselectedId);
+        }
+      } catch (loadError) {
+        if (!controller.signal.aborted) {
+          setSiteError(loadError instanceof Error ? loadError.message : "점검지 목록을 불러오지 못했습니다.");
+        }
+      }
+    }
+    void loadSites();
+    return () => controller.abort();
+  }, []);
 
   function clearSpeechSilenceTimer() {
     if (speechSilenceTimerRef.current !== null) {
@@ -336,6 +368,11 @@ export default function GuardSpecialRemarksPage() {
       return;
     }
 
+    if (!inspectionSiteId) {
+      setError("점검지를 선택하세요.");
+      return;
+    }
+
     reportingRef.current = true;
     setSavingProvider(provider);
     setError("");
@@ -377,6 +414,7 @@ export default function GuardSpecialRemarksPage() {
           employeeName,
           worksiteId,
           worksiteName,
+          inspectionSiteId,
           content,
           photoDataUrl: selectedPhotoDataUrls[0] ?? "",
           photoDataUrls: selectedPhotoDataUrls,
@@ -430,6 +468,23 @@ export default function GuardSpecialRemarksPage() {
       <section className="guard-special-remarks-intro-card">
         <h1>특이사항</h1>
         <p>근무 중 특이사항을 작성하여 관리자에게 보고합니다.</p>
+      </section>
+
+      <section aria-label="점검지 선택" className="guard-special-remarks-photo-card">
+        <label htmlFor="special-remark-site">점검지 (필수)</label>
+        <select
+          className="w-full rounded-md border border-input bg-background px-3 py-2"
+          disabled={saving || !sites?.length}
+          id="special-remark-site"
+          onChange={(event) => setInspectionSiteId(event.target.value)}
+          required
+          value={inspectionSiteId}
+        >
+          <option value="">점검지를 선택하세요</option>
+          {sites?.map((site) => <option key={site.id} value={site.id}>{site.name}</option>)}
+        </select>
+        {siteError ? <p role="alert">{siteError}</p> : !sites ? <p role="status">점검지를 불러오는 중입니다.</p> : null}
+        {sites?.length === 0 && <p>현재 근무지에 등록된 점검지가 없습니다.</p>}
       </section>
 
       <section aria-label="특이사항 입력" className="guard-special-remarks-input-card">
@@ -492,7 +547,7 @@ export default function GuardSpecialRemarksPage() {
 
       <Button
         className="guard-general-button guard-special-remarks-report-button"
-        disabled={saving || !content.trim()}
+        disabled={saving || !inspectionSiteId || !content.trim()}
         onClick={() => handleReport("push")}
         type="button"
       >

@@ -19,6 +19,7 @@ type SpecialRemarkReport = {
   reported_at: string;
   employee_name: string;
   worksite_name: string;
+  site_name?: string | null;
   employee_role?: string;
   work_style?: "0" | "1" | "2" | null;
   content: string;
@@ -123,6 +124,7 @@ export default function SpecialRemarksPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-left">근무지</TableHead>
+                  <TableHead className="text-left">점검지</TableHead>
                   <TableHead className="text-left">이름</TableHead>
                   <TableHead className="text-left">점검일시</TableHead>
                   <TableHead className="text-left">특이사항내용</TableHead>
@@ -133,7 +135,7 @@ export default function SpecialRemarksPage() {
               <TableBody>
                 {filteredReports.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={6} className="p-8 text-center text-muted-foreground italic">
+                    <TableCell data-responsive-empty colSpan={7} className="p-8 text-center text-muted-foreground italic">
                       조회 결과에 해당하는 특이사항이 없습니다.
                     </TableCell>
                   </TableRow>
@@ -141,6 +143,7 @@ export default function SpecialRemarksPage() {
                   filteredReports.map((report) => (
                     <TableRow key={report.id} className="hover:bg-muted/40 transition-colors">
                       <TableCell data-label="근무지">{report.worksite_name || "-"}</TableCell>
+                      <TableCell data-label="점검지">{report.site_name || "-"}</TableCell>
                       <TableCell data-label="이름">{employeeSummary({ employeeName: report.employee_name, employeeRole: report.employee_role,
                         workStyle: report.work_style === "0" ? "일반근무" : report.work_style === "1" ? "격일근무" : report.work_style === "2" ? "야간근무" : "-" })}</TableCell>
                       <TableCell data-label="점검일시">

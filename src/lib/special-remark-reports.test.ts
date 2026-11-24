@@ -31,7 +31,11 @@ const from = vi.fn();
 
 vi.mock("./supabase-admin", () => ({
   getSupabaseAdmin: () => ({
-    from,
+    from: (table: string) => table === "inspection_sites"
+      ? { select: () => ({ eq: () => ({ eq: () => ({
+          maybeSingle: async () => ({ data: { name: "로비" }, error: null }),
+        }) }) }) }
+      : from(table),
     storage: {
       getBucket,
       createBucket,
@@ -129,6 +133,7 @@ describe("special remark report storage deletion", () => {
         employeeId: "employee-1",
         employeeName: "홍길동",
         worksiteId: "work-1",
+        inspectionSiteId: "site-1",
         worksiteName: "본사",
         content: "특이사항",
         photoDataUrl: `data:image/jpeg;base64,${"A".repeat(700 * 1024)}`,
@@ -167,6 +172,7 @@ describe("special remark push-only storage", () => {
         employeeId: "employee-1",
         employeeName: "홍길동",
         worksiteId: "work-1",
+        inspectionSiteId: "site-1",
         worksiteName: "본사",
         content: "문이 파손되었습니다.",
       },
@@ -211,6 +217,7 @@ describe("special remark push-only storage", () => {
         employeeId: "employee-1",
         employeeName: "홍길동",
         worksiteId: "work-1",
+        inspectionSiteId: "site-1",
         worksiteName: "본사",
         content: "문이 파손되었습니다.",
         photoDataUrls: [
@@ -249,6 +256,7 @@ describe("special remark push-only storage", () => {
         employeeId: "employee-1",
         employeeName: "홍길동",
         worksiteId: "work-1",
+        inspectionSiteId: "site-1",
         worksiteName: "본사",
         content: "특이사항",
         photoDataUrl: "data:image/jpeg;base64,AAAA",
@@ -405,6 +413,7 @@ describe("special remark report Naver SMTP delivery", () => {
         employeeId: "employee-1",
         employeeName: "홍길동",
         worksiteId: "work-1",
+        inspectionSiteId: "site-1",
         worksiteName: "본사",
         content: "문이 파손되었습니다.",
         photoDataUrl: "data:image/jpeg;base64,AAAA",
@@ -464,6 +473,7 @@ describe("special remark report Naver SMTP delivery", () => {
           employeeId: "employee-1",
           employeeName: "홍길동",
           worksiteId: "work-1",
+          inspectionSiteId: "site-1",
           worksiteName: "본사",
           content: "문이 파손되었습니다.",
         },
@@ -505,6 +515,7 @@ describe("special remark report Naver SMTP delivery", () => {
           employeeId: "employee-1",
           employeeName: "홍길동",
           worksiteId: "work-1",
+          inspectionSiteId: "site-1",
           worksiteName: "본사",
           content: "문이 파손되었습니다.",
         },
@@ -561,6 +572,7 @@ describe("special remark report Formspree delivery", () => {
         employeeId: "employee-1",
         employeeName: "홍길동",
         worksiteId: "work-1",
+        inspectionSiteId: "site-1",
         worksiteName: "본사",
         content: "문이 파손되었습니다.",
         photoDataUrl: "data:image/jpeg;base64,AAAA",
@@ -623,6 +635,7 @@ describe("special remark report Formspree delivery", () => {
         employeeId: "employee-1",
         employeeName: "홍길동",
         worksiteId: "work-1",
+        inspectionSiteId: "site-1",
         worksiteName: "본사",
         content: "문이 파손되었습니다.",
         gpsInfo: { latitude: 37.5665, longitude: 126.978 },
@@ -667,6 +680,7 @@ describe("special remark report Formspree delivery", () => {
         employeeId: "employee-1",
         employeeName: "홍길동",
         worksiteId: "work-1",
+        inspectionSiteId: "site-1",
         worksiteName: "본사",
         content: "문이 파손되었습니다.",
         photoDataUrls: ["data:image/jpeg;base64,AAAA", "data:image/jpeg;base64,BBBB"],
@@ -710,6 +724,7 @@ describe("special remark report Formspree delivery", () => {
           employeeId: "employee-1",
           employeeName: "홍길동",
           worksiteId: "work-1",
+          inspectionSiteId: "site-1",
           worksiteName: "본사",
           content: "문이 파손되었습니다.",
           photoDataUrl: "data:image/jpeg;base64,AAAA",

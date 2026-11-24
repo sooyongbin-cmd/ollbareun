@@ -18,6 +18,7 @@ export type SpecialRemarkReportRow = {
   employee_role?: string;
   work_style?: "0" | "1" | "2" | null;
   worksite_name: string;
+  site_name?: string | null;
   content: string;
   photo_url: string | null;
   photo_urls?: string[] | null;
@@ -38,10 +39,6 @@ function requireString(value: unknown, label: string) {
   }
 
   return value.trim();
-}
-
-function optionalString(value: unknown) {
-  return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
 function throwIfError(error: { message?: string; hint?: string; code?: string } | null) {
@@ -391,6 +388,7 @@ export async function createSpecialRemarkReport(input: {
   employeeName: unknown;
   worksiteId: unknown;
   worksiteName: unknown;
+  inspectionSiteId: unknown;
   content: unknown;
   photoDataUrl?: unknown;
   photoDataUrls?: unknown;
@@ -398,9 +396,19 @@ export async function createSpecialRemarkReport(input: {
 }, options: { emailProvider?: EmailProvider; sendEmail?: boolean } = {}) {
   const employee_id = requireString(input.employeeId, "현장점검자");
   const employee_name = requireString(input.employeeName, "현장점검자명");
-  const worksite_id = optionalString(input.worksiteId);
+  const worksite_id = requireString(input.worksiteId, "근무지");
+  const inspectionSiteId = requireString(input.inspectionSiteId, "점검지");
   const worksite_name = requireString(input.worksiteName, "근무지");
   const content = requireString(input.content, "특이사항 내용");
+  const supabase = getSupabaseAdmin();
+  const { data: site, error: siteError } = await supabase.from("inspection_sites")
+    .select("name")
+    .eq("id", inspectionSiteId)
+    .eq("worksite_id", worksite_id)
+    .maybeSingle();
+  throwIfError(siteError);
+  if (!site) throw new Error("현재 근무지에 등록된 점검지를 선택하세요.");
+
   const shouldSendEmail = options.sendEmail !== false;
   const email_to = shouldSendEmail ? await getSystemConfigContent("manager_email") : null;
   const photoDataUrls = getPhotoDataUrls(input);
@@ -421,8 +429,6 @@ export async function createSpecialRemarkReport(input: {
     }
   }
 
-  const supabase = getSupabaseAdmin();
-
   const { data, error } = await supabase
     .from("inspection_special_reports")
     .insert({
@@ -430,6 +436,7 @@ export async function createSpecialRemarkReport(input: {
       employee_id,
       employee_name,
       worksite_name,
+      site_name: site.name,
       content,
       photo_url,
       photo_urls,

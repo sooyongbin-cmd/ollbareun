@@ -8,6 +8,7 @@ import {
   type InspectionSiteRow,
   type InspectionLogRow,
 } from "@/lib/inspection";
+import Link from "next/link";
 import AlertModal from "@/components/modals/alert-modal";
 import { Button } from "@/components/ui/button";
 import {
@@ -424,6 +425,10 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
     window.history.go(0);
   }
 
+  function specialRemarksHref(siteId: string) {
+    return `/guard/main/special-remarks?inspectionSiteId=${encodeURIComponent(siteId)}`;
+  }
+
   if (presentation === "work") {
     const totalCount = currentList?.sites.length ?? 0;
     const completedCount = currentList?.sites.filter((site) => {
@@ -491,6 +496,11 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
                         ) : null}
                         {completed ? "체크 완료" : "미완료"}
                       </span>
+                      {completed && (
+                        <Button asChild size="sm" variant="outline">
+                          <Link href={specialRemarksHref(site.id)}>특이사항</Link>
+                        </Button>
+                      )}
                     </div>
                   </article>
                 );
@@ -509,7 +519,14 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
             {!saving && (
               <DialogFooter className="flex-row justify-end">
                 {alertMessage ? (
-                  <Button type="button" onClick={closeWorkScan}>완료</Button>
+                  <>
+                    <Button type="button" onClick={closeWorkScan}>완료</Button>
+                    {nfcPayload && (
+                      <Button asChild variant="outline">
+                        <Link href={specialRemarksHref(nfcPayload.siteId)}>특이사항</Link>
+                      </Button>
+                    )}
+                  </>
                 ) : (
                   <Button type="button" onClick={closeWorkScan}>닫기</Button>
                 )}

@@ -62,11 +62,14 @@ export default function GuardWorksiteSection() {
   const scheduledStart = formatGuardWorkTime(selectedShift?.intime ?? null);
   const scheduledEnd = formatGuardWorkTime(selectedShift?.outtime ?? null);
   const timeLabel = scheduledStart && scheduledEnd ? `${scheduledStart} - ${scheduledEnd}` : "근무시간 미등록";
-  const statusLabel = workAction === "clock-out"
-    ? "퇴근가능"
-    : workAction === "complete"
-      ? "근무완료"
-      : "출근가능";
+  const isLeave = selectedShift?.intime_status === "3";
+  const statusLabel = isLeave
+    ? "휴가"
+    : workAction === "clock-out"
+      ? "퇴근가능"
+      : workAction === "complete"
+        ? "근무완료"
+        : "출근가능";
   const buttonLabel = workAction === "clock-out"
     ? "퇴근하기"
     : workAction === "complete"
@@ -117,7 +120,7 @@ export default function GuardWorksiteSection() {
           buttonClassName="guard-general-button"
           href="/guard/main/attendance"
           hasAssignedWorksite={hasAssignedWorksite}
-          disabled={!selectedShift || workAction === "complete"}
+          disabled={!selectedShift || isLeave || workAction === "complete"}
           variant="default"
         >
           {buttonLabel}

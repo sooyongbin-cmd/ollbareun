@@ -165,8 +165,7 @@
   .educationDialog {
     box-sizing: border-box;
     display: flex;
-    width: calc(100vw - 1rem) !important;
-    max-width: calc(100vw - 1rem) !important;
+    max-width: calc(100vw - 20px) !important;
     height: calc(100dvh - 1rem) !important;
     max-height: calc(100dvh - 1rem) !important;
     flex-direction: column;

@@ -393,7 +393,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 20px 10px;
   box-sizing: border-box;
   background: rgb(20 20 20 / 32%);
 }
@@ -401,7 +401,7 @@
 .modal {
   position: relative;
   display: flex;
-  width: min(367px, calc(100vw - 40px));
+  width: min(367px, 100%);
   max-height: calc(100dvh - 40px);
   flex-direction: column;
   align-items: center;

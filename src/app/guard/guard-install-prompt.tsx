@@ -56,7 +56,7 @@ export default function GuardInstallPrompt() {
   }
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[100] px-4 pb-4 sm:pb-6" role="dialog" aria-labelledby="guard-install-title">
+    <div className="fixed inset-x-0 bottom-0 z-[100] px-[10px] pb-4 sm:pb-6" role="dialog" aria-labelledby="guard-install-title">
       <div className="mx-auto flex w-full max-w-[37.5rem] items-center gap-4 rounded-xl border border-border bg-background p-4 shadow-lg">
         {/* A fixed-size PWA icon does not need Next.js image optimization. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}

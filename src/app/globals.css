@@ -168,6 +168,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Guard-only readable font and viewport scale */
+/* Radix renders guard dialogs under body, outside the guard layout. */
+body:has(.guard-zoom-scope) :is([data-slot="dialog-content"], [data-slot="alert-dialog-content"]) {
+  --dialog-horizontal-gutter: 20px;
+  width: calc(100% - var(--dialog-horizontal-gutter));
+}
+
 .guard-zoom-scope {
   zoom: var(--guard-zoom-scale, 1);
 }
@@ -987,7 +993,6 @@ html[data-manager-theme="dark"] {
 .guard-attendance-dialog {
   box-sizing: border-box;
   display: flex !important;
-  width: calc(100% - 40px) !important;
   max-width: 380px !important;
   height: auto !important;
   min-height: 0 !important;

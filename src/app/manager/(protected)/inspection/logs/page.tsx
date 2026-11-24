@@ -79,7 +79,7 @@ export default function InspectionLogsPage() {
       }
     }
 
-    void loadWorksites();
+    void loadOptions();
 
     return () => {
       ignore = true;

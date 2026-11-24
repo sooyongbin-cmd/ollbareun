@@ -9,6 +9,15 @@ import {
   type InspectionLogRow,
 } from "@/lib/inspection";
 import AlertModal from "@/components/modals/alert-modal";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { isStandaloneApp } from "@/lib/in-app-browser";
 import { readStoredGuardSession, readStoredGuardSessionSnapshot, subscribeToGuardSessionChange } from "../../guard-session-storage";
 import styles from "./page.module.css";
@@ -246,10 +255,12 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
   const [status, setStatus] = useState("NFC 태그를 가까이 대세요.");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [workScanOpen, setWorkScanOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [showAppRequired, setShowAppRequired] = useState(false);
   const [isAppContext, setIsAppContext] = useState<boolean | null>(null);
   const handledPayloadRef = useRef("");
+  const workScanOpenRef = useRef(false);
 
   useEffect(() => {
     setIsAppContext(isStandaloneApp() || document.referrer.startsWith("android-app://"));
@@ -272,14 +283,13 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
       }
 
       handledPayloadRef.current = payloadKey;
-      setSaving(true);
       setError("");
       setStatus("NFC 태그 자료를 읽었습니다.");
 
       try {
         const parsed = parseInspectionQrPayload(rawPayload);
         setNfcPayload(parsed);
-        setStatus("NFC 태그 자료를 읽었습니다. 처리 중입니다.");
+        setStatus("NFC 태그 자료를 읽었습니다. 점검 기록을 저장하는 중입니다.");
         await postInspectionLog({
           employeeId,
           employeeName,
@@ -295,8 +305,6 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
         handledPayloadRef.current = "";
         setStatus("NFC 태그 처리가 완료되지 않았습니다.");
         setError(saveError instanceof Error ? saveError.message : "NFC 태그 점검을 저장하지 못했습니다.");
-      } finally {
-        setSaving(false);
       }
     },
     [],
@@ -304,22 +312,34 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
 
   const saveInspectionSource = useCallback(
     async (source: InspectionSource) => {
+      if (presentation === "work") {
+        if (workScanOpenRef.current) {
+          return;
+        }
+
+        workScanOpenRef.current = true;
+        setWorkScanOpen(true);
+      }
+
+      setSaving(true);
+      setError("");
       try {
         if (source.type === "payload") {
           await saveInspectionPayload(source.value);
           return;
         }
 
-        setStatus("NFC 태그 자료를 읽었습니다. 처리 중입니다.");
-        setError("");
+        setStatus("NFC 태그 자료를 읽었습니다. 점검 위치를 확인하는 중입니다.");
         const payload = await fetchInspectionSitePayload(source.value);
         await saveInspectionPayload(payload);
       } catch (saveError) {
         setStatus("NFC 태그 처리가 완료되지 않았습니다.");
         setError(saveError instanceof Error ? saveError.message : "점검 위치 정보를 불러오지 못했습니다.");
+      } finally {
+        setSaving(false);
       }
     },
-    [saveInspectionPayload],
+    [presentation, saveInspectionPayload],
   );
 
   useEffect(() => {
@@ -350,6 +370,9 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
 
     const reader = new nfcWindow.NDEFReader();
     reader.onreading = (event) => {
+      if (workScanOpenRef.current) {
+        return;
+      }
       const source = extractSourceFromReading(event);
       if (!source) {
         setError("NFC 태그 내용을 읽을 수 없습니다.");
@@ -359,12 +382,18 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
       void saveInspectionSource(source);
     };
     reader.onreadingerror = () => {
-      setError("NFC 태그를 읽지 못했습니다. 다시 태그해주세요.");
+      if (!workScanOpenRef.current) {
+        setError("NFC 태그를 읽지 못했습니다. 다시 태그해주세요.");
+      }
     };
 
     reader
       .scan()
-      .then(() => setStatus("화면이 켜진 상태에서 태그에 가까이 대주세요."))
+      .then(() => {
+        if (!workScanOpenRef.current) {
+          setStatus("화면이 켜진 상태에서 태그에 가까이 대주세요.");
+        }
+      })
       .catch((scanError) => {
         setStatus("NFC 태그 읽기를 시작하지 못했습니다.");
         setError(scanError instanceof Error ? scanError.message : "NFC 태그 읽기를 시작하지 못했습니다.");
@@ -408,7 +437,7 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
             <div className={styles.worksiteNotice}>
               <p>✓ 휴대폰 케이스에 교통카드나 다른 카드가<br /> 있으면 인식이 안 될 수 있습니다.</p>
               <p aria-live="polite" className={error ? styles.error : undefined} role={error ? "alert" : "status"}>
-                {error || (saving ? "NFC 태그 자료를 읽었습니다. 처리 중입니다." : status)}
+                {workScanOpen ? "NFC 태그를 가까이 대세요." : error || status}
               </p>
             </div>
           </div>
@@ -450,12 +479,28 @@ export function GuardInspectionNfcScreen({ presentation = "legacy" }: GuardInspe
           </div>
         </section>
 
-        <AlertModal
-          isOpen={Boolean(alertMessage)}
-          onClose={handleSuccessAlertClose}
-          title="알림"
-          description={alertMessage}
-        />
+        <Dialog open={workScanOpen}>
+          <DialogContent className="max-w-md" showCloseButton={false}>
+            <DialogHeader>
+              <DialogTitle>NFC 점검</DialogTitle>
+              <DialogDescription aria-live="polite">
+                {error || alertMessage || status}
+              </DialogDescription>
+            </DialogHeader>
+            {!saving && (
+              <DialogFooter className="flex-row justify-end">
+                {alertMessage ? (
+                  <Button type="button" onClick={handleSuccessAlertClose}>완료</Button>
+                ) : (
+                  <Button type="button" onClick={() => {
+                    workScanOpenRef.current = false;
+                    setWorkScanOpen(false);
+                  }}>닫기</Button>
+                )}
+              </DialogFooter>
+            )}
+          </DialogContent>
+        </Dialog>
         <AlertModal
           isOpen={showAppRequired}
           onClose={() => setShowAppRequired(false)}

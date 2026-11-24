@@ -1,6 +1,7 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { educationToday } from "@/lib/education-periods";
 import InspectionLogsPage from "./page";
 
 describe("inspection logs page", () => {
@@ -32,22 +33,26 @@ describe("inspection logs page", () => {
     );
   });
 
-  it("filters logs by selected worksite and shows date, worksite, site, inspector, and role columns", async () => {
+  it("filters logs by worksite, inspection site, employee, and month and shows date, worksite, site, inspector, and role columns", async () => {
     const user = userEvent.setup();
     render(<InspectionLogsPage />);
 
     expect(await screen.findByRole("heading", { name: "점검지점검현황" })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "점검일자" })).toBeInTheDocument();
+    expect(await screen.findByRole("columnheader", { name: "점검일자" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "근무지" })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "점검지명" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "점검지" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "점검자" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "직군" })).toBeInTheDocument();
 
-    await user.selectOptions(screen.getByLabelText("근무지"), "work-1");
+    expect(screen.getByLabelText("조회년월")).toHaveValue(educationToday().slice(0, 7));
+    fireEvent.change(screen.getByLabelText("조회년월"), { target: { value: "2026-06" } });
     await waitFor(() => {
-      expect(fetch).toHaveBeenLastCalledWith("/api/inspection/logs?worksiteId=work-1");
+      expect(fetch).toHaveBeenLastCalledWith("/api/inspection/logs?yearMonth=2026-06");
     });
     expect(await screen.findByText("Gate")).toBeInTheDocument();
+    await user.type(screen.getByLabelText("근무지"), "work");
+    await user.type(screen.getByLabelText("점검지"), "gat");
+    await user.type(screen.getByLabelText("근무자"), "ali");
     const dataRow = screen.getAllByRole("row")[1];
     const cells = within(dataRow).getAllByRole("cell");
     expect(cells.map((cell) => cell.textContent)).toEqual([
@@ -57,5 +62,7 @@ describe("inspection logs page", () => {
       "Alice",
       "경비원",
     ]);
+    await user.type(screen.getByLabelText("근무자"), "x");
+    expect(screen.getByText("조회 결과에 해당하는 점검 기록이 없습니다.")).toBeInTheDocument();
   });
 });

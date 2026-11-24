@@ -442,14 +442,36 @@ export async function createInspectionLog(input: {
   return data as InspectionLogRow;
 }
 
-export async function listInspectionLogs(input: { worksiteId?: unknown } = {}) {
+export async function listInspectionLogs(input: { worksiteId?: unknown; yearMonth?: string } = {}) {
   const worksiteId = typeof input.worksiteId === "string" ? input.worksiteId.trim() : "";
   const supabase = getSupabaseAdmin();
   const query = supabase.from("inspection_logs").select("*").order("inspected_at", { ascending: false });
-  const { data, error } = worksiteId ? await query.eq("worksite_id", worksiteId) : await query;
+  if (worksiteId) query.eq("worksite_id", worksiteId);
 
-  throwIfError(error);
-  const logs = (data ?? []) as InspectionLogRow[];
+  const logs: InspectionLogRow[] = [];
+  if (input.yearMonth === undefined) {
+    const { data, error } = await query;
+    throwIfError(error);
+    logs.push(...(data ?? []));
+  } else {
+    const yearMonth = input.yearMonth;
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(yearMonth) || yearMonth.startsWith("0000")) {
+      throw new Error("조회년월을 확인하세요.");
+    }
+    const start = new Date(`${yearMonth}-01T00:00:00+09:00`);
+    const nextMonth = new Date(`${yearMonth}-01T00:00:00Z`);
+    nextMonth.setUTCMonth(nextMonth.getUTCMonth() + 1);
+    const end = new Date(nextMonth.getTime() - 9 * 60 * 60 * 1000);
+
+    query.gte("inspected_at", start.toISOString()).lt("inspected_at", end.toISOString()).order("id");
+    const pageSize = 500;
+    for (let offset = 0; ; offset += pageSize) {
+      const { data, error } = await query.range(offset, offset + pageSize - 1);
+      throwIfError(error);
+      logs.push(...(data ?? []));
+      if (!data || data.length < pageSize) break;
+    }
+  }
   const employeeIds = Array.from(new Set(logs.map((log) => log.employee_id).filter((id): id is string => Boolean(id))));
 
   if (employeeIds.length === 0) {

@@ -15,7 +15,8 @@ export async function GET(request: Request) {
       }
       return Response.json({ logs: await listInspectionLogs({ worksiteId: session.worksite.id }) });
     }
-    return Response.json({ logs: await listInspectionLogs({ worksiteId }) });
+    const yearMonth = url.searchParams.get("yearMonth");
+    return Response.json({ logs: await listInspectionLogs(yearMonth === null ? { worksiteId } : { worksiteId, yearMonth }) });
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "점검지점검현황을 불러오지 못했습니다." },

@@ -29,6 +29,15 @@ type KakaoGeocodeResult = {
   y: string;
 };
 
+type KakaoPlace = {
+  id: string;
+  place_name: string;
+  road_address_name: string;
+  address_name: string;
+  x: string;
+  y: string;
+};
+
 type KakaoGlobal = {
   maps: {
     load: (callback: () => void) => void;
@@ -50,6 +59,9 @@ type KakaoGlobal = {
       ) => void;
     };
     services: {
+      Places?: new () => {
+        keywordSearch: (keyword: string, callback: (places: KakaoPlace[], status: string) => void) => void;
+      };
       Geocoder: new () => {
         addressSearch: (
           address: string,
@@ -72,7 +84,7 @@ declare global {
 }
 
 type WorksiteGpsPickerProps = {
-  address: string;
+  address?: string;
   value: GpsInfo | null;
   onChange: (gps: GpsInfo | null) => void;
   hideInput?: boolean;
@@ -135,6 +147,27 @@ function loadKakaoMap() {
   return kakaoLoader;
 }
 
+export async function searchKakaoPlaces(keyword: string) {
+  await loadKakaoMap();
+  const services = window.kakao?.maps.services;
+  if (!services?.Places) {
+    throw new Error("카카오 장소 검색을 사용할 수 없습니다.");
+  }
+
+  const places = new services.Places();
+  return new Promise<KakaoPlace[]>((resolve, reject) => {
+    places.keywordSearch(keyword, (results, status) => {
+      if (status === services.Status.OK) {
+        resolve(results);
+      } else if (status === "ZERO_RESULT") {
+        resolve([]);
+      } else {
+        reject(new Error("장소 검색에 실패했습니다. 다시 시도해 주세요."));
+      }
+    });
+  });
+}
+
 function toLatLng(gps: GpsInfo) {
   const kakao = window.kakao;
   if (!kakao) {
@@ -161,7 +194,7 @@ function createMarkerImage() {
   });
 }
 
-export default function WorksiteGpsPicker({ address, value, onChange, hideInput = false }: WorksiteGpsPickerProps) {
+export default function WorksiteGpsPicker({ address = "", value, onChange, hideInput = false }: WorksiteGpsPickerProps) {
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<KakaoMap | null>(null);
   const markerRef = useRef<KakaoMarker | null>(null);

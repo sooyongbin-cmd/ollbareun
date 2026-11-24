@@ -6,24 +6,12 @@ import type { RegistrationFormProps } from "@/components/modals/registration-mod
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import type { GpsInfo } from "@/lib/gps";
-import WorksiteGpsPicker from "../worksite-gps-picker";
+import WorksiteGpsPicker, { searchKakaoPlaces } from "../worksite-gps-picker";
 import { SaveIcon } from "@/components/icons/save-icon";
 import AlertModal from "@/components/modals/alert-modal";
 import ProcessingModal from "@/components/modals/processing-modal";
-
-declare global {
-  interface Window {
-    jusoCallBack?: (
-      roadFullAddr?: string,
-      roadAddrPart1?: string,
-      addrDetail?: string,
-      roadAddrPart2?: string,
-      ...rest: string[]
-    ) => void;
-  }
-}
 
 type WorksiteResponse = {
   worksite: {
@@ -52,36 +40,60 @@ export default function WorksiteNewPage({ modal = false, onClose, onSaved }: Reg
   const [error, setError] = useState("");
   const [address, setAddress] = useState("");
   const [gpsInfo, setGpsInfo] = useState<GpsInfo | null>(null);
+  const [keyword, setKeyword] = useState("");
+  const [places, setPlaces] = useState<Awaited<ReturnType<typeof searchKakaoPlaces>>>([]);
+  const [searchStatus, setSearchStatus] = useState("");
+  const [searching, setSearching] = useState(false);
   const [saving, setSaving] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [createdWorksiteId, setCreatedWorksiteId] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    window.jusoCallBack = (roadFullAddr, roadAddrPart1, addrDetail, roadAddrPart2) => {
-      const selectedAddress =
-        roadFullAddr?.trim() || [roadAddrPart1, addrDetail, roadAddrPart2].filter(Boolean).join(" ").trim();
-      setAddress(selectedAddress);
-    };
+  async function searchPlaces() {
+    const query = keyword.trim();
+    if (searching || !query) return;
 
-    return () => {
-      delete window.jusoCallBack;
-    };
-  }, []);
+    setSearching(true);
+    setPlaces([]);
+    setSearchStatus("장소를 검색하는 중입니다.");
+    try {
+      const results = await searchKakaoPlaces(query);
+      setPlaces(results);
+      setSearchStatus(results.length ? "" : "검색 결과가 없습니다.");
+    } catch (searchError) {
+      setSearchStatus(searchError instanceof Error ? searchError.message : "장소 검색에 실패했습니다.");
+    } finally {
+      setSearching(false);
+    }
+  }
 
-  function openAddressPopup() {
-    const popup = window.open(
-      "/api/juso/popup",
-      "jusoPopup",
-      "width=570,height=620,scrollbars=yes,resizable=yes",
-    );
-    popup?.focus();
+  function selectPlace(place: (typeof places)[number]) {
+    const selectedAddress = place.road_address_name || place.address_name;
+    const latitude = Number(place.y);
+    const longitude = Number(place.x);
+    if (!selectedAddress || !place.y.trim() || !place.x.trim()
+      || !Number.isFinite(latitude) || !Number.isFinite(longitude)
+      || Math.abs(latitude) > 90 || Math.abs(longitude) > 180) {
+      setSearchStatus("선택한 장소의 주소 또는 GPS정보를 확인할 수 없습니다.");
+      return;
+    }
+
+    setAddress(selectedAddress);
+    setGpsInfo({ latitude, longitude });
+    setPlaces([]);
+    setSearchStatus("");
+    setError("");
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (saving) return;
     setError("");
+
+    if (!address) {
+      setError("장소 검색 결과에서 근무지를 선택하세요.");
+      return;
+    }
 
     if (!gpsInfo) {
       setError("GPS정보를 입력하거나 지도에서 위치를 선택하세요.");
@@ -126,25 +138,61 @@ export default function WorksiteNewPage({ modal = false, onClose, onSaved }: Reg
               <Input className="w-full" id="worksite-name" name="name" placeholder="작업장 이름을 입력하세요." required />
             </div>
             <div className="space-y-2">
-              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="worksite-address">
-                근무지주소
+              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="worksite-place">
+                카카오 장소 검색
               </label>
               <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_8.25rem]">
                 <Input
-                  className="w-full"
-                  id="worksite-address"
-                  name="address"
-                  value={address}
-                  placeholder="주소 검색으로 선택하세요."
-                  readOnly
-                  required
+                  id="worksite-place"
+                  value={keyword}
+                  disabled={searching}
+                  placeholder="건물명 또는 사업장명을 입력하세요."
+                  onChange={(event) => {
+                    setKeyword(event.target.value);
+                    setPlaces([]);
+                    setSearchStatus("");
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key !== "Enter" || event.nativeEvent.isComposing || event.keyCode === 229) return;
+                    event.preventDefault();
+                    void searchPlaces();
+                  }}
                 />
-                <Button className="inline-flex min-h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full whitespace-nowrap md:w-full" type="button" onClick={openAddressPopup} variant="outline">
-                  주소 검색
+                <Button type="button" variant="outline" disabled={searching || !keyword.trim()} onClick={searchPlaces}>
+                  장소 검색
                 </Button>
               </div>
+              {searchStatus && <p role="status" className="text-sm text-muted-foreground">{searchStatus}</p>}
+              {places.length > 0 && (
+                <ul aria-label="장소 검색 결과" className="max-h-48 divide-y overflow-y-auto rounded-md border">
+                  {places.map((place) => (
+                    <li key={place.id}>
+                      <button
+                        type="button"
+                        className="w-full px-3 py-2 text-left hover:bg-accent focus-visible:bg-accent"
+                        onClick={() => selectPlace(place)}
+                      >
+                        <span className="block text-sm font-medium">{place.place_name}</span>
+                        <span className="block text-sm text-muted-foreground">{place.road_address_name || place.address_name}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
-            <WorksiteGpsPicker address={address} value={gpsInfo} onChange={setGpsInfo} />
+            <div className="space-y-2">
+              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="worksite-address">
+                근무지주소
+              </label>
+              <Input
+                id="worksite-address"
+                name="address"
+                value={address}
+                placeholder="장소 검색 결과에서 선택하세요."
+                readOnly
+              />
+            </div>
+            <WorksiteGpsPicker value={gpsInfo} onChange={setGpsInfo} />
             <div className="space-y-2">
               <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="worksite-radius">
                 허용반경(m)

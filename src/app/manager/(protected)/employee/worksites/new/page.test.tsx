@@ -3,6 +3,24 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import WorksiteNewPage from "./page";
 
+const searchKakaoPlaces = vi.hoisted(() => vi.fn());
+vi.mock("../worksite-gps-picker", async (importOriginal) => ({
+  ...await importOriginal<typeof import("../worksite-gps-picker")>(),
+  searchKakaoPlaces,
+}));
+
+async function selectPlace(name: string, address: string, y = "35.126906", x = "129.109566") {
+  searchKakaoPlaces.mockResolvedValueOnce([
+    { id: name, place_name: name, road_address_name: address, address_name: "", y, x },
+  ]);
+  const user = userEvent.setup();
+  const search = screen.getByLabelText("카카오 장소 검색");
+  await user.clear(search);
+  await user.type(search, name);
+  await user.click(screen.getByRole("button", { name: "장소 검색" }));
+  await user.click(await screen.findByRole("button", { name: new RegExp(name) }));
+}
+
 const push = vi.fn();
 const MockGeocoder = vi.fn(function Geocoder() {
   return { addressSearch: vi.fn() };
@@ -71,7 +89,7 @@ describe("worksite new page", () => {
     expect(map).toHaveAttribute("data-test-id", "worksite-map");
   });
 
-  it("recenters and relayouts the map when address GPS is found", async () => {
+  it("recenters and relayouts the map when a Kakao place is selected", async () => {
     const map = {
       setCenter: vi.fn(),
       relayout: vi.fn(),
@@ -109,27 +127,9 @@ describe("worksite new page", () => {
       },
     };
 
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async (input: RequestInfo | URL) => {
-        const url = String(input);
-        if (url.startsWith("/api/kakao/geocode")) {
-          return Response.json({
-            gpsInfo: {
-              latitude: 35.126906,
-              longitude: 129.109566,
-            },
-          });
-        }
-        return Response.json({}, { status: 404 });
-      }),
-    );
-
     render(<WorksiteNewPage />);
 
-    act(() => {
-      window.jusoCallBack?.("부산광역시 남구 수영로 1", "부산광역시 남구 수영로 1", "", "");
-    });
+    await selectPlace("테스트 사업장", "부산광역시 남구 수영로 1");
 
     await waitFor(() => {
       expect(screen.getByText("선택한 GPS정보: 35.126906, 129.109566")).toBeInTheDocument();
@@ -182,27 +182,9 @@ describe("worksite new page", () => {
       },
     };
 
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async (input: RequestInfo | URL) => {
-        const url = String(input);
-        if (url.startsWith("/api/kakao/geocode")) {
-          return Response.json({
-            gpsInfo: {
-              latitude: 35.126906,
-              longitude: 129.109566,
-            },
-          });
-        }
-        return Response.json({}, { status: 404 });
-      }),
-    );
-
     render(<WorksiteNewPage />);
 
-    act(() => {
-      window.jusoCallBack?.("부산광역시 남구 수영로 1", "부산광역시 남구 수영로 1", "", "");
-    });
+    await selectPlace("테스트 사업장", "부산광역시 남구 수영로 1");
 
     await waitFor(() => {
       expect(screen.getByText("선택한 GPS정보: 35.126906, 129.109566")).toBeInTheDocument();
@@ -288,18 +270,10 @@ describe("worksite new page", () => {
 
     render(<WorksiteNewPage />);
 
-    expect(screen.getByLabelText("근무지주소").parentElement).toHaveClass(
-      "md:grid-cols-[minmax(0,1fr)_8.25rem]",
-    );
-    expect(screen.getByRole("button", { name: "주소 검색" })).toHaveClass("md:w-full", "whitespace-nowrap");
-
     await user.type(screen.getByLabelText("근무지명"), "인천 현장");
-    act(() => {
-      window.jusoCallBack?.("인천광역시 동구 송림로 1", "인천광역시 동구 송림로 1", "", "");
-    });
+    await selectPlace("테스트 사업장", "인천광역시 동구 송림로 1", "37.1", "126.7");
     expect(screen.queryByText("주소 기준 GPS")).not.toBeInTheDocument();
     expect(screen.getByTestId("worksite-map")).toBeInTheDocument();
-    await user.type(screen.getByLabelText("GPS정보"), "37.1, 126.7");
     await user.click(screen.getByRole("button", { name: "저장" }));
 
     expect(await screen.findByText("자료를 저장하였습니다.")).toBeInTheDocument();
@@ -307,27 +281,16 @@ describe("worksite new page", () => {
     expect(push).toHaveBeenCalledWith("/manager/employee/worksites");
   });
 
-  it("opens the juso popup and fills the selected address", async () => {
-    const user = userEvent.setup();
-    const popup = { focus: vi.fn() };
-    const open = vi.spyOn(window, "open").mockReturnValue(popup as unknown as Window);
-
+  it("replaces the address and GPS when another Kakao place is selected", async () => {
     render(<WorksiteNewPage />);
-
-    await user.click(screen.getByRole("button", { name: "주소 검색" }));
-
-    expect(open).toHaveBeenCalledWith(
-      "/api/juso/popup",
-      "jusoPopup",
-      "width=570,height=620,scrollbars=yes,resizable=yes",
-    );
-    expect(popup.focus).toHaveBeenCalled();
-
-    act(() => {
-      window.jusoCallBack?.("서울특별시 중구 세종대로 110", "서울특별시 중구 세종대로 110", "", "");
-    });
-
+    await selectPlace("첫 사업장", "서울특별시 중구 세종대로 110", "37.566", "126.978");
     expect(screen.getByLabelText("근무지주소")).toHaveValue("서울특별시 중구 세종대로 110");
-  });
+    expect(screen.getByLabelText("GPS정보")).toHaveValue("37.566000, 126.978000");
 
+    await selectPlace("둘째 사업장", "부산광역시 남구 수영로 1");
+    expect(searchKakaoPlaces).toHaveBeenLastCalledWith("둘째 사업장");
+    expect(screen.getByLabelText("근무지주소")).toHaveValue("부산광역시 남구 수영로 1");
+    expect(screen.getByLabelText("GPS정보")).toHaveValue("35.126906, 129.109566");
+    expect(fetch).not.toHaveBeenCalled();
+  });
 });

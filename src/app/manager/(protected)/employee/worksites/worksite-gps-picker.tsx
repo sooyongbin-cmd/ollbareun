@@ -198,7 +198,7 @@ export default function WorksiteGpsPicker({ address = "", value, onChange, hideI
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<KakaoMap | null>(null);
   const markerRef = useRef<KakaoMarker | null>(null);
-  const manualInputRef = useRef(false);
+  const manualGpsRef = useRef<GpsInfo | null | undefined>(undefined);
   const selectedGpsRef = useRef<GpsInfo | null>(value);
   const [addressGps, setAddressGps] = useState<GpsInfo | null>(null);
   const [inputValue, setInputValue] = useState(formatGpsInfo(value));
@@ -209,10 +209,9 @@ export default function WorksiteGpsPicker({ address = "", value, onChange, hideI
   }, [addressGps, value]);
 
   useEffect(() => {
-    if (manualInputRef.current) {
-      manualInputRef.current = false;
-      return;
-    }
+    const manualGps = manualGpsRef.current;
+    manualGpsRef.current = undefined;
+    if (manualGps === value) return;
 
     setInputValue(formatGpsInfo(value));
   }, [value]);
@@ -347,9 +346,10 @@ export default function WorksiteGpsPicker({ address = "", value, onChange, hideI
   }, [addressGps, value]);
 
   function handleGpsInputChange(nextValue: string) {
-    manualInputRef.current = true;
+    const gps = parseGpsInfo(nextValue);
+    manualGpsRef.current = gps;
     setInputValue(nextValue);
-    onChange(parseGpsInfo(nextValue));
+    onChange(gps);
   }
 
   return (

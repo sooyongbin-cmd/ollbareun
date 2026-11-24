@@ -6,7 +6,7 @@ import type { RegistrationFormProps } from "@/components/modals/registration-mod
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import type { GpsInfo } from "@/lib/gps";
 import WorksiteGpsPicker, { searchKakaoPlaces } from "../worksite-gps-picker";
 import { SaveIcon } from "@/components/icons/save-icon";
@@ -39,6 +39,9 @@ export default function WorksiteNewPage({ modal = false, onClose, onSaved }: Reg
   const [createdRecord, setCreatedRecord] = useState<DetailData | null>(null);
   const [error, setError] = useState("");
   const [address, setAddress] = useState("");
+  const [addressQuery, setAddressQuery] = useState("");
+  const [addressStatus, setAddressStatus] = useState("");
+  const [addressLookupPending, setAddressLookupPending] = useState(false);
   const [gpsInfo, setGpsInfo] = useState<GpsInfo | null>(null);
   const [keyword, setKeyword] = useState("");
   const [places, setPlaces] = useState<Awaited<ReturnType<typeof searchKakaoPlaces>>>([]);
@@ -48,6 +51,54 @@ export default function WorksiteNewPage({ modal = false, onClose, onSaved }: Reg
   const [alertMessage, setAlertMessage] = useState("");
   const [createdWorksiteId, setCreatedWorksiteId] = useState<string | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    if (!addressQuery) return;
+
+    const controller = new AbortController();
+    async function lookupAddress() {
+      try {
+        const response = await fetch(`/api/kakao/geocode?query=${encodeURIComponent(addressQuery)}`, {
+          signal: controller.signal,
+        });
+        const result = (await response.json()) as { gpsInfo?: GpsInfo };
+        if (controller.signal.aborted) return;
+
+        if (!response.ok || !result.gpsInfo) {
+          throw new Error("주소의 GPS정보를 찾지 못했습니다.");
+        }
+
+        setGpsInfo(result.gpsInfo);
+        setAddressStatus("");
+      } catch {
+        if (!controller.signal.aborted) {
+          setAddressStatus("주소의 GPS정보를 조회하지 못했습니다. 주소를 확인하거나 지도에서 위치를 선택하세요.");
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setAddressLookupPending(false);
+        }
+      }
+    }
+
+    const timer = window.setTimeout(() => void lookupAddress(), 450);
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [addressQuery]);
+
+  function editAddress(nextAddress: string) {
+    setAddress(nextAddress);
+    const query = nextAddress.trim();
+    if (query === address.trim()) return;
+
+    setAddressQuery(query);
+    setGpsInfo(null);
+    setAddressLookupPending(Boolean(query));
+    setAddressStatus(query ? "주소의 GPS정보를 조회하는 중입니다." : "");
+    setError("");
+  }
 
   async function searchPlaces() {
     const query = keyword.trim();
@@ -79,6 +130,9 @@ export default function WorksiteNewPage({ modal = false, onClose, onSaved }: Reg
     }
 
     setAddress(selectedAddress);
+    setAddressQuery("");
+    setAddressStatus("");
+    setAddressLookupPending(false);
     setGpsInfo({ latitude, longitude });
     setPlaces([]);
     setSearchStatus("");
@@ -87,11 +141,11 @@ export default function WorksiteNewPage({ modal = false, onClose, onSaved }: Reg
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (saving) return;
+    if (saving || addressLookupPending) return;
     setError("");
 
     if (!address) {
-      setError("장소 검색 결과에서 근무지를 선택하세요.");
+      setError("근무지주소를 입력하거나 장소 검색 결과에서 선택하세요.");
       return;
     }
 
@@ -188,9 +242,10 @@ export default function WorksiteNewPage({ modal = false, onClose, onSaved }: Reg
                 id="worksite-address"
                 name="address"
                 value={address}
-                placeholder="장소 검색 결과에서 선택하세요."
-                readOnly
+                placeholder="근무지주소를 입력하세요."
+                onChange={(event) => editAddress(event.target.value)}
               />
+              {addressStatus && <p role="status" className="text-sm text-muted-foreground">{addressStatus}</p>}
             </div>
             <WorksiteGpsPicker value={gpsInfo} onChange={setGpsInfo} />
             <div className="space-y-2">
@@ -213,7 +268,7 @@ export default function WorksiteNewPage({ modal = false, onClose, onSaved }: Reg
               aria-label="저장"
               className="inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 w-full md:w-auto"
               data-testid="worksite-submit"
-              disabled={saving}
+              disabled={saving || addressLookupPending}
               type="submit"
             >
               <SaveIcon size={20} />

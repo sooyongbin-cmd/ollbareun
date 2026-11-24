@@ -74,10 +74,10 @@ describe("worksite new page", () => {
     });
   });
 
-  it("keeps the worksite address read-only and hides address GPS display", () => {
+  it("allows editing the worksite address and hides address GPS display", () => {
     render(<WorksiteNewPage />);
 
-    expect(screen.getByLabelText("근무지주소")).toHaveAttribute("readonly");
+    expect(screen.getByLabelText("근무지주소")).not.toHaveAttribute("readonly");
     expect(screen.getByLabelText("허용반경(m)")).toHaveValue("100");
     expect(screen.queryByText("주소 기준 GPS")).not.toBeInTheDocument();
   });
@@ -292,5 +292,29 @@ describe("worksite new page", () => {
     expect(screen.getByLabelText("근무지주소")).toHaveValue("부산광역시 남구 수영로 1");
     expect(screen.getByLabelText("GPS정보")).toHaveValue("35.126906, 129.109566");
     expect(fetch).not.toHaveBeenCalled();
+  });
+  it("looks up the edited address and replaces coordinates from a selected place", async () => {
+    const user = userEvent.setup();
+    const geocode = vi.fn(async () => Response.json({
+      gpsInfo: { latitude: 35.123456, longitude: 129.123456 },
+    }));
+    vi.stubGlobal("fetch", geocode);
+    render(<WorksiteNewPage />);
+    await selectPlace("첫 사업장", "서울특별시 중구 세종대로 110", "37.566", "126.978");
+
+    const address = screen.getByLabelText("근무지주소");
+    await user.clear(address);
+    await user.type(address, "부산광역시 남구 수영로 1");
+    expect(screen.getByLabelText("GPS정보")).toHaveValue("");
+    expect(screen.getByRole("button", { name: "저장" })).toBeDisabled();
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("GPS정보")).toHaveValue("35.123456, 129.123456");
+    });
+    expect(geocode).toHaveBeenCalledTimes(1);
+    expect(geocode).toHaveBeenCalledWith(
+      `/api/kakao/geocode?query=${encodeURIComponent("부산광역시 남구 수영로 1")}`,
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
   });
 });

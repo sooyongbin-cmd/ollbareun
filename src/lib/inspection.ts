@@ -129,37 +129,6 @@ async function attachTodayInspections(sites: InspectionSiteRow[], supabase: Supa
   throwIfError(error);
 
   const logs = (data ?? []) as TodayInspectionLog[];
-  const counts = new Map<string, number>();
-  if (input.includeRemarkCounts && input.yearMonth && logs.length > 0) {
-    const monthStart = `${input.yearMonth}-01`;
-    const nextMonth = new Date(`${monthStart}T00:00:00Z`);
-    nextMonth.setUTCMonth(nextMonth.getUTCMonth() + 1);
-    const remarkQuery = supabase.from("inspection_special_reports")
-      .select("reported_at,worksite_id,inspection_site_id")
-      .not("worksite_id", "is", null)
-      .not("inspection_site_id", "is", null)
-      .gte("reported_at", `${monthStart}T00:00:00+09:00`)
-      .lt("reported_at", `${nextMonth.toISOString().slice(0, 10)}T00:00:00+09:00`)
-      .order("id");
-    if (worksiteId) remarkQuery.eq("worksite_id", worksiteId);
-
-    const pageSize = 500;
-    for (let offset = 0; ; offset += pageSize) {
-      const { data, error } = await remarkQuery.range(offset, offset + pageSize - 1);
-      throwIfError(error);
-      for (const report of data ?? []) {
-        const date = educationToday(new Date(report.reported_at));
-        const key = JSON.stringify([date, report.worksite_id, report.inspection_site_id]);
-        counts.set(key, (counts.get(key) ?? 0) + 1);
-      }
-      if (!data || data.length < pageSize) break;
-    }
-  }
-  const rows = input.includeRemarkCounts ? logs.map((log) => {
-    const date = educationToday(new Date(log.inspected_at));
-    const count = counts.get(JSON.stringify([date, log.worksite_id, log.inspection_site_id])) ?? 0;
-    return { ...log, specialRemarks: count > 0 ? { date, count } : null };
-  }) : logs;
   const employeeIds = Array.from(new Set(logs.map((log) => log.employee_id).filter((id): id is string => Boolean(id))));
   const rolesByEmployeeId = new Map<string, string>();
 
@@ -504,6 +473,37 @@ export async function listInspectionLogs(input: { worksiteId?: unknown; yearMont
       if (!data || data.length < pageSize) break;
     }
   }
+  const counts = new Map<string, number>();
+  if (input.includeRemarkCounts && input.yearMonth && logs.length > 0) {
+    const monthStart = `${input.yearMonth}-01`;
+    const nextMonth = new Date(`${monthStart}T00:00:00Z`);
+    nextMonth.setUTCMonth(nextMonth.getUTCMonth() + 1);
+    const remarkQuery = supabase.from("inspection_special_reports")
+      .select("reported_at,worksite_id,inspection_site_id")
+      .not("worksite_id", "is", null)
+      .not("inspection_site_id", "is", null)
+      .gte("reported_at", `${monthStart}T00:00:00+09:00`)
+      .lt("reported_at", `${nextMonth.toISOString().slice(0, 10)}T00:00:00+09:00`)
+      .order("id");
+    if (worksiteId) remarkQuery.eq("worksite_id", worksiteId);
+
+    const pageSize = 500;
+    for (let offset = 0; ; offset += pageSize) {
+      const { data, error } = await remarkQuery.range(offset, offset + pageSize - 1);
+      throwIfError(error);
+      for (const report of data ?? []) {
+        const date = educationToday(new Date(report.reported_at));
+        const key = JSON.stringify([date, report.worksite_id, report.inspection_site_id]);
+        counts.set(key, (counts.get(key) ?? 0) + 1);
+      }
+      if (!data || data.length < pageSize) break;
+    }
+  }
+  const rows = input.includeRemarkCounts ? logs.map((log) => {
+    const date = educationToday(new Date(log.inspected_at));
+    const count = counts.get(JSON.stringify([date, log.worksite_id, log.inspection_site_id])) ?? 0;
+    return { ...log, specialRemarks: count > 0 ? { date, count } : null };
+  }) : logs;
   const employeeIds = Array.from(new Set(logs.map((log) => log.employee_id).filter((id): id is string => Boolean(id))));
 
   if (employeeIds.length === 0) {

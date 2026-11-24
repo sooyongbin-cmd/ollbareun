@@ -26,9 +26,22 @@ export async function GET(request: Request, { params }: { params: Promise<{ assi
       .lte("work_date", assignment.end_date)
       .order("work_date");
     if (attendanceId) query = query.eq("id", attendanceId);
-    const { data, error } = await query;
-    if (error) throw new Error(error.message);
-    return Response.json({ dailyAttendance: data ?? [] });
+    const [attendance, leave] = await Promise.all([
+      query,
+      attendanceId ? null : supabase
+        .from("leave")
+        .select("start_date,end_date")
+        .eq("employee_id", assignment.employee_id)
+        .lte("start_date", assignment.end_date)
+        .gte("end_date", assignment.start_date),
+    ]);
+    if (attendance.error) throw new Error(attendance.error.message);
+    if (leave?.error) throw new Error(leave.error.message);
+
+    return Response.json({
+      dailyAttendance: attendance.data ?? [],
+      ...(leave && { leavePeriods: leave.data ?? [] }),
+    });
   } catch (error) {
     return Response.json({ error: error instanceof Error ? error.message : "출퇴근 예정시각을 불러오지 못했습니다." }, { status: 400 });
   }

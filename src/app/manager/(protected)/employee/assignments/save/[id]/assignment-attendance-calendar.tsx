@@ -8,7 +8,10 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export type DailyAttendance = { id?: string; work_date: string; intime: string | null; outtime: string | null };
 
+export type LeavePeriod = { start_date: string; end_date: string };
+
 type Props = {
+  leavePeriods?: LeavePeriod[];
   dailyAttendance?: DailyAttendance[];
   startDate: string;
   endDate: string;
@@ -51,6 +54,7 @@ function getMonthCells(month: string) {
 
 export default function AssignmentAttendanceCalendar({
   dailyAttendance = [],
+  leavePeriods = [],
   startDate,
   endDate,
   currentMonth,
@@ -143,17 +147,23 @@ export default function AssignmentAttendanceCalendar({
                 const isWeekendOrHoliday = isWeekend || holidays.has(date);
                 const attendanceId = attendanceIdByDate.get(date);
                 const withinAssignment = date >= startDate && date <= endDate;
+                const isLeave = withinAssignment && leavePeriods.some(
+                  (period) => period.start_date <= date && date <= period.end_date,
+                );
                 const className = [
                   "flex min-w-0 min-h-24 flex-col items-center justify-start gap-1 px-0.5 py-2 rounded-lg border text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50",
                   isWeekendOrHoliday
                     ? "border-transparent bg-orange-100/80 hover:border-orange-300 hover:bg-orange-100 dark:bg-orange-950/30 dark:hover:bg-orange-950/50"
                     : "border-transparent bg-muted/40 hover:border-primary/40 hover:bg-primary/10",
-                  !withinAssignment || !attendanceId ? "cursor-not-allowed opacity-40" : "cursor-pointer",
+                  !withinAssignment || (!attendanceId && !isLeave) ? "cursor-not-allowed opacity-40" : undefined,
+                  withinAssignment && attendanceId ? "cursor-pointer" : undefined,
                 ].join(" ");
                 const contents = (
                   <>
                     <span>{Number(date.slice(-2))}</span>
-                    {entriesByDate.get(date)?.map((entry, timeIndex) => (
+                    {isLeave ? (
+                      <span className="text-xs font-semibold text-primary">휴가</span>
+                    ) : entriesByDate.get(date)?.map((entry, timeIndex) => (
                       <span className="text-[0.625rem] leading-tight sm:text-xs" key={`${entry.type}-${date}-${timeIndex}`}><span className="block sm:inline">{entry.type} </span>{formatTime(entry.value)}</span>
                     ))}
                   </>
@@ -161,7 +171,7 @@ export default function AssignmentAttendanceCalendar({
 
                 return attendanceId && withinAssignment ? (
                   <DetailModalLink onSaved={onSaved}
-                    aria-label={`${date} 근태상세 보기`}
+                    aria-label={`${date} ${isLeave ? "휴가, " : ""}근태상세 보기`}
                     className={className}
                     href={`/manager/reports/attendance/detail/${encodeURIComponent(attendanceId)}`}
                     key={date}
@@ -169,7 +179,7 @@ export default function AssignmentAttendanceCalendar({
                     {contents}
                   </DetailModalLink>
                 ) : (
-                  <div aria-label={`${date} 근태자료 없음`} className={className} key={date}>
+                  <div aria-label={`${date} ${isLeave ? "휴가" : "근태자료 없음"}`} className={className} key={date}>
                     {contents}
                   </div>
                 );

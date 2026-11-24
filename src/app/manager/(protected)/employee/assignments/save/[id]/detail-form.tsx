@@ -16,7 +16,7 @@ import ConfirmModal from "@/components/modals/confirm-modal";
 import AlertModal from "@/components/modals/alert-modal";
 import ProcessingModal from "@/components/modals/processing-modal";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import AssignmentAttendanceCalendar, { type DailyAttendance } from "./assignment-attendance-calendar";
+import AssignmentAttendanceCalendar, { type DailyAttendance, type LeavePeriod } from "./assignment-attendance-calendar";
 
 type Assignment = {
   id: string;
@@ -108,6 +108,7 @@ export default function AssignmentSavePage({ recordId, modal = false, onClose, o
   const [savedEndDate, setSavedEndDate] = useState("");
   const [currentMonth, setCurrentMonth] = useState("");
   const [dailyAttendance, setDailyAttendance] = useState<DailyAttendance[]>([]);
+  const [leavePeriods, setLeavePeriods] = useState<LeavePeriod[]>([]);
   const [attendanceHistory, setAttendanceHistory] = useState<AttendanceHistory[]>([]);
   const [attendanceHistoryLoading, setAttendanceHistoryLoading] = useState(Boolean(assignmentId));
   const [attendanceHistoryError, setAttendanceHistoryError] = useState("");
@@ -130,7 +131,7 @@ export default function AssignmentSavePage({ recordId, modal = false, onClose, o
         const [assignmentPayload, bootstrapPayload, dailyAttendancePayload] = await Promise.all([
           fetchJson<AssignmentResponse>(`/api/assignments/${assignmentId}`),
           fetchJson<Bootstrap>("/api/bootstrap"),
-          fetchJson<{ dailyAttendance: DailyAttendance[] }>(`/api/manager/assignments/${assignmentId}/daily-attendance`),
+          fetchJson<{ dailyAttendance: DailyAttendance[]; leavePeriods: LeavePeriod[] }>(`/api/manager/assignments/${assignmentId}/daily-attendance`),
         ]);
 
         const assignment = assignmentPayload.assignment;
@@ -143,6 +144,7 @@ export default function AssignmentSavePage({ recordId, modal = false, onClose, o
 
         if (!ignore) {
           setDailyAttendance(dailyAttendancePayload.dailyAttendance ?? []);
+          setLeavePeriods(dailyAttendancePayload.leavePeriods ?? []);
           setSavedSchedule(scheduleSummary(assignment));
           setEmployeeId(assignment.employee_id);
           setWorksiteId(assignment.worksite_id);
@@ -415,6 +417,7 @@ export default function AssignmentSavePage({ recordId, modal = false, onClose, o
             dailyAttendance={dailyAttendance}
             currentMonth={currentMonth}
             holidays={holidays}
+            leavePeriods={leavePeriods}
             endDate={savedEndDate}
             onMonthChange={setCurrentMonth}
             onSaved={partial.onSaved}

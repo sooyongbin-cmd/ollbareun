@@ -8,6 +8,13 @@ export async function GET(request: Request) {
     }
     const url = new URL(request.url);
     const yearMonth = url.searchParams.get("yearMonth") ?? "";
+    const date = url.searchParams.get("date");
+    const worksiteId = url.searchParams.get("worksiteId");
+    const inspectionSiteId = url.searchParams.get("inspectionSiteId");
+    if (date !== null || worksiteId !== null || inspectionSiteId !== null) {
+      if (!date || !worksiteId || !inspectionSiteId) throw new Error("조회일자, 근무지, 점검지를 확인하세요.");
+      return Response.json({ reports: await listSpecialRemarkReports({ scope: { date, worksiteId, inspectionSiteId } }) });
+    }
     return Response.json({ reports: await listSpecialRemarkReports({ yearMonth }) });
   } catch (error) {
     return Response.json(

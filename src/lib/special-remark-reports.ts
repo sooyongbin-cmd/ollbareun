@@ -437,6 +437,7 @@ export async function createSpecialRemarkReport(input: {
       employee_name,
       worksite_name,
       site_name: site.name,
+      inspection_site_id: inspectionSiteId,
       content,
       photo_url,
       photo_urls,
@@ -512,7 +513,7 @@ export async function sendSpecialRemarkReportEmail(report: SpecialRemarkReportRo
   }
 }
 
-export async function listSpecialRemarkReports(input: { yearMonth?: unknown; includePhotos?: boolean; employeeId?: string } = {}) {
+export async function listSpecialRemarkReports(input: { yearMonth?: unknown; includePhotos?: boolean; employeeId?: string; scope?: { date: string; worksiteId: string; inspectionSiteId: string } } = {}) {
   const yearMonth = typeof input.yearMonth === "string" ? input.yearMonth.trim() : "";
   if (yearMonth && !/^\d{4}-(0[1-9]|1[0-2])$/.test(yearMonth)) throw new Error("조회년월을 확인하세요.");
   const supabase = getSupabaseAdmin();
@@ -520,7 +521,17 @@ export async function listSpecialRemarkReports(input: { yearMonth?: unknown; inc
 
   if (input.employeeId) query = query.eq("employee_id", input.employeeId);
 
-  if (yearMonth) {
+  if (input.scope) {
+    const { date, worksiteId, inspectionSiteId } = input.scope;
+    const start = new Date(`${date}T00:00:00Z`);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(start.getTime()) || start.toISOString().slice(0, 10) !== date) {
+      throw new Error("조회일자를 확인하세요.");
+    }
+    start.setUTCDate(start.getUTCDate() + 1);
+    query = query.eq("worksite_id", worksiteId).eq("inspection_site_id", inspectionSiteId)
+      .gte("reported_at", `${date}T00:00:00+09:00`)
+      .lt("reported_at", `${start.toISOString().slice(0, 10)}T00:00:00+09:00`);
+  } else if (yearMonth) {
     const start = `${yearMonth}-01`;
     const next = new Date(`${start}T00:00:00Z`);
     next.setUTCMonth(next.getUTCMonth() + 1);
@@ -528,12 +539,25 @@ export async function listSpecialRemarkReports(input: { yearMonth?: unknown; inc
       .lt("reported_at", `${next.toISOString().slice(0, 10)}T00:00:00+09:00`);
   }
 
-  const { data, error } = await query;
-  throwIfError(error);
   type ReportWithEmployee = SpecialRemarkReportRow & {
     employees?: { role: string | null; work_style: "0" | "1" | "2" | null } | null;
   };
-  const reports = await Promise.all(((data ?? []) as ReportWithEmployee[]).map(({ employees, ...report }) => {
+  const rows: ReportWithEmployee[] = [];
+  if (input.scope) {
+    query.order("id");
+    const pageSize = 500;
+    for (let offset = 0; ; offset += pageSize) {
+      const { data, error } = await query.range(offset, offset + pageSize - 1);
+      throwIfError(error);
+      rows.push(...(data ?? []) as ReportWithEmployee[]);
+      if (!data || data.length < pageSize) break;
+    }
+  } else {
+    const { data, error } = await query;
+    throwIfError(error);
+    rows.push(...(data ?? []) as ReportWithEmployee[]);
+  }
+  const reports = await Promise.all(rows.map(({ employees, ...report }) => {
     const row = { ...report, employee_role: employees?.role ?? "-", work_style: employees?.work_style ?? null };
     return input.includePhotos === false ? normalizeReportPhotoUrls(row) : withSignedPhotoUrls(row);
   }));

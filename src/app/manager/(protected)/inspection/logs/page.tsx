@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import ListResults from "@/components/list-results";
 
 import { Input } from "@/components/ui/input";
@@ -11,7 +12,10 @@ import ManagerLoadingMessage from "../../manager-loading-message";
 type InspectionLog = {
   id: string;
   inspected_at: string;
+  worksite_id: string | null;
+  inspection_site_id: string | null;
   worksite_name: string;
+  specialRemarks?: { date: string; count: number } | null;
   site_name: string;
   employee_name: string;
   employee_role?: string;
@@ -34,7 +38,7 @@ function formatDateTime(value: string) {
 }
 
 async function fetchLogs(yearMonth: string) {
-  const response = await fetch(`/api/inspection/logs?${new URLSearchParams({ yearMonth })}`);
+  const response = await fetch(`/api/inspection/logs?${new URLSearchParams({ yearMonth, includeRemarkCounts: "true" })}`);
   const payload = await response.json();
 
   if (!response.ok) {
@@ -183,12 +187,13 @@ export default function InspectionLogsPage() {
                   <TableHead className="text-left">점검지</TableHead>
                   <TableHead className="text-left">점검자</TableHead>
                   <TableHead className="text-left">직군</TableHead>
+                  <TableHead className="text-left">특이사항</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredLogs.length === 0 ? (
                   <TableRow>
-                    <TableCell data-responsive-empty colSpan={5} className="p-8 text-center text-muted-foreground italic">
+                    <TableCell data-responsive-empty colSpan={6} className="p-8 text-center text-muted-foreground italic">
                       조회 결과에 해당하는 점검 기록이 없습니다.
                     </TableCell>
                   </TableRow>
@@ -200,6 +205,21 @@ export default function InspectionLogsPage() {
                       <TableCell data-label="점검지" className="font-semibold">{log.site_name}</TableCell>
                       <TableCell data-label="점검자">{log.employee_name}</TableCell>
                       <TableCell data-label="직군">{log.employee_role ?? "직군 없음"}</TableCell>
+                      <TableCell data-label="특이사항">
+                        {log.specialRemarks && log.worksite_id && log.inspection_site_id && (
+                          <Link
+                            className="font-semibold text-primary underline underline-offset-4"
+                            href={`/manager/inspection/special-remarks?${new URLSearchParams({
+                              date: log.specialRemarks.date,
+                              worksiteId: log.worksite_id,
+                              inspectionSiteId: log.inspection_site_id,
+                              siteName: log.site_name,
+                            })}`}
+                          >
+                            {log.specialRemarks.count}건
+                          </Link>
+                        )}
+                      </TableCell>
                     </TableRow>
                   ))
                 )}

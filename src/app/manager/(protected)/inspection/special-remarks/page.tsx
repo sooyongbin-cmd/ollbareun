@@ -11,7 +11,9 @@ import { educationToday } from "@/lib/education-periods";
 import { employeeSummary } from "@/lib/employee-summary";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import ManagerLoadingMessage from "../../manager-loading-message";
 
 type SpecialRemarkReport = {
@@ -32,9 +34,8 @@ function getFirstPhotoUrl(report: Pick<SpecialRemarkReport, "photo_url" | "photo
   return report.photo_urls?.[0] ?? report.photo_url;
 }
 
-async function fetchReports(yearMonth: string) {
-  const query = `?yearMonth=${encodeURIComponent(yearMonth)}`;
-  const response = await fetch(`/api/inspection/special-remarks${query}`);
+async function fetchReports(query: string) {
+  const response = await fetch(`/api/inspection/special-remarks?${query}`);
   const payload = await response.json();
 
   if (!response.ok) {
@@ -45,12 +46,29 @@ async function fetchReports(yearMonth: string) {
 }
 
 export default function SpecialRemarksPage() {
+  return <Suspense fallback={<ManagerLoadingMessage />}><SpecialRemarksList /></Suspense>;
+}
+
+function SpecialRemarksList() {
+  const searchParams = useSearchParams();
+  const date = searchParams.get("date");
+  const worksiteId = searchParams.get("worksiteId");
+  const inspectionSiteId = searchParams.get("inspectionSiteId");
+  const siteName = searchParams.get("siteName");
+  const scoped = Boolean(date && worksiteId && inspectionSiteId);
   const [yearMonth, setYearMonth] = useState(() => educationToday().slice(0, 7));
   const [completed, setCompleted] = useState(false);
   const [reports, setReports] = useState<SpecialRemarkReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const filteredReports = reports.filter((report) => (report.processing_status === "Y") === completed);
+  const filteredReports = scoped ? reports : reports.filter((report) => (report.processing_status === "Y") === completed);
+  const query = new URLSearchParams({ yearMonth });
+  if (date && worksiteId && inspectionSiteId) {
+    query.set("date", date);
+    query.set("worksiteId", worksiteId);
+    query.set("inspectionSiteId", inspectionSiteId);
+  }
+  const reportQuery = query.toString();
 
   function applyChanges(changes: DetailChange[]) {
     setReports((rows) => applyDetailChanges(rows, changes, "remark"));
@@ -63,8 +81,8 @@ export default function SpecialRemarksPage() {
       setError("");
       setReports([]);
       try {
-        if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(yearMonth)) throw new Error("조회년월을 확인하세요.");
-        const nextReports = await fetchReports(yearMonth);
+        if (!scoped && !/^\d{4}-(0[1-9]|1[0-2])$/.test(yearMonth)) throw new Error("조회년월을 확인하세요.");
+        const nextReports = await fetchReports(reportQuery);
         if (!ignore) setReports(nextReports);
       } catch (loadError) {
         if (!ignore) setError(loadError instanceof Error ? loadError.message : "특이사항 목록을 불러오지 못했습니다.");
@@ -74,7 +92,7 @@ export default function SpecialRemarksPage() {
     }
     void loadReports();
     return () => { ignore = true; };
-  }, [yearMonth]);
+  }, [reportQuery, scoped, yearMonth]);
 
   return (
     <section className="space-y-[1.5rem]">
@@ -83,30 +101,39 @@ export default function SpecialRemarksPage() {
       </header>
 
       <section aria-label="특이사항 검색" className="manager-section bg-muted/40 rounded-xl border border-border/50">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end">
-          <div className="min-w-0 flex w-full flex-col gap-2 md:w-48">
-            <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="special-remark-month">
-              조회년월
-            </label>
-            <Input
-              className="w-full"
-              id="special-remark-month"
-              type="month"
-              onChange={(event) => setYearMonth(event.target.value)}
-              value={yearMonth}
-            />
+        {scoped ? (
+          <div className="flex flex-wrap items-center gap-4">
+            <p className="text-sm font-semibold">{date}{siteName ? ` · ${siteName}` : ""}</p>
+            <Link className="text-sm text-primary underline underline-offset-4" href="/manager/inspection/special-remarks">
+              전체 특이사항 보기
+            </Link>
           </div>
-          <label className="flex min-h-10 items-center gap-2 text-sm font-semibold" htmlFor="special-remark-completed">
-            <input
-              id="special-remark-completed"
-              type="checkbox"
-              className="size-4 accent-primary"
-              checked={completed}
-              onChange={(event) => setCompleted(event.target.checked)}
-            />
-            처리완료
-          </label>
-        </div>
+        ) : (
+          <div className="flex flex-col gap-4 md:flex-row md:items-end">
+            <div className="min-w-0 flex w-full flex-col gap-2 md:w-48">
+              <label className="text-[0.875rem] font-semibold text-muted-foreground ml-1" htmlFor="special-remark-month">
+                조회년월
+              </label>
+              <Input
+                className="w-full"
+                id="special-remark-month"
+                type="month"
+                onChange={(event) => setYearMonth(event.target.value)}
+                value={yearMonth}
+              />
+            </div>
+            <label className="flex min-h-10 items-center gap-2 text-sm font-semibold" htmlFor="special-remark-completed">
+              <input
+                id="special-remark-completed"
+                type="checkbox"
+                className="size-4 accent-primary"
+                checked={completed}
+                onChange={(event) => setCompleted(event.target.checked)}
+              />
+              처리완료
+            </label>
+          </div>
+        )}
       </section>
 
       <section aria-label="특이사항 목록" className="manager-section bg-muted/40 rounded-xl border border-border/50">

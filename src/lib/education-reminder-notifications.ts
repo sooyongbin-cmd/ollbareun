@@ -484,10 +484,7 @@ export async function processDueEducationReminderJobs(): Promise<EducationRemind
     let lastErrorReason = "";
     await Promise.all(employeeSubscriptions.map(async (subscription) => {
       try {
-        await webpush.sendNotification({
-          endpoint: subscription.endpoint,
-          keys: { p256dh: subscription.p256dh, auth: subscription.auth },
-        }, payload);
+        await sendEducationPush(subscription, payload);
         result.successCount++;
         succeeded = true;
       } catch (pushError) {
@@ -527,5 +524,101 @@ export async function processDueEducationReminderJobs(): Promise<EducationRemind
   result.unregisteredEmployees = [...unregisteredEmployeeNames];
   result.unregisteredEmployeeIds = [...unregisteredEmployeeIdSet];
   result.unregisteredCount = unregisteredEmployeeIdSet.size;
+  return result;
+}
+
+function sendEducationPush(subscription: PushSubscriptionRow, payload: string) {
+  return webpush.sendNotification({
+    endpoint: subscription.endpoint,
+    keys: { p256dh: subscription.p256dh, auth: subscription.auth },
+  }, payload);
+}
+
+type MonthEndReminderJob = {
+  month_end: string;
+  employee_id: string;
+  missing_count: number;
+  attempts: number;
+};
+
+export async function processMonthEndEducationReminders() {
+  configureWebPush();
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase.rpc("claim_month_end_education_reminder_jobs");
+  if (error) throw new Error(error.message);
+  const jobs = (data ?? []) as MonthEndReminderJob[];
+  const result = { sent: 0, skipped: 0, retried: 0, failed: 0 };
+
+  const outcomes = await Promise.allSettled(jobs.map(async (job) => {
+    let status = "skipped";
+    let lastError: string | null = null;
+
+    if (job.missing_count > 0) {
+      const { data: subscriptions, error: lookupError } = await supabase
+        .from("push_subscriptions")
+        .select("employee_id, endpoint, p256dh, auth")
+        .eq("employee_id", job.employee_id);
+
+      const payload = JSON.stringify({
+        title: "[월말알림] 안전교육 이수 독려 알림",
+        ...notificationBranding,
+        body: `이번 달 마감되는 안전교육 중 미이수 교육이 ${job.missing_count}건 있습니다. 안전교육 화면에서 확인해 주세요.`,
+        data: { url: educationReminderUrl },
+      });
+
+      const expiredEndpoints: string[] = [];
+      const pushes = await Promise.allSettled(
+        ((subscriptions ?? []) as PushSubscriptionRow[]).map(async (subscription) => {
+          try {
+            await sendEducationPush(subscription, payload);
+          } catch (error) {
+            const reason = getErrorReason(error);
+            if (reason.includes("HTTP 410") || reason.includes("HTTP 404")) {
+              expiredEndpoints.push(subscription.endpoint);
+            }
+            throw new Error(reason);
+          }
+        }),
+      );
+
+      if (pushes.some((push) => push.status === "fulfilled")) {
+        status = "sent";
+      } else {
+        const failure = pushes.find((push) => push.status === "rejected");
+        lastError = lookupError?.message ?? failure?.reason.message ?? "등록된 푸시 구독이 없습니다.";
+        status = job.attempts >= reminderJobRetryLimit ? "failed" : "pending";
+      }
+
+      if (expiredEndpoints.length > 0) {
+        const { error: deleteError } = await supabase
+          .from("push_subscriptions").delete().in("endpoint", expiredEndpoints);
+        if (deleteError) console.error("Failed to delete expired push subscriptions:", deleteError);
+      }
+    }
+
+    const { data: updated, error: updateError } = await supabase
+      .from("month_end_education_reminder_jobs")
+      .update({
+        status,
+        locked_until: null,
+        sent_at: status === "sent" ? new Date().toISOString() : null,
+        last_error: lastError?.slice(0, 1000) ?? null,
+        next_attempt_at: new Date(Date.now() + reminderJobRetryDelayMs).toISOString(),
+      })
+      .eq("month_end", job.month_end)
+      .eq("employee_id", job.employee_id)
+      .eq("status", "processing")
+      .eq("attempts", job.attempts)
+      .select("employee_id");
+    if (updateError) throw new Error(updateError.message);
+    if (!updated?.length) throw new Error("월말 교육알림 작업 상태를 저장하지 못했습니다.");
+    if (status === "pending") return "retried" as const;
+    return status as "sent" | "skipped" | "failed";
+  }));
+
+  for (const outcome of outcomes) {
+    if (outcome.status === "rejected") throw outcome.reason;
+    result[outcome.value]++;
+  }
   return result;
 }

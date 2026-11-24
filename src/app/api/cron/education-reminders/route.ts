@@ -1,4 +1,4 @@
-import { processDueEducationReminderJobs } from "@/lib/education-reminder-notifications";
+import { processDueEducationReminderJobs, processMonthEndEducationReminders } from "@/lib/education-reminder-notifications";
 
 export async function GET(request: Request) {
   const isVercelCron = request.headers.get("user-agent") === "vercel-cron/1.0";
@@ -13,8 +13,13 @@ export async function GET(request: Request) {
   }
 
   try {
-    const result = await processDueEducationReminderJobs();
-    return Response.json(result);
+    const [regular, monthEnd] = await Promise.allSettled([
+      processDueEducationReminderJobs(),
+      hasValidCronSecret ? processMonthEndEducationReminders() : Promise.resolve(null),
+    ]);
+    if (regular.status === "rejected") throw regular.reason;
+    if (monthEnd.status === "rejected") throw monthEnd.reason;
+    return Response.json(monthEnd.value ? { ...regular.value, monthEnd: monthEnd.value } : regular.value);
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "교육알림 cron 실행 중 오류가 발생했습니다." },

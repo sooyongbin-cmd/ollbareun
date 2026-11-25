@@ -110,7 +110,11 @@ describe("monthly daily education attendance", () => {
     expect(completionQuery?.filters).toContainEqual(["in", "employee_id", ["employee-1", "employee-2"]]);
     expect(completionQuery?.filters).toContainEqual(["in", "work_date", ["2026-09-03", "2026-09-04"]]);
     expect(result.dailySubjects).toEqual([{ id: "d3", title: "일일3" }, { id: "d1", title: "일일1" }, { id: "d2", title: "일일2" }]);
-    expect(result.detailRows.find((row) => row.employeeId === "employee-1" && row.workDate === "2026-09-03")?.subjects).toEqual([{ resourceId: "d3", isCompleted: true }, { resourceId: "d1", isCompleted: true }, { resourceId: "d2", isCompleted: null }]);
+    expect(result.detailRows.find((row) => row.employeeId === "employee-1" && row.workDate === "2026-09-03")?.subjects).toEqual([
+      { resourceId: "d3", isCompleted: true, completedAt: "2026-09-03T00:30:00Z" },
+      { resourceId: "d1", isCompleted: true, completedAt: "2026-09-03T01:15:00Z" },
+      { resourceId: "d2", isCompleted: null, completedAt: null },
+    ]);
 
     const periodQuery = queries.find(({ table, filters }) => table === "education_completions"
       && filters.some(([method, column]) => method === "gte" && column === "work_date"));

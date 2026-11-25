@@ -45,7 +45,7 @@ export type MonthlyEducationDetailRow = {
   workDate: string;
   daily: boolean;
   dailyCompletedAt?: string | null;
-  subjects: { resourceId: string; isCompleted: boolean | null }[];
+  subjects: { resourceId: string; isCompleted: boolean | null; completedAt: string | null }[];
 };
 
 function throwIfError(error: { message?: string } | null) {
@@ -271,13 +271,17 @@ export async function loadMonthlyEducationAttendance(yearMonth: string, employee
   const detailByEmployeeDay = new Map<string, MonthlyEducationDetailRow>();
   detailAttendanceRows.forEach((record) => {
     const key = `${record.employee_id}:${record.work_date}`;
-    const subjects = dailySubjects.map((resource) => ({ resourceId: resource.id,
-      isCompleted: isEducationResourceForDate(resource, record.work_date)
-        ? dailyDetailCompletionKeys.has(JSON.stringify([record.employee_id, record.work_date, resource.title, "일일"])) : null }));
-    const applicableSubjects = dailySubjects.filter((resource) => isEducationResourceForDate(resource, record.work_date));
-    const completedTimes = applicableSubjects.map((resource) =>
-      completedAtByKey.get(JSON.stringify([record.employee_id, record.work_date, resource.title, "일일"])));
-    const validTimes = completedTimes.filter((time): time is string => time !== undefined);
+    const subjects = dailySubjects.map((resource) => {
+      const applicable = isEducationResourceForDate(resource, record.work_date);
+      const key = JSON.stringify([record.employee_id, record.work_date, resource.title, "일일"]);
+      return {
+        resourceId: resource.id,
+        isCompleted: applicable ? dailyDetailCompletionKeys.has(key) : null,
+        completedAt: applicable ? completedAtByKey.get(key) ?? null : null,
+      };
+    });
+    const completedTimes = subjects.filter((subject) => subject.isCompleted !== null).map((subject) => subject.completedAt);
+    const validTimes = completedTimes.filter((time): time is string => time !== null);
     const dailyCompletedAt = validTimes.length > 0 && validTimes.length === completedTimes.length
       ? validTimes.reduce((latest, time) => Date.parse(time) > Date.parse(latest) ? time : latest) : null;
     if (!detailByEmployeeDay.has(key)) detailByEmployeeDay.set(key, {

@@ -69,10 +69,13 @@ export default function AttendanceDetailPage({ recordId, modal = false, onClose,
     return () => { active = false; };
   }, [id]);
 
+  const isOnLeave = record?.intimeStatus === "3";
+  const isLeaveToggleOn = isOnLeave || leaveRequested;
   const canRequestLeave = record?.intimeStatus === "0" && !clockInDateTime;
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (isOnLeave) return;
     if (leaveRequested && (clockInDateTime || clockOutDateTime)) {
       setErrorAlert("휴가신청은 출근·퇴근 처리 및 교육이수와 함께 할 수 없습니다.");
       return;
@@ -121,7 +124,7 @@ export default function AttendanceDetailPage({ recordId, modal = false, onClose,
   }
 
   async function save() {
-    if (saving) return;
+    if (isOnLeave || saving) return;
     setSaving(true);
     setError("");
     try {
@@ -244,12 +247,12 @@ export default function AttendanceDetailPage({ recordId, modal = false, onClose,
             <Input className="w-full bg-muted/50" id={field.id} value={field.value || "-"} readOnly />
           </div>)}
           <div className="space-y-2"><label className="ml-1 text-sm font-semibold text-muted-foreground" htmlFor="clock-in-date-time">출근일시</label>
-            <Input id="clock-in-date-time" type="datetime-local" value={clockInDateTime} onChange={(event) => {
+            <Input id="clock-in-date-time" type="datetime-local" value={clockInDateTime} readOnly={isOnLeave} onChange={(event) => {
               setClockInDateTime(event.target.value);
               if (event.target.value) setLeaveRequested(false);
             }} /></div>
           <div className="space-y-2"><label className="ml-1 text-sm font-semibold text-muted-foreground" htmlFor="clock-out-date-time">퇴근일시</label>
-            <Input id="clock-out-date-time" type="datetime-local" value={clockOutDateTime} onChange={(event) => setClockOutDateTime(event.target.value)} /></div>
+            <Input id="clock-out-date-time" type="datetime-local" value={clockOutDateTime} readOnly={isOnLeave} onChange={(event) => setClockOutDateTime(event.target.value)} /></div>
         </fieldset>
         <hr className="border-border/60" />
         <section aria-labelledby="attendance-education-heading" className="space-y-4">
@@ -280,13 +283,13 @@ export default function AttendanceDetailPage({ recordId, modal = false, onClose,
                 type="button"
                 role="switch"
                 aria-labelledby="attendance-leave-toggle-label"
-                aria-checked={leaveRequested}
+                aria-checked={isLeaveToggleOn}
                 disabled={!canRequestLeave || leaveTypeLoading}
                 onClick={() => void toggleLeaveRequest()}
-                title={!canRequestLeave ? "결근 상태이며 출근일시가 없는 경우에만 휴가신청할 수 있습니다." : undefined}
-                className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 ${leaveRequested ? "border-primary bg-primary" : "border-input bg-muted"}`}
+                title={isOnLeave ? "이미 휴가 처리된 근태입니다." : !canRequestLeave ? "결근 상태이며 출근일시가 없는 경우에만 휴가신청할 수 있습니다." : undefined}
+                className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 ${isLeaveToggleOn ? "border-primary bg-primary" : "border-input bg-muted"}`}
               >
-                <span aria-hidden="true" className={`inline-block size-4 rounded-full bg-background shadow transition-transform ${leaveRequested ? "translate-x-6" : "translate-x-1"}`} />
+                <span aria-hidden="true" className={`inline-block size-4 rounded-full bg-background shadow transition-transform ${isLeaveToggleOn ? "translate-x-6" : "translate-x-1"}`} />
               </button>
             </div>
             {leaveRequested ? (
@@ -308,7 +311,7 @@ export default function AttendanceDetailPage({ recordId, modal = false, onClose,
         </section>
         {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
         <div className="flex gap-3">
-          <Button type="submit" disabled={saving || deleting || completingResourceId !== null}>저장</Button>
+          <Button type="submit" disabled={isOnLeave || saving || deleting || completingResourceId !== null}>저장</Button>
           <Button type="button" variant="destructive" disabled={saving || deleting || completingResourceId !== null} onClick={() => setDeleteConfirmOpen(true)}>삭제</Button>
           <Button className="ml-auto" type="button" variant="outline" disabled={saving || deleting || completingResourceId !== null} onClick={() => onClose ? onClose() : returnToList()}>{modal ? "닫기" : "목록"}</Button>
         </div>

@@ -40,10 +40,7 @@ const completionDateTimeFormatter = new Intl.DateTimeFormat("sv-SE", {
 function formatDailyCompletion(completedAt: string | null, workDate: string) {
   if (!completedAt) return "O";
   const [date, time] = completionDateTimeFormatter.format(new Date(completedAt)).split(" ");
-  if (date === workDate) return time;
-
-  const [year, month, day] = date.split("-");
-  return `${year}년 ${Number(month)}월 ${Number(day)}일 ${time}`;
+  return date === workDate ? time : `${date} ${time}`;
 }
 
 function Mark({ completed, completedLabel = "O", onClick, label }: { completed: boolean; completedLabel?: string; onClick?: () => void; label?: string }) {

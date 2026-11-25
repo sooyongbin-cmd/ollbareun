@@ -393,7 +393,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
                   {dailySubjects.map((subject) => {
                     const result = row.subjects.find((item) => item.resourceId === subject.id);
                     return <TableCell key={subject.id} data-label={subject.title} className="whitespace-nowrap">{result?.isCompleted == null ? "-" : <Mark completed={result.isCompleted}
-                      completedLabel={formatDailyCompletion(result.completedAt, row.workDate)}
+                      completedLabel={formatDailyCompletion(result.completedAt ?? null, row.workDate)}
                       onClick={() => openCompletionDialog(row.employeeId, row.employeeName, "daily", row.workDate, subject.id)}
                       label={`${row.employeeName} 근무자 ${subject.title} 미이수 처리 (${row.workDate})`} />}</TableCell>;
                   })}

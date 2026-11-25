@@ -45,7 +45,7 @@ export type MonthlyEducationDetailRow = {
   workDate: string;
   daily: boolean;
   dailyCompletedAt?: string | null;
-  subjects: { resourceId: string; isCompleted: boolean | null; completedAt: string | null }[];
+  subjects: { resourceId: string; isCompleted: boolean | null; completedAt?: string | null }[];
 };
 
 function throwIfError(error: { message?: string } | null) {

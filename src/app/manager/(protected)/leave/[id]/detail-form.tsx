@@ -48,6 +48,7 @@ export default function LeaveDetailPage({ recordId, modal = false, onClose, onSa
   const [loadError, setLoadError] = useState("");
   const [error, setError] = useState("");
   const [leaveType, setLeaveType] = useState("");
+  const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [leaveTypes, setLeaveTypes] = useState<string[]>([]);
   const [optionsError, setOptionsError] = useState("");
@@ -64,6 +65,7 @@ export default function LeaveDetailPage({ recordId, modal = false, onClose, onSa
         if (!ignore) {
           setRecord(payload.leave);
           setLeaveType(payload.leave.leaveType);
+          setStartDate(payload.leave.startDate);
           setEndDate(payload.leave.endDate);
         }
       } catch (loadFailure) {
@@ -99,10 +101,10 @@ export default function LeaveDetailPage({ recordId, modal = false, onClose, onSa
     setSaved(false);
     setError("");
     try {
-      const { leave } = await fetchJson<{ leave: Pick<LeaveRecord, "id" | "leaveType" | "endDate"> }>(`/api/leave/${leaveId}`, {
+      const { leave } = await fetchJson<{ leave: Pick<LeaveRecord, "id" | "leaveType" | "startDate" | "endDate"> }>(`/api/leave/${leaveId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ leaveType, endDate }),
+        body: JSON.stringify({ leaveType, startDate, endDate }),
       });
       setRecord({ ...record, ...leave });
       onSaved?.(leave);
@@ -172,13 +174,14 @@ export default function LeaveDetailPage({ recordId, modal = false, onClose, onSa
                 <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="leave-start-date">
                   시작일
                 </label>
-                <Input id="leave-start-date" value={record?.startDate ?? ""} readOnly />
+                <Input id="leave-start-date" type="date" value={startDate}
+                  onChange={(event) => { setStartDate(event.target.value); setSaved(false); }} disabled={saving || deleting} required />
               </div>
               <div className="space-y-2">
                 <label className="ml-1 text-[0.875rem] font-semibold text-muted-foreground" htmlFor="leave-end-date">
                   종료일
                 </label>
-                <Input id="leave-end-date" type="date" min={record?.startDate} value={endDate}
+                <Input id="leave-end-date" type="date" min={startDate || undefined} value={endDate}
                   onChange={(event) => { setEndDate(event.target.value); setSaved(false); }} disabled={saving || deleting} required />
               </div>
             </div>

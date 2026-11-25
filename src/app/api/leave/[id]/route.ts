@@ -33,6 +33,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     return Response.json({ leave: await updateLeave({
       id,
       leaveType: body.leaveType,
+      startDate: body.startDate,
       endDate: body.endDate,
     }, getSupabaseAdmin()) });
   } catch (error) {

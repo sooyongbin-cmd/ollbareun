@@ -52,7 +52,7 @@ describe("leave data", () => {
   it("creates and updates a leave period with validated values", async () => {
     const rpc = vi.fn()
       .mockResolvedValueOnce({ data: { id: "leave-1" }, error: null })
-      .mockResolvedValueOnce({ data: { id: "leave-1", leave_type: "연차", end_date: "2026-06-03" }, error: null });
+      .mockResolvedValueOnce({ data: { id: "leave-1", leave_type: "연차", start_date: "2026-06-02", end_date: "2026-06-03" }, error: null });
     const supabase = { rpc };
 
     await expect(createLeave({ employeeId: "emp-1", leaveType: "월차", startDate: "2026-06-01", endDate: "2026-06-01" }, supabase as never)).resolves.toEqual({ id: "leave-1" });
@@ -63,10 +63,10 @@ describe("leave data", () => {
       p_end_date: "2026-06-01",
     });
 
-    await expect(updateLeave({ id: "leave-1", leaveType: "연차", endDate: "2026-06-03" }, supabase as never))
-      .resolves.toEqual({ id: "leave-1", leaveType: "연차", endDate: "2026-06-03" });
+    await expect(updateLeave({ id: "leave-1", leaveType: "연차", startDate: "2026-06-02", endDate: "2026-06-03" }, supabase as never))
+      .resolves.toEqual({ id: "leave-1", leaveType: "연차", startDate: "2026-06-02", endDate: "2026-06-03" });
     expect(rpc).toHaveBeenCalledWith("update_leave_with_attendance", {
-      p_leave_id: "leave-1", p_leave_type: "연차", p_end_date: "2026-06-03",
+      p_leave_id: "leave-1", p_leave_type: "연차", p_start_date: "2026-06-02", p_end_date: "2026-06-03",
     });
   });
 

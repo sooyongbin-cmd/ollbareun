@@ -32,11 +32,11 @@ describe("guard footer patrol visibility", () => {
     expect(screen.getByRole("link", { name: "점검" })).toHaveAttribute("aria-current", "page");
   });
 
-  it.each(["파견", "", undefined])("hides inspection but preserves five other links for %s", (role) => {
+  it.each(["파견", "", undefined])("hides inspection but keeps the other available links for %s", (role) => {
     writeSession(role);
     render(<GuardBottomNavigation />);
     expect(screen.queryByRole("link", { name: "점검" })).not.toBeInTheDocument();
-    expect(screen.getAllByRole("link")).toHaveLength(5);
+    expect(screen.getAllByRole("link")).toHaveLength(4);
   });
 
   it("updates when the role changes and when the session is cleared", () => {
@@ -57,7 +57,27 @@ describe("guard footer patrol visibility", () => {
     expect(screen.getByRole("button", { name: "출퇴근" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "점검" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "특이사항" })).toBeDisabled();
-    expect(screen.getByRole("link", { name: "안전교육" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "안전교육" })).toBeDisabled();
+  });
+
+  it("enables safety education during work and disables it when the shift becomes leave", () => {
+    const schedule = {
+      id: "schedule-1",
+      employee_id: "test-employee",
+      worksite_id: "site-1",
+      work_date: "2026-05-26",
+      intime: "2026-05-26T00:00:00.000Z",
+      outtime: "2026-05-26T09:00:00.000Z",
+      work_intime: "2026-05-26T00:00:00.000Z",
+      work_outtime: null,
+    };
+    writeSession("경비원", [schedule]);
+    render(<GuardBottomNavigation />);
+
+    expect(screen.getByRole("link", { name: "안전교육" })).toHaveAttribute("href", "/guard/main/safety");
+
+    act(() => writeSession("경비원", [{ ...schedule, intime_status: "3" }]));
+    expect(screen.getByRole("button", { name: "안전교육" })).toBeDisabled();
   });
 
   it("disables attendance after the selected work date is completed", () => {

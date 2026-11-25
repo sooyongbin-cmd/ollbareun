@@ -128,7 +128,7 @@ describe("guard main navigation", () => {
     expect(screen.getAllByRole("button", { name: "출근하기" })[0]).toHaveClass(
       "text-primary-foreground",
     );
-    expect(screen.getByRole("link", { name: "안전교육" })).toHaveAttribute("href", "/guard/main/safety");
+    expect(screen.getByRole("button", { name: "안전교육" })).toBeDisabled();
     expect(screen.getByRole("link", { name: "순찰" })).toHaveAttribute("href", "/guard/main/work");
     expect(screen.getByRole("link", { name: "특이사항 보고" })).toHaveAttribute("href", "/guard/main/special-remarks");
     expect(screen.queryByRole("button", { name: "근무지확인" })).not.toBeInTheDocument();
@@ -373,7 +373,8 @@ describe("guard main navigation", () => {
     expect(screen.getByRole("button", { name: "출퇴근" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "특이사항" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "점검" })).toBeDisabled();
-    expect(screen.getAllByRole("link", { name: "안전교육" })).toHaveLength(2);
+    expect(screen.getAllByRole("button", { name: "안전교육" })).toHaveLength(2);
+    expect(screen.getAllByRole("button", { name: "안전교육" }).every((button) => button.hasAttribute("disabled"))).toBe(true);
     expect(screen.getByRole("link", { name: "근무 정보" })).toBeInTheDocument();
   });
 
@@ -809,7 +810,7 @@ describe("guard main navigation", () => {
 
     expect(screen.queryByRole("link", { name: "순찰" })).not.toBeInTheDocument();
     expect(document.querySelector('a[href="/guard/main/work"]')).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "안전교육" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "안전교육" })).toBeDisabled();
     expect(screen.getByRole("link", { name: "특이사항 보고" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "근무 정보" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "순찰(QR코드)" })).not.toBeInTheDocument();

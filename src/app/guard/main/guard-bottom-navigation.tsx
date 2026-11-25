@@ -19,7 +19,7 @@ const items = [
 export default function GuardBottomNavigation() {
   const pathname = usePathname();
   const patrolEnabled = useGuardPatrolVisibility();
-  const { hasWorkSchedule, canAccessAttendance } = useGuardScheduleAvailability();
+  const { hasWorkSchedule, canAccessAttendance, canAccessSafetyEducation } = useGuardScheduleAvailability();
 
   return (
     <nav
@@ -35,7 +35,7 @@ export default function GuardBottomNavigation() {
               ? !hasWorkSchedule
               : item.href === "/guard/main/attendance"
                 ? !canAccessAttendance
-                : false;
+                : item.href === "/guard/main/safety" && !canAccessSafetyEducation;
 
           if (disabled) {
             return (

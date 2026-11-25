@@ -61,8 +61,12 @@ export default function GuardWorksiteSection() {
   const worksiteName = typeof session?.worksite?.name === "string" ? session.worksite.name : null;
   const scheduledStart = formatGuardWorkTime(selectedShift?.intime ?? null);
   const scheduledEnd = formatGuardWorkTime(selectedShift?.outtime ?? null);
-  const timeLabel = scheduledStart && scheduledEnd ? `${scheduledStart} - ${scheduledEnd}` : "근무시간 미등록";
   const isLeave = selectedShift?.intime_status === "3";
+  const timeLabel = isLeave
+    ? "-"
+    : scheduledStart && scheduledEnd
+      ? `${scheduledStart} - ${scheduledEnd}`
+      : "근무시간 미등록";
   const statusLabel = isLeave
     ? "휴가"
     : workAction === "clock-out"

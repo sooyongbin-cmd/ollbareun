@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import LeaveDetailPage from "./page";
@@ -25,8 +25,8 @@ describe("leave detail page", () => {
         return Response.json({ leave: { id: "leave-1", employeeId: "emp-1", employeeName: "홍길동", leaveType: "월차", startDate: "2026-06-01", endDate: "2026-06-03" } });
       }
       if (init.method === "PATCH") {
-        expect(JSON.parse(String(init.body))).toEqual({ employeeId: "emp-1", leaveType: "연차", startDate: "2026-06-02", endDate: "2026-06-04" });
-        return Response.json({ leave: { id: "leave-1" } });
+        expect(JSON.parse(String(init.body))).toEqual({ leaveType: "연차", endDate: "2026-06-04" });
+        return Response.json({ leave: { id: "leave-1", leaveType: "연차", endDate: "2026-06-04" } });
       }
       if (init.method === "DELETE") {
         return new Response(null, { status: 204 });
@@ -35,7 +35,19 @@ describe("leave detail page", () => {
     }));
   });
 
-  it("shows the leave record without a save button and deletes it", async () => {
+  it("updates the leave type and end date while keeping the start date read-only", async () => {
+    const user = userEvent.setup();
+    render(<LeaveDetailPage />);
+
+    await user.selectOptions(await screen.findByRole("combobox", { name: "휴가종류" }), "연차");
+    expect(screen.getByLabelText("시작일")).toHaveAttribute("readonly");
+    fireEvent.change(screen.getByLabelText("종료일"), { target: { value: "2026-06-04" } });
+    await user.click(screen.getByRole("button", { name: "저장" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent("휴가 정보를 저장했습니다.");
+  });
+
+  it("shows the leave record and deletes it", async () => {
     const user = userEvent.setup();
     render(<LeaveDetailPage />);
 
@@ -43,7 +55,6 @@ describe("leave detail page", () => {
     expect(screen.getByDisplayValue("월차")).toBeInTheDocument();
     expect(screen.getByDisplayValue("2026-06-01")).toBeInTheDocument();
     expect(screen.getByDisplayValue("2026-06-03")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "저장" })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "삭제" }));
     await user.click(screen.getByRole("button", { name: "예" }));

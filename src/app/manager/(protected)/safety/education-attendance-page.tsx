@@ -31,7 +31,22 @@ function currentKstYearMonth() {
   return currentKstDate().slice(0, 7);
 }
 
-function Mark({ completed, onClick, label }: { completed: boolean; onClick?: () => void; label?: string }) {
+const completionDateTimeFormatter = new Intl.DateTimeFormat("sv-SE", {
+  timeZone: "Asia/Seoul",
+  year: "numeric", month: "2-digit", day: "2-digit",
+  hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+});
+
+function formatDailyCompletion(completedAt: string | null, workDate: string) {
+  if (!completedAt) return "O";
+  const [date, time] = completionDateTimeFormatter.format(new Date(completedAt)).split(" ");
+  if (date === workDate) return time;
+
+  const [year, month, day] = date.split("-");
+  return `${year}년 ${Number(month)}월 ${Number(day)}일 ${time}`;
+}
+
+function Mark({ completed, completedLabel = "O", onClick, label }: { completed: boolean; completedLabel?: string; onClick?: () => void; label?: string }) {
   if (!completed && onClick) {
     return (
       <button
@@ -45,7 +60,7 @@ function Mark({ completed, onClick, label }: { completed: boolean; onClick?: () 
       </button>
     );
   }
-  return <span className={completed ? "font-semibold text-muted-foreground" : "text-destructive"}>{completed ? "O" : "X"}</span>;
+  return <span className={completed ? "font-semibold text-muted-foreground" : "text-destructive"}>{completed ? completedLabel : "X"}</span>;
 }
 
 function SummaryMark({ completed, onClick, label }: { completed: boolean; onClick?: () => void; label?: string }) {
@@ -240,10 +255,7 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
     if (!selected || selected.status !== "success") return;
 
     if (selected.educationType === "daily") {
-      setDetailRows((current) => current.map((row) =>
-        row.employeeId === selected.employeeId && row.workDate === selected.workDate
-          ? { ...row, subjects: row.subjects.map((subject) => subject.resourceId === selected.resourceId ? { ...subject, isCompleted: true } : subject) }
-          : row));
+      void loadRows();
     } else {
       setMonthlyRows((current) => current.map((row) => {
         if (row.employeeId !== selected.employeeId) return row;
@@ -379,8 +391,9 @@ export default function EducationAttendancePage({ mode }: { mode: EducationAtten
                   <TableCell data-label="이름" className="font-semibold">{showName ? row.employeeName : "-"}</TableCell>
                   <TableCell data-label="근무일" className="whitespace-nowrap text-muted-foreground">{row.workDate}</TableCell>
                   {dailySubjects.map((subject) => {
-                    const status = row.subjects.find((item) => item.resourceId === subject.id)?.isCompleted;
-                    return <TableCell key={subject.id} data-label={subject.title}>{status == null ? "-" : <Mark completed={status}
+                    const result = row.subjects.find((item) => item.resourceId === subject.id);
+                    return <TableCell key={subject.id} data-label={subject.title} className="whitespace-nowrap">{result?.isCompleted == null ? "-" : <Mark completed={result.isCompleted}
+                      completedLabel={formatDailyCompletion(result.completedAt ?? null, row.workDate)}
                       onClick={() => openCompletionDialog(row.employeeId, row.employeeName, "daily", row.workDate, subject.id)}
                       label={`${row.employeeName} 근무자 ${subject.title} 미이수 처리 (${row.workDate})`} />}</TableCell>;
                   })}

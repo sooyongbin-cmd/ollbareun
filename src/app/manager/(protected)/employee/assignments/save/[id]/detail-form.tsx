@@ -68,6 +68,16 @@ type HolidayResponse = {
   holidays: { holiday_date: string; selected: string }[];
 };
 
+const assignmentDateFormatter = new Intl.DateTimeFormat("sv-SE", {
+  timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit",
+});
+
+function getCalendarMonth(startDate: string, endDate: string) {
+  const today = assignmentDateFormatter.format(new Date());
+  const date = today < startDate ? startDate : today > endDate ? endDate : today;
+  return date.slice(0, 7);
+}
+
 type Bootstrap = {
   employees: Employee[];
   worksites: Worksite[];
@@ -128,23 +138,13 @@ export default function AssignmentSavePage({ recordId, modal = false, onClose, o
 
     async function loadData() {
       try {
-        const [assignmentPayload, bootstrapPayload, dailyAttendancePayload] = await Promise.all([
+        const [assignmentPayload, bootstrapPayload] = await Promise.all([
           fetchJson<AssignmentResponse>(`/api/assignments/${assignmentId}`),
           fetchJson<Bootstrap>("/api/bootstrap"),
-          fetchJson<{ dailyAttendance: DailyAttendance[]; leavePeriods: LeavePeriod[] }>(`/api/manager/assignments/${assignmentId}/daily-attendance`),
         ]);
 
         const assignment = assignmentPayload.assignment;
-        const firstYear = Number(assignment.start_date.slice(0, 4));
-        const lastYear = Number(assignment.end_date.slice(0, 4));
-        const holidayPayloads = await Promise.all(
-          Array.from({ length: lastYear - firstYear + 1 }, (_, index) => firstYear + index)
-            .map((year) => fetchJson<HolidayResponse>(`/api/manager/holidays?year=${year}`)),
-        );
-
         if (!ignore) {
-          setDailyAttendance(dailyAttendancePayload.dailyAttendance ?? []);
-          setLeavePeriods(dailyAttendancePayload.leavePeriods ?? []);
           setSavedSchedule(scheduleSummary(assignment));
           setEmployeeId(assignment.employee_id);
           setWorksiteId(assignment.worksite_id);
@@ -152,10 +152,7 @@ export default function AssignmentSavePage({ recordId, modal = false, onClose, o
           setEndDate(assignment.end_date);
           setSavedStartDate(assignment.start_date);
           setSavedEndDate(assignment.end_date);
-          setCurrentMonth(assignment.start_date.slice(0, 7));
-          setHolidays(new Set(holidayPayloads.flatMap((payload) =>
-            (payload.holidays ?? []).filter((holiday) => holiday.selected === "Y").map((holiday) => holiday.holiday_date),
-          )));
+          setCurrentMonth(getCalendarMonth(assignment.start_date, assignment.end_date));
           setEmployees(bootstrapPayload.employees ?? []);
           setWorksites(bootstrapPayload.worksites ?? []);
         }
@@ -186,6 +183,20 @@ export default function AssignmentSavePage({ recordId, modal = false, onClose, o
   useEffect(() => {
     let ignore = false;
 
+    async function loadDailyAttendance() {
+      try {
+        const payload = await fetchJson<{ dailyAttendance: DailyAttendance[]; leavePeriods: LeavePeriod[] }>(
+          `/api/manager/assignments/${assignmentId}/daily-attendance`,
+        );
+        if (!ignore) {
+          setDailyAttendance(payload.dailyAttendance ?? []);
+          setLeavePeriods(payload.leavePeriods ?? []);
+        }
+      } catch (dailyError) {
+        if (!ignore) setError(dailyError instanceof Error ? dailyError.message : "달력 자료를 불러오지 못했습니다.");
+      }
+    }
+
     async function loadAttendanceHistory() {
       try {
         const payload = await fetchJson<AttendanceHistoryResponse>(
@@ -205,18 +216,40 @@ export default function AssignmentSavePage({ recordId, modal = false, onClose, o
       }
     }
 
-    if (!assignmentId) {
-      return () => {
-        ignore = true;
-      };
-    }
+    if (!assignmentId || !savedStartDate || !savedEndDate) return;
 
+    void loadDailyAttendance();
     void loadAttendanceHistory();
 
     return () => {
       ignore = true;
     };
-  }, [assignmentId]);
+  }, [assignmentId, savedStartDate, savedEndDate]);
+
+  const firstCalendarYear = savedStartDate.slice(0, 4);
+  const lastCalendarYear = savedEndDate.slice(0, 4);
+
+  useEffect(() => {
+    if (!firstCalendarYear || !lastCalendarYear) return;
+
+    let ignore = false;
+    const firstYear = Number(firstCalendarYear);
+    const lastYear = Number(lastCalendarYear);
+    const years = Array.from({ length: lastYear - firstYear + 1 }, (_, index) => firstYear + index);
+    void Promise.all(years.map((year) => fetchJson<HolidayResponse>(`/api/manager/holidays?year=${year}`)))
+      .then((payloads) => {
+        if (!ignore) {
+          setHolidays(new Set(payloads.flatMap((payload) =>
+            (payload.holidays ?? []).filter((holiday) => holiday.selected === "Y").map((holiday) => holiday.holiday_date),
+          )));
+        }
+      })
+      .catch((holidayError) => {
+        if (!ignore) setError(holidayError instanceof Error ? holidayError.message : "휴일 정보를 불러오지 못했습니다.");
+      });
+
+    return () => { ignore = true; };
+  }, [firstCalendarYear, lastCalendarYear]);
 
   const partial = usePartialDetailUpdate(async (changes: DetailChange[], commit) => {
     onChanged?.(changes);
@@ -254,6 +287,13 @@ export default function AssignmentSavePage({ recordId, modal = false, onClose, o
           endDate,
         }),
       });
+
+      const { start_date: savedStart, end_date: savedEnd } = saved.assignment;
+      if (savedStart !== savedStartDate || savedEnd !== savedEndDate) {
+        setSavedStartDate(savedStart);
+        setSavedEndDate(savedEnd);
+        setCurrentMonth(getCalendarMonth(savedStart, savedEnd));
+      }
 
       const employee = employees.find((item) => item.id === saved.assignment.employee_id);
       onSaved?.({ ...saved.assignment, employee_name: employee?.name,

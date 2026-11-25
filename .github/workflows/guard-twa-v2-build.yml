@@ -1,0 +1,37 @@
+name: Build guard TWA v2
+on:
+  push:
+    branches: [codex/guard-twa-v2-build]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
+      - run: sdkmanager "platforms;android-36" "build-tools;35.0.0"
+      - name: Build unsigned version 2
+        working-directory: android/guard-twa
+        run: |
+          sed -i "s/hostName: 'ollbareun.vercel.app'/hostName: 'www.olbareum.com'/; s|https://ollbareun.vercel.app|https://www.olbareum.com|g" app/build.gradle
+          sed -i 's|https://ollbareun.vercel.app|https://www.olbareum.com|g' app/src/main/res/values/strings.xml
+          grep -F "hostName: 'www.olbareum.com'" app/build.gradle
+          grep -F 'versionCode 2' app/build.gradle
+          grep -F 'applicationId "guard.ollbareun.vercel.app"' app/build.gradle
+          grep -F 'https://www.olbareum.com' app/src/main/res/values/strings.xml
+          bash gradlew --no-daemon bundleRelease
+      - uses: actions/upload-artifact@v4
+        with:
+          name: guard-twa-v2-unsigned
+          path: android/guard-twa/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+          retention-days: 7

@@ -6733,6 +6733,9 @@
 }
 
 .aboutPage .stats strong {
+  align-self: stretch;
+  text-align: center;
+  white-space: nowrap;
   font-size: 59.34px;
   line-height: 71px;
 }
@@ -6766,7 +6769,9 @@
 .aboutPage .companyYearCounter::after,
 .aboutPage .companyStatCounter::after {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
   color: var(--home-blue);
   text-align: center;
 }

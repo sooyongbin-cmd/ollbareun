@@ -197,24 +197,30 @@ section.disinfectionSection {
   to { transform: translateX(-50%); }
 }
 
-.modalOverlay {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  /* 20% transparent: keep the document prominent over the page. */
-  background: rgb(0 0 0 / 80%);
-}
+.gallery { display: block; }
 
 .certificateModal {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
   z-index: 201;
-  display: flex;
+  display: none;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  padding: 64px 56px;
   align-items: center;
   justify-content: center;
-  padding: 64px 56px;
+  background: rgba(0, 0, 0, 0.8);
   pointer-events: auto;
 }
+
+.certificateModal[open] { display: flex; }
+.certificateModal::backdrop { background: transparent; }
 
 .certificateModal button {
   pointer-events: auto;
@@ -232,7 +238,8 @@ section.disinfectionSection {
 .modalImageButton {
   flex: 0 0 auto;
   align-self: flex-start;
-  width: calc(min(calc(100vw - 112px), calc((100dvh - 128px) * 886 / 1253)) * var(--certificate-zoom, 1));
+  --certificate-height: calc(100vh - 128px);
+  width: calc(min(100vw - 112px, var(--certificate-height) * 886 / 1253) * var(--certificate-zoom, 1));
   max-width: none;
   margin: auto;
   padding: 0;
@@ -254,7 +261,14 @@ section.disinfectionSection {
  * Keep the existing fitted size on mobile and retain the zoom multiplier. */
 @media (min-width: 769px) {
   .modalImageButton {
-    width: calc(min(calc(100vw - 112px), calc(55.45dvh * 886 / 1253)) * var(--certificate-zoom, 1));
+    --certificate-height: 55.45vh;
+  }
+}
+
+@supports (height: 100dvh) {
+  .modalImageButton { --certificate-height: calc(100dvh - 128px); }
+  @media (min-width: 769px) {
+    .modalImageButton { --certificate-height: 55.45dvh; }
   }
 }
 

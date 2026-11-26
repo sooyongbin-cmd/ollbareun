@@ -13818,6 +13818,8 @@
 }
 
 .clientsPage .clientGroups > div > h3 {
+  display: grid;
+  place-items: center;
   margin-top: 0;
 }
 

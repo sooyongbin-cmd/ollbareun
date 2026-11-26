@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { flexGapBootstrap } from "../lib/flex-gap-bootstrap";
 import "./globals.css";
 
 const siteUrl = new URL("https://www.olbareum.com");
@@ -42,8 +43,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className="h-full antialiased selection:bg-primary/20">
+    <html lang="ko" className="h-full antialiased selection:bg-primary/20" suppressHydrationWarning>
       <body className="min-h-full flex flex-col bg-background font-sans text-foreground">
+        <script data-app-layout="" dangerouslySetInnerHTML={{ __html: flexGapBootstrap }} />
         {children}
       </body>
     </html>

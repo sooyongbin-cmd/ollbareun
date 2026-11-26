@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { createElement, useEffect, useState, type ReactNode } from "react";
 import styles from "./page.module.css";
 import HomepageContactMap from "./homepage-contact-map";
 import HomepageFooter from "./homepage-footer";
@@ -411,94 +411,30 @@ function ContactSection() {
   );
 }
 
-function CompanyFoundingYear({ isAnimated }: { isAnimated: boolean }) {
-  const currentYear = new Date().getFullYear();
-
-  return (
-    <strong
-      className={styles.companyYearCounter}
-      style={{ "--company-year": isAnimated ? COMPANY_FOUNDING_YEAR : currentYear } as CSSProperties}
-      aria-label={String(COMPANY_FOUNDING_YEAR)}
-    >
-      {COMPANY_FOUNDING_YEAR}
-    </strong>
-  );
-}
-
-type CompanyStatKind = "integer" | "decimal" | "percent";
-
-function CompanyStatValue({
-  target,
-  kind,
-  isAnimated,
-  label,
-}: {
-  target: number;
-  kind: CompanyStatKind;
-  isAnimated: boolean;
-  label: string;
+function CompanyStatValue({ value, suffix = "", fromYear = false }: {
+  value: number;
+  suffix?: string;
+  fromYear?: boolean;
 }) {
-  const className = {
-    integer: styles.companyIntegerCounter,
-    decimal: styles.companyDecimalCounter,
-    percent: styles.companyPercentCounter,
-  }[kind];
-
-  const decimalValue = Math.round(target * 10);
-  const style = kind === "decimal"
-    ? {
-        "--company-stat-whole": isAnimated ? Math.floor(decimalValue / 10) : 0,
-        "--company-stat-tenths": isAnimated ? decimalValue % 10 : 0,
-      }
-    : { "--company-stat-value": isAnimated ? target : 0 };
-
+  const label = `${value}${suffix}`;
   return (
-    <strong
-      className={`${styles.companyStatCounter} ${className}`}
-      style={style as CSSProperties}
-      aria-label={label}
-    >
-      {label}
+    <strong aria-label={label}>
+      {createElement("olbareum-stat-value", {
+        "data-value": value,
+        "data-suffix": suffix,
+        "data-from": fromYear ? "year" : undefined,
+      }, label)}
     </strong>
   );
 }
 
 function CompanyStats() {
-  const [isAnimated, setIsAnimated] = useState(false);
-  const statsRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const stats = statsRef.current;
-
-    if (!stats) {
-      return;
-    }
-
-    const animate = () => setIsAnimated(true);
-
-    if (!("IntersectionObserver" in window)) {
-      animate();
-      return;
-    }
-
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry?.isIntersecting) {
-        animate();
-        observer.disconnect();
-      }
-    }, { threshold: 0.4 });
-
-    observer.observe(stats);
-
-    return () => observer.disconnect();
-  }, []);
-
   return (
-    <div ref={statsRef} className={styles.stats}>
-      <div><Image src="/homepage/archive/stat-company.svg" alt="" width={31} height={36} aria-hidden="true" /><CompanyFoundingYear isAnimated={isAnimated} /><span>법인 설립</span></div>
-      <div><Image src="/homepage/archive/stat-employees.svg" alt="" width={54} height={28} aria-hidden="true" /><CompanyStatValue target={26} kind="integer" isAnimated={isAnimated} label="26" /><span>2026 임직원</span></div>
-      <div><Image src="/homepage/archive/stat-sales.svg" alt="" width={37} height={34} aria-hidden="true" /><CompanyStatValue target={10.3} kind="decimal" isAnimated={isAnimated} label="10.3억" /><span>2025 매출</span></div>
-      <div><Image src="/homepage/archive/stat-growth.svg" alt="" width={34} height={34} aria-hidden="true" /><CompanyStatValue target={220} kind="percent" isAnimated={isAnimated} label="220%" /><span>2022~25 매출 성장률</span></div>
+    <div className={styles.stats} data-company-stats="">
+      <div><Image src="/homepage/archive/stat-company.svg" alt="" width={31} height={36} aria-hidden="true" /><CompanyStatValue value={COMPANY_FOUNDING_YEAR} fromYear /><span>법인 설립</span></div>
+      <div><Image src="/homepage/archive/stat-employees.svg" alt="" width={54} height={28} aria-hidden="true" /><CompanyStatValue value={26} /><span>2026 임직원</span></div>
+      <div><Image src="/homepage/archive/stat-sales.svg" alt="" width={37} height={34} aria-hidden="true" /><CompanyStatValue value={10.3} suffix="억" /><span>2025 매출</span></div>
+      <div><Image src="/homepage/archive/stat-growth.svg" alt="" width={34} height={34} aria-hidden="true" /><CompanyStatValue value={220} suffix="%" /><span>2022~25 매출 성장률</span></div>
     </div>
   );
 }

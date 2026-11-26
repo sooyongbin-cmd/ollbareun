@@ -34,6 +34,31 @@ function lowerUtilitySelector(selector) {
   return output;
 }
 
+// In native cascade layers the shared TableCell padding utilities and
+// TableBody's last-row border win over the more specific mobile card rules.
+function preserveMobileTableUtilities(legacy, postcss) {
+  const cards = '[data-mobile-layout="cards"]';
+  const body = '[data-slot="table-body"]';
+  const cell = '[data-slot="table-cell"]';
+  const media = legacy.nodes.find(node => node.name === "media" &&
+    node.nodes.some(rule => rule.selector?.includes(cards) && rule.selector.includes(cell)));
+  if (!media) return;
+  const overrides = postcss.atRule({ name: "media", params: media.params });
+  legacy.walkRules(rule => {
+    let selector;
+    if (/^\.(?:[\w-]+\\:)*p[txyrblse]?-[^ ]+$/.test(rule.selector)) {
+      selector = `${cards} ${body} ${cell}${rule.selector}`;
+    } else if (rule.selector === String.raw`.\[\&_tr\:last-child\]\:border-0 tr:last-child`) {
+      selector = `${cards} ${body}${rule.selector}`;
+    } else return;
+    const copy = rule.clone({ selector });
+    if (rule.parent.type === "atrule") {
+      overrides.append(rule.parent.clone({ nodes: [copy] }));
+    } else overrides.append(copy);
+  });
+  if (overrides.nodes.length) legacy.append(overrides);
+}
+
 function buildLayoutStyles(root, postcss) {
   const layers = root.nodes.filter(node => node.type === "atrule" && node.name === "layer" && node.nodes);
   if (!layers.some(layer => layer.params === "utilities")) return null;
@@ -67,6 +92,7 @@ function buildLayoutStyles(root, postcss) {
     if (!node.nodes?.length) node.remove();
   }
   legacy.each(removeEmpty);
+  preserveMobileTableUtilities(legacy, postcss);
 
   // The normal theme is in a cascade layer, which Safari 13 discards.
   const theme = new Map();

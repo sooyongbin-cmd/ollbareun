@@ -89,16 +89,21 @@
     return items.sort(function (a, b) { return a.order - b.order || a.index - b.index; });
   }
 
-  function usedGap(value, extent) {
+  function usedGap(value, container, horizontal) {
     if (!value || value === "normal") return 0;
-    return /%$/.test(value) ? parseFloat(value) * extent / 100 : parseFloat(value) || 0;
+    if (!/%$/.test(value)) return parseFloat(value) || 0;
+    var css = getComputedStyle(container);
+    var extent = horizontal
+      ? container.clientWidth - parseFloat(css.paddingLeft) - parseFloat(css.paddingRight)
+      : container.clientHeight - parseFloat(css.paddingTop) - parseFloat(css.paddingBottom);
+    return parseFloat(value) * extent / 100;
   }
 
   function apply(container) {
     var css = getComputedStyle(container);
     if (css.display !== "flex" && css.display !== "inline-flex") return;
-    var rowGap = usedGap(css.rowGap, container.clientHeight);
-    var columnGap = usedGap(css.columnGap, container.clientWidth);
+    var rowGap = usedGap(css.rowGap, container, false);
+    var columnGap = usedGap(css.columnGap, container, true);
     if (!rowGap && !columnGap) return;
     var items = flowItems(container);
     if (items.length < 2) return;

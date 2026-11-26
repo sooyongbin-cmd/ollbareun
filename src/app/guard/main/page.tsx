@@ -7,7 +7,7 @@ import GuardPatrolLink from "./guard-patrol-link";
 import { useGuardScheduleAvailability } from "./use-guard-schedule-availability";
 
 export default function GuardMainPage() {
-  const { hasWorkSchedule, canAccessSafetyEducation, selectedWorkDate } = useGuardScheduleAvailability();
+  const { canAccessWorkReports, canAccessSafetyEducation, selectedWorkDate } = useGuardScheduleAvailability();
 
   return (
     <div className="guard-main-page">
@@ -18,7 +18,7 @@ export default function GuardMainPage() {
           안전교육
         </Link> : <button aria-disabled="true" className="guard-menu-button" disabled type="button">안전교육</button>}
         <GuardPatrolLink />
-        {hasWorkSchedule ? (
+        {canAccessWorkReports ? (
           <Link className="guard-menu-button" href="/guard/main/special-remarks">
             특이사항 보고
           </Link>

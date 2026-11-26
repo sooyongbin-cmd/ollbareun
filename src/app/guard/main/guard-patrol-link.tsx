@@ -6,9 +6,9 @@ import { useGuardScheduleAvailability } from "./use-guard-schedule-availability"
 
 export default function GuardPatrolLink() {
   const visible = useGuardPatrolVisibility();
-  const { hasWorkSchedule } = useGuardScheduleAvailability();
+  const { canAccessWorkReports } = useGuardScheduleAvailability();
 
-  return visible && hasWorkSchedule ? (
+  return visible && canAccessWorkReports ? (
     <Link className="guard-menu-button" href="/guard/main/work">
       순찰
     </Link>

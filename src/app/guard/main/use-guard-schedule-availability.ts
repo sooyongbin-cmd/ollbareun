@@ -41,6 +41,7 @@ export function useGuardScheduleAvailability() {
 
   return {
     canAccessSafetyEducation,
+    canAccessWorkReports: Boolean(selectedSchedule?.work_intime && !selectedSchedule.work_outtime && !isLeave),
     selectedWorkDate,
     hasWorkSchedule: selectedSchedule !== null && !isLeave,
     canAccessAttendance: !isLeave && (action === "clock-in" || action === "clock-out"),

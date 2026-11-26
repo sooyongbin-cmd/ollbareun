@@ -135,8 +135,8 @@ describe("public homepage pages", () => {
   it("renders the Figma company content", () => {
     const { container } = render(<AboutPage />);
 
-    expect(screen.getByText("2018", { selector: "strong" })).toBeInTheDocument();
-    expect(screen.getByText("10.3억")).toBeInTheDocument();
+    const values = container.querySelectorAll("[data-company-stats] strong");
+    expect(Array.from(values, value => value.textContent)).toEqual(["2018", "26", "10.3억", "220%"]);
     expect(screen.getByText("B.E.S.T")).toBeInTheDocument();
     expect(container.querySelectorAll('[class*="timeline"] > li')).toHaveLength(5);
     expect(container.querySelectorAll('[class*="socialGrid"] > article')).toHaveLength(4);

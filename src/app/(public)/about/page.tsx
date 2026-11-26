@@ -7,5 +7,10 @@ export const metadata: Metadata = {
 };
 
 export default function About() {
-  return <AboutPage />;
+  return (
+    <>
+      <AboutPage />
+      <script async src="/about-company-stats.js" />
+    </>
+  );
 }

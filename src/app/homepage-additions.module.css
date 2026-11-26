@@ -171,7 +171,7 @@ section.disinfectionSection {
   padding: 0;
   border: 1px solid #777;
   background: #fff;
-  cursor: zoom-in;
+  cursor: pointer;
 }
 
 .certificateButton img {
@@ -246,7 +246,7 @@ section.disinfectionSection {
   border: 0;
   background: #fff;
   line-height: 0;
-  cursor: zoom-out;
+  cursor: pointer;
 }
 
 .modalImageButton img {
